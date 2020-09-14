@@ -26,6 +26,7 @@ describe('reducer', () => {
           currentPaginationInfo: { index: 5, size: 50 },
         },
         active: true,
+        createView: undefined,
       });
     });
 

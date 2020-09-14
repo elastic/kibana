@@ -71,6 +71,7 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         listView: createLoadingListViewWithPagination(pagination),
         active: true,
+        createView: undefined,
       });
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
@@ -78,6 +79,7 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         listView: createLoadedListViewWithPagination(pagination, pagination, 500),
         active: true,
+        createView: undefined,
       });
     });
 
@@ -100,6 +102,7 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         listView: createLoadedListViewWithPagination(pagination, pagination, 500),
         active: true,
+        createView: undefined,
       });
     });
 
@@ -119,6 +122,7 @@ describe('middleware', () => {
           createServerApiError('Internal Server Error')
         ),
         active: true,
+        createView: undefined,
       });
 
       const infiniteLoopTest = async () => {
