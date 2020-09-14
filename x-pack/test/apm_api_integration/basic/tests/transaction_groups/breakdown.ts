@@ -90,21 +90,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]
         `);
 
-        expectSnapshot({
-          title,
-          color,
-          type,
-          hideLegend,
-          legendValue,
-        }).toMatchInline(`
-          Object {
-            "color": "#54b399",
-            "hideLegend": false,
-            "legendValue": "100%",
-            "title": "app",
-            "type": "areaStacked",
-          }
-        `);
+        expectSnapshot(title).toMatchInline(`"app"`);
+        expectSnapshot(color).toMatchInline(`"#54b399"`);
+        expectSnapshot(type).toMatchInline(`"areaStacked"`);
+        expectSnapshot(hideLegend).toMatchInline(`false`);
+        expectSnapshot(legendValue).toMatchInline(`"100%"`);
       });
       it('returns the transaction breakdown sorted by name', async () => {
         const response = await supertest.get(

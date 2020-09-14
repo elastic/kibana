@@ -56,33 +56,33 @@ function getSnapshotMeta(currentTest: Test) {
 }
 
 export function registerMochaHooksForSnapshots() {
-  let snapshotStatesByFilePath: Record<string, ISnapshotState> = {};
+  let snapshotStatesByFilePath: Record<
+    string,
+    { snapshotState: ISnapshotState; testsInFile: Test[] }
+  > = {};
 
   registered = true;
 
   beforeEach(function () {
-    const { file, snapshotTitle } = getSnapshotMeta(this.currentTest!);
+    const currentTest = this.currentTest!;
+
+    const { file, snapshotTitle } = getSnapshotMeta(currentTest);
 
     if (!snapshotStatesByFilePath[file]) {
-      snapshotStatesByFilePath[file] = getSnapshotState(file);
+      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest);
     }
 
     testContext = {
       file,
       snapshotTitle,
       snapshotContext: {
-        snapshotState: snapshotStatesByFilePath[file],
+        snapshotState: snapshotStatesByFilePath[file].snapshotState,
         currentTestName: snapshotTitle,
       },
     };
   });
 
   afterEach(function () {
-    if (!this.currentTest?.isPassed()) {
-      const { file, snapshotTitle } = getSnapshotMeta(this.currentTest!);
-      snapshotStatesByFilePath[file].markSnapshotsAsCheckedForTest(snapshotTitle);
-    }
-
     testContext = null;
   });
 
@@ -94,15 +94,24 @@ export function registerMochaHooksForSnapshots() {
     const isUpdatingSnapshots = process.env.UPDATE_SNAPSHOTS;
 
     Object.keys(snapshotStatesByFilePath).forEach((file) => {
-      const snapshot = snapshotStatesByFilePath[file];
+      const { snapshotState, testsInFile } = snapshotStatesByFilePath[file];
+
+      testsInFile.forEach((test) => {
+        const snapshotMeta = getSnapshotMeta(test);
+        // If test is failed or skipped, mark snapshots as used. Otherwise,
+        // running a test in isolation will generate false positives.
+        if (!test.isPassed()) {
+          snapshotState.markSnapshotsAsCheckedForTest(snapshotMeta.snapshotTitle);
+        }
+      });
 
       if (!isUpdatingSnapshots) {
-        unused.push(...snapshot.getUncheckedKeys());
+        unused.push(...snapshotState.getUncheckedKeys());
       } else {
-        snapshot.removeUncheckedKeys();
+        snapshotState.removeUncheckedKeys();
       }
 
-      snapshot.save();
+      snapshotState.save();
     });
 
     if (unused.length) {
@@ -134,9 +143,17 @@ Error.prepareStackTrace = (error, structuredStackTrace) => {
   }
 };
 
-function getSnapshotState(file: string) {
+function getSnapshotState(file: string, test: Test) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
+
+  let parent = test.parent;
+  const testsInFile: Test[] = [];
+
+  while (parent) {
+    testsInFile.push(...parent.tests);
+    parent = parent.parent;
+  }
 
   const snapshotState = new SnapshotState(
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
@@ -147,7 +164,7 @@ function getSnapshotState(file: string) {
     }
   );
 
-  return snapshotState;
+  return { snapshotState, testsInFile };
 }
 
 export function expectSnapshot(received: any) {
@@ -182,7 +199,7 @@ function expectToMatchInlineSnapshot(
 ) {
   const matcher = toMatchInlineSnapshot.bind(snapshotContext as any);
 
-  const result = arguments.length === 1 ? matcher(received) : matcher(received, _actual);
+  const result = arguments.length === 2 ? matcher(received) : matcher(received, _actual);
 
   expect(result.pass).to.eql(true, result.message());
 }
