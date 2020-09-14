@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, memo, useState } from 'react';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
@@ -16,6 +16,11 @@ import {
   EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
+  EuiPopover,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiContextMenuPanelProps,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -24,6 +29,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
+import { EuiContextMenuItemProps } from '@elastic/eui/src/components/context_menu/context_menu_item';
+import { NavigateToAppOptions } from 'kibana/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -42,6 +49,7 @@ import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/
 import {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
+  pagePathGetters,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
@@ -50,6 +58,8 @@ import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { APP_ID } from '../../../../../common/constants';
 
 const EndpointListNavLink = memo<{
   name: string;
@@ -73,9 +83,40 @@ const EndpointListNavLink = memo<{
 });
 EndpointListNavLink.displayName = 'EndpointListNavLink';
 
+const TableRowActions = memo<{
+  items: EuiContextMenuPanelProps['items'];
+}>(({ items }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+
+  return (
+    <EuiPopover
+      anchorPosition="downRight"
+      panelPaddingSize="none"
+      button={
+        <EuiButtonIcon
+          data-test-subj="endpointTableRowActions"
+          iconType="boxesHorizontal"
+          onClick={handleToggleMenu}
+          aria-label={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
+            defaultMessage: 'Open',
+          })}
+        />
+      }
+      isOpen={isOpen}
+      closePopover={handleCloseMenu}
+    >
+      <EuiContextMenuPanel items={items} />
+    </EuiPopover>
+  );
+});
+TableRowActions.displayName = 'EndpointTableRowActions';
+
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const EndpointList = () => {
   const history = useHistory();
+  const { services } = useKibana();
   const {
     listData,
     pageIndex,
@@ -90,6 +131,7 @@ export const EndpointList = () => {
     policyItemsLoading,
     endpointPackageVersion,
     endpointsExist,
+    agentPolicies,
     autoRefreshInterval,
     isAutoRefreshEnabled,
     patternsError,
@@ -350,8 +392,87 @@ export const EndpointList = () => {
           );
         },
       },
+      {
+        field: '',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
+          defaultMessage: 'Actions',
+        }),
+        actions: [
+          {
+            // eslint-disable-next-line react/display-name
+            render: (item: HostInfo) => {
+              return (
+                <TableRowActions
+                  items={[
+                    <EuiContextMenuItemNavByRouter
+                      data-test-subj="hostLink"
+                      icon="logoSecurity"
+                      key="hostDetailsLink"
+                      navigateAppId={APP_ID}
+                      navigateOptions={{ path: `hosts/${item.metadata.host.hostname}` }}
+                      href={`${services?.application?.getUrlForApp('securitySolution')}/hosts/${
+                        item.metadata.host.hostname
+                      }`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.hostDetails"
+                        defaultMessage="View Host Details"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
+                    <EuiContextMenuItemNavByRouter
+                      icon="logoObservability"
+                      key="agentConfigLink"
+                      data-test-subj="agentPolicyLink"
+                      navigateAppId="ingestManager"
+                      navigateOptions={{
+                        path: `#${pagePathGetters.policy_details({
+                          policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
+                        })}`,
+                      }}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.policy_details({
+                        policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
+                      })}`}
+                      disabled={
+                        agentPolicies[item.metadata.Endpoint.policy.applied.id] === undefined
+                      }
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
+                        defaultMessage="View Agent Policy"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
+                    <EuiContextMenuItemNavByRouter
+                      icon="logoObservability"
+                      key="agentDetailsLink"
+                      data-test-subj="agentDetailsLink"
+                      navigateAppId="ingestManager"
+                      navigateOptions={{
+                        path: `#${pagePathGetters.fleet_agent_details({
+                          agentId: item.metadata.elastic.agent.id,
+                        })}`,
+                      }}
+                      href={`${services?.application?.getUrlForApp(
+                        'ingestManager'
+                      )}#${pagePathGetters.fleet_agent_details({
+                        agentId: item.metadata.elastic.agent.id,
+                      })}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.list.actions.agentDetails"
+                        defaultMessage="View Agent Details"
+                      />
+                    </EuiContextMenuItemNavByRouter>,
+                  ]}
+                />
+              );
+            },
+          },
+        ],
+      },
     ];
-  }, [formatUrl, queryParams, search]);
+  }, [formatUrl, queryParams, search, agentPolicies, services?.application?.getUrlForApp]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist) {
@@ -467,3 +588,20 @@ export const EndpointList = () => {
     </AdministrationListPage>
   );
 };
+
+const EuiContextMenuItemNavByRouter = memo<
+  Omit<EuiContextMenuItemProps, 'onClick'> & {
+    navigateAppId: string;
+    navigateOptions: NavigateToAppOptions;
+    children: React.ReactNode;
+  }
+>(({ navigateAppId, navigateOptions, children, ...otherMenuItemProps }) => {
+  const handleOnClick = useNavigateToAppEventHandler(navigateAppId, navigateOptions);
+
+  return (
+    <EuiContextMenuItem {...otherMenuItemProps} onClick={handleOnClick}>
+      {children}
+    </EuiContextMenuItem>
+  );
+});
+EuiContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';
