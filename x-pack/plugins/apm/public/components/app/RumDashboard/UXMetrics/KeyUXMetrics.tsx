@@ -17,6 +17,14 @@ import {
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 
+function formatMicroSecValue(value: number | string): string {
+  const valueInMs = Number(value) / 1000;
+  if (valueInMs < 1000) {
+    return valueInMs + ' ms';
+  }
+  return valueInMs / 1000 + ' s';
+}
+
 interface Props {
   data?: UXMetrics | null;
   loading: boolean;
@@ -42,8 +50,6 @@ export function KeyUXMetrics({ data, loading }: Props) {
     [start, end, serviceName, uiFilters]
   );
 
-  const { noOfLongTasks, longTaskStats } = longTaskData ?? {};
-
   const STAT_STYLE = { width: '240px' };
 
   return (
@@ -51,7 +57,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={((Number(data?.fcp ?? 0) * 1000).toFixed(0) ?? '-') + ' ms'}
+          title={formatMicroSecValue(Number(data?.fcp ?? 0) * 1000)}
           description={FCP_LABEL}
           isLoading={loading}
         />
@@ -67,7 +73,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={noOfLongTasks?.value ?? 0}
+          title={longTaskData?.noOfLongTasks ?? 0}
           description={NO_OF_LONG_TASK}
           isLoading={status !== 'success'}
         />
@@ -75,7 +81,9 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={((longTaskStats?.max ?? 0) / 10000).toFixed(1) + ' s'}
+          title={
+            ((longTaskData?.longestLongTask ?? 0) / 100000).toFixed(1) + ' s'
+          }
           description={LONGEST_LONG_TASK}
           isLoading={status !== 'success'}
         />
@@ -83,7 +91,9 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={((longTaskStats?.sum ?? 0) / 10000).toFixed(1) + ' s'}
+          title={
+            ((longTaskData?.sumOfLongTasks ?? 0) / 100000).toFixed(1) + ' s'
+          }
           description={SUM_LONG_TASKS}
           isLoading={status !== 'success'}
         />

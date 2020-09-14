@@ -32,15 +32,22 @@ export async function getLongTaskMetrics({
         bool: projection.body.query.bool,
       },
       aggs: {
-        noOfLongTasks: { value_count: { field: 'span.type' } },
-        longTaskSum: {
-          sum: {
-            field: SPAN_DURATION,
+        transIds: {
+          terms: {
+            field: 'transaction.id',
+            size: 1000,
           },
-        },
-        longTaskMax: {
-          max: {
-            field: SPAN_DURATION,
+          aggs: {
+            sumLongTask: {
+              sum: {
+                field: SPAN_DURATION,
+              },
+            },
+            longestLongTask: {
+              max: {
+                field: SPAN_DURATION,
+              },
+            },
           },
         },
       },
@@ -50,7 +57,30 @@ export async function getLongTaskMetrics({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  return response.aggregations!;
+  const { transIds } = response.aggregations!;
+
+  const validTransactions: string[] = await filterPageLoadTransactions(
+    setup,
+    transIds.buckets.map((bucket) => bucket.key as string)
+  );
+  let noOfLongTasks = 0;
+  let sumOfLongTasks = 0;
+  let longestLongTask = 0;
+
+  transIds.buckets.forEach((bucket) => {
+    if (validTransactions.includes(bucket.key as string)) {
+      noOfLongTasks += bucket.doc_count;
+      sumOfLongTasks += bucket.sumLongTask.value ?? 0;
+      if ((bucket.longestLongTask.value ?? 0) > longestLongTask) {
+        longestLongTask = bucket.longestLongTask.value!;
+      }
+    }
+  });
+  return {
+    noOfLongTasks,
+    sumOfLongTasks,
+    longestLongTask,
+  };
 }
 
 async function filterPageLoadTransactions(
@@ -63,37 +93,25 @@ async function filterPageLoadTransactions(
 
   const params = mergeProjection(projection, {
     body: {
-      size: 0,
+      size: transactionIds.length,
       query: {
         bool: {
-          filter: [
-            ...projection.body.query.bool.filter,
+          must: [
             {
-              term: {
-                'user_agent.name': 'Chrome',
+              terms: {
+                'transaction.id': transactionIds,
               },
             },
           ],
+          filter: [...projection.body.query.bool.filter],
         },
       },
-      aggs: {
-        noOfLongTasks: { value_count: { field: 'span.type' } },
-        longTaskSum: {
-          sum: {
-            field: SPAN_DURATION,
-          },
-        },
-        longTaskMax: {
-          max: {
-            field: SPAN_DURATION,
-          },
-        },
-      },
+      _source: ['transaction.id'],
     },
   });
 
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  return response.aggregations!;
+  return response.hits.hits.map((hit) => (hit._source as any).transaction.id)!;
 }

@@ -132,7 +132,7 @@ export async function getWebCoreVitals({
     fid: ((fid.values['50.0'] || 0) / 1000).toFixed(2),
     lcp: ((lcp.values['50.0'] || 0) / 1000).toFixed(2),
     tbt: ((tbt.values['50.0'] || 0) / 1000).toFixed(2),
-    fcp: ((fcp.values['50.0'] || 0) / 1000).toFixed(2),
+    fcp: fcp.values['50.0'] || 0,
 
     lcpRanks: getRanksPercentages(lcpRanks.values),
     fidRanks: getRanksPercentages(fidRanks.values),
