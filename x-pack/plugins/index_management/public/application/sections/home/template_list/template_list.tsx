@@ -59,7 +59,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   history,
 }) => {
   const { uiMetricService } = useServices();
-  const { error, isLoading, data: allTemplates, sendRequest: reload } = useLoadIndexTemplates();
+  const { error, isLoading, data: allTemplates, resendRequest: reload } = useLoadIndexTemplates();
 
   const [filters, setFilters] = useState<Filters<FilterName>>({
     managed: {

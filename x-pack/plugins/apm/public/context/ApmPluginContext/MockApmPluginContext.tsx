@@ -39,6 +39,7 @@ const mockCore = {
       apm: {},
     },
     currentAppId$: new Observable(),
+    navigateToUrl: (url: string) => {},
   },
   chrome: {
     docTitle: { change: () => {} },

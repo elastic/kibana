@@ -66,7 +66,7 @@ export const getJiraConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     projectKey: 'pkey',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
@@ -85,6 +85,7 @@ export const getJiraConnector = () => ({
         },
       ],
     },
+    isCaseOwned: true,
   },
 });
 
@@ -98,7 +99,7 @@ export const getResilientConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     orgId: 'pkey',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
@@ -117,6 +118,7 @@ export const getResilientConnector = () => ({
         },
       ],
     },
+    isCaseOwned: true,
   },
 });
 

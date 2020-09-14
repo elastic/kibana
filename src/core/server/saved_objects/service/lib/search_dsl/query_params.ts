@@ -21,6 +21,7 @@ import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { DEFAULT_NAMESPACE_STRING } from '../utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -73,7 +74,7 @@ function getFieldsForTypes(
  */
 function getClauseForType(
   registry: ISavedObjectTypeRegistry,
-  namespaces: string[] = ['default'],
+  namespaces: string[] = [DEFAULT_NAMESPACE_STRING],
   type: string
 ) {
   if (namespaces.length === 0) {
@@ -88,11 +89,11 @@ function getClauseForType(
     };
   } else if (registry.isSingleNamespace(type)) {
     const should: Array<Record<string, any>> = [];
-    const eligibleNamespaces = namespaces.filter((namespace) => namespace !== 'default');
+    const eligibleNamespaces = namespaces.filter((x) => x !== DEFAULT_NAMESPACE_STRING);
     if (eligibleNamespaces.length > 0) {
       should.push({ terms: { namespace: eligibleNamespaces } });
     }
-    if (namespaces.includes('default')) {
+    if (namespaces.includes(DEFAULT_NAMESPACE_STRING)) {
       should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
     }
     if (should.length === 0) {
@@ -162,9 +163,7 @@ export function getQueryParams({
   // would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
   // We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
   const normalizedNamespaces = namespaces
-    ? Array.from(
-        new Set(namespaces.map((namespace) => (namespace === '*' ? 'default' : namespace)))
-      )
+    ? Array.from(new Set(namespaces.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x))))
     : undefined;
 
   const bool: any = {
