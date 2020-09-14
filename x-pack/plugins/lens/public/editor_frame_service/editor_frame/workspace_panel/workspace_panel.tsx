@@ -8,15 +8,7 @@ import React, { useState, useEffect, useMemo, useContext, useCallback } from 're
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiImage,
-  EuiText,
-  EuiButtonEmpty,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
@@ -40,7 +32,6 @@ import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/publ
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-// @ts-ignore
 import { DropIllustration } from '../../../assets/drop_illustration';
 
 export interface WorkspacePanelProps {
@@ -81,11 +72,6 @@ export function InnerWorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   title,
 }: WorkspacePanelProps) {
-  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
-  const emptyStateGraphicURL = IS_DARK_THEME
-    ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
-    : '/plugins/lens/assets/lens_app_graphic_light_2x.png';
-
   const dragDropContext = useContext(DragContext);
 
   const suggestionForDraggedField = useMemo(
@@ -214,40 +200,52 @@ export function InnerWorkspacePanel({
   function renderEmptyWorkspace() {
     return (
       <EuiText
-        className={classNames('lnsWorkspacePanel__emptyContent', {
-          'lnsWorkspacePanel__emptyContent-onTop': expression !== null,
-        })}
+        className={classNames('lnsWorkspacePanel__emptyContent')}
         textAlign="center"
         color="subdued"
         data-test-subj="empty-workspace"
+        size="s"
       >
-        <h3>
-          <FormattedMessage
-            id="xpack.lens.editorFrame.emptyWorkspace"
-            defaultMessage="Drop some fields here to start"
-          />
-        </h3>
-        <DropIllustration className="lnsWorkspacePanel__dropIllustration" />
-        <p>
-          <FormattedMessage
-            id="xpack.lens.editorFrame.emptyWorkspaceHeading"
-            defaultMessage="Lens is a new tool for creating visualizations"
-          />
-        </p>
-        <p>
-          <small>
-            <EuiLink
-              href="https://www.elastic.co/products/kibana/feedback"
-              target="_blank"
-              external
-            >
+        <h2>
+          <strong>
+            {expression === null ? (
               <FormattedMessage
-                id="xpack.lens.editorFrame.goToForums"
-                defaultMessage="Make requests and give feedback"
+                id="xpack.lens.editorFrame.emptyWorkspace"
+                defaultMessage="Drop some fields here to start"
               />
-            </EuiLink>
-          </small>
-        </p>
+            ) : (
+              <FormattedMessage
+                id="xpack.lens.editorFrame.emptyWorkspace"
+                defaultMessage="Drop field here"
+              />
+            )}
+          </strong>
+        </h2>
+        <DropIllustration className="lnsWorkspacePanel__dropIllustration" />
+        {expression === null && (
+          <>
+            <p>
+              <FormattedMessage
+                id="xpack.lens.editorFrame.emptyWorkspaceHeading"
+                defaultMessage="Lens is a new tool for creating visualizations"
+              />
+            </p>
+            <p>
+              <small>
+                <EuiLink
+                  href="https://www.elastic.co/products/kibana/feedback"
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.goToForums"
+                    defaultMessage="Make requests and give feedback"
+                  />
+                </EuiLink>
+              </small>
+            </p>
+          </>
+        )}
       </EuiText>
     );
   }
@@ -341,7 +339,7 @@ export function InnerWorkspacePanel({
         onDrop={onDrop}
       >
         {renderVisualization()}
-        {Boolean(suggestionForDraggedField) && renderEmptyWorkspace()}
+        {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
       </DragDrop>
     </WorkspacePanelWrapper>
   );

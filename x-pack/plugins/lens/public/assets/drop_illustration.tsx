@@ -6,7 +6,14 @@
 
 import * as React from 'react';
 
-export const DropIllustration = ({ title, titleId, ...props }) => (
+export const DropIllustration = ({
+  title,
+  titleId,
+  ...props
+}: {
+  title: string;
+  titleId: string;
+}) => (
   <svg
     width={176}
     height={176}
