@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
   const retry = getService('retry');
+  const comboBox = getService('comboBox');
 
   describe('Connectors', function () {
     before(async () => {
@@ -95,7 +96,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should test a connector', async () => {
       const connectorName = generateUniqueKey();
-      await createConnector(connectorName);
+      const indexName = generateUniqueKey();
+      await createIndexConnector(connectorName, indexName);
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -106,14 +108,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
-      await testSubjects.setValue('messageTextArea', 'some message');
+      // test success
+      await testSubjects.setValue('documentsJsonEditor', '{ "key": "value" }');
+
+      await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
+
+      await retry.try(async () => {
+        await testSubjects.find('executionSuccessfulResult');
+      });
+
+      // test failure
+      await testSubjects.setValue('documentsJsonEditor', '{ "": "value" }', {
+        clearWithKeyboard: true,
+      });
 
       await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
 
       await retry.try(async () => {
         const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
         expect(await executionFailureResultCallout.getVisibleText()).to.match(
-          /error posting slack message/
+          /error indexing documents/
         );
       });
     });
@@ -231,6 +245,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.setValue('nameInput', connectorName);
 
     await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+
+    await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
+    await pageObjects.common.closeToast();
+  }
+
+  async function createIndexConnector(connectorName: string, indexName: string) {
+    await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+    await testSubjects.click('.index-card');
+
+    await testSubjects.setValue('nameInput', connectorName);
+
+    await comboBox.set('connectorIndexesComboBox', indexName);
 
     await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
     await pageObjects.common.closeToast();

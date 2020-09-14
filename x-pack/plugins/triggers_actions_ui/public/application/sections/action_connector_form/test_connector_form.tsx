@@ -14,7 +14,6 @@ import {
   EuiDescriptionList,
   EuiCallOut,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
