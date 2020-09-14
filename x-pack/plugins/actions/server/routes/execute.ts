@@ -13,8 +13,7 @@ import {
 } from 'kibana/server';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 
-import { ActionTypeExecutorResult } from '../types';
-import { BASE_ACTION_API_PATH } from '../../common';
+import { BASE_ACTION_API_PATH, ActionTypeExecutorResult } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),

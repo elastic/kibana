@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
+  const retry = getService('retry');
 
   describe('Connectors', function () {
     before(async () => {
@@ -90,6 +91,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           actionType: 'Slack',
         },
       ]);
+    });
+
+    it('should test a connector', async () => {
+      const connectorName = generateUniqueKey();
+      await createConnector(connectorName);
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+
+      await testSubjects.setValue('messageTextArea', 'some message');
+
+      await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
+
+      await retry.try(async () => {
+        const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
+        expect(await executionFailureResultCallout.getVisibleText()).to.match(
+          /error posting slack message/
+        );
+      });
     });
 
     it('should reset connector when canceling an edit', async () => {
