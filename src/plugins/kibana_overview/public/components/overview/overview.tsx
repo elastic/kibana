@@ -180,7 +180,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
             <EuiButton
               fill
               iconType="indexOpen"
-              onClick={createAppNavigationHandler('app/management/kibana/indexPatterns')}
+              onClick={createAppNavigationHandler('/app/management/kibana/indexPatterns')}
             >
               <FormattedMessage
                 defaultMessage="Begin by adding data"
