@@ -236,8 +236,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           [
             'Hostname',
             'Agent Status',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'Operating System',
             'IP Address',
             'Version',
@@ -267,8 +267,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           [
             'Hostname',
             'Agent Status',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'Operating System',
             'IP Address',
             'Version',
