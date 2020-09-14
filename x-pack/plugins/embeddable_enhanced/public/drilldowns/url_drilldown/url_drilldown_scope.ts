@@ -99,17 +99,17 @@ export function getContextScope(contextScopeInput: ContextScopeInput): UrlDrilld
 
 /**
  * URL drilldown event scope,
- * available as: {{event.key}}, {{event.from}}
+ * available as {{event.$}}
  */
-type UrlDrilldownEventScope = ValueClickTriggerEventScope | RangeSelectTriggerEventScope;
-type EventScopeInput = ActionContext;
-interface ValueClickTriggerEventScope {
+export type UrlDrilldownEventScope = ValueClickTriggerEventScope | RangeSelectTriggerEventScope;
+export type EventScopeInput = ActionContext;
+export interface ValueClickTriggerEventScope {
   key?: string;
-  value?: string | number | boolean;
+  value: string | number | boolean;
   negate: boolean;
   points: Array<{ key?: string; value: string | number | boolean }>;
 }
-interface RangeSelectTriggerEventScope {
+export interface RangeSelectTriggerEventScope {
   key: string;
   from?: string | number;
   to?: string | number;
@@ -170,7 +170,9 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       to: new Date().toISOString(),
     };
   } else {
-    const nPoints = 4; // number of mock points to generate
+    // number of mock points to generate
+    // should be larger or equal of any possible data points length emitted by VALUE_CLICK_TRIGGER
+    const nPoints = 4;
     const points = new Array(nPoints).fill(0).map((_, index) => ({
       key: `event.points.${index}.key`,
       value: `event.points.${index}.value`,
