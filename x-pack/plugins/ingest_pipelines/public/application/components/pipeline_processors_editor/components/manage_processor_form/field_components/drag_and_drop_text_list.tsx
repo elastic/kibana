@@ -44,7 +44,7 @@ interface Props {
 
 const i18nTexts = {
   removeItemButtonAriaLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.grokForm.patternsHelpText',
+    'xpack.ingestPipelines.pipelineEditor.dragAndDropList.removeItemLabel',
     { defaultMessage: 'Remove item' }
   ),
 };
