@@ -152,6 +152,7 @@
 /x-pack/plugins/cloud/ @elastic/kibana-platform
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
+/packages/kbn-std/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
 /src/legacy/server/logging/ @elastic/kibana-platform
