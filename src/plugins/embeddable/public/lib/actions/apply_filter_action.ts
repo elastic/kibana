@@ -42,6 +42,7 @@ export function createFilterAction(): ActionByType<typeof ACTION_APPLY_FILTER> {
   return createAction<typeof ACTION_APPLY_FILTER>({
     type: ACTION_APPLY_FILTER,
     id: ACTION_APPLY_FILTER,
+    order: 100,
     getIconType: () => 'filter',
     getDisplayName: () => {
       return i18n.translate('embeddableApi.actions.applyFilterActionTitle', {
