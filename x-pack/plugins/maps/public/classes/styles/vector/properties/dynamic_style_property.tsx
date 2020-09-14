@@ -387,9 +387,7 @@ export class DynamicStyleProperty<T>
     if (this.supportsMbFeatureState()) {
       return getNumericalMbFeatureStateValue(rawValue);
     } else {
-      return this.isOrdinal()
-        ? getNumericalMbFeatureStateValue(rawValue)
-        : this.formatField(rawValue);
+      return rawValue;
     }
   }
 }
