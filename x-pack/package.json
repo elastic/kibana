@@ -195,7 +195,7 @@
     "jsdom": "13.1.0",
     "jsondiffpatch": "0.4.1",
     "jsts": "^1.6.2",
-    "kea": "2.2.0-rc.4",
+    "kea": "^2.2.0",
     "loader-utils": "^1.2.3",
     "lz-string": "^1.4.4",
     "madge": "3.4.4",

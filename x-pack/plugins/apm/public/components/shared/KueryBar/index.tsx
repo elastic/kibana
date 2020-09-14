@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   esKuery,
@@ -22,6 +22,7 @@ import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
 import { Typeahead } from './Typeahead';
+import { useProcessorEvent } from './use_processor_event';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -38,6 +39,10 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 }
 
 export function KueryBar() {
+  const { groupId, serviceName } = useParams<{
+    groupId?: string;
+    serviceName?: string;
+  }>();
   const history = useHistory();
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -49,7 +54,7 @@ export function KueryBar() {
 
   let currentRequestCheck;
 
-  const { processorEvent } = urlParams;
+  const processorEvent = useProcessorEvent();
 
   const examples = {
     transaction: 'transaction.duration.us > 300000',
@@ -98,7 +103,12 @@ export function KueryBar() {
         (await data.autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [indexPattern],
-          boolFilter: getBoolFilter(urlParams),
+          boolFilter: getBoolFilter({
+            groupId,
+            processorEvent,
+            serviceName,
+            urlParams,
+          }),
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,

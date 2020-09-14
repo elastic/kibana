@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HotPhase, SerializedHotPhase } from '../../../../common/types';
 import { serializedPhaseInitialization } from '../../constants';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import { HotPhase, SerializedHotPhase } from './types';
 import {
   maximumAgeRequiredMessage,
   maximumDocumentsRequiredMessage,

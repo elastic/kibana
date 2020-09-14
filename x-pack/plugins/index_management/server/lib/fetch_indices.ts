@@ -45,7 +45,9 @@ async function fetchIndicesCall(
   // This call retrieves alias and settings (incl. hidden status) information about indices
   const indices: GetIndicesResponse = await callAsCurrentUser('transport.request', {
     method: 'GET',
-    path: `/${indexNamesString}`,
+    // transport.request doesn't do any URI encoding, unlike other JS client APIs. This enables
+    // working with Logstash indices with names like %{[@metadata][beat]}-%{[@metadata][version]}.
+    path: `/${encodeURIComponent(indexNamesString)}`,
     query: {
       expand_wildcards: 'hidden,all',
     },

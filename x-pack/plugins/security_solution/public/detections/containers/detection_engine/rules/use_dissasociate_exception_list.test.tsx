@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 import * as api from './api';
-import { ruleMock } from './mock';
+import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import {
   ReturnUseDissasociateExceptionList,
   UseDissasociateExceptionListProps,
@@ -23,7 +23,7 @@ describe('useDissasociateExceptionList', () => {
   const onSuccess = jest.fn();
 
   beforeEach(() => {
-    jest.spyOn(api, 'patchRule').mockResolvedValue(ruleMock);
+    jest.spyOn(api, 'patchRule').mockResolvedValue(getRulesSchemaMock());
   });
 
   afterEach(() => {

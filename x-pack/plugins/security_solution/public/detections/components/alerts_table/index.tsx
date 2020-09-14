@@ -9,10 +9,10 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HeaderSection } from '../../../common/components/header_section';
@@ -32,6 +32,7 @@ import {
 } from './default_config';
 import { FILTER_OPEN, AlertsTableFilterGroup } from './alerts_filter_group';
 import { AlertsUtilityBar } from './alerts_utility_bar';
+import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
 import {
   SetEventsDeletedProps,
@@ -90,6 +91,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
+  const { addWarning } = useAppToasts();
   const { initializeTimeline, setSelectAll, setIndexToAdd } = useManageTimeline();
 
   const getGlobalQuery = useCallback(
@@ -130,21 +132,29 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (count: number, status: Status) => {
-      let title: string;
-      switch (status) {
-        case 'closed':
-          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
-          break;
-        case 'open':
-          title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
-          break;
-        case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
+    (updated: number, conflicts: number, status: Status) => {
+      if (conflicts > 0) {
+        // Partial failure
+        addWarning({
+          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+        });
+      } else {
+        let title: string;
+        switch (status) {
+          case 'closed':
+            title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'open':
+            title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
+            break;
+          case 'in-progress':
+            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+        }
+        displaySuccessToast(title, dispatchToaster);
       }
-      displaySuccessToast(title, dispatchToaster);
     },
-    [dispatchToaster]
+    [addWarning, dispatchToaster]
   );
 
   const onAlertStatusUpdateFailure = useCallback(

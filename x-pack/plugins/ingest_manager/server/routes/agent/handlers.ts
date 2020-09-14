@@ -15,6 +15,7 @@ import {
   PostAgentEnrollResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
+  PostAgentEnrollRequest,
 } from '../../../common/types';
 import {
   GetAgentsRequestSchema,
@@ -22,8 +23,7 @@ import {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
-  PostAgentCheckinRequestSchema,
-  PostAgentEnrollRequestSchema,
+  PostAgentCheckinRequest,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
 } from '../../types';
@@ -159,9 +159,9 @@ export const updateAgentHandler: RequestHandler<
 };
 
 export const postAgentCheckinHandler: RequestHandler<
-  TypeOf<typeof PostAgentCheckinRequestSchema.params>,
+  PostAgentCheckinRequest['params'],
   undefined,
-  TypeOf<typeof PostAgentCheckinRequestSchema.body>
+  PostAgentCheckinRequest['body']
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
@@ -218,7 +218,7 @@ export const postAgentCheckinHandler: RequestHandler<
 export const postAgentEnrollHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof PostAgentEnrollRequestSchema.body>
+  PostAgentEnrollRequest['body']
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);

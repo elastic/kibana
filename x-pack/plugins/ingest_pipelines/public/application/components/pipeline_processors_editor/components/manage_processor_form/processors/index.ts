@@ -24,3 +24,15 @@ export { HtmlStrip } from './html_strip';
 export { Inference } from './inference';
 export { Join } from './join';
 export { Json } from './json';
+export { Kv } from './kv';
+export { Lowercase } from './lowercase';
+export { Pipeline } from './pipeline';
+export { Remove } from './remove';
+export { Rename } from './rename';
+export { Script } from './script';
+export { SetProcessor } from './set';
+export { SetSecurityUser } from './set_security_user';
+export { Split } from './split';
+export { Sort } from './sort';
+
+export { FormFieldsComponent } from './shared';
