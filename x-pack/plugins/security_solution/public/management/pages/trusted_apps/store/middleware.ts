@@ -38,46 +38,49 @@ const createTrustedAppsListResourceStateChangedAction = (
   payload: { newState },
 });
 
-const refreshList = async (
+const refreshListIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  store.dispatch(
-    createTrustedAppsListResourceStateChangedAction({
-      type: 'LoadingResourceState',
-      // need to think on how to avoid the casting
-      previousState: getCurrentListResourceState(store.getState()) as Immutable<
-        StaleResourceState<TrustedAppsListData>
-      >,
-    })
-  );
-
-  try {
-    const pageIndex = getListCurrentPageIndex(store.getState());
-    const pageSize = getListCurrentPageSize(store.getState());
-    const response = await trustedAppsService.getTrustedAppsList({
-      page: pageIndex + 1,
-      per_page: pageSize,
-    });
-
+  if (needsRefreshOfListData(store.getState())) {
     store.dispatch(
       createTrustedAppsListResourceStateChangedAction({
-        type: 'LoadedResourceState',
-        data: {
-          items: response.data,
-          totalItemsCount: response.total,
-          paginationInfo: { index: pageIndex, size: pageSize },
-        },
+        type: 'LoadingResourceState',
+        // need to think on how to avoid the casting
+        previousState: getCurrentListResourceState(store.getState()) as Immutable<
+          StaleResourceState<TrustedAppsListData>
+        >,
       })
     );
-  } catch (error) {
-    store.dispatch(
-      createTrustedAppsListResourceStateChangedAction({
-        type: 'FailedResourceState',
-        error,
-        lastLoadedState: getLastLoadedListResourceState(store.getState()),
-      })
-    );
+
+    try {
+      const pageIndex = getListCurrentPageIndex(store.getState());
+      const pageSize = getListCurrentPageSize(store.getState());
+      const response = await trustedAppsService.getTrustedAppsList({
+        page: pageIndex + 1,
+        per_page: pageSize,
+      });
+
+      store.dispatch(
+        createTrustedAppsListResourceStateChangedAction({
+          type: 'LoadedResourceState',
+          data: {
+            items: response.data,
+            totalItemsCount: response.total,
+            paginationInfo: { index: pageIndex, size: pageSize },
+            timestamp: new Date().getTime(),
+          },
+        })
+      );
+    } catch (error) {
+      store.dispatch(
+        createTrustedAppsListResourceStateChangedAction({
+          type: 'FailedResourceState',
+          error,
+          lastLoadedState: getLastLoadedListResourceState(store.getState()),
+        })
+      );
+    }
   }
 };
 
@@ -88,8 +91,8 @@ export const createTrustedAppsPageMiddleware = (
     next(action);
 
     // TODO: need to think if failed state is a good condition to consider need for refresh
-    if (action.type === 'userChangedUrl' && needsRefreshOfListData(store.getState())) {
-      await refreshList(store, trustedAppsService);
+    if (action.type === 'userChangedUrl' || action.type === 'trustedAppsListDataOutdated') {
+      await refreshListIfNeeded(store, trustedAppsService);
     }
   };
 };
