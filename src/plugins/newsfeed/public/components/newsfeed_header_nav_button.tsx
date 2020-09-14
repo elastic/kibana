@@ -68,7 +68,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
           aria-label="Newsfeed menu"
           onClick={showFlyout}
         >
-          <EuiIcon type="email" size="m" />
+          <EuiIcon type="cheer" size="m" />
           {showBadge ? (
             <EuiNotificationBadge className="euiHeaderNotification" data-test-subj="showBadgeNews">
               &#9642;
