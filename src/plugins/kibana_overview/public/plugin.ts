@@ -18,7 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/public';
 import {
   KibanaOverviewPluginSetup,
   KibanaOverviewPluginStart,
@@ -42,8 +48,10 @@ export class KibanaOverviewPlugin
   ): KibanaOverviewPluginSetup {
     // Register an application into the side navigation menu
     core.application.register({
+      category: DEFAULT_APP_CATEGORIES.kibana,
       id: 'kibanaOverview',
       title: PLUGIN_NAME,
+      order: 1,
       appRoute: PLUGIN_PATH,
       async mount(params: AppMountParameters) {
         // Load application bundle

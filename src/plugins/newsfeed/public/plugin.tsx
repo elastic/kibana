@@ -59,7 +59,7 @@ export class NewsfeedPublicPlugin
       mount: (target) => this.mount(api$, target),
     });
 
-    return { api$ };
+    return { fetchNewsFeed: () => getApi(core.http, this.config, this.kibanaVersion) };
   }
 
   public stop() {

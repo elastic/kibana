@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Moment } from 'moment';
 import React, { FC, useState, useEffect } from 'react';
 import { Observable } from 'rxjs';
 import {
@@ -34,15 +35,18 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToken,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { PLUGIN_ID } from '../../../common';
 import { createAppNavigationHandler } from '../../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 import { PageHeader } from '../page_header';
 
 const apps = {
-  dashboard: {
+  dashboards: {
+    id: 'dashboards',
     title: 'Dashboard',
     description: i18n.translate('kibana.overview.apps.featureCatalogueDescription1', {
       defaultMessage: 'Analyze data in dashboards.',
@@ -51,6 +55,7 @@ const apps = {
     path: '/app/dashboards',
   },
   discover: {
+    id: 'discover',
     title: 'Discover',
     description: i18n.translate('kibana.overview.apps.featureCatalogueDescription2', {
       defaultMessage: 'Search and find insights.',
@@ -59,6 +64,7 @@ const apps = {
     path: '/app/discover',
   },
   canvas: {
+    id: 'canvas',
     title: 'Canvas',
     description: i18n.translate('kibana.overview.apps.featureCatalogueDescription3', {
       defaultMessage: 'Design pixel-perfect reports.',
@@ -67,6 +73,7 @@ const apps = {
     path: '/app/canvas',
   },
   maps: {
+    id: 'maps',
     title: 'Maps',
     description: i18n.translate('kibana.overview.apps.featureCatalogueDescription4', {
       defaultMessage: 'Plot geographic data.',
@@ -75,6 +82,7 @@ const apps = {
     path: '/app/maps',
   },
   ml: {
+    id: 'ml',
     title: 'Machine Learning',
     description: i18n.translate('kibana.overview.apps.featureCatalogueDescription5', {
       defaultMessage: 'Model, predict, and detect.',
@@ -83,6 +91,7 @@ const apps = {
     path: '/app/ml',
   },
   graph: {
+    id: 'graph',
     title: 'Graph',
     description: i18n.translate('kibana.overview.apps.featureCatalogueDescription6', {
       defaultMessage: 'Reveal patterns and relationships.',
@@ -92,6 +101,41 @@ const apps = {
   },
 };
 
+const solutions = {
+  enterpriseSearch: {
+    id: 'enterprise_search',
+    title: 'Enterprise Search',
+    description:
+      'Build a leading search experience using a refined set of APIs and powerful search-based UI.',
+    icon: 'logoEnterpriseSearch',
+  },
+  observability: {
+    id: 'observability',
+    title: 'Observability',
+    description:
+      'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
+    icon: 'logoObservability',
+  },
+  securitySolution: {
+    id: 'security_solution',
+    title: 'Security',
+    description:
+      'Combine network and host data integrations, sharable analytics, and explore your security data.',
+    icon: 'logoSecurity',
+  },
+};
+
+interface FeedItem {
+  title: string;
+  description: string;
+  link: string;
+  publishOn: Moment;
+}
+
+interface FetchResult {
+  feedItems: FeedItem[];
+}
+
 interface Props {
   newsfeed$: Observable<FetchResult | null | void>;
 }
@@ -99,6 +143,14 @@ interface Props {
 export const Overview: FC<Props> = ({ newsfeed$ }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
+  const { addBasePath, application, indexPatternService, uiSettings } = getServices();
+  const { capabilities } = application;
+  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+
+  const getSolutionGraphicURL = (solutionId: string) =>
+    `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_${
+      IS_DARK_THEME ? 'dark' : 'light'
+    }_2x.png`;
 
   useEffect(() => {
     function handleStatusChange(fetchResult: FetchResult | void | null) {
@@ -111,9 +163,6 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
     return () => subscription.unsubscribe();
   }, [newsfeed$]);
 
-  const { addBasePath, indexPatternService, uiSettings } = getServices();
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
-
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
       const resp = await indexPatternService.getTitles();
@@ -125,9 +174,9 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
   }, [indexPatternService]);
 
   const renderGettingStarted = () => {
-    const gettingStartedGraphicURL = IS_DARK_THEME
-      ? '/plugins/home/assets/kibana_montage_dark_2x.png'
-      : '/plugins/home/assets/kibana_montage_light_2x.png';
+    const gettingStartedGraphicURL = `/plugins/${PLUGIN_ID}/assets/kibana_montage_${
+      IS_DARK_THEME ? 'dark' : 'light'
+    }_2x.png`;
 
     return (
       <section
@@ -200,7 +249,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
     );
   };
 
-  const renderFeedItem = ({ title, description, link, publishOn }) => (
+  const renderFeedItem = ({ title, description, link, publishOn }: FeedItem) => (
     <article key={title}>
       <header>
         <EuiTitle size="xxs">
@@ -229,26 +278,28 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
   const renderAppCard = (appId: string) => {
     const app = apps[appId];
 
-    return (
+    return capabilities.navLinks[appId] ? (
       <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
         <EuiCard
           description={app.description}
           href={addBasePath(app.path)}
           image={addBasePath(
-            `/plugins/home/assets/kibana_${appId}_${IS_DARK_THEME ? 'dark' : 'light'}_2x.png`
+            `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${
+              IS_DARK_THEME ? 'dark' : 'light'
+            }_2x.png`
           )}
-          // isDisabled={!Boolean(directory)} TODO: should apps be hidden or disabled?
+          // isDisabled={!capabilities.navLinks[appId]}
           onClick={createAppNavigationHandler(app.path)}
           title={app.title}
           titleElement="h3"
           titleSize="s"
         />
       </EuiFlexItem>
-    );
+    ) : null;
   };
 
   const renderNormal = () => {
-    const mainApps = ['dashboard', 'discover'];
+    const mainApps = ['dashboards', 'discover'];
     const otherApps = Object.keys(apps).filter((appId) => !mainApps.includes(appId));
 
     return (
@@ -311,6 +362,31 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
               </EuiTitle>
 
               <EuiSpacer size="m" />
+
+              <EuiFlexGroup>
+                {Object.values(solutions).map(({ id, title, description, icon }) => (
+                  <EuiFlexItem key={id}>
+                    <EuiCard
+                      title={
+                        <EuiTitle size="s">
+                          <h3>{title}</h3>
+                        </EuiTitle>
+                      }
+                      description={<span>{description}</span>}
+                      icon={
+                        <EuiToken
+                          iconType={icon}
+                          shape="circle"
+                          fill="light"
+                          size="l"
+                          className="homSolutionPanel__icon"
+                        />
+                      }
+                      image={<EuiImage url={addBasePath(getSolutionGraphicURL(id))} alt={title} />}
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
             </section>
           </EuiFlexItem>
         </EuiFlexGroup>
