@@ -14,11 +14,11 @@ object DefaultBuild : BuildType({
   artifactRules = """
     +:install/kibana/**/* => kibana-default.tar.gz
     target/kibana-*
-    +:src/**/public/target/**/* => kibana-default-plugins.tar.gz!/src/
-    +:x-pack/plugins/**/public/target/**/* => kibana-default-plugins.tar.gz!/x-pack/plugins/
-    +:x-pack/test/**/public/target/**/* => kibana-default-plugins.tar.gz!/x-pack/test/
-    +:examples/**/public/target/**/* => kibana-default-plugins.tar.gz!/examples/
-    +:test/**/public/target/**/* => kibana-default-plugins.tar.gz!/test/
+    +:src/**/target/public/**/* => kibana-default-plugins.tar.gz!/src/
+    +:x-pack/plugins/**/target/public/**/* => kibana-default-plugins.tar.gz!/x-pack/plugins/
+    +:x-pack/test/**/target/public/**/* => kibana-default-plugins.tar.gz!/x-pack/test/
+    +:examples/**/target/public/**/* => kibana-default-plugins.tar.gz!/examples/
+    +:test/**/target/public/**/* => kibana-default-plugins.tar.gz!/test/
   """.trimIndent()
 
   kibanaAgent(16)
