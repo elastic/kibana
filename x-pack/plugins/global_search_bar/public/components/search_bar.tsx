@@ -167,6 +167,37 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
             wrap
           >
             <FormattedMessage
+              id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail"
+              defaultMessage="{shortcutDescription}{commandDescription}"
+              values={{
+                shortcutDescription: (
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription"
+                      defaultMessage="Shortcut"
+                    />
+                  </EuiFlexItem>
+                ),
+                commandDescription: (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>
+                      {isMac ? (
+                        <FormattedMessage
+                          id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
+                          defaultMessage="Command + /"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
+                          defaultMessage="Control + /"
+                        />
+                      )}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ),
+              }}
+            />
+            <FormattedMessage
               id="xpack.globalSearchBar.searchBar.shortcut"
               defaultMessage="{what}{how}"
               values={{
