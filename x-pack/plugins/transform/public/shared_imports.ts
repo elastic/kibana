@@ -15,7 +15,6 @@ export {
 
 export {
   getFieldType,
-  getErrorMessage,
   extractErrorMessage,
   formatHumanReadableDateTimeSeconds,
   getDataGridSchemaFromKibanaFieldType,
@@ -28,7 +27,6 @@ export {
   DataGrid,
   EsSorting,
   RenderCellValue,
-  SearchResponse7,
   UseDataGridReturnType,
   UseIndexDataReturnType,
   INDEX_STATUS,
