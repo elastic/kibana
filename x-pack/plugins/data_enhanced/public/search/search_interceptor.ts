@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throwError, EMPTY, timer, from } from 'rxjs';
+import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
-import { getLongQueryNotification } from './long_query_notification';
+import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
@@ -17,50 +18,34 @@ import { IAsyncSearchOptions } from '.';
 import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
+  private uiSettingsSub: Subscription;
+  private searchTimeout: number;
+
   /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
-   * @param deps `SearchInterceptorDeps`
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+   * @internal
    */
-  constructor(deps: SearchInterceptorDeps, requestTimeout?: number) {
-    super(deps, requestTimeout);
+  constructor(deps: SearchInterceptorDeps) {
+    super(deps);
+    this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
+
+    this.uiSettingsSub = deps.uiSettings
+      .get$(UI_SETTINGS.SEARCH_TIMEOUT)
+      .subscribe((timeout: number) => {
+        this.searchTimeout = timeout;
+      });
+  }
+
+  public stop() {
+    this.uiSettingsSub.unsubscribe();
   }
 
   /**
    * Abort our `AbortController`, which in turn aborts any intercepted searches.
    */
   public cancelPending = () => {
-    this.hideToast();
     this.abortController.abort();
     this.abortController = new AbortController();
     if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
-  };
-
-  /**
-   * Un-schedule timing out all of the searches intercepted.
-   */
-  public runBeyondTimeout = () => {
-    this.hideToast();
-    this.timeoutSubscriptions.unsubscribe();
-    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryRunBeyondTimeout();
-  };
-
-  protected showToast = () => {
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.deps.toasts.addInfo(
-      {
-        title: 'Your query is taking a while',
-        text: getLongQueryNotification({
-          cancel: this.cancelPending,
-          runBeyondTimeout: this.runBeyondTimeout,
-        }),
-      },
-      {
-        toastLifeTimeMs: 1000000,
-      }
-    );
-    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryPopupShown();
   };
 
   public search(
@@ -69,12 +54,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   ) {
     let { id } = request;
 
-    request.params = {
-      ignoreThrottled: !this.deps.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-      ...request.params,
-    };
-
-    const { combinedSignal, cleanup } = this.setupTimers(options);
+    const { combinedSignal, cleanup } = this.setupAbortSignal({
+      abortSignal: options.abortSignal,
+      timeout: this.searchTimeout,
+    });
     const aborted$ = from(toPromise(combinedSignal));
     const strategy = options?.strategy || ENHANCED_ES_SEARCH_STRATEGY;
 
@@ -108,7 +91,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           // we don't need to send a follow-up request to delete this search. Otherwise, we
           // send the follow-up request to delete this search, then throw an abort error.
           if (id !== undefined) {
-            this.deps.http.delete(`/internal/search/es/${id}`);
+            this.deps.http.delete(`/internal/search/${strategy}/${id}`);
           }
         },
       }),
@@ -118,4 +101,28 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       })
     );
   }
+
+  // Right now we are debouncing but we will hook this up with background sessions to show only one
+  // error notification per session.
+  protected showTimeoutError = debounce(
+    (e: Error) => {
+      const message = this.application.capabilities.advancedSettings?.save
+        ? i18n.translate('xpack.data.search.timeoutIncreaseSetting', {
+            defaultMessage:
+              'One or more queries timed out. Increase run time with the search.timeout advanced setting.',
+          })
+        : i18n.translate('xpack.data.search.timeoutContactAdmin', {
+            defaultMessage:
+              'One or more queries timed out. Contact your system administrator to increase the run time.',
+          });
+      this.deps.toasts.addError(e, {
+        title: 'Timed out',
+        toastMessage: message,
+      });
+    },
+    60000,
+    {
+      leading: true,
+    }
+  );
 }

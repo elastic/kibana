@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, map, last, get } from 'lodash';
+import { defaults, map, last } from 'lodash';
 
 import { IndexPattern } from './index_pattern';
 
@@ -29,7 +29,7 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { FieldFormat } from '../..';
+import { FieldFormat, IndexPatternsService } from '../..';
 
 class MockFieldFormatter {}
 
@@ -116,6 +116,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     apiClient,
     patternCache,
     fieldFormats: fieldFormatsMock,
+    indexPatternsService: {} as IndexPatternsService,
     onNotification: () => {},
     onError: () => {},
     shortDotsEnable: false,
@@ -151,7 +152,6 @@ describe('IndexPattern', () => {
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
       expect(indexPattern).toHaveProperty('addScriptedField');
       expect(indexPattern).toHaveProperty('removeScriptedField');
-      expect(indexPattern).toHaveProperty('save');
 
       // properties
       expect(indexPattern).toHaveProperty('fields');
@@ -388,61 +388,5 @@ describe('IndexPattern', () => {
         expect(field.count).toEqual(0);
       });
     });
-  });
-
-  test('should handle version conflicts', async () => {
-    setDocsourcePayload(null, {
-      id: 'foo',
-      version: 'foo',
-      attributes: {
-        title: 'something',
-      },
-    });
-    // Create a normal index pattern
-    const pattern = new IndexPattern('foo', {
-      savedObjectsClient: savedObjectsClient as any,
-      apiClient,
-      patternCache,
-      fieldFormats: fieldFormatsMock,
-      onNotification: () => {},
-      onError: () => {},
-      shortDotsEnable: false,
-      metaFields: [],
-    });
-    await pattern.init();
-
-    expect(get(pattern, 'version')).toBe('fooa');
-
-    // Create the same one - we're going to handle concurrency
-    const samePattern = new IndexPattern('foo', {
-      savedObjectsClient: savedObjectsClient as any,
-      apiClient,
-      patternCache,
-      fieldFormats: fieldFormatsMock,
-      onNotification: () => {},
-      onError: () => {},
-      shortDotsEnable: false,
-      metaFields: [],
-    });
-    await samePattern.init();
-
-    expect(get(samePattern, 'version')).toBe('fooaa');
-
-    // This will conflict because samePattern did a save (from refreshFields)
-    // but the resave should work fine
-    pattern.title = 'foo2';
-    await pattern.save();
-
-    // This should not be able to recover
-    samePattern.title = 'foo3';
-
-    let result;
-    try {
-      await samePattern.save();
-    } catch (err) {
-      result = err;
-    }
-
-    expect(result.res.status).toBe(409);
   });
 });

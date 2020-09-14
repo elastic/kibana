@@ -1,13 +1,23 @@
 # search
 
-The `search` plugin provides the ability to register search strategies that take in a request
-object, and return a response object, of a given shape.
+The `search` service provides you with APIs to query Elasticsearch.
 
-Both client side search strategies can be registered, as well as server side search strategies.
+The services are split into two parts: (1) low-level API; and (2) high-level API.
 
-The `search` plugin includes two one concrete client side implementations - 
- `SYNC_SEARCH_STRATEGY` and `ES_SEARCH_STRATEGY` which uses `SYNC_SEARCH_STRATEGY`.  There is also one
- default server side search strategy, `ES_SEARCH_STRATEGY`.
+## Low-level API
 
- Includes the `esSearch` plugin in order to search for data from Elasticsearch using Elasticsearch
-DSL.
+With low level API you work directly with elasticsearch DSL
+
+```typescript
+const results = await data.search.search(request, params);
+```
+
+## High-level API
+
+Using high-level API you work with Kibana abstractions around Elasticsearch DSL: filters, queries, and aggregations. Provided by the *Search Source* service.
+
+```typescript
+const search = data.search.searchSource.createEmpty();
+search.setField('query', data.query.queryString);
+const results = await search.fetch();
+```
