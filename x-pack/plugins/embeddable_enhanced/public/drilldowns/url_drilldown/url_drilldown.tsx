@@ -29,6 +29,7 @@ interface UrlDrilldownDeps {
   getGlobalScope: () => UrlDrilldownGlobalScope;
   navigateToUrl: (url: string) => Promise<void>;
   getSyntaxHelpDocsLink: () => string;
+  getVariablesHelpDocsLink: () => string;
 }
 
 export type ActionContext = ChartActionContext;
@@ -72,6 +73,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
         onConfig={onConfig}
         scope={scope}
         syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
+        variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
       />
     );
   };

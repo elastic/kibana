@@ -8,7 +8,7 @@ import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart } from 'kibana/public';
 import {
   KibanaContextProvider,
@@ -31,6 +31,7 @@ import {
 } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
+import { ScopedHistory } from '../../../../../src/core/public';
 
 export interface UptimeAppColors {
   danger: string;
@@ -46,13 +47,13 @@ export interface UptimeAppProps {
   canSave: boolean;
   core: CoreStart;
   darkMode: boolean;
+  history: ScopedHistory;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
   plugins: ClientPluginsSetup;
   startPlugins: ClientPluginsStart;
-  routerBasename: string;
   setBadge: UMUpdateBadge;
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedRange[];
@@ -68,7 +69,6 @@ const Application = (props: UptimeAppProps) => {
     i18n: i18nCore,
     plugins,
     renderGlobalHelpControls,
-    routerBasename,
     setBadge,
     startPlugins,
   } = props;
@@ -99,7 +99,7 @@ const Application = (props: UptimeAppProps) => {
       <i18nCore.Context>
         <ReduxProvider store={store}>
           <KibanaContextProvider services={{ ...core, ...plugins }}>
-            <Router basename={routerBasename}>
+            <Router history={props.history}>
               <UptimeRefreshContextProvider>
                 <UptimeSettingsContextProvider {...props}>
                   <UptimeThemeContextProvider darkMode={darkMode}>

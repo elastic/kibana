@@ -13,12 +13,13 @@ import { AlertsComponentsProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../lib/kibana';
-import { MatrixHistogramContainer } from '../matrix_histogram';
+import { MatrixHistogram } from '../matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
 import { MatrixHistogramConfigs } from '../matrix_histogram/types';
-const ID = 'alertsOverTimeQuery';
 
-export const AlertsView = ({
+const ID = 'alertsHistogramQuery';
+
+const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
   timelineId,
   deleteQuery,
   endDate,
@@ -26,18 +27,18 @@ export const AlertsView = ({
   pageFilters,
   setQuery,
   startDate,
-  type,
-}: AlertsComponentsProps) => {
+}) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const { globalFullScreen } = useFullScreen();
+
   const getSubtitle = useCallback(
     (totalCount: number) =>
       `${i18n.SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${i18n.UNIT(
         totalCount
       )}`,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [defaultNumberFormat]
   );
-  const { globalFullScreen } = useFullScreen();
+
   const alertsHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
@@ -45,6 +46,7 @@ export const AlertsView = ({
     }),
     [getSubtitle]
   );
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -56,14 +58,12 @@ export const AlertsView = ({
   return (
     <>
       {!globalFullScreen && (
-        <MatrixHistogramContainer
+        <MatrixHistogram
           endDate={endDate}
           filterQuery={filterQuery}
           id={ID}
           setQuery={setQuery}
-          sourceId="default"
           startDate={startDate}
-          type={type}
           {...alertsHistogramConfigs}
         />
       )}
@@ -76,4 +76,7 @@ export const AlertsView = ({
     </>
   );
 };
-AlertsView.displayName = 'AlertsView';
+
+AlertsViewComponent.displayName = 'AlertsViewComponent';
+
+export const AlertsView = React.memo(AlertsViewComponent);

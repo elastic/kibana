@@ -13,6 +13,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
@@ -29,7 +30,10 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 
-export function TransactionDetails() {
+type TransactionDetailsProps = RouteComponentProps<{ serviceName: string }>;
+
+export function TransactionDetails({ match }: TransactionDetailsProps) {
+  const { serviceName } = match.params;
   const location = useLocation();
   const { urlParams } = useUrlParams();
   const {
@@ -41,7 +45,7 @@ export function TransactionDetails() {
   const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
     urlParams
   );
-  const { transactionName, transactionType, serviceName } = urlParams;
+  const { transactionName, transactionType } = urlParams;
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
   useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });

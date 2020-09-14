@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TextEditor } from '../field_components';
@@ -16,6 +16,7 @@ import {
   fieldValidators,
   UseField,
   Field,
+  useKibana,
 } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
@@ -24,55 +25,79 @@ import { EDITOR_PX_HEIGHT } from './shared';
 
 const { emptyField } = fieldValidators;
 
-const fieldsConfig: Record<string, FieldConfig> = {
-  /* Required field config */
-  pattern: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldLabel', {
-      defaultMessage: 'Pattern',
-    }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText',
-      {
-        defaultMessage: 'The pattern to apply to the field.',
-      }
-    ),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternRequiredError', {
-            defaultMessage: 'A pattern value is required.',
-          })
-        ),
-      },
-    ],
-  },
-  /* Optional field config */
-  append_separator: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorparaotrFieldLabel',
-      {
-        defaultMessage: 'Append separator (optional)',
-      }
-    ),
-    helpText: (
-      <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorHelpText"
-        defaultMessage="The character(s) that separate the appended fields. Default value is {value} (an empty string)."
-        values={{ value: <EuiCode inline>{'""'}</EuiCode> }}
-      />
-    ),
-  },
+const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
+  return {
+    /* Required field config */
+    pattern: {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldLabel', {
+        defaultMessage: 'Pattern',
+      }),
+      helpText: (
+        <FormattedMessage
+          id="xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText"
+          defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {keyModifier} to alter the dissection behavior."
+          values={{
+            keyModifier: (
+              <EuiLink
+                target="_blank"
+                external
+                href={esDocUrl + '/dissect-processor.html#dissect-key-modifiers'}
+              >
+                {i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText.dissectProcessorLink',
+                  {
+                    defaultMessage: 'key modifier',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      ),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.ingestPipelines.pipelineEditor.dissectForm.patternRequiredError',
+              {
+                defaultMessage: 'A pattern value is required.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+    /* Optional field config */
+    append_separator: {
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate(
+        'xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorparaotrFieldLabel',
+        {
+          defaultMessage: 'Append separator (optional)',
+        }
+      ),
+      helpText: (
+        <FormattedMessage
+          id="xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorHelpText"
+          defaultMessage="If you specify a key modifier, this character separates the fields when appending results. Defaults to {value}."
+          values={{ value: <EuiCode inline>{'""'}</EuiCode> }}
+        />
+      ),
+    },
+  };
 };
 
 export const Dissect: FunctionComponent = () => {
+  const { services } = useKibana();
+  const fieldsConfig = getFieldsConfig(services.documentation.getEsDocsBasePath());
+
   return (
     <>
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dissectForm.fieldNameHelpText',
-          { defaultMessage: 'The field to dissect.' }
+          { defaultMessage: 'Field to dissect.' }
         )}
       />
 

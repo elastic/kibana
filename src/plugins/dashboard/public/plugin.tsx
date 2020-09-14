@@ -33,6 +33,7 @@ import {
   SavedObjectsClientContract,
   ScopedHistory,
 } from 'src/core/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -52,6 +53,7 @@ import {
   getSavedObjectFinder,
   SavedObjectLoader,
   SavedObjectsStart,
+  showSaveModal,
 } from '../../saved_objects/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
@@ -102,6 +104,10 @@ import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
 import { AttributeService } from '.';
+import {
+  AttributeServiceOptions,
+  ATTRIBUTE_SERVICE_KEY,
+} from './attribute_service/attribute_service';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -120,6 +126,7 @@ interface SetupDependencies {
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
@@ -128,6 +135,7 @@ interface SetupDependencies {
 interface StartDependencies {
   data: DataPublicPluginStart;
   kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
   navigation: NavigationStart;
@@ -150,10 +158,13 @@ export interface DashboardStart {
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
   getAttributeService: <
     A extends { title: string },
-    V extends EmbeddableInput & { attributes: A },
-    R extends SavedObjectEmbeddableInput
+    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    },
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
   >(
-    type: string
+    type: string,
+    options?: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
 }
 
@@ -182,7 +193,16 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
-    { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
+    {
+      share,
+      uiActions,
+      embeddable,
+      home,
+      kibanaLegacy,
+      urlForwarding,
+      data,
+      usageCollection,
+    }: SetupDependencies
   ): Setup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
       DashboardFeatureFlagConfig
@@ -303,7 +323,8 @@ export class DashboardPlugin
           navigation,
           share: shareStart,
           data: dataStart,
-          kibanaLegacy: { dashboardConfig, navigateToDefaultApp, navigateToLegacyKibanaUrl },
+          kibanaLegacy: { dashboardConfig },
+          urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
           savedObjects,
         } = pluginsStart;
 
@@ -349,7 +370,7 @@ export class DashboardPlugin
     initAngularBootstrap();
 
     core.application.register(app);
-    kibanaLegacy.forwardApp(
+    urlForwarding.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,
       (path) => {
@@ -358,7 +379,7 @@ export class DashboardPlugin
         return `#/list${tail || ''}`;
       }
     );
-    kibanaLegacy.forwardApp(
+    urlForwarding.forwardApp(
       DashboardConstants.DASHBOARD_ID,
       DashboardConstants.DASHBOARDS_ID,
       (path) => {
@@ -465,14 +486,16 @@ export class DashboardPlugin
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
-      getAttributeService: (type: string) =>
+      getAttributeService: (type: string, options) =>
         new AttributeService(
           type,
+          showSaveModal,
           core.savedObjects.client,
           core.overlays,
           core.i18n.Context,
           core.notifications.toasts,
-          embeddable.getEmbeddableFactory
+          embeddable.getEmbeddableFactory,
+          options
         ),
     };
   }

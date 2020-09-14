@@ -16,6 +16,8 @@ import {
   EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +35,7 @@ import {
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
-import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
+import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -46,6 +48,7 @@ import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
+import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 
 const EndpointListNavLink = memo<{
@@ -89,6 +92,7 @@ export const EndpointList = () => {
     endpointsExist,
     autoRefreshInterval,
     isAutoRefreshEnabled,
+    patternsError,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -99,7 +103,7 @@ export const EndpointList = () => {
       pageIndex,
       pageSize,
       totalItemCount,
-      pageSizeOptions: [10, 20, 50],
+      pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
       hidePerPageOptions: false,
     };
   }, [pageIndex, pageSize, totalItemCount]);
@@ -397,16 +401,16 @@ export const EndpointList = () => {
   const hasListData = listData && listData.length > 0;
 
   const refreshStyle = useMemo(() => {
-    return { display: hasListData ? 'flex' : 'none', maxWidth: 200 };
-  }, [hasListData]);
+    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist]);
 
   const refreshIsPaused = useMemo(() => {
-    return !hasListData ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
-  }, [hasListData, hasSelectedEndpoint, isAutoRefreshEnabled]);
+    return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
+  }, [endpointsExist, hasSelectedEndpoint, isAutoRefreshEnabled]);
 
   const refreshInterval = useMemo(() => {
-    return !hasListData ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
-  }, [hasListData, autoRefreshInterval]);
+    return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
+  }, [endpointsExist, autoRefreshInterval]);
 
   return (
     <AdministrationListPage
@@ -426,9 +430,14 @@ export const EndpointList = () => {
       }
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      {
-        <>
-          <div style={refreshStyle}>
+      <>
+        <EuiFlexGroup>
+          {endpointsExist && !patternsError && (
+            <EuiFlexItem>
+              <AdminSearchBar />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false} style={refreshStyle}>
             <EuiSuperDatePicker
               onTimeChange={NOOP}
               isDisabled={hasSelectedEndpoint}
@@ -438,10 +447,10 @@ export const EndpointList = () => {
               onRefreshChange={onRefreshChange}
               isAutoRefreshOnly={true}
             />
-          </div>
-          <EuiSpacer size="m" />
-        </>
-      }
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+      </>
       {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">

@@ -58,6 +58,8 @@ import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
+  expectDefineFormToRepopulateAndContinue,
+  expectAboutFormToRepopulateAndContinue,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
@@ -82,6 +84,8 @@ describe('Detection rules, custom', () => {
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
     fillAboutRuleAndContinue(newRule);
+    expectDefineFormToRepopulateAndContinue(newRule);
+    expectAboutFormToRepopulateAndContinue(newRule);
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');

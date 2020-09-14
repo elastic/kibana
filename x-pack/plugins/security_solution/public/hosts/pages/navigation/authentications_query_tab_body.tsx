@@ -10,19 +10,20 @@ import { AuthenticationTable } from '../../components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useAuthentications } from '../../containers/authentications';
 import { HostsComponentsQueryProps } from './types';
-import { hostsModel } from '../../store';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
   MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { KpiHostsChartColors } from '../../components/kpi_hosts/types';
 import * as i18n from '../translations';
-import { HistogramType } from '../../../graphql/types';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
-const ID = 'authenticationsOverTimeQuery';
+
+const ID = 'authenticationsHistogramQuery';
+
 const authStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'event.outcome',
@@ -53,13 +54,13 @@ const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     authStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? authStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
-  histogramType: HistogramType.authentications,
+  histogramType: MatrixHistogramType.authentications,
   mapping: authMatrixDataMappingFields,
   stackByOptions: authStackByOptions,
   title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
 };
 
-export const AuthenticationsQueryTabBody = ({
+const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   docValueFields,
   endDate,
@@ -68,7 +69,12 @@ export const AuthenticationsQueryTabBody = ({
   setQuery,
   startDate,
   type,
-}: HostsComponentsQueryProps) => {
+}) => {
+  const [
+    loading,
+    { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
+  ] = useAuthentications({ docValueFields, endDate, filterQuery, skip, startDate, type });
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -77,21 +83,14 @@ export const AuthenticationsQueryTabBody = ({
     };
   }, [deleteQuery]);
 
-  const [
-    loading,
-    { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useAuthentications({ docValueFields, endDate, filterQuery, startDate, type });
-
   return (
     <>
-      <MatrixHistogramContainer
+      <MatrixHistogram
         endDate={endDate}
         filterQuery={filterQuery}
         id={ID}
         setQuery={setQuery}
-        sourceId="default"
         startDate={startDate}
-        type={hostsModel.HostsType.page}
         {...histogramConfigs}
       />
 
@@ -113,5 +112,9 @@ export const AuthenticationsQueryTabBody = ({
     </>
   );
 };
+
+AuthenticationsQueryTabBodyComponent.displayName = 'AuthenticationsQueryTabBodyComponent';
+
+export const AuthenticationsQueryTabBody = React.memo(AuthenticationsQueryTabBodyComponent);
 
 AuthenticationsQueryTabBody.displayName = 'AuthenticationsQueryTabBody';

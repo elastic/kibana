@@ -20,12 +20,12 @@ which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
 | `cpu.cgroup.path.override:`
- | Override for cgroup cpu path when mounted in a
-manner that is inconsistent with `/proc/self/cgroup`.
+ | *deprecated* This setting has been renamed to `ops.cGroupOverrides.cpuPath`
+and the old name will no longer be supported as of 8.0.
 
 | `cpuacct.cgroup.path.override:`
- | Override for cgroup cpuacct path when mounted
-in a manner that is inconsistent with `/proc/self/cgroup`.
+ | *deprecated* This setting has been renamed to `ops.cGroupOverrides.cpuAcctPath`
+and the old name will no longer be supported as of 8.0.
 
 | `csp.rules:`
  | A https://w3c.github.io/webappsec-csp/[content-security-policy] template
@@ -437,6 +437,14 @@ not saved in {es}. *Default: `data`*
 | `ops.interval:`
  | Set the interval in milliseconds to sample
 system and process performance metrics. The minimum value is 100. *Default: `5000`*
+
+| `ops.cGroupOverrides.cpuPath:`
+ | Override for cgroup cpu path when mounted in a
+manner that is inconsistent with `/proc/self/cgroup`.
+
+| `ops.cGroupOverrides.cpuAcctPath:`
+ | Override for cgroup cpuacct path when mounted
+in a manner that is inconsistent with `/proc/self/cgroup`.
 
 | `server.basePath:`
  | Enables you to specify a path to mount {kib} at if you are

@@ -34,7 +34,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { RouteComponentProps } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { getIndexListUri } from '../../../../../../index_management/public';
-import { PolicyFromES } from '../../../services/policies/types';
+import { PolicyFromES } from '../../../../../common/types';
 import { getPolicyPath } from '../../../services/navigation';
 import { sortTable } from '../../../services';
 import { trackUiMetric } from '../../../services/ui_metric';

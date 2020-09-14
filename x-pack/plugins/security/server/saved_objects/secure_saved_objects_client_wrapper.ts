@@ -19,7 +19,7 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import { CheckPrivilegesResponse } from '../authorization/check_privileges';
+import { CheckPrivilegesResponse } from '../authorization/types';
 import { SpacesService } from '../plugin';
 
 interface SecureSavedObjectsClientWrapperOptions {
@@ -199,12 +199,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    await this.ensureAuthorized(
-      this.getUniqueObjectTypes(objects),
-      'bulk_update',
-      options && options.namespace,
-      { objects, options }
-    );
+    const objectNamespaces = objects
+      // The repository treats an `undefined` object namespace is treated as the absence of a namespace, falling back to options.namespace;
+      // in this case, filter it out here so we don't accidentally check for privileges in the Default space when we shouldn't be doing so.
+      .filter(({ namespace }) => namespace !== undefined)
+      .map(({ namespace }) => namespace!);
+    const namespaces = [options?.namespace, ...objectNamespaces];
+    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
+      objects,
+      options,
+    });
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
     return await this.redactSavedObjectsNamespaces(response);
@@ -212,7 +216,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private async checkPrivileges(
     actions: string | string[],
-    namespaceOrNamespaces?: string | string[]
+    namespaceOrNamespaces?: string | Array<undefined | string>
   ) {
     try {
       return await this.checkSavedObjectsPrivilegesAsCurrentUser(actions, namespaceOrNamespaces);
@@ -224,7 +228,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private async ensureAuthorized(
     typeOrTypes: string | string[],
     action: string,
-    namespaceOrNamespaces?: string | string[],
+    namespaceOrNamespaces?: string | Array<undefined | string>,
     args?: Record<string, unknown>,
     auditAction: string = action,
     requiresAll = true
@@ -238,12 +242,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const { hasAllRequested, username, privileges } = result;
     const spaceIds = uniq(
-      privileges.map(({ resource }) => resource).filter((x) => x !== undefined)
+      privileges.kibana.map(({ resource }) => resource).filter((x) => x !== undefined)
     ).sort() as string[];
 
     const isAuthorized =
       (requiresAll && hasAllRequested) ||
-      (!requiresAll && privileges.some(({ authorized }) => authorized));
+      (!requiresAll && privileges.kibana.some(({ authorized }) => authorized));
     if (isAuthorized) {
       this.auditLogger.savedObjectsAuthorizationSuccess(
         username,
@@ -271,7 +275,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private getMissingPrivileges(privileges: CheckPrivilegesResponse['privileges']) {
-    return privileges
+    return privileges.kibana
       .filter(({ authorized }) => !authorized)
       .map(({ resource, privilege }) => ({ spaceId: resource, privilege }));
   }
@@ -284,7 +288,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const action = this.actions.login;
     const checkPrivilegesResult = await this.checkPrivileges(action, namespaces);
     // check if the user can log into each namespace
-    const map = checkPrivilegesResult.privileges.reduce(
+    const map = checkPrivilegesResult.privileges.kibana.reduce(
       (acc: Record<string, boolean>, { resource, authorized }) => {
         // there should never be a case where more than one privilege is returned for a given space
         // if there is, fail-safe (authorized + unauthorized = unauthorized)

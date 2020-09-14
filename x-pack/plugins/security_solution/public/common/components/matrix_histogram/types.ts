@@ -9,7 +9,7 @@ import { ScaleType, Position, TickFormatter } from '@elastic/charts';
 import { ActionCreator } from 'redux';
 import { ESQuery } from '../../../../common/typed_json';
 import { InputsModelId } from '../../store/inputs/constants';
-import { HistogramType } from '../../../graphql/types';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { UpdateDateRange } from '../charts/common';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 
@@ -29,7 +29,7 @@ export interface MatrixHistogramConfigs {
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
   hideHistogramIfEmpty?: boolean;
-  histogramType: HistogramType;
+  histogramType: MatrixHistogramType;
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   stackByOptions: MatrixHistogramOption[];
@@ -40,13 +40,7 @@ export interface MatrixHistogramConfigs {
 
 interface MatrixHistogramBasicProps {
   chartHeight?: number;
-  defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
-  dispatchSetAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
   endDate: GlobalTimeArgs['to'];
   headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
@@ -75,8 +69,7 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   indexToAdd?: string[] | null;
-  isInspected: boolean;
-  histogramType: HistogramType;
+  histogramType: MatrixHistogramType;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
