@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import './dimension_popover.scss';
 
 import React from 'react';
 import { EuiPopover } from '@elastic/eui';
@@ -31,6 +32,7 @@ export function DimensionPopover({
     <EuiPopover
       className="lnsDimensionPopover"
       anchorClassName="lnsDimensionPopover__trigger"
+      panelClassName="lnsDimensionPopover__fixTranslateDnd"
       isOpen={
         popoverState.isOpen &&
         (popoverState.openId === accessor || (noMatch && popoverState.addingToGroupId === groupId))
