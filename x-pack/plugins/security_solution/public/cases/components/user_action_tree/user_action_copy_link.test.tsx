@@ -68,7 +68,7 @@ describe('UserActionCopyLink ', () => {
   it('calls copy clipboard correctly', async () => {
     wrapper.find(`[data-test-subj="copy-link-${props.id}"]`).first().simulate('click');
     expect(copy).toHaveBeenCalledWith(
-      'securitySolution:case#case/case-1/copy-link-idtimerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))&?timerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))'
+      'securitySolution:case/case-1/copy-link-id?timerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))'
     );
   });
 });

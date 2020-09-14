@@ -9,7 +9,7 @@ import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 
-import { useFormatUrl } from '../../../common/components/link_to';
+import { useFormatUrl, getCaseDetailsUrlWithCommentId } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
 import * as i18n from './translations';
 
@@ -19,11 +19,11 @@ interface UserActionCopyLinkProps {
 
 const UserActionCopyLinkComponent = ({ id }: UserActionCopyLinkProps) => {
   const { detailName: caseId } = useParams<{ detailName: string }>();
-  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
+  const { formatUrl } = useFormatUrl(SecurityPageName.case);
 
   const handleAnchorLink = useCallback(() => {
-    copy(formatUrl(`#${SecurityPageName.case}/${caseId}/${id}${urlSearch}`));
-  }, [caseId, id, urlSearch, formatUrl]);
+    copy(formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId: id }), true));
+  }, [caseId, formatUrl, id]);
 
   return (
     <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>

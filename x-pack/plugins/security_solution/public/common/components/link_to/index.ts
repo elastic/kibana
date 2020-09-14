@@ -22,19 +22,21 @@ export {
   getCaseUrl,
   getCreateCaseUrl,
   getConfigureCasesUrl,
+  getCaseDetailsUrlWithCommentId,
 } from './redirect_to_case';
 
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getUrlForApp } = useKibana().services.application;
   const search = useGetUrlSearch(navTabs[page]);
   const formatUrl = useCallback(
-    (path: string) => {
+    (path: string, absolute: boolean = false) => {
       const pathArr = path.split('?');
       const formattedPath = `${pathArr[0]}${
         isEmpty(pathArr[1]) ? search : `${pathArr[1]}${isEmpty(search) ? '' : `&${search}`}`
       }`;
       return getUrlForApp(`${APP_ID}:${page}`, {
         path: formattedPath,
+        absolute,
       });
     },
     [getUrlForApp, page, search]
