@@ -14,9 +14,9 @@ jest.mock('./', () => ({
 }));
 import { FlashMessagesLogic } from './';
 
-import { handleAPIError } from './handle_api_errors';
+import { flashAPIErrors } from './handle_api_errors';
 
-describe('handleAPIError', () => {
+describe('flashAPIErrors', () => {
   const mockHttpError = {
     body: {
       statusCode: 404,
@@ -33,7 +33,7 @@ describe('handleAPIError', () => {
   });
 
   it('converts API errors into flash messages', () => {
-    handleAPIError(mockHttpError);
+    flashAPIErrors(mockHttpError);
 
     expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
       { type: 'error', message: 'Could not find X' },
@@ -43,7 +43,7 @@ describe('handleAPIError', () => {
   });
 
   it('queues messages when isQueued is passed', () => {
-    handleAPIError(mockHttpError, { isQueued: true });
+    flashAPIErrors(mockHttpError, { isQueued: true });
 
     expect(FlashMessagesLogic.actions.setQueuedMessages).toHaveBeenCalledWith([
       { type: 'error', message: 'Could not find X' },
@@ -54,7 +54,7 @@ describe('handleAPIError', () => {
 
   it('displays a generic error message and re-throws non-API errors', () => {
     try {
-      handleAPIError(Error('whatever') as any);
+      flashAPIErrors(Error('whatever') as any);
     } catch (e) {
       expect(e.message).toEqual('whatever');
       expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([

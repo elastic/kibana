@@ -32,7 +32,7 @@ interface IOptions {
 /**
  * Converts API/HTTP errors into user-facing Flash Messages
  */
-export const handleAPIError = (
+export const flashAPIErrors = (
   error: HttpResponse<IErrorResponse>,
   { isQueued }: IOptions = {}
 ) => {
