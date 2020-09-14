@@ -38,8 +38,12 @@ function flatKeys(source) {
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
+    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
+    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+
     before('create some telemetry-data tracked indices', async () => {
       return es.indices.create({ index: 'filebeat-telemetry_tests_logs' });
     });

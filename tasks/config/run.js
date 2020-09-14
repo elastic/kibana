@@ -153,12 +153,6 @@ module.exports = function () {
       args: ['scripts/test_hardening.js'],
     }),
 
-    test_package_safer_lodash_set: scriptWithGithubChecks({
-      title: '@elastic/safer-lodash-set tests',
-      cmd: YARN,
-      args: ['--cwd', 'packages/elastic-safer-lodash-set', 'test'],
-    }),
-
     apiIntegrationTests: scriptWithGithubChecks({
       title: 'API integration tests',
       cmd: NODE,

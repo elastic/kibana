@@ -260,13 +260,19 @@ export function createConfig(
     type: keyof ProvidersConfigType;
     name: string;
     order: number;
+    hasAccessAgreement: boolean;
   }> = [];
   for (const [type, providerGroup] of Object.entries(providers)) {
-    for (const [name, { enabled, order }] of Object.entries(providerGroup ?? {})) {
+    for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        sortedProviders.push({ type: type as any, name, order });
+        sortedProviders.push({
+          type: type as any,
+          name,
+          order,
+          hasAccessAgreement: !!accessAgreement?.message,
+        });
       }
     }
   }

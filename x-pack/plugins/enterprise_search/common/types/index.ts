@@ -18,6 +18,10 @@ export interface IInitialAppData {
   ilmEnabled?: boolean;
   isFederatedAuth?: boolean;
   configuredLimits?: IConfiguredLimits;
+  access?: {
+    hasAppSearchAccess: boolean;
+    hasWorkplaceSearchAccess: boolean;
+  };
   appSearch?: IAppSearchAccount;
   workplaceSearch?: IWorkplaceSearchInitialData;
 }

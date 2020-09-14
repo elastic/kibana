@@ -10,6 +10,9 @@
 readonly links: {
         readonly dashboard: {
             readonly drilldowns: string;
+            readonly drilldownsTriggerPicker: string;
+            readonly urlDrilldownTemplateSyntax: string;
+            readonly urlDrilldownVariables: string;
         };
         readonly filebeat: {
             readonly base: string;
