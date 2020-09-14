@@ -19,6 +19,24 @@ export type TrustedAppsListResourceStateChanged = ResourceStateChanged<
   TrustedAppsListData
 >;
 
+export type TrustedAppDeletionSubmissionResourceStateChanged = ResourceStateChanged<
+  'trustedAppDeletionSubmissionResourceStateChanged'
+>;
+
+export type TrustedAppDeletionDialogStarted = Action<'trustedAppDeletionDialogStarted'> & {
+  payload: {
+    entryId: string;
+  };
+};
+
+export type TrustedAppDeletionDialogConfirmed = Action<'trustedAppDeletionDialogConfirmed'>;
+
+export type TrustedAppDeletionDialogClosed = Action<'trustedAppDeletionDialogClosed'>;
+
 export type TrustedAppsPageAction =
   | TrustedAppsListDataOutdated
-  | TrustedAppsListResourceStateChanged;
+  | TrustedAppsListResourceStateChanged
+  | TrustedAppDeletionSubmissionResourceStateChanged
+  | TrustedAppDeletionDialogStarted
+  | TrustedAppDeletionDialogConfirmed
+  | TrustedAppDeletionDialogClosed;

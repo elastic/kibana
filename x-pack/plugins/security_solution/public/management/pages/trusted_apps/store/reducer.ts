@@ -18,7 +18,14 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../common/constants';
 
-import { TrustedAppsListDataOutdated, TrustedAppsListResourceStateChanged } from './action';
+import {
+  TrustedAppDeletionDialogClosed,
+  TrustedAppDeletionDialogConfirmed,
+  TrustedAppDeletionDialogStarted,
+  TrustedAppDeletionSubmissionResourceStateChanged,
+  TrustedAppsListDataOutdated,
+  TrustedAppsListResourceStateChanged,
+} from './action';
 import { TrustedAppsListPageState } from '../state';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
@@ -57,6 +64,55 @@ const trustedAppsListResourceStateChanged: CaseReducer<TrustedAppsListResourceSt
       currentListResourceState: action.payload.newState,
     },
   };
+};
+
+const trustedAppDeletionSubmissionResourceStateChanged: CaseReducer<TrustedAppDeletionSubmissionResourceStateChanged> = (
+  state,
+  action
+) => {
+  if (state.deletionDialog) {
+    return {
+      ...state,
+      deletionDialog: {
+        ...state.deletionDialog,
+        submissionResourceState: action.payload.newState,
+      },
+    };
+  } else {
+    return state;
+  }
+};
+
+const trustedAppDeletionDialogStarted: CaseReducer<TrustedAppDeletionDialogStarted> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    deletionDialog: {
+      entryId: action.payload.entryId,
+      confirmed: false,
+      submissionResourceState: { type: 'UninitialisedResourceState' },
+    },
+  };
+};
+
+const trustedAppDeletionDialogConfirmed: CaseReducer<TrustedAppDeletionDialogConfirmed> = (
+  state,
+  action
+) => {
+  if (state.deletionDialog) {
+    return { ...state, deletionDialog: { ...state.deletionDialog, confirmed: true } };
+  } else {
+    return state;
+  }
+};
+
+const trustedAppDeletionDialogClosed: CaseReducer<TrustedAppDeletionDialogClosed> = (
+  state,
+  action
+) => {
+  return { ...state, deletionDialog: undefined };
 };
 
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
@@ -101,6 +157,18 @@ export const trustedAppsPageReducer: StateReducer = (
 
     case 'trustedAppsListResourceStateChanged':
       return trustedAppsListResourceStateChanged(state, action);
+
+    case 'trustedAppDeletionSubmissionResourceStateChanged':
+      return trustedAppDeletionSubmissionResourceStateChanged(state, action);
+
+    case 'trustedAppDeletionDialogStarted':
+      return trustedAppDeletionDialogStarted(state, action);
+
+    case 'trustedAppDeletionDialogConfirmed':
+      return trustedAppDeletionDialogConfirmed(state, action);
+
+    case 'trustedAppDeletionDialogClosed':
+      return trustedAppDeletionDialogClosed(state, action);
 
     case 'userChangedUrl':
       return userChangedUrl(state, action);

@@ -16,12 +16,17 @@ import { TrustedAppsHttpService, TrustedAppsService } from '../service';
 
 import {
   AsyncResourceState,
+  getLastLoadedResourceState,
+  isStaleResourceState,
   StaleResourceState,
   TrustedAppsListData,
   TrustedAppsListPageState,
 } from '../state';
 
-import { TrustedAppsListResourceStateChanged } from './action';
+import {
+  TrustedAppDeletionSubmissionResourceStateChanged,
+  TrustedAppsListResourceStateChanged,
+} from './action';
 
 import {
   getCurrentListResourceState,
@@ -84,6 +89,58 @@ const refreshListIfNeeded = async (
   }
 };
 
+const createTrustedAppDeletionSubmissionResourceStateChanged = (
+  newState: Immutable<AsyncResourceState>
+): Immutable<TrustedAppDeletionSubmissionResourceStateChanged> => ({
+  type: 'trustedAppDeletionSubmissionResourceStateChanged',
+  payload: { newState },
+});
+
+const submitDeletionIfNeeded = async (
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const deletionDialog = store.getState().deletionDialog;
+
+  if (deletionDialog) {
+    const submissionResourceState = deletionDialog.submissionResourceState;
+
+    if (isStaleResourceState(submissionResourceState)) {
+      store.dispatch(
+        createTrustedAppDeletionSubmissionResourceStateChanged({
+          type: 'LoadingResourceState',
+          previousState: submissionResourceState,
+        })
+      );
+
+      try {
+        await trustedAppsService.deleteTrustedApp({ id: deletionDialog.entryId });
+
+        store.dispatch(
+          createTrustedAppDeletionSubmissionResourceStateChanged({
+            type: 'LoadedResourceState',
+            data: null,
+          })
+        );
+        store.dispatch({
+          type: 'trustedAppDeletionDialogClosed',
+        });
+        store.dispatch({
+          type: 'trustedAppsListDataOutdated',
+        });
+      } catch (error) {
+        store.dispatch(
+          createTrustedAppDeletionSubmissionResourceStateChanged({
+            type: 'FailedResourceState',
+            error,
+            lastLoadedState: getLastLoadedResourceState(submissionResourceState),
+          })
+        );
+      }
+    }
+  }
+};
+
 export const createTrustedAppsPageMiddleware = (
   trustedAppsService: TrustedAppsService
 ): ImmutableMiddleware<TrustedAppsListPageState, AppAction> => {
@@ -93,6 +150,10 @@ export const createTrustedAppsPageMiddleware = (
     // TODO: need to think if failed state is a good condition to consider need for refresh
     if (action.type === 'userChangedUrl' || action.type === 'trustedAppsListDataOutdated') {
       await refreshListIfNeeded(store, trustedAppsService);
+    }
+
+    if (action.type === 'trustedAppDeletionDialogConfirmed') {
+      await submitDeletionIfNeeded(store, trustedAppsService);
     }
   };
 };
