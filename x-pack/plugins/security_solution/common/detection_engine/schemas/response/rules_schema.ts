@@ -258,6 +258,7 @@ export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): 
       t.exact(t.type({ threat_query: dependentRulesSchema.props.threat_query })),
       t.exact(t.type({ threat_index: dependentRulesSchema.props.threat_index })),
       t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),
+      t.exact(t.partial({ threat_filters: dependentRulesSchema.props.threat_filters })),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
     ];
   } else {
