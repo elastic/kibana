@@ -79,8 +79,8 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
         defaultMessage: 'Top values for each custom query',
       }),
       bottomCopy: i18n.translate('xpack.lens.indexPattern.groupingSecondFilters', {
-        defaultMessage: 'Overall top {otherFieldName}',
-        values: { otherFieldName },
+        defaultMessage: 'Overall top {target}',
+        values: { target: otherFieldName },
       }),
     };
   },

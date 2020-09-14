@@ -123,8 +123,8 @@ export const dateHistogramOperation: OperationDefinition<
         values: { field: fieldName },
       }),
       bottomCopy: i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
-        defaultMessage: 'Overall top {otherFieldName}',
-        values: { otherFieldName },
+        defaultMessage: 'Overall top {target}',
+        values: { target: otherFieldName },
       }),
     };
   },

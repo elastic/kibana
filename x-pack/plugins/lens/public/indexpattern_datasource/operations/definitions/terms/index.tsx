@@ -76,8 +76,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               defaultMessage: 'Top values for each custom query',
             })
           : i18n.translate('xpack.lens.indexPattern.groupingSecondTerms', {
-              defaultMessage: 'Top values for each {otherFieldName}',
-              values: { otherFieldName },
+              defaultMessage: 'Top values for each {target}',
+              values: { target: otherFieldName },
             }),
     };
   },
