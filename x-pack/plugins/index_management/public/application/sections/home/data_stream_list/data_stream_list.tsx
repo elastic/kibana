@@ -49,7 +49,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
-  const { error, isLoading, data: dataStreams, sendRequest: reload } = useLoadDataStreams({
+  const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
 

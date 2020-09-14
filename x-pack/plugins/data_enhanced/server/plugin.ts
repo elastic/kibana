@@ -18,8 +18,8 @@ import {
 } from '../../../../src/plugins/data/server';
 import { enhancedEsSearchStrategyProvider } from './search';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../common';
 import { getUiSettings } from './ui_settings';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../common';
 
 interface SetupDependencies {
   data: DataPluginSetup;

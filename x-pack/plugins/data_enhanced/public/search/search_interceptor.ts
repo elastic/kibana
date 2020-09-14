@@ -6,7 +6,8 @@
 
 import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
-import { getLongQueryNotification } from './long_query_notification';
+import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
@@ -42,36 +43,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    * Abort our `AbortController`, which in turn aborts any intercepted searches.
    */
   public cancelPending = () => {
-    this.hideToast();
     this.abortController.abort();
     this.abortController = new AbortController();
     if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
-  };
-
-  /**
-   * Un-schedule timing out all of the searches intercepted.
-   */
-  public runBeyondTimeout = () => {
-    this.hideToast();
-    this.timeoutSubscriptions.unsubscribe();
-    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryRunBeyondTimeout();
-  };
-
-  protected showToast = () => {
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.deps.toasts.addInfo(
-      {
-        title: 'Your query is taking a while',
-        text: getLongQueryNotification({
-          cancel: this.cancelPending,
-          runBeyondTimeout: this.runBeyondTimeout,
-        }),
-      },
-      {
-        toastLifeTimeMs: 1000000,
-      }
-    );
-    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryPopupShown();
   };
 
   public search(
@@ -127,4 +101,28 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       })
     );
   }
+
+  // Right now we are debouncing but we will hook this up with background sessions to show only one
+  // error notification per session.
+  protected showTimeoutError = debounce(
+    (e: Error) => {
+      const message = this.application.capabilities.advancedSettings?.save
+        ? i18n.translate('xpack.data.search.timeoutIncreaseSetting', {
+            defaultMessage:
+              'One or more queries timed out. Increase run time with the search.timeout advanced setting.',
+          })
+        : i18n.translate('xpack.data.search.timeoutContactAdmin', {
+            defaultMessage:
+              'One or more queries timed out. Contact your system administrator to increase the run time.',
+          });
+      this.deps.toasts.addError(e, {
+        title: 'Timed out',
+        toastMessage: message,
+      });
+    },
+    60000,
+    {
+      leading: true,
+    }
+  );
 }
