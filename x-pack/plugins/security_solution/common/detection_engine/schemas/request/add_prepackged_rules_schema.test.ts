@@ -1596,5 +1596,84 @@ describe('add prepackaged rules schema', () => {
       };
       expect(message.schema).toEqual(expected);
     });
+
+    describe('threat_mapping', () => {
+      test('You can set a threat query, index, mapping, filters on a pre-packaged rule', () => {
+        const payload: AddPrepackagedRulesSchema = {
+          ...getAddPrepackagedRulesSchemaMock(),
+          threat_query: '*:*',
+          threat_index: 'list-index',
+          threat_mapping: [
+            {
+              entries: [
+                {
+                  field: 'host.name',
+                  value: 'host.name',
+                  type: 'mapping',
+                },
+              ],
+            },
+          ],
+          threat_filters: [
+            {
+              bool: {
+                must: [
+                  {
+                    query_string: {
+                      query: 'host.name: linux',
+                      analyze_wildcard: true,
+                      time_zone: 'Zulu',
+                    },
+                  },
+                ],
+                filter: [],
+                should: [],
+                must_not: [],
+              },
+            },
+          ],
+        };
+
+        const decoded = addPrepackagedRulesSchema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+        expect(getPaths(left(message.errors))).toEqual([]);
+        const expected: AddPrepackagedRulesSchema = {
+          ...getAddPrepackagedRulesSchemaDecodedMock(),
+          threat_query: '*:*',
+          threat_index: 'list-index',
+          threat_mapping: [
+            {
+              entries: [
+                {
+                  field: 'host.name',
+                  value: 'host.name',
+                  type: 'mapping',
+                },
+              ],
+            },
+          ],
+          threat_filters: [
+            {
+              bool: {
+                must: [
+                  {
+                    query_string: {
+                      query: 'host.name: linux',
+                      analyze_wildcard: true,
+                      time_zone: 'Zulu',
+                    },
+                  },
+                ],
+                filter: [],
+                should: [],
+                must_not: [],
+              },
+            },
+          ],
+        };
+        expect(message.schema).toEqual(expected);
+      });
+    });
   });
 });
