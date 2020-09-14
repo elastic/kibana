@@ -7,20 +7,12 @@
 import React from 'react';
 import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
-import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
-import { FramePublicAPI } from '../types';
 import { ToolbarPopover } from '../shared_components';
 
 describe('Axes Settings', () => {
-  let frame: FramePublicAPI;
   let props: AxisSettingsPopoverProps;
   beforeEach(() => {
-    frame = createMockFramePublicAPI();
-    frame.datasourceLayers = {
-      first: createMockDatasource('test').publicAPIMock,
-    };
     props = {
-      frame,
       layers: [
         {
           seriesType: 'bar',

@@ -10,7 +10,7 @@ import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/
 import { Position } from '@elastic/charts';
 import { ToolbarPopover } from '../shared_components';
 
-interface LegendSettingsPopoverProps {
+export interface LegendSettingsPopoverProps {
   /**
    * Determines the legend display options
    */
@@ -105,6 +105,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
             defaultMessage: 'Display',
           })}
+          data-test-subj="lens-legend-display-btn"
           name="legendDisplay"
           buttonSize="compressed"
           options={legendOptions}
@@ -123,6 +124,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             defaultMessage: 'Position',
           })}
           isDisabled={mode === 'hide'}
+          data-test-subj="lens-legend-position-btn"
           name="legendPosition"
           buttonSize="compressed"
           options={toggleButtonsIcons}
@@ -143,6 +145,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
               defaultMessage: 'Nested',
             })}
+            data-test-subj="lens-legend-nested-switch"
             showLabel={false}
             disabled={mode === 'hide'}
             checked={!!nestedLegend}

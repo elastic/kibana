@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerConfig, AxesSettingsConfig } from './types';
-import { FramePublicAPI } from '../types';
 import { ToolbarPopover } from '../shared_components';
 import { ToolbarButtonProps } from '../toolbar_button';
 import { isHorizontalChart } from './state_helpers';
@@ -47,10 +46,6 @@ export interface AxisSettingsPopoverProps {
    * Callback to axis title change
    */
   updateTitleState: (value: string) => void;
-  /**
-   * Determines the frame
-   */
-  frame: FramePublicAPI;
   /**
    * Determines if the popover is Disabled
    */
@@ -129,7 +124,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   layers,
   axis,
   axisTitle,
-  frame,
   updateTitleState,
   toggleTickLabelsVisibility,
   toggleGridlinesVisibility,

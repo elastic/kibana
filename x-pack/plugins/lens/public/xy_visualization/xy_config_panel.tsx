@@ -118,7 +118,7 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 }
 
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
-  const { frame, state, setState } = props;
+  const { state, setState } = props;
 
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'line'].includes(seriesType)
@@ -283,7 +283,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             <AxisSettingsPopover
               axis="yLeft"
               layers={state?.layers}
-              frame={frame}
               axisTitle={state?.yTitle}
               updateTitleState={(value) => setState({ ...state, yTitle: value })}
               areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
@@ -300,7 +299,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
-            frame={frame}
             axisTitle={state?.xTitle}
             updateTitleState={(value) => setState({ ...state, xTitle: value })}
             areTickLabelsVisible={tickLabelsVisibilitySettings.x}
@@ -320,7 +318,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             <AxisSettingsPopover
               axis="yRight"
               layers={state?.layers}
-              frame={frame}
               axisTitle={state?.yRightTitle}
               updateTitleState={(value) => setState({ ...state, yRightTitle: value })}
               areTickLabelsVisible={tickLabelsVisibilitySettings.yRight}
