@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { HOSTS_URL, CASES_URL } from '../urls/navigation';
+import { loginAndWaitForPageWithoutDateRange, loginAndWaitForTimeline } from '../tasks/login';
+import { CASES_URL } from '../urls/navigation';
 import { openTimeline } from '../tasks/security_main';
 import {
   createNewTimeline,
@@ -23,6 +23,7 @@ import { goToCreateNewCase } from '../tasks/all_cases';
 import { createNewCase } from '../tasks/create_new_case';
 import { navigateFromHeaderTo } from '../tasks/security_header';
 import { HOSTS } from '../screens/security_header';
+import { SIEM_TIMELINE_ID } from '../objects/timeline';
 
 describe('attach timeline to case', () => {
   before(() => {
@@ -40,13 +41,7 @@ describe('attach timeline to case', () => {
   });
 
   it('attach timeline to a new case', () => {
-    loginAndWaitForPage(HOSTS_URL);
-    openTimeline();
-
-    openTimelineFromSettings();
-    waitForTimelinesPanelToBeLoaded();
-
-    cy.get(TIMELINE(caseTimeline.id!)).click();
+    loginAndWaitForTimeline(SIEM_TIMELINE_ID);
     attachTimelineToNewCase();
 
     cy.location('origin').then((origin) => {
@@ -58,13 +53,7 @@ describe('attach timeline to case', () => {
   });
 
   it('attach timeline to an existing case with no case', () => {
-    loginAndWaitForPage(HOSTS_URL);
-    openTimeline();
-
-    openTimelineFromSettings();
-    waitForTimelinesPanelToBeLoaded();
-
-    cy.get(TIMELINE(caseTimeline.id!)).click();
+    loginAndWaitForTimeline(SIEM_TIMELINE_ID);
     attachTimelineToExistingCase();
 
     cy.get(ALL_CASES_CREATE_NEW_CASE_TABLE_BTN).click();
