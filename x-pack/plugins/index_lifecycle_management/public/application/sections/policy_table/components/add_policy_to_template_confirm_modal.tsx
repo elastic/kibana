@@ -42,7 +42,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
   const [aliasName, setAliasName] = useState<string>();
   const [templateError, setTemplateError] = useState<string>();
 
-  const { error, isLoading, data: templates, sendRequest } = useLoadIndexTemplates(isLegacy);
+  const { error, isLoading, data: templates, resendRequest } = useLoadIndexTemplates(isLegacy);
 
   const renderTemplateHasPolicyWarning = () => {
     const selectedTemplate = templates!.find((template) => template.name === templateName);
@@ -95,7 +95,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
           <p>
             {message} ({statusCode})
           </p>
-          <EuiButton isLoading={isLoading} color="danger" onClick={sendRequest}>
+          <EuiButton isLoading={isLoading} color="danger" onClick={resendRequest}>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.errorLoadingTemplatesButton"
               defaultMessage="Try again"
