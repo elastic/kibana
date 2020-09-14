@@ -25,17 +25,18 @@ object EssentialCi : BuildType({
   }
 
   dependsOn(
+    Lint,
     AllTests,
     OssBuild,
-    DefaultBuild,
     OssVisualRegression,
-    DefaultVisualRegression,
-    Lint,
-    OssCiGroups,
-    DefaultCiGroups,
-    OssFirefox,
-    DefaultFirefox,
     OssAccessibility,
-    OssPluginFunctional
+    OssPluginFunctional,
+    OssCiGroups,
+    OssFirefox,
+    DefaultBuild,
+    DefaultVisualRegression,
+    DefaultCiGroups,
+    DefaultFirefox,
+    DefaultAccessibility
   )
 })

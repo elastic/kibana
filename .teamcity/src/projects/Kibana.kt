@@ -125,6 +125,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
         buildType(DefaultCiGroups)
         buildType(DefaultVisualRegression)
         buildType(DefaultFirefox)
+        buildType(DefaultAccessibility)
 
         subProject {
           id("Default_CIGroups")

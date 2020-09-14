@@ -27,6 +27,16 @@ object DefaultVisualRegression : BuildType({
         """.trimIndent()
     }
 
+    // TODO does this need to go somewhere else? does it need to be its own job? it's really short
+    script {
+      name = "Default Saved Object Field Metrics"
+      scriptContent =
+        """
+          #!/bin/bash
+          ./.ci/teamcity/default/saved_object_field_metrics.sh
+        """.trimIndent()
+    }
+
     failedTestReporter()
   }
 
