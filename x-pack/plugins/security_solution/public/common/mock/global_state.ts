@@ -22,12 +22,13 @@ import {
   DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
+  DEFAULT_INDEX_PATTERN,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
-import { initialSourcererState } from '../store/sourcerer/model';
+import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 
 export const mockGlobalState: State = {
   app: {
@@ -242,7 +243,18 @@ export const mockGlobalState: State = {
     },
     insertTimeline: null,
   },
-  sourcerer: initialSourcererState, // TO DO
+  sourcerer: {
+    ...initialSourcererState,
+    allIndexPatterns: DEFAULT_INDEX_PATTERN,
+    sourcererScopes: {
+      ...initialSourcererState.sourcererScopes,
+      [SourcererScopeName.default]: {
+        ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
+        loading: false,
+        selectedPatterns: DEFAULT_INDEX_PATTERN,
+      },
+    },
+  },
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

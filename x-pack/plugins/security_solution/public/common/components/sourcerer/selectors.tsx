@@ -15,12 +15,12 @@ export interface SourcererScopeSelector {
 }
 
 export const getSourcererScopeSelector = () => {
-  const getkibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
+  const getKibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
   const getScopesSelector = sourcererSelectors.scopesSelector();
   const getAllIndexPatternsSelector = sourcererSelectors.allIndexPatternsSelector();
 
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
-    const kibanaIndexPatterns = getkibanaIndexPatternsSelector(state);
+    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
     const scope = getScopesSelector(state)[scopeId];
     const allExistingIndexPatterns = getAllIndexPatternsSelector(state);
 

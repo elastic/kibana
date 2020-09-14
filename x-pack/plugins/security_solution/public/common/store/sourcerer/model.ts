@@ -51,7 +51,7 @@ export interface SourcererModel {
   sourcererScopes: SourcererScopeById;
 }
 
-const initSourcererScope = {
+export const initSourcererScope = {
   browserFields: EMPTY_BROWSER_FIELDS,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   errorMessage: null,
