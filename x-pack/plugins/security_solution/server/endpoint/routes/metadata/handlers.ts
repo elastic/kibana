@@ -165,7 +165,7 @@ export async function getHostData(
       query
     )
   );
-  const hostMetadata: HostMetadata | undefined = hostResult.result;
+  const hostMetadata = hostResult.result;
   if (!hostMetadata) {
     return undefined;
   }
