@@ -23,6 +23,7 @@ import DefaultRoot
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
 import jetbrains.buildServer.configs.kotlin.v2019_2.Template
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.placeholder
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
@@ -39,6 +40,10 @@ object DefaultTemplate : Template({
   requirements {
     // equals("system.cloud.profile_id", "kibana")
     startsWith("teamcity.agent.name", "kibana-standard-4-", "RQ_AGENT_NAME")
+  }
+
+  features {
+    perfmon {  }
   }
 
   failureConditions {
