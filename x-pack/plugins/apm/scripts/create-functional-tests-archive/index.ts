@@ -83,8 +83,9 @@ async function run() {
     },
   };
 
-  const archivesDir = path.join(__dirname, '.archives');
   const root = path.join(__dirname, '../../../../..');
+  const commonDir = path.join(root, 'x-pack/test/apm_api_integration/common');
+  const archivesDir = path.join(commonDir, 'fixtures/es_archiver');
 
   // create the archive
 
@@ -98,67 +99,30 @@ async function run() {
     }
   );
 
-  const targetDirs = ['trial', 'basic'];
+  const currentConfig = {};
 
-  // copy the archives to the test fixtures
+  // get the current metadata and extend/override metadata for the new archive
+  const configFilePath = path.join(commonDir, 'archives_metadata.ts');
 
-  await Promise.all(
-    targetDirs.map(async (target) => {
-      const targetPath = path.resolve(
-        __dirname,
-        '../../../../test/apm_api_integration/',
-        target
-      );
-      const targetArchivesPath = path.resolve(
-        targetPath,
-        'fixtures/es_archiver',
-        archiveName
-      );
+  try {
+    Object.assign(currentConfig, (await import(configFilePath)).default);
+  } catch (error) {
+    // do nothing
+  }
 
-      if (!fs.existsSync(targetArchivesPath)) {
-        fs.mkdirSync(targetArchivesPath);
-      }
+  const newConfig = {
+    ...currentConfig,
+    [archiveName]: {
+      start: gte,
+      end: lt,
+    },
+  };
 
-      fs.copyFileSync(
-        path.join(archivesDir, archiveName, 'data.json.gz'),
-        path.join(targetArchivesPath, 'data.json.gz')
-      );
-      fs.copyFileSync(
-        path.join(archivesDir, archiveName, 'mappings.json'),
-        path.join(targetArchivesPath, 'mappings.json')
-      );
-
-      const currentConfig = {};
-
-      // get the current metadata and extend/override metadata for the new archive
-      const configFilePath = path.join(targetPath, 'archives_metadata.ts');
-
-      try {
-        Object.assign(currentConfig, (await import(configFilePath)).default);
-      } catch (error) {
-        // do nothing
-      }
-
-      const newConfig = {
-        ...currentConfig,
-        [archiveName]: {
-          start: gte,
-          end: lt,
-        },
-      };
-
-      fs.writeFileSync(
-        configFilePath,
-        `export default ${JSON.stringify(newConfig, null, 2)}`,
-        { encoding: 'utf-8' }
-      );
-    })
+  fs.writeFileSync(
+    configFilePath,
+    `export default ${JSON.stringify(newConfig, null, 2)}`,
+    { encoding: 'utf-8' }
   );
-
-  fs.unlinkSync(path.join(archivesDir, archiveName, 'data.json.gz'));
-  fs.unlinkSync(path.join(archivesDir, archiveName, 'mappings.json'));
-  fs.rmdirSync(path.join(archivesDir, archiveName));
-  fs.rmdirSync(archivesDir);
 
   // run ESLint on the generated metadata files
 

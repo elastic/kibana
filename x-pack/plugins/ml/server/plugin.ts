@@ -67,7 +67,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
     const { admin, user, apmUser } = getPluginPrivileges();
 
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',

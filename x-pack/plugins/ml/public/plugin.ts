@@ -101,6 +101,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       },
     });
 
+    const managementApp = registerManagementSection(pluginsSetup.management, core);
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
@@ -110,26 +112,35 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerFeature(pluginsSetup.home);
         }
 
+        const { capabilities } = coreStart.application;
+
         // register ML for the index pattern management no data screen.
         pluginsSetup.indexPatternManagement.environment.update({
           ml: () =>
-            coreStart.application.capabilities.ml.canFindFileStructure
-              ? MlCardState.ENABLED
-              : MlCardState.HIDDEN,
+            capabilities.ml.canFindFileStructure ? MlCardState.ENABLED : MlCardState.HIDDEN,
         });
+
+        const canManageMLJobs = capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
 
         // register various ML plugin features which require a full license
         if (isFullLicense(license)) {
-          registerManagementSection(pluginsSetup.management, core);
+          if (canManageMLJobs && managementApp) {
+            managementApp.enable();
+          }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
           registerUrlGenerator(pluginsSetup.share, core);
+        } else if (managementApp) {
+          managementApp.disable();
         }
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater.next(() => ({
           status: AppStatus.inaccessible,
         }));
+        if (managementApp) {
+          managementApp.disable();
+        }
       }
     });
 
