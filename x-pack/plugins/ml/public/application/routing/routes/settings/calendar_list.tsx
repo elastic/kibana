@@ -10,7 +10,6 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { NavigateToPath } from '../../../contexts/kibana';
 
@@ -25,7 +24,7 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { CalendarsList } from '../../../settings/calendars';
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
@@ -38,12 +37,7 @@ export const calendarListRouteFactory = (
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    {
-      text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
-        defaultMessage: 'Calendar management',
-      }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list', navigateToPath),
-    },
+    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
   ],
 });
 
