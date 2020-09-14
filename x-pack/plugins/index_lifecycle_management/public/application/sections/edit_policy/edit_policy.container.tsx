@@ -33,7 +33,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   getUrlForApp,
   history,
 }) => {
-  const { error, isLoading, data: policies, sendRequest } = useLoadPoliciesList(false);
+  const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList(false);
   if (isLoading) {
     return (
       <EuiEmptyPrompt
@@ -65,7 +65,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
           </p>
         }
         actions={
-          <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesReloadButton"
               defaultMessage="Try again"
