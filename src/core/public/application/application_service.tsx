@@ -23,7 +23,6 @@ import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/
 import { createBrowserHistory, History } from 'history';
 
 import { MountPoint } from '../types';
-import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { ContextSetup, IContextContainer } from '../context';
@@ -32,7 +31,6 @@ import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
   App,
-  AppBase,
   AppLeaveHandler,
   AppMount,
   AppMountDeprecated,
@@ -42,8 +40,6 @@ import {
   AppUpdater,
   InternalApplicationSetup,
   InternalApplicationStart,
-  LegacyApp,
-  LegacyAppMounter,
   Mounter,
   NavigateToAppOptions,
 } from './types';
@@ -53,9 +49,8 @@ import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './ut
 interface SetupDeps {
   context: ContextSetup;
   http: HttpSetup;
-  injectedMetadata: InjectedMetadataSetup;
   history?: History<any>;
-  /** Used to redirect to external urls (and legacy apps) */
+  /** Used to redirect to external urls */
   redirectTo?: (path: string) => void;
 }
 
@@ -101,7 +96,7 @@ interface AppInternalState {
  * @internal
  */
 export class ApplicationService {
-  private readonly apps = new Map<string, App<any> | LegacyApp>();
+  private readonly apps = new Map<string, App<any>>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
   private readonly appInternalStates = new Map<string, AppInternalState>();
@@ -119,28 +114,17 @@ export class ApplicationService {
   public setup({
     context,
     http: { basePath },
-    injectedMetadata,
     redirectTo = (path: string) => {
       window.location.assign(path);
     },
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    if (injectedMetadata.getLegacyMode()) {
-      this.currentAppId$.next(injectedMetadata.getLegacyMetadata().app.id);
-    } else {
-      // Only setup history if we're not in legacy mode
-      this.history = history || createBrowserHistory({ basename });
-    }
+    this.history = history || createBrowserHistory({ basename });
 
     this.navigate = (url, state, replace) => {
-      if (this.history) {
-        // basePath not needed here because `history` is configured with basename
-        return replace ? this.history.replace(url, state) : this.history.push(url, state);
-      } else {
-        // If we do not have history available (legacy mode), use redirectTo to do a full page refresh.
-        return redirectTo(basePath.prepend(url));
-      }
+      // basePath not needed here because `history` is configured with basename
+      return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
     };
 
     this.redirectTo = redirectTo;
@@ -200,7 +184,6 @@ export class ApplicationService {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
           navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
-          legacy: false,
         });
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
@@ -211,43 +194,6 @@ export class ApplicationService {
           exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
-          legacy: false,
-        });
-      },
-      registerLegacyApp: (app) => {
-        const appRoute = `/app/${app.id.split(':')[0]}`;
-
-        if (this.registrationClosed) {
-          throw new Error('Applications cannot be registered after "setup"');
-        } else if (this.apps.has(app.id)) {
-          throw new Error(`An application is already registered with the id "${app.id}"`);
-        } else if (basename && appRoute!.startsWith(`${basename}/`)) {
-          throw new Error('Cannot register an application route that includes HTTP base path');
-        }
-
-        const appBasePath = basePath.prepend(appRoute);
-        const mount: LegacyAppMounter = ({ history: appHistory }) => {
-          redirectTo(appHistory.createHref(appHistory.location));
-          window.location.reload();
-        };
-
-        const { updater$, ...appProps } = app;
-        this.apps.set(app.id, {
-          ...appProps,
-          status: app.status ?? AppStatus.accessible,
-          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
-          legacy: true,
-        });
-        if (updater$) {
-          registerStatusUpdater(app.id, updater$);
-        }
-        this.mounters.set(app.id, {
-          appRoute,
-          appBasePath,
-          exactRoute: false,
-          mount,
-          unmountBeforeMounting: true,
-          legacy: true,
         });
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
@@ -323,7 +269,7 @@ export class ApplicationService {
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
-      history: this.history,
+      history: this.history!,
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (
         appId,
@@ -421,7 +367,7 @@ export class ApplicationService {
   }
 }
 
-const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapper[]): T => {
+const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
   let changes: Partial<AppUpdatableFields> = {};
   statusUpdaters.forEach((wrapper) => {
     if (wrapper.application !== allApplicationsFilter && wrapper.application !== app.id) {

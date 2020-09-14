@@ -157,7 +157,7 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
-  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean;
+  onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
@@ -228,6 +228,22 @@ export interface DatasourceLayerPanelProps<T> {
   layerId: string;
   state: T;
   setState: StateSetter<T>;
+}
+
+export interface DraggedOperation {
+  layerId: string;
+  groupId: string;
+  columnId: string;
+}
+
+export function isDraggedOperation(
+  operationCandidate: unknown
+): operationCandidate is DraggedOperation {
+  return (
+    typeof operationCandidate === 'object' &&
+    operationCandidate !== null &&
+    'columnId' in operationCandidate
+  );
 }
 
 export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {

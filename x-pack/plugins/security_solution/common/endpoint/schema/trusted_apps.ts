@@ -6,6 +6,12 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const DeleteTrustedAppsRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+
 export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),

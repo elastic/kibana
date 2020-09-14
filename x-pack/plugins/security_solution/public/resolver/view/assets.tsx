@@ -24,7 +24,8 @@ type ResolverColorNames =
   | 'resolverBackground'
   | 'resolverEdge'
   | 'resolverEdgeText'
-  | 'resolverBreadcrumbBackground';
+  | 'resolverBreadcrumbBackground'
+  | 'pillStroke';
 
 type ColorMap = Record<ResolverColorNames, string>;
 interface NodeStyleConfig {
@@ -438,6 +439,7 @@ export const useResolverTheme = (): {
     resolverBreadcrumbBackground: theme.euiColorLightestShade,
     resolverEdgeText: getThemedOption(theme.euiColorDarkShade, theme.euiColorFullShade),
     triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
+    pillStroke: theme.euiColorLightShade,
   };
 
   const nodeAssets: NodeStyleMap = {
@@ -475,7 +477,7 @@ export const useResolverTheme = (): {
       ),
       isLabelFilled: false,
       labelButtonFill: 'primary',
-      strokeColor: `${theme.euiColorPrimary}33`, // 33 = 20% opacity
+      strokeColor: theme.euiColorPrimary,
     },
     terminatedTriggerCube: {
       backingFill: colorMap.triggerBackingFill,
@@ -489,7 +491,7 @@ export const useResolverTheme = (): {
       ),
       isLabelFilled: false,
       labelButtonFill: 'danger',
-      strokeColor: `${theme.euiColorDanger}33`,
+      strokeColor: theme.euiColorDanger,
     },
   };
 

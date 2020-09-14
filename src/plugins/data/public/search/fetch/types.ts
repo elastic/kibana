@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { HttpStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { GetConfigFn } from '../../../common';
-import { ISearchStartLegacy } from '../types';
 
 /**
  * @internal
@@ -29,15 +30,10 @@ import { ISearchStartLegacy } from '../types';
  */
 export type SearchRequest = Record<string, any>;
 
-export interface FetchOptions {
-  abortSignal?: AbortSignal;
-  searchStrategyId?: string;
-}
-
 export interface FetchHandlers {
-  legacySearchService: ISearchStartLegacy;
   config: { get: GetConfigFn };
-  esShardTimeout: number;
+  http: HttpStart;
+  loadingCount$: BehaviorSubject<number>;
 }
 
 export interface SearchError {

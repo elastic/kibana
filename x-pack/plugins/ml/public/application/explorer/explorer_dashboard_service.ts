@@ -21,6 +21,7 @@ import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_
 import { EXPLORER_ACTION } from './explorer_constants';
 import { AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
+import { ExplorerAppState } from '../../../common/types/ml_url_generator';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
@@ -48,24 +49,6 @@ const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
   // share the last emitted value among new subscribers
   shareReplay(1)
 );
-
-export interface ExplorerAppState {
-  mlExplorerSwimlane: {
-    selectedType?: string;
-    selectedLanes?: string[];
-    selectedTimes?: number[];
-    showTopFieldValues?: boolean;
-    viewByFieldName?: string;
-    viewByPerPage?: number;
-    viewByFromPage?: number;
-  };
-  mlExplorerFilter: {
-    influencersFilterQuery?: unknown;
-    filterActive?: boolean;
-    filteredFields?: string[];
-    queryString?: string;
-  };
-}
 
 const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
   map(

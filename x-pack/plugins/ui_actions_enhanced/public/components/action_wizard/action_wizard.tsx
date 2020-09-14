@@ -21,7 +21,12 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { txtChangeButton, txtTriggerPickerHelpText, txtTriggerPickerLabel } from './i18n';
+import {
+  txtChangeButton,
+  txtTriggerPickerHelpText,
+  txtTriggerPickerLabel,
+  txtTriggerPickerHelpTooltip,
+} from './i18n';
 import './action_wizard.scss';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
@@ -157,14 +162,17 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
   const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
   return (
     <EuiFormFieldset
+      data-test-subj={`triggerPicker`}
       legend={{
         children: (
           <EuiText size="s">
             <h5>
               <span>{txtTriggerPickerLabel}</span>{' '}
-              <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
-                {txtTriggerPickerHelpText}
-              </EuiLink>
+              <EuiToolTip content={txtTriggerPickerHelpTooltip}>
+                <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
+                  {txtTriggerPickerHelpText}
+                </EuiLink>
+              </EuiToolTip>
             </h5>
           </EuiText>
         ),
@@ -271,7 +279,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           />
         </>
       )}
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <div>
         <actionFactory.ReactCollectConfig
           config={config}

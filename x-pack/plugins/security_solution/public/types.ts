@@ -22,7 +22,7 @@ import {
 import { SecurityPluginSetup } from '../../security/public';
 import { AppFrontendLibs } from './common/lib/lib';
 import { ResolverPluginSetup } from './resolver/types';
-import { Inspect } from '../common/search_strategy/security_solution';
+import { Inspect } from '../common/search_strategy';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;

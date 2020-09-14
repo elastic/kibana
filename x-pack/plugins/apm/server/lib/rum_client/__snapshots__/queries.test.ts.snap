@@ -148,7 +148,7 @@ Object {
   "body": Object {
     "aggs": Object {
       "pageViews": Object {
-        "aggs": Object {},
+        "aggs": undefined,
         "auto_date_histogram": Object {
           "buckets": 50,
           "field": "@timestamp",

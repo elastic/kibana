@@ -20,9 +20,15 @@
 import { schema } from '@kbn/config-schema';
 import { createWriteStream, WriteStream } from 'fs';
 
-import { Layout, Layouts } from '../../layouts/layouts';
+import { Layout, Layouts, LayoutConfigType } from '../../layouts/layouts';
 import { LogRecord } from '../../log_record';
 import { DisposableAppender } from '../appenders';
+
+export interface FileAppenderConfig {
+  kind: 'file';
+  layout: LayoutConfigType;
+  path: string;
+}
 
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.

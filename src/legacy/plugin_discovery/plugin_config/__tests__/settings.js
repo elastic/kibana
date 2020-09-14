@@ -18,7 +18,6 @@
  */
 
 import expect from '@kbn/expect';
-import sinon from 'sinon';
 
 import { PluginPack } from '../../plugin_pack';
 import { getSettings } from '../settings';
@@ -33,7 +32,6 @@ describe('plugin_discovery/settings', () => {
     provider: ({ Plugin }) =>
       new Plugin({
         configPrefix: 'a.b.c',
-        deprecations: ({ rename }) => [rename('foo', 'bar')],
       }),
   })
     .getPluginSpecs()
@@ -58,29 +56,6 @@ describe('plugin_discovery/settings', () => {
 
     it('allows rootSettings to be undefined', async () => {
       expect(await getSettings(pluginSpec)).to.eql(undefined);
-    });
-
-    it('resolves deprecations', async () => {
-      const logDeprecation = sinon.stub();
-      expect(
-        await getSettings(
-          pluginSpec,
-          {
-            a: {
-              b: {
-                c: {
-                  foo: true,
-                },
-              },
-            },
-          },
-          logDeprecation
-        )
-      ).to.eql({
-        bar: true,
-      });
-
-      sinon.assert.calledOnce(logDeprecation);
     });
   });
 });

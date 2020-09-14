@@ -28,13 +28,13 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Value',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.valueFieldHelpText', {
-      defaultMessage: 'The value to be appended by this processor.',
+      defaultMessage: 'Values to append.',
     }),
     validations: [
       {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.valueRequiredError', {
-            defaultMessage: 'A value to set is required.',
+            defaultMessage: 'A value is required.',
           })
         ),
       },
@@ -47,7 +47,7 @@ export const Append: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.fieldHelpText', {
-          defaultMessage: 'The field to be appended to.',
+          defaultMessage: 'Field to append values to.',
         })}
       />
 

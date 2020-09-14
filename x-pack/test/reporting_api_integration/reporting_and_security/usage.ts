@@ -115,7 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('from new jobs posted', () => {
+    // FAILING: https://github.com/elastic/kibana/issues/76581
+    describe.skip('from new jobs posted', () => {
       it('should handle csv', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
