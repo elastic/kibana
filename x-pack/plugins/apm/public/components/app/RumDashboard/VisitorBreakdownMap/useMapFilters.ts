@@ -14,7 +14,8 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/apm_index_pattern';
+
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
 
 const getMatchFilter = (field: string, value: string): Filter => {
   return {

@@ -20,7 +20,8 @@ import {
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from '../../../../../../maps/common/constants';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/apm_index_pattern';
+
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
 
 const ES_TERM_SOURCE: ESTermSourceDescriptor = {
   type: 'ES_TERM_SOURCE',
