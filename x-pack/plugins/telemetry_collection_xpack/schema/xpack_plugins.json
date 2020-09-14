@@ -297,6 +297,28 @@
         }
       }
     },
+    "security": {
+      "properties": {
+        "auditLoggingEnabled": {
+          "type": "boolean"
+        },
+        "loginSelectorEnabled": {
+          "type": "boolean"
+        },
+        "accessAgreementEnabled": {
+          "type": "boolean"
+        },
+        "authProviderCount": {
+          "type": "number"
+        },
+        "enabledAuthProviders": {
+          "type": "keyword"
+        },
+        "httpAuthSchemes": {
+          "type": "keyword"
+        }
+      }
+    },
     "spaces": {
       "properties": {
         "usesFeatureControls": {
