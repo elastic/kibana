@@ -5,7 +5,7 @@
  */
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { MonitoringUsage } from '../types';
+import { MonitoringClusterStackProductUsage } from '../types';
 import { fetchESUsage } from './fetch_es_usage';
 import { MonitoringConfig } from '../../../config';
 // @ts-ignore
@@ -26,7 +26,12 @@ export const getStackProductsUsage = async (
   callCluster: CallCluster,
   availableCcs: string[],
   clusterUuid: string
-): Promise<Pick<MonitoringUsage, 'elasticsearch' | 'kibana' | 'logstash' | 'beats' | 'apm'>> => {
+): Promise<
+  Pick<
+    MonitoringClusterStackProductUsage,
+    'elasticsearch' | 'kibana' | 'logstash' | 'beats' | 'apm'
+  >
+> => {
   const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
   const kibanaIndex = getCcsIndexPattern(INDEX_PATTERN_KIBANA, availableCcs);
   const logstashIndex = getCcsIndexPattern(INDEX_PATTERN_LOGSTASH, availableCcs);

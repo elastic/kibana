@@ -6,15 +6,18 @@
 
 export interface MonitoringUsage {
   hasMonitoringData: boolean;
+  clusters: MonitoringClusterStackProductUsage[];
+}
+
+export interface MonitoringClusterStackProductUsage {
   clusterUuid: string;
   license: string;
-  allClusterUuids: string[];
+  metricbeatUsed: boolean;
   elasticsearch: StackProductUsage;
   logstash: StackProductUsage;
   kibana: StackProductUsage;
   beats: StackProductUsage;
   apm: StackProductUsage;
-  metricbeatUsed: boolean;
 }
 
 export interface StackProductUsage {

@@ -21,7 +21,6 @@ import {
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../src/core/server';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
@@ -163,19 +162,7 @@ export class Plugin {
         },
       });
 
-      const getSavedObjectClient = async () => {
-        const coreStart = (await core.getStartServices())[0];
-        return new SavedObjectsClient(
-          coreStart.savedObjects.createInternalRepository([SAVED_OBJECT_TELEMETRY])
-        );
-      };
-
-      registerCollectors(
-        plugins.usageCollection,
-        config,
-        cluster.callAsInternalUser,
-        getSavedObjectClient
-      );
+      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
     }
 
     // Always create the bulk uploader

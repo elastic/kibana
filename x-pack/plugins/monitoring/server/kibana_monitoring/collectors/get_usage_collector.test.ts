@@ -5,7 +5,7 @@
  */
 
 import { getMonitoringUsageCollector } from './get_usage_collector';
-import { getStackProductsUsage } from './lib/get_stack_products_usage';
+import { fetchClusters } from '../../lib/alerts/fetch_clusters';
 
 jest.mock('../../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn().mockImplementation(() => {
@@ -58,9 +58,6 @@ jest.mock('./lib/fetch_license_type', () => ({
 
 describe('getMonitoringUsageCollector', () => {
   const callCluster = jest.fn();
-  const getSavedObjectClient = jest.fn().mockImplementation(() => ({
-    create: jest.fn(),
-  }));
   const config: any = {
     ui: {
       ccs: {
@@ -73,7 +70,7 @@ describe('getMonitoringUsageCollector', () => {
     const usageCollection: any = {
       makeUsageCollector: jest.fn(),
     };
-    await getMonitoringUsageCollector(usageCollection, config, callCluster, getSavedObjectClient);
+    await getMonitoringUsageCollector(usageCollection, config, callCluster);
 
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
 
@@ -82,34 +79,35 @@ describe('getMonitoringUsageCollector', () => {
     expect(typeof args[0].isReady).toBe('function');
     expect(args[0].schema).toStrictEqual({
       hasMonitoringData: { type: 'boolean' },
-      license: { type: 'keyword' },
-      clusterUuid: { type: 'keyword' },
-      allClusterUuids: { type: 'keyword' },
-      metricbeatUsed: { type: 'boolean' },
-      elasticsearch: {
-        enabled: { type: 'boolean' },
-        count: { type: 'long' },
+      clusters: {
+        license: { type: 'keyword' },
+        clusterUuid: { type: 'keyword' },
         metricbeatUsed: { type: 'boolean' },
-      },
-      kibana: {
-        enabled: { type: 'boolean' },
-        count: { type: 'long' },
-        metricbeatUsed: { type: 'boolean' },
-      },
-      logstash: {
-        enabled: { type: 'boolean' },
-        count: { type: 'long' },
-        metricbeatUsed: { type: 'boolean' },
-      },
-      beats: {
-        enabled: { type: 'boolean' },
-        count: { type: 'long' },
-        metricbeatUsed: { type: 'boolean' },
-      },
-      apm: {
-        enabled: { type: 'boolean' },
-        count: { type: 'long' },
-        metricbeatUsed: { type: 'boolean' },
+        elasticsearch: {
+          enabled: { type: 'boolean' },
+          count: { type: 'long' },
+          metricbeatUsed: { type: 'boolean' },
+        },
+        kibana: {
+          enabled: { type: 'boolean' },
+          count: { type: 'long' },
+          metricbeatUsed: { type: 'boolean' },
+        },
+        logstash: {
+          enabled: { type: 'boolean' },
+          count: { type: 'long' },
+          metricbeatUsed: { type: 'boolean' },
+        },
+        beats: {
+          enabled: { type: 'boolean' },
+          count: { type: 'long' },
+          metricbeatUsed: { type: 'boolean' },
+        },
+        apm: {
+          enabled: { type: 'boolean' },
+          count: { type: 'long' },
+          metricbeatUsed: { type: 'boolean' },
+        },
       },
     });
   });
@@ -119,22 +117,25 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, callCluster, getSavedObjectClient);
+    await getMonitoringUsageCollector(usageCollection, config, callCluster);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
     const result = await args[0].fetch();
     expect(result).toStrictEqual({
       hasMonitoringData: true,
-      clusterUuid: '1abc',
-      license: 'trial',
-      allClusterUuids: ['1abc'],
-      elasticsearch: { count: 5, enabled: true, metricbeatUsed: true },
-      kibana: { count: 2, enabled: true, metricbeatUsed: false },
-      logstash: { count: 0, enabled: false, metricbeatUsed: false },
-      beats: { count: 1, enabled: true, metricbeatUsed: false },
-      apm: { count: 1, enabled: true, metricbeatUsed: true },
-      metricbeatUsed: true,
+      clusters: [
+        {
+          clusterUuid: '1abc',
+          license: 'trial',
+          elasticsearch: { count: 5, enabled: true, metricbeatUsed: true },
+          kibana: { count: 2, enabled: true, metricbeatUsed: false },
+          logstash: { count: 0, enabled: false, metricbeatUsed: false },
+          beats: { count: 1, enabled: true, metricbeatUsed: false },
+          apm: { count: 1, enabled: true, metricbeatUsed: true },
+          metricbeatUsed: true,
+        },
+      ],
     });
   });
 
@@ -143,21 +144,18 @@ describe('getMonitoringUsageCollector', () => {
       makeUsageCollector: jest.fn(),
     };
 
-    await getMonitoringUsageCollector(usageCollection, config, callCluster, getSavedObjectClient);
+    await getMonitoringUsageCollector(usageCollection, config, callCluster);
     const mock = (usageCollection.makeUsageCollector as jest.Mock).mock;
     const args = mock.calls[0];
 
-    (getStackProductsUsage as jest.Mock).mockImplementation(() => {
-      return {};
+    (fetchClusters as jest.Mock).mockImplementation(() => {
+      return [];
     });
 
     const result = await args[0].fetch();
     expect(result).toStrictEqual({
       hasMonitoringData: false,
-      clusterUuid: '1abc',
-      license: 'trial',
-      allClusterUuids: ['1abc'],
-      metricbeatUsed: false,
+      clusters: [],
     });
   });
 });
