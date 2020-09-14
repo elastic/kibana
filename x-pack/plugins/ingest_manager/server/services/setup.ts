@@ -170,6 +170,12 @@ export async function setupFleet(
       });
     })
   );
+
+  await Promise.all(
+    agentPolicies.map((agentPolicy) =>
+      agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id)
+    )
+  );
 }
 
 function generateRandomPassword() {
