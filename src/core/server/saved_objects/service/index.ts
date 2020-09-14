@@ -27,6 +27,7 @@ export {
   SavedObjectsErrorHelpers,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsUtils,
 } from './lib';
 
 export * from './saved_objects_client';
