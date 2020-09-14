@@ -6,14 +6,12 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode } from '@elastic/eui';
 
 import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
 import { TextEditor } from '../field_components';
 
-import { FieldsConfig } from './shared';
+import { EDITOR_PX_HEIGHT, FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { TargetField } from './common_fields/target_field';
@@ -78,7 +76,7 @@ export const Gsub: FunctionComponent = () => {
         component={TextEditor}
         componentProps={{
           editorProps: {
-            height: 75,
+            height: EDITOR_PX_HEIGHT.extraSmall,
             options: { minimap: { enabled: false } },
           },
         }}
@@ -87,17 +85,7 @@ export const Gsub: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.replacement} component={Field} path="fields.replacement" />
 
-      <TargetField
-        helpText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldHelpText"
-            defaultMessage="Field used to contain updated text. Defaults to {field}."
-            values={{
-              field: <EuiCode>{'field'}</EuiCode>,
-            }}
-          />
-        }
-      />
+      <TargetField />
 
       <IgnoreMissingField />
     </>

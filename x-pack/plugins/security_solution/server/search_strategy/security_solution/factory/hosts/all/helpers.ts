@@ -5,26 +5,33 @@
  */
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
+import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { HostsEdges } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { hostFieldsMap } from '../../../../../lib/ecs_fields';
 
 import { HostAggEsItem, HostBuckets, HostValue } from '../../../../../lib/hosts/types';
+import { toArray } from '../../../../helpers/to_array';
 
-const HOSTS_FIELDS = ['_id', 'lastSeen', 'host.id', 'host.name', 'host.os.name', 'host.os.version'];
+export const HOSTS_FIELDS: readonly string[] = [
+  '_id',
+  'lastSeen',
+  'host.id',
+  'host.name',
+  'host.os.name',
+  'host.os.version',
+];
 
-export const formatHostEdgesData = (bucket: HostAggEsItem): HostsEdges =>
-  HOSTS_FIELDS.reduce<HostsEdges>(
+export const formatHostEdgesData = (
+  fields: readonly string[] = HOSTS_FIELDS,
+  bucket: HostAggEsItem
+): HostsEdges =>
+  fields.reduce<HostsEdges>(
     (flattenedFields, fieldName) => {
       const hostId = get('key', bucket);
       flattenedFields.node._id = hostId || null;
       flattenedFields.cursor.value = hostId || '';
       const fieldValue = getHostFieldValue(fieldName, bucket);
       if (fieldValue != null) {
-        return set(
-          `node.${fieldName}`,
-          Array.isArray(fieldValue) ? fieldValue : [fieldValue],
-          flattenedFields
-        );
+        return set(`node.${fieldName}`, toArray(fieldValue), flattenedFields);
       }
       return flattenedFields;
     },

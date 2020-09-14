@@ -125,7 +125,7 @@ export const useNetworkTls = ({
         const searchSubscription$ = data.search
           .search<NetworkTlsRequestOptions, NetworkTlsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {

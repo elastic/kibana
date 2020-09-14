@@ -10,18 +10,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { HostsEdges, PageInfoPaginated } from '../../../graphql/types';
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { hostsModel, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import {
+  HostsEdges,
+  PageInfoPaginated,
   DocValueFields,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
-} from '../../../../common/search_strategy/security_solution';
+} from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
@@ -131,7 +132,7 @@ export const useAllHost = ({
         const searchSubscription$ = data.search
           .search<HostsRequestOptions, HostsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
-            signal: abortCtrl.current.signal,
+            abortSignal: abortCtrl.current.signal,
           })
           .subscribe({
             next: (response) => {

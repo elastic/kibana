@@ -7,7 +7,6 @@
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { AlertAction } from '../../../../../../alerts/common';
 import { Filter } from '../../../../../../../../src/plugins/data/common';
-import { FormData, FormHook } from '../../../../shared_imports';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import { FieldValueThreshold } from '../../../components/rules/threshold_input';
@@ -18,14 +17,16 @@ import {
   RiskScoreMapping,
   RuleNameOverride,
   SeverityMapping,
+  SortOrder,
   TimestampOverride,
   Type,
+  Severity,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { List } from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;
-  direction: 'asc' | 'desc';
+  direction: SortOrder;
 }
 
 export interface EuiBasicTableOnChange {
@@ -36,34 +37,51 @@ export interface EuiBasicTableOnChange {
   sort?: EuiBasicTableSortTypes;
 }
 
+export type RuleStatusType = 'passive' | 'active' | 'valid';
+
 export enum RuleStep {
   defineRule = 'define-rule',
   aboutRule = 'about-rule',
   scheduleRule = 'schedule-rule',
   ruleActions = 'rule-actions',
 }
-export type RuleStatusType = 'passive' | 'active' | 'valid';
+export type RuleStepsOrder = [
+  RuleStep.defineRule,
+  RuleStep.aboutRule,
+  RuleStep.scheduleRule,
+  RuleStep.ruleActions
+];
 
-export interface RuleStepData {
-  data: unknown;
-  isValid: boolean;
+export interface RuleStepsData {
+  [RuleStep.defineRule]: DefineStepRule;
+  [RuleStep.aboutRule]: AboutStepRule;
+  [RuleStep.scheduleRule]: ScheduleStepRule;
+  [RuleStep.ruleActions]: ActionsStepRule;
 }
+
+export type RuleStepsFormData = {
+  [K in keyof RuleStepsData]: {
+    data: RuleStepsData[K] | undefined;
+    isValid: boolean;
+  };
+};
+
+export type RuleStepsFormHooks = {
+  [K in keyof RuleStepsData]: () => Promise<RuleStepsFormData[K] | undefined>;
+};
 
 export interface RuleStepProps {
   addPadding?: boolean;
   descriptionColumns?: 'multi' | 'single' | 'singleSplit';
-  setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
   isReadOnlyView: boolean;
   isUpdateView?: boolean;
   isLoading: boolean;
+  onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
-  setForm?: (step: RuleStep, form: FormHook<FormData>) => void;
+  setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
 }
 
-interface StepRuleData {
-  isNew: boolean;
-}
-export interface AboutStepRule extends StepRuleData {
+export interface AboutStepRule {
   author: string[];
   name: string;
   description: string;
@@ -87,7 +105,7 @@ export interface AboutStepRuleDetails {
 }
 
 export interface AboutStepSeverity {
-  value: string;
+  value: Severity;
   mapping: SeverityMapping;
   isMappingChecked: boolean;
 }
@@ -98,7 +116,7 @@ export interface AboutStepRiskScore {
   isMappingChecked: boolean;
 }
 
-export interface DefineStepRule extends StepRuleData {
+export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
   machineLearningJobId: string;
@@ -108,13 +126,13 @@ export interface DefineStepRule extends StepRuleData {
   threshold: FieldValueThreshold;
 }
 
-export interface ScheduleStepRule extends StepRuleData {
+export interface ScheduleStepRule {
   interval: string;
   from: string;
   to?: string;
 }
 
-export interface ActionsStepRule extends StepRuleData {
+export interface ActionsStepRule {
   actions: AlertAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;

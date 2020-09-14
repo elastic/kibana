@@ -21,8 +21,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.commonFields.targetFieldHelpText',
       {
-        defaultMessage:
-          'The field to assign the joined value to. If empty, the field is updated in-place.',
+        defaultMessage: 'Output field. If empty, the input field is updated in place.',
       }
     ),
   },

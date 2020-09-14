@@ -80,9 +80,9 @@ export const selectNumberOfRules = (numberOfRules: number) => {
 };
 
 export const sortByActivatedRules = () => {
-  cy.get(SORT_RULES_BTN).click({ force: true });
+  cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
   waitForRulesToBeLoaded();
-  cy.get(SORT_RULES_BTN).click({ force: true });
+  cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
   waitForRulesToBeLoaded();
 };
 

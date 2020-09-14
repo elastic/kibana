@@ -47,9 +47,6 @@ const createStartContractMock = () => {
     docTitle: {
       change: jest.fn(),
       reset: jest.fn(),
-      __legacy: {
-        setBaseTitle: jest.fn(),
-      },
     },
     navControls: {
       registerLeft: jest.fn(),

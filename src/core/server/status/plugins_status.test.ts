@@ -312,9 +312,9 @@ describe('PluginStatusService', () => {
       pluginA$.next(available);
       pluginA$.next(degraded);
       // Waiting for the debounce timeout should cut a new update
-      await delay(100);
+      await delay(500);
       pluginA$.next(available);
-      await delay(100);
+      await delay(500);
       subscription.unsubscribe();
 
       expect(statusUpdates).toMatchInlineSnapshot(`

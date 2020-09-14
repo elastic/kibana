@@ -29,7 +29,7 @@ export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
   return (
     <EuiFlexItem>
       <CreateJobLinkCard
-        data-test-subj={id}
+        data-test-subj={`mlRecognizerCard ${config.id}`}
         href={href}
         title={config.title}
         description={config.description}

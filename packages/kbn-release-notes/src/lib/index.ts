@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './pull_request';
+export * from './pr_api';
 export * from './version';
 export * from './is_pr_relevant';
 export * from './streams';

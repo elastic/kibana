@@ -9,21 +9,21 @@ import { getOr } from 'lodash/fp';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
 import {
+  HostsQueries,
   AuthenticationsEdges,
-  AuthenticationsRequestOptions,
-  AuthenticationsStrategyResponse,
+  HostAuthenticationsRequestOptions,
+  HostAuthenticationsStrategyResponse,
   AuthenticationHit,
-} from '../../../../../../common/search_strategy/security_solution/hosts/authentications';
+} from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
-import { formatAuthenticationData, getHits } from './helpers';
+import { authenticationFields, formatAuthenticationData, getHits } from './helpers';
 
 export const authentications: SecuritySolutionFactory<HostsQueries.authentications> = {
-  buildDsl: (options: AuthenticationsRequestOptions) => {
+  buildDsl: (options: HostAuthenticationsRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -31,16 +31,16 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
     return buildAuthenticationQuery(options);
   },
   parse: async (
-    options: AuthenticationsRequestOptions,
+    options: HostAuthenticationsRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<AuthenticationsStrategyResponse> => {
+  ): Promise<HostAuthenticationsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHits(response);
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationData(hit, auditdFieldsMap)
+      formatAuthenticationData(authenticationFields, hit, auditdFieldsMap)
     );
 
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);

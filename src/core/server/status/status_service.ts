@@ -60,7 +60,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       this.pluginsStatus.getAll$()
     ).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
-      debounceTime(100),
+      debounceTime(500),
       map(([coreStatus, pluginsStatus]) => {
         const summary = getSummaryStatus([
           ...Object.entries(coreStatus),
@@ -69,7 +69,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         this.logger.debug(`Recalculated overall status`, { status: summary });
         return summary;
       }),
-      distinctUntilChanged(isDeepStrictEqual)
+      distinctUntilChanged(isDeepStrictEqual),
+      shareReplay(1)
     );
 
     return {

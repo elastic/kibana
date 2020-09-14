@@ -68,6 +68,7 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
+import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 
 const ExplorerPage = ({
   children,
@@ -144,6 +145,22 @@ export class Explorer extends React.Component {
 
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
   htmlIdGen = htmlIdGenerator();
+
+  componentDidMount() {
+    const { invalidTimeRangeError } = this.props;
+    if (invalidTimeRangeError) {
+      const toastNotifications = getToastNotifications();
+      toastNotifications.addWarning(
+        i18n.translate('xpack.ml.explorer.invalidTimeRangeInUrlCallout', {
+          defaultMessage:
+            'The time filter was changed to the full range due to an invalid default time filter. Check the advanced settings for {field}.',
+          values: {
+            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+          },
+        })
+      );
+    }
+  }
 
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
@@ -298,7 +315,6 @@ export class Explorer extends React.Component {
 
           <div className={mainColumnClasses}>
             <EuiSpacer size="m" />
-
             {stoppedPartitions && (
               <EuiCallOut
                 size={'s'}
