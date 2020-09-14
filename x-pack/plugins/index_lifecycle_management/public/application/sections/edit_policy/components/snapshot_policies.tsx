@@ -31,7 +31,7 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({
   onChange,
   getUrlForApp,
 }) => {
-  const { error, isLoading, data, sendRequest } = useLoadSnapshotPolicies();
+  const { error, isLoading, data, resendRequest } = useLoadSnapshotPolicies();
 
   const policies = data.map((name: string) => ({
     label: name,
@@ -75,7 +75,7 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({
               <EuiButtonIcon
                 size="s"
                 color="warning"
-                onClick={sendRequest}
+                onClick={resendRequest}
                 iconType="refresh"
                 aria-label={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.deletePhase.reloadPoliciesLabel',

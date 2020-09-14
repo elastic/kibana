@@ -3,17 +3,34 @@
     {
       "serviceName": "opbeans-node",
       "agentName": "nodejs",
-      "transactionsPerMinute": 0,
-      "errorsPerMinute": 46.06666666666667,
+      "transactionsPerMinute": {
+        "value": 0,
+        "timeseries": []
+      },
+      "errorsPerMinute": {
+        "value": 46.06666666666667,
+        "timeseries": []
+      },
       "avgResponseTime": null,
-      "environments": ["test"]
+      "environments": [
+        "test"
+      ]
     },
     {
       "serviceName": "opbeans-python",
       "agentName": "python",
-      "transactionsPerMinute": 86.93333333333334,
-      "errorsPerMinute": 12.6,
-      "avgResponseTime": 91535.42944785276,
+      "transactionsPerMinute": {
+        "value": 86.93333333333334,
+        "timeseries": []
+      },
+      "errorsPerMinute": {
+        "value": 12.6,
+        "timeseries": []
+      },
+      "avgResponseTime": {
+        "value": 91535.42944785276,
+        "timeseries": []
+      },
       "environments": []
     }
   ]

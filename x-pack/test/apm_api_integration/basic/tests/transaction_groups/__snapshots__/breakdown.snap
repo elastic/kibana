@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Breakdown when data is loaded returns the transaction breakdown for a service 1`] = `
+Object {
+  "timeseries": Array [
+    Object {
+      "color": "#54b399",
+      "data": Array [
+        Object {
+          "x": 1593413100000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413130000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413160000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413190000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413220000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413250000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413280000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413310000,
+          "y": 0.16700861715223636,
+        },
+        Object {
+          "x": 1593413340000,
+          "y": null,
+        },
+      ],
+      "hideLegend": false,
+      "legendValue": "17%",
+      "title": "app",
+      "type": "areaStacked",
+    },
+    Object {
+      "color": "#6092c0",
+      "data": Array [
+        Object {
+          "x": 1593413100000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413130000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413160000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413190000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413220000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413250000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413280000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413310000,
+          "y": 0.7702092736971686,
+        },
+        Object {
+          "x": 1593413340000,
+          "y": null,
+        },
+      ],
+      "hideLegend": false,
+      "legendValue": "77%",
+      "title": "http",
+      "type": "areaStacked",
+    },
+    Object {
+      "color": "#d36086",
+      "data": Array [
+        Object {
+          "x": 1593413100000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413130000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413160000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413190000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413220000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413250000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413280000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413310000,
+          "y": 0.0508822322527698,
+        },
+        Object {
+          "x": 1593413340000,
+          "y": null,
+        },
+      ],
+      "hideLegend": false,
+      "legendValue": "5.1%",
+      "title": "postgresql",
+      "type": "areaStacked",
+    },
+    Object {
+      "color": "#9170b8",
+      "data": Array [
+        Object {
+          "x": 1593413100000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413130000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413160000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413190000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413220000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413250000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413280000,
+          "y": null,
+        },
+        Object {
+          "x": 1593413310000,
+          "y": 0.011899876897825195,
+        },
+        Object {
+          "x": 1593413340000,
+          "y": null,
+        },
+      ],
+      "hideLegend": false,
+      "legendValue": "1.2%",
+      "title": "redis",
+      "type": "areaStacked",
+    },
+  ],
+}
+`;
