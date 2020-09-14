@@ -52,6 +52,7 @@ describe('EndpointList store concerns', () => {
         policyItemsLoading: false,
         endpointPackageInfo: undefined,
         nonExistingPolicies: {},
+        agentPolicies: {},
         endpointsExist: true,
         patterns: [],
         patternsError: undefined,
