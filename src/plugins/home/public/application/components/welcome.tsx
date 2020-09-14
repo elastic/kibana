@@ -76,7 +76,7 @@ export class Welcome extends React.Component<Props> {
   componentDidMount() {
     const { telemetry } = this.props;
     this.services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    if (telemetry) {
+    if (telemetry?.telemetryService.userCanChangeSettings) {
       telemetry.telemetryNotifications.setOptedInNoticeSeen();
     }
     document.addEventListener('keydown', this.hideOnEsc);
@@ -88,7 +88,7 @@ export class Welcome extends React.Component<Props> {
 
   private renderTelemetryEnabledOrDisabledText = () => {
     const { telemetry } = this.props;
-    if (!telemetry) {
+    if (!telemetry || !telemetry.telemetryService.userCanChangeSettings) {
       return null;
     }
 

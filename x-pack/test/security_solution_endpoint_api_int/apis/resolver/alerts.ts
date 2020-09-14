@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { eventId } from '../../../../plugins/security_solution/common/endpoint/models/event';
+import {
+  eventIDSafeVersion,
+  timestampSafeVersion,
+} from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { ResolverRelatedAlerts } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -69,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow alerts to be filtered', async () => {
-      const filter = `not event.id:"${tree.origin.relatedAlerts[0].event.id}"`;
+      const filter = `not event.id:"${tree.origin.relatedAlerts[0].event?.id}"`;
       const { body }: { body: ResolverRelatedAlerts } = await supertest
         .post(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
         .set('kbn-xsrf', 'xxx')
@@ -84,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       // should not find the alert that we excluded in the filter
       expect(
         body.alerts.find((bodyAlert) => {
-          return eventId(bodyAlert) === tree.origin.relatedAlerts[0].event.id;
+          return eventIDSafeVersion(bodyAlert) === tree.origin.relatedAlerts[0].event?.id;
         })
       ).to.not.be.ok();
     });
@@ -135,14 +138,16 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       const sortedAsc = [...tree.origin.relatedAlerts].sort((event1, event2) => {
         // this sorts the events by timestamp in ascending order
-        const diff = event1['@timestamp'] - event2['@timestamp'];
+        const diff = (timestampSafeVersion(event1) ?? 0) - (timestampSafeVersion(event2) ?? 0);
+        const event1ID = eventIDSafeVersion(event1) ?? 0;
+        const event2ID = eventIDSafeVersion(event2) ?? 0;
         // if the timestamps are the same, fallback to the event.id sorted in
         // ascending order
         if (diff === 0) {
-          if (event1.event.id < event2.event.id) {
+          if (event1ID < event2ID) {
             return -1;
           }
-          if (event1.event.id > event2.event.id) {
+          if (event1ID > event2ID) {
             return 1;
           }
           return 0;
@@ -152,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body.alerts.length).to.eql(4);
       for (let i = 0; i < body.alerts.length; i++) {
-        expect(eventId(body.alerts[i])).to.equal(sortedAsc[i].event.id);
+        expect(eventIDSafeVersion(body.alerts[i])).to.equal(sortedAsc[i].event?.id);
       }
     });
   });

@@ -10,7 +10,6 @@ import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
 import { ActionsService } from '../../services/agents';
-import { NewAgentAction } from '../../../common/types/models';
 import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 
 export const postNewAgentActionHandlerBuilder = function (
@@ -26,7 +25,7 @@ export const postNewAgentActionHandlerBuilder = function (
 
       const agent = await actionsService.getAgent(soClient, request.params.agentId);
 
-      const newAgentAction = request.body.action as NewAgentAction;
+      const newAgentAction = request.body.action;
 
       const savedAgentAction = await actionsService.createAgentAction(soClient, {
         created_at: new Date().toISOString(),

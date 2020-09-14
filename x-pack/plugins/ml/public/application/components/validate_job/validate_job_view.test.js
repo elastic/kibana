@@ -16,6 +16,12 @@ jest.mock('../../util/dependency_cache', () => ({
   }),
 }));
 
+jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: (comp) => {
+    return comp;
+  },
+}));
+
 const job = {
   job_id: 'test-id',
 };
@@ -25,11 +31,16 @@ const getJobConfig = () => job;
 function prepareTest(messages) {
   const p = Promise.resolve(messages);
 
-  const mlJobService = {
-    validateJob: () => p,
+  const ml = {
+    validateJob: () => Promise.resolve(messages),
+  };
+  const kibana = {
+    services: {
+      notifications: { toasts: { addDanger: jest.fn() } },
+    },
   };
 
-  const component = <ValidateJob getJobConfig={getJobConfig} mlJobService={mlJobService} />;
+  const component = <ValidateJob getJobConfig={getJobConfig} ml={ml} kibana={kibana} />;
 
   const wrapper = shallowWithIntl(component);
 
