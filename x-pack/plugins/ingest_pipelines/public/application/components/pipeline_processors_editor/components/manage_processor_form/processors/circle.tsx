@@ -5,13 +5,14 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiCode } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
   fieldValidators,
   UseField,
-  Field,
   SelectField,
   NumericField,
 } from '../../../../../../shared_imports';
@@ -19,22 +20,12 @@ import {
 import { FieldsConfig } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
+import { TargetField } from './common_fields/target_field';
 
 const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.circleForm.targetFieldHelpText',
-      {
-        defaultMessage: 'By default field is updated in-place.',
-      }
-    ),
-  },
+  /* Required fields config */
   error_distance: {
     type: FIELD_TYPES.NUMBER,
     deserializer: (v) => (typeof v === 'number' && !isNaN(v) ? v : 1.0),
@@ -45,12 +36,15 @@ const fieldsConfig: FieldsConfig = {
         defaultMessage: 'Error distance',
       }
     ),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceHelpText',
-      {
-        defaultMessage:
-          'The difference between the resulting inscribed distance from center to side and the circle’s radius (measured in meters for geo_shape, unit-less for shape).',
-      }
+    helpText: () => (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceHelpText"
+        defaultMessage="Difference between the side of the inscribed shape to the encompassing circle. Determines the accuracy of the output polygon. Measured in meters for {geo_shape}, but uses no units for {shape}."
+        values={{
+          geo_shape: <EuiCode>{'geo_shape'}</EuiCode>,
+          shape: <EuiCode>{'shape'}</EuiCode>,
+        }}
+      />
     ),
     validations: [
       {
@@ -71,12 +65,13 @@ const fieldsConfig: FieldsConfig = {
   },
   shape_type: {
     type: FIELD_TYPES.SELECT,
+    serializer: String,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeFieldLabel', {
       defaultMessage: 'Shape type',
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeFieldHelpText',
-      { defaultMessage: 'Which field mapping type is to be used.' }
+      { defaultMessage: 'Field mapping type to use when processing the output polygon.' }
     ),
     validations: [
       {
@@ -96,7 +91,7 @@ export const Circle: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.circleForm.fieldNameHelpText',
-          { defaultMessage: 'The string-valued field to trim whitespace from.' }
+          { defaultMessage: 'Field to convert.' }
         )}
       />
 
@@ -132,7 +127,7 @@ export const Circle: FunctionComponent = () => {
         path="fields.shape_type"
       />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField />
 
       <IgnoreMissingField />
     </>

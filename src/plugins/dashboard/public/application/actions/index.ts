@@ -33,7 +33,17 @@ export {
   ACTION_CLONE_PANEL,
 } from './clone_panel_action';
 export {
+  AddToLibraryAction,
+  AddToLibraryActionContext,
+  ACTION_ADD_TO_LIBRARY,
+} from './add_to_library_action';
+export {
+  UnlinkFromLibraryAction,
   UnlinkFromLibraryActionContext,
   ACTION_UNLINK_FROM_LIBRARY,
-  UnlinkFromLibraryAction,
 } from './unlink_from_library_action';
+export {
+  LibraryNotificationActionContext,
+  LibraryNotificationAction,
+  ACTION_LIBRARY_NOTIFICATION,
+} from './library_notification_action';

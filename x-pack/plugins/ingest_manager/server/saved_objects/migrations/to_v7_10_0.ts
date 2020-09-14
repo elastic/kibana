@@ -5,7 +5,14 @@
  */
 
 import { SavedObjectMigrationFn } from 'kibana/server';
-import { Agent, AgentEvent, AgentPolicy, PackagePolicy, EnrollmentAPIKey } from '../../types';
+import {
+  Agent,
+  AgentEvent,
+  AgentPolicy,
+  PackagePolicy,
+  EnrollmentAPIKey,
+  Settings,
+} from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
   Exclude<Agent, 'policy_id' | 'policy_revision'> & {
@@ -42,6 +49,7 @@ export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
   AgentPolicy
 > = (agentPolicyDoc) => {
   agentPolicyDoc.attributes.package_policies = agentPolicyDoc.attributes.package_configs;
+  // @ts-expect-error
   delete agentPolicyDoc.attributes.package_configs;
 
   return agentPolicyDoc;
@@ -66,7 +74,21 @@ export const migratePackagePolicyToV7100: SavedObjectMigrationFn<
   PackagePolicy
 > = (packagePolicyDoc) => {
   packagePolicyDoc.attributes.policy_id = packagePolicyDoc.attributes.config_id;
+  // @ts-expect-error
   delete packagePolicyDoc.attributes.config_id;
 
   return packagePolicyDoc;
+};
+
+export const migrateSettingsToV7100: SavedObjectMigrationFn<
+  Exclude<Settings, 'kibana_urls'> & {
+    kibana_url: string;
+  },
+  Settings
+> = (settingsDoc) => {
+  settingsDoc.attributes.kibana_urls = [settingsDoc.attributes.kibana_url];
+  // @ts-expect-error
+  delete settingsDoc.attributes.kibana_url;
+
+  return settingsDoc;
 };

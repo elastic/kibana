@@ -4,23 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { coreMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-
 import { Plugin } from './plugin';
-const initContext = coreMock.createPluginInitializerContext();
-const coreSetup = coreMock.createSetup();
-const coreStart = coreMock.createStart();
-const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
-typeRegistry.getVisibleTypes.mockReturnValue([
-  {
-    name: 'foo',
-    hidden: false,
-    mappings: { properties: {} },
-    namespaceType: 'single' as 'single',
-  },
-]);
-coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 
 describe('Features Plugin', () => {
+  let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
+  let coreSetup: ReturnType<typeof coreMock.createSetup>;
+  let coreStart: ReturnType<typeof coreMock.createStart>;
+  let typeRegistry: ReturnType<typeof savedObjectsServiceMock.createTypeRegistryMock>;
+
+  beforeEach(() => {
+    initContext = coreMock.createPluginInitializerContext();
+    coreSetup = coreMock.createSetup();
+    coreStart = coreMock.createStart();
+    typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
+    typeRegistry.getVisibleTypes.mockReturnValue([
+      {
+        name: 'foo',
+        hidden: false,
+        mappings: { properties: {} },
+        namespaceType: 'single' as 'single',
+      },
+    ]);
+    coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
+  });
+
   it('returns OSS + registered features', async () => {
     const plugin = new Plugin(initContext);
     const { registerFeature } = await plugin.setup(coreSetup, {});
@@ -87,5 +94,13 @@ describe('Features Plugin', () => {
 
     expect(soTypes.includes('foo')).toBe(true);
     expect(soTypes.includes('bar')).toBe(false);
+  });
+
+  it('registers a capabilities provider', async () => {
+    const plugin = new Plugin(initContext);
+    await plugin.setup(coreSetup, {});
+
+    expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledTimes(1);
+    expect(coreSetup.capabilities.registerProvider).toHaveBeenCalledWith(expect.any(Function));
   });
 });

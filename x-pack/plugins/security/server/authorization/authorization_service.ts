@@ -5,7 +5,7 @@
  */
 
 import { Subscription, Observable } from 'rxjs';
-import { UICapabilities } from 'ui/capabilities';
+import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
 import {
   LoggerFactory,
   KibanaRequest,

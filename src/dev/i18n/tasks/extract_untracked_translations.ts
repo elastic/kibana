@@ -47,7 +47,7 @@ export async function extractUntrackedMessagesTask({
     '**/build/**',
     '**/__fixtures__/**',
     '**/packages/kbn-i18n/**',
-    '**/packages/kbn-plugin-generator/sao_template/**',
+    '**/packages/kbn-plugin-generator/template/**',
     '**/packages/kbn-ui-framework/generator-kui/**',
     '**/target/**',
     '**/test/**',

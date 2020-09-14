@@ -48,7 +48,7 @@ guidelines]
 * Write all new code on
 {kib-repo}blob/{branch}/src/core/README.md[the
 platform], and following
-{kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions]
+{kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions].
 * _Always_ use the `SavedObjectClient` for reading and writing Saved
 Objects.
 * Add `README`s to all your plugins and services.
@@ -99,7 +99,7 @@ Re-using these services will help create a consistent experience across
 [discrete]
 === Backward compatibility
 
-Eventually we want to garauntee to our plugin developers that their plugins will not break from minor to minor.
+Eventually we want to guarantee to our plugin developers that their plugins will not break from minor to minor.
 
 Any time you create or change a public API, keep this in mind, and consider potential
 backward compatibility issues. While we have a formal

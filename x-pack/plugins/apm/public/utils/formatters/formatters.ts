@@ -23,24 +23,3 @@ export function tpmUnit(type?: string) {
         defaultMessage: 'tpm',
       });
 }
-
-export function asPercent(
-  numerator: number,
-  denominator: number | undefined,
-  fallbackResult = ''
-) {
-  if (!denominator || isNaN(numerator)) {
-    return fallbackResult;
-  }
-
-  const decimal = numerator / denominator;
-
-  // 33.2 => 33%
-  // 3.32 => 3.3%
-  // 0 => 0%
-  if (Math.abs(decimal) >= 0.1 || decimal === 0) {
-    return numeral(decimal).format('0%');
-  }
-
-  return numeral(decimal).format('0.0%');
-}

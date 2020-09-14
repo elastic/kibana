@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('ingest_manager_agent_policies', () => {
     describe('POST /api/ingest_manager/agent_policies', () => {
       it('should work with valid values', async () => {
-        const { body: apiResponse } = await supertest
+        await supertest
           .post(`/api/ingest_manager/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -22,8 +22,17 @@ export default function ({ getService }: FtrProviderContext) {
             namespace: 'default',
           })
           .expect(200);
+      });
 
-        expect(apiResponse.success).to.be(true);
+      it('should return a 400 with an empty namespace', async () => {
+        await supertest
+          .post(`/api/ingest_manager/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: '',
+          })
+          .expect(400);
       });
 
       it('should return a 400 with an invalid namespace', async () => {
@@ -32,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'TEST',
-            namespace: '',
+            namespace: 'InvalidNamespace',
           })
           .expect(400);
       });
@@ -50,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should work with valid values', async () => {
         const {
-          body: { success, item },
+          body: { item },
         } = await supertest
           .post(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}/copy`)
           .set('kbn-xsrf', 'xxxx')
@@ -62,7 +71,6 @@ export default function ({ getService }: FtrProviderContext) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, ...newPolicy } = item;
 
-        expect(success).to.be(true);
         expect(newPolicy).to.eql({
           name: 'Copied policy',
           description: 'Test',

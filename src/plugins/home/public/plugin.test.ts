@@ -20,7 +20,7 @@
 import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
-import { kibanaLegacyPluginMock } from '../../kibana_legacy/public/mocks';
+import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
 
@@ -33,11 +33,47 @@ describe('HomePublicPlugin', () => {
   });
 
   describe('setup', () => {
+    test('registers tutorial directory to feature catalogue', async () => {
+      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
+        coreMock.createSetup() as any,
+        {
+          urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        }
+      );
+      expect(setup).toHaveProperty('featureCatalogue');
+      expect(setup.featureCatalogue.register).toHaveBeenCalledTimes(1);
+      expect(setup.featureCatalogue.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: 'data',
+          icon: 'indexOpen',
+          id: 'home_tutorial_directory',
+          showOnHomePage: true,
+        })
+      );
+    });
+
+    test('registers kibana solution to feature catalogue', async () => {
+      const setup = await new HomePublicPlugin(mockInitializerContext).setup(
+        coreMock.createSetup() as any,
+        {
+          urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        }
+      );
+      expect(setup).toHaveProperty('featureCatalogue');
+      expect(setup.featureCatalogue.registerSolution).toHaveBeenCalledTimes(1);
+      expect(setup.featureCatalogue.registerSolution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          icon: 'logoKibana',
+          id: 'kibana',
+        })
+      );
+    });
+
     test('wires up and returns registry', async () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
-          kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+          urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
       expect(setup).toHaveProperty('featureCatalogue');
@@ -48,7 +84,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
-          kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+          urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
       expect(setup).toHaveProperty('environment');
@@ -59,7 +95,7 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin(mockInitializerContext).setup(
         coreMock.createSetup() as any,
         {
-          kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+          urlForwarding: urlForwardingPluginMock.createSetupContract(),
         }
       );
       expect(setup).toHaveProperty('tutorials');

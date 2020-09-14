@@ -144,7 +144,7 @@ export class ValidationResults {
       this.createPrivilegesErrorResult(error);
       return;
     }
-    const message: string = error.message;
+    const message: string = error.body.error?.reason;
     if (message) {
       const rxp = /exceeded the allowed maximum of \[(\d+?)\]/;
       const match = rxp.exec(message);
@@ -170,7 +170,7 @@ export class ValidationResults {
   }
 
   public createPrivilegesErrorResult(error: any) {
-    const message: string = error.message;
+    const message: string = error.body.error?.reason;
     if (message) {
       this._results.push({
         id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,

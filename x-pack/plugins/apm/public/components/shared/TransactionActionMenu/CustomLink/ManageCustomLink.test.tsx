@@ -4,18 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { render, act, fireEvent } from '@testing-library/react';
 import { ManageCustomLink } from './ManageCustomLink';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
+}
 
 describe('ManageCustomLink', () => {
   it('renders with create button', () => {
     const component = render(
-      <ManageCustomLink onCreateCustomLinkClick={jest.fn()} />
+      <ManageCustomLink onCreateCustomLinkClick={jest.fn()} />,
+      { wrapper: Wrapper }
     );
     expect(
       component.getByLabelText('Custom links settings page')
@@ -27,7 +33,8 @@ describe('ManageCustomLink', () => {
       <ManageCustomLink
         onCreateCustomLinkClick={jest.fn()}
         showCreateCustomLinkButton={false}
-      />
+      />,
+      { wrapper: Wrapper }
     );
     expect(
       component.getByLabelText('Custom links settings page')
@@ -39,7 +46,8 @@ describe('ManageCustomLink', () => {
     const { getByText } = render(
       <ManageCustomLink
         onCreateCustomLinkClick={handleCreateCustomLinkClickMock}
-      />
+      />,
+      { wrapper: Wrapper }
     );
     expect(handleCreateCustomLinkClickMock).not.toHaveBeenCalled();
     act(() => {

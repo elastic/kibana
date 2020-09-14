@@ -10,7 +10,6 @@
     "data",
     "cloud",
     "features",
-    "home",
     "licensing",
     "usageCollection",
     "share",
@@ -20,6 +19,7 @@
     "indexPatternManagement"
   ],
   "optionalPlugins": [
+    "home",
     "security",
     "spaces",
     "management",
@@ -32,6 +32,7 @@
     "kibanaUtils",
     "kibanaReact",
     "dashboard",
-    "savedObjects"
+    "savedObjects",
+    "home"
   ]
 }

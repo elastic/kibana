@@ -134,13 +134,13 @@ export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudf
 export CHECKS_REPORTER_ACTIVE=false
 
 # This is mainly for release-manager builds, which run in an environment that doesn't have Chrome installed
-if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
-  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
-  export DETECT_CHROMEDRIVER_VERSION=true
-  export CHROMEDRIVER_FORCE_DOWNLOAD=true
-else
-  echo "Chrome not detected, installing default chromedriver binary for the package version"
-fi
+# if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
+#   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
+#   export DETECT_CHROMEDRIVER_VERSION=true
+#   export CHROMEDRIVER_FORCE_DOWNLOAD=true
+# else
+#   echo "Chrome not detected, installing default chromedriver binary for the package version"
+# fi
 
 ### only run on pr jobs for elastic/kibana, checks-reporter doesn't work for other repos
 if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'elastic/kibana' ]] ; then

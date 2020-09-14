@@ -19,10 +19,8 @@ import {
   AppNavLinkStatus,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { jiraActionType, resilientActionType } from './common/lib/connectors';
 import {
   PluginSetup,
   PluginStart,
@@ -66,25 +64,36 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
-    initTelemetry(plugins.usageCollection, APP_ID);
-
-    plugins.home.featureCatalogue.register({
-      id: APP_ID,
-      title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
-        defaultMessage: 'Security',
-      }),
-      description: i18n.translate('xpack.securitySolution.featureCatalogue.description', {
-        defaultMessage: 'Explore security metrics and logs for events and alerts',
-      }),
-      icon: APP_ICON,
-      path: APP_OVERVIEW_PATH,
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
+    const APP_NAME = i18n.translate('xpack.securitySolution.security.title', {
+      defaultMessage: 'Security',
     });
 
-    plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
-    plugins.triggers_actions_ui.actionTypeRegistry.register(resilientActionType());
+    initTelemetry(plugins.usageCollection, APP_ID);
+
+    if (plugins.home) {
+      plugins.home.featureCatalogue.registerSolution({
+        id: APP_ID,
+        title: APP_NAME,
+        subtitle: i18n.translate('xpack.securitySolution.featureCatalogue.subtitle', {
+          defaultMessage: 'SIEM & Endpoint Security',
+        }),
+        descriptions: [
+          i18n.translate('xpack.securitySolution.featureCatalogueDescription1', {
+            defaultMessage: 'Prevent threats autonomously.',
+          }),
+          i18n.translate('xpack.securitySolution.featureCatalogueDescription2', {
+            defaultMessage: 'Detect and respond.',
+          }),
+          i18n.translate('xpack.securitySolution.featureCatalogueDescription3', {
+            defaultMessage: 'Investigate incidents.',
+          }),
+        ],
+        icon: 'logoSecurity',
+        path: APP_OVERVIEW_PATH,
+        order: 300,
+      });
+    }
 
     const mountSecurityFactory = async () => {
       const storage = new Storage(localStorage);
@@ -105,9 +114,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     core.application.register({
       exactRoute: true,
       id: APP_ID,
-      title: i18n.translate('xpack.securitySolution.security.title', {
-        defaultMessage: 'Security',
-      }),
+      title: APP_NAME,
       appRoute: APP_PATH,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async () => {
@@ -319,7 +326,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    return {};
+    return {
+      resolver: async () => {
+        const { resolverPluginSetup } = await import('./resolver');
+        return resolverPluginSetup();
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {

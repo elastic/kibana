@@ -13,8 +13,10 @@ import {
   EuiDroppable,
   EuiText,
   EuiTextAlign,
+  EuiTextColor,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AddTooltipFieldPopover, FieldProps } from './add_tooltip_field_popover';
 import { IField } from '../../classes/fields/field';
@@ -156,7 +158,18 @@ export class TooltipSelector extends Component<Props, State> {
 
   _renderProperties() {
     if (!this.state.selectedFieldProps.length) {
-      return null;
+      return (
+        <EuiText size="s" textAlign="center">
+          <p>
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.maps.tooltipSelector.emptyState.description"
+                defaultMessage="Add a tooltip field to create filters from field values."
+              />
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      );
     }
 
     return (

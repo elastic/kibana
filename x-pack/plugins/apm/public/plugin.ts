@@ -45,7 +45,7 @@ export interface ApmPluginSetupDeps {
   alerts?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
   observability?: ObservabilityPluginSetup;
@@ -69,8 +69,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
 
-    pluginSetupDeps.home.environment.update({ apmUi: true });
-    pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+    if (pluginSetupDeps.home) {
+      pluginSetupDeps.home.environment.update({ apmUi: true });
+      pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+    }
 
     if (plugins.observability) {
       const getApmDataHelper = async () => {
@@ -143,8 +145,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Error rate',
       }),
       iconClass: 'bell',
-      alertParamsExpression: lazy(() =>
-        import('./components/shared/ErrorRateAlertTrigger')
+      alertParamsExpression: lazy(
+        () => import('./components/shared/ErrorRateAlertTrigger')
       ),
       validate: () => ({
         errors: [],
@@ -158,8 +160,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Transaction duration',
       }),
       iconClass: 'bell',
-      alertParamsExpression: lazy(() =>
-        import('./components/shared/TransactionDurationAlertTrigger')
+      alertParamsExpression: lazy(
+        () => import('./components/shared/TransactionDurationAlertTrigger')
+      ),
+      validate: () => ({
+        errors: [],
+      }),
+      requiresAppContext: true,
+    });
+
+    plugins.triggers_actions_ui.alertTypeRegistry.register({
+      id: AlertType.TransactionDurationAnomaly,
+      name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
+        defaultMessage: 'Transaction duration anomaly',
+      }),
+      iconClass: 'bell',
+      alertParamsExpression: lazy(
+        () =>
+          import('./components/shared/TransactionDurationAnomalyAlertTrigger')
       ),
       validate: () => ({
         errors: [],

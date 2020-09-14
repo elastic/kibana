@@ -1442,7 +1442,7 @@ describe('xy_expression', () => {
       expect(convertSpy).toHaveBeenCalledWith('I');
     });
 
-    test('it should not pass the formatter function to the x axis if the visibility of the tick labels is off', () => {
+    test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
       const { data, args } = sampleArgs();
 
       args.tickLabelsVisibilitySettings = { x: false, y: true, type: 'lens_xy_tickLabelsConfig' };
@@ -1460,15 +1460,94 @@ describe('xy_expression', () => {
         />
       );
 
-      const tickFormatter = instance.find(Axis).first().prop('tickFormat');
+      const axisStyle = instance.find(Axis).first().prop('style');
 
-      if (!tickFormatter) {
-        throw new Error('tickFormatter prop not found');
-      }
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          visible: false,
+        },
+      });
+    });
 
-      tickFormatter('I');
+    test('it should set the tickLabel visibility on the y axis if the tick labels is hidden', () => {
+      const { data, args } = sampleArgs();
 
-      expect(convertSpy).toHaveBeenCalledTimes(0);
+      args.tickLabelsVisibilitySettings = { x: true, y: false, type: 'lens_xy_tickLabelsConfig' };
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const axisStyle = instance.find(Axis).at(1).prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          visible: false,
+        },
+      });
+    });
+
+    test('it should set the tickLabel visibility on the x axis if the tick labels is shown', () => {
+      const { data, args } = sampleArgs();
+
+      args.tickLabelsVisibilitySettings = { x: true, y: true, type: 'lens_xy_tickLabelsConfig' };
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const axisStyle = instance.find(Axis).first().prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          visible: true,
+        },
+      });
+    });
+
+    test('it should set the tickLabel visibility on the y axis if the tick labels is shown', () => {
+      const { data, args } = sampleArgs();
+
+      args.tickLabelsVisibilitySettings = { x: false, y: true, type: 'lens_xy_tickLabelsConfig' };
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const axisStyle = instance.find(Axis).at(1).prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          visible: true,
+        },
+      });
     });
 
     it('calls the color function with the right series layers', () => {
@@ -1831,8 +1910,7 @@ describe('xy_expression', () => {
       expect(component.find(BarSeries).prop('fit')).toEqual(undefined);
       expect(component.find(AreaSeries).at(0).prop('fit')).toEqual({ type: Fit.Carry });
       expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toEqual([]);
-      // stacked area series doesn't get the fit prop
-      expect(component.find(AreaSeries).at(1).prop('fit')).toEqual(undefined);
+      expect(component.find(AreaSeries).at(1).prop('fit')).toEqual({ type: Fit.Carry });
       expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toEqual(['c']);
     });
 
@@ -1896,7 +1974,13 @@ describe('xy_expression', () => {
         />
       );
 
-      expect(component.find(Axis).at(0).prop('title')).toEqual(undefined);
+      const axisStyle = component.find(Axis).first().prop('style');
+
+      expect(axisStyle).toMatchObject({
+        axisTitle: {
+          visible: false,
+        },
+      });
     });
 
     test('it should show the X axis gridlines if the setting is on', () => {
@@ -1917,7 +2001,9 @@ describe('xy_expression', () => {
         />
       );
 
-      expect(component.find(Axis).at(0).prop('showGridLines')).toBeTruthy();
+      expect(component.find(Axis).at(0).prop('gridLine')).toMatchObject({
+        visible: true,
+      });
     });
   });
 });

@@ -291,37 +291,7 @@ describe('singleBulkCreate', () => {
 
   test('filter duplicate rules will return nothing filtered when the two rule ids do not match with each other', () => {
     const filtered = filterDuplicateRules('some id', sampleDocWithAncestors());
-    expect(filtered).toEqual([
-      {
-        _index: 'myFakeSignalIndex',
-        _type: 'doc',
-        _score: 100,
-        _version: 1,
-        _id: 'e1e08ddc-5e37-49ff-a258-5393aa44435a',
-        _source: {
-          someKey: 'someValue',
-          '@timestamp': '2020-04-20T21:27:45+0000',
-          signal: {
-            parent: {
-              rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-              id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
-              type: 'event',
-              index: 'myFakeSignalIndex',
-              depth: 1,
-            },
-            ancestors: [
-              {
-                rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-                id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
-                type: 'event',
-                index: 'myFakeSignalIndex',
-                depth: 1,
-              },
-            ],
-          },
-        },
-      },
-    ]);
+    expect(filtered).toEqual(sampleDocWithAncestors().hits.hits);
   });
 
   test('filters duplicate rules will return empty array when the two rule ids match each other', () => {

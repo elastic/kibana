@@ -12,6 +12,7 @@ import {
   createMockDatasource,
   DatasourceMock,
 } from '../../mocks';
+import { ChildDragDropProvider } from '../../../drag_drop';
 import { EuiFormRow, EuiPopover } from '@elastic/eui';
 import { mount } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -272,6 +273,7 @@ describe('LayerPanel', () => {
 
       expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
     });
+
     it('should close the popover when the active visualization changes', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
@@ -322,6 +324,153 @@ describe('LayerPanel', () => {
       });
       component.update();
       expect(component.find(EuiPopover).prop('isOpen')).toBe(false);
+    });
+  });
+
+  // This test is more like an integration test, since the layer panel owns all
+  // the coordination between drag and drop
+  describe('drag and drop behavior', () => {
+    it('should determine if the datasource supports dropping of a field onto empty dimension', () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      mockDatasource.canHandleDrop.mockReturnValue(true);
+
+      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider dragging={draggingField} setDragging={jest.fn()}>
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dragDropContext: expect.objectContaining({
+            dragging: draggingField,
+          }),
+        })
+      );
+
+      component.find('DragDrop[data-test-subj="lnsGroup"]').first().simulate('drop');
+
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dragDropContext: expect.objectContaining({
+            dragging: draggingField,
+          }),
+        })
+      );
+    });
+
+    it('should allow drag to move between groups', () => {
+      (generateId as jest.Mock).mockReturnValue(`newid`);
+
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: ['a'],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroupA',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: ['b'],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroupB',
+          },
+        ],
+      });
+
+      mockDatasource.canHandleDrop.mockReturnValue(true);
+
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider dragging={draggingOperation} setDragging={jest.fn()}>
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).toHaveBeenCalledTimes(2);
+      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dragDropContext: expect.objectContaining({
+            dragging: draggingOperation,
+          }),
+        })
+      );
+
+      // Simulate drop on the pre-populated dimension
+      component.find('DragDrop[data-test-subj="lnsGroupB"]').at(0).simulate('drop');
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columnId: 'b',
+          dragDropContext: expect.objectContaining({
+            dragging: draggingOperation,
+          }),
+        })
+      );
+
+      // Simulate drop on the empty dimension
+      component.find('DragDrop[data-test-subj="lnsGroupB"]').at(1).simulate('drop');
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columnId: 'newid',
+          dragDropContext: expect.objectContaining({
+            dragging: draggingOperation,
+          }),
+        })
+      );
+    });
+
+    it('should prevent dropping in the same group', () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: ['a', 'b'],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider dragging={draggingOperation} setDragging={jest.fn()}>
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).not.toHaveBeenCalled();
+
+      component.find('DragDrop[data-test-subj="lnsGroup"]').at(0).simulate('drop');
+      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
+
+      component.find('DragDrop[data-test-subj="lnsGroup"]').at(1).simulate('drop');
+      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
+
+      component.find('DragDrop[data-test-subj="lnsGroup"]').at(2).simulate('drop');
+      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
     });
   });
 });

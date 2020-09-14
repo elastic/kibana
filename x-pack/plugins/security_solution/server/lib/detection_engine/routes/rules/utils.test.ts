@@ -22,7 +22,7 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
+import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils';
 import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';

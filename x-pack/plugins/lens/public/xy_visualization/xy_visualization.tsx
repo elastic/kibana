@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
-import { State, PersistableState, SeriesType, visualizationTypes, LayerConfig } from './types';
+import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
 import chartMixedSVG from '../assets/chart_mixed_xy.svg';
 import { isHorizontalChart } from './state_helpers';
@@ -74,7 +74,7 @@ function getDescription(state?: State) {
   };
 }
 
-export const xyVisualization: Visualization<State, PersistableState> = {
+export const xyVisualization: Visualization<State> = {
   id: 'lnsXY',
 
   visualizationTypes,
@@ -158,8 +158,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getConfiguration(props) {
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;

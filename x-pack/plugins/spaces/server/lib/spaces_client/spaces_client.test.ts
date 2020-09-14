@@ -242,6 +242,11 @@ describe('#getAll', () => {
         expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.savedObject.get('config', 'find'),
       },
+      {
+        purpose: 'shareSavedObjectsIntoSpace' as GetSpacePurpose,
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
+          mockAuthorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
+      },
     ].forEach((scenario) => {
       describe(`with purpose='${scenario.purpose}'`, () => {
         test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {

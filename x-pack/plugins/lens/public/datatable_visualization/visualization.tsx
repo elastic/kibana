@@ -25,10 +25,7 @@ function newLayerState(layerId: string): LayerState {
   };
 }
 
-export const datatableVisualization: Visualization<
-  DatatableVisualizationState,
-  DatatableVisualizationState
-> = {
+export const datatableVisualization: Visualization<DatatableVisualizationState> = {
   id: 'lnsDatatable',
 
   visualizationTypes: [
@@ -74,8 +71,6 @@ export const datatableVisualization: Visualization<
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getSuggestions({
     table,
@@ -148,14 +143,28 @@ export const datatableVisualization: Visualization<
       groups: [
         {
           groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.columns', {
-            defaultMessage: 'Columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdown', {
+            defaultMessage: 'Break down by',
           }),
           layerId: state.layers[0].layerId,
-          accessors: sortedColumns,
+          accessors: sortedColumns.filter((c) => datasource.getOperationForColumnId(c)?.isBucketed),
           supportsMoreColumns: true,
-          filterOperations: () => true,
+          filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
+        },
+        {
+          groupId: 'metrics',
+          groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
+            defaultMessage: 'Metrics',
+          }),
+          layerId: state.layers[0].layerId,
+          accessors: sortedColumns.filter(
+            (c) => !datasource.getOperationForColumnId(c)?.isBucketed
+          ),
+          supportsMoreColumns: true,
+          filterOperations: (op) => !op.isBucketed,
+          required: true,
+          dataTestSubj: 'lnsDatatable_metrics',
         },
       ],
     };
@@ -186,9 +195,9 @@ export const datatableVisualization: Visualization<
     };
   },
 
-  toExpression(state, frame): Ast {
+  toExpression(state, datasourceLayers): Ast {
     const layer = state.layers[0];
-    const datasource = frame.datasourceLayers[layer.layerId];
+    const datasource = datasourceLayers[layer.layerId];
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
     const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));

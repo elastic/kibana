@@ -13,6 +13,7 @@ import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
 import { EndpointState } from '../types';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';
@@ -86,6 +87,15 @@ interface ServerReturnedEndpointExistValue {
   payload: boolean;
 }
 
+interface ServerReturnedMetadataPatterns {
+  type: 'serverReturnedMetadataPatterns';
+  payload: IIndexPattern[];
+}
+
+interface ServerFailedToReturnMetadataPatterns {
+  type: 'serverFailedToReturnMetadataPatterns';
+  payload: ServerApiError;
+}
 interface UserUpdatedEndpointListRefreshOptions {
   type: 'userUpdatedEndpointListRefreshOptions';
   payload: {
@@ -112,6 +122,8 @@ export type EndpointAction =
   | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
+  | ServerReturnedMetadataPatterns
+  | ServerFailedToReturnMetadataPatterns
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
   | UserUpdatedEndpointListRefreshOptions;

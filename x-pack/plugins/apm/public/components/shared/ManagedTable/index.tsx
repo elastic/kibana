@@ -6,9 +6,9 @@
 
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
-import React, { useMemo, useCallback, ReactNode } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 // TODO: this should really be imported from EUI
@@ -37,6 +37,7 @@ interface Props<T> {
 }
 
 function UnoptimizedManagedTable<T>(props: Props<T>) {
+  const history = useHistory();
   const {
     items,
     columns,
@@ -92,7 +93,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
         }),
       });
     },
-    []
+    [history]
   );
 
   const paginationProps = useMemo(() => {

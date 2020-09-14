@@ -14,6 +14,11 @@ interface Props {
   editorProps: { [key: string]: any };
 }
 
+const defaultEditorOptions = {
+  minimap: { enabled: false },
+  lineNumbers: 'off',
+};
+
 export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps }) => {
   const { value, setValue } = field;
   const { xJson, setXJson, convertToJson } = Monaco.useXJsonMode(value);
@@ -31,7 +36,7 @@ export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps }) =>
       editorProps={{
         value: xJson,
         languageId: XJsonLang.ID,
-        options: { minimap: { enabled: false } },
+        options: defaultEditorOptions,
         onChange,
         ...editorProps,
       }}

@@ -13,7 +13,6 @@ import qs from 'query-string';
 import {
   EuiButton,
   EuiCallOut,
-  EuiHealth,
   EuiLink,
   EuiCheckbox,
   EuiFlexGroup,
@@ -38,12 +37,11 @@ import {
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { healthToColor } from '../../../../services';
 import { encodePathForReactRouter } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
-import { NoMatch, PageErrorForbidden } from '../../../../components';
+import { NoMatch, PageErrorForbidden, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const HEADERS = {
@@ -260,7 +258,7 @@ export class IndexTable extends Component {
     const { openDetailPanel, filterChanged, history } = this.props;
 
     if (fieldName === 'health') {
-      return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
+      return <DataHealth health={value} />;
     } else if (fieldName === 'name') {
       return (
         <Fragment>

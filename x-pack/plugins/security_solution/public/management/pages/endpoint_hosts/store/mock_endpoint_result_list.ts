@@ -90,7 +90,6 @@ const endpointListApiPathHandlerMocks = ({
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
         response: epmPackages,
-        success: true,
       };
     },
 
@@ -114,7 +113,6 @@ const endpointListApiPathHandlerMocks = ({
       return {
         items: [agentPolicy],
         total: 10,
-        success: true,
         perPage: 10,
         page: 1,
       };
@@ -132,7 +130,6 @@ const endpointListApiPathHandlerMocks = ({
         page: 1,
         perPage: 10,
         total: endpointPackagePolicies?.length,
-        success: true,
       };
     },
   };

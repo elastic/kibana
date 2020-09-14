@@ -70,7 +70,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       timeFieldName: string,
       earliestMs: number,
       latestMs: number,
-      interval: string
+      intervalMs: number
     ): Observable<MetricData> {
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
@@ -136,7 +136,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           byTime: {
             date_histogram: {
               field: timeFieldName,
-              interval,
+              fixed_interval: `${intervalMs}ms`,
               min_doc_count: 0,
             },
           },
@@ -202,7 +202,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       criteriaFields: any[],
       earliestMs: number,
       latestMs: number,
-      interval: string,
+      intervalMs: number,
       aggType?: { min: any; max: any }
     ): Observable<ModelPlotOutput> {
       const obj: ModelPlotOutput = {
@@ -291,7 +291,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
               times: {
                 date_histogram: {
                   field: 'timestamp',
-                  interval,
+                  fixed_interval: `${intervalMs}ms`,
                   min_doc_count: 0,
                 },
                 aggs: {
@@ -446,7 +446,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       jobIds: string[] | undefined,
       earliestMs: number,
       latestMs: number,
-      interval: string,
+      intervalMs: number,
       maxJobs: number,
       maxEvents: number
     ): Observable<ScheduledEventsByBucket> {
@@ -518,7 +518,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
                   times: {
                     date_histogram: {
                       field: 'timestamp',
-                      interval,
+                      fixed_interval: `${intervalMs}ms`,
                       min_doc_count: 1,
                     },
                     aggs: {

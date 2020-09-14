@@ -129,16 +129,13 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <ProcessorsHeader onLoadJson={onLoadJson} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} className="pipelineProcessorsEditor__container">
               <ProcessorsEditor />
-            </EuiFlexItem>
-            <EuiFlexItem>
+
               <EuiSpacer size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+
               <OnFailureProcessorsTitle />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+
               <GlobalOnFailureProcessorsEditor />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -44,7 +44,7 @@ expect.extend({
     const received: T[] = [];
 
     // Set to true if the test passes.
-    let pass: boolean = false;
+    let lastCheckPassed: boolean = false;
 
     // Async iterate over the iterable
     for await (const next of receivedIterable) {
@@ -52,15 +52,17 @@ expect.extend({
       received.push(next);
       // Use deep equals to compare the value to the expected value
       if (this.equals(next, expected)) {
-        // If the value is equal, break
-        pass = true;
+        lastCheckPassed = true;
+      } else if (lastCheckPassed) {
+        // the previous check passed but this one didn't
+        lastCheckPassed = false;
         break;
       }
     }
 
     // Use `pass` as set in the above loop (or initialized to `false`)
     // See https://jestjs.io/docs/en/expect#custom-matchers-api and https://jestjs.io/docs/en/expect#thisutils
-    const message = pass
+    const message = lastCheckPassed
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
@@ -84,7 +86,7 @@ expect.extend({
             )
             .join(`\n\n`)}`;
 
-    return { message, pass };
+    return { message, pass: lastCheckPassed };
   },
   /**
    * A custom matcher that takes an async generator and compares each value it yields to an expected value.

@@ -39,7 +39,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       description: i18n.translate('xpack.painlessLab.registryProviderDescription', {
         defaultMessage: 'Simulate and debug painless code.',
       }),
-      icon: '',
+      icon: 'empty',
       path: '/app/dev_tools#/painless_lab',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,

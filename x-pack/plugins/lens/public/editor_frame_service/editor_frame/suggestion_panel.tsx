@@ -21,6 +21,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
@@ -28,7 +29,7 @@ import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '../../../../../../src/plugins/expressions/public';
-import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
+import { prependDatasourceExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
@@ -108,7 +109,7 @@ const SuggestionPreview = ({
 }: {
   onSelect: () => void;
   preview: {
-    expression?: Ast;
+    expression?: Ast | null;
     icon: IconType;
     title: string;
   };
@@ -213,12 +214,24 @@ export function SuggestionPanel({
     frame.globalPalette.state,
   ]);
 
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: frame.query,
+      timeRange: {
+        from: frame.dateRange.fromDate,
+        to: frame.dateRange.toDate,
+      },
+      filters: frame.filters,
+    }),
+    [frame.query, frame.dateRange.fromDate, frame.dateRange.toDate, frame.filters]
+  );
+
   const AutoRefreshExpressionRenderer = useMemo(() => {
     const autoRefreshFetch$ = plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$();
     return (props: ReactExpressionRendererProps) => (
-      <ExpressionRendererComponent {...props} reload$={autoRefreshFetch$} />
+      <ExpressionRendererComponent {...props} searchContext={context} reload$={autoRefreshFetch$} />
     );
-  }, [plugins.data.query.timefilter.timefilter]);
+  }, [plugins.data.query.timefilter.timefilter, context]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
@@ -249,15 +262,6 @@ export function SuggestionPanel({
       });
     }
   }
-
-  const expressionContext = {
-    query: frame.query,
-    filters: frame.filters,
-    timeRange: {
-      from: frame.dateRange.fromDate,
-      to: frame.dateRange.toDate,
-    },
-  };
 
   return (
     <div className="lnsSuggestionPanel">
@@ -303,9 +307,7 @@ export function SuggestionPanel({
         {currentVisualizationId && (
           <SuggestionPreview
             preview={{
-              expression: currentStateExpression
-                ? prependKibanaContext(currentStateExpression, expressionContext)
-                : undefined,
+              expression: currentStateExpression,
               icon:
                 visualizationMap[currentVisualizationId].getDescription(currentVisualizationState)
                   .icon || 'empty',
@@ -323,9 +325,7 @@ export function SuggestionPanel({
           return (
             <SuggestionPreview
               preview={{
-                expression: suggestion.previewExpression
-                  ? prependKibanaContext(suggestion.previewExpression, expressionContext)
-                  : undefined,
+                expression: suggestion.previewExpression,
                 icon: suggestion.previewIcon,
                 title: suggestion.title,
               }}
@@ -389,7 +389,6 @@ function getPreviewExpression(
       if (updatedLayerApis[layerId]) {
         updatedLayerApis[layerId] = datasource.getPublicAPI({
           layerId,
-          dateRange: frame.dateRange,
           state: datasourceState,
         });
       }
@@ -398,7 +397,7 @@ function getPreviewExpression(
 
   return visualization.toPreviewExpression(
     visualizableState.visualizationState,
-    suggestionFrameApi
+    suggestionFrameApi.datasourceLayers
   );
 }
 

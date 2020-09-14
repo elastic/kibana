@@ -9,7 +9,7 @@
     "charts",
     "expressions",
     "navigation",
-    "kibanaLegacy",
+    "urlForwarding",
     "visualizations",
     "dashboard",
     "charts"

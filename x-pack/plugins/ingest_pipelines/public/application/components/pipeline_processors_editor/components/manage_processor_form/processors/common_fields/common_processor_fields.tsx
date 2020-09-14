@@ -16,11 +16,12 @@ import {
 } from '../../../../../../../shared_imports';
 
 import { TextEditor } from '../../field_components';
+import { to, from, EDITOR_PX_HEIGHT } from '../shared';
 
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,
-  serializer: (v) => (v === false ? undefined : v),
-  deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
+  deserializer: to.booleanOrUndef,
+  serializer: from.undefinedIfValue(false),
   label: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureFieldLabel',
     {
@@ -39,7 +40,7 @@ const ifConfig: FieldConfig = {
     defaultMessage: 'Condition (optional)',
   }),
   helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldHelpText', {
-    defaultMessage: 'Conditionally execute this processor.',
+    defaultMessage: 'Conditionally run this processor.',
   }),
   type: FIELD_TYPES.TEXT,
 };
@@ -49,7 +50,7 @@ const tagConfig: FieldConfig = {
     defaultMessage: 'Tag (optional)',
   }),
   helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldHelpText', {
-    defaultMessage: 'An identifier for this processor. Useful for debugging and metrics.',
+    defaultMessage: 'Identifier for the processor. Useful for debugging and metrics.',
   }),
   type: FIELD_TYPES.TEXT,
 };
@@ -62,9 +63,12 @@ export const CommonProcessorFields: FunctionComponent = () => {
         component={TextEditor}
         componentProps={{
           editorProps: {
-            language: 'painless',
-            height: 75,
-            options: { minimap: { enabled: false } },
+            languageId: 'painless',
+            height: EDITOR_PX_HEIGHT.extraSmall,
+            options: {
+              lineNumbers: 'off',
+              minimap: { enabled: false },
+            },
           },
         }}
         path="fields.if"

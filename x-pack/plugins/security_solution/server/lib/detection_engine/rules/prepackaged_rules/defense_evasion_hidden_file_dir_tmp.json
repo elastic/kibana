@@ -6,6 +6,7 @@
   "false_positives": [
     "Certain tools may create hidden temporary files or directories upon installation or as part of their normal behavior. These events can be filtered by the process arguments, username, or process name values."
   ],
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -55,5 +56,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

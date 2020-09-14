@@ -57,7 +57,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     }
   }, [license, serviceName, urlParams]);
 
-  const { ref, height, width } = useRefDimensions();
+  const { ref, height } = useRefDimensions();
 
   useTrackPageview({ app: 'apm', path: 'service_map' });
   useTrackPageview({ app: 'apm', path: 'service_map', delay: 15000 });
@@ -78,7 +78,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         height={height}
         serviceName={serviceName}
         style={getCytoscapeDivStyle(theme)}
-        width={width}
       >
         <Controls />
         <BetaBadge />

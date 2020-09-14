@@ -33,6 +33,12 @@ export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
+export const API_ROOT_PATH = `/${GIS_API_PATH}`;
+
+export const MVT_GETTILE_API_PATH = 'mvt/getTile';
+export const MVT_SOURCE_LAYER_NAME = 'source_layer';
+export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
+export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
@@ -220,6 +226,7 @@ export enum SCALING_TYPES {
   LIMIT = 'LIMIT',
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
+  MVT = 'MVT',
 }
 
 export const RGBA_0000 = 'rgba(0,0,0,0)';

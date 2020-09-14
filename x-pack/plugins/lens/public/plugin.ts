@@ -10,7 +10,8 @@ import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public'
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
+import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
+import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -35,7 +36,7 @@ import { getLensAliasConfig } from './vis_type_alias';
 import './index.scss';
 
 export interface LensPluginSetupDependencies {
-  kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
@@ -72,7 +73,7 @@ export class LensPlugin {
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
     {
-      kibanaLegacy,
+      urlForwarding,
       expressions,
       data,
       embeddable,
@@ -117,7 +118,7 @@ export class LensPlugin {
       },
     });
 
-    kibanaLegacy.forwardApp('lens', 'lens');
+    urlForwarding.forwardApp('lens', 'lens');
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {

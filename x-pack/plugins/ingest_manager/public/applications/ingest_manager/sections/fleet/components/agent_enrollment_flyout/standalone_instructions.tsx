@@ -15,12 +15,13 @@ import {
   EuiFlexGroup,
   EuiCodeBlock,
   EuiCopy,
+  EuiLink,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentPolicy } from '../../../../types';
-import { useCore, sendGetOneAgentPolicyFull } from '../../../../hooks';
+import { useCore, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
 import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
 
@@ -31,6 +32,7 @@ interface Props {
 const RUN_INSTRUCTIONS = './elastic-agent run';
 
 export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPolicies }) => {
+  const { getHref } = useLink();
   const core = useCore();
   const { notifications } = core;
 
@@ -157,7 +159,17 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepCheckForDataDescription"
-              defaultMessage="The agent should begin sending data. Go to Datasets to view your data."
+              defaultMessage="The agent should begin sending data. Go to {link} to view your data."
+              values={{
+                link: (
+                  <EuiLink href={getHref('data_streams')}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.agentEnrollment.goToDataStreamsLink"
+                      defaultMessage="data streams"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           </EuiText>
         </>

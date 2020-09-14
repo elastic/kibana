@@ -26,19 +26,4 @@ export interface RouteDependencies {
   };
 }
 
-export interface Index {
-  health: string;
-  status: string;
-  name: string;
-  uuid: string;
-  primary: string;
-  replica: string;
-  documents: any;
-  size: any;
-  isFrozen: boolean;
-  aliases: string | string[];
-  data_stream?: string;
-  [key: string]: any;
-}
-
 export type CallAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];

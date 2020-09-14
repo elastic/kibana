@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 import { FormDataProvider } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
@@ -32,11 +32,23 @@ export const ProcessorSettingsFields: FunctionComponent<Props> = ({ processor })
           if (type?.length) {
             const formDescriptor = getProcessorDescriptor(type as any);
 
-            if (formDescriptor?.FieldsComponent) {
+            if (formDescriptor) {
+              const renderedFields = formDescriptor.FieldsComponent ? (
+                <formDescriptor.FieldsComponent
+                  key={type}
+                  initialFieldValues={processor?.options}
+                />
+              ) : null;
               return (
                 <>
-                  <formDescriptor.FieldsComponent />
-                  <EuiSpacer size="m" />
+                  {renderedFields ? (
+                    <>
+                      {renderedFields}
+                      <EuiHorizontalRule />
+                    </>
+                  ) : (
+                    renderedFields
+                  )}
                   <CommonProcessorFields />
                 </>
               );

@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { inputsModel } from '../../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
@@ -44,6 +45,7 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
+  refetch: inputsModel.Refetch;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -71,6 +73,7 @@ const EventsComponent: React.FC<Props> = ({
   onUpdateColumns,
   onUnPinEvent,
   pinnedEventIds,
+  refetch,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
@@ -78,7 +81,7 @@ const EventsComponent: React.FC<Props> = ({
   updateNote,
 }) => (
   <EventsTbody data-test-subj="events">
-    {data.map((event, i) => (
+    {data.map((event) => (
       <StatefulEvent
         actionsColumnWidth={actionsColumnWidth}
         addNoteToEvent={addNoteToEvent}
@@ -100,6 +103,7 @@ const EventsComponent: React.FC<Props> = ({
         onRowSelected={onRowSelected}
         onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}
+        refetch={refetch}
         rowRenderers={rowRenderers}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}

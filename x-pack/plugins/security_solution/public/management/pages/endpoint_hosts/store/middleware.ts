@@ -15,6 +15,8 @@ import {
   listData,
   endpointPackageInfo,
   nonExistingPolicies,
+  patterns,
+  searchBarQuery,
 } from './selectors';
 import { EndpointState } from '../types';
 import {
@@ -23,8 +25,24 @@ import {
   sendGetAgentPolicyList,
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
+import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 
-export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
+export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
+  coreStart,
+  depsStart
+) => {
+  async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
+    const { indexPatterns } = depsStart.data;
+    const fields = await indexPatterns.getFieldsForWildcard({
+      pattern: metadataCurrentIndexPattern,
+    });
+    const indexPattern: IIndexPattern = {
+      title: metadataCurrentIndexPattern,
+      fields,
+    };
+    return [indexPattern];
+  }
   // eslint-disable-next-line complexity
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
@@ -52,10 +70,31 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
+      // get index pattern and fields for search bar
+      if (patterns(getState()).length === 0) {
+        try {
+          const indexPatterns = await fetchIndexPatterns();
+          if (indexPatterns !== undefined) {
+            dispatch({
+              type: 'serverReturnedMetadataPatterns',
+              payload: indexPatterns,
+            });
+          }
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnMetadataPatterns',
+            payload: error,
+          });
+        }
+      }
+
       try {
+        const decodedQuery: Query = searchBarQuery(getState());
+
         endpointResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+            filters: { kql: decodedQuery.query },
           }),
         });
         endpointResponse.request_page_index = Number(pageIndex);

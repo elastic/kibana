@@ -32,6 +32,7 @@ import { PluginsSystem } from './plugins_system';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
 import { pick } from '../../utils';
+import { InternalEnvironmentServiceSetup } from '../environment';
 
 /** @internal */
 export interface PluginsServiceSetup {
@@ -73,6 +74,11 @@ export type PluginsServiceSetupDeps = InternalCoreSetup;
 export type PluginsServiceStartDeps = InternalCoreStart;
 
 /** @internal */
+export interface PluginsServiceDiscoverDeps {
+  environment: InternalEnvironmentServiceSetup;
+}
+
+/** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
@@ -90,12 +96,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
   }
 
-  public async discover() {
+  public async discover({ environment }: PluginsServiceDiscoverDeps) {
     this.log.debug('Discovering plugins');
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const { error$, plugin$ } = discover(config, this.coreContext);
+    const { error$, plugin$ } = discover(config, this.coreContext, {
+      uuid: environment.instanceUuid,
+    });
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 

@@ -122,7 +122,7 @@ async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promi
   });
   const obj: PostAgentEnrollResponse = await res.json();
 
-  if (!obj.success) {
+  if (!res.ok) {
     log.error(JSON.stringify(obj, null, 2));
     throw new Error('unable to enroll');
   }

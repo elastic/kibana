@@ -28,6 +28,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
+|  [SavedObjectsUtils](./kibana-plugin-core-server.savedobjectsutils.md) |  |
 |  [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) | Registry holding information about all the registered [saved object types](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->. |
 
 ## Enumerations
@@ -45,10 +46,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [deepFreeze(object)](./kibana-plugin-core-server.deepfreeze.md) | Apply Object.freeze to a value recursively and convert the return type to Readonly variant recursively |
 |  [exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-core-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-core-server.savedobjectsexportoptions.md) for more detailed information. |
 |  [getFlattenedObject(rootValue)](./kibana-plugin-core-server.getflattenedobject.md) | Flattens a deeply nested object to a map of dot-separated paths pointing to all primitive values \*\*and arrays\*\* from <code>rootValue</code>.<!-- -->example: getFlattenedObject(<!-- -->{ a: { b: 1, c: \[2,3\] } }<!-- -->) // =<!-- -->&gt; { 'a.b': 1, 'a.c': \[2,3\] } |
-|  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-core-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
+|  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, })](./kibana-plugin-core-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
 |  [isRelativeUrl(candidatePath)](./kibana-plugin-core-server.isrelativeurl.md) | Determine if a url is relative. Any url including a protocol, hostname, or port is not considered relative. This means that absolute \*paths\* are considered to be relative \*urls\* |
 |  [modifyUrl(url, urlModifier)](./kibana-plugin-core-server.modifyurl.md) | Takes a URL and a function that takes the meaningful parts of the URL as a key-value object, modifies some or all of the parts, and returns the modified parts formatted again as a url.<!-- -->Url Parts sent: - protocol - slashes (does the url have the //) - auth - hostname (just the name of the host, no port or auth information) - port - pathname (the path after the hostname, no query or hash, starts with a slash if there was a path) - query (always an object, even when no query on original url) - hash<!-- -->Why? - The default url library in node produces several conflicting properties on the "parsed" output. Modifying any of these might lead to the modifications being ignored (depending on which property was modified) - It's not always clear whether to use path/pathname, host/hostname, so this tries to add helpful constraints |
-|  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-core-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
+|  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, })](./kibana-plugin-core-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
 
 ## Interfaces
 
@@ -123,7 +124,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LoggerFactory](./kibana-plugin-core-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) | Provides APIs to plugins for customizing the plugin's logger. |
 |  [LogMeta](./kibana-plugin-core-server.logmeta.md) | Contextual metadata |
-|  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) |  |
+|  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [NodesVersionCompatibility](./kibana-plugin-core-server.nodesversioncompatibility.md) |  |
 |  [OnPostAuthToolkit](./kibana-plugin-core-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
@@ -161,6 +162,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-server.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-server.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsBulkUpdateResponse](./kibana-plugin-core-server.savedobjectsbulkupdateresponse.md) |  |
+|  [SavedObjectsCheckConflictsObject](./kibana-plugin-core-server.savedobjectscheckconflictsobject.md) |  |
+|  [SavedObjectsCheckConflictsResponse](./kibana-plugin-core-server.savedobjectscheckconflictsresponse.md) |  |
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-core-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-core-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
 |  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
@@ -175,12 +178,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsFindOptions](./kibana-plugin-core-server.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponse](./kibana-plugin-core-server.savedobjectsfindresponse.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
 |  [SavedObjectsFindResult](./kibana-plugin-core-server.savedobjectsfindresult.md) |  |
+|  [SavedObjectsImportAmbiguousConflictError](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.md) | Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite. |
 |  [SavedObjectsImportConflictError](./kibana-plugin-core-server.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |
 |  [SavedObjectsImportError](./kibana-plugin-core-server.savedobjectsimporterror.md) | Represents a failure to import. |
 |  [SavedObjectsImportMissingReferencesError](./kibana-plugin-core-server.savedobjectsimportmissingreferenceserror.md) | Represents a failure to import due to missing references. |
 |  [SavedObjectsImportOptions](./kibana-plugin-core-server.savedobjectsimportoptions.md) | Options to control the import operation. |
 |  [SavedObjectsImportResponse](./kibana-plugin-core-server.savedobjectsimportresponse.md) | The response describing the result of an import. |
 |  [SavedObjectsImportRetry](./kibana-plugin-core-server.savedobjectsimportretry.md) | Describes a retry operation for importing a saved object. |
+|  [SavedObjectsImportSuccess](./kibana-plugin-core-server.savedobjectsimportsuccess.md) | Represents a successful import. |
 |  [SavedObjectsImportUnknownError](./kibana-plugin-core-server.savedobjectsimportunknownerror.md) | Represents a failure to import due to an unknown reason. |
 |  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-core-server.savedobjectsimportunsupportedtypeerror.md) | Represents a failure to import due to having an unsupported saved object type. |
 |  [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |  |
@@ -214,7 +219,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
 |  [URLMeaningfulParts](./kibana-plugin-core-server.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
-|  [UuidServiceSetup](./kibana-plugin-core-server.uuidservicesetup.md) | APIs to access the application's instance uuid. |
 
 ## Variables
 
@@ -302,7 +306,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientFactoryProvider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) | Provider to invoke to retrieve a [SavedObjectsClientFactory](./kibana-plugin-core-server.savedobjectsclientfactory.md)<!-- -->. |
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
 |  [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) | Describe a [saved object type mapping](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) field.<!-- -->Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html) For the mapping documentation |
-|  [SavedObjectsNamespaceType](./kibana-plugin-core-server.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces. \* agnostic: this type of saved object is global.<!-- -->Note: do not write logic that uses this value directly; instead, use the appropriate accessors in the [type registry](./kibana-plugin-core-server.savedobjecttyperegistry.md)<!-- -->. |
+|  [SavedObjectsNamespaceType](./kibana-plugin-core-server.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces. \* agnostic: this type of saved object is global. |
 |  [SavedObjectUnsanitizedDoc](./kibana-plugin-core-server.savedobjectunsanitizeddoc.md) | Describes Saved Object documents from Kibana &lt; 7.0.0 which don't have a <code>references</code> root property defined. This type should only be used in migrations. |
 |  [ScopeableRequest](./kibana-plugin-core-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->. |
 |  [ServiceStatusLevel](./kibana-plugin-core-server.servicestatuslevel.md) | A convenience type that represents the union of each value in [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md)<!-- -->. |

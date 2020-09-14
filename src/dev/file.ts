@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { dirname, extname, join, relative, resolve, sep } from 'path';
+import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
 
 export class File {
   private path: string;
@@ -36,6 +36,12 @@ export class File {
 
   public getRelativePath() {
     return this.relativePath;
+  }
+
+  public getWithoutExtension() {
+    const directory = dirname(this.path);
+    const stem = basename(this.path, this.ext);
+    return new File(resolve(directory, stem));
   }
 
   public isJs() {

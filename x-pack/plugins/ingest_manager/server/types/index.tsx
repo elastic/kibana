@@ -16,7 +16,10 @@ export {
   AgentEvent,
   AgentEventSOAttributes,
   AgentAction,
+  AgentPolicyAction,
+  BaseAgentActionSOAttributes,
   AgentActionSOAttributes,
+  AgentPolicyActionSOAttributes,
   PackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
@@ -37,6 +40,7 @@ export {
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
   Installation,
+  EpmPackageInstallStatus,
   InstallationStatus,
   PackageInfo,
   RegistryVarsEntry,
@@ -62,6 +66,10 @@ export {
   IndexTemplateMappings,
   Settings,
   SettingsSOAttributes,
+  InstallType,
+  // Agent Request types
+  PostAgentEnrollRequest,
+  PostAgentCheckinRequest,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];

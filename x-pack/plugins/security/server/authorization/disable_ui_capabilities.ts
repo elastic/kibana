@@ -5,7 +5,7 @@
  */
 
 import { flatten, isObject, mapValues } from 'lodash';
-import { UICapabilities } from 'ui/capabilities';
+import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { Feature } from '../../../features/server';
 

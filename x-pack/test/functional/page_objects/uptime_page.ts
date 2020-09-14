@@ -39,6 +39,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       if (monitorIdToCheck) {
         await commonService.monitorIdExists(monitorIdToCheck);
       }
+      await pageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {

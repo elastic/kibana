@@ -13,7 +13,6 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
       '@elastic/eui/lib/(.*)?': `${kibanaDirectory}/node_modules/@elastic/eui/test-env/$1`,
-      '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
       '^fixtures/(.*)': `${kibanaDirectory}/src/fixtures/$1`,
       'uiExports/(.*)': fileMockPath,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
@@ -58,7 +57,6 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       `${xPackKibanaDirectory}/dev-tools/jest/setup/setup_test.js`,
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
-      `${kibanaDirectory}/src/dev/jest/setup/default_timeout.js`,
     ],
     testEnvironment: 'jest-environment-jsdom-thirteen',
     testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
