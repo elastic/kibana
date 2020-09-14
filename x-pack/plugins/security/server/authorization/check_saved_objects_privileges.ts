@@ -14,8 +14,12 @@ export type CheckSavedObjectsPrivilegesWithRequest = (
 
 export type CheckSavedObjectsPrivileges = (
   actions: string | string[],
-  namespaceOrNamespaces?: string | string[]
+  namespaceOrNamespaces?: string | Array<undefined | string>
 ) => Promise<CheckPrivilegesResponse>;
+
+function uniq<T>(arr: T[]): T[] {
+  return Array.from(new Set<T>(arr));
+}
 
 export const checkSavedObjectsPrivilegesWithRequestFactory = (
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
@@ -26,7 +30,7 @@ export const checkSavedObjectsPrivilegesWithRequestFactory = (
   ): CheckSavedObjectsPrivileges {
     return async function checkSavedObjectsPrivileges(
       actions: string | string[],
-      namespaceOrNamespaces?: string | string[]
+      namespaceOrNamespaces?: string | Array<undefined | string>
     ) {
       const spacesService = getSpacesService();
       if (!spacesService) {
@@ -37,7 +41,10 @@ export const checkSavedObjectsPrivilegesWithRequestFactory = (
         if (!namespaceOrNamespaces.length) {
           throw new Error(`Can't check saved object privileges for 0 namespaces`);
         }
-        const spaceIds = namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x));
+        const spaceIds = uniq(
+          namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x))
+        );
+
         return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, actions);
       } else {
         // Spaces enabled, authorizing against a single space
