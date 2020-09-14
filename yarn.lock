@@ -4120,7 +4120,7 @@
     "@types/node" "*"
     "@types/webpack" "*"
 
-"@types/lodash@^4.14.116", "@types/lodash@^4.14.159":
+"@types/lodash@^4.14.159":
   version "4.14.159"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.159.tgz#61089719dc6fdd9c5cb46efc827f2571d1517065"
   integrity sha512-gF7A72f7WQN33DpqOWw9geApQPh4M3PxluMtaHxWHXEGSN12/WbcEk/eNSqWNQcQhF66VSZ06vCF94CrHwXJDg==
