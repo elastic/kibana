@@ -1,0 +1,68 @@
+{
+  "post": {
+    "summary": "Fleet - Agent - Enroll",
+    "tags": [],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "item": {
+                  "$ref": "../../../../components/schemas/Agent.json"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "operationId": "post-fleet-agents-enroll",
+    "parameters": [
+      {
+        "$ref": "../../../../components/parameters/xsrfHeader.json"
+      }
+    ],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["PERMANENT", "EPHEMERAL", "TEMPORARY"]
+              },
+              "shared_id": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "required": ["local", "user_provided"],
+                "properties": {
+                  "local": {
+                    "$ref": "../../../../components/schemas/AgentMetadata.json"
+                  },
+                  "user_provided": {
+                    "$ref": "../../../../components/schemas/AgentMetadata.json"
+                  }
+                }
+              }
+            },
+            "required": ["type", "metadata"]
+          }
+        }
+      }
+    },
+    "security": [
+      {
+        "Enrollment_API_Key": []
+      }
+    ]
+  }
+}

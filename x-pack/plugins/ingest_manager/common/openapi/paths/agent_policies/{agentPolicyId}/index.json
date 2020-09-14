@@ -1,0 +1,74 @@
+{
+  "parameters": [
+    {
+      "schema": {
+        "type": "string"
+      },
+      "name": "agentPolicyId",
+      "in": "path",
+      "required": true
+    }
+  ],
+  "get": {
+    "summary": "Agent policy - Info",
+    "tags": [],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "$ref": "../../../components/schemas/AgentPolicy.json"
+                }
+              },
+              "required": ["item"]
+            }
+          }
+        }
+      }
+    },
+    "operationId": "agent-policy-info",
+    "description": "Get one agent policy",
+    "parameters": []
+  },
+  "put": {
+    "summary": "Agent policy - Update",
+    "tags": [],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "$ref": "../../../components/schemas/AgentPolicy.json"
+                }
+              },
+              "required": ["item"]
+            }
+          }
+        }
+      }
+    },
+    "operationId": "put-agent-policy-agentPolicyId",
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "../../../components/schemas/NewAgentPolicy.json"
+          }
+        }
+      }
+    },
+    "parameters": [
+      {
+        "$ref": "../../../components/parameters/xsrfHeader.json"
+      }
+    ]
+  }
+}

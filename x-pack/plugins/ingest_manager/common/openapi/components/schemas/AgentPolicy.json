@@ -1,0 +1,48 @@
+{
+  "allOf": [
+    {
+      "$ref": "./NewAgentPolicy.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive"]
+        },
+        "packagePolicies": {
+          "oneOf": [
+            {
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "items": {
+                "$ref": "./PackagePolicy.json"
+              }
+            }
+          ],
+          "type": "array"
+        },
+        "updated_on": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_by": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "number"
+        },
+        "agents": {
+          "type": "number"
+        }
+      },
+      "required": ["id", "status"]
+    }
+  ]
+}

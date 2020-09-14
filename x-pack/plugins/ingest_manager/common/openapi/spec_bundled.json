@@ -1,0 +1,2576 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Ingest Manager",
+    "version": "0.2",
+    "contact": {
+      "name": "Ingest Team"
+    },
+    "license": {
+      "name": "Elastic"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5601/api/ingest_manager",
+      "description": "local"
+    }
+  ],
+  "paths": {
+    "/agent_policies": {
+      "get": {
+        "summary": "Agent policy - List",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/AgentPolicy/allOf/0"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "active",
+                                  "inactive"
+                                ]
+                              },
+                              "packagePolicies": {
+                                "oneOf": [
+                                  {
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  {
+                                    "items": {
+                                      "$ref": "#/components/schemas/AgentPolicy/allOf/1/properties/packagePolicies/oneOf/1/items"
+                                    }
+                                  }
+                                ],
+                                "type": "array"
+                              },
+                              "updated_on": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updated_by": {
+                                "type": "string"
+                              },
+                              "revision": {
+                                "type": "number"
+                              },
+                              "agents": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "status"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "perPage"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agent-policy-list",
+        "parameters": [
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "The number of items to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "kuery",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "description": ""
+      },
+      "post": {
+        "summary": "Agent policy - Create",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/paths/~1agent_policies/get/responses/200/content/application~1json/schema/properties/items/items"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-agent-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentPolicy/allOf/0"
+              }
+            }
+          }
+        },
+        "security": [
+
+        ],
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/agent_policies/{agentPolicyId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentPolicyId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Agent policy - Info",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/paths/~1agent_policies/get/responses/200/content/application~1json/schema/properties/items/items"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agent-policy-info",
+        "description": "Get one agent policy",
+        "parameters": [
+
+        ]
+      },
+      "put": {
+        "summary": "Agent policy - Update",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/paths/~1agent_policies/get/responses/200/content/application~1json/schema/properties/items/items"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "put-agent-policy-agentPolicyId",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentPolicy/allOf/0"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/agent_policies/{agentPolicyId}/copy": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentPolicyId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent policy - copy one policy",
+        "operationId": "agent-policy-copy",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/paths/~1agent_policies/get/responses/200/content/application~1json/schema/properties/items/items"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          },
+          "description": ""
+        },
+        "description": "Copies one agent policy"
+      }
+    },
+    "/agent_policies/delete": {
+      "post": {
+        "summary": "Agent policy - Delete",
+        "operationId": "post-agent-policy-delete",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "success": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "success"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agentPolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      },
+      "parameters": [
+
+      ]
+    },
+    "/package_policies": {
+      "get": {
+        "summary": "PackagePolicies - List",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AgentPolicy/allOf/1/properties/packagePolicies/oneOf/1/items"
+                      }
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-packagePolicies",
+        "security": [
+
+        ],
+        "parameters": [
+
+        ]
+      },
+      "parameters": [
+
+      ],
+      "post": {
+        "summary": "PackagePolicies - Create",
+        "operationId": "post-packagePolicies",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PackagePolicy/allOf/1"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/package_policies/{packagePolicyId}": {
+      "get": {
+        "summary": "PackagePolicies - Info",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/AgentPolicy/allOf/1/properties/packagePolicies/oneOf/1/items"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-packagePolicies-packagePolicyId"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "packagePolicyId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "put": {
+        "summary": "PackagePolicies - Update",
+        "operationId": "put-packagePolicies-packagePolicyId",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/AgentPolicy/allOf/1/properties/packagePolicies/oneOf/1/items"
+                    },
+                    "sucess": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "item",
+                    "sucess"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/fleet/setup": {
+      "get": {
+        "summary": "Fleet setup - Info",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isInitialized": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "isInitialized"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-fleet-setup",
+        "security": [
+          {
+            "basicAuth": [
+
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Fleet setup - Create",
+        "operationId": "post-fleet-setup",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isInitialized": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "isInitialized"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "admin_username": {
+                    "type": "string"
+                  },
+                  "admin_password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "admin_username",
+                  "admin_password"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/epm/packages/{pkgkey}": {
+      "get": {
+        "summary": "EPM - Packages - Info",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "properties": {
+                        "response": {
+                          "title": "PackageInfo",
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "version": {
+                              "type": "string"
+                            },
+                            "readme": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "categories": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "requirement": {
+                              "oneOf": [
+                                {
+                                  "properties": {
+                                    "kibana": {
+                                      "type": "object",
+                                      "properties": {
+                                        "versions": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "properties": {
+                                    "elasticsearch": {
+                                      "type": "object",
+                                      "properties": {
+                                        "versions": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              ],
+                              "type": "object"
+                            },
+                            "screenshots": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "src": {
+                                    "type": "string"
+                                  },
+                                  "path": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  },
+                                  "size": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "src",
+                                  "path"
+                                ]
+                              }
+                            },
+                            "icons": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "assets": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "internal": {
+                              "type": "boolean"
+                            },
+                            "format_version": {
+                              "type": "string"
+                            },
+                            "datasets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "title": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "release": {
+                                    "type": "string"
+                                  },
+                                  "ingeset_pipeline": {
+                                    "type": "string"
+                                  },
+                                  "vars": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "default": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "name",
+                                        "default"
+                                      ]
+                                    }
+                                  },
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "package": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "title",
+                                  "name",
+                                  "release",
+                                  "ingeset_pipeline",
+                                  "type",
+                                  "package"
+                                ]
+                              }
+                            },
+                            "download": {
+                              "type": "string"
+                            },
+                            "path": {
+                              "type": "string"
+                            },
+                            "removable": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "title",
+                            "version",
+                            "description",
+                            "type",
+                            "categories",
+                            "requirement",
+                            "assets",
+                            "format_version",
+                            "download",
+                            "path"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "installed",
+                            "not_installed"
+                          ]
+                        },
+                        "savedObject": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "savedObject"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-epm-package-pkgkey",
+        "security": [
+          {
+            "basicAuth": [
+
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgkey",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "EPM - Packages - Install",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "response"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-epm-install-pkgkey",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "EPM - Packages - Delete",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "response"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-epm-delete-pkgkey",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/epm/packages": {
+      "get": {
+        "summary": "EPM - Packages - List",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "title": "SearchResult",
+                    "type": "object",
+                    "properties": {
+                      "description": {
+                        "type": "string"
+                      },
+                      "download": {
+                        "type": "string"
+                      },
+                      "icons": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "path": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "savedObject": {
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "description",
+                      "download",
+                      "icons",
+                      "name",
+                      "path",
+                      "title",
+                      "type",
+                      "version",
+                      "status"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-epm-list"
+      },
+      "parameters": [
+
+      ]
+    },
+    "/epm/categories": {
+      "get": {
+        "summary": "EPM - Categories",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "count": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title",
+                      "count"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-epm-categories"
+      }
+    },
+    "/fleet/agents": {
+      "get": {
+        "summary": "Fleet - Agent - List",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "list",
+                    "total",
+                    "page",
+                    "perPage"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-fleet-agents",
+        "security": [
+          {
+            "basicAuth": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/fleet/agents/{agentId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Fleet - Agent - Info",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-fleet-agents-agentId"
+      },
+      "put": {
+        "summary": "Fleet - Agent - Update",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "put-fleet-agents-agentId",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Fleet - Agent - Delete",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "delete-fleet-agents-agentId",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/fleet/agents/{agentId}/events": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Fleet - Agent - Events",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "get-fleet-agents-agentId-events"
+      }
+    },
+    "/fleet/agents/{agentId}/checkin": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Fleet - Agent - Check In",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "checkin"
+                      ]
+                    },
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agent_id": {
+                            "type": "string"
+                          },
+                          "data": {
+                            "type": "object"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "agent_id",
+                          "data",
+                          "id",
+                          "created_at",
+                          "type"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-fleet-agents-agentId-checkin",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ],
+        "security": [
+          {
+            "Access_API_Key": [
+
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "local_metadata": {
+                    "$ref": "#/components/schemas/Agent/properties/user_provided_metadata"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AgentEvent/allOf/1"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fleet/agents/{agentId}/acks": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Fleet - Agent - Acks",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "acks"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-fleet-agents-agentId-acks",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fleet/agents/{agentId}/unenroll": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Fleet - Agent - Unenroll",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "post-fleet-agents-unenroll",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fleet/agents/enroll": {
+      "post": {
+        "summary": "Fleet - Agent - Enroll",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string"
+                    },
+                    "item": {
+                      "title": "Agent",
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "$ref": "#/components/schemas/Agent/properties/type"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "enrolled_at": {
+                          "type": "string"
+                        },
+                        "unenrolled_at": {
+                          "type": "string"
+                        },
+                        "unenrollment_started_at": {
+                          "type": "string"
+                        },
+                        "shared_id": {
+                          "type": "string"
+                        },
+                        "access_api_key_id": {
+                          "type": "string"
+                        },
+                        "default_api_key_id": {
+                          "type": "string"
+                        },
+                        "policy_id": {
+                          "type": "string"
+                        },
+                        "policy_revision": {
+                          "type": "number",
+                          "nullable": true
+                        },
+                        "last_checkin": {
+                          "type": "string"
+                        },
+                        "user_provided_metadata": {
+                          "$ref": "#/components/schemas/Agent/properties/user_provided_metadata"
+                        },
+                        "local_metadata": {
+                          "$ref": "#/components/schemas/Agent/properties/user_provided_metadata"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "current_error_events": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Agent/properties/current_error_events/items"
+                          }
+                        },
+                        "access_api_key": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "$ref": "#/components/schemas/Agent/properties/status"
+                        },
+                        "default_api_key": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "active",
+                        "enrolled_at",
+                        "id",
+                        "current_error_events",
+                        "status"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-fleet-agents-enroll",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "PERMANENT",
+                      "EPHEMERAL",
+                      "TEMPORARY"
+                    ]
+                  },
+                  "shared_id": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "required": [
+                      "local",
+                      "user_provided"
+                    ],
+                    "properties": {
+                      "local": {
+                        "$ref": "#/components/schemas/Agent/properties/user_provided_metadata"
+                      },
+                      "user_provided": {
+                        "$ref": "#/components/schemas/Agent/properties/user_provided_metadata"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "metadata"
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Enrollment_API_Key": [
+
+            ]
+          }
+        ]
+      }
+    },
+    "/fleet/agent-status": {
+      "get": {
+        "summary": "Fleet - Agent - Status for policy",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "get-fleet-agent-status",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "policyId",
+            "in": "query",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/fleet/enrollment-api-keys": {
+      "get": {
+        "summary": "Enrollment - List",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "get-fleet-enrollment-api-keys",
+        "parameters": [
+
+        ]
+      },
+      "post": {
+        "summary": "Enrollment - Create",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "post-fleet-enrollment-api-keys",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/fleet/enrollment-api-keys/{keyId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "keyId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Enrollment - Info",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "get-fleet-enrollment-api-keys-keyId"
+      },
+      "delete": {
+        "summary": "Enrollment - Delete",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "delete-fleet-enrollment-api-keys-keyId",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/setup": {
+      "post": {
+        "summary": "Ingest Manager - Setup",
+        "tags": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isInitialized": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-setup",
+        "parameters": [
+          {
+            "$ref": "#/paths/~1fleet~1agents~1%7BagentId%7D/put/parameters/0"
+          }
+        ]
+      }
+    },
+    "/fleet/install/{osType}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "osType",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Fleet - Get OS install script",
+        "tags": [
+
+        ],
+        "responses": {
+        },
+        "operationId": "get-fleet-install-osType"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgentPolicy": {
+        "allOf": [
+          {
+            "title": "NewAgentPolicy",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "namespace": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "inactive"
+                ]
+              },
+              "packagePolicies": {
+                "oneOf": [
+                  {
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "items": {
+                      "title": "PackagePolicy",
+                      "allOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "revision": {
+                              "type": "number"
+                            },
+                            "inputs": {
+                              "type": "array",
+                              "items": {
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "revision"
+                          ]
+                        },
+                        {
+                          "$ref": "#/components/schemas/PackagePolicy/allOf/1"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "type": "array"
+              },
+              "updated_on": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_by": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "agents": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "status"
+            ]
+          }
+        ]
+      },
+      "PackagePolicy": {
+        "title": "PackagePolicy",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "inputs": {
+                "type": "array",
+                "items": {
+                }
+              }
+            },
+            "required": [
+              "id",
+              "revision"
+            ]
+          },
+          {
+            "title": "NewPackagePolicy",
+            "type": "object",
+            "description": "",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "package": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "version",
+                  "title"
+                ]
+              },
+              "namespace": {
+                "type": "string"
+              },
+              "output_id": {
+                "type": "string"
+              },
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "processors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "streams": {
+                      "type": "array",
+                      "items": {
+                      }
+                    },
+                    "config": {
+                      "type": "object"
+                    },
+                    "vars": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "enabled",
+                    "streams"
+                  ]
+                }
+              },
+              "policy_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "output_id",
+              "inputs",
+              "policy_id",
+              "name"
+            ]
+          }
+        ]
+      },
+      "NewAgentPolicy": {
+        "title": "NewAgentPolicy",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "NewPackagePolicy": {
+        "title": "NewPackagePolicy",
+        "type": "object",
+        "description": "",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "package": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "version",
+              "title"
+            ]
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "output_id": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "processors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "streams": {
+                  "type": "array",
+                  "items": {
+                  }
+                },
+                "config": {
+                  "type": "object"
+                },
+                "vars": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "type",
+                "enabled",
+                "streams"
+              ]
+            }
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "output_id",
+          "inputs",
+          "policy_id",
+          "name"
+        ]
+      },
+      "PackageInfo": {
+        "title": "PackageInfo",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "readme": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requirement": {
+            "oneOf": [
+              {
+                "properties": {
+                  "kibana": {
+                    "type": "object",
+                    "properties": {
+                      "versions": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "elasticsearch": {
+                    "type": "object",
+                    "properties": {
+                      "versions": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "screenshots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "src": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "src",
+                "path"
+              ]
+            }
+          },
+          "icons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "internal": {
+            "type": "boolean"
+          },
+          "format_version": {
+            "type": "string"
+          },
+          "datasets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "release": {
+                  "type": "string"
+                },
+                "ingeset_pipeline": {
+                  "type": "string"
+                },
+                "vars": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "default": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "default"
+                    ]
+                  }
+                },
+                "type": {
+                  "type": "string"
+                },
+                "package": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "name",
+                "release",
+                "ingeset_pipeline",
+                "type",
+                "package"
+              ]
+            }
+          },
+          "download": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "removable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "title",
+          "version",
+          "description",
+          "type",
+          "categories",
+          "requirement",
+          "assets",
+          "format_version",
+          "download",
+          "path"
+        ]
+      },
+      "SearchResult": {
+        "title": "SearchResult",
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "download": {
+            "type": "string"
+          },
+          "icons": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "savedObject": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "description",
+          "download",
+          "icons",
+          "name",
+          "path",
+          "title",
+          "type",
+          "version",
+          "status"
+        ]
+      },
+      "AgentStatus": {
+        "type": "string",
+        "title": "AgentStatus",
+        "enum": [
+          "offline",
+          "error",
+          "online",
+          "inactive",
+          "warning"
+        ]
+      },
+      "Agent": {
+        "title": "Agent",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "AgentType",
+            "enum": [
+              "PERMANENT",
+              "EPHEMERAL",
+              "TEMPORARY"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "enrolled_at": {
+            "type": "string"
+          },
+          "unenrolled_at": {
+            "type": "string"
+          },
+          "unenrollment_started_at": {
+            "type": "string"
+          },
+          "shared_id": {
+            "type": "string"
+          },
+          "access_api_key_id": {
+            "type": "string"
+          },
+          "default_api_key_id": {
+            "type": "string"
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "policy_revision": {
+            "type": "number",
+            "nullable": true
+          },
+          "last_checkin": {
+            "type": "string"
+          },
+          "user_provided_metadata": {
+            "title": "AgentMetadata",
+            "type": "object"
+          },
+          "local_metadata": {
+            "$ref": "#/components/schemas/Agent/properties/user_provided_metadata"
+          },
+          "id": {
+            "type": "string"
+          },
+          "current_error_events": {
+            "type": "array",
+            "items": {
+              "title": "AgentEvent",
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                },
+                {
+                  "$ref": "#/components/schemas/AgentEvent/allOf/1"
+                }
+              ]
+            }
+          },
+          "access_api_key": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "title": "AgentStatus",
+            "enum": [
+              "offline",
+              "error",
+              "online",
+              "inactive",
+              "warning"
+            ]
+          },
+          "default_api_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "active",
+          "enrolled_at",
+          "id",
+          "current_error_events",
+          "status"
+        ]
+      },
+      "AgentType": {
+        "type": "string",
+        "title": "AgentType",
+        "enum": [
+          "PERMANENT",
+          "EPHEMERAL",
+          "TEMPORARY"
+        ]
+      },
+      "AgentMetadata": {
+        "title": "AgentMetadata",
+        "type": "object"
+      },
+      "NewAgentEvent": {
+        "title": "NewAgentEvent",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "STATE",
+              "ERROR",
+              "ACTION_RESULT",
+              "ACTION"
+            ]
+          },
+          "subtype": {
+            "type": "string",
+            "enum": [
+              "RUNNING",
+              "STARTING",
+              "IN_PROGRESS",
+              "CONFIG",
+              "FAILED",
+              "STOPPING",
+              "STOPPED",
+              "DEGRADED",
+              "DATA_DUMP",
+              "ACKNOWLEDGED",
+              "UNKNOWN"
+            ]
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "stream_id": {
+            "type": "string"
+          },
+          "action_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "subtype",
+          "timestamp",
+          "message",
+          "agent_id"
+        ]
+      },
+      "AgentEvent": {
+        "title": "AgentEvent",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          {
+            "title": "NewAgentEvent",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "STATE",
+                  "ERROR",
+                  "ACTION_RESULT",
+                  "ACTION"
+                ]
+              },
+              "subtype": {
+                "type": "string",
+                "enum": [
+                  "RUNNING",
+                  "STARTING",
+                  "IN_PROGRESS",
+                  "CONFIG",
+                  "FAILED",
+                  "STOPPING",
+                  "STOPPED",
+                  "DEGRADED",
+                  "DATA_DUMP",
+                  "ACKNOWLEDGED",
+                  "UNKNOWN"
+                ]
+              },
+              "timestamp": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "payload": {
+                "type": "string"
+              },
+              "agent_id": {
+                "type": "string"
+              },
+              "policy_id": {
+                "type": "string"
+              },
+              "stream_id": {
+                "type": "string"
+              },
+              "action_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "subtype",
+              "timestamp",
+              "message",
+              "agent_id"
+            ]
+          }
+        ]
+      },
+      "AccessApiKey": {
+        "name": "Authorization",
+        "type": "apiKey",
+        "in": "header",
+        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
+      },
+      "EnrollmentApiKey": {
+        "type": "string",
+        "title": "EnrollmentApiKey",
+        "format": "byte"
+      }
+    },
+    "parameters": {
+      "pageSizeParam": {
+        "name": "perPage",
+        "in": "query",
+        "description": "The number of items to return",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "pageIndexParam": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "kueryParam": {
+        "name": "kuery",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "xsrfHeader": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "required": true
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "Enrollment_API_Key": {
+        "name": "Authorization",
+        "type": "apiKey",
+        "in": "header",
+        "description": "e.g. Authorization: ApiKey base64EnrollmentApiKey"
+      },
+      "Access_API_Key": {
+        "name": "Authorization",
+        "type": "apiKey",
+        "in": "header",
+        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
+      }
+    }
+  },
+  "security": [
+    {
+      "basicAuth": [
+
+      ]
+    }
+  ]
+}

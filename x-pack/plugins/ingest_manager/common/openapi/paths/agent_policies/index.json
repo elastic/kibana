@@ -1,0 +1,86 @@
+{
+  "get": {
+    "summary": "Agent policy - List",
+    "tags": [],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "../../components/schemas/AgentPolicy.json"
+                  }
+                },
+                "total": {
+                  "type": "number"
+                },
+                "page": {
+                  "type": "number"
+                },
+                "perPage": {
+                  "type": "number"
+                }
+              },
+              "required": ["items", "total", "page", "perPage"]
+            }
+          }
+        }
+      }
+    },
+    "operationId": "agent-policy-list",
+    "parameters": [
+      {
+        "$ref": "../../components/parameters/pageSizeParam.json"
+      },
+      {
+        "$ref": "../../components/parameters/pageIndexParam.json"
+      },
+      {
+        "$ref": "../../components/parameters/kueryParam.json"
+      }
+    ],
+    "description": ""
+  },
+  "post": {
+    "summary": "Agent policy - Create",
+    "tags": [],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "$ref": "../../components/schemas/AgentPolicy.json"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "operationId": "post-agent-policy",
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "../../components/schemas/NewAgentPolicy.json"
+          }
+        }
+      }
+    },
+    "security": [],
+    "parameters": [
+      {
+        "$ref": "../../components/parameters/xsrfHeader.json"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "parameters": [
+    {
+      "schema": {
+        "type": "string"
+      },
+      "name": "agentId",
+      "in": "path",
+      "required": true
+    }
+  ],
+  "post": {
+    "summary": "Fleet - Agent - Acks",
+    "tags": [],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": ["acks"]
+                }
+              },
+              "required": ["action"]
+            }
+          }
+        }
+      }
+    },
+    "operationId": "post-fleet-agents-agentId-acks",
+    "parameters": [
+      {
+        "$ref": "../../../../../components/parameters/xsrfHeader.json"
+      }
+    ],
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      }
+    }
+  }
+}

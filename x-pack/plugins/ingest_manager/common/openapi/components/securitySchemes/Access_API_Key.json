@@ -1,0 +1,7 @@
+{
+  "name": "Authorization",
+  "type": "apiKey",
+  "in": "header",
+  "description": "e.g. Authorization: ApiKey base64AccessApiKey"
+}
+

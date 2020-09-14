@@ -1,0 +1,75 @@
+{
+  "get": {
+    "summary": "Fleet setup - Info",
+    "tags": [],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isInitialized": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["isInitialized"]
+            }
+          }
+        }
+      }
+    },
+    "operationId": "get-fleet-setup",
+    "security": [
+      {
+        "basicAuth": []
+      }
+    ]
+  },
+  "post": {
+    "summary": "Fleet setup - Create",
+    "operationId": "post-fleet-setup",
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isInitialized": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["isInitialized"]
+            }
+          }
+        }
+      }
+    },
+    "requestBody": {
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "admin_username": {
+                "type": "string"
+              },
+              "admin_password": {
+                "type": "string"
+              }
+            },
+            "required": ["admin_username", "admin_password"]
+          }
+        }
+      }
+    },
+    "parameters": [
+      {
+        "$ref": "../../../components/parameters/xsrfHeader.json"
+      }
+    ]
+  }
+}

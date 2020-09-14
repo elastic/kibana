@@ -1,0 +1,23 @@
+{
+  "get": {
+    "summary": "EPM - Packages - List",
+    "tags": [],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "../../../components/schemas/SearchResult.json"
+              }
+            }
+          }
+        }
+      }
+    },
+    "operationId": "get-epm-list"
+  },
+  "parameters": []
+}

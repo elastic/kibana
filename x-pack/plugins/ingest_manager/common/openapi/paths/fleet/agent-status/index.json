@@ -1,0 +1,18 @@
+{
+  "get": {
+    "summary": "Fleet - Agent - Status for policy",
+    "tags": [],
+    "responses": {},
+    "operationId": "get-fleet-agent-status",
+    "parameters": [
+      {
+        "schema": {
+          "type": "string"
+        },
+        "name": "policyId",
+        "in": "query",
+        "required": false
+      }
+    ]
+  }
+}

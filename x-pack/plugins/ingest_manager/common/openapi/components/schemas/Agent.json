@@ -1,0 +1,65 @@
+{
+  "title": "Agent",
+  "type": "object",
+  "properties": {
+    "type": {
+      "$ref": "./AgentType.json"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "enrolled_at": {
+      "type": "string"
+    },
+    "unenrolled_at": {
+      "type": "string"
+    },
+    "unenrollment_started_at": {
+      "type": "string"
+    },
+    "shared_id": {
+      "type": "string"
+    },
+    "access_api_key_id": {
+      "type": "string"
+    },
+    "default_api_key_id": {
+      "type": "string"
+    },
+    "policy_id": {
+      "type": "string"
+    },
+    "policy_revision": {
+      "type": "number",
+      "nullable": true
+    },
+    "last_checkin": {
+      "type": "string"
+    },
+    "user_provided_metadata": {
+      "$ref": "./AgentMetadata.json"
+    },
+    "local_metadata": {
+      "$ref": "./AgentMetadata.json"
+    },
+    "id": {
+      "type": "string"
+    },
+    "current_error_events": {
+      "type": "array",
+      "items": {
+        "$ref": "./AgentEvent.json"
+      }
+    },
+    "access_api_key": {
+      "type": "string"
+    },
+    "status": {
+      "$ref": "./AgentStatus.json"
+    },
+    "default_api_key": {
+      "type": "string"
+    }
+  },
+  "required": ["type", "active", "enrolled_at", "id", "current_error_events", "status"]
+}

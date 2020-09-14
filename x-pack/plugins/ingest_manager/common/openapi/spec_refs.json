@@ -1,0 +1,163 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Ingest Manager",
+    "version": "0.2",
+    "contact": {
+      "name": "Ingest Team"
+    },
+    "license": {
+      "name": "Elastic"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5601/api/ingest_manager",
+      "description": "local"
+    }
+  ],
+  "paths": {
+    "/agent_policies": {
+      "$ref": "./paths/agent_policies/index.json"
+    },
+    "/agent_policies/{agentPolicyId}": {
+      "$ref": "./paths/agent_policies/{agentPolicyId}/index.json"
+    },
+    "/agent_policies/{agentPolicyId}/copy": {
+      "$ref": "./paths/agent_policies/{agentPolicyId}/copy/index.json"
+    },
+    "/agent_policies/delete": {
+      "$ref": "./paths/agent_policies/delete/index.json"
+    },
+    "/package_policies": {
+      "$ref": "./paths/package_policies/index.json"
+    },
+    "/package_policies/{packagePolicyId}": {
+      "$ref": "./paths/package_policies/{packagePolicyId}/index.json"
+    },
+    "/fleet/setup": {
+      "$ref": "./paths/fleet/setup/index.json"
+    },
+    "/epm/packages/{pkgkey}": {
+      "$ref": "./paths/epm/packages/{pkgkey}/index.json"
+    },
+    "/epm/packages": {
+      "$ref": "./paths/epm/packages/index.json"
+    },
+    "/epm/categories": {
+      "$ref": "./paths/epm/categories/index.json"
+    },
+    "/fleet/agents": {
+      "$ref": "./paths/fleet/agents/index.json"
+    },
+    "/fleet/agents/{agentId}": {
+      "$ref": "./paths/fleet/agents/{agentId}/index.json"
+    },
+    "/fleet/agents/{agentId}/events": {
+      "$ref": "./paths/fleet/agents/{agentId}/events/index.json"
+    },
+    "/fleet/agents/{agentId}/checkin": {
+      "$ref": "./paths/fleet/agents/{agentId}/checkin/index.json"
+    },
+    "/fleet/agents/{agentId}/acks": {
+      "$ref": "./paths/fleet/agents/{agentId}/acks/index.json"
+    },
+    "/fleet/agents/{agentId}/unenroll": {
+      "$ref": "./paths/fleet/agents/{agentId}/unenroll/index.json"
+    },
+    "/fleet/agents/enroll": {
+      "$ref": "./paths/fleet/agents/enroll/index.json"
+    },
+    "/fleet/agent-status": {
+      "$ref": "./paths/fleet/agent-status/index.json"
+    },
+    "/fleet/enrollment-api-keys": {
+      "$ref": "./paths/fleet/enrollment-api-keys/index.json"
+    },
+    "/fleet/enrollment-api-keys/{keyId}": {
+      "$ref": "./paths/fleet/enrollment-api-keys/{keyId}/index.json"
+    },
+    "/setup": {
+      "$ref": "./paths/setup/index.json"
+    },
+    "/fleet/install/{osType}": {
+      "$ref": "./paths/fleet/install/{osType}/index.json"
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgentPolicy": {
+        "$ref": "./components/schemas/AgentPolicy.json"
+      },
+      "PackagePolicy": {
+        "$ref": "./components/schemas/PackagePolicy.json"
+      },
+      "NewAgentPolicy": {
+        "$ref": "./components/schemas/NewAgentPolicy.json"
+      },
+      "NewPackagePolicy": {
+        "$ref": "./components/schemas/NewPackagePolicy.json"
+      },
+      "PackageInfo": {
+        "$ref": "./components/schemas/PackageInfo.json"
+      },
+      "SearchResult": {
+        "$ref": "./components/schemas/SearchResult.json"
+      },
+      "AgentStatus": {
+        "$ref": "./components/schemas/AgentStatus.json"
+      },
+      "Agent": {
+        "$ref": "./components/schemas/Agent.json"
+      },
+      "AgentType": {
+        "$ref": "./components/schemas/AgentType.json"
+      },
+      "AgentMetadata": {
+        "$ref": "./components/schemas/AgentMetadata.json"
+      },
+      "NewAgentEvent": {
+        "$ref": "./components/schemas/NewAgentEvent.json"
+      },
+      "AgentEvent": {
+        "$ref": "./components/schemas/AgentEvent.json"
+      },
+      "AccessApiKey": {
+        "$ref": "./components/schemas/AccessApiKey.json"
+      },
+      "EnrollmentApiKey": {
+        "$ref": "./components/schemas/EnrollmentApiKey.json"
+      }
+    },
+    "parameters": {
+      "pageSizeParam": {
+        "$ref": "./components/parameters/pageSizeParam.json"
+      },
+      "pageIndexParam": {
+        "$ref": "./components/parameters/pageIndexParam.json"
+      },
+      "kueryParam": {
+        "$ref": "./components/parameters/kueryParam.json"
+      },
+      "xsrfHeader": {
+        "$ref": "./components/parameters/xsrfHeader.json"
+      }
+    },
+    "securitySchemes": {
+      "basicAuth": {
+        "$ref": "./components/securitySchemes/basicAuth.json"
+      },
+      "Enrollment_API_Key": {
+        "$ref": "./components/securitySchemes/Enrollment_API_Key.json"
+      },
+      "Access_API_Key": {
+        "$ref": "./components/securitySchemes/Access_API_Key.json"
+      }
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ]
+}
