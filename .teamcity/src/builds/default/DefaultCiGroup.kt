@@ -14,24 +14,24 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
   paused = true
 
   steps {
-    script {
-      name = "Build OSS Plugins"
-      scriptContent =
-        """
-                #!/bin/bash
-                ./.ci/teamcity/oss/build_plugins.sh
-        """.trimIndent()
-    }
-
-    // TODO is there a way to re-use what was built in the DefaultBuild job?
-    script {
-      name = "Build Default Plugins"
-      scriptContent =
-        """
-                #!/bin/bash
-                ./.ci/teamcity/default/build_plugins.sh
-        """.trimIndent()
-    }
+//    script {
+//      name = "Build OSS Plugins"
+//      scriptContent =
+//        """
+//                #!/bin/bash
+//                ./.ci/teamcity/oss/build_plugins.sh
+//        """.trimIndent()
+//    }
+//
+//    // TODO is there a way to re-use what was built in the DefaultBuild job?
+//    script {
+//      name = "Build Default Plugins"
+//      scriptContent =
+//        """
+//                #!/bin/bash
+//                ./.ci/teamcity/default/build_plugins.sh
+//        """.trimIndent()
+//    }
 
     script {
       name = "Default CI Group $ciGroup"
@@ -50,7 +50,7 @@ class DefaultCiGroup(val ciGroup: Int) : BuildType({
   }
 
   dependencies {
-    defaultBuild()
+    defaultBuildWithPlugins()
   }
 
   addTestArtifacts()
