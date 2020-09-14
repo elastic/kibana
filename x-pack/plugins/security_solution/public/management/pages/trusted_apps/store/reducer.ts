@@ -76,6 +76,7 @@ export const initialTrustedAppsPageState: TrustedAppsListPageState = {
       index: MANAGEMENT_DEFAULT_PAGE,
       size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     },
+    freshDataTimestamp: new Date().getTime(),
   },
   active: false,
 };

@@ -24,12 +24,15 @@ const pageInfosEqual = (pageInfo1: PaginationInfo, pageInfo2: PaginationInfo): b
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState>): boolean => {
   const currentPageInfo = state.listView.currentPaginationInfo;
   const currentPage = state.listView.currentListResourceState;
+  const freshDataTimestamp = state.listView.freshDataTimestamp;
 
   return (
     state.active &&
-    isOutdatedResourceState(currentPage, (data) =>
-      pageInfosEqual(currentPageInfo, data.paginationInfo)
-    )
+    isOutdatedResourceState(currentPage, (data) => {
+      return (
+        pageInfosEqual(currentPageInfo, data.paginationInfo) && data.timestamp >= freshDataTimestamp
+      );
+    })
   );
 };
 

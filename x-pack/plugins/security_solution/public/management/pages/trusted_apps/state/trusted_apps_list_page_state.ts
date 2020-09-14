@@ -16,12 +16,14 @@ export interface TrustedAppsListData {
   items: TrustedApp[];
   totalItemsCount: number;
   paginationInfo: PaginationInfo;
+  timestamp: number;
 }
 
 export interface TrustedAppsListPageState {
   listView: {
     currentListResourceState: AsyncResourceState<TrustedAppsListData>;
     currentPaginationInfo: PaginationInfo;
+    freshDataTimestamp: number;
   };
   active: boolean;
 }
