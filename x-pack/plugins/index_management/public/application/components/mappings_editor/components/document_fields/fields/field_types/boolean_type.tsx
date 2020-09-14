@@ -27,7 +27,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'null_value': {
-      return field.null_value !== undefined && field.null_value !== '';
+      return field.null_value !== undefined;
     }
     default:
       return false;
