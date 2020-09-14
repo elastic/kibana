@@ -268,7 +268,6 @@ describe('ML - custom URL utils', () => {
       );
     });
 
-    /** FIXME */
     test.skip('returns expected URL for a Kibana Discover type URL when record field contains special characters', () => {
       expect(getUrlForRecord(TEST_DISCOVER_URL, TEST_RECORD_SPECIAL_CHARS)).toBe(
         "discover#/?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"%3C%3E%3A%3B%5B%7D%5C%22)\" and odd:field,name:>:&12<''))"
@@ -459,7 +458,7 @@ describe('ML - custom URL utils', () => {
       };
 
       expect(getUrlForRecord(urlConfig, testRecords)).toBe(
-        "security/hosts/ml-hosts?_g=()&query=(query:'process.name:\"seq\"',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-02-01T16:00:00.000Z',kind:absolute,to:'2019-02-01T18:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-02-01T16%3A00%3A00.000Z',kind:absolute,to:'2019-02-01T18%3A59%3A59.999Z')))"
+        "security/hosts/ml-hosts?_g=()&query=(language:kuery,query:'process.name:\"seq\"')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-02-01T16:00:00.000Z',kind:absolute,to:'2019-02-01T18:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-02-01T16%3A00%3A00.000Z',kind:absolute,to:'2019-02-01T18%3A59%3A59.999Z')))"
       );
     });
 
