@@ -174,6 +174,21 @@ describe('EnterpriseSearchRequestHandler', () => {
         });
       });
 
+      it('handles invalid json', async () => {
+        EnterpriseSearchAPI.mockReturn('invalid' as any, { status: 400, headers: JSON_HEADER });
+
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/4xx' });
+        await makeAPICall(requestHandler);
+
+        expect(responseMock.customError).toHaveBeenCalledWith({
+          statusCode: 400,
+          body: {
+            message: 'Bad Request',
+            attributes: { errors: ['Bad Request'] },
+          },
+        });
+      });
+
       it('handles blank bodies', async () => {
         EnterpriseSearchAPI.mockReturn(undefined as any, { status: 404 });
 
