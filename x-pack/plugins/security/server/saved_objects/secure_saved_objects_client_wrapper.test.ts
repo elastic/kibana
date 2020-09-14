@@ -117,7 +117,11 @@ const expectSuccess = async (fn: Function, args: Record<string, any>, action?: s
   return result;
 };
 
-const expectPrivilegeCheck = async (fn: Function, args: Record<string, any>) => {
+const expectPrivilegeCheck = async (
+  fn: Function,
+  args: Record<string, any>,
+  namespacesOverride?: Array<undefined | string>
+) => {
   clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesFailure
   );
@@ -131,7 +135,7 @@ const expectPrivilegeCheck = async (fn: Function, args: Record<string, any>) => 
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
     actions,
-    args.options?.namespace ?? args.options?.namespaces
+    namespacesOverride ?? args.options?.namespace ?? args.options?.namespaces
   );
 };
 
@@ -218,15 +222,17 @@ function getMockCheckPrivilegesSuccess(actions: string | string[], namespaces?: 
   return {
     hasAllRequested: true,
     username: USERNAME,
-    privileges: _namespaces
-      .map((resource) =>
-        _actions.map((action) => ({
-          resource,
-          privilege: action,
-          authorized: true,
-        }))
-      )
-      .flat(),
+    privileges: {
+      kibana: _namespaces
+        .map((resource) =>
+          _actions.map((action) => ({
+            resource,
+            privilege: action,
+            authorized: true,
+          }))
+        )
+        .flat(),
+    },
   };
 }
 
@@ -242,15 +248,17 @@ function getMockCheckPrivilegesFailure(actions: string | string[], namespaces?: 
   return {
     hasAllRequested: false,
     username: USERNAME,
-    privileges: _namespaces
-      .map((resource, idxa) =>
-        _actions.map((action, idxb) => ({
-          resource,
-          privilege: action,
-          authorized: idxa > 0 || idxb > 0,
-        }))
-      )
-      .flat(),
+    privileges: {
+      kibana: _namespaces
+        .map((resource, idxa) =>
+          _actions.map((action, idxb) => ({
+            resource,
+            privilege: action,
+            authorized: idxa > 0 || idxb > 0,
+          }))
+        )
+        .flat(),
+    },
   };
 }
 
@@ -483,7 +491,18 @@ describe('#bulkUpdate', () => {
 
   test(`checks privileges for user, actions, and namespace`, async () => {
     const objects = [obj1, obj2];
-    await expectPrivilegeCheck(client.bulkUpdate, { objects, options });
+    const namespacesOverride = [options.namespace]; // the bulkCreate function checks privileges as an array
+    await expectPrivilegeCheck(client.bulkUpdate, { objects, options }, namespacesOverride);
+  });
+
+  test(`checks privileges for object namespaces if present`, async () => {
+    const objects = [
+      { ...obj1, namespace: 'foo-ns' },
+      { ...obj2, namespace: 'bar-ns' },
+    ];
+    const namespacesOverride = [undefined, 'foo-ns', 'bar-ns'];
+    // use the default namespace for the options
+    await expectPrivilegeCheck(client.bulkUpdate, { objects, options: {} }, namespacesOverride);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {

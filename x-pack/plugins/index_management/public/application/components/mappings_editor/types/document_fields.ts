@@ -59,6 +59,7 @@ export type MainType =
   | 'geo_point'
   | 'geo_shape'
   | 'token_count'
+  | 'wildcard'
   /**
    * 'other' is a special type that only exists inside of MappingsEditor as a placeholder
    * for undocumented field types.
@@ -124,6 +125,7 @@ export type ParameterName =
   | 'eager_global_ordinals_join'
   | 'index_prefixes'
   | 'index_phrases'
+  | 'positive_score_impact'
   | 'norms'
   | 'norms_keyword'
   | 'term_vector'

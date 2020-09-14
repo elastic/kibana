@@ -20,7 +20,7 @@
 import { RequestHandlerContext } from '../../../../core/server';
 import { ISearchOptions } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
-import { SearchUsage } from './collectors/usage';
+import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
 export interface SearchEnhancements {
