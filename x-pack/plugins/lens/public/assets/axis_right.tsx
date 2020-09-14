@@ -6,7 +6,14 @@
 
 import * as React from 'react';
 
-export const EuiIconAxisRight = ({ title, titleId, ...props }) => (
+export const EuiIconAxisRight = ({
+  title,
+  titleId,
+  ...props
+}: {
+  title: string;
+  titleId: string;
+}) => (
   <svg
     width={16}
     height={16}

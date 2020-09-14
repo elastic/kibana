@@ -16,16 +16,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerConfig, AxesSettingsConfig } from './types';
-import { ToolbarPopover } from '../shared_components';
-import { ToolbarButtonProps } from '../toolbar_button';
+import { ToolbarPopover, ToolbarButtonProps } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
-// @ts-ignore
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
-// @ts-ignore
 import { EuiIconAxisLeft } from '../assets/axis_left';
-// @ts-ignore
 import { EuiIconAxisRight } from '../assets/axis_right';
-// @ts-ignore
 import { EuiIconAxisTop } from '../assets/axis_top';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -82,7 +77,7 @@ const popoverConfig = (
   switch (axis) {
     case 'yLeft':
       return {
-        icon: isHorizontal ? EuiIconAxisBottom : EuiIconAxisLeft,
+        icon: (isHorizontal ? EuiIconAxisBottom : EuiIconAxisLeft) as IconType,
         groupPosition: 'left',
         popoverTitle: isHorizontal
           ? i18n.translate('xpack.lens.xyChart.bottomAxisLabel', {
@@ -94,7 +89,7 @@ const popoverConfig = (
       };
     case 'yRight':
       return {
-        icon: isHorizontal ? EuiIconAxisTop : EuiIconAxisRight,
+        icon: (isHorizontal ? EuiIconAxisTop : EuiIconAxisRight) as IconType,
         groupPosition: 'right',
         popoverTitle: isHorizontal
           ? i18n.translate('xpack.lens.xyChart.topAxisLabel', {
@@ -107,7 +102,7 @@ const popoverConfig = (
     case 'x':
     default:
       return {
-        icon: isHorizontal ? EuiIconAxisLeft : EuiIconAxisBottom,
+        icon: (isHorizontal ? EuiIconAxisLeft : EuiIconAxisBottom) as IconType,
         groupPosition: 'center',
         popoverTitle: isHorizontal
           ? i18n.translate('xpack.lens.xyChart.leftAxisLabel', {

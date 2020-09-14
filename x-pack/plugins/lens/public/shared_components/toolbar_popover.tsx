@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from '../toolbar_button';
+import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';
 import { EuiIconLegend } from '../assets/legend';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
