@@ -77,7 +77,6 @@ export class ActionsAuthorization {
         });
         if (hasAllRequested) {
           this.auditLogger.actionsAuthorizationSuccess(username, operation, actionTypeId);
-          this.auditLogger.actionsAuthorizationSuccess(username, operation, actionTypeId);
         } else {
           throw Boom.forbidden(
             this.auditLogger.actionsAuthorizationFailure(username, operation, actionTypeId)
