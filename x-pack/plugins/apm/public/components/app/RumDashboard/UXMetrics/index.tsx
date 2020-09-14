@@ -23,7 +23,7 @@ export interface UXMetrics {
   cls: string;
   fid: string;
   lcp: string;
-  tbt: string;
+  tbt: number;
   fcp: string;
   lcpRanks: number[];
   fidRanks: number[];
