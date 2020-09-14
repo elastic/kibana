@@ -84,6 +84,10 @@ import {
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatFiltersOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
@@ -206,6 +210,10 @@ export interface CreateRulesOptions {
   tags: Tags;
   threat: Threat;
   threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;

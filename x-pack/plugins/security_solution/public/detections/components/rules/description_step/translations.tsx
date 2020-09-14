@@ -48,6 +48,13 @@ export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.threatMatchRuleTypeDescription',
+  {
+    defaultMessage: 'Threat Match',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {

@@ -59,6 +59,10 @@ import {
   license,
   rule_name_override,
   timestamp_override,
+  threat_index,
+  threat_query,
+  threat_filters,
+  threat_mapping,
 } from '../common/schemas';
 import { DefaultListArray } from '../types/lists_default_array';
 import {
@@ -113,7 +117,7 @@ export const dependentRulesSchema = t.partial({
   language,
   query,
 
-  // when type = saved_query, saved_is is required
+  // when type = saved_query, saved_id is required
   saved_id,
 
   // These two are required together or not at all.
@@ -126,6 +130,12 @@ export const dependentRulesSchema = t.partial({
 
   // Threshold fields
   threshold,
+
+  // Threat Match fields
+  threat_filters,
+  threat_index,
+  threat_query,
+  threat_mapping,
 });
 
 /**
@@ -205,7 +215,7 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 };
 
 export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (['query', 'saved_query', 'threshold'].includes(typeAndTimelineOnly.type)) {
+  if (['query', 'saved_query', 'threshold', 'threat_match'].includes(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
@@ -239,6 +249,19 @@ export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.
   }
 };
 
+export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'threat_match') {
+    return [
+      t.exact(t.type({ threat_query: dependentRulesSchema.props.threat_query })),
+      t.exact(t.type({ threat_index: dependentRulesSchema.props.threat_index })),
+      t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),
+      t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
@@ -248,6 +271,7 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
     ...addQueryFields(typeAndTimelineOnly),
     ...addMlFields(typeAndTimelineOnly),
     ...addThresholdFields(typeAndTimelineOnly),
+    ...addThreatMatchFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

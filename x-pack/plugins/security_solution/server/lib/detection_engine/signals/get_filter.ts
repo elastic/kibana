@@ -18,6 +18,7 @@ import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';
 import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
+import { QueryFilter } from './types';
 
 interface GetFilterArgs {
   type: Type;
@@ -48,7 +49,7 @@ export const getFilter = async ({
   type,
   query,
   lists,
-}: GetFilterArgs): Promise<unknown> => {
+}: GetFilterArgs): Promise<QueryFilter> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
       return getQueryFilter(query, language, filters || [], index, lists);
@@ -94,6 +95,9 @@ export const getFilter = async ({
     }
     case 'query': {
       return queryFilter();
+    }
+    case 'threat_match': {
+      return savedId != null ? savedQueryFilter() : queryFilter();
     }
     case 'saved_query': {
       return savedQueryFilter();

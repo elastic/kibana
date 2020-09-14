@@ -51,6 +51,10 @@ import {
   Author,
   RiskScoreMapping,
   SeverityMapping,
+  threat_filters,
+  threat_mapping,
+  threat_query,
+  threat_index,
 } from '../common/schemas';
 
 import {
@@ -135,6 +139,10 @@ export const importRulesSchema = t.intersection([
       updated_at, // defaults "undefined" if not set during decode
       created_by, // defaults "undefined" if not set during decode
       updated_by, // defaults "undefined" if not set during decode
+      threat_filters, // defaults to "undefined" if not set during decode
+      threat_mapping, // defaults to "undefined" if not set during decode
+      threat_query, // defaults to "undefined" if not set during decode
+      threat_index, // defaults to "undefined" if not set during decode
     })
   ),
 ]);

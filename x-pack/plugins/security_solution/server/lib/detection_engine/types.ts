@@ -37,6 +37,9 @@ import {
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
   Type,
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
@@ -73,6 +76,10 @@ export interface RuleTypeParams {
   severityMapping: SeverityMappingOrUndefined;
   threat: ThreatOrUndefined;
   threshold: ThresholdOrUndefined;
+  threatFilters: PartialFilter[] | undefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;

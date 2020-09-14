@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DslQuery, Filter } from 'src/plugins/data/common';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { AlertType, AlertTypeState, AlertExecutorOptions } from '../../../../../alerts/server';
@@ -155,3 +156,15 @@ export interface RuleAlertAttributes extends AlertAttributes {
 }
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
+
+/**
+ * TODO: Remove this if/when the return filter has its own type exposed
+ */
+export interface QueryFilter {
+  bool: {
+    must: DslQuery[];
+    filter: Filter[];
+    should: unknown[];
+    must_not: Filter[];
+  };
+}

@@ -105,6 +105,24 @@ export const validateThreshold = (rule: CreateRulesSchema): string[] => {
   return [];
 };
 
+export const validateThreatMapping = (rule: CreateRulesSchema): string[] => {
+  let errors: string[] = [];
+  if (rule.type === 'threat_match') {
+    if (!rule.threat_mapping) {
+      errors = ['when "type" is "threat_match", "threat_mapping" is required', ...errors];
+    } else if (rule.threat_mapping.length === 0) {
+      errors = ['threat_mapping" must have at least one element', ...errors];
+    }
+    if (!rule.threat_query) {
+      errors = ['when "type" is "threat_match", "threat_query" is required', ...errors];
+    }
+    if (!rule.threat_index) {
+      errors = ['when "type" is "threat_match", "threat_index" is required', ...errors];
+    }
+  }
+  return errors;
+};
+
 export const createRuleValidateTypeDependents = (schema: CreateRulesSchema): string[] => {
   return [
     ...validateAnomalyThreshold(schema),
@@ -115,5 +133,6 @@ export const createRuleValidateTypeDependents = (schema: CreateRulesSchema): str
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
     ...validateThreshold(schema),
+    ...validateThreatMapping(schema),
   ];
 };
