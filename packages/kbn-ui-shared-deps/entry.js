@@ -54,6 +54,3 @@ export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme
 
 import * as Theme from './theme.ts';
 export { Theme };
-
-// massive deps that we should really get rid of or reduce in size substantially
-export const ElasticsearchBrowser = require('elasticsearch-browser/elasticsearch.js');

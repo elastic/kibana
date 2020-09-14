@@ -6,7 +6,6 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media.ts';
 import {
@@ -667,6 +666,100 @@ describe('when on the list page', () => {
       it('should format unknown policy action names', async () => {
         expect(renderResult.getByText('A New Unknown Action')).not.toBeNull();
       });
+    });
+  });
+
+  describe('when the more actions column is opened', () => {
+    let hostInfo: HostInfo;
+    let agentId: string;
+    let agentPolicyId: string;
+    const generator = new EndpointDocGenerator('seed');
+    let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+
+    const mockEndpointListApi = () => {
+      const { hosts } = mockEndpointResultList();
+      hostInfo = {
+        host_status: hosts[0].host_status,
+        metadata: hosts[0].metadata,
+      };
+      const packagePolicy = docGenerator.generatePolicyPackagePolicy();
+      packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
+      const agentPolicy = generator.generateAgentPolicy();
+      agentPolicyId = agentPolicy.id;
+      agentId = hosts[0].metadata.elastic.agent.id;
+
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [hostInfo],
+        endpointPackagePolicies: [packagePolicy],
+        agentPolicy,
+      });
+    };
+
+    beforeEach(() => {
+      mockEndpointListApi();
+
+      reactTestingLibrary.act(() => {
+        history.push('/endpoints');
+      });
+
+      renderAndWaitForData = async () => {
+        const renderResult = render();
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+        return renderResult;
+      };
+
+      coreStart.application.getUrlForApp.mockImplementation((appName) => {
+        switch (appName) {
+          case 'securitySolution':
+            return '/app/security';
+          case 'ingestManager':
+            return '/app/ingestManager';
+        }
+        return appName;
+      });
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('navigates to the Security Solution Host Details page', async () => {
+      const renderResult = await renderAndWaitForData();
+      // open the endpoint actions menu
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+
+      const hostLink = await renderResult.findByTestId('hostLink');
+      expect(hostLink.getAttribute('href')).toEqual(
+        `/app/security/hosts/${hostInfo.metadata.host.hostname}`
+      );
+    });
+    it('navigates to the Ingest Agent Policy page', async () => {
+      const renderResult = await renderAndWaitForData();
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+
+      const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
+      expect(agentPolicyLink.getAttribute('href')).toEqual(
+        `/app/ingestManager#/policies/${agentPolicyId}`
+      );
+    });
+    it('navigates to the Ingest Agent Details page', async () => {
+      const renderResult = await renderAndWaitForData();
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+
+      const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
+      expect(agentDetailsLink.getAttribute('href')).toEqual(
+        `/app/ingestManager#/fleet/agents/${agentId}`
+      );
     });
   });
 });

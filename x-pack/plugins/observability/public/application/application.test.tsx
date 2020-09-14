@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createMemoryHistory } from 'history';
 import React from 'react';
-import { renderApp } from './';
 import { Observable } from 'rxjs';
-import { CoreStart, AppMountParameters } from 'src/core/public';
+import { AppMountParameters, CoreStart } from 'src/core/public';
+import { renderApp } from './';
 
 describe('renderApp', () => {
   it('renders', () => {
@@ -19,6 +20,7 @@ describe('renderApp', () => {
     } as unknown) as CoreStart;
     const params = ({
       element: window.document.createElement('div'),
+      history: createMemoryHistory(),
     } as unknown) as AppMountParameters;
 
     expect(() => {

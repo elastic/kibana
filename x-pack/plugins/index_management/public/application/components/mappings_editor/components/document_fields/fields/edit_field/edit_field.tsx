@@ -163,7 +163,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit, updateF
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        {form.isSubmitted && form.isValid === false && (
+        {form.isSubmitted && !form.isValid && (
           <>
             <EuiCallOut
               title={i18n.translate(
@@ -193,7 +193,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit, updateF
               fill
               onClick={submitForm}
               type="submit"
-              disabled={form.isSubmitted && form.isValid === false}
+              disabled={form.isSubmitted && !form.isValid}
               data-test-subj="editFieldUpdateButton"
             >
               {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel', {

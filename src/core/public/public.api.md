@@ -7,6 +7,7 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
+import { ErrorToastOptions as ErrorToastOptions_2 } from 'src/core/public/notifications';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -27,7 +28,9 @@ import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/ser
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { ShallowPromise } from '@kbn/utility-types';
+import { ToastInputFields as ToastInputFields_2 } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -39,25 +42,18 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 // @internal (undocumented)
 export function __kbnBootstrap__(): void;
 
-// @public
-export interface App<HistoryLocationState = unknown> extends AppBase {
-    appRoute?: string;
-    chromeless?: boolean;
-    exactRoute?: boolean;
-    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
-}
-
 // @public (undocumented)
-export interface AppBase {
+export interface App<HistoryLocationState = unknown> {
+    appRoute?: string;
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
     defaultPath?: string;
     euiIconType?: string;
+    exactRoute?: boolean;
     icon?: string;
     id: string;
-    // @internal
-    legacy?: boolean;
+    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
     status?: AppStatus;
@@ -121,7 +117,7 @@ export interface ApplicationSetup {
 
 // @public (undocumented)
 export interface ApplicationStart {
-    applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
+    applications$: Observable<ReadonlyMap<string, PublicAppInfo>>;
     capabilities: RecursiveReadonly<Capabilities>;
     currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
@@ -165,6 +161,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     element: HTMLElement;
     history: ScopedHistory<HistoryLocationState>;
     onAppLeave: (handler: AppLeaveHandler) => void;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 // @public
@@ -185,10 +182,10 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
 
 // @public
-export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
+export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
 // @public
 export function assertNever(x: never): never;
@@ -226,10 +223,6 @@ export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
 export interface ChromeDocTitle {
-    // @internal (undocumented)
-    __legacy: {
-        setBaseTitle(baseTitle: string): void;
-    };
     change(newTitle: string | string[]): void;
     reset(): void;
 }
@@ -289,28 +282,18 @@ export interface ChromeNavControls {
 
 // @public (undocumented)
 export interface ChromeNavLink {
-    // @deprecated
-    readonly active?: boolean;
     readonly baseUrl: string;
     readonly category?: AppCategory;
-    // @deprecated
     readonly disabled?: boolean;
-    // @deprecated
-    readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
-    readonly href?: string;
+    readonly href: string;
     readonly icon?: string;
     readonly id: string;
-    // @internal
-    readonly legacy: boolean;
-    // @deprecated
-    readonly linkToLastSubUrl?: boolean;
     readonly order?: number;
-    // @deprecated
-    readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
     readonly url?: string;
 }
 
@@ -323,12 +306,14 @@ export interface ChromeNavLinks {
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
     showOnly(id: string): void;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppBase"
+    //
     // @deprecated
     update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
 }
 
 // @public (undocumented)
-export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase' | 'href'>>;
+export type ChromeNavLinkUpdateableFields = Partial<Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>>;
 
 // @public
 export interface ChromeRecentlyAccessed {
@@ -505,6 +490,9 @@ export interface DocLinksStart {
     readonly links: {
         readonly dashboard: {
             readonly drilldowns: string;
+            readonly drilldownsTriggerPicker: string;
+            readonly urlDrilldownTemplateSyntax: string;
+            readonly urlDrilldownVariables: string;
         };
         readonly filebeat: {
             readonly base: string;
@@ -880,52 +868,6 @@ export interface IUiSettingsClient {
     set: (key: string, value: any) => Promise<boolean>;
 }
 
-// @public (undocumented)
-export interface LegacyApp extends AppBase {
-    // (undocumented)
-    appUrl: string;
-    // (undocumented)
-    disableSubUrlTracking?: boolean;
-    // (undocumented)
-    linkToLastSubUrl?: boolean;
-    // (undocumented)
-    subUrlBase?: string;
-}
-
-// @public @deprecated
-export interface LegacyCoreSetup extends CoreSetup<any, any> {
-    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
-    //
-    // @deprecated (undocumented)
-    injectedMetadata: InjectedMetadataSetup;
-}
-
-// @public @deprecated
-export interface LegacyCoreStart extends CoreStart {
-    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
-    //
-    // @deprecated (undocumented)
-    injectedMetadata: InjectedMetadataStart;
-}
-
-// @public (undocumented)
-export interface LegacyNavLink {
-    // (undocumented)
-    category?: AppCategory;
-    // (undocumented)
-    euiIconType?: string;
-    // (undocumented)
-    icon?: string;
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    order: number;
-    // (undocumented)
-    title: string;
-    // (undocumented)
-    url: string;
-}
-
 // @public
 export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
 
@@ -1039,17 +981,9 @@ export type PluginOpaqueId = symbol;
 
 // @public
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
-    legacy: false;
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
-};
-
-// @public
-export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
-    legacy: true;
-    status: AppStatus;
-    navLinkStatus: AppNavLinkStatus;
 };
 
 // @public
@@ -1188,8 +1122,10 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
+    // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    filter?: string;
+    filter?: string | KueryNode;
     // (undocumented)
     hasReference?: {
         type: string;
@@ -1542,6 +1478,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:215:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:185:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

@@ -13,7 +13,7 @@ import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import GettingStarted from '../../assets/getting_started.png';
+import GettingStarted from './assets/getting_started.png';
 
 export const SetupGuide: React.FC = () => (
   <SetupGuideLayout

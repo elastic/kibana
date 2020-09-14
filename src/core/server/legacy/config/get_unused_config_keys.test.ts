@@ -217,34 +217,4 @@ describe('getUnusedConfigKeys', () => {
       })
     ).toEqual([]);
   });
-
-  describe('using deprecation', () => {
-    it('should use the plugin deprecations provider', async () => {
-      expect(
-        await getUnusedConfigKeys({
-          coreHandledConfigPaths: [],
-          pluginSpecs: [
-            ({
-              getDeprecationsProvider() {
-                return async ({ rename }: any) => [rename('foo1', 'foo2')];
-              },
-              getConfigPrefix: () => 'foo',
-            } as unknown) as LegacyPluginSpec,
-          ],
-          disabledPluginSpecs: [],
-          settings: {
-            foo: {
-              foo: 'dolly',
-              foo1: 'bar',
-            },
-          },
-          legacyConfig: getConfig({
-            foo: {
-              foo2: 'bar',
-            },
-          }),
-        })
-      ).toEqual(['foo.foo']);
-    });
-  });
 });

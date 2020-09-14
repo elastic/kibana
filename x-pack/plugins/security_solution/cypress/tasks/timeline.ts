@@ -5,8 +5,11 @@
  */
 
 import {
+  BULK_ACTIONS,
   CLOSE_TIMELINE_BTN,
   CREATE_NEW_TIMELINE,
+  EXPORT_TIMELINE_ACTION,
+  TIMELINE_CHECKBOX,
   HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
@@ -20,6 +23,7 @@ import {
   TIMELINE_INSPECT_BUTTON,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE,
+  TIMELINES_TABLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
   REMOVE_COLUMN,
@@ -64,6 +68,12 @@ export const executeTimelineKQL = (query: string) => {
 
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
+};
+
+export const exportTimeline = (timelineId: string) => {
+  cy.get(TIMELINE_CHECKBOX(timelineId)).click({ force: true });
+  cy.get(BULK_ACTIONS).click({ force: true });
+  cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
 export const openTimelineFieldsBrowser = () => {
@@ -120,6 +130,10 @@ export const removeColumn = (column: number) => {
 
 export const resetFields = () => {
   cy.get(RESET_FIELDS).click({ force: true });
+};
+
+export const waitForTimelinesPanelToBeLoaded = () => {
+  cy.get(TIMELINES_TABLE).should('exist');
 };
 
 export const waitForTimelineChanges = () => {

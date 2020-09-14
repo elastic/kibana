@@ -10,7 +10,7 @@ import { TIMELINE_URL } from '../../../../common/constants';
 
 import { ConfigType } from '../../..';
 import { SetupPlugins } from '../../../plugin';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
 import { buildSiemResponse, transformError } from '../../detection_engine/routes/utils';
 
@@ -28,7 +28,7 @@ export const getTimelineRoute = (
   router.get(
     {
       path: `${TIMELINE_URL}`,
-      validate: { query: buildRouteValidation(getTimelineByIdSchemaQuery) },
+      validate: { query: buildRouteValidationWithExcess(getTimelineByIdSchemaQuery) },
       options: {
         tags: ['access:securitySolution'],
       },

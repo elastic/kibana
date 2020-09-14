@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import expectedBreakdown from './expectation/breakdown.json';
-import expectedBreakdownWithTransactionName from './expectation/breakdown_transaction_name.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ kpis: [], timeseries: [] });
+        expect(response.body).to.eql({ timeseries: [] });
       });
     });
 
@@ -39,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedBreakdown);
+        expectSnapshot(response.body).toMatch();
       });
       it('returns the transaction breakdown for a transaction group', async () => {
         const response = await supertest.get(
@@ -47,20 +46,71 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedBreakdownWithTransactionName);
+        const { timeseries } = response.body;
+        const { title, color, type, data, hideLegend, legendValue } = timeseries[0];
+
+        expectSnapshot(data).toMatchInline(`
+          Array [
+            Object {
+              "x": 1593413100000,
+              "y": null,
+            },
+            Object {
+              "x": 1593413130000,
+              "y": null,
+            },
+            Object {
+              "x": 1593413160000,
+              "y": null,
+            },
+            Object {
+              "x": 1593413190000,
+              "y": null,
+            },
+            Object {
+              "x": 1593413220000,
+              "y": null,
+            },
+            Object {
+              "x": 1593413250000,
+              "y": null,
+            },
+            Object {
+              "x": 1593413280000,
+              "y": null,
+            },
+            Object {
+              "x": 1593413310000,
+              "y": 1,
+            },
+            Object {
+              "x": 1593413340000,
+              "y": null,
+            },
+          ]
+        `);
+
+        expectSnapshot(title).toMatchInline(`"app"`);
+        expectSnapshot(color).toMatchInline(`"#54b399"`);
+        expectSnapshot(type).toMatchInline(`"areaStacked"`);
+        expectSnapshot(hideLegend).toMatchInline(`false`);
+        expectSnapshot(legendValue).toMatchInline(`"100%"`);
       });
-      it('returns the top 4 by percentage and sorts them by name', async () => {
+      it('returns the transaction breakdown sorted by name', async () => {
         const response = await supertest.get(
           `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body.kpis.map((kpi: { name: string }) => kpi.name)).to.eql([
-          'app',
-          'http',
-          'postgresql',
-          'redis',
-        ]);
+        expectSnapshot(response.body.timeseries.map((serie: { title: string }) => serie.title))
+          .toMatchInline(`
+          Array [
+            "app",
+            "http",
+            "postgresql",
+            "redis",
+          ]
+        `);
       });
     });
   });

@@ -117,7 +117,7 @@ describe('NewCalendar', () => {
   test('Import modal shown on Import Events button click', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
-    const importButton = wrapper.find('[data-test-subj="mlImportEvents"]');
+    const importButton = wrapper.find('[data-test-subj="mlCalendarImportEventsButton"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 
@@ -127,7 +127,7 @@ describe('NewCalendar', () => {
   test('New event modal shown on New event button click', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
-    const importButton = wrapper.find('[data-test-subj="mlNewEvent"]');
+    const importButton = wrapper.find('[data-test-subj="mlCalendarNewEventButton"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 

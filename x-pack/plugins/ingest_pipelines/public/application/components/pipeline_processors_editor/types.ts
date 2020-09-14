@@ -90,7 +90,7 @@ export type ProcessorStatus =
 export interface ProcessorResult {
   processor_type: string;
   status: ProcessorStatus;
-  doc: Document;
+  doc?: Document;
   tag: string;
   ignored_error?: any;
   error?: any;

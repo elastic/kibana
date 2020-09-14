@@ -8,19 +8,15 @@ import React, { useEffect } from 'react';
 import { useValues, useActions } from 'kea';
 import { History } from 'history';
 
-import {
-  FlashMessagesLogic,
-  IFlashMessagesValues,
-  IFlashMessagesActions,
-} from './flash_messages_logic';
+import { FlashMessagesLogic } from './flash_messages_logic';
 
 interface IFlashMessagesProviderProps {
   history: History;
 }
 
 export const FlashMessagesProvider: React.FC<IFlashMessagesProviderProps> = ({ history }) => {
-  const { historyListener } = useValues(FlashMessagesLogic) as IFlashMessagesValues;
-  const { listenToHistory } = useActions(FlashMessagesLogic) as IFlashMessagesActions;
+  const { historyListener } = useValues(FlashMessagesLogic);
+  const { listenToHistory } = useActions(FlashMessagesLogic);
 
   useEffect(() => {
     if (!historyListener) listenToHistory(history);

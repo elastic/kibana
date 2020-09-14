@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 import { ReactNode } from 'react';
 import { History } from 'history';
-
-import { IKeaLogic, TKeaReducers, IKeaParams } from '../types';
 
 export interface IFlashMessage {
   type: 'success' | 'info' | 'warning' | 'error';
@@ -22,27 +20,27 @@ export interface IFlashMessagesValues {
   historyListener: Function | null;
 }
 export interface IFlashMessagesActions {
-  setFlashMessages(messages: IFlashMessage | IFlashMessage[]): void;
+  setFlashMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearFlashMessages(): void;
-  setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): void;
+  setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearQueuedMessages(): void;
-  listenToHistory(history: History): void;
-  setHistoryListener(historyListener: Function): void;
+  listenToHistory(history: History): History;
+  setHistoryListener(historyListener: Function): { historyListener: Function };
 }
 
 const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
   !Array.isArray(messages) ? [messages] : messages;
 
-export const FlashMessagesLogic = kea({
-  actions: (): IFlashMessagesActions => ({
+export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlashMessagesActions>>({
+  actions: {
     setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearFlashMessages: () => null,
     setQueuedMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearQueuedMessages: () => null,
     listenToHistory: (history) => history,
     setHistoryListener: (historyListener) => ({ historyListener }),
-  }),
-  reducers: (): TKeaReducers<IFlashMessagesValues, IFlashMessagesActions> => ({
+  },
+  reducers: {
     messages: [
       [],
       {
@@ -63,8 +61,8 @@ export const FlashMessagesLogic = kea({
         setHistoryListener: (_, { historyListener }) => historyListener,
       },
     ],
-  }),
-  listeners: ({ values, actions }): Partial<IFlashMessagesActions> => ({
+  },
+  listeners: ({ values, actions }) => ({
     listenToHistory: (history) => {
       // On React Router navigation, clear previous flash messages and load any queued messages
       const unlisten = history.listen(() => {
@@ -81,7 +79,4 @@ export const FlashMessagesLogic = kea({
       if (removeHistoryListener) removeHistoryListener();
     },
   }),
-} as IKeaParams<IFlashMessagesValues, IFlashMessagesActions>) as IKeaLogic<
-  IFlashMessagesValues,
-  IFlashMessagesActions
->;
+});

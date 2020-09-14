@@ -20,6 +20,14 @@ import { RouteSpyState } from '../../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../../common/components/navigation/types';
 import { SecurityPageName } from '../../../../app/types';
 import { APP_ID } from '../../../../../common/constants';
+import { RuleStep, RuleStepsOrder } from './types';
+
+export const ruleStepsOrder: RuleStepsOrder = [
+  RuleStep.defineRule,
+  RuleStep.aboutRule,
+  RuleStep.scheduleRule,
+  RuleStep.ruleActions,
+];
 
 const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetUrlForApp) => {
   const tabPath = pathname.split('/')[1];

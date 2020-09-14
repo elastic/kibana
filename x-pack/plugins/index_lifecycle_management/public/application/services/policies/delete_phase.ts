@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DeletePhase, SerializedDeletePhase } from '../../../../common/types';
 import { serializedPhaseInitialization } from '../../constants';
-import { DeletePhase, SerializedDeletePhase } from './types';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
 import {
   numberRequiredMessage,

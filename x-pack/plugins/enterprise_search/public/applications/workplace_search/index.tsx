@@ -8,10 +8,11 @@ import React, { useContext, useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
+import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 import { IInitialAppData } from '../../../common/types';
 import { KibanaContext, IKibanaContext } from '../index';
-import { HttpLogic, IHttpLogicValues } from '../shared/http';
-import { AppLogic, IAppActions, IAppValues } from './app_logic';
+import { HttpLogic } from '../shared/http';
+import { AppLogic } from './app_logic';
 import { Layout } from '../shared/layout';
 import { WorkplaceSearchNav } from './components/layout/nav';
 
@@ -19,6 +20,7 @@ import { SETUP_GUIDE_PATH } from './routes';
 
 import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
+import { NotFound } from '../shared/not_found';
 import { Overview } from './views/overview';
 
 export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
@@ -27,9 +29,9 @@ export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
 };
 
 export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic) as IAppValues;
-  const { initializeAppData } = useActions(AppLogic) as IAppActions;
-  const { errorConnecting } = useValues(HttpLogic) as IHttpLogicValues;
+  const { hasInitialized } = useValues(AppLogic);
+  const { initializeAppData } = useActions(AppLogic);
+  const { errorConnecting } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -52,6 +54,9 @@ export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
               <Route exact path="/groups">
                 {/* Will replace with groups component subsequent PR */}
                 <div />
+              </Route>
+              <Route>
+                <NotFound product={WORKPLACE_SEARCH_PLUGIN} />
               </Route>
             </Switch>
           )}

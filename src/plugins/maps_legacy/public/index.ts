@@ -42,18 +42,6 @@ import { mapTooltipProvider } from './tooltip_provider';
 
 import './map/index.scss';
 
-export interface MapsLegacyConfigType {
-  regionmap: any;
-  emsTileLayerId: string;
-  includeElasticMapsService: boolean;
-  proxyElasticMapsServiceInMaps: boolean;
-  tilemap: any;
-  emsFontLibraryUrl: string;
-  emsFileApiUrl: string;
-  emsTileApiUrl: string;
-  emsLandingPageUrl: string;
-}
-
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsLegacyPlugin(initializerContext);
 }

@@ -49,13 +49,11 @@ storiesOf('app/ServiceMap/Cytoscape', module)
         },
       ];
       const height = 300;
-      const width = 1340;
       const serviceName = 'opbeans-python';
       return (
         <Cytoscape
           elements={elements}
           height={height}
-          width={width}
           serviceName={serviceName}
         />
       );
@@ -330,7 +328,7 @@ storiesOf('app/ServiceMap/Cytoscape', module)
           },
         },
       ];
-      return <Cytoscape elements={elements} height={600} width={1340} />;
+      return <Cytoscape elements={elements} height={600} />;
     },
     {
       info: { propTables: false, source: false },

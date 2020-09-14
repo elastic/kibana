@@ -132,7 +132,7 @@ This is an irreversible action and impacts all alerts that use this connector.
 PagerDuty connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted.
+API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 [float]
