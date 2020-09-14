@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import { run, createFlagError } from '@kbn/dev-utils';
+import { run, createFlagError, REPO_ROOT } from '@kbn/dev-utils';
 import { parse } from './parse_owners';
 import { flush } from './flush';
 import { enumeratePatterns } from './enumerate_patterns';
 import { push } from './enumeration_helpers';
-import { resolve } from 'path';
 import { pipe } from '../utils';
-
-const ROOT = resolve(__dirname, '../../../../..');
 
 const flags = {
   string: ['src', 'dest'],
@@ -50,7 +47,7 @@ export const generateTeamAssignments = () => {
         () =>
           pipe(
             logSuccess(flags.src, log),
-            enumeratePatterns(ROOT)(log),
+            enumeratePatterns(REPO_ROOT)(log),
             flush(flags.dest)(log)
           )(new Map(data))
       );
