@@ -613,23 +613,18 @@ export class VectorStyle implements IVectorStyle {
 
       for (let j = 0; j < dynamicStyleProps.length; j++) {
         const dynamicStyleProp = dynamicStyleProps[j];
-        const name = dynamicStyleProp.getFieldName();
-
         const field = dynamicStyleProp.getField();
         const targetMbName = field.getMbPropertyName(dynamicStyleProp.getStyleName());
-        const rawValue = feature.properties ? feature.properties[name] : undefined;
+        const rawValue = feature.properties
+          ? feature.properties[dynamicStyleProp.getFieldName()]
+          : undefined;
         const targetMbValue = dynamicStyleProp.getMbPropertyValue(rawValue);
         if (dynamicStyleProp.supportsMbFeatureState()) {
-          tmpFeatureState[name] = getNumericalMbFeatureStateValue(rawValue); // the same value will be potentially overridden multiple times, if the name remains identical
+          tmpFeatureState[targetMbName] = targetMbValue; // the same value will be potentially overridden multiple times, if the name remains identical
         } else {
-          // in practice, a new system property will only be created for:
-          // - label text: this requires the value to be formatted first.
-          // - icon orientation: this is a lay-out property which do not support feature-state (but we're still coercing to a number)
-          const formattedValue = dynamicStyleProp.isOrdinal()
-            ? getNumericalMbFeatureStateValue(rawValue)
-            : dynamicStyleProp.formatField(rawValue);
-
-          if (feature.properties) feature.properties[computedName] = formattedValue;
+          if (feature.properties) {
+            feature.properties[targetMbName] = targetMbValue;
+          }
         }
       }
       tmpFeatureIdentifier.source = mbSourceId;
