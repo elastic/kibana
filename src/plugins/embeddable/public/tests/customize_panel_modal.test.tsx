@@ -179,5 +179,5 @@ test('Can set title to an empty string', async () => {
 
   findTestSubject(component, 'saveNewTitleButton').simulate('click');
   expect(inputField.props().value).toBeUndefined();
-  expect(updateTitle).toBeCalledWith('');
+  expect(updateTitle).toBeCalledWith('', true);
 });
