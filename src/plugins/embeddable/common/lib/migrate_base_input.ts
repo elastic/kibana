@@ -20,9 +20,10 @@
 import { SavedObjectReference } from '../../../../core/types';
 import { EmbeddableInput } from '../types';
 
-export const telemetryBaseEmbeddableInput = (state: EmbeddableInput) => {
-  return {} as Record<string, any>;
-};
+export const telemetryBaseEmbeddableInput = (
+  state: EmbeddableInput,
+  telemetryData: Record<string, any>
+) => {};
 
 export const extractBaseEmbeddableInput = (state: EmbeddableInput) => {
   return { state, references: [] as SavedObjectReference[] };

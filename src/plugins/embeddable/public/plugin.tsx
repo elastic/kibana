@@ -197,11 +197,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
   }
 
-  private telemetry = (state: EmbeddableInput) => {
+  private telemetry = (state: EmbeddableInput, telemetryData: Record<string, any> = {}) => {
     const enhancements: Record<string, any> = state.enhancements || {};
     const factory = this.getEmbeddableFactory(state.id);
 
-    const telemetryData = telemetryBaseEmbeddableInput(state);
+    telemetryBaseEmbeddableInput(state, telemetryData);
     if (factory) {
       factory.telemetry(state, telemetryData);
     }

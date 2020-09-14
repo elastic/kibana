@@ -14,13 +14,12 @@ import {
   ActionFactoryDefinition,
   DynamicActionsState,
 } from './types';
-import { PersistableState } from '../../../../src/plugins/kibana_utils/common';
 
 export interface SetupContract {
   registerActionFactory: any;
 }
 
-export type StartContract = PersistableState<DynamicActionsState>;
+export type StartContract = void;
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -33,11 +32,6 @@ export class AdvancedUiActionsPublicPlugin
   constructor() {}
 
   public setup(core: CoreSetup, { embeddable }: SetupDependencies) {
-    // this.enhancements = new UiActionsServiceEnhancements({
-    //   getLicense: () => this.getLicenseInfo(),
-    //   featureUsageSetup: licensing.featureUsage,
-    //   getFeatureUsageStart: () => startServices().plugins.licensing.featureUsage,
-    // });
     embeddable.registerEnhancement(dynamicActionEnhancement(this));
 
     return {
@@ -45,13 +39,7 @@ export class AdvancedUiActionsPublicPlugin
     };
   }
 
-  public start() {
-    return {
-      telemetry: this.telemetry,
-      inject: this.inject,
-      extract: this.extract,
-    };
-  }
+  public start() {}
 
   public stop() {}
 
