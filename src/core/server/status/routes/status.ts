@@ -46,14 +46,10 @@ interface Deps {
   };
 }
 
-interface SerializableServiceStatus extends Omit<ServiceStatus, 'level'> {
-  level: string;
-}
-
 interface StatusInfo {
-  overall: SerializableServiceStatus;
-  core: Record<string, SerializableServiceStatus>;
-  plugins: Record<string, SerializableServiceStatus>;
+  overall: ServiceStatus;
+  core: CoreStatus;
+  plugins: Record<string, ServiceStatus>;
 }
 
 interface StatusHttpBody {
@@ -140,9 +136,9 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
       let statusInfo: StatusInfo | LegacyStatusInfo;
       if (req.query?.v8format) {
         statusInfo = {
-          overall: serializeStatus(overall),
-          core: serializeStatusRecord((core as unknown) as Record<string, ServiceStatus>),
-          plugins: serializeStatusRecord(plugins),
+          overall,
+          core,
+          plugins,
         };
       } else {
         statusInfo = calculateLegacyStatus({
@@ -183,16 +179,3 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
     }
   );
 };
-
-const serializeStatus = (status: ServiceStatus): SerializableServiceStatus => ({
-  ...status,
-  level: status.level.toString(),
-});
-
-const serializeStatusRecord = (
-  statuses: Record<string, ServiceStatus>
-): Record<string, SerializableServiceStatus> =>
-  Object.keys(statuses).reduce((acc, serviceName) => {
-    acc[serviceName] = serializeStatus(statuses[serviceName]);
-    return acc;
-  }, {} as Record<string, SerializableServiceStatus>);

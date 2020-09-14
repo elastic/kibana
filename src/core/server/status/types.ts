@@ -71,6 +71,9 @@ export const ServiceStatusLevels = deepFreeze({
   available: {
     toString: () => 'available',
     valueOf: () => 0,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * Some features may not be working.
@@ -78,6 +81,9 @@ export const ServiceStatusLevels = deepFreeze({
   degraded: {
     toString: () => 'degraded',
     valueOf: () => 1,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * The service is unavailable, but other functions that do not depend on this service should work.
@@ -85,6 +91,9 @@ export const ServiceStatusLevels = deepFreeze({
   unavailable: {
     toString: () => 'unavailable',
     valueOf: () => 2,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * Block all user functions and display the status page, reserved for Core services only.
@@ -92,6 +101,9 @@ export const ServiceStatusLevels = deepFreeze({
   critical: {
     toString: () => 'critical',
     valueOf: () => 3,
+    toJSON() {
+      return this.toString();
+    },
   },
 });
 

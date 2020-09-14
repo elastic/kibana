@@ -21,7 +21,6 @@ import { BehaviorSubject } from 'rxjs';
 import { UnwrapPromise } from '@kbn/utility-types';
 
 import {
-  AuthStatus,
   MetricsServiceSetup,
   ServiceStatus,
   ServiceStatusLevels,
@@ -75,7 +74,6 @@ describe('/api/stats', () => {
       },
       metrics,
       overallStatus$,
-      getAuthState: () => ({ status: AuthStatus.unknown, state: {} as any }),
     });
 
     await server.start();

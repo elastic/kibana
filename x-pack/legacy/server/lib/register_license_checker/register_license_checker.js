@@ -11,13 +11,17 @@ import { checkLicense } from '../check_license';
 
 export function registerLicenseChecker(server, pluginId, pluginName, minimumLicenseRequired) {
   const xpackMainPlugin = server.plugins.xpack_main;
-  server.newPlatform.setup.core.status.core$
+  const subscription = server.newPlatform.setup.core.status.core$
     .pipe(pairwise())
     .subscribe(([coreLast, coreCurrent]) => {
       if (
+        !subscription.closed &&
         coreLast.elasticsearch.level !== ServiceStatusLevels.available &&
         coreCurrent.elasticsearch.level === ServiceStatusLevels.available
       ) {
+        // Unsubscribe as soon as ES becomes available so this function only runs once
+        subscription.unsubscribe();
+
         // Register a function that is called whenever the xpack info changes,
         // to re-compute the license check results for this plugin
         xpackMainPlugin.info

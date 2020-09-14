@@ -24,8 +24,6 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import {
-  AuthStatus,
-  GetAuthState,
   IRouter,
   LegacyAPICaller,
   MetricsServiceSetup,
@@ -46,7 +44,6 @@ export function registerStatsRoute({
   collectorSet,
   metrics,
   overallStatus$,
-  getAuthState,
 }: {
   router: IRouter;
   config: {
@@ -63,7 +60,6 @@ export function registerStatsRoute({
   collectorSet: CollectorSet;
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
-  getAuthState: GetAuthState;
 }) {
   const getUsage = async (callCluster: LegacyAPICaller): Promise<any> => {
     const usage = await collectorSet.bulkFetchUsage(callCluster);
@@ -106,13 +102,6 @@ export function registerStatsRoute({
 
       let extended;
       if (isExtended) {
-        // Unauthenticated users should never have access to these stats.
-        if (getAuthState(req).status === AuthStatus.unauthenticated) {
-          return res.unauthorized({
-            body: 'Unauthenticated for extended stats',
-          });
-        }
-
         const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
         const collectorsReady = await collectorSet.areAllCollectorsReady();
 

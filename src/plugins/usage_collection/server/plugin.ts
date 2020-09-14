@@ -67,7 +67,6 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
       },
       metrics: core.metrics,
       overallStatus$: core.status.overall$,
-      getAuthState: core.http.auth.get,
     });
 
     return collectorSet;

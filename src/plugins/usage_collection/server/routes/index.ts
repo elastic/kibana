@@ -18,7 +18,6 @@
  */
 
 import {
-  GetAuthState,
   IRouter,
   ISavedObjectsRepository,
   MetricsServiceSetup,
@@ -50,7 +49,6 @@ export function setupRoutes({
   collectorSet: CollectorSet;
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
-  getAuthState: GetAuthState;
 }) {
   registerUiMetricRoute(router, getSavedObjects);
   registerStatsRoute({ router, ...rest });
