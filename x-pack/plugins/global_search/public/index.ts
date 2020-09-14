@@ -31,4 +31,4 @@ export {
   GlobalSearchPluginStart,
   GlobalSearchResultProvider,
 } from './types';
-export { SearchServiceStart, GlobalSearchFindOptions } from './services';
+export { GlobalSearchFindOptions } from './services/types';

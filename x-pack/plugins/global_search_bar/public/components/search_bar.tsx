@@ -115,17 +115,13 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   };
 
   const onChange = (selected: EuiSelectableTemplateSitewideOption[]) => {
-    // @ts-ignore - ts error is "union type is too complex to express"
     const { url } = selected.find(({ checked }) => checked === 'on');
 
-    if (/^https?:\/\//.test(url)) window.location.assign(url);
-    else {
-      navigateToUrl(url);
-      (document.activeElement as HTMLElement).blur();
-      if (searchRef) {
-        clearField(searchRef);
-        searchRef.dispatchEvent(blurEvent);
-      }
+    navigateToUrl(url);
+    (document.activeElement as HTMLElement).blur();
+    if (searchRef) {
+      clearField(searchRef);
+      searchRef.dispatchEvent(blurEvent);
     }
   };
 
