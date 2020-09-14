@@ -8,7 +8,8 @@ export interface Timeline {
   title: string;
   description: string;
   query: string;
-  id?: string;
 }
 
-export const SIEM_TIMELINE_ID = '0162c130-78be-11ea-9718-118a926974a4';
+export interface TimelineWithId extends Timeline {
+  id: string;
+}
