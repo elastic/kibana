@@ -40,7 +40,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
             icon="copy"
             onClick={[Function]}
           >
-            Duplicate rule…
+            Duplicate rule
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             data-test-subj="rules-details-export-rule"
@@ -56,7 +56,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
             icon="trash"
             onClick={[Function]}
           >
-            Delete rule…
+            Delete rule
           </EuiContextMenuItem>,
         ]
       }

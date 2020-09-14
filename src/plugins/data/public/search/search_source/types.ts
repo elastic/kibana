@@ -34,19 +34,37 @@ export interface SortDirectionNumeric {
 
 export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
 
+/**
+ * search source fields
+ */
 export interface SearchSourceFields {
   type?: string;
+  /**
+   * {@link Query}
+   */
   query?: Query;
+  /**
+   * {@link Filter}
+   */
   filter?: Filter[] | Filter | (() => Filter[] | Filter | undefined);
+  /**
+   * {@link EsQuerySortValue}
+   */
   sort?: EsQuerySortValue | EsQuerySortValue[];
   highlight?: any;
   highlightAll?: boolean;
+  /**
+   * {@link AggConfigs}
+   */
   aggs?: any;
   from?: number;
   size?: number;
   source?: NameList;
   version?: boolean;
   fields?: NameList;
+  /**
+   * {@link IndexPatternService}
+   */
   index?: IndexPattern;
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
