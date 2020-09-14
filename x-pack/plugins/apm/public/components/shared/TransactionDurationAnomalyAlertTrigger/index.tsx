@@ -42,9 +42,10 @@ interface Props {
 
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
+  const { serviceName } = alertParams;
   const { urlParams } = useUrlParams();
   const transactionTypes = useServiceTransactionTypes(urlParams);
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
   const supportedTransactionTypes = transactionTypes.filter((transactionType) =>
     [TRANSACTION_PAGE_LOAD, TRANSACTION_REQUEST].includes(transactionType)
