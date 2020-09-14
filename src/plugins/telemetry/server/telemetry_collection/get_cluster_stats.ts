@@ -26,7 +26,7 @@ import { TIMEOUT } from './constants';
  * This is the equivalent to GET /_cluster/stats?timeout=30s.
  */
 export async function getClusterStats(callCluster: LegacyAPICaller, esClient: ElasticsearchClient) {
-  const useLegacy = true;
+  const useLegacy = false;
   const legacyClusterStats = await callCluster('cluster.stats', {
     timeout: TIMEOUT,
   });

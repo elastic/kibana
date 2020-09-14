@@ -65,6 +65,6 @@ export async function clusterInfoGetter(esClient: ElasticsearchClient) {
  * }
  */
 export function getClusterInfo(callCluster: LegacyAPICaller, esClient: ElasticsearchClient) {
-  const useLegacy = true;
+  const useLegacy = false;
   return useLegacy ? callCluster<ESClusterInfo>('info') : clusterInfoGetter(esClient);
 }

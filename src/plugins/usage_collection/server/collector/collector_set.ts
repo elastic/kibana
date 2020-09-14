@@ -118,7 +118,8 @@ export class CollectorSet {
   };
 
   // all collections eventually pass through bulkFetch.
-  // the shape of the reponse is different when using the new ES client as is the error handling.
+  // the shape of the response is different when using the new ES client as is the error handling.
+  // We'll handle the refactor for using the new client in a follow up PR.
   public bulkFetch = async (
     callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
@@ -130,7 +131,7 @@ export class CollectorSet {
         try {
           return {
             type: collector.type,
-            result: await collector.fetch(callCluster, esClient), // each collector must ensure they handle the return shape appropriately.
+            result: await collector.fetch(callCluster, esClient), // each collector must ensure they handle the response appropriately.
           };
         } catch (err) {
           this.logger.warn(err);

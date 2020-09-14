@@ -118,7 +118,7 @@ export const getLocalLicense: LicenseGetter = async (
   clustersDetails,
   { callCluster, esClient }
 ) => {
-  const useLegacy = true;
+  const useLegacy = false;
   if (!useLegacy) {
     const license = await getLicenseFromLocalOrMasterNewClient(esClient);
     return clustersDetails.reduce(

@@ -81,6 +81,7 @@ export function handleKibanaStats(
   };
 }
 
+// Tina Note: pass both the legacy and new es clients to bulkFetch. BulkFetch calls all the collector fetch methods.
 export async function getKibana(
   usageCollection: UsageCollectionSetup,
   callWithInternalUser: LegacyAPICaller,

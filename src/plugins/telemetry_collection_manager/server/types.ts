@@ -140,7 +140,7 @@ export interface CollectionConfig<
   title: string;
   priority: number;
   esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient; // --> by now we know that the client getter will return the IClusterClient
+  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient BUT we assure that through a code check
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;

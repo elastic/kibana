@@ -30,6 +30,6 @@ export async function xpackUsageGetter(esClient: ElasticsearchClient) {
  * Like any X-Pack related API, X-Pack must installed for this to work.
  */
 export function getXPackUsage(callCluster: CallCluster, esClient: ElasticsearchClient) {
-  const useLegacy = true;
+  const useLegacy = false;
   return useLegacy ? legacyClientXpackUsageGetter(callCluster) : xpackUsageGetter(esClient);
 }

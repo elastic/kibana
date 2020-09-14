@@ -19,4 +19,8 @@
 
 export { DATA_TELEMETRY_ID } from './constants';
 
-export { getDataTelemetry, buildDataTelemetryPayload } from './get_data_telemetry';
+export {
+  getDataTelemetry,
+  buildDataTelemetryPayload,
+  DataTelemetryPayload,
+} from './get_data_telemetry';
