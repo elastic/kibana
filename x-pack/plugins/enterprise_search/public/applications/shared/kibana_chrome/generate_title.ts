@@ -20,7 +20,7 @@ export type TTitle = string[];
 /**
  * Given an array of page titles, return a final formatted document title
  * @param pages - e.g., ['Curations', 'some Engine', 'App Search']
- * @returns - e.g., 'Curations | some Engine | App Search'
+ * @returns - e.g., 'Curations - some Engine - App Search'
  */
 export const generateTitle = (pages: TTitle) => pages.join(' - ');
 

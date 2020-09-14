@@ -22,16 +22,22 @@ import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
+export interface InternalFieldConfig<T> {
+  initialValue?: T;
+  isIncludedInOutput?: boolean;
+}
+
 export const useField = <T>(
   form: FormHook,
   path: string,
-  config: FieldConfig<any, T> & { initialValue?: T } = {},
+  config: FieldConfig<any, T> & InternalFieldConfig<T> = {},
   valueChangeListener?: (value: T) => void
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
     defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
     initialValue = config.defaultValue ?? '', // The value explicitly passed
+    isIncludedInOutput = true,
     label = '',
     labelAppend = '',
     helpText = '',
@@ -69,11 +75,12 @@ export const useField = <T>(
   const [isChangingValue, setIsChangingValue] = useState(false);
   const [isValidated, setIsValidated] = useState(false);
 
+  const isMounted = useRef<boolean>(false);
   const validateCounter = useRef(0);
   const changeCounter = useRef(0);
+  const hasBeenReset = useRef<boolean>(false);
   const inflightValidation = useRef<Promise<any> | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  const isMounted = useRef<boolean>(false);
 
   // -- HELPERS
   // ----------------------------------
@@ -142,11 +149,7 @@ export const useField = <T>(
     __updateFormDataAt(path, value);
 
     // Validate field(s) (that will update form.isValid state)
-    // We only validate if the value is different than the initial or default value
-    // to avoid validating after a form.reset() call.
-    if (value !== initialValue && value !== defaultValue) {
-      await __validateFields(fieldsToValidateOnChange ?? [path]);
-    }
+    await __validateFields(fieldsToValidateOnChange ?? [path]);
 
     if (isMounted.current === false) {
       return;
@@ -172,8 +175,6 @@ export const useField = <T>(
   }, [
     path,
     value,
-    defaultValue,
-    initialValue,
     valueChangeListener,
     errorDisplayDelay,
     fieldsToValidateOnChange,
@@ -206,7 +207,7 @@ export const useField = <T>(
       validationTypeToValidate,
     }: {
       formData: any;
-      value: unknown;
+      value: T;
       validationTypeToValidate?: string;
     }): ValidationError[] | Promise<ValidationError[]> => {
       if (!validations) {
@@ -239,7 +240,7 @@ export const useField = <T>(
           }
 
           inflightValidation.current = validator({
-            value: (valueToValidate as unknown) as string,
+            value: valueToValidate,
             errors: validationErrors,
             form: { getFormData, getFields },
             formData,
@@ -254,6 +255,8 @@ export const useField = <T>(
 
           validationErrors.push({
             ...validationResult,
+            // See comment below that explains why we add "__isBlocking__".
+            __isBlocking__: validationResult.__isBlocking__ ?? validation.isBlocking,
             validationType: validationType || VALIDATION_TYPES.FIELD,
           });
 
@@ -283,7 +286,7 @@ export const useField = <T>(
           }
 
           const validationResult = validator({
-            value: (valueToValidate as unknown) as string,
+            value: valueToValidate,
             errors: validationErrors,
             form: { getFormData, getFields },
             formData,
@@ -306,6 +309,11 @@ export const useField = <T>(
 
           validationErrors.push({
             ...(validationResult as ValidationError),
+            // We add an "__isBlocking__" property to know if this error is a blocker or no.
+            // Most validation errors are blockers but in some cases a validation is more a warning than an error
+            // like with the ComboBox items when they are added.
+            __isBlocking__:
+              (validationResult as ValidationError).__isBlocking__ ?? validation.isBlocking,
             validationType: validationType || VALIDATION_TYPES.FIELD,
           });
 
@@ -386,15 +394,27 @@ export const useField = <T>(
    */
   const setValue: FieldHook<T>['setValue'] = useCallback(
     (newValue) => {
-      const formattedValue = formatInputValue<T>(newValue);
-      setStateValue(formattedValue);
-      return formattedValue;
+      setStateValue((prev) => {
+        let formattedValue: T;
+        if (typeof newValue === 'function') {
+          formattedValue = formatInputValue<T>((newValue as Function)(prev));
+        } else {
+          formattedValue = formatInputValue<T>(newValue);
+        }
+        return formattedValue;
+      });
     },
     [formatInputValue]
   );
 
   const _setErrors: FieldHook<T>['setErrors'] = useCallback((_errors) => {
-    setErrors(_errors.map((error) => ({ validationType: VALIDATION_TYPES.FIELD, ...error })));
+    setErrors(
+      _errors.map((error) => ({
+        validationType: VALIDATION_TYPES.FIELD,
+        __isBlocking__: true,
+        ...error,
+      }))
+    );
   }, []);
 
   /**
@@ -455,6 +475,7 @@ export const useField = <T>(
       setErrors([]);
 
       if (resetValue) {
+        hasBeenReset.current = true;
         const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
         setValue(newValue);
         return newValue;
@@ -463,7 +484,8 @@ export const useField = <T>(
     [setValue, deserializeValue, defaultValue]
   );
 
-  const isValid = errors.length === 0;
+  // Don't take into account non blocker validation. Some are just warning (like trying to add a wrong ComboBox item)
+  const isValid = errors.filter((e) => e.__isBlocking__ !== false).length === 0;
 
   const field = useMemo<FieldHook<T>>(() => {
     return {
@@ -486,6 +508,7 @@ export const useField = <T>(
       clearErrors,
       validate,
       reset,
+      __isIncludedInOutput: isIncludedInOutput,
       __serializeValue: serializeValue,
     };
   }, [
@@ -501,6 +524,7 @@ export const useField = <T>(
     isValidating,
     isValidated,
     isChangingValue,
+    isIncludedInOutput,
     onChange,
     getErrorsMessages,
     setValue,
@@ -525,6 +549,13 @@ export const useField = <T>(
   }, [path, __removeField]);
 
   useEffect(() => {
+    // If the field value has been reset, we don't want to call the "onValueChange()"
+    // as it will set the "isPristine" state to true or validate the field, which initially we don't want.
+    if (hasBeenReset.current) {
+      hasBeenReset.current = false;
+      return;
+    }
+
     if (!isMounted.current) {
       return;
     }

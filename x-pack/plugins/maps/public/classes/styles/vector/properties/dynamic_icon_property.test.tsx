@@ -6,7 +6,6 @@
 
 import { shallow } from 'enzyme';
 
-jest.mock('ui/new_platform');
 jest.mock('../components/vector_style_editor', () => ({
   VectorStyleEditor: () => {
     return <div>mockVectorStyleEditor</div>;

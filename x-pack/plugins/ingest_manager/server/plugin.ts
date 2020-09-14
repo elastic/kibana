@@ -173,7 +173,7 @@ export class IngestManagerPlugin
     // Register feature
     // TODO: Flesh out privileges
     if (deps.features) {
-      deps.features.registerFeature({
+      deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
         name: 'Ingest Manager',
         icon: 'savedObjectsApp',
@@ -238,7 +238,7 @@ export class IngestManagerPlugin
           // we currently only use this global interceptor if fleet is enabled
           // since it would run this func on *every* req (other plugins, CSS, etc)
           registerLimitedConcurrencyRoutes(core, config);
-          registerAgentRoutes(router);
+          registerAgentRoutes(router, config);
           registerEnrollmentApiKeyRoutes(router);
           registerInstallScriptRoutes({
             router,

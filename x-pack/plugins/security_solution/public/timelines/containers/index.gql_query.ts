@@ -200,6 +200,7 @@ export const timelineQuery = gql`
                 country_iso_code
               }
               signal {
+                status
                 original_time
                 rule {
                   id

@@ -12,7 +12,6 @@ import {
   ResolverTree,
   ResolverEntityIndex,
 } from '../../../common/endpoint/types';
-import { DEFAULT_INDEX_KEY as defaultIndexKey } from '../../../common/constants';
 
 /**
  * The data access layer for resolver. All communication with the Kibana server is done through this object. This object is provided to Resolver. In tests, a mock data access layer can be used instead.
@@ -36,13 +35,6 @@ export function dataAccessLayerFactory(
       return context.services.http.get(`/api/endpoint/resolver/${entityID}`, {
         signal,
       });
-    },
-
-    /**
-     * Used to get the default index pattern from the SIEM application.
-     */
-    indexPatterns(): string[] {
-      return context.services.uiSettings.get(defaultIndexKey);
     },
 
     /**

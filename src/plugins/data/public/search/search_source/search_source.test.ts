@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { GetConfigFn } from 'src/plugins/data/common';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
 import { fetchSoon } from '../legacy';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 
 jest.mock('../legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -54,8 +54,6 @@ describe('SearchSource', () => {
   let searchSourceDependencies: SearchSourceDependencies;
 
   beforeEach(() => {
-    const data = dataPluginMock.createStartContract();
-
     mockSearchMethod = jest.fn(() => {
       return new Observable((subscriber) => {
         setTimeout(() => {
@@ -70,8 +68,8 @@ describe('SearchSource', () => {
     searchSourceDependencies = {
       getConfig: jest.fn(),
       search: mockSearchMethod,
-      legacySearch: data.search.__LEGACY,
-      esShardTimeout: 30000,
+      http: coreMock.createStart().http,
+      loadingCount$: new BehaviorSubject(0),
     };
   });
 

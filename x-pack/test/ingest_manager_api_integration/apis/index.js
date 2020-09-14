@@ -22,5 +22,8 @@ export default function ({ loadTestFile }) {
 
     // Agent policies
     loadTestFile(require.resolve('./agent_policy/index'));
+
+    // Settings
+    loadTestFile(require.resolve('./settings/index'));
   });
 }

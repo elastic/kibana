@@ -7,76 +7,57 @@
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
+  HostDetailsStrategyResponse,
+  HostDetailsRequestOptions,
   HostOverviewStrategyResponse,
+  HostAuthenticationsRequestOptions,
+  HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
+  HostFirstLastSeenStrategyResponse,
+  HostFirstLastSeenRequestOptions,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
+  HostUncommonProcessesStrategyResponse,
+  HostUncommonProcessesRequestOptions,
 } from './hosts';
+import {
+  NetworkQueries,
+  NetworkDetailsStrategyResponse,
+  NetworkDetailsRequestOptions,
+  NetworkDnsStrategyResponse,
+  NetworkDnsRequestOptions,
+  NetworkTlsStrategyResponse,
+  NetworkTlsRequestOptions,
+  NetworkHttpStrategyResponse,
+  NetworkHttpRequestOptions,
+  NetworkOverviewStrategyResponse,
+  NetworkOverviewRequestOptions,
+  NetworkTopCountriesStrategyResponse,
+  NetworkTopCountriesRequestOptions,
+  NetworkTopNFlowStrategyResponse,
+  NetworkTopNFlowRequestOptions,
+  NetworkUsersStrategyResponse,
+  NetworkUsersRequestOptions,
+} from './network';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramRequestOptions,
+  MatrixHistogramStrategyResponse,
+} from './matrix_histogram';
+import {
+  DocValueFields,
+  TimerangeInput,
+  SortField,
+  PaginationInput,
+  PaginationInputPaginated,
+} from '../common';
+
 export * from './hosts';
-export type Maybe<T> = T | null;
+export * from './matrix_histogram';
+export * from './network';
 
-export type FactoryQueryTypes = HostsQueries;
-
-export interface Inspect {
-  dsl: string[];
-  response: string[];
-}
-
-export interface PageInfoPaginated {
-  activePage: number;
-  fakeTotalCount: number;
-  showMorePagesIndicator: boolean;
-}
-
-export interface CursorType {
-  value?: Maybe<string>;
-  tiebreaker?: Maybe<string>;
-}
-
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
-
-export interface SortField {
-  field: 'lastSeen' | 'hostName';
-  direction: Direction;
-}
-
-export interface TimerangeInput {
-  /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
-  interval: string;
-  /** The end of the timerange */
-  to: string;
-  /** The beginning of the timerange */
-  from: string;
-}
-
-export interface PaginationInput {
-  /** The limit parameter allows you to configure the maximum amount of items to be returned */
-  limit: number;
-  /** The cursor parameter defines the next result you want to fetch */
-  cursor?: Maybe<string>;
-  /** The tiebreaker parameter allow to be more precise to fetch the next item */
-  tiebreaker?: Maybe<string>;
-}
-
-export interface PaginationInputPaginated {
-  /** The activePage parameter defines the page of results you want to fetch */
-  activePage: number;
-  /** The cursorStart parameter defines the start of the results to be displayed */
-  cursorStart: number;
-  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
-  fakePossibleCount: number;
-  /** The querySize parameter is the number of items to be returned */
-  querySize: number;
-}
-
-export interface DocValueFields {
-  field: string;
-  format: string;
-}
+export type FactoryQueryTypes = HostsQueries | NetworkQueries | typeof MatrixHistogramQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -86,24 +67,78 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: FactoryQueryTypes;
 }
 
-export interface RequestOptions extends RequestBasicOptions {
+/** A mapping of semantic fields to their document counterparts */
+
+export interface RequestOptions<Field = string> extends RequestBasicOptions {
   pagination: PaginationInput;
-  sortField?: SortField;
+  sort: SortField<Field>;
 }
 
-export interface RequestOptionsPaginated extends RequestBasicOptions {
+export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
-  sortField?: SortField;
+  sort: SortField<Field>;
 }
 
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsStrategyResponse
-  : T extends HostsQueries.hostOverview
+  : T extends HostsQueries.details
+  ? HostDetailsStrategyResponse
+  : T extends HostsQueries.overview
   ? HostOverviewStrategyResponse
+  : T extends HostsQueries.authentications
+  ? HostAuthenticationsStrategyResponse
+  : T extends HostsQueries.firstLastSeen
+  ? HostFirstLastSeenStrategyResponse
+  : T extends HostsQueries.uncommonProcesses
+  ? HostUncommonProcessesStrategyResponse
+  : T extends NetworkQueries.details
+  ? NetworkDetailsStrategyResponse
+  : T extends NetworkQueries.dns
+  ? NetworkDnsStrategyResponse
+  : T extends NetworkQueries.http
+  ? NetworkHttpStrategyResponse
+  : T extends NetworkQueries.overview
+  ? NetworkOverviewStrategyResponse
+  : T extends NetworkQueries.tls
+  ? NetworkTlsStrategyResponse
+  : T extends NetworkQueries.topCountries
+  ? NetworkTopCountriesStrategyResponse
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowStrategyResponse
+  : T extends NetworkQueries.users
+  ? NetworkUsersStrategyResponse
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
-  : T extends HostsQueries.hostOverview
+  : T extends HostsQueries.details
+  ? HostDetailsRequestOptions
+  : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
+  : T extends HostsQueries.authentications
+  ? HostAuthenticationsRequestOptions
+  : T extends HostsQueries.firstLastSeen
+  ? HostFirstLastSeenRequestOptions
+  : T extends HostsQueries.uncommonProcesses
+  ? HostUncommonProcessesRequestOptions
+  : T extends NetworkQueries.details
+  ? NetworkDetailsRequestOptions
+  : T extends NetworkQueries.dns
+  ? NetworkDnsRequestOptions
+  : T extends NetworkQueries.http
+  ? NetworkHttpRequestOptions
+  : T extends NetworkQueries.overview
+  ? NetworkOverviewRequestOptions
+  : T extends NetworkQueries.tls
+  ? NetworkTlsRequestOptions
+  : T extends NetworkQueries.topCountries
+  ? NetworkTopCountriesRequestOptions
+  : T extends NetworkQueries.topNFlow
+  ? NetworkTopNFlowRequestOptions
+  : T extends NetworkQueries.users
+  ? NetworkUsersRequestOptions
+  : T extends typeof MatrixHistogramQuery
+  ? MatrixHistogramRequestOptions
   : never;

@@ -29,7 +29,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Add to root',
     }),
     deserializer: to.booleanOrUndef,
-    serializer: from.defaultBoolToUndef(false),
+    serializer: from.undefinedIfValue(false),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.jsonForm.addToRootFieldHelpText',
       {
@@ -65,12 +65,7 @@ export const Json: FunctionComponent = () => {
         )}
       />
 
-      <TargetField
-        helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.jsonForm.targetFieldHelpText',
-          { defaultMessage: 'Field used to contain the JSON object.' }
-        )}
-      />
+      <TargetField />
 
       <UseField
         config={fieldsConfig.add_to_root}

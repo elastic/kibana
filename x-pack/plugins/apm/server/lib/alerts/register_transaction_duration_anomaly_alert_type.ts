@@ -73,15 +73,19 @@ export function registerTransactionDurationAnomalyAlertType({
         return;
       }
       const alertParams = params as TypeOf<typeof paramsSchema>;
-      const mlClient = services.getLegacyScopedClusterClient(ml.mlClient);
-      const request = { params: 'DummyKibanaRequest' } as KibanaRequest;
-      const { mlAnomalySearch } = ml.mlSystemProvider(mlClient, request);
-      const anomalyDetectors = ml.anomalyDetectorsProvider(mlClient, request);
+      const request = {} as KibanaRequest;
+      const { mlAnomalySearch } = ml.mlSystemProvider(request);
+      const anomalyDetectors = ml.anomalyDetectorsProvider(request);
 
       const mlJobIds = await getMLJobIds(
         anomalyDetectors,
         alertParams.environment
       );
+
+      if (mlJobIds.length === 0) {
+        return {};
+      }
+
       const anomalySearchParams = {
         body: {
           size: 0,
