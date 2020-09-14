@@ -213,9 +213,16 @@ export class VisualizeEmbeddableFactory
         savedVis.uiStateJSON = visObj?.uiState.toString();
       }
       const id = await savedVis.save(saveOptions);
+      if (!id || id === '') {
+        throw new Error(
+          i18n.translate('visualizations.savingVisualizationFailed.errorMsg', {
+            defaultMessage: 'Saving a visualization failed',
+          })
+        );
+      }
       return { id };
     } catch (error) {
-      return { id: '' };
+      throw error;
     }
   }
 }
