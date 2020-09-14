@@ -32,7 +32,9 @@ export const TimelineParser: Plugin = function () {
     let index = 0;
     const nextChar = value[index];
 
-    if (nextChar !== '[') return false; // this isn't actually a  timeline
+    if (nextChar !== '[') {
+      return false;
+    }
 
     if (silent) {
       return true;
@@ -96,7 +98,9 @@ export const TimelineParser: Plugin = function () {
       });
     }
 
-    if (!timelineId) return false;
+    if (!timelineId) {
+      return false;
+    }
 
     return eat(`[${timelineTitle}](${timelineUrl})`)({
       type: ID,
@@ -109,13 +113,14 @@ export const TimelineParser: Plugin = function () {
   const parseNewFormat: RemarkTokenizer = function (eat, value, silent) {
     const nextChar = value[START_POS];
 
-    if (nextChar !== '{' && nextChar !== '}') return false; // this isn't actually a timeline
+    if (nextChar !== '{') {
+      return false;
+    }
 
     if (silent) {
       return true;
     }
 
-    // is there a configuration?
     const hasConfiguration = nextChar === '{';
 
     let match = PREFIX;
@@ -163,14 +168,19 @@ export const TimelineParser: Plugin = function () {
   };
 
   const tokenizeTimeline: RemarkTokenizer = function tokenizeTimeline(eat, value, silent) {
-    if (value.startsWith(PREFIX) === false && value.startsWith(OLD_PREFIX) === false) return false;
+    if (
+      (value.startsWith(PREFIX) === false && value.startsWith(OLD_PREFIX) === false) ||
+      (value.startsWith(OLD_PREFIX) === true && !value.includes('timelines?timeline=(id:'))
+    ) {
+      return false;
+    }
 
     if (value.startsWith(OLD_PREFIX)) {
       oldFormat = true;
-      parseOldFormat.call(this, eat, value, silent);
+      return parseOldFormat.call(this, eat, value, silent);
     }
 
-    parseNewFormat.call(this, eat, value, silent);
+    return parseNewFormat.call(this, eat, value, silent);
   };
 
   tokenizeTimeline.locator = (value: string, fromIndex: number) => {
