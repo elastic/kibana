@@ -20,7 +20,7 @@ export type LegendProps = {
 export interface IStyleProperty<T> {
   isDynamic(): boolean;
   isComplete(): boolean;
-  formatField(value: string | number | undefined): string | number;
+  formatField(value: string | number | undefined | null): string | number;
   getStyleName(): VECTOR_STYLES;
   getOptions(): T;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
@@ -53,9 +53,8 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
     return true;
   }
 
-  formatField(value: string | number | undefined): string | number {
-    // eslint-disable-next-line eqeqeq
-    return value == undefined ? '' : value;
+  formatField(value: string | number | undefined | null): string | number {
+    return typeof value === 'undefined' || value === null ? '' : value;
   }
 
   getStyleName(): VECTOR_STYLES {

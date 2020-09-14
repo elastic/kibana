@@ -18,11 +18,13 @@ export class DynamicOrientationProperty extends DynamicStyleProperty<Orientation
     }
   }
 
-  supportsMbFeatureState() {
+  supportsMbFeatureState(): boolean {
     return false;
   }
 
-  getMbPropertyValue(rawValue) {
+  getMbPropertyValue(
+    rawValue: string | number | null | undefined
+  ): string | number | null | undefined {
     return getNumericalMbFeatureStateValue(rawValue);
   }
 }

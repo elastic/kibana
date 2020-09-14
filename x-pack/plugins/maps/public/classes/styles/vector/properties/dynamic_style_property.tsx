@@ -323,11 +323,11 @@ export class DynamicStyleProperty<T>
     };
   }
 
-  formatField(value: string | number | undefined): string | number {
+  formatField(value: string | number | undefined | null): string | number {
     if (this.getField()) {
       const fieldName = this.getFieldName();
       const fieldFormatter = this._getFieldFormatter(fieldName);
-      return fieldFormatter ? fieldFormatter(value) : super.formatField(value);
+      return fieldFormatter && value !== null ? fieldFormatter(value) : super.formatField(value);
     } else {
       return super.formatField(value);
     }
@@ -388,7 +388,11 @@ export class DynamicStyleProperty<T>
   }
 }
 
-export function getNumericalMbFeatureStateValue(value: string | number) {
+export function getNumericalMbFeatureStateValue(value: string | number | null | undefined) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
   const valueAsFloat = parseFloat(value);
   return isNaN(valueAsFloat) ? null : valueAsFloat;
 }

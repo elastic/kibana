@@ -30,7 +30,9 @@ export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOption
     return false;
   }
 
-  getMbPropertyValue(rawValue) {
+  getMbPropertyValue(
+    rawValue: string | number | null | undefined
+  ): string | number | null | undefined {
     return this.formatField(rawValue);
   }
 }
