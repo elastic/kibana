@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../features/server';
+import { KibanaFeature } from '../../../features/server';
 
-export function validateFeaturePrivileges(features: Feature[]) {
+export function validateFeaturePrivileges(features: KibanaFeature[]) {
   for (const feature of features) {
     const seenPrivilegeIds = new Set<string>();
     Object.keys(feature.privileges ?? {}).forEach((privilegeId) => {
@@ -20,7 +20,7 @@ export function validateFeaturePrivileges(features: Feature[]) {
         subFeaturePrivilegeGroup.privileges.forEach((subFeaturePrivilege) => {
           if (seenPrivilegeIds.has(subFeaturePrivilege.id)) {
             throw new Error(
-              `Feature '${feature.id}' already has a privilege with ID '${subFeaturePrivilege.id}'. Sub feature '${subFeature.name}' cannot also specify this.`
+              `KibanaFeature '${feature.id}' already has a privilege with ID '${subFeaturePrivilege.id}'. Sub feature '${subFeature.name}' cannot also specify this.`
             );
           }
           seenPrivilegeIds.add(subFeaturePrivilege.id);

@@ -70,12 +70,13 @@ export class ActionsAuthorization {
         );
       } else {
         const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-        const { hasAllRequested, username } = await checkPrivileges(
-          operationAlias[operation]
+        const { hasAllRequested, username } = await checkPrivileges({
+          kibana: operationAlias[operation]
             ? operationAlias[operation](authorization)
-            : authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)
-        );
+            : authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation),
+        });
         if (hasAllRequested) {
+          this.auditLogger.actionsAuthorizationSuccess(username, operation, actionTypeId);
           this.auditLogger.actionsAuthorizationSuccess(username, operation, actionTypeId);
         } else {
           throw Boom.forbidden(

@@ -9,7 +9,8 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { TransformPivotConfig } from '../../../../common';
+import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
 // A Validator function takes in a value to check and returns an array of error messages.
 // If no messages (empty array) get returned, the value is valid.
@@ -118,53 +119,35 @@ interface Action {
   value: string;
 }
 
-// Some attributes can have a value of `null` to trigger
-// a reset to the default value, or in the case of `docs_per_second`
-// `null` is used to disable throttling.
-interface UpdateTransformPivotConfig {
-  description: string;
-  frequency: string;
-  settings: {
-    docs_per_second: number | null;
-  };
-}
-
 // Takes in the form configuration and returns a
 // request object suitable to be sent to the
 // transform update API endpoint.
 export const applyFormFieldsToTransformConfig = (
   config: TransformPivotConfig,
   { description, docsPerSecond, frequency }: EditTransformFlyoutFieldsState
-): Partial<UpdateTransformPivotConfig> => {
-  const updateConfig: Partial<UpdateTransformPivotConfig> = {};
-
-  // set the values only if they changed from the default
-  // and actually differ from the previous value.
-  if (
-    !(config.frequency === undefined && frequency.value === '') &&
-    config.frequency !== frequency.value
-  ) {
-    updateConfig.frequency = frequency.value;
-  }
-
-  if (
-    !(config.description === undefined && description.value === '') &&
-    config.description !== description.value
-  ) {
-    updateConfig.description = description.value;
-  }
-
+): PostTransformsUpdateRequestSchema => {
   // if the input field was left empty,
   // fall back to the default value of `null`
   // which will disable throttling.
   const docsPerSecondFormValue =
     docsPerSecond.value !== '' ? parseInt(docsPerSecond.value, 10) : null;
   const docsPerSecondConfigValue = config.settings?.docs_per_second ?? null;
-  if (docsPerSecondFormValue !== docsPerSecondConfigValue) {
-    updateConfig.settings = { docs_per_second: docsPerSecondFormValue };
-  }
 
-  return updateConfig;
+  return {
+    // set the values only if they changed from the default
+    // and actually differ from the previous value.
+    ...(!(config.frequency === undefined && frequency.value === '') &&
+    config.frequency !== frequency.value
+      ? { frequency: frequency.value }
+      : {}),
+    ...(!(config.description === undefined && description.value === '') &&
+    config.description !== description.value
+      ? { description: description.value }
+      : {}),
+    ...(docsPerSecondFormValue !== docsPerSecondConfigValue
+      ? { settings: { docs_per_second: docsPerSecondFormValue } }
+      : {}),
+  };
 };
 
 // Takes in a transform configuration and returns

@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionComponent } from 'react';
-
 /**
  * This fields component has no unique fields
  */
-export const Drop: FunctionComponent = () => {
-  return null;
-};
+export const Drop = undefined;

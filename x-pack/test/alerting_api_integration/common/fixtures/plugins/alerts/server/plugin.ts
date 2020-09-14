@@ -32,7 +32,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     core: CoreSetup<FixtureStartDeps>,
     { features, actions, alerts, spaces, security }: FixtureSetupDeps
   ) {
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: 'alertsFixture',
       name: 'Alerts',
       app: ['alerts', 'kibana'],
