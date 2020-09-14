@@ -48,8 +48,6 @@
         }
       }
     },
-<<<<<<< HEAD
-=======
     "application_usage": {
       "properties": {
         "dashboards": {
@@ -1286,7 +1284,6 @@
         }
       }
     },
->>>>>>> 0fd503edc61dcdc1ea95d1941cb198fa63c64e03
     "csp": {
       "properties": {
         "strict": {
