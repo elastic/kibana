@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { Link } from 'react-router-dom';
-import { useMlLink } from '../../../contexts/kibana';
+import { useMlLink } from '../../../contexts/kibana/use_create_url';
 export const ExplorerNoJobsFound = () => {
   const ADJobsManagementUrl = useMlLink({
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,

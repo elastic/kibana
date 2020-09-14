@@ -105,7 +105,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
-      const [coreStart, pluginsStart] = await core.getStartServices();
+      const [coreStart] = await core.getStartServices();
       if (isMlEnabled(license)) {
         // add ML to home page
         if (pluginsSetup.home) {

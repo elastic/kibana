@@ -17,12 +17,10 @@ import { ManagementSetup } from 'src/plugins/management/public';
 import { MlStartDependencies } from '../../plugin';
 
 import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
-import { SharePluginStart } from '../../../../../../src/plugins/share/public';
 
 export function registerManagementSection(
   management: ManagementSetup | undefined,
-  core: CoreSetup<MlStartDependencies>,
-  share: SharePluginStart
+  core: CoreSetup<MlStartDependencies>
 ) {
   if (management !== undefined) {
     return management.sections.section.insightsAndAlerting.registerApp({
@@ -33,7 +31,7 @@ export function registerManagementSection(
       order: 2,
       async mount(params: ManagementAppMountParams) {
         const { mountApp } = await import('./jobs_list');
-        return mountApp(core, share, params);
+        return mountApp(core, params);
       },
     });
   }

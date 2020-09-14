@@ -38,9 +38,9 @@ export const ResultsLinks: FC<Props> = ({
     to: 'now',
   });
   const [showCreateJobLink, setShowCreateJobLink] = useState(false);
-  const [globalStateString, setGlobalStateString] = useState('');
   const [globalState, setGlobalState] = useState<MlCommonGlobalState | undefined>();
 
+  const [discoverLink, setDiscoverLink] = useState('');
   const {
     services: {
       http: { basePath },
@@ -48,6 +48,38 @@ export const ResultsLinks: FC<Props> = ({
   } = useMlKibana();
   const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
+
+  const {
+    services: {
+      share: {
+        urlGenerators: { getUrlGenerator },
+      },
+    },
+  } = useMlKibana();
+
+  useEffect(() => {
+    let unamounted = false;
+
+    const getDiscoverUrl = async (): Promise<void> => {
+      const state: any = {
+        indexPatternId,
+      };
+
+      if (globalState?.time) {
+        state.timeRange = globalState.time;
+      }
+      if (!unamounted) {
+        const discoverUrlGenerator = getUrlGenerator('DISCOVER_APP_URL_GENERATOR');
+        const discoverUrl = await discoverUrlGenerator.createUrl(state);
+        setDiscoverLink(discoverUrl);
+      }
+    };
+    getDiscoverUrl();
+
+    return () => {
+      unamounted = true;
+    };
+  }, [indexPatternId, getUrlGenerator]);
 
   const openInDataVisualizer = useCallback(async () => {
     const path = await mlUrlGenerator.createUrl({
@@ -77,17 +109,12 @@ export const ResultsLinks: FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    const _g =
-      timeFieldName !== undefined
-        ? `&_g=(time:(from:'${duration.from}',mode:quick,to:'${duration.to}'))`
-        : '';
     const _globalState: MlCommonGlobalState = {
       time: {
         from: duration.from,
         to: duration.to,
       },
     };
-    setGlobalStateString(_g);
     setGlobalState(_globalState);
   }, [duration]);
 
@@ -124,7 +151,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={`${basePath.get()}/app/discover/?&_a=(index:'${indexPatternId}')${globalStateString}`}
+            href={discoverLink}
           />
         </EuiFlexItem>
       )}

@@ -30,10 +30,9 @@ const renderApp = (
 
 export async function mountApp(
   core: CoreSetup<MlStartDependencies>,
-  share: SharePluginStart,
   params: ManagementAppMountParams
 ) {
-  const [coreStart] = await core.getStartServices();
+  const [coreStart, pluginsStart] = await core.getStartServices();
 
   setDependencyCache({
     docLinks: coreStart.docLinks!,
@@ -44,5 +43,5 @@ export async function mountApp(
 
   params.setBreadcrumbs(getJobsListBreadcrumbs());
 
-  return renderApp(params.element, params.history, coreStart, share);
+  return renderApp(params.element, params.history, coreStart, pluginsStart.share);
 }
