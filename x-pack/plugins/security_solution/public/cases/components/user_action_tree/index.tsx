@@ -31,10 +31,10 @@ import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionCopyLink } from './user_action_copy_link';
-import { UserActionPropertyActions } from './user_action_property_actions';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { UserActionUsername } from './user_action_username';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
+import { UserActionContentToolbar } from './user_action_content_toolbar';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -232,22 +232,15 @@ export const UserActionTree = React.memo(
           isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
         }),
         actions: (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <UserActionCopyLink id={DESCRIPTION_ID} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UserActionPropertyActions
-                id={DESCRIPTION_ID}
-                editLabel={i18n.EDIT_DESCRIPTION}
-                quoteLabel={i18n.QUOTE}
-                disabled={!userCanCrud}
-                isLoading={isLoadingDescription}
-                onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
-                onQuote={handleManageQuote.bind(null, caseData.description)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <UserActionContentToolbar
+            id={DESCRIPTION_ID}
+            editLabel={i18n.EDIT_DESCRIPTION}
+            quoteLabel={i18n.QUOTE}
+            disabled={!userCanCrud}
+            isLoading={isLoadingDescription}
+            onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
+            onQuote={handleManageQuote.bind(null, caseData.description)}
+          />
         ),
       }),
       [
@@ -307,22 +300,15 @@ export const UserActionTree = React.memo(
                       />
                     ),
                     actions: (
-                      <EuiFlexGroup>
-                        <EuiFlexItem>
-                          <UserActionCopyLink id={comment.id} />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <UserActionPropertyActions
-                            id={comment.id}
-                            editLabel={i18n.EDIT_COMMENT}
-                            quoteLabel={i18n.QUOTE}
-                            disabled={!userCanCrud}
-                            isLoading={isLoadingIds.includes(comment.id)}
-                            onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-                            onQuote={handleManageQuote.bind(null, comment.comment)}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                      <UserActionContentToolbar
+                        id={comment.id}
+                        editLabel={i18n.EDIT_COMMENT}
+                        quoteLabel={i18n.QUOTE}
+                        disabled={!userCanCrud}
+                        isLoading={isLoadingIds.includes(comment.id)}
+                        onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
+                        onQuote={handleManageQuote.bind(null, comment.comment)}
+                      />
                     ),
                   },
                 ];
