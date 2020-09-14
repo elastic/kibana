@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumLongTasksProjection } from '../../projections/rum_overview';
+import {
+  getRumLongTasksProjection,
+  getRumOverviewProjection,
+} from '../../projections/rum_overview';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -30,8 +33,58 @@ export async function getLongTaskMetrics({
       },
       aggs: {
         noOfLongTasks: { value_count: { field: 'span.type' } },
-        longTaskStats: {
-          stats: {
+        longTaskSum: {
+          sum: {
+            field: SPAN_DURATION,
+          },
+        },
+        longTaskMax: {
+          max: {
+            field: SPAN_DURATION,
+          },
+        },
+      },
+    },
+  });
+
+  const { apmEventClient } = setup;
+
+  const response = await apmEventClient.search(params);
+  return response.aggregations!;
+}
+
+async function filterPageLoadTransactions(
+  setup: Setup & SetupTimeRange & SetupUIFilters,
+  transactionIds: string[]
+) {
+  const projection = getRumOverviewProjection({
+    setup,
+  });
+
+  const params = mergeProjection(projection, {
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...projection.body.query.bool.filter,
+            {
+              term: {
+                'user_agent.name': 'Chrome',
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        noOfLongTasks: { value_count: { field: 'span.type' } },
+        longTaskSum: {
+          sum: {
+            field: SPAN_DURATION,
+          },
+        },
+        longTaskMax: {
+          max: {
             field: SPAN_DURATION,
           },
         },
