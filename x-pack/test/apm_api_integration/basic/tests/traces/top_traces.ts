@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { sortBy, omit } from 'lodash';
+import { sortBy } from 'lodash';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -54,17 +54,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct buckets', async () => {
-        const responseWithoutSamples = sortBy(
-          response.body.items.map((item: any) => omit(item, 'sample')),
-          'impact'
-        );
+        const sortedItems = sortBy(response.body.items, 'impact');
 
-        const firstItem = responseWithoutSamples[0];
-        const lastItem = responseWithoutSamples[responseWithoutSamples.length - 1];
+        const firstItem = sortedItems[0];
+        const lastItem = sortedItems[sortedItems.length - 1];
 
-        const groups = responseWithoutSamples.map((item) => item.key).slice(0, 5);
+        const groups = sortedItems.map((item) => item.key).slice(0, 5);
 
-        expectSnapshot(responseWithoutSamples).toMatch();
+        expectSnapshot(sortedItems).toMatch();
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
@@ -74,6 +71,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "service.name": "opbeans-node",
               "transaction.name": "GET /throw-error",
             },
+            "serviceName": "opbeans-node",
+            "transactionName": "GET /throw-error",
+            "transactionType": "request",
             "transactionsPerMinute": 0.5,
           }
         `);
@@ -86,6 +86,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "service.name": "opbeans-node",
               "transaction.name": "Process payment",
             },
+            "serviceName": "opbeans-node",
+            "transactionName": "Process payment",
+            "transactionType": "Worker",
             "transactionsPerMinute": 0.25,
           }
         `);
@@ -114,16 +117,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           ]
         `);
-      });
-
-      it('returns a sample', async () => {
-        // sample should provide enough information to deeplink to a transaction detail page
-        response.body.items.forEach((item: any) => {
-          expect(item.sample.trace.id).to.be.an('string');
-          expect(item.sample.transaction.id).to.be.an('string');
-          expect(item.sample.service.name).to.be(item.key['service.name']);
-          expect(item.sample.transaction.name).to.be(item.key['transaction.name']);
-        });
       });
     });
   });

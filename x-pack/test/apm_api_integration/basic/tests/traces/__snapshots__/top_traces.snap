@@ -9,6 +9,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /throw-error",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /throw-error",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -18,6 +21,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#orders",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#orders",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -27,6 +33,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#order",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#order",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -36,6 +45,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#product",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#product",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -45,6 +57,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/products/:id/customers",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/products/:id/customers",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -54,6 +69,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#products",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#products",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -63,6 +81,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/orders/:id",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/orders/:id",
+    "transactionType": "request",
     "transactionsPerMinute": 0.75,
   },
   Object {
@@ -72,6 +93,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/orders",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/orders",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -81,6 +105,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/stats",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/stats",
+    "transactionType": "request",
     "transactionsPerMinute": 0.75,
   },
   Object {
@@ -90,6 +117,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/types/:id",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/types/:id",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -99,6 +129,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "POST /api",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "POST /api",
+    "transactionType": "request",
     "transactionsPerMinute": 0.25,
   },
   Object {
@@ -108,6 +141,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/products",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/products",
+    "transactionType": "request",
     "transactionsPerMinute": 1,
   },
   Object {
@@ -117,6 +153,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/products/top",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/products/top",
+    "transactionType": "request",
     "transactionsPerMinute": 0.25,
   },
   Object {
@@ -126,6 +165,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#topProducts",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#topProducts",
+    "transactionType": "request",
     "transactionsPerMinute": 1.75,
   },
   Object {
@@ -135,6 +177,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /log-error",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /log-error",
+    "transactionType": "request",
     "transactionsPerMinute": 0.25,
   },
   Object {
@@ -144,6 +189,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#customerWhoBought",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#customerWhoBought",
+    "transactionType": "request",
     "transactionsPerMinute": 3.25,
   },
   Object {
@@ -153,6 +201,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET static file",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET static file",
+    "transactionType": "request",
     "transactionsPerMinute": 3.5,
   },
   Object {
@@ -162,6 +213,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/types",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/types",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -171,6 +225,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/products/:id",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/products/:id",
+    "transactionType": "request",
     "transactionsPerMinute": 1,
   },
   Object {
@@ -180,6 +237,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/customers",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api/customers",
+    "transactionType": "request",
     "transactionsPerMinute": 0.75,
   },
   Object {
@@ -189,6 +249,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#stats",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#stats",
+    "transactionType": "request",
     "transactionsPerMinute": 1,
   },
   Object {
@@ -198,6 +261,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /log-message",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /log-message",
+    "transactionType": "request",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -207,6 +273,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#customers",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#customers",
+    "transactionType": "request",
     "transactionsPerMinute": 1,
   },
   Object {
@@ -216,6 +285,9 @@ Array [
       "service.name": "client",
       "transaction.name": "/customers",
     },
+    "serviceName": "client",
+    "transactionName": "/customers",
+    "transactionType": "route-change",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -225,6 +297,9 @@ Array [
       "service.name": "client",
       "transaction.name": "/products",
     },
+    "serviceName": "client",
+    "transactionName": "/products",
+    "transactionType": "page-load",
     "transactionsPerMinute": 0.25,
   },
   Object {
@@ -234,6 +309,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#customer",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "APIRestController#customer",
+    "transactionType": "request",
     "transactionsPerMinute": 1.25,
   },
   Object {
@@ -243,6 +321,9 @@ Array [
       "service.name": "client",
       "transaction.name": "/orders",
     },
+    "serviceName": "client",
+    "transactionName": "/orders",
+    "transactionType": "route-change",
     "transactionsPerMinute": 0.5,
   },
   Object {
@@ -252,6 +333,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "ResourceHttpRequestHandler",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "ResourceHttpRequestHandler",
+    "transactionType": "request",
     "transactionsPerMinute": 3.5,
   },
   Object {
@@ -261,6 +345,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "POST /api/orders",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "POST /api/orders",
+    "transactionType": "request",
     "transactionsPerMinute": 0.25,
   },
   Object {
@@ -270,6 +357,9 @@ Array [
       "service.name": "opbeans-java",
       "transaction.name": "DispatcherServlet#doGet",
     },
+    "serviceName": "opbeans-java",
+    "transactionName": "DispatcherServlet#doGet",
+    "transactionType": "request",
     "transactionsPerMinute": 3.25,
   },
   Object {
@@ -279,6 +369,9 @@ Array [
       "service.name": "client",
       "transaction.name": "/dashboard",
     },
+    "serviceName": "client",
+    "transactionName": "/dashboard",
+    "transactionType": "page-load",
     "transactionsPerMinute": 0.75,
   },
   Object {
@@ -288,6 +381,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "GET /api",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "GET /api",
+    "transactionType": "request",
     "transactionsPerMinute": 8,
   },
   Object {
@@ -297,6 +393,9 @@ Array [
       "service.name": "opbeans-node",
       "transaction.name": "Process payment",
     },
+    "serviceName": "opbeans-node",
+    "transactionName": "Process payment",
+    "transactionType": "Worker",
     "transactionsPerMinute": 0.25,
   },
 ]
