@@ -21,13 +21,12 @@ export interface CompleteTimeline {
 export interface TimelineFilter {
   field: string;
   operator: string;
-  value: string;
+  value?: string;
 }
 
 export const filter: TimelineFilter = {
   field: 'host.name',
-  operator: 'is',
-  value: 'siem-kibana',
+  operator: 'exists',
 };
 
 export const timeline: CompleteTimeline = {

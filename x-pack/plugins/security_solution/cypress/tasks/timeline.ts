@@ -65,7 +65,9 @@ export const addFilter = (filter: TimelineFilter) => {
   cy.get(COMBO_BOX).contains(filter.field).click();
   cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
   cy.get(COMBO_BOX).contains(filter.operator).click();
-  cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
+  if (filter.operator !== 'exists') {
+    cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
+  }
   cy.get(SAVE_FILTER_BTN).click();
 };
 
