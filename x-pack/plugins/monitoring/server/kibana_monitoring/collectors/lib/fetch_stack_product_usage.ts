@@ -98,7 +98,9 @@ export async function fetchStackProductUsage(
   const count = uuidBuckets.length;
   const metricbeatUsed = Boolean(
     uuidBuckets.find((uuidBucket) =>
-      uuidBucket.indices.buckets.find((indexBucket) => indexBucket.key.includes('-mb-'))
+      (get(uuidBucket, 'indices.buckets', []) as KeyBucket[]).find((indexBucket) =>
+        indexBucket.key.includes('-mb-')
+      )
     )
   );
   return {
