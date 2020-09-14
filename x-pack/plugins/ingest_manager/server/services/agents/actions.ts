@@ -123,18 +123,19 @@ export async function getAgentActionsForCheckin(
   const filter = nodeTypes.function.buildNode('and', [
     nodeTypes.function.buildNode(
       'not',
-      nodeTypes.function.buildNode(
-        'is',
-        `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
-        '*'
-      )
+      nodeTypes.function.buildNodeWithArgumentNodes('is', [
+        nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`),
+        nodeTypes.wildcard.buildNode(nodeTypes.wildcard.wildcardSymbol),
+        nodeTypes.literal.buildNode(false),
+      ])
     ),
-    nodeTypes.function.buildNode(
-      'is',
-      `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`,
-      agentId
-    ),
+    nodeTypes.function.buildNodeWithArgumentNodes('is', [
+      nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id`),
+      nodeTypes.literal.buildNode(agentId),
+      nodeTypes.literal.buildNode(false),
+    ]),
   ]);
+
   const res = await soClient.find<AgentActionSOAttributes>({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     filter,
@@ -225,11 +226,11 @@ export async function getNewActionsSince(soClient: SavedObjectsClientContract, t
   const filter = nodeTypes.function.buildNode('and', [
     nodeTypes.function.buildNode(
       'not',
-      nodeTypes.function.buildNode(
-        'is',
-        `${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`,
-        '*'
-      )
+      nodeTypes.function.buildNodeWithArgumentNodes('is', [
+        nodeTypes.literal.buildNode(`${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at`),
+        nodeTypes.wildcard.buildNode(nodeTypes.wildcard.wildcardSymbol),
+        nodeTypes.literal.buildNode(false),
+      ])
     ),
     nodeTypes.function.buildNode(
       'range',
