@@ -25,12 +25,16 @@ export class PreserveLayout extends Layout {
   private readonly scaledHeight: number;
   private readonly scaledWidth: number;
 
-  constructor(size: Size) {
+  constructor(size: Size, layoutSelectors?: LayoutSelectorDictionary) {
     super(LayoutTypes.PRESERVE_LAYOUT);
     this.height = size.height;
     this.width = size.width;
     this.scaledHeight = size.height * ZOOM;
     this.scaledWidth = size.width * ZOOM;
+
+    if (layoutSelectors) {
+      this.selectors = layoutSelectors;
+    }
   }
 
   public getCssOverridesPath() {
