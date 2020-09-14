@@ -22,6 +22,9 @@ import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { PanelView } from './panel_view';
 import { PanelViewWithSharing } from './panel_view_with_sharing';
 import { PanelViewWithSharingLong } from './panel_view_with_sharing_long';
+import { PanelEdit } from './panel_edit';
+import { PanelEditWithDrilldowns } from './panel_edit_with_drilldowns';
+import { PanelEditWithDrilldownsAndContextActions } from './panel_edit_with_drilldowns_and_context_actions';
 
 export const ContextMenuExamples: React.FC = () => {
   return (
@@ -41,6 +44,18 @@ export const ContextMenuExamples: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <PanelViewWithSharingLong />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <PanelEdit />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PanelEditWithDrilldowns />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PanelEditWithDrilldownsAndContextActions />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>
