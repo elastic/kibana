@@ -331,15 +331,17 @@ const result = await actionsClient.execute({
 
 Kibana ships with a set of built-in action types:
 
-| Type                      | Id            | Description                                                        |
-| ------------------------- | ------------- | ------------------------------------------------------------------ |
-| [Server log](#server-log) | `.server-log` | Logs messages to the Kibana log using Kibana's logger              |
-| [Email](#email)           | `.email`      | Sends an email using SMTP                                          |
-| [Slack](#slack)           | `.slack`      | Posts a message to a slack channel                                 |
-| [Index](#index)           | `.index`      | Indexes document(s) into Elasticsearch                             |
-| [Webhook](#webhook)       | `.webhook`    | Send a payload to a web service using HTTP POST or PUT             |
-| [PagerDuty](#pagerduty)   | `.pagerduty`  | Trigger, resolve, or acknowlege an incident to a PagerDuty service |
-| [ServiceNow](#servicenow) | `.servicenow` | Create or update an incident to a ServiceNow instance              |
+| Type                            | Id            | Description                                                        |
+| ------------------------------- | ------------- | ------------------------------------------------------------------ |
+| [Server log](#server-log)       | `.server-log` | Logs messages to the Kibana log using Kibana's logger              |
+| [Email](#email)                 | `.email`      | Sends an email using SMTP                                          |
+| [Slack](#slack)                 | `.slack`      | Posts a message to a slack channel                                 |
+| [Index](#index)                 | `.index`      | Indexes document(s) into Elasticsearch                             |
+| [Webhook](#webhook)             | `.webhook`    | Send a payload to a web service using HTTP POST or PUT             |
+| [PagerDuty](#pagerduty)         | `.pagerduty`  | Trigger, resolve, or acknowlege an incident to a PagerDuty service |
+| [ServiceNow](#servicenow)       | `.servicenow` | Create or update an incident to a ServiceNow instance              |
+| [Jira](#jira)                   | `.jira`       | Create or update an issue to a Jira instance                       |
+| [IBM Resilient](#ibm-resilient) | `.resilient`  | Create or update an incident to a IBM Resilient instance           |
 
 ---
 
@@ -561,8 +563,8 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 | Property      | Description                                                                                                               | Type                  |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | savedObjectId | The id of the saved object.                                                                                               | string                |
-| title         | The title of the case.                                                                                                    | string _(optional)_   |
-| description   | The description of the case.                                                                                              | string _(optional)_   |
+| title         | The title of the incident.                                                                                                | string _(optional)_   |
+| description   | The description of the incident.                                                                                          | string _(optional)_   |
 | comment       | A comment.                                                                                                                | string _(optional)_   |
 | comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`.             | object[] _(optional)_ |
 | externalId    | The id of the incident in ServiceNow. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
@@ -601,16 +603,16 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 
 #### `subActionParams (pushToService)`
 
-| Property      | Description                                                                                                         | Type                  |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| savedObjectId | The id of the saved object                                                                                          | string                |
-| title         | The title of the case                                                                                               | string _(optional)_   |
-| description   | The description of the case                                                                                         | string _(optional)_   |
-| externalId    | The id of the incident in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
-| issueType     | The id of the issue type in Jira.                                                                                   | string _(optional)_   |
-| priority      | The name of the priority in Jira. Example: `Medium`.                                                                | string _(optional)_   |
-| labels        | An array of labels.                                                                                                 | string[] _(optional)_ |
-| comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`        | object[] _(optional)_ |
+| Property      | Description                                                                                                      | Type                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------- |
+| savedObjectId | The id of the saved object                                                                                       | string                |
+| title         | The title of the issue                                                                                           | string _(optional)_   |
+| description   | The description of the issue                                                                                     | string _(optional)_   |
+| externalId    | The id of the issue in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| issueType     | The id of the issue type in Jira.                                                                                | string _(optional)_   |
+| priority      | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
+| labels        | An array of labels.                                                                                              | string[] _(optional)_ |
+| comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`     | object[] _(optional)_ |
 
 #### `subActionParams (issueTypes)`
 
@@ -628,10 +630,10 @@ ID: `.resilient`
 
 ### `config`
 
-| Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| apiUrl                | IBM Resilient instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | string |
-| incidentConfiguration | Case configuration object. The object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in IBM Resilient and will be overwrite on each update. | object |
+| Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Type   |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| apiUrl                | IBM Resilient instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string |
+| incidentConfiguration | Optional property and specific to **Cases only**. If defined, the object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in IBM Resilient and will be overwrite on each update. | object |
 
 ### `secrets`
 
@@ -652,10 +654,12 @@ ID: `.resilient`
 | Property      | Description                                                                                                                  | Type                  |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | savedObjectId | The id of the saved object                                                                                                   | string                |
-| title         | The title of the case                                                                                                        | string _(optional)_   |
-| description   | The description of the case                                                                                                  | string _(optional)_   |
-| comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`                 | object[] _(optional)_ |
+| title         | The title of the incident                                                                                                    | string _(optional)_   |
+| description   | The description of the incident                                                                                              | string _(optional)_   |
+| comments      | The comments of the incident. A comment is of the form `{ commentId: string, version: string, comment: string }`             | object[] _(optional)_ |
 | externalId    | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| incidentTypes | An array with the ids of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
+| severityCode  | IBM Resilient id of the severity code.                                                                                       | number _(optional)_   |
 
 # Command Line Utility
 

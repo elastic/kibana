@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {
   normalizeMapping,
   buildMap,
@@ -14,7 +16,23 @@ import {
 } from './utils';
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
-import { Comment, MapRecord, PushToServiceApiParams } from './types';
+import { Comment, MapRecord } from './types';
+
+interface Entity {
+  createdAt: string | null;
+  createdBy: { fullName: string; username: string } | null;
+  updatedAt: string | null;
+  updatedBy: { fullName: string; username: string } | null;
+}
+
+interface PushToServiceApiParams extends Entity {
+  savedObjectId: string;
+  title: string;
+  description: string | null;
+  externalId: string | null;
+  externalObject: Record<string, any>;
+  comments: Comment[];
+}
 
 const mapping: MapRecord[] = [
   { source: 'title', target: 'short_description', actionType: 'overwrite' },
@@ -22,7 +40,6 @@ const mapping: MapRecord[] = [
   { source: 'comments', target: 'comments', actionType: 'append' },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const finalMapping: Map<string, any> = new Map();
 
 finalMapping.set('title', {
@@ -61,7 +78,7 @@ const fullParams: PushToServiceApiParams = {
   updatedAt: null,
   updatedBy: null,
   externalId: null,
-  externalCase: {
+  externalObject: {
     short_description: 'a title',
     description: 'a description',
   },
@@ -154,7 +171,7 @@ describe('mapParams', () => {
 describe('prepareFieldsForTransformation', () => {
   test('prepare fields with defaults', () => {
     const res = prepareFieldsForTransformation({
-      externalCase: fullParams.externalCase,
+      externalCase: fullParams.externalObject,
       mapping: finalMapping,
     });
     expect(res).toEqual([
@@ -175,7 +192,7 @@ describe('prepareFieldsForTransformation', () => {
 
   test('prepare fields with default pipes', () => {
     const res = prepareFieldsForTransformation({
-      externalCase: fullParams.externalCase,
+      externalCase: fullParams.externalObject,
       mapping: finalMapping,
       defaultPipes: ['myTestPipe'],
     });
@@ -199,11 +216,15 @@ describe('prepareFieldsForTransformation', () => {
 describe('transformFields', () => {
   test('transform fields for creation correctly', () => {
     const fields = prepareFieldsForTransformation({
-      externalCase: fullParams.externalCase,
+      externalCase: fullParams.externalObject,
       mapping: finalMapping,
     });
 
-    const res = transformFields({
+    const res = transformFields<
+      PushToServiceApiParams,
+      {},
+      { short_description: string; description: string }
+    >({
       params: fullParams,
       fields,
     });
@@ -216,12 +237,16 @@ describe('transformFields', () => {
 
   test('transform fields for update correctly', () => {
     const fields = prepareFieldsForTransformation({
-      externalCase: fullParams.externalCase,
+      externalCase: fullParams.externalObject,
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
 
-    const res = transformFields({
+    const res = transformFields<
+      PushToServiceApiParams,
+      {},
+      { short_description: string; description: string }
+    >({
       params: {
         ...fullParams,
         updatedAt: '2020-03-15T08:34:53.450Z',
@@ -245,12 +270,16 @@ describe('transformFields', () => {
 
   test('add newline character to description', () => {
     const fields = prepareFieldsForTransformation({
-      externalCase: fullParams.externalCase,
+      externalCase: fullParams.externalObject,
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
 
-    const res = transformFields({
+    const res = transformFields<
+      PushToServiceApiParams,
+      {},
+      { short_description: string; description: string }
+    >({
       params: fullParams,
       fields,
       currentIncident: {
@@ -263,11 +292,15 @@ describe('transformFields', () => {
 
   test('append username if fullname is undefined when create', () => {
     const fields = prepareFieldsForTransformation({
-      externalCase: fullParams.externalCase,
+      externalCase: fullParams.externalObject,
       mapping: finalMapping,
     });
 
-    const res = transformFields({
+    const res = transformFields<
+      PushToServiceApiParams,
+      {},
+      { short_description: string; description: string }
+    >({
       params: {
         ...fullParams,
         createdBy: { fullName: '', username: 'elastic' },
@@ -283,12 +316,16 @@ describe('transformFields', () => {
 
   test('append username if fullname is undefined when update', () => {
     const fields = prepareFieldsForTransformation({
-      externalCase: fullParams.externalCase,
+      externalCase: fullParams.externalObject,
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
 
-    const res = transformFields({
+    const res = transformFields<
+      PushToServiceApiParams,
+      {},
+      { short_description: string; description: string }
+    >({
       params: {
         ...fullParams,
         updatedAt: '2020-03-15T08:34:53.450Z',
