@@ -8,10 +8,12 @@ import {
   AuthenticationHit,
   Direction,
   HostsQueries,
-  HostAuthenticationsRequestOptions,
+  HostDetailsRequestOptions,
+  SortField,
+  HostsFields,
 } from '../../../../../../../common/search_strategy';
 
-export const mockOptions: HostAuthenticationsRequestOptions = {
+export const mockOptions: HostDetailsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'auditbeat-*',
@@ -436,12 +438,12 @@ export const mockOptions: HostAuthenticationsRequestOptions = {
     from: '2020-09-02T15:17:13.678Z',
     to: '2020-09-03T15:17:13.678Z',
   },
-  sort: {
+  sort: ({
     direction: Direction.desc,
     field: 'success',
-  },
+  } as unknown) as SortField<HostsFields>,
   params: {},
-};
+} as HostDetailsRequestOptions;
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
