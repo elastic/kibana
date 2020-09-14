@@ -12,6 +12,7 @@ import { TabId } from './navigation_menu';
 import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
 import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
 import { useUrlState } from '../../util/url_state';
+import { ML_APP_NAME } from '../../../../common/constants/app';
 
 export interface Tab {
   id: TabId;
@@ -23,10 +24,6 @@ interface Props {
   disableLinks: boolean;
   tabId: TabId;
 }
-
-const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
-  defaultMessage: 'Machine Learning',
-});
 
 function getTabs(disableLinks: boolean): Tab[] {
   return [

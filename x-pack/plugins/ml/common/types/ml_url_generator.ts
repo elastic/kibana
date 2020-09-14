@@ -15,7 +15,7 @@ export type MLPageState<PageType, PageState> = PageState extends OptionalPageSta
   ? { page: PageType; pageState?: PageState; excludeBasePath?: boolean }
   : PageState extends object
   ? { page: PageType; pageState: PageState; excludeBasePath?: boolean }
-  : { page: PageType };
+  : { page: PageType; excludeBasePath?: boolean };
 
 export interface MlCommonGlobalState {
   time?: TimeRange;
@@ -141,6 +141,7 @@ export interface TimeSeriesExplorerPageState
   timeRange?: TimeRange;
   detectorIndex?: number;
   entities?: Record<string, string>;
+  globalState?: MlCommonGlobalState;
 }
 
 export type TimeSeriesExplorerUrlState = MLPageState<

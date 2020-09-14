@@ -280,6 +280,8 @@ export const ModelsList: FC = () => {
       type: 'icon',
       available: (item) => item.metadata?.analytics_config?.id,
       onClick: async (item) => {
+        if (item.metadata?.analytics_config === undefined) return;
+
         const url = await urlGenerator.createUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
           pageState: {
