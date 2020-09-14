@@ -338,7 +338,7 @@ describe('UserActionTree ', () => {
     expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
   });
 
-  it.skip('quotes', async () => {
+  it('quotes', async () => {
     await act(async () => {
       const commentData = {
         comment: '',
@@ -362,7 +362,9 @@ describe('UserActionTree ', () => {
         .first()
         .simulate('click');
 
-      wrapper.update();
+      await waitFor(() => {
+        wrapper.update();
+      });
 
       wrapper
         .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
@@ -373,8 +375,8 @@ describe('UserActionTree ', () => {
     });
   });
 
-  it.skip('Outlines comment when url param is provided', async () => {
-    const commentId = 'neat-comment-id';
+  it('Outlines comment when url param is provided', async () => {
+    const commentId = 'basic-comment-id';
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
 
     await act(async () => {
@@ -392,8 +394,15 @@ describe('UserActionTree ', () => {
         </TestProviders>
       );
 
+      await waitFor(() => {
+        wrapper.update();
+      });
+
       expect(
-        wrapper.find(`[data-test-subj="move-to-link-basic-comment-id"]`).exists()
+        wrapper
+          .find(`[data-test-subj="comment-create-action-${commentId}"]`)
+          .first()
+          .hasClass('outlined')
       ).toBeTruthy();
     });
   });
