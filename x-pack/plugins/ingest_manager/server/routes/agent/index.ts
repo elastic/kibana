@@ -27,6 +27,7 @@ import {
   PostNewAgentActionRequestSchema,
   PutAgentReassignRequestSchema,
   PostAgentEnrollRequestBodyJSONSchema,
+  PostAgentUpgradeRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -45,6 +46,7 @@ import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
 import { postAgentsUnenrollHandler } from './unenroll_handler';
 import { IngestManagerConfigType } from '../..';
+import { postAgentUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({
   coerceTypes: true,
@@ -211,5 +213,14 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getAgentStatusForAgentPolicyHandler
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.UPGRADE_PATTERN,
+      validate: PostAgentUpgradeRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postAgentUpgradeHandler
   );
 };

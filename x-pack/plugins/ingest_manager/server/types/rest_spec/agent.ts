@@ -172,6 +172,12 @@ export const PostAgentUnenrollRequestSchema = {
   ),
 };
 
+export const PostAgentUpgradeRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+};
+
 export const PutAgentReassignRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
