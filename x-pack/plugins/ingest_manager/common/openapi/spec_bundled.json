@@ -1127,7 +1127,7 @@
         "summary": "Fleet - Agent - Status for policy",
         "tags": [],
         "responses": {},
-        "operationId": "get-fleet-agent-status",
+        "operationId": "get-fleet-agent_status",
         "parameters": [
           {
             "schema": {

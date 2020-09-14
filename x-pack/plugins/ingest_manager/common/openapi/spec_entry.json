@@ -69,7 +69,7 @@
       "$ref": "./paths/fleet/agents/enroll/index.json"
     },
     "/fleet/agent-status": {
-      "$ref": "./paths/fleet/agent-status/index.json"
+      "$ref": "./paths/fleet/agent_status/index.json"
     },
     "/fleet/enrollment-api-keys": {
       "$ref": "./paths/fleet/enrollment_api_keys/index.json"
