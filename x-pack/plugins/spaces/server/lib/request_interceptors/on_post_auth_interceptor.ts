@@ -108,7 +108,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
       if (appId !== 'kibana' && space && space.disabledFeatures.length > 0) {
         log.debug(`Verifying application is available: "${appId}"`);
 
-        const allFeatures = features.getFeatures();
+        const allFeatures = features.getKibanaFeatures();
 
         const isRegisteredApp = allFeatures.some((feature) => feature.app.includes(appId));
         if (isRegisteredApp) {
