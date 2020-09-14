@@ -205,8 +205,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: ExpressionAstExpression,
     action: (fn: ExpressionFunction, link: ExpressionAstFunction) => void
   ) {
-    const newAST = cloneDeep(ast);
-    for (const link of newAST.chain) {
+    for (const link of ast.chain) {
       const { function: fnName, arguments: fnArgs } = link;
       const fn = getByAlias(this.state.get().functions, fnName);
 
@@ -225,27 +224,27 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
       }
     }
 
-    return newAST;
+    return ast;
   }
 
   public inject(ast: ExpressionAstExpression, references: SavedObjectReference[]) {
-    return this.walkAst(ast, (fn, link) => {
+    return this.walkAst(cloneDeep(ast), (fn, link) => {
       link.arguments = fn.inject(link.arguments, references);
     });
   }
 
   public extract(ast: ExpressionAstExpression) {
     const allReferences: SavedObjectReference[] = [];
-    const newAst = this.walkAst(ast, (fn, link) => {
+    const newAst = this.walkAst(cloneDeep(ast), (fn, link) => {
       const { args, references } = fn.extract(link.arguments);
       link.arguments = args;
-      references.forEach((ref) => allReferences.push(ref));
+      allReferences.push(...references);
     });
     return { ast: newAst, references: allReferences };
   }
 
   public migrate(ast: ExpressionAstExpression) {
-    return this.walkAst(ast, (fn, link) => {
+    return this.walkAst(cloneDeep(ast), (fn, link) => {
       const newLink = fn.migrate(link);
       link.function = newLink.function;
       link.arguments = newLink.arguments;
@@ -253,7 +252,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public telemetry(ast: ExpressionAstExpression, telemetryData: Record<string, any>) {
-    return this.walkAst(ast, (fn, link) => {
+    return this.walkAst(cloneDeep(ast), (fn, link) => {
       fn.telemetry(link, telemetryData);
     });
   }

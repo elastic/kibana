@@ -96,13 +96,16 @@ export interface ExpressionFunctionDefinition<
   fn(input: Input, args: Arguments, context: Context): Output;
 
   /**
-   * migrate function
+   * telemetry function
    * @param state any previous or current version of the ast for this function
    */
   telemetry?(state: ExpressionAstFunction, telemetryData: Record<string, any>): void;
 
   /**
    * migrate function
+   * This function will be executed for arguments of an expression function before being executed for the
+   * current expression function. This means all arguments will already be migrated when this method is
+   * called on an expression function
    * @param state any previous or current version of the ast for this function
    */
   migrate?(state: ExpressionAstFunction): ExpressionAstFunction;
