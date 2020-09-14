@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSeverity, severity } from './getSeverity';
+import { getSeverity, Severity } from './anomaly_detection';
 
 describe('getSeverity', () => {
   describe('when score is undefined', () => {
@@ -15,25 +15,25 @@ describe('getSeverity', () => {
 
   describe('when score < 25', () => {
     it('returns warning', () => {
-      expect(getSeverity(10)).toEqual(severity.warning);
+      expect(getSeverity(10)).toEqual(Severity.warning);
     });
   });
 
   describe('when score is between 25 and 50', () => {
     it('returns minor', () => {
-      expect(getSeverity(40)).toEqual(severity.minor);
+      expect(getSeverity(40)).toEqual(Severity.minor);
     });
   });
 
   describe('when score is between 50 and 75', () => {
     it('returns major', () => {
-      expect(getSeverity(60)).toEqual(severity.major);
+      expect(getSeverity(60)).toEqual(Severity.major);
     });
   });
 
   describe('when score is 75 or more', () => {
     it('returns critical', () => {
-      expect(getSeverity(100)).toEqual(severity.critical);
+      expect(getSeverity(100)).toEqual(Severity.critical);
     });
   });
 });
