@@ -26,9 +26,9 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiIcon,
-  EuiLink,
   EuiPortal,
   EuiTitle,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
@@ -67,40 +67,44 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
             <EuiFlexItem>
               <EuiTitle className="dscTable__flyoutHeader">
                 <h2>
-                  <EuiIcon type="folderOpen" size="l" />{' '}
+                  <EuiIcon type="expand" size="m" />{' '}
                   {i18n.translate('discover.grid.tableRow.detailHeading', {
                     defaultMessage: 'Expanded document',
                   })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexEnd">
-                {indexPattern.isTimeBased() && (
-                  <EuiFlexItem grow={false}>
-                    <EuiLink href={getContextAppHref ? getContextAppHref(hit._id) : ''}>
-                      {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkText', {
-                        defaultMessage: 'View surrounding documents',
-                      })}
-                    </EuiLink>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    href={`#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
-                      hit._id as string
-                    )}`}
-                  >
-                    {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkText', {
-                      defaultMessage: 'View single document',
-                    })}
-                  </EuiLink>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
+          <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexEnd">
+            {indexPattern.isTimeBased() && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="documents"
+                  href={getContextAppHref ? getContextAppHref(hit._id) : ''}
+                >
+                  {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkText', {
+                    defaultMessage: 'View surrounding documents',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="document"
+                href={`#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
+                  hit._id as string
+                )}`}
+              >
+                {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkText', {
+                  defaultMessage: 'View single document',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <DocViewer
             hit={hit}
             columns={columns}

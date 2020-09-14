@@ -67,26 +67,6 @@ export function DocViewTableRow({
 
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
-      {typeof onFilter === 'function' && (
-        <td className="kbnDocViewer__buttons">
-          <DocViewTableRowBtnFilterAdd
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter(fieldMapping, valueRaw, '+')}
-          />
-          <DocViewTableRowBtnFilterRemove
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter(fieldMapping, valueRaw, '-')}
-          />
-          {typeof onToggleColumn === 'function' && (
-            <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
-          )}
-          <DocViewTableRowBtnFilterExists
-            disabled={!fieldMapping || !fieldMapping.filterable}
-            onClick={() => onFilter('_exists_', field, '+')}
-            scripted={fieldMapping && fieldMapping.scripted}
-          />
-        </td>
-      )}
       <td className="kbnDocViewer__field">
         <FieldName
           fieldName={field}
@@ -112,6 +92,26 @@ export function DocViewTableRow({
           dangerouslySetInnerHTML={{ __html: value as string }}
         />
       </td>
+      {typeof onFilter === 'function' && (
+        <td className="kbnDocViewer__buttons">
+          <DocViewTableRowBtnFilterAdd
+            disabled={!fieldMapping || !fieldMapping.filterable}
+            onClick={() => onFilter(fieldMapping, valueRaw, '+')}
+          />
+          <DocViewTableRowBtnFilterRemove
+            disabled={!fieldMapping || !fieldMapping.filterable}
+            onClick={() => onFilter(fieldMapping, valueRaw, '-')}
+          />
+          {typeof onToggleColumn === 'function' && (
+            <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
+          )}
+          <DocViewTableRowBtnFilterExists
+            disabled={!fieldMapping || !fieldMapping.filterable}
+            onClick={() => onFilter('_exists_', field, '+')}
+            scripted={fieldMapping && fieldMapping.scripted}
+          />
+        </td>
+      )}
     </tr>
   );
 }
