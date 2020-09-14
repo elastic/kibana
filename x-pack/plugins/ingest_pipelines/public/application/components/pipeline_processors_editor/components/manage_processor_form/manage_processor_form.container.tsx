@@ -53,10 +53,12 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
     onSubmit: handleSubmit,
   });
 
+  const { subscribe } = form;
+
   useEffect(() => {
-    const subscription = form.subscribe(onFormUpdate);
+    const subscription = subscribe(onFormUpdate);
     return subscription.unsubscribe;
-  }, [onFormUpdate, form]);
+  }, [onFormUpdate, subscribe]);
 
   return (
     <ViewComponent

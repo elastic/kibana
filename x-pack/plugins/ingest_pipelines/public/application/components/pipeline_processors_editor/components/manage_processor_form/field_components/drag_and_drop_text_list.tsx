@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiFieldText,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import {
@@ -77,7 +78,13 @@ function DragAndDropTextListComponent({
         <EuiDroppable droppableId={droppableId}>
           {value.map((item, idx) => {
             return (
-              <EuiDraggable spacing="none" draggableId={String(item.id)} index={idx} key={item.id}>
+              <EuiDraggable
+                customDragHandle
+                spacing="none"
+                draggableId={String(item.id)}
+                index={idx}
+                key={item.id}
+              >
                 {(provided) => {
                   return (
                     <EuiFlexGroup
@@ -105,27 +112,53 @@ function DragAndDropTextListComponent({
                           readDefaultValueOnForm={!item.isNew}
                         >
                           {(field) => {
-                            const { isInvalid } = getFieldValidityAndErrorMessage(field);
+                            const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(
+                              field
+                            );
                             return (
-                              <EuiFieldText
-                                isInvalid={isInvalid}
-                                value={field.value}
-                                onChange={field.onChange}
-                                compressed
-                                fullWidth
-                              />
+                              <EuiFlexGroup gutterSize="none" alignItems="center">
+                                <EuiFlexItem>
+                                  <EuiFieldText
+                                    isInvalid={isInvalid}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    compressed
+                                    fullWidth
+                                  />
+                                </EuiFlexItem>
+                                {typeof errorMessage === 'string' && (
+                                  <EuiFlexItem grow={false}>
+                                    <div className="pipelineProcessorsEditor__form__dragAndDropList__errorIcon">
+                                      <EuiIconTip
+                                        aria-label={errorMessage}
+                                        content={errorMessage}
+                                        type="alert"
+                                        color="danger"
+                                      />
+                                    </div>
+                                  </EuiFlexItem>
+                                )}
+                              </EuiFlexGroup>
                             );
                           }}
                         </UseField>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label={i18nTexts.removeItemButtonAriaLabel}
-                          className="pipelineProcessorsEditor__form__dragAndDropList__removeButton"
-                          iconType="minusInCircle"
-                          color="danger"
-                          onClick={() => onRemove(item.id)}
-                        />
+                        {value.length > 1 ? (
+                          <EuiButtonIcon
+                            aria-label={i18nTexts.removeItemButtonAriaLabel}
+                            className="pipelineProcessorsEditor__form__dragAndDropList__removeButton"
+                            iconType="minusInCircle"
+                            color="danger"
+                            onClick={() => onRemove(item.id)}
+                          />
+                        ) : (
+                          // Render a no-op placeholder button
+                          <EuiIcon
+                            className="pipelineProcessorsEditor__form__dragAndDropList__removeButton"
+                            type="empty"
+                          />
+                        )}
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   );

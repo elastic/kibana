@@ -21,9 +21,6 @@ window.Worker = function () {
   (this as any).terminate = () => {};
 };
 
-// disable all react-beautiful-dnd development warnings
-(window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
-
 describe('<Grok/>', () => {
   const setup = (props?: { defaultValue: Record<string, any> }) => {
     function MyComponent() {
@@ -43,6 +40,16 @@ describe('<Grok/>', () => {
     }
     return mount(<MyComponent />);
   };
+
+  beforeAll(() => {
+    // disable all react-beautiful-dnd development warnings
+    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = true;
+  });
+
+  afterAll(() => {
+    // enable all react-beautiful-dnd development warnings
+    (window as any)['__react-beautiful-dnd-disable-dev-warnings'] = false;
+  });
   test('smoke', () => {
     setup({ defaultValue: { type: 'grok', fields: { patterns: ['test'] } } });
   });
