@@ -28,7 +28,7 @@ interface Props {
 }
 
 export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, selectedNodeAttrs }) => {
-  const { data, isLoading, error, sendRequest } = useLoadNodeDetails(selectedNodeAttrs);
+  const { data, isLoading, error, resendRequest } = useLoadNodeDetails(selectedNodeAttrs);
   let content;
   if (isLoading) {
     content = <EuiLoadingContent lines={3} />;
@@ -47,7 +47,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
         <p>
           {message} ({statusCode})
         </p>
-        <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+        <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsReloadButton"
             defaultMessage="Try again"

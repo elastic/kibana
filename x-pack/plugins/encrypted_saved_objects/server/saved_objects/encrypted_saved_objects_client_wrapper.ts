@@ -150,14 +150,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // sequential processing.
     const encryptedObjects = await Promise.all(
       objects.map(async (object) => {
-        const { type, id, attributes } = object;
+        const { type, id, attributes, namespace: objectNamespace } = object;
         if (!this.options.service.isRegistered(type)) {
           return object;
         }
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           type,
-          options?.namespace
+          objectNamespace ?? options?.namespace
         );
         return {
           ...object,

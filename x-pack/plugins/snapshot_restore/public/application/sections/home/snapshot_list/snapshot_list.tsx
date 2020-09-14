@@ -44,7 +44,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     error,
     isLoading,
     data: { snapshots = [], repositories = [], policies = [], errors = {} },
-    sendRequest: reload,
+    resendRequest: reload,
   } = useLoadSnapshots();
 
   const { uiMetricService } = useServices();

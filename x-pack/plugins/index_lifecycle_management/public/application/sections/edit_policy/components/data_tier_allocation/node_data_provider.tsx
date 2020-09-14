@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const NodesDataProvider = ({ children }: Props): JSX.Element => {
-  const { isLoading, data, error, sendRequest } = useLoadNodes();
+  const { isLoading, data, error, resendRequest } = useLoadNodes();
 
   if (isLoading) {
     return (
@@ -45,7 +45,7 @@ export const NodesDataProvider = ({ children }: Props): JSX.Element => {
             <p>
               {message} ({statusCode})
             </p>
-            <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
+            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesReloadButton"
                 defaultMessage="Try again"
