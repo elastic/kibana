@@ -37,14 +37,6 @@ function getMovedEntities(
   const currLocationArr = transformResults(currentIntervalResults, dateField, geoField);
   const prevLocationArr = transformResults(prevToCurrentIntervalResults, dateField, geoField);
 
-  console.log('');
-  console.log('^^^^^^^^^^^^^^^^^^^^^^^');
-  console.log('Previous locations');
-  console.log(JSON.stringify(prevLocationArr, null, 2));
-  console.log('Current locations');
-  console.log(JSON.stringify(currLocationArr, null, 2));
-  console.log('^^^^^^^^^^^^^^^^^^^^^^^');
-  console.log('');
   return (
     currLocationArr
       // Check if shape has a previous location and has moved
@@ -75,8 +67,8 @@ function getMovedEntities(
       // Do not track entries to or exits from 'other'
       .filter((entityMovementDescriptor) =>
         trackingEvent === 'entered'
-          ? entityMovementDescriptor.currLocation.shape !== OTHER_CATEGORY
-          : entityMovementDescriptor.prevLocation.shape !== OTHER_CATEGORY
+          ? entityMovementDescriptor.currLocation.shapeId !== OTHER_CATEGORY
+          : entityMovementDescriptor.prevLocation.shapeId !== OTHER_CATEGORY
       )
   );
 }
@@ -93,13 +85,13 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
     services: AlertServices;
     params: {
       index: string;
-      geoField: string; // But also add support for this
-      entity: string; //
-      dateField: string; //
-      trackingEvent: TrackingEvent; //
+      geoField: string;
+      entity: string;
+      dateField: string;
+      trackingEvent: TrackingEvent;
       boundaryType: BoundaryType;
-      boundaryIndex: string; //
-      boundaryGeoField: string; //
+      boundaryIndex: string;
+      boundaryGeoField: string;
     };
   }) {
     const executeEsQuery = await executeEsQueryFactory(params, services, log);
@@ -118,11 +110,16 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
       params.dateField,
       params.geoField
     );
-    console.log('Moved entities');
-    console.log(JSON.stringify(movedEntities));
-    console.log('');
 
-    movedEntities.forEach(({ entityName }) =>
-      services.alertInstanceFactory(entityName).scheduleActions(ActionGroupId)
+    movedEntities.forEach(({ entityName, currLocation, prevLocation }) =>
+      services.alertInstanceFactory(entityName).scheduleActions(ActionGroupId, {
+        crossingEventTimeStamp: currLocation.date,
+        currentLocation: currLocation.location,
+        currentBoundaryId: currLocation.shapeId,
+        previousLocation: prevLocation.location,
+        previousBoundaryId: prevLocation.shapeId,
+        crossingDocumentId: null,
+        timeOfDetection: currIntervalEndTime,
+      })
     );
   };
