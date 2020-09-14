@@ -3,6 +3,9 @@
     "indices": [
       "INDEX_PATTERN_NAME"
     ],
+    "indices_options": {
+      "allow_no_indices": true
+    },
     "query": {
       "bool": {
         "must": [
@@ -13,9 +16,6 @@
           }
         ]
       }
-    },
-    "indices_options": {
-      "allow_no_indices": "true"
     },
     "aggs": {
       "host.name": {

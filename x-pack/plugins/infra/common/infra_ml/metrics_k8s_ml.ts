@@ -7,17 +7,17 @@
 import * as rt from 'io-ts';
 
 export const metricK8sJobTypeRT = rt.keyof({
-  cpu_usage: null,
-  memory_usage: null,
-  network_in: null,
-  network_out: null,
+  k8s_cpu_usage: null,
+  k8s_memory_usage: null,
+  k8s_network_in: null,
+  k8s_network_out: null,
 });
 
 export type MetricK8sJobType = rt.TypeOf<typeof metricK8sJobTypeRT>;
 
 export const metricsK8SJobTypes: MetricK8sJobType[] = [
-  'cpu_usage',
-  'memory_usage',
-  'network_in',
-  'network_out',
+  'k8s_cpu_usage',
+  'k8s_memory_usage',
+  'k8s_network_in',
+  'k8s_network_out',
 ];

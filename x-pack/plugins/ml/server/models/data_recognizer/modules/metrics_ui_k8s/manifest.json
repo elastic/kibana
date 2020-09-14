@@ -15,42 +15,42 @@
     },
     "jobs": [
       {
-        "id": "cpu_usage",
-        "file": "cpu_usage.json"
+        "id": "k8s_cpu_usage",
+        "file": "k8s_cpu_usage.json"
       },
       {
-        "id": "memory_usage",
-        "file": "memory_usage.json"
+        "id": "k8s_memory_usage",
+        "file": "k8s_memory_usage.json"
       },
       {
-        "id": "network_in",
-        "file": "network_in.json"
+        "id": "k8s_network_in",
+        "file": "k8s_network_in.json"
       },
       {
-        "id": "network_out",
-        "file": "network_out.json"
+        "id": "k8s_network_out",
+        "file": "k8s_network_out.json"
       }
     ],
     "datafeeds": [
       {
-        "id": "datafeed-cpu_usage",
-        "file": "datafeed_cpu_usage.json",
-        "job_id": "cpu_usage"
+        "id": "datafeed-k8s_cpu_usage",
+        "file": "datafeed_k8s_cpu_usage.json",
+        "job_id": "k8s_cpu_usage"
       },
       {
-        "id": "datafeed-memory_usage",
-        "file": "datafeed_memory_usage.json",
-        "job_id": "memory_usage"
+        "id": "datafeed-k8s_memory_usage",
+        "file": "datafeed_k8s_memory_usage.json",
+        "job_id": "k8s_memory_usage"
       },
       {
-        "id": "datafeed-network_in",
-        "file": "datafeed_network_in.json",
-        "job_id": "network_in"
+        "id": "datafeed-k8s_network_in",
+        "file": "datafeed_k8s_network_in.json",
+        "job_id": "k8s_network_in"
       },
       {
-        "id": "datafeed-network_out",
-        "file": "datafeed_network_out.json",
-        "job_id": "network_out"
+        "id": "datafeed-k8s_network_out",
+        "file": "datafeed_k8s_network_out.json",
+        "job_id": "k8s_network_out"
       }
     ]
   }
