@@ -1,20 +1,69 @@
 [[kibana-navigation]]
 == Routing, Navigation and URL
 
-{kib} platform provides a set of tools to help developers built consistent experience around routing and browser navigation.
-Some of that tooling is inside `core`, some is available as part of various plugins.  
+The {kib} platform provides a set of tools to help developers build consistent experience around routing and browser navigation.
+Some of that tooling is inside `core`, some is available as part of various plugins.
 
-The purpose of this guide is to give you (a {kib} contributor) a high-level overview of available tools and to explain common approaches for handling routing,
-and browser navigation.
+The purpose of this guide is to give a high-level overview of available tools and to explain common approaches for handling routing and browser navigation.
 
 This guide covers following topics:
 
-* <<navigating-between-kibana-apps>>
 * <<deep-linking>>
+* <<navigating-between-kibana-apps>>
 * <<routing>>
 * <<history-and-location>>
 * <<state-sync>>
 * <<preserve-state>>
+
+[[deep-linking]]
+=== Deep-linking into {kib} apps
+
+Assuming you want to link from your app to *Discover*. When building such URL there are two things to consider:
+
+1. Prepending a proper `basePath`.
+2. Specifying *Discover* state. 
+
+==== Prepending a proper `basePath`
+
+To prepend a {kib} `basePath` use `core.http.basePath.prepend` helper: 
+
+[source,typescript jsx]
+----
+const discoverUrl = core.http.basePath.prepend(`/discover`);
+
+console.log(discoverUrl); // http://localhost:5601/bpr/s/space/app/discover
+----
+
+==== Specifying state
+
+**Consider a {kib} app URL a part of app's plugin contract:**
+. Avoid hardcoding other app's URL in your app's code.
+. Avoid generating other app's state and serializing it into URL query params.
+
+[source,typescript jsx]
+----
+// Avoid relying on other app's state structure in your app's code:
+const discoverUrlWithSomeState = core.http.basePath.prepend(`/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2020-09-10T11:39:50.203Z',to:'2020-09-10T11:40:20.249Z'))&_a=(columns:!(_source),filters:!(),index:'90943e30-9a47-11e8-b64d-95841ca0b247',interval:auto,query:(language:kuery,query:''),sort:!())`);
+----
+
+Instead, each app should expose {kib-repo}tree/{branch}/src/plugins/share/public/url_generators/README.md[a URL generator].
+Other apps should use those URL generators for creating URLs. 
+
+[source,typescript jsx]
+----
+// Properly generated URL to *Discover* app. Generator code is owned by *Discover* app and available on *Discover*'s plugin contract.
+const discoverUrl = discoverUrlGenerator.createUrl({filters, timeRange});
+----
+
+To get a better idea, take a look at *Discover* URL generator {kib-repo}tree/{branch}/src/discover/public/url_generator.ts[implementation].
+It allows specifying various **Discover** app state pieces like: index pattern, filters, query, time range and more.
+
+There are two ways to access other's app URL generator in your code:
+
+1. *(preferred)* From a plugin contract of a destination app.
+2. (in case an explicit plugin dependency is not possible) Using URL generator service instance on `share` plugin contract.
+
+In case you want other apps to link to your app, then you should create a URL generator and expose it on your plugin's contract.
 
 
 [[navigating-between-kibana-apps]]
@@ -23,16 +72,17 @@ This guide covers following topics:
 {kib} is a single page application and there is a set of simple rules developers should follow
 to make sure there is no page reload when navigating from one place in {kib} to another. 
 
-For example, navigation using native browser apis:  
+For example, navigation using native browser APIs would cause a full page reload.  
 
 [source,js]
 ----
-window.location.href = core.http.basePath.prepend(`/dashboard/my-dashboard`); // (try to avoid this)
+const urlToADashboard = core.http.basePath.prepend(`/dashboard/my-dashboard`);
+
+// this would cause a full page reload: 
+window.location.href = urlToADashboard; 
 ----
 
-would cause a full page reload.
-
-To navigate between different {kib} apps without a page reload there are apis in `core`:
+To navigate between different {kib} apps without a page reload there are APIs in `core`:
 
 * {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetoapp.md[core.application.navigateToApp]
 * {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetourl.md[core.application.navigateToUrl]
@@ -42,19 +92,19 @@ To navigate between different {kib} apps without a page reload there are apis in
 [source,typescript jsx]
 ----
 const myLink = () => 
-  <a href={core.http.basePath.prepend(`/dashboard/my-dashboard`)}>Go to Dashboard</a>; 
+  <a href={urlToADashboard}>Go to Dashboard</a>; 
 ----
 
-A workaround could be to handle a click, prevent browser navigation and use `core.application.navigateToApp` api:
+A workaround could be to handle a click, prevent browser navigation and use `core.application.navigateToApp` API:
 
 [source,typescript jsx]
 ----
 const MySPALink = () => 
   <a 
-    href={core.http.basePath.prepend(`/dashboard/my-dashboard`)} 
+    href={urlToADashboard} 
     onClick={(e) => {
       e.preventDefault();
-      core.application.navigateToApp('dashboard', {path: '/my-dashboard'}); 
+      core.application.navigateToApp('dashboard', { path: '/my-dashboard' }); 
     }}
   > 
     Go to Dashboard 
@@ -70,40 +120,10 @@ const MyApp = () =>
   <RedirectAppLinks application={core.application}>
     {/*...*/}
     {/* navigations using this link will happen in SPA friendly way */}
-      <a href={core.http.basePath.prepend(`/dashboard/my-dashboard`)}>Go to Dashboard</a>
+      <a href={urlToADashboard}>Go to Dashboard</a>
     {/*...*/}
   </RedirectAppLinks>
 ----
-
-
-[[deep-linking]]
-=== Deep-linking into {kib} apps
-
-**Consider a {kib} app URL a part of app's plugin contract.** +
-Try to avoid hardcoding other app's URL in your app's code:
-
-[source,typescript jsx]
-----
-const discoverUrl = core.http.basePath.prepend(`/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2020-09-10T11:39:50.203Z',to:'2020-09-10T11:40:20.249Z'))&_a=(columns:!(_source),filters:!(),index:'90943e30-9a47-11e8-b64d-95841ca0b247',interval:auto,query:(language:kuery,query:''),sort:!())`);
-----
-
-Instead, each app should expose {kib-repo}tree/{branch}/src/plugins/share/public/url_generators/README.md[a URL generator].
-Other apps should use those URL generators for deep-linking.
-
-To get a better idea, take a look at {kib-repo}tree/{branch}/src/discover/public/url_generator.ts[**Discover** app URL generator].
-It allows specifying various **Discover** app state pieces like: index pattern, filters, query, time range and more.
-Other apps should use it to generate a link to **Discover** with specified state:
-
-[source,typescript jsx]
-----
-const discoverUrl = discoverUrlGenerator.createUrl({filters, timeRange});
-----
-
-There are two ways to access other's app URL generator in your code:
-
-1. *(preferred)* From a plugin contract of a destination app.
-2. (in case an explicit plugin dependency is not possible) Using URL generator service instance on `share` plugin contract. 
-
 
 [[routing]]
 === Setting up internal app routing
@@ -120,7 +140,7 @@ This is required to make sure `core` is aware of navigations triggered inside yo
 * {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.appmountparameters.history.md[Example usage]
 * {kib-repo}tree/{branch}/test/plugin_functional/plugins/core_plugin_a/public/application.tsx#L120[Example plugin]
 
-Relative links will be resolved relative to your app's route (`http://localhost5601/app/{your-app-id}`)
+Relative links will be resolved relative to your app's route (e.g.: `http://localhost5601/app/{your-app-id}`)
 and setting up internal links in your app in SPA friendly way would look something like:
 
 [source,typescript jsx]
@@ -131,9 +151,9 @@ const MyInternalLink = () => <Link to="/my-other-page"></Link>
 ----
 
 [[history-and-location]]
-=== Working with history and browser location
+=== Using history and browser location
 
-Try to avoid using `window.location.href` and `window.history` directly. +  
+Try to avoid using `window.location` and `window.history` directly. +  
 Instead, consider using {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md[ScopedHistory]
 instance provided by `core`.
 
@@ -143,9 +163,9 @@ instance provided by `core`.
 Common use-case for using 
 `core`'s {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md[ScopedHistory] directly: 
 
-* Reading/writing query params or hash,
-* Imperatively triggering internal navigations within your app,
-* Listening to browser location changes
+* Reading/writing query params or hash.
+* Imperatively triggering internal navigations within your app.
+* Listening to browser location changes.
 
 
 [[state-sync]]
@@ -173,7 +193,7 @@ There are utils to help you to implement such kind of state syncing.
 
 **When you shouldn't use state syncing utils:**
 
-* Adding a query param flag or simple key/value to URL
+* Adding a query param flag or simple key/value to the URL. 
 
 Follow {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_sync#state-syncing-utilities[these] docs to learn more.
 
