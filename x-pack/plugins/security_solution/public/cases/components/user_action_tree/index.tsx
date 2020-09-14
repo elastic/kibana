@@ -124,8 +124,7 @@ export const UserActionTree = React.memo(
           updateCase,
         });
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [caseData, handleManageMarkdownEditId, patchComment, updateCase]
+      [caseData.id, fetchUserActions, patchComment, updateCase]
     );
 
     const handleOutlineComment = useCallback(
@@ -211,202 +210,232 @@ export const UserActionTree = React.memo(
       }
     }, [commentId, initLoading, isLoadingUserActions, isLoadingIds, handleOutlineComment]);
 
-    const descriptionCommentListObj: EuiCommentProps = {
-      username: (
-        <UserActionUsername
-          username={caseData.createdBy.username ?? i18n.UNKNOWN}
-          fullName={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''}
-        />
-      ),
-      event: i18n.ADDED_DESCRIPTION,
-      'data-test-subj': 'description-action',
-      timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
-      children: MarkdownDescription,
-      timelineIcon: (
-        <UserActionAvatar
-          username={caseData.createdBy.username}
-          fullName={caseData.createdBy.fullName}
-        />
-      ),
-      className: classNames({
-        isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
+    const descriptionCommentListObj: EuiCommentProps = useMemo(
+      () => ({
+        username: (
+          <UserActionUsername
+            username={caseData.createdBy.username ?? i18n.UNKNOWN}
+            fullName={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''}
+          />
+        ),
+        event: i18n.ADDED_DESCRIPTION,
+        'data-test-subj': 'description-action',
+        timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
+        children: MarkdownDescription,
+        timelineIcon: (
+          <UserActionAvatar
+            username={caseData.createdBy.username}
+            fullName={caseData.createdBy.fullName}
+          />
+        ),
+        className: classNames({
+          isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
+        }),
+        actions: (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <UserActionCopyLink id={DESCRIPTION_ID} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UserActionPropertyActions
+                id={DESCRIPTION_ID}
+                editLabel={i18n.EDIT_DESCRIPTION}
+                quoteLabel={i18n.QUOTE}
+                disabled={!userCanCrud}
+                isLoading={isLoadingDescription}
+                onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
+                onQuote={handleManageQuote.bind(null, caseData.description)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
       }),
-      actions: (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <UserActionCopyLink id={DESCRIPTION_ID} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UserActionPropertyActions
-              id={DESCRIPTION_ID}
-              editLabel={i18n.EDIT_DESCRIPTION}
-              quoteLabel={i18n.QUOTE}
-              disabled={!userCanCrud}
-              isLoading={isLoadingDescription}
-              onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
-              onQuote={handleManageQuote.bind(null, caseData.description)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    };
+      [
+        MarkdownDescription,
+        caseData,
+        handleManageMarkdownEditId,
+        handleManageQuote,
+        isLoadingDescription,
+        userCanCrud,
+        manageMarkdownEditIds,
+      ]
+    );
 
-    const userActions: EuiCommentProps[] = caseUserActions.reduce<EuiCommentProps[]>(
-      (comments, action, index) => {
-        if (action.commentId != null && action.action === 'create') {
-          const comment = caseData.comments.find((c) => c.id === action.commentId);
-          if (comment != null) {
-            return [
-              ...comments,
-              {
-                username: (
-                  <UserActionUsername
-                    username={comment.createdBy.username ?? ''}
-                    fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
-                  />
-                ),
-                'data-test-subj': `comment-create-action-${comment.id}`,
-                timestamp: (
-                  <UserActionTimestamp
-                    createdAt={comment.createdAt}
-                    updatedAt={comment.updatedAt}
-                  />
-                ),
-                className: classNames('userAction__comment', {
-                  outlined: comment.id === selectedOutlineCommentId,
-                  isEdit: manageMarkdownEditIds.includes(comment.id),
-                }),
-                children: (
-                  <UserActionMarkdown
-                    id={comment.id}
-                    content={comment.comment}
-                    isEditable={manageMarkdownEditIds.includes(comment.id)}
-                    onChangeEditable={handleManageMarkdownEditId}
-                    onSaveContent={handleSaveComment.bind(null, {
-                      id: comment.id,
-                      version: comment.version,
-                    })}
-                  />
-                ),
-                timelineIcon: (
-                  <UserActionAvatar
-                    username={comment.createdBy.username}
-                    fullName={comment.createdBy.fullName}
-                  />
-                ),
-                actions: (
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <UserActionCopyLink id={comment.id} />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <UserActionPropertyActions
-                        id={DESCRIPTION_ID}
-                        editLabel={i18n.EDIT_COMMENT}
-                        quoteLabel={i18n.QUOTE}
-                        disabled={!userCanCrud}
-                        isLoading={isLoadingIds.includes(comment.id)}
-                        onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-                        onQuote={handleManageQuote.bind(null, comment.comment)}
+    const userActions: EuiCommentProps[] = useMemo(
+      () =>
+        caseUserActions.reduce<EuiCommentProps[]>(
+          (comments, action, index) => {
+            if (action.commentId != null && action.action === 'create') {
+              const comment = caseData.comments.find((c) => c.id === action.commentId);
+              if (comment != null) {
+                return [
+                  ...comments,
+                  {
+                    username: (
+                      <UserActionUsername
+                        username={comment.createdBy.username ?? ''}
+                        fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
                       />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ),
-              },
-            ];
-          }
-        }
-
-        if (action.actionField.length === 1) {
-          const myField = action.actionField[0];
-          const parsedValue = parseString(`${action.newValue}`);
-          const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
-            caseServices,
-            parsedValue,
-            index
-          );
-
-          const labelTitle: string | JSX.Element = getLabelTitle({
-            action,
-            field: myField,
-            firstPush,
-            connectors,
-          });
-
-          const showTopFooter =
-            action.action === 'push-to-service' &&
-            index === caseServices[parsedConnectorId].lastPushIndex;
-
-          const showBottomFooter =
-            action.action === 'push-to-service' &&
-            index === caseServices[parsedConnectorId].lastPushIndex &&
-            caseServices[parsedConnectorId].hasDataToPush;
-
-          let footers: EuiCommentProps[] = [];
-
-          if (showTopFooter) {
-            footers = [
-              ...footers,
-              {
-                username: '',
-                type: 'update',
-                event: i18n.ALREADY_PUSHED_TO_SERVICE(`${parsedConnectorName}`),
-                timelineIcon: 'sortUp',
-                'data-test-subj': 'top-footer',
-              },
-            ];
-          }
-
-          if (showBottomFooter) {
-            footers = [
-              ...footers,
-              {
-                username: '',
-                type: 'update',
-                event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${parsedConnectorName}`),
-                timelineIcon: 'sortDown',
-                'data-test-subj': 'bottom-footer',
-              },
-            ];
-          }
-
-          return [
-            ...comments,
-            {
-              username: (
-                <UserActionUsernameWithAvatar
-                  username={action.actionBy.username ?? ''}
-                  fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
-                />
-              ),
-              type: 'update',
-              event: labelTitle,
-              'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
-              timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-              timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
-              actions: (
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <UserActionCopyLink id={action.actionId} />
-                  </EuiFlexItem>
-                  {action.action === 'update' && action.commentId != null && (
-                    <EuiFlexItem>
-                      <UserActionMoveToReference
-                        id={action.commentId}
-                        outlineComment={handleOutlineComment}
+                    ),
+                    'data-test-subj': `comment-create-action-${comment.id}`,
+                    timestamp: (
+                      <UserActionTimestamp
+                        createdAt={comment.createdAt}
+                        updatedAt={comment.updatedAt}
                       />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              ),
-            },
-            ...footers,
-          ];
-        }
+                    ),
+                    className: classNames('userAction__comment', {
+                      outlined: comment.id === selectedOutlineCommentId,
+                      isEdit: manageMarkdownEditIds.includes(comment.id),
+                    }),
+                    children: (
+                      <UserActionMarkdown
+                        id={comment.id}
+                        content={comment.comment}
+                        isEditable={manageMarkdownEditIds.includes(comment.id)}
+                        onChangeEditable={handleManageMarkdownEditId}
+                        onSaveContent={handleSaveComment.bind(null, {
+                          id: comment.id,
+                          version: comment.version,
+                        })}
+                      />
+                    ),
+                    timelineIcon: (
+                      <UserActionAvatar
+                        username={comment.createdBy.username}
+                        fullName={comment.createdBy.fullName}
+                      />
+                    ),
+                    actions: (
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <UserActionCopyLink id={comment.id} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <UserActionPropertyActions
+                            id={comment.id}
+                            editLabel={i18n.EDIT_COMMENT}
+                            quoteLabel={i18n.QUOTE}
+                            disabled={!userCanCrud}
+                            isLoading={isLoadingIds.includes(comment.id)}
+                            onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
+                            onQuote={handleManageQuote.bind(null, comment.comment)}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ),
+                  },
+                ];
+              }
+            }
 
-        return comments;
-      },
-      [descriptionCommentListObj]
+            if (action.actionField.length === 1) {
+              const myField = action.actionField[0];
+              const parsedValue = parseString(`${action.newValue}`);
+              const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
+                caseServices,
+                parsedValue,
+                index
+              );
+
+              const labelTitle: string | JSX.Element = getLabelTitle({
+                action,
+                field: myField,
+                firstPush,
+                connectors,
+              });
+
+              const showTopFooter =
+                action.action === 'push-to-service' &&
+                index === caseServices[parsedConnectorId].lastPushIndex;
+
+              const showBottomFooter =
+                action.action === 'push-to-service' &&
+                index === caseServices[parsedConnectorId].lastPushIndex &&
+                caseServices[parsedConnectorId].hasDataToPush;
+
+              let footers: EuiCommentProps[] = [];
+
+              if (showTopFooter) {
+                footers = [
+                  ...footers,
+                  {
+                    username: '',
+                    type: 'update',
+                    event: i18n.ALREADY_PUSHED_TO_SERVICE(`${parsedConnectorName}`),
+                    timelineIcon: 'sortUp',
+                    'data-test-subj': 'top-footer',
+                  },
+                ];
+              }
+
+              if (showBottomFooter) {
+                footers = [
+                  ...footers,
+                  {
+                    username: '',
+                    type: 'update',
+                    event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${parsedConnectorName}`),
+                    timelineIcon: 'sortDown',
+                    'data-test-subj': 'bottom-footer',
+                  },
+                ];
+              }
+
+              return [
+                ...comments,
+                {
+                  username: (
+                    <UserActionUsernameWithAvatar
+                      username={action.actionBy.username ?? ''}
+                      fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
+                    />
+                  ),
+                  type: 'update',
+                  event: labelTitle,
+                  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+                  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+                  timelineIcon:
+                    action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
+                  actions: (
+                    <EuiFlexGroup>
+                      <EuiFlexItem>
+                        <UserActionCopyLink id={action.actionId} />
+                      </EuiFlexItem>
+                      {action.action === 'update' && action.commentId != null && (
+                        <EuiFlexItem>
+                          <UserActionMoveToReference
+                            id={action.commentId}
+                            outlineComment={handleOutlineComment}
+                          />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  ),
+                },
+                ...footers,
+              ];
+            }
+
+            return comments;
+          },
+          [descriptionCommentListObj]
+        ),
+      [
+        caseData,
+        caseServices,
+        caseUserActions,
+        connectors,
+        handleOutlineComment,
+        descriptionCommentListObj,
+        handleManageMarkdownEditId,
+        handleManageQuote,
+        handleSaveComment,
+        isLoadingIds,
+        manageMarkdownEditIds,
+        selectedOutlineCommentId,
+        userCanCrud,
+      ]
     );
 
     const bottomActions = [
