@@ -12,10 +12,10 @@
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  overflow: hidden;
+  // overflow: hidden;
 }
 
-.dscApp  .dscSidebar__sectionStatic {
+.dscApp .dscSidebar__sectionStatic {
   padding: 0 16px;
 }
 
@@ -26,8 +26,20 @@
   flex-grow: 1;
   overflow-x: hidden;
   scrollbar-width: thin;
-  -webkit-mask-image: linear-gradient(to bottom, rgba(255, 0, 0, 0.1) 0%, red 7.5px, red calc(100% - 7.5px), rgba(255, 0, 0, 0.1) 100%);
-  mask-image: linear-gradient(to bottom, rgba(255, 0, 0, 0.1) 0%, red 7.5px, red calc(100% - 7.5px), rgba(255, 0, 0, 0.1) 100%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(255, 0, 0, 0.1) 0%,
+    red 7.5px,
+    red calc(100% - 7.5px),
+    rgba(255, 0, 0, 0.1) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(255, 0, 0, 0.1) 0%,
+    red 7.5px,
+    red calc(100% - 7.5px),
+    rgba(255, 0, 0, 0.1) 100%
+  );
   height: 100%;
   overflow-y: auto;
   padding: 0 16px;

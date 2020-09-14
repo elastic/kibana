@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import rison from 'rison-node';
-import { EuiResizableContainer } from '@elastic/eui';
+// import { EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonToggle } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
@@ -36,6 +36,38 @@ import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DiscoverFetchError } from './fetch_error/fetch_error';
 import './discover.scss';
 import { esFilters } from '../../../../data/public';
+
+// Hook
+function useWindowSize() {
+  // Initialize state with undefined width/height so server and client renders match
+  // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
+
+  useEffect(() => {
+    // Handler to call on window resize
+    function handleResize() {
+      // Set window width/height to state
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+
+    // Call handler right away so state gets updated with initial window size
+    handleResize();
+
+    // Remove event listener on cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // Empty array ensures that effect is only run on mount
+
+  return windowSize;
+}
 
 export function Discover({
   addColumn,
@@ -85,6 +117,7 @@ export function Discover({
   }
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, filterManager } = opts;
+  const size = useWindowSize();
 
   const getContextAppHref = (anchorId: string) => {
     const path = `#/context/${encodeURIComponent(indexPattern.id)}/${encodeURIComponent(anchorId)}`;
@@ -126,151 +159,134 @@ export function Discover({
           useDefaultBehaviors={true}
         />
         <main className="dscApp__frame">
-          <EuiResizableContainer>
-            {(EuiResizablePanel, EuiResizableButton) => (
-              <>
-                <EuiResizablePanel
-                  minSize="20%"
-                  initialSize={100}
-                  scrollable={false}
-                  className="dscApp__sidebar"
-                >
-                  <DiscoverSidebar
-                    columns={state.columns}
-                    fieldCounts={fieldCounts}
-                    hits={rows}
-                    indexPatternList={indexPatternList}
-                    onAddField={addColumn}
-                    onAddFilter={onAddFilter}
-                    onRemoveField={onRemoveColumn}
-                    selectedIndexPattern={searchSource && searchSource.getField('index')}
-                    setIndexPattern={setIndexPattern}
-                  />
-                </EuiResizablePanel>
+          <>
+            <div>
+              {size.width}px / {size.height}px
+            </div>
+            <DiscoverSidebar
+              columns={state.columns}
+              fieldCounts={fieldCounts}
+              hits={rows}
+              indexPatternList={indexPatternList}
+              onAddField={addColumn}
+              onAddFilter={onAddFilter}
+              onRemoveField={onRemoveColumn}
+              selectedIndexPattern={searchSource && searchSource.getField('index')}
+              setIndexPattern={setIndexPattern}
+            />
 
-                <EuiResizableButton />
+            <>
+              {resultState === 'none' && (
+                <DiscoverNoResults
+                  timeFieldName={opts.timefield}
+                  queryLanguage={state.query.language}
+                />
+              )}
+              {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
 
-                <EuiResizablePanel
-                  initialSize={500}
-                  minSize="50%"
-                  scrollable={false}
-                  className="dscApp__content"
-                >
-                  <>
-                    {resultState === 'none' && (
-                      <DiscoverNoResults
-                        timeFieldName={opts.timefield}
-                        queryLanguage={state.query.language}
-                      />
-                    )}
-                    {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
+              {resultState === 'loading' && (
+                <>
+                  {fetchError && <DiscoverFetchError fetchError={fetchError} />}
+                  {!fetchError && (
+                    <div className="dscOverlay">
+                      <LoadingSpinner />
+                    </div>
+                  )}
+                </>
+              )}
 
-                    {resultState === 'loading' && (
-                      <>
-                        {fetchError && <DiscoverFetchError fetchError={fetchError} />}
-                        {!fetchError && (
-                          <div className="dscOverlay">
-                            <LoadingSpinner />
+              {resultState === 'ready' && (
+                <div className="dscWrapper__content">
+                  <div className="dscResultCount">
+                    <EuiFlexGroup justifyContent="spaceBetween">
+                      <EuiFlexItem
+                        grow={false}
+                        className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
+                      >
+                        <HitsCounter
+                          hits={hits > 0 ? hits : 0}
+                          showResetButton={!!(savedSearch && savedSearch.id)}
+                          onResetQuery={resetQuery}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem className="dscResultCount__actions">
+                        <TimechartHeader
+                          from={toMoment(timeRange.from)}
+                          to={toMoment(timeRange.to)}
+                          options={intervalOptions}
+                          onChangeInterval={onChangeInterval}
+                          stateInterval={state.interval}
+                          showScaledInfo={bucketInterval.scaled}
+                          bucketIntervalDescription={bucketInterval.description}
+                          bucketIntervalScale={bucketInterval.scale}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+                        <EuiButtonToggle
+                          label={toggleOn ? 'Hide chart' : 'Show chart'}
+                          iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                          onChange={(e: any) => {
+                            toggleChart(e.target.checked);
+                          }}
+                          isSelected={toggleOn}
+                          isEmpty
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
+
+                  <div className="dscResults">
+                    {opts.timefield && toggleOn && (
+                      <section
+                        aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
+                        className="dscTimechart"
+                      >
+                        {vis && rows.length !== 0 && (
+                          <div className="dscHistogramGrid" data-test-subj="discoverChart">
+                            <DiscoverHistogram
+                              chartData={histogramData}
+                              timefilterUpdateHandler={timefilterUpdateHandler}
+                            />
                           </div>
                         )}
-                      </>
+                      </section>
                     )}
-
-                    {resultState === 'ready' && (
-                      <div className="dscWrapper__content">
-                        <div className="dscResultCount">
-                          <EuiFlexGroup justifyContent="spaceBetween">
-                            <EuiFlexItem
-                              grow={false}
-                              className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
-                            >
-                              <HitsCounter
-                                hits={hits > 0 ? hits : 0}
-                                showResetButton={!!(savedSearch && savedSearch.id)}
-                                onResetQuery={resetQuery}
-                              />
-                            </EuiFlexItem>
-                            <EuiFlexItem className="dscResultCount__actions">
-                              <TimechartHeader
-                                from={toMoment(timeRange.from)}
-                                to={toMoment(timeRange.to)}
-                                options={intervalOptions}
-                                onChangeInterval={onChangeInterval}
-                                stateInterval={state.interval}
-                                showScaledInfo={bucketInterval.scaled}
-                                bucketIntervalDescription={bucketInterval.description}
-                                bucketIntervalScale={bucketInterval.scale}
-                              />
-                            </EuiFlexItem>
-                            <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-                              <EuiButtonToggle
-                                label={toggleOn ? 'Hide chart' : 'Show chart'}
-                                iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                                onChange={(e: any) => {
-                                  toggleChart(e.target.checked);
-                                }}
-                                isSelected={toggleOn}
-                                isEmpty
-                              />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
+                    <section className="dscTable" aria-labelledby="documentsAriaLabel">
+                      <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
+                        <FormattedMessage
+                          id="discover.documentsAriaLabel"
+                          defaultMessage="Documents"
+                        />
+                      </h2>
+                      {rows && rows.length && (
+                        <div className="dscDiscoverGrid">
+                          <DiscoverGrid
+                            ariaLabelledBy="documentsAriaLabel"
+                            columns={state.columns}
+                            columnsWidth={state.columnsWidth}
+                            indexPattern={indexPattern}
+                            rows={rows}
+                            sort={state.sort}
+                            sampleSize={opts.sampleSize}
+                            searchDescription={opts.savedSearch.description}
+                            searchTitle={opts.savedSearch.lastSavedTitle}
+                            showTimeCol={showTimeCol}
+                            getContextAppHref={getContextAppHref}
+                            onAddColumn={addColumn}
+                            onFilter={onAddFilter}
+                            onRemoveColumn={onRemoveColumn}
+                            onSetColumns={onSetColumns}
+                            onSort={onSort}
+                            onResize={onResize}
+                          />
                         </div>
-
-                        <div className="dscResults">
-                          {opts.timefield && toggleOn && (
-                            <section
-                              aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
-                              className="dscTimechart"
-                            >
-                              {vis && rows.length !== 0 && (
-                                <div className="dscHistogramGrid" data-test-subj="discoverChart">
-                                  <DiscoverHistogram
-                                    chartData={histogramData}
-                                    timefilterUpdateHandler={timefilterUpdateHandler}
-                                  />
-                                </div>
-                              )}
-                            </section>
-                          )}
-                          <section className="dscTable" aria-labelledby="documentsAriaLabel">
-                            <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
-                              <FormattedMessage
-                                id="discover.documentsAriaLabel"
-                                defaultMessage="Documents"
-                              />
-                            </h2>
-                            {rows && rows.length && (
-                              <div className="dscDiscoverGrid">
-                                <DiscoverGrid
-                                  ariaLabelledBy="documentsAriaLabel"
-                                  columns={state.columns}
-                                  columnsWidth={state.columnsWidth}
-                                  indexPattern={indexPattern}
-                                  rows={rows}
-                                  sort={state.sort}
-                                  sampleSize={opts.sampleSize}
-                                  searchDescription={opts.savedSearch.description}
-                                  searchTitle={opts.savedSearch.lastSavedTitle}
-                                  showTimeCol={showTimeCol}
-                                  getContextAppHref={getContextAppHref}
-                                  onAddColumn={addColumn}
-                                  onFilter={onAddFilter}
-                                  onRemoveColumn={onRemoveColumn}
-                                  onSetColumns={onSetColumns}
-                                  onSort={onSort}
-                                  onResize={onResize}
-                                />
-                              </div>
-                            )}
-                          </section>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                </EuiResizablePanel>
-              </>
-            )}
-          </EuiResizableContainer>
+                      )}
+                    </section>
+                  </div>
+                </div>
+              )}
+            </>
+          </>
         </main>
       </div>
     </I18nProvider>
