@@ -70,17 +70,10 @@ const trustedAppDeletionSubmissionResourceStateChanged: CaseReducer<TrustedAppDe
   state,
   action
 ) => {
-  if (state.deletionDialog) {
-    return {
-      ...state,
-      deletionDialog: {
-        ...state.deletionDialog,
-        submissionResourceState: action.payload.newState,
-      },
-    };
-  } else {
-    return state;
-  }
+  return {
+    ...state,
+    deletionDialog: { ...state.deletionDialog, submissionResourceState: action.payload.newState },
+  };
 };
 
 const trustedAppDeletionDialogStarted: CaseReducer<TrustedAppDeletionDialogStarted> = (
@@ -101,18 +94,14 @@ const trustedAppDeletionDialogConfirmed: CaseReducer<TrustedAppDeletionDialogCon
   state,
   action
 ) => {
-  if (state.deletionDialog) {
-    return { ...state, deletionDialog: { ...state.deletionDialog, confirmed: true } };
-  } else {
-    return state;
-  }
+  return { ...state, deletionDialog: { ...state.deletionDialog, confirmed: true } };
 };
 
 const trustedAppDeletionDialogClosed: CaseReducer<TrustedAppDeletionDialogClosed> = (
   state,
   action
 ) => {
-  return { ...state, deletionDialog: undefined };
+  return { ...state, deletionDialog: initialDeletionDialogState };
 };
 
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
@@ -135,6 +124,11 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
   }
 };
 
+const initialDeletionDialogState: TrustedAppsListPageState['deletionDialog'] = {
+  confirmed: false,
+  submissionResourceState: { type: 'UninitialisedResourceState' },
+};
+
 export const initialTrustedAppsPageState: TrustedAppsListPageState = {
   listView: {
     currentListResourceState: { type: 'UninitialisedResourceState' },
@@ -144,6 +138,7 @@ export const initialTrustedAppsPageState: TrustedAppsListPageState = {
     },
     freshDataTimestamp: new Date().getTime(),
   },
+  deletionDialog: initialDeletionDialogState,
   active: false,
 };
 

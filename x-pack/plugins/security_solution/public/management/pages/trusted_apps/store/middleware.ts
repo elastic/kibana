@@ -30,6 +30,8 @@ import {
 
 import {
   getCurrentListResourceState,
+  getDeletionDialogEntryId,
+  getDeletionSubmissionResourceState,
   getLastLoadedListResourceState,
   getListCurrentPageIndex,
   getListCurrentPageSize,
@@ -100,43 +102,40 @@ const submitDeletionIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  const deletionDialog = store.getState().deletionDialog;
+  const submissionResourceState = getDeletionSubmissionResourceState(store.getState());
+  const entryId = getDeletionDialogEntryId(store.getState());
 
-  if (deletionDialog) {
-    const submissionResourceState = deletionDialog.submissionResourceState;
+  if (isStaleResourceState(submissionResourceState) && entryId !== undefined) {
+    store.dispatch(
+      createTrustedAppDeletionSubmissionResourceStateChanged({
+        type: 'LoadingResourceState',
+        previousState: submissionResourceState,
+      })
+    );
 
-    if (isStaleResourceState(submissionResourceState)) {
+    try {
+      await trustedAppsService.deleteTrustedApp({ id: entryId });
+
       store.dispatch(
         createTrustedAppDeletionSubmissionResourceStateChanged({
-          type: 'LoadingResourceState',
-          previousState: submissionResourceState,
+          type: 'LoadedResourceState',
+          data: null,
         })
       );
-
-      try {
-        await trustedAppsService.deleteTrustedApp({ id: deletionDialog.entryId });
-
-        store.dispatch(
-          createTrustedAppDeletionSubmissionResourceStateChanged({
-            type: 'LoadedResourceState',
-            data: null,
-          })
-        );
-        store.dispatch({
-          type: 'trustedAppDeletionDialogClosed',
-        });
-        store.dispatch({
-          type: 'trustedAppsListDataOutdated',
-        });
-      } catch (error) {
-        store.dispatch(
-          createTrustedAppDeletionSubmissionResourceStateChanged({
-            type: 'FailedResourceState',
-            error,
-            lastLoadedState: getLastLoadedResourceState(submissionResourceState),
-          })
-        );
-      }
+      store.dispatch({
+        type: 'trustedAppDeletionDialogClosed',
+      });
+      store.dispatch({
+        type: 'trustedAppsListDataOutdated',
+      });
+    } catch (error) {
+      store.dispatch(
+        createTrustedAppDeletionSubmissionResourceStateChanged({
+          type: 'FailedResourceState',
+          error,
+          lastLoadedState: getLastLoadedResourceState(submissionResourceState),
+        })
+      );
     }
   }
 };

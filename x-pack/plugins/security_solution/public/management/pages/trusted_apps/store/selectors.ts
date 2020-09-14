@@ -80,21 +80,25 @@ export const isListLoading = (state: Immutable<TrustedAppsListPageState>): boole
 };
 
 export const isDeletionDialogOpen = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  return Boolean(state.deletionDialog);
+  return state.deletionDialog.entryId === undefined;
 };
 
 export const isDeletionInProgress = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  if (state.deletionDialog) {
-    return isLoadingResourceState(state.deletionDialog.submissionResourceState);
-  } else {
-    return false;
-  }
+  return isLoadingResourceState(state.deletionDialog.submissionResourceState);
 };
 
 export const hasDeletionError = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  if (state.deletionDialog) {
-    return isFailedResourceState(state.deletionDialog.submissionResourceState);
-  } else {
-    return false;
-  }
+  return isFailedResourceState(state.deletionDialog.submissionResourceState);
+};
+
+export const getDeletionSubmissionResourceState = (
+  state: Immutable<TrustedAppsListPageState>
+): AsyncResourceState => {
+  return state.deletionDialog.submissionResourceState;
+};
+
+export const getDeletionDialogEntryId = (
+  state: Immutable<TrustedAppsListPageState>
+): string | undefined => {
+  return state.deletionDialog.entryId;
 };
