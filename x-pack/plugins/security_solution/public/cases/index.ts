@@ -5,7 +5,7 @@
  */
 
 import { SecuritySubPlugin } from '../app/types';
-import { CasesRoutes } from './routes';
+import { createCaseRoutes } from './routes';
 import { createCaseSettingsRegistry } from './settings_registry';
 import { registerCaseSettings } from './components/settings';
 import { CaseSettingsRegistry } from './types';
@@ -26,7 +26,7 @@ export class Cases {
 
   public start(): SecuritySubPlugin {
     return {
-      SubPluginRoutes: CasesRoutes,
+      SubPluginRoutes: createCaseRoutes({ caseSettingsRegistry: this.caseSettingsRegistry }),
     };
   }
 }
