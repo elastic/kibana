@@ -6,14 +6,18 @@ sidebar_label: About
 
 ## Presentation
 
-The form library helps us building forms efficiently by providing a system whose main task is (1) to abstract away the state management of fields values and (2) running validations on the fields when their values change.  
-The system is composed of **three parts**: the core, fields components and validators.
+The form library helps us building forms efficiently by providing a system whose main task is (1) to abstract away the state management of fields values and validity and (2) running validations on the fields when their values change.  
+The system is composed of **three parts**:
+
+* the core
+* fields components
+* validators.
 
 ## Motivation
 
-In the Elasticsearch UI team we build many forms. Many many forms! :blush: For each of them, we used to manually declare the form state & then write validation functions, call them and then update the form state. We were basically re-inventing the wheel for each new form we built. It took our precious dev time to re-think the approach each time, but even more problematic: it meant that each of our form was built slightly differently. Maintaining those forms meant that we needed to remember how the state was being updated on a specific form and how its validation worked. This was far from efficient...
+In the Elasticsearch UI team we build many forms. Many many forms! :blush: For each of them, we used to manually declare the form state, write validation functions, call them on certain events and then update the form state. We were basically re-inventing the wheel for each new form we built. It took our precious dev time to re-think the approach each time, but even more problematic: it meant that each of our form was built slightly differently. Maintaining those forms meant that we needed to remember how the state was being updated on a specific form and how its validation worked. This was far from efficient...
 
-We needed a system in place that takes care of the repetitive task of managing a form state and validating its value, so we could dedicate more time doing what we love: **build amazing UX for our users!**.
+We needed a system in place that took care of the repetitive task of managing a form state and validating its value, so we could dedicate more time doing what we love: **build amazing UX for our users!**.
 
 The form lib was born.
 

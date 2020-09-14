@@ -6,7 +6,7 @@ sidebar_label: useForm()
 
 **Returns:** [`FormHook`](form_hook.md)
 
-The `useForm` hook is where to declare a new form object. As we have seen in the ["Getting started"](about.md), you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optionals).
+We use the `useForm` hook to declare a new form object. As we have seen in the ["Getting started"](about.md), you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optionals).
 
 ## Configuration
 
@@ -16,6 +16,7 @@ The `useForm` hook is where to declare a new form object. As we have seen in the
 **Returns:** `Promise<void>`
 
 The `onSubmit` handler is executed when calling `form.submit()`. It receives the form data and a boolean for the validity of the form.
+Meanwhile the form is being submitted, the form `isSubmitting` state will be set to `true`. This can be useful to change the state of the submit button in the UI.
 
 ```js
 interface MyFormData {
@@ -23,12 +24,16 @@ interface MyFormData {
 }
 
 const onFormSubmit = async (data: MyFormData, isValid: boolean): Promise<void> => {
+    // "form.isSubmitting" is set to "true"
+
     if (!isValid) {
       // Maybe show a callout
       return;
     }
     // Do anything with the data
     await myApiService.createResource(data);
+
+    // "form.isSubmitting" is set to "false".
 }
 const { form } = useForm<MyFormData>({ onSubmit: onFormSubmit });
 
@@ -51,7 +56,7 @@ const { form } = useForm({ defaultValue: fetchedData });
 
 **Type:** `Record<string, FieldConfig>`
 
-Instead of manually providing a `config` object to each `<UseField />`, it is more convenient in most cases to provide a schema to the form with configuration objects at the desired paths.
+Instead of manually providing a `config` object to each `<UseField />`, in some cases it is more convenient to provide a schema to the form with the fields configuration at the desired paths.
 
 ```js
 interface MyForm {
@@ -65,11 +70,14 @@ const schema: Schema<MyForm> {
   user: {
     firstName: {
       defaultValue: '',
-      ... // any other config
+      ... // other config
     },
     lastName: {
       defaultValue: '',
       ...
+    },
+    isAdmin: {
+      defaultValue: false,
     }
   }
 };
@@ -81,8 +89,9 @@ export const MyComponent = () => {
   // it will be read from the schema
   return (
     <Form form={form}>
-      <UseField paht="user.firstName" />
-      <UseField paht="user.lastName" />
+      <UseField path="user.firstName" />
+      <UseField path="user.lastName" />
+      <UseField path="user.isAdmin" />
     </Form>
   );
 }
@@ -90,13 +99,11 @@ export const MyComponent = () => {
 
 ### deserializer
 
-This handler lets you  you provide a `defaultValue`, you might want parse the object and transform it (e.g. adding a field) before it is used as `defaultValue` internally ([read more about the "In" state here](in_out_raw_state.md#in-data-state)).  
-Let's see it through an example.
+When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values ([read more about the "In" state here](in_out_raw_state.md#in-data-state)).  
+**Note:** It is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.  
 
 ```js
-import { Form, useForm, Field, getUseField, FIELD_TYPES, FormDataProvider } from '<es_ui_shared>/public';
-
-const UseField = getUseField({ component: Field });
+import { Form, useForm, useFormData, Field, FIELD_TYPES, FormDataProvider } from '<es_ui_shared>/public';
 
 // Data coming from the server
 const fetchedData = {
@@ -108,43 +115,28 @@ const fetchedData = {
 
 // We want to have a toggle in the UI to display the address _if_ there is one.
 // Otherwise the toggle value is "false" and no address is displayed.
-// As a convention, we will add internal fields inside an "__internal__" object.
-const deserializer = (value) => {
-  const internalFields = {
-    showAddress: value.hasOwnProperty('address'),
-  };
-
-  // We modify the object and add additional fields under __internal__
+const deserializer = (defaultValue) => {
   return {
-    ...value,
-    __internal__: internalFields
+    ...defaultValue,
+    // We add an extra toggle field
+    showAddress:  defaultValue.hasOwnProperty('address'),
   };
 }
 
 export const MyComponent = ({ fetchedData }: Props) => {
-  const onFormSubmit: FormConfig<UserFormData>['onSubmit'] = async (data, isValid) => {
-    console.log('Is form valid:', isValid);
-    console.log('Form data:', data);
-  };
-
   const { form } = useForm({
-    onSubmit: onFormSubmit,
     defaultValue: fetchedData,
     deserializer
   });
+  const [{ showAddress }] = useFormData({ form, watch: 'showAddress' })
 
-  // We can now use our internal field in the UI
+  // We can now use our "showAddress" internal field in the UI
   return (
     <Form form={form}>
-      <UseField path="name" config={{ type: FieldType:Text }} />
-      <UseField path="__internal__.showAddress" config={{ type: FIELD_TYPES.TOGGLE }} />
-
+      <UseField path="name" config={{ type: FieldType:Text }} component={Field} />
+      <UseField path="showAddress" config={{ type: FIELD_TYPES.TOGGLE }} component={Field} />
       {/* Show the street address when the toggle is "true" */}
-      <FormDataProvider pathsToWatch="__internal__.showAddress">
-        {({ '__internal__.showAddress': showAddress }) => {
-          return showAddress ? <UseField path="address.street" /> : null;
-        }}
-      </FormDataProvider>
+      {showAddress ? <UseField path="address.street" /> : null}
 
       <button onClick={form.submit}>Submit</button>
     </Form>
@@ -154,7 +146,8 @@ export const MyComponent = ({ fetchedData }: Props) => {
 
 ### serializer
 
-Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example).  [Read more about the "Out" state here](in_out_raw_state.md#out-data-state).
+Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example).  [Read more about the "Out" state here](in_out_raw_state.md#out-data-state).  
+**Note:** As with the `deserializer`, it is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.
 
 If we run the example above for the `deserializer`, and we click on the "Submit" button, we would get this in the console
 
@@ -164,13 +157,11 @@ Form data: {
     street: 'El Camino Real #350'
   },
   name: 'John',
-  __internal__: {
-    showAddress: true
-  }
+  showAddress: true
 }
 ```
 
-Not exactly what we want. Let's use a `serializer` to remove the `__internal__` object.
+We don't want to surface the internal `showAddress` field. Let's use a `serializer` to remove it.
 
 ```js
 
@@ -178,20 +169,14 @@ const deserializer = (value) => {
   ...
 };
 
-  // Remove the __internal__ object from the outputted data
+  // Remove the showAddress field from the outputted data
 const serializer = (value) => {
-  const { __internal__, ...rest } = value;
+  const { showAddress, ...rest } = value;
   return rest;
 }
 
 export const MyComponent = ({ fetchedData }: Props) => {
-  const onFormSubmit: FormConfig<UserFormData>['onSubmit'] = async (data, isValid) => {
-    console.log('Is form valid:', isValid);
-    console.log('Form data:', data);
-  };
-
   const { form } = useForm({
-    onSubmit: onFormSubmit,
     defaultValue: fetchedData,
     deserializer,
     serializer,
@@ -202,7 +187,7 @@ export const MyComponent = ({ fetchedData }: Props) => {
 };
 ```
 
-Much better, now when we submit the form, the internal fields are not leaked outside when we build the form object.
+Much better, now when we submit the form, the internal fields are not leaked outside when building the form object.
 
 ### id
 
@@ -219,9 +204,9 @@ You can optionally give an id to the form, that will be attached to the `form` o
 **Type:**: `number` (ms)
 **Default:**: 500
 
-When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state change entirely depend on the time it take to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the value change time will be the time it takes to run all the async validations.
+When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state change entirely depend on the time it take to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the "value change" duration will be the time it takes to run all the async validations.
 
-With this option, you can define the minimum time you'd like to have between the two state change, so the `isChangingValue` state will stay `true` for at least the amount of milliseconds defined here. This is useful for example if you want to display possible errors on the field after a minimum of time has passed.
+With this option, you can define the minimum time you'd like to have between the two state change, so the `isChangingValue` state will stay `true` for at least the amount of milliseconds defined here. This is useful for example if you want to display possible errors on the field after a minimum of time has passed since the last value change.
 
 This setting **can be overriden** on a per-field basis, providing a `valueChangeDebounceTime` in its config object.
 

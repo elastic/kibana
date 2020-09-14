@@ -6,7 +6,7 @@ sidebar_label: Introduction
 
 ## Welcome to the ES UI team docs!
 
-In this website you will find all you ever wanted to know about the reusable solution we built to ease our development of Kibana plugins tailord at managing the Elastic Stack.
+You will find here the documentation of the reusable solutions we have built to speed up our development of Kibana plugins to manage Elasticsearch.
 
 ## Features
 

@@ -8,9 +8,9 @@ There are multiple places where you can define the default value of a field. Not
 
 ## Order of precedence
 
-1. As a prop on the `<UseField />`
-2. In the `defaultValue` config passed to `useForm({ defaultValue: { ... } })`
-3. In the `defaultValue` parameter of the field config (as a `<UseFielld />` prop or inside a form schema)
+1. As a prop on the `<UseField path="name" defaultValue="John" />` component
+2. In the **form** `defaultValue` config passed to `useForm({ defaultValue: { ... } })`
+3. In the **field** `defaultValue` config parameter (either passed as prop to `<UseFielld />` prop or declared inside a form Schema)
 4. If no default value is found above, it defaults to `""` (empty string)
 
 ### As a prop on `<UseField />`
@@ -22,7 +22,7 @@ This takes over any other `defaultValue` defined elsewhere. What you provide as 
 <UseField path="user.firstName" defaultValue="John" />
 ```
 
-### In the `defaultValue` config passed to `useForm()`
+### In the form `defaultValue` config passed to `useForm()`
 
 The above solution works well for very small forms, but with larger form it is not very convenient to manually add the default value of each field.
 
@@ -38,25 +38,28 @@ const fetchedData = {
 // We need to manually write each connection, which is not convenient
 <UseField path="user.firstName" defaultValue={fetchedData.user.firstName} />
 <UseField path="user.lastName" defaultValue={fetchedData.user.lastName} />
+```
 
-// It is much easier to provide the defaultValue for the whole form
+It is much easier to provide the defaultValue object (probably fetched from the server) at the form level
+
+```js
 const { form } = useForm({ defaultValue: fetchedData });
 
-// And the defaultValue for each field will be automatically mapped to their paths
+// And the defaultValue for each field will be automatically mapped to its paths
 <UseField path="user.firstName" />
 <UseField path="user.lastName" />
 ```
 
-### In the `defaultValue` parameter of the field config
+### In the field `defaultValue` config parameter of the field config
 
-When you are creating a new resource, the form is empty and there is no data coming from the server to map. You still migth want to define a defaultValue for non text field (checkbox, arrays...)
+When you are creating a new resource, the form is empty and there is no data coming from the server to map. You still migth want to define a defaultValue for your fields.
 
 ```js
 interface Props {
   fetchedData?: { index: boolean }
 }
 
-export const MyComponent = ({ fetchedData }: Props) => {
+export const MyForm = ({ fetchedData }: Props) => {
   // fetchedData can be "undefined" or an object.
   // If it is undefined, then the config.defaultValue will be used
   const { form } = useForm({ defaultValue: fetchedData });
@@ -71,13 +74,16 @@ Or the same but using a form schema
 
 ```js
 const schema = {
-  index: { defaultValue: true }
+  // Field config for the path "index" declared below
+  index: {
+    defaultValue: true,
+  },
 };
 
 export const MyComponent = ({ fetchedData }: Props) => {
   // 1. If defaultValue is not undefined **and** there is a value at the "index" path, use it
-  // 2. otherwise if there is a schema with a config at the "index" path read its defaultValue
-  // 3. otherwise use an "" (empty string) - which will throw an error for a checkbox -.
+  // 2. otherwise if there is a schema with a config at the "index" path read its "defaultValue"
+  // 3. if it's still undefined, use an "" (empty string) - which will throw an error for a checkbox field-.
   const { form } = useForm({ schema, defaultValue: fetchedData });
 
   return (

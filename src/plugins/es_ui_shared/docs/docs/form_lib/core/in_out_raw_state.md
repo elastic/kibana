@@ -40,7 +40,7 @@ This also means that, when we listen to form data changes, we will receive both 
 
 ## "Out" data state
 
-The "out" data state data is the object you expect to receive back from the form. To build this object, all the `serializers` provided (at the form or at the field level) are executed against the "In" data state. In the above example, it corresponds to the `interface MyForm`.
+The "out" data state data is the object you expect to receive back from the form. To build this object, all the `serializers` provided (at the form or at the field level) are executed against the "In" data state. In the above example, the "Out" data state corresponds to the `interface MyForm`.
 
 ## "In" data state
 
@@ -48,7 +48,7 @@ The "In" data state is the state the form internally works with. If a `defaultVa
  This state can diverge from the "Out" data state in **two aspects**:
 
 - The _type_ of a field is different
-- The _fields_ of the form diverge (it has less or more fields).
+- The number of _fields_ of the form diverge (it has less or more fields).
 
 This does not mean it will always be different than the Out state, but in some cases it will.
 
@@ -60,7 +60,7 @@ interface AddressFormData {
   ...
 }
 
-// Internally, the form "Select" component requires the selected option to be an object 
+// Internally, the form "Select" component expects an object with a label and a value property
 // This will be the internal ("In") state of that field.
 interface AddressFormDataIn {
   country: { label: 'España', value: 'ES' }
@@ -72,8 +72,10 @@ interface AddressFormDataIn {
 // This field is _only_ used in the UI but we don't want it in our outputted form data
 
 interface AddressFormDataIn {
-  showEmail: boolean; // this toggle field is only used in the UI and should not be returned by the form
+  // This toggle field is only used in the UI and should not be returned by the form.
+  // We will probably add a serializer() to the form to remove it.
+  showAdvancedSettings: boolean;
 }
 ```
 
-Once we understand the difference between those three data states it will be easier to understand why we get a "raw" data object, or when to use the `(de)serializers`.
+Once we understand the difference between those three data states it will be easier to understand why we get a "raw" data object, or when to use a `(de)serializers`.
