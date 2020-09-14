@@ -78,6 +78,7 @@ import {
   rumServicesRoute,
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
+  rumUrlSearch,
 } from './rum_client';
 import {
   observabilityOverviewHasDataRoute,
@@ -174,6 +175,7 @@ const createApmApi = () => {
     .add(rumServicesRoute)
     .add(rumVisitorsBreakdownRoute)
     .add(rumWebCoreVitals)
+    .add(rumUrlSearch)
 
     // Observability dashboard
     .add(observabilityOverviewHasDataRoute)

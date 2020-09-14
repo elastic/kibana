@@ -15,6 +15,7 @@ import { getPageLoadDistBreakdown } from '../lib/rum_client/get_pl_dist_breakdow
 import { getRumServices } from '../lib/rum_client/get_rum_services';
 import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
+import { getUrlSearch } from '../lib/rum_client/get_url_search';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
@@ -128,5 +129,25 @@ export const rumWebCoreVitals = createRoute(() => ({
     const setup = await setupRequest(context, request);
 
     return getWebCoreVitals({ setup });
+  },
+}));
+
+export const rumUrlSearch = createRoute(() => ({
+  path: '/api/apm/rum-client/url-search',
+  params: {
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.partial({ urlQuery: t.string }),
+    ]),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      query: { urlQuery },
+    } = context.params;
+
+    return getUrlSearch({ setup, urlQuery });
   },
 }));

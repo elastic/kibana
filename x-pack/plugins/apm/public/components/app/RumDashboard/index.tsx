@@ -20,6 +20,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { RUM_AGENTS } from '../../../../common/agent_name';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { URLSearch } from './URLSearch';
 
 export function RumOverview() {
   useTrackPageview({ app: 'apm', path: 'rum_overview' });
@@ -63,6 +64,7 @@ export function RumOverview() {
         <EuiFlexItem grow={1}>
           <EnvironmentFilter />
           <EuiSpacer />
+
           <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
             <>
               <ServiceNameFilter
@@ -70,6 +72,7 @@ export function RumOverview() {
                 serviceNames={data ?? []}
               />
               <EuiSpacer size="xl" />
+              <URLSearch />
               <EuiHorizontalRule margin="none" />{' '}
             </>
           </LocalUIFilters>
