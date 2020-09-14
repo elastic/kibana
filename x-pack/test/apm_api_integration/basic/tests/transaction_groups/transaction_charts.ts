@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import expectedTransactionCharts from './expectation/transaction_charts.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,17 +24,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({
-          apmTimeseries: {
-            overallAvgDuration: null,
-            responseTimes: {
-              avg: [],
-              p95: [],
-              p99: [],
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "apmTimeseries": Object {
+              "overallAvgDuration": null,
+              "responseTimes": Object {
+                "avg": Array [],
+                "p95": Array [],
+                "p99": Array [],
+              },
+              "tpmBuckets": Array [],
             },
-            tpmBuckets: [],
-          },
-        });
+          }
+        `);
       });
     });
 
@@ -48,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedTransactionCharts);
+        expectSnapshot(response.body).toMatch();
       });
     });
   });

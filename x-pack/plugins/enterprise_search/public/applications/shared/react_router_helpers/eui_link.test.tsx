@@ -45,8 +45,16 @@ describe('EUI & React Router Component Helpers', () => {
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('onClick')).toBeInstanceOf(Function);
-    expect(link.prop('href')).toEqual('/enterprise_search/foo/bar');
+    expect(link.prop('href')).toEqual('/app/enterprise_search/foo/bar');
     expect(mockHistory.createHref).toHaveBeenCalled();
+  });
+
+  it('renders with the correct non-basenamed href when shouldNotCreateHref is passed', () => {
+    const wrapper = mount(<EuiReactRouterLink to="/foo/bar" shouldNotCreateHref />);
+    const link = wrapper.find(EuiLink);
+
+    expect(link.prop('href')).toEqual('/foo/bar');
+    expect(mockHistory.createHref).not.toHaveBeenCalled();
   });
 
   describe('onClick', () => {
