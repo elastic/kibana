@@ -10,7 +10,7 @@ import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
-import { getErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
 import {
   AnalysisConfig,
@@ -486,7 +486,7 @@ export const loadEvalData = async ({
     results.eval = evalResult;
     return results;
   } catch (e) {
-    results.error = getErrorMessage(e);
+    results.error = extractErrorMessage(e);
     return results;
   }
 };

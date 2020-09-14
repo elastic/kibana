@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { flow } from 'lodash';
 import {
   ExternalServiceParams,
   PushToServiceApiHandlerArgs,
@@ -12,12 +11,11 @@ import {
   ExternalServiceApi,
   PushToServiceApiParams,
   PushToServiceResponse,
+  Incident,
 } from './types';
 
 // TODO: to remove, need to support Case
-import { transformers } from '../case/transformers';
-import { TransformFieldsArgs, Comment, EntityInformation } from '../case/common_types';
-import { prepareFieldsForTransformation } from '../case/utils';
+import { transformFields, transformComments, prepareFieldsForTransformation } from '../case/utils';
 
 const handshakeHandler = async ({
   externalService,
@@ -62,7 +60,7 @@ const pushToServiceHandler = async ({
       defaultPipes,
     });
 
-    incident = transformFields({
+    incident = transformFields<PushToServiceApiParams, ExternalServiceParams, Incident>({
       params,
       fields,
       currentIncident,
@@ -116,47 +114,6 @@ const pushToServiceHandler = async ({
   }
   return res;
 };
-
-export const transformFields = ({
-  params,
-  fields,
-  currentIncident,
-}: TransformFieldsArgs<PushToServiceApiParams, ExternalServiceParams>): Record<string, string> => {
-  return fields.reduce((prev, cur) => {
-    const transform = flow(...cur.pipes.map((p) => transformers[p]));
-    return {
-      ...prev,
-      [cur.key]: transform({
-        value: cur.value,
-        date: params.updatedAt ?? params.createdAt,
-        user: getEntity(params),
-        previousValue: currentIncident ? currentIncident[cur.key] : '',
-      }).value,
-    };
-  }, {});
-};
-
-export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {
-  return comments.map((c) => ({
-    ...c,
-    comment: flow(...pipes.map((p) => transformers[p]))({
-      value: c.comment,
-      date: c.updatedAt ?? c.createdAt,
-      user: getEntity(c),
-    }).value,
-  }));
-};
-
-export const getEntity = (entity: EntityInformation): string =>
-  (entity.updatedBy != null
-    ? entity.updatedBy.fullName
-      ? entity.updatedBy.fullName
-      : entity.updatedBy.username
-    : entity.createdBy != null
-    ? entity.createdBy.fullName
-      ? entity.createdBy.fullName
-      : entity.createdBy.username
-    : '') ?? '';
 
 export const api: ExternalServiceApi = {
   handshake: handshakeHandler,

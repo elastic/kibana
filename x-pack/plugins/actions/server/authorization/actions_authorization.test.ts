@@ -85,7 +85,9 @@ describe('ensureAuthorized', () => {
     await actionsAuthorization.ensureAuthorized('create', 'myType');
 
     expect(authorization.actions.savedObject.get).toHaveBeenCalledWith('action', 'create');
-    expect(checkPrivileges).toHaveBeenCalledWith(mockAuthorizationAction('action', 'create'));
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: mockAuthorizationAction('action', 'create'),
+    });
 
     expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
     expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
@@ -131,10 +133,12 @@ describe('ensureAuthorized', () => {
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       'create'
     );
-    expect(checkPrivileges).toHaveBeenCalledWith([
-      mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
-      mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
-    ]);
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: [
+        mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
+        mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+      ],
+    });
 
     expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
     expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
