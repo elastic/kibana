@@ -62,7 +62,7 @@ export const CALENDAR_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 });
 
 export const FILTER_LISTS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
     defaultMessage: 'Filter lists',
   }),
   href: '/settings/filter_lists',

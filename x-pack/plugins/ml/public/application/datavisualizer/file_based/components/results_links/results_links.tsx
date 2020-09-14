@@ -15,6 +15,10 @@ import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import { MlCommonGlobalState } from '../../../../../../common/types/ml_url_generator';
+import {
+  DISCOVER_APP_URL_GENERATOR,
+  DiscoverUrlGeneratorState,
+} from '../../../../../../../../../src/plugins/discover/public';
 
 const RECHECK_DELAY_MS = 3000;
 
@@ -61,7 +65,7 @@ export const ResultsLinks: FC<Props> = ({
     let unamounted = false;
 
     const getDiscoverUrl = async (): Promise<void> => {
-      const state: any = {
+      const state: DiscoverUrlGeneratorState = {
         indexPatternId,
       };
 
@@ -69,7 +73,7 @@ export const ResultsLinks: FC<Props> = ({
         state.timeRange = globalState.time;
       }
       if (!unamounted) {
-        const discoverUrlGenerator = getUrlGenerator('DISCOVER_APP_URL_GENERATOR');
+        const discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
         const discoverUrl = await discoverUrlGenerator.createUrl(state);
         setDiscoverLink(discoverUrl);
       }
@@ -165,7 +169,7 @@ export const ResultsLinks: FC<Props> = ({
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
               title={
                 <FormattedMessage
-                  id="xpack.ml.fileDatavisualizer.resultsLinks.redirectToADCreateJobsSelectTypePageTitle"
+                  id="xpack.ml.fileDatavisualizer.resultsLinks.createNewMLJobTitle"
                   defaultMessage="Create new ML job"
                 />
               }
