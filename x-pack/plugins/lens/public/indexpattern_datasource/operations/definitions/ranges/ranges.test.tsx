@@ -7,7 +7,15 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { EuiSwitchEvent, EuiFieldNumber, EuiSwitch, EuiRange } from '@elastic/eui';
+import {
+  EuiSwitchEvent,
+  EuiFieldNumber,
+  EuiSwitch,
+  EuiRange,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiFieldText,
+} from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState, IndexPattern } from '../../../types';
@@ -16,12 +24,16 @@ import { rangeOperation } from '../index';
 import { RangeIndexPatternColumn } from './ranges';
 import { autoInterval } from 'src/plugins/data/common';
 import { MODES, DEFAULT_INTERVAL, TYPING_DEBOUNCE_TIME } from './constants';
+import { RangePopover } from './advanced_editor';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(() => {
   return { convert: ({ gte, lt }: { gte: string; lt: string }) => `${gte} - ${lt}` };
 });
+
+type ReactMouseEvent = React.MouseEvent<HTMLAnchorElement, MouseEvent> &
+  React.MouseEvent<HTMLButtonElement, MouseEvent>;
 
 const defaultOptions = {
   storage: {} as IStorageWrapper,
@@ -367,15 +379,231 @@ describe('ranges', () => {
     });
 
     describe('Specify range intervals manually', () => {
-      it('should show one range interval to start with', () => {});
+      // @ts-expect-error
+      window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
 
-      it('should add a new range', () => {});
+      beforeEach(() => setToRangeMode());
 
-      it('should reflect the edit immediately to the state', () => {});
+      it('should show one range interval to start with', () => {
+        const setStateSpy = jest.fn();
 
-      it('should not accept not valid ranges', () => {});
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
 
-      it('should set custom labels on ranges', () => {});
+        expect(
+          instance.find('[data-test-subj="indexPattern-ranges-container"]').children
+        ).toHaveLength(1);
+      });
+
+      it('should add a new range', () => {
+        const setStateSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        // This series of act clojures are made to make it work properly the update flush
+        act(() => {
+          instance.find(EuiButtonEmpty).prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        act(() => {
+          // need another wrapping for this in order to work
+          instance.update();
+
+          expect(instance.find(RangePopover)).toHaveLength(2);
+
+          // edit the range and check
+          instance.find(RangePopover).find(EuiFieldNumber).first().prop('onChange')!({
+            target: {
+              value: '50',
+            },
+          } as React.ChangeEvent<HTMLInputElement>);
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+          expect(setStateSpy).toHaveBeenCalledWith({
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    ...state.layers.first.columns.col1,
+                    params: {
+                      ...state.layers.first.columns.col1.params,
+                      ranges: [
+                        { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                        { from: 50, to: Infinity, label: '' },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          });
+        });
+      });
+
+      it('should open a popover to edit an existing range', () => {
+        const setStateSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        // This series of act clojures are made to make it work properly the update flush
+        act(() => {
+          instance.find(RangePopover).find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        act(() => {
+          // need another wrapping for this in order to work
+          instance.update();
+
+          // edit the range "to" field
+          instance.find(RangePopover).find(EuiFieldNumber).last().prop('onChange')!({
+            target: {
+              value: '50',
+            },
+          } as React.ChangeEvent<HTMLInputElement>);
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+          expect(setStateSpy).toHaveBeenCalledWith({
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    ...state.layers.first.columns.col1,
+                    params: {
+                      ...state.layers.first.columns.col1.params,
+                      ranges: [{ from: 0, to: 50, label: '' }],
+                    },
+                  },
+                },
+              },
+            },
+          });
+        });
+      });
+
+      it('should not accept not valid ranges', () => {
+        const setStateSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        // This series of act clojures are made to make it work properly the update flush
+        act(() => {
+          instance.find(RangePopover).find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        act(() => {
+          // need another wrapping for this in order to work
+          instance.update();
+
+          // edit the range "to" field
+          instance.find(RangePopover).find(EuiFieldNumber).last().prop('onChange')!({
+            target: {
+              value: '-1',
+            },
+          } as React.ChangeEvent<HTMLInputElement>);
+        });
+
+        act(() => {
+          instance.update();
+
+          // and check
+          expect(instance.find(RangePopover).find(EuiFieldNumber).last().prop('isInvalid')).toBe(
+            true
+          );
+        });
+      });
+
+      it('should set custom labels on ranges', () => {
+        const setStateSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        // This series of act clojures are made to make it work properly the update flush
+        act(() => {
+          instance.find(RangePopover).find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        act(() => {
+          // need another wrapping for this in order to work
+          instance.update();
+
+          // edit the range "to" field
+          instance.find(RangePopover).find(EuiFieldText).prop('onChange')!({
+            target: {
+              value: 'MyCustomLabel',
+            },
+          } as React.ChangeEvent<HTMLInputElement>);
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+          expect(setStateSpy).toHaveBeenCalledWith({
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    ...state.layers.first.columns.col1,
+                    params: {
+                      ...state.layers.first.columns.col1.params,
+                      ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: 'MyCustomLabel' }],
+                    },
+                  },
+                },
+              },
+            },
+          });
+        });
+      });
     });
   });
 });

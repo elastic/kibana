@@ -110,6 +110,7 @@ export const RangePopover = ({
           }}
         />
       }
+      data-test-subj="indexPattern-ranges-popover"
     >
       <EuiForm>
         <EuiFormRow>
@@ -259,7 +260,11 @@ export const AdvancedRangeEditor = ({
     >
       <>
         <EuiDragDropContext onDragEnd={onDragEnd}>
-          <EuiDroppable droppableId="RANGES_DROPPABLE_AREA" spacing="s">
+          <EuiDroppable
+            droppableId="RANGES_DROPPABLE_AREA"
+            spacing="s"
+            data-test-subj="indexPattern-ranges-container"
+          >
             {localRanges.map((range: LocalRangeType, idx: number) => {
               return (
                 <EuiDraggable
@@ -306,6 +311,7 @@ export const AdvancedRangeEditor = ({
                                   color="text"
                                   onClick={onClick}
                                   className="lnsRangesOperation__popoverButton"
+                                  data-test-subj="indexPattern-ranges-popover-trigger"
                                 >
                                   <EuiText
                                     size="s"
