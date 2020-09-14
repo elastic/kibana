@@ -10,6 +10,8 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -51,8 +53,7 @@ import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { extractErrorMessage } from '../../../../common/util/errors';
 
 class RuleEditorFlyoutUI extends Component {
   static propTypes = {
@@ -431,8 +432,8 @@ class RuleEditorFlyoutUI extends Component {
             values: { jobId },
           }
         );
-        if (error.message) {
-          errorMessage += ` : ${error.message}`;
+        if (error.error) {
+          errorMessage += ` : ${extractErrorMessage(error.error)}`;
         }
         toasts.addDanger(errorMessage);
       });

@@ -72,6 +72,7 @@ describe('endpoint list middleware', () => {
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+        filters: { kql: '' },
       }),
     });
     expect(listData(getState())).toEqual(apiResponse.hosts);
@@ -100,6 +101,7 @@ describe('endpoint list middleware', () => {
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+        filters: { kql: '' },
       }),
     });
     expect(listData(getState())).toEqual(apiResponse.hosts);

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -13,6 +14,11 @@ import {
   BulkUpdateTestDefinition,
 } from '../../common/suites/bulk_update';
 
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
 const { fail404 } = testCaseFailures;
 
 const createTestCases = () => {
@@ -30,7 +36,19 @@ const createTestCases = () => {
   ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail404() }];
   const allTypes = normalTypes.concat(hiddenType);
-  return { normalTypes, hiddenType, allTypes };
+  // an "object namespace" string can be specified for individual objects (to bulkUpdate across namespaces)
+  // even if the Spaces plugin is disabled, this should work, as `namespace` is handled by the Core API
+  const withObjectNamespaces = [
+    { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespace: DEFAULT_SPACE_ID },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_1, namespace: SPACE_1_ID },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespace: SPACE_1_ID, ...fail404() }, // intentional 404 test case
+    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespace: DEFAULT_SPACE_ID }, // SPACE_1_ID would also work
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, namespace: SPACE_2_ID, ...fail404() }, // intentional 404 test case
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, namespace: SPACE_2_ID },
+    CASES.NAMESPACE_AGNOSTIC, // any namespace would work and would make no difference
+    { ...CASES.DOES_NOT_EXIST, ...fail404() },
+  ];
+  return { normalTypes, hiddenType, allTypes, withObjectNamespaces };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -42,10 +60,13 @@ export default function ({ getService }: FtrProviderContext) {
     supertest
   );
   const createTests = () => {
-    const { normalTypes, hiddenType, allTypes } = createTestCases();
+    const { normalTypes, hiddenType, allTypes, withObjectNamespaces } = createTestCases();
     // use singleRequest to reduce execution time and/or test combined cases
     return {
-      unauthorized: createTestDefinitions(allTypes, true),
+      unauthorized: [
+        createTestDefinitions(allTypes, true),
+        createTestDefinitions(withObjectNamespaces, true, { singleRequest: true }),
+      ].flat(),
       authorized: [
         createTestDefinitions(normalTypes, false, { singleRequest: true }),
         createTestDefinitions(hiddenType, true),
@@ -53,8 +74,12 @@ export default function ({ getService }: FtrProviderContext) {
           singleRequest: true,
           responseBodyOverride: expectForbidden(['hiddentype']),
         }),
+        createTestDefinitions(withObjectNamespaces, false, { singleRequest: true }),
       ].flat(),
-      superuser: createTestDefinitions(allTypes, false, { singleRequest: true }),
+      superuser: [
+        createTestDefinitions(allTypes, false, { singleRequest: true }),
+        createTestDefinitions(withObjectNamespaces, false, { singleRequest: true }),
+      ].flat(),
     };
   };
 
