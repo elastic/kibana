@@ -7,6 +7,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { FIELD_TYPES, UseField, Field } from '../../../../../../shared_imports';
 
 import { FieldsConfig } from './shared';
@@ -15,7 +16,16 @@ import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';
 
+const propertyOptions: EuiComboBoxOptionOption[] = [
+  { label: 'name' },
+  { label: 'os' },
+  { label: 'device' },
+  { label: 'original' },
+  { label: 'version' },
+];
+
 const fieldsConfig: FieldsConfig = {
+  /* Optional fields config */
   regex_file: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
@@ -54,6 +64,7 @@ export const UserAgent: FunctionComponent = () => {
           'xpack.ingestPipelines.pipelineEditor.userAgentForm.propertiesFieldHelpText',
           { defaultMessage: 'Properties added to the target field.' }
         )}
+        propertyOptions={propertyOptions}
       />
 
       <IgnoreMissingField />

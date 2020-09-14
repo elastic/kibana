@@ -7,6 +7,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { ComboBoxField, FIELD_TYPES, UseField } from '../../../../../../../shared_imports';
 
 import { FieldsConfig, to } from '../shared';
@@ -27,9 +28,10 @@ const fieldsConfig: FieldsConfig = {
 
 interface Props {
   helpText?: React.ReactNode;
+  propertyOptions?: EuiComboBoxOptionOption[];
 }
 
-export const PropertiesField: FunctionComponent<Props> = ({ helpText }) => {
+export const PropertiesField: FunctionComponent<Props> = ({ helpText, propertyOptions }) => {
   return (
     <UseField
       config={{
@@ -38,6 +40,12 @@ export const PropertiesField: FunctionComponent<Props> = ({ helpText }) => {
       }}
       component={ComboBoxField}
       path="fields.properties"
+      componentProps={{
+        euiFieldProps: {
+          options: propertyOptions || [],
+          noSuggestions: !propertyOptions,
+        },
+      }}
     />
   );
 };
