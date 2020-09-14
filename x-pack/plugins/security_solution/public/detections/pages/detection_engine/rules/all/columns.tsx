@@ -99,7 +99,6 @@ interface GetColumns {
   reFetchRules: (refreshPrePackagedRule?: boolean) => void;
 }
 
-// Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
 export const getColumns = ({
   dispatch,
   dispatchToaster,
@@ -127,7 +126,8 @@ export const getColumns = ({
         </LinkAnchor>
       ),
       truncateText: true,
-      width: '24%',
+      width: '20%',
+      sortable: true,
     },
     {
       field: 'risk_score',
@@ -138,14 +138,14 @@ export const getColumns = ({
         </EuiText>
       ),
       truncateText: true,
-      width: '14%',
+      width: '10%',
     },
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
       render: (value: Rule['severity']) => <SeverityBadge value={value} />,
       truncateText: true,
-      width: '16%',
+      width: '12%',
     },
     {
       field: 'status_date',
@@ -160,7 +160,7 @@ export const getColumns = ({
         );
       },
       truncateText: true,
-      width: '20%',
+      width: '14%',
     },
     {
       field: 'status',
@@ -174,8 +174,39 @@ export const getColumns = ({
           </>
         );
       },
-      width: '16%',
+      width: '12%',
       truncateText: true,
+    },
+    {
+      field: 'updated_at',
+      name: i18n.COLUMN_LAST_UPDATE,
+      render: (value: Rule['updated_at']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
+            <FormattedRelative value={value} />
+          </LocalizedDateTooltip>
+        );
+      },
+      sortable: true,
+      truncateText: true,
+      width: '14%',
+    },
+    {
+      field: 'version',
+      name: i18n.COLUMN_VERSION,
+      render: (value: Rule['version']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <EuiText data-test-subj="version" size="s">
+            {value}
+          </EuiText>
+        );
+      },
+      truncateText: true,
+      width: '10%',
     },
     {
       field: 'tags',
@@ -190,7 +221,7 @@ export const getColumns = ({
         </TruncatableText>
       ),
       truncateText: true,
-      width: '20%',
+      width: '14%',
     },
     {
       align: 'center',
