@@ -273,7 +273,7 @@ export const getAgentsHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const { agents, total, page, perPage } = await AgentService.listAgents<true>(soClient, {
+    const { agents, total, page, perPage } = await AgentService.listAgents(soClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,

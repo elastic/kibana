@@ -9,7 +9,7 @@ import Boom from 'boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { getAgents, listAgents } from './crud';
+import { getAgents, listAllAgents } from './crud';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -48,9 +48,8 @@ export async function reassignAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAgents<false>(soClient, {
+          await listAllAgents(soClient, {
             kuery: options.kuery,
-            usePagination: false,
             showInactive: false,
           })
         ).agents;

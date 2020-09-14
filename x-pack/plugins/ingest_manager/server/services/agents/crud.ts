@@ -3,36 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import Boom from 'boom';
-import { SavedObjectsClientContract, SavedObjectsFindResult } from 'src/core/server';
-import {
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-  AGENT_TYPE_EPHEMERAL,
-  AGENT_POLLING_THRESHOLD_MS,
-} from '../../constants';
+import { SavedObjectsClientContract } from 'src/core/server';
+import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
+import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
-import { escapeSearchQueryPhrase } from '../saved_object';
 
-type ListAgentsResponse<P extends boolean> = P extends false
-  ? {
-      agents: Agent[];
-      total: number;
-    }
-  : {
-      agents: Agent[];
-      total: number;
-      page: number;
-      perPage: number;
-    };
-
-const AGENT_ACTIVE_CONDITITON = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND not ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL}`;
-const RECENTLY_SEEN_EPHEMERAL_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL} AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.last_checkin > ${
-  Date.now() - 3 * AGENT_POLLING_THRESHOLD_MS
-}`;
-const ACTIVE_AGENT_CONDITION = `(${AGENT_ACTIVE_CONDITITON}) OR (${RECENTLY_SEEN_EPHEMERAL_AGENT_CONDITION})`;
+const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
 
 function _joinFilters(filters: string[], operator = 'AND') {
@@ -45,92 +23,83 @@ function _joinFilters(filters: string[], operator = 'AND') {
   }, undefined);
 }
 
-export async function listAgents<P extends boolean>(
+export async function listAgents(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
-    usePagination?: boolean;
     showInactive: boolean;
   }
-): Promise<ListAgentsResponse<P>> {
+): Promise<{
+  agents: Agent[];
+  total: number;
+  page: number;
+  perPage: number;
+}> {
   const {
     page = 1,
     perPage = 20,
     sortField = 'enrolled_at',
     sortOrder = 'desc',
     kuery,
-    usePagination = true,
     showInactive = false,
   } = options;
-
   const filters = [];
 
   if (kuery && kuery !== '') {
-    // To ensure users dont need to know about SO data structure...
-    filters.push(
-      kuery.replace(
-        new RegExp(`${AGENT_SAVED_OBJECT_TYPE}\.`, 'g'),
-        `${AGENT_SAVED_OBJECT_TYPE}.attributes.`
-      )
-    );
+    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
   }
 
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
 
-  let agentSOs: Array<SavedObjectsFindResult<AgentSOAttributes>> = [];
+  const { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
+    type: AGENT_SAVED_OBJECT_TYPE,
+    filter: _joinFilters(filters),
+    sortField,
+    sortOrder,
+    page,
+    perPage,
+  });
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { saved_objects, total } = await soClient.find<AgentSOAttributes>(
-    usePagination
-      ? {
-          type: AGENT_SAVED_OBJECT_TYPE,
-          filter: _joinFilters(filters),
-          sortField,
-          sortOrder,
-          page,
-          perPage,
-        }
-      : {
-          type: AGENT_SAVED_OBJECT_TYPE,
-          filter: _joinFilters(filters),
-          page: 1,
-          perPage: 10000,
-        }
-  );
+  return {
+    agents: agentSOs.map(savedObjectToAgent),
+    total,
+    page,
+    perPage,
+  };
+}
 
-  agentSOs = saved_objects;
+export async function listAllAgents(
+  soClient: SavedObjectsClientContract,
+  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
+    showInactive: boolean;
+  }
+): Promise<{
+  agents: Agent[];
+  total: number;
+}> {
+  const { sortField = 'enrolled_at', sortOrder = 'desc', kuery, showInactive = false } = options;
+  const filters = [];
 
-  // If not using pagination and we have more than 10000 agents found,
-  // page through rest of results and return all found agents
-  if (!usePagination && total > 10000) {
-    const remainingPages = Math.ceil((total - 10000) / 10000);
-    for (let currentPage = 2; currentPage <= remainingPages + 1; currentPage++) {
-      const pageResult = await soClient.find<AgentSOAttributes>({
-        type: AGENT_SAVED_OBJECT_TYPE,
-        filter: _joinFilters(filters),
-        page: currentPage,
-        perPage: 10000,
-      });
-      agentSOs = [...agentSOs, ...pageResult.saved_objects];
-    }
+  if (kuery && kuery !== '') {
+    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
   }
 
-  const agents: Agent[] = agentSOs.map(savedObjectToAgent);
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
 
-  const response = usePagination
-    ? ({
-        agents,
-        total,
-        page,
-        perPage,
-      } as ListAgentsResponse<P>)
-    : ({
-        agents,
-        total,
-      } as ListAgentsResponse<P>);
+  const { saved_objects: agentSOs, total } = await findAllSOs<AgentSOAttributes>(soClient, {
+    type: AGENT_SAVED_OBJECT_TYPE,
+    kuery: _joinFilters(filters),
+    sortField,
+    sortOrder,
+  });
 
-  return response;
+  return {
+    agents: agentSOs.map(savedObjectToAgent),
+    total,
+  };
 }
 
 export async function countInactiveAgents(
@@ -141,13 +110,7 @@ export async function countInactiveAgents(
   const filters = [INACTIVE_AGENT_CONDITION];
 
   if (kuery && kuery !== '') {
-    // To ensure users dont need to know about SO data structure...
-    filters.push(
-      kuery.replace(
-        new RegExp(`${AGENT_SAVED_OBJECT_TYPE}\.`, 'g'),
-        `${AGENT_SAVED_OBJECT_TYPE}.attributes.`
-      )
-    );
+    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
   }
 
   const { total } = await soClient.find<AgentSOAttributes>({

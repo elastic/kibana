@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+import { ListWithKuery } from '../types';
 
 /**
  * Escape a value with double quote to use with saved object search
@@ -22,4 +24,53 @@ export const normalizeKuery = (savedObjectType: string, kuery: string): string =
     new RegExp(`${savedObjectType}\.(?!attributes\.)`, 'g'),
     `${savedObjectType}.attributes.`
   );
+};
+
+// Like saved object client `.find()`, but ignores `page` and `perPage` parameters and
+// returns *all* matching saved objects by collocating results from all `.find` pages
+export const findAllSOs = async <T = unknown>(
+  soClient: SavedObjectsClientContract,
+  options: Omit<ListWithKuery, 'page' | 'perPage'> & {
+    type: string;
+  }
+): Promise<Pick<SavedObjectsFindResponse<T>, 'saved_objects' | 'total'>> => {
+  const { type, sortField, sortOrder, kuery } = options;
+  let savedObjectResults: SavedObjectsFindResponse<T>['saved_objects'] = [];
+
+  // TODO: This is the default `index.max_result_window` ES setting, which dictates
+  // the maximum amount of results allowed to be returned from a search. It's possible
+  // for the actual setting to differ from the default. Can we retrieve the real
+  // setting in the future?
+  const searchLimit = 10000;
+
+  const query = {
+    type,
+    sortField,
+    sortOrder,
+    filter: kuery,
+    page: 1,
+    perPage: searchLimit,
+  };
+
+  const { saved_objects: initialSOs, total } = await soClient.find<T>(query);
+
+  savedObjectResults = initialSOs;
+
+  if (total > searchLimit) {
+    const remainingPages = Math.ceil((total - searchLimit) / searchLimit);
+    for (let currentPage = 2; currentPage <= remainingPages + 1; currentPage++) {
+      const { saved_objects: currentPageSavedObjects } = await soClient.find<T>({
+        ...query,
+        page: currentPage,
+      });
+      if (currentPageSavedObjects.length) {
+        savedObjectResults = [...savedObjectResults, ...currentPageSavedObjects];
+      }
+    }
+  }
+
+  return {
+    saved_objects: savedObjectResults,
+    total,
+  };
 };
