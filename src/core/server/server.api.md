@@ -2047,6 +2047,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
     attributes: Partial<T>;
     id: string;
+    namespace?: string;
     type: string;
 }
 
@@ -2630,6 +2631,12 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
     references: SavedObjectReference[] | undefined;
 }
 
+// @public (undocumented)
+export class SavedObjectsUtils {
+    static namespaceIdToString: (namespace?: string | undefined) => string;
+    static namespaceStringToId: (namespace: string) => string | undefined;
+}
+
 // @public
 export class SavedObjectTypeRegistry {
     getAllTypes(): SavedObjectsType[];
@@ -2778,10 +2785,17 @@ export type SharedGlobalConfig = RecursiveReadonly<{
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
+//
 // @public
 export interface StatusServiceSetup {
     core$: Observable<CoreStatus>;
+    dependencies$: Observable<Record<string, ServiceStatus>>;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "StatusSetup"
+    derivedStatus$: Observable<ServiceStatus>;
     overall$: Observable<ServiceStatus>;
+    set(status$: Observable<ServiceStatus>): void;
 }
 
 // @public
@@ -2870,8 +2884,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:135:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:268:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

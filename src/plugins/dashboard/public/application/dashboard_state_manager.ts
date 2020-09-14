@@ -25,7 +25,7 @@ import { History } from 'history';
 
 import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { migrateLegacyQuery } from '../../../kibana_legacy/public';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 import { ViewMode } from '../embeddable_plugin';
 import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
