@@ -263,6 +263,7 @@ export function getIndexPatternDatasource({
               data,
               savedObjects: core.savedObjects,
               docLinks: core.docLinks,
+              http: core.http,
             }}
           >
             <IndexPatternDimensionEditor

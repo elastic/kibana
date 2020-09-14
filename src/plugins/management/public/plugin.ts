@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { BehaviorSubject } from 'rxjs';
 import { ManagementSetup, ManagementStart } from './types';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import {
@@ -27,6 +28,9 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   AppMountParameters,
+  AppUpdater,
+  AppStatus,
+  AppNavLinkStatus,
 } from '../../../core/public';
 
 import {
@@ -40,6 +44,8 @@ interface ManagementSetupDependencies {
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
   private readonly managementSections = new ManagementSectionsService();
+
+  private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -70,6 +76,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       order: 9040,
       euiIconType: 'managementApp',
       category: DEFAULT_APP_CATEGORIES.management,
+      updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
@@ -89,6 +96,19 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   public start(core: CoreStart) {
     this.managementSections.start({ capabilities: core.application.capabilities });
+    const hasAnyEnabledApps = getSectionsServiceStartPrivate()
+      .getSectionsEnabled()
+      .some((section) => section.getAppsEnabled().length > 0);
+
+    if (!hasAnyEnabledApps) {
+      this.appUpdater.next(() => {
+        return {
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        };
+      });
+    }
+
     return {};
   }
 }
