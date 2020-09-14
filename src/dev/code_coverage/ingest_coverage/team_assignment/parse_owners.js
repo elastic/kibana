@@ -22,27 +22,14 @@ import { map, filter, takeUntil } from 'rxjs/operators';
 import { lineRead, pathAndTeams, empties, comments, dropCCDelim } from './parse_owners_helpers';
 import { pipe } from '../utils';
 
-const mutate = (xs) => (x) => xs.push(x);
-export const parse = (codeOwnersPath) => (log) => (enumerationF) => (flushF) => {
-  const cleanAndParse = pipe(dropCCDelim, pathAndTeams);
-  const allLines$ = (lineReader) =>
-    fromEvent(lineReader, 'line').pipe(
-      filter(empties),
-      filter(comments),
-      map(cleanAndParse),
-      takeUntil(fromEvent(lineReader, 'close'))
-    );
+const cleanAndParse = pipe(dropCCDelim, pathAndTeams);
 
-  const rl = lineRead(codeOwnersPath);
-  const data = [];
-  const mutateData = mutate(data);
-  allLines$(rl).subscribe(
-    mutateData,
-    (e) => log.error(e),
-    () => {
-      log.verbose(`\n### Parsing [${codeOwnersPath}] Complete`);
-      // TODO: Maybe change this pipe such that the log object is not passed twice.
-      pipe(enumerationF(log), flushF(log))(new Map(data));
-    }
+const allLines$ = (lineReader) =>
+  fromEvent(lineReader, 'line').pipe(
+    filter(empties),
+    filter(comments),
+    map(cleanAndParse),
+    takeUntil(fromEvent(lineReader, 'close'))
   );
-};
+
+export const parse = (codeOwnersPath) => allLines$(lineRead(codeOwnersPath));
