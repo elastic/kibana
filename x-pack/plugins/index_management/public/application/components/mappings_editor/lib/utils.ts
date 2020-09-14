@@ -71,8 +71,24 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
   };
 };
 
-export const getTypeLabelFromType = (type: DataType) =>
-  TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
+const getTypeLabel = (type?: DataType): string => {
+  return type && TYPE_DEFINITION[type]
+    ? TYPE_DEFINITION[type].label
+    : `${TYPE_DEFINITION.other.label}: ${type}`;
+};
+
+export const getTypeLabelFromField = (field: Field) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { type, runtime_type } = field;
+  const typeLabel = getTypeLabel(type);
+
+  if (type === 'runtime') {
+    const runtimeTypeLabel = getTypeLabel(runtime_type);
+    return `${typeLabel} ${runtimeTypeLabel}`;
+  }
+
+  return typeLabel;
+};
 
 export const getFieldConfig = <T = unknown>(
   param: ParameterName,

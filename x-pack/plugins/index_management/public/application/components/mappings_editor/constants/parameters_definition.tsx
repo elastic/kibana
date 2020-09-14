@@ -20,6 +20,7 @@ import {
 import {
   AliasOption,
   DataType,
+  RuntimeType,
   ComboBoxOption,
   ParameterName,
   ParameterDefinition,
@@ -27,6 +28,7 @@ import {
 import { documentationService } from '../../../services/documentation';
 import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
+import { RUNTIME_FIELD_OPTIONS } from './field_options';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField, numberGreaterThanField } = fieldValidators;
@@ -182,6 +184,40 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
           ),
         },
       ],
+    },
+    schema: t.string,
+  },
+  runtime_type: {
+    fieldConfig: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.runtimeTypeLabel', {
+        defaultMessage: 'Emitted type',
+      }),
+      defaultValue: 'keyword',
+      deserializer: (fieldType: RuntimeType | undefined) => {
+        if (typeof fieldType === 'string' && Boolean(fieldType)) {
+          const label =
+            RUNTIME_FIELD_OPTIONS.find(({ value }) => value === fieldType)?.label ?? fieldType;
+          return [
+            {
+              label,
+              value: fieldType,
+            },
+          ];
+        }
+        return [];
+      },
+      serializer: (value: ComboBoxOption[]) => (value.length === 0 ? '' : value[0].value),
+    },
+    schema: t.string,
+  },
+  script: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.painlessScriptLabel', {
+        defaultMessage: 'Script',
+      }),
     },
     schema: t.string,
   },
