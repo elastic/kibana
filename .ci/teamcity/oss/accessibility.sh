@@ -4,8 +4,7 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-export CI_GROUP="$1"
-export JOB=kibana-ciGroup${CI_GROUP}
+export JOB=kibana-oss-accessibility
 export KIBANA_INSTALL_DIR="$KIBANA_DIR/build/kibana-build-oss"
 
 checks-reporter-with-killswitch "Kibana accessibility tests" \
