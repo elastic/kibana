@@ -18,8 +18,8 @@ import {
 } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
-import { getMetricsProjection } from '../../../../../../common/projections/metrics';
-import { mergeProjection } from '../../../../../../common/projections/util/merge_projection';
+import { getMetricsProjection } from '../../../../../projections/metrics';
+import { mergeProjection } from '../../../../../projections/util/merge_projection';
 import {
   AGENT_NAME,
   LABEL_NAME,
@@ -42,7 +42,7 @@ export async function fetchAndTransformGcMetrics({
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const { bucketSize } = getBucketSize(start, end, 'auto');
 
@@ -75,7 +75,11 @@ export async function fetchAndTransformGcMetrics({
           },
           aggs: {
             over_time: {
-              date_histogram: getMetricsDateHistogramParams(start, end),
+              date_histogram: getMetricsDateHistogramParams(
+                start,
+                end,
+                config['xpack.apm.metricsInterval']
+              ),
               aggs: {
                 // get the max value
                 max: {
@@ -105,7 +109,7 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   const { aggregations } = response;
 

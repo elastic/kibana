@@ -115,10 +115,17 @@ export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   }
 );
 
+export const ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel',
+  {
+    defaultMessage: 'Send alert to timeline',
+  }
+);
+
 export const ACTION_ADD_EXCEPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addException',
   {
-    defaultMessage: 'Add exception',
+    defaultMessage: 'Add rule exception',
   }
 );
 

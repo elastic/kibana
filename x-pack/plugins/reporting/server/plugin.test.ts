@@ -86,6 +86,15 @@ describe('Reporting Plugin', () => {
     expect(plugin.start(coreStart, pluginStart)).not.toHaveProperty('then');
   });
 
+  it('registers an advanced setting for PDF logos', async () => {
+    const plugin = new ReportingPlugin(initContext);
+    plugin.setup(coreSetup, pluginSetup);
+    expect(coreSetup.uiSettings.register).toHaveBeenCalled();
+    expect(coreSetup.uiSettings.register.mock.calls[0][0]).toHaveProperty(
+      'xpackReporting:customPdfLogo'
+    );
+  });
+
   it('logs start issues', async () => {
     const plugin = new ReportingPlugin(initContext);
     // @ts-ignore overloading error logger

@@ -1,5 +1,5 @@
 [[development-basepath]]
-=== Considerations for basepath
+== Considerations for basepath
 
 In dev mode, {kib} by default runs behind a proxy which adds a random path component to its URL.
 

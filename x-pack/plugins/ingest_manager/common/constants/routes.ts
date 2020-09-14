@@ -7,8 +7,8 @@
 export const API_ROOT = `/api/ingest_manager`;
 export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
-export const PACKAGE_CONFIG_API_ROOT = `${API_ROOT}/package_configs`;
-export const AGENT_CONFIG_API_ROOT = `${API_ROOT}/agent_configs`;
+export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
+export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
@@ -32,25 +32,25 @@ export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
 };
 
-// Package config API routes
-export const PACKAGE_CONFIG_API_ROUTES = {
-  LIST_PATTERN: `${PACKAGE_CONFIG_API_ROOT}`,
-  INFO_PATTERN: `${PACKAGE_CONFIG_API_ROOT}/{packageConfigId}`,
-  CREATE_PATTERN: `${PACKAGE_CONFIG_API_ROOT}`,
-  UPDATE_PATTERN: `${PACKAGE_CONFIG_API_ROOT}/{packageConfigId}`,
-  DELETE_PATTERN: `${PACKAGE_CONFIG_API_ROOT}/delete`,
+// Package policy API routes
+export const PACKAGE_POLICY_API_ROUTES = {
+  LIST_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
+  INFO_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
+  CREATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
+  UPDATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
+  DELETE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/delete`,
 };
 
-// Agent config API routes
-export const AGENT_CONFIG_API_ROUTES = {
-  LIST_PATTERN: `${AGENT_CONFIG_API_ROOT}`,
-  INFO_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}`,
-  CREATE_PATTERN: `${AGENT_CONFIG_API_ROOT}`,
-  UPDATE_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}`,
-  COPY_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/copy`,
-  DELETE_PATTERN: `${AGENT_CONFIG_API_ROOT}/delete`,
-  FULL_INFO_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/full`,
-  FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_CONFIG_API_ROOT}/{agentConfigId}/download`,
+// Agent policy API routes
+export const AGENT_POLICY_API_ROUTES = {
+  LIST_PATTERN: `${AGENT_POLICY_API_ROOT}`,
+  INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}`,
+  CREATE_PATTERN: `${AGENT_POLICY_API_ROOT}`,
+  UPDATE_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}`,
+  COPY_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/copy`,
+  DELETE_PATTERN: `${AGENT_POLICY_API_ROOT}/delete`,
+  FULL_INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/full`,
+  FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/download`,
 };
 
 // Output API routes

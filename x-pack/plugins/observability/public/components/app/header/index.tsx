@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,12 +37,12 @@ interface Props {
   showGiveFeedback?: boolean;
 }
 
-export const Header = ({
+export function Header({
   color,
   restrictWidth,
   showAddData = false,
   showGiveFeedback = false,
-}: Props) => {
+}: Props) {
   const { core } = usePluginContext();
   return (
     <Container color={color}>
@@ -58,21 +57,13 @@ export const Header = ({
               <h1>
                 {i18n.translate('xpack.observability.home.title', {
                   defaultMessage: 'Observability',
-                })}{' '}
-                <EuiBetaBadge
-                  className="eui-alignMiddle"
-                  label={i18n.translate('xpack.observability.beta', { defaultMessage: 'Beta' })}
-                  tooltipContent="This feature is in beta. Please help us improve it by reporting any bugs or give us feedback."
-                />
+                })}
               </h1>
             </EuiTitle>
           </EuiFlexItem>
           {showGiveFeedback && (
             <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
-              <EuiButtonEmpty
-                href={'https://discuss.elastic.co/c/observability/'}
-                iconType="popout"
-              >
+              <EuiButtonEmpty href={'https://ela.st/observability-discuss'} iconType="popout">
                 {i18n.translate('xpack.observability.home.feedback', {
                   defaultMessage: 'Give us feedback',
                 })}
@@ -94,4 +85,4 @@ export const Header = ({
       </Wrapper>
     </Container>
   );
-};
+}

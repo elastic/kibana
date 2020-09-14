@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
 
 import { DefaultNamespace } from '../types/default_namespace';
-import { DefaultStringArray, NonEmptyString } from '../../siem_common_deps';
+import { DefaultStringArray, NonEmptyString } from '../../shared_imports';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
@@ -274,6 +274,7 @@ export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
 
 export const namespace_type = DefaultNamespace;
 
+export const operatorIncluded = t.keyof({ included: null });
 export const operator = t.keyof({ excluded: null, included: null });
 export type Operator = t.TypeOf<typeof operator>;
 export enum OperatorEnum {
@@ -281,13 +282,6 @@ export enum OperatorEnum {
   EXCLUDED = 'excluded',
 }
 
-export const operator_type = t.keyof({
-  exists: null,
-  list: null,
-  match: null,
-  match_any: null,
-});
-export type OperatorType = t.TypeOf<typeof operator_type>;
 export enum OperatorTypeEnum {
   NESTED = 'nested',
   MATCH = 'match',
@@ -307,3 +301,19 @@ export type Deserializer = t.TypeOf<typeof deserializer>;
 
 export const deserializerOrUndefined = t.union([deserializer, t.undefined]);
 export type DeserializerOrUndefined = t.TypeOf<typeof deserializerOrUndefined>;
+
+export const _version = t.string;
+export const _versionOrUndefined = t.union([_version, t.undefined]);
+export type _VersionOrUndefined = t.TypeOf<typeof _versionOrUndefined>;
+
+export const version = t.number;
+export type Version = t.TypeOf<typeof version>;
+
+export const versionOrUndefined = t.union([version, t.undefined]);
+export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
+
+export const immutable = t.boolean;
+export type Immutable = t.TypeOf<typeof immutable>;
+
+export const immutableOrUndefined = t.union([immutable, t.undefined]);
+export type ImmutableOrUndefined = t.TypeOf<typeof immutableOrUndefined>;

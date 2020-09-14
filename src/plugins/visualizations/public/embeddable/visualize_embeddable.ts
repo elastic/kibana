@@ -34,18 +34,19 @@ import {
   EmbeddableOutput,
   Embeddable,
   IContainer,
+  Adapters,
 } from '../../../../plugins/embeddable/public';
-import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
 import {
   IExpressionLoaderParams,
   ExpressionsStart,
   ExpressionRenderError,
 } from '../../../../plugins/expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
-import { Vis } from '../vis';
+import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
+import { TriggerId } from '../../../ui_actions/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -59,12 +60,10 @@ export interface VisualizeEmbeddableConfiguration {
 }
 
 export interface VisualizeInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  query?: Query;
-  filters?: Filter[];
   vis?: {
     colors?: { [key: string]: string };
   };
+  savedVis?: SerializedVis;
   table?: unknown;
 }
 
@@ -78,14 +77,11 @@ export interface VisualizeOutput extends EmbeddableOutput {
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega', 'timelion'];
-
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
   private query?: Query;
-  private title?: string;
   private filters?: Filter[];
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
@@ -96,6 +92,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
+  private readonly inspectorAdapters?: Adapters;
 
   constructor(
     timefilter: TimefilterContract,
@@ -131,13 +128,20 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         this.handleChanges();
       })
     );
+
+    const inspectorAdapters = this.vis.type.inspectorAdapters;
+
+    if (inspectorAdapters) {
+      this.inspectorAdapters =
+        typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
+    }
   }
   public getVisualizationDescription() {
     return this.vis.description;
   }
 
   public getInspectorAdapters = () => {
-    if (!this.handler || visTypesWithoutInspector.includes(this.vis.type.name)) {
+    if (!this.handler || (this.inspectorAdapters && !Object.keys(this.inspectorAdapters).length)) {
       return undefined;
     }
     return this.handler.inspect();
@@ -150,7 +154,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (!adapters) return;
 
     return this.deps.start().plugins.inspector.open(adapters, {
-      title: this.getTitle() || '',
+      title: this.getTitle(),
     });
   };
 
@@ -208,11 +212,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       dirty = true;
     }
 
-    if (this.output.title !== this.title) {
-      this.title = this.output.title;
-      if (this.domNode) {
-        this.domNode.setAttribute('data-title', this.title || '');
-      }
+    // propagate the title to the output embeddable
+    // but only when the visualization is in edit/Visualize mode
+    if (!this.parent && this.vis.title !== this.output.title) {
+      this.updateOutput({ title: this.vis.title });
     }
 
     if (this.vis.description && this.domNode) {
@@ -229,26 +232,20 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   hasInspector = () => Boolean(this.getInspectorAdapters());
 
   onContainerLoading = () => {
-    this.domNode.setAttribute('data-render-complete', 'false');
+    this.renderComplete.dispatchInProgress();
     this.updateOutput({ loading: true, error: undefined });
   };
 
-  onContainerRender = (count: number) => {
-    this.domNode.setAttribute('data-render-complete', 'true');
-    this.domNode.setAttribute('data-rendering-count', count.toString());
+  onContainerRender = () => {
+    this.renderComplete.dispatchComplete();
     this.updateOutput({ loading: false, error: undefined });
-    dispatchRenderComplete(this.domNode);
   };
 
   onContainerError = (error: ExpressionRenderError) => {
     if (this.abortController) {
       this.abortController.abort();
     }
-    this.domNode.setAttribute(
-      'data-rendering-count',
-      this.domNode.getAttribute('data-rendering-count') + 1
-    );
-    this.domNode.setAttribute('data-render-complete', 'false');
+    this.renderComplete.dispatchError();
     this.updateOutput({ loading: false, error });
   };
 
@@ -257,7 +254,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
-    super.render(domNode);
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
@@ -267,6 +263,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     domNode.appendChild(div);
 
     this.domNode = div;
+    super.render(this.domNode);
 
     const expressions = getExpressions();
     this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
@@ -294,19 +291,26 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const triggerId =
-            event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
-          const context = {
-            embeddable: this,
-            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
-          };
+          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+          let context;
+
+          if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+            context = {
+              embeddable: this,
+              timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+              ...event.data,
+            };
+          } else {
+            context = {
+              embeddable: this,
+              data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
+            };
+          }
 
           getUiActions().getTrigger(triggerId).exec(context);
         }
       })
     );
-
-    div.setAttribute('data-title', this.output.title || '');
 
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);
@@ -314,11 +318,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     div.setAttribute('data-test-subj', 'visualizationLoader');
     div.setAttribute('data-shared-item', '');
-    div.setAttribute('data-rendering-count', '0');
-    div.setAttribute('data-render-complete', 'false');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
-
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.updateHandler();
@@ -349,6 +350,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         filters: this.input.filters,
       },
       uiState: this.vis.uiState,
+      inspectorAdapters: this.inspectorAdapters,
     };
     if (this.abortController) {
       this.abortController.abort();
@@ -376,7 +378,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     });
   };
 
-  public supportedTriggers() {
+  public supportedTriggers(): TriggerId[] {
     return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 }

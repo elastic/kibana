@@ -30,20 +30,31 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   ) {
     const esSection = management.sections.section.insightsAndAlerting;
 
+    const pluginName = i18n.translate(
+      'xpack.watcher.sections.watchList.managementSection.watcherDisplayName',
+      { defaultMessage: 'Watcher' }
+    );
+
     const watcherESApp = esSection.registerApp({
       id: 'watcher',
-      title: i18n.translate(
-        'xpack.watcher.sections.watchList.managementSection.watcherDisplayName',
-        { defaultMessage: 'Watcher' }
-      ),
+      title: pluginName,
       order: 3,
       mount: async ({ element, setBreadcrumbs, history }) => {
-        const [core] = await getStartServices();
-        const { i18n: i18nDep, docLinks, savedObjects, application } = core;
-        const { boot } = await import('./application/boot');
+        const [coreStart] = await getStartServices();
+        const {
+          chrome: { docTitle },
+          i18n: i18nDep,
+          docLinks,
+          savedObjects,
+          application,
+        } = coreStart;
+
+        docTitle.change(pluginName);
+
+        const { renderApp } = await import('./application');
         const { TimeBuckets } = await import('./legacy');
 
-        return boot({
+        const unmountAppCallback = renderApp({
           // Skip the first license status, because that's already been used to determine
           // whether to include Watcher.
           licenseStatus$: licensing.license$.pipe(skip(1), map(licenseToLicenseStatus)),
@@ -60,6 +71,11 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           history,
           getUrlForApp: application.getUrlForApp,
         });
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
 
@@ -89,7 +105,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       // which is a less frustrating UX.
       if (valid) {
         watcherESApp.enable();
-        watcherHome.showOnHomePage = true;
       } else {
         watcherESApp.disable();
       }

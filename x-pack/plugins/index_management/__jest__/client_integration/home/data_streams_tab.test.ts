@@ -78,7 +78,13 @@ describe('Data Streams tab', () => {
 
   describe('when there are data streams', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([
+      const {
+        setLoadIndicesResponse,
+        setLoadDataStreamsResponse,
+        setLoadDataStreamResponse,
+      } = httpRequestsMockHelpers;
+
+      setLoadIndicesResponse([
         {
           health: '',
           status: '',
@@ -105,20 +111,16 @@ describe('Data Streams tab', () => {
       ]);
 
       const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
-
-      httpRequestsMockHelpers.setLoadDataStreamsResponse([
+      setLoadDataStreamsResponse([
         dataStreamForDetailPanel,
         createDataStreamPayload('dataStream2'),
       ]);
-
-      httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamForDetailPanel);
+      setLoadDataStreamResponse(dataStreamForDetailPanel);
 
       testBed = await setup();
-
       await act(async () => {
         testBed.actions.goToDataStreamsList();
       });
-
       testBed.component.update();
     });
 
@@ -127,8 +129,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', '1', 'Delete'],
-        ['', 'dataStream2', '1', 'Delete'],
+        ['', 'dataStream1', 'green', '1', 'Delete'],
+        ['', 'dataStream2', 'green', '1', 'Delete'],
       ]);
     });
 
@@ -144,6 +146,30 @@ describe('Data Streams tab', () => {
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
+    });
+
+    test('has a switch that will reload the data streams with additional stats when clicked', async () => {
+      const { exists, actions, table, component } = testBed;
+      const totalRequests = server.requests.length;
+
+      expect(exists('includeStatsSwitch')).toBe(true);
+
+      // Changing the switch will automatically reload the data streams.
+      await act(async () => {
+        actions.clickIncludeStatsSwitch();
+      });
+      component.update();
+
+      // A request is sent, but sinon isn't capturing the query parameters for some reason.
+      expect(server.requests.length).toBe(totalRequests + 1);
+      expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
+
+      // The table renders with the stats columns though.
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1b', '1', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1b', '1', 'Delete'],
+      ]);
     });
 
     test('clicking the indices count navigates to the backing indices', async () => {

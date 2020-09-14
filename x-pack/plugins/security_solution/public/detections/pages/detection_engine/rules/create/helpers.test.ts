@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NewRule } from '../../../../containers/detection_engine/rules';
+import { List } from '../../../../../../common/detection_engine/schemas/types';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request/create_rules_schema';
+import { Rule } from '../../../../containers/detection_engine/rules';
+import {
+  getListMock,
+  getEndpointListMock,
+} from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
@@ -127,6 +133,7 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
       };
+      // @ts-expect-error
       delete mockStepData.timeline.id;
 
       const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
@@ -175,6 +182,7 @@ describe('helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         },
       };
+      // @ts-expect-error
       delete mockStepData.timeline.title;
       const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
 
@@ -371,6 +379,51 @@ describe('helpers', () => {
       };
 
       expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with endpoint exceptions_list', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        []
+      );
+      expect(result.exceptions_list).toEqual([getEndpointListMock()]);
+    });
+
+    test('returns formatted object with detections exceptions_list', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(mockData, [getListMock()]);
+      expect(result.exceptions_list).toEqual([getListMock()]);
+    });
+
+    test('returns formatted object with both exceptions_lists', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        [getListMock()]
+      );
+      expect(result.exceptions_list).toEqual([getEndpointListMock(), getListMock()]);
+    });
+
+    test('returns formatted object with pre-existing exceptions lists', () => {
+      const exceptionsLists: List[] = [getEndpointListMock(), getListMock()];
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        exceptionsLists
+      );
+      expect(result.exceptions_list).toEqual(exceptionsLists);
+    });
+
+    test('returns formatted object with pre-existing endpoint exceptions list disabled', () => {
+      const exceptionsLists: List[] = [getEndpointListMock(), getListMock()];
+      const result: AboutStepRuleJson = formatAboutStepData(mockData, exceptionsLists);
+      expect(result.exceptions_list).toEqual([getListMock()]);
     });
 
     test('returns formatted object with empty falsePositive and references filtered out', () => {
@@ -669,13 +722,13 @@ describe('helpers', () => {
       mockActions = mockActionsStepRule();
     });
 
-    test('returns NewRule with type of saved_query when saved_id exists', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
+    test('returns rule with type of saved_query when saved_id exists', () => {
+      const result: Rule = formatRule<Rule>(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.type).toEqual('saved_query');
     });
 
-    test('returns NewRule with type of query when saved_id does not exist', () => {
+    test('returns rule with type of query when saved_id does not exist', () => {
       const mockDefineStepRuleWithoutSavedId = {
         ...mockDefine,
         queryBar: {
@@ -683,7 +736,7 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result: NewRule = formatRule(
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
         mockDefineStepRuleWithoutSavedId,
         mockAbout,
         mockSchedule,
@@ -693,10 +746,15 @@ describe('helpers', () => {
       expect(result.type).toEqual('query');
     });
 
-    test('returns NewRule without id if ruleId does not exist', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
+    test('returns rule without id if ruleId does not exist', () => {
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
+        mockDefine,
+        mockAbout,
+        mockSchedule,
+        mockActions
+      );
 
-      expect(result.id).toBeUndefined();
+      expect(result).not.toHaveProperty<CreateRulesSchema>('id');
     });
   });
 

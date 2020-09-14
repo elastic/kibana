@@ -51,13 +51,13 @@ describe('Inspector Data View', () => {
     });
 
     it('should render loading state', () => {
-      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />);
+      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />); // eslint-disable-line react/jsx-pascal-case
 
       expect(component).toMatchSnapshot();
     });
 
     it('should render empty state', async () => {
-      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />);
+      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />); // eslint-disable-line react/jsx-pascal-case
       const tabularLoader = Promise.resolve(null);
       adapters.data.setTabularLoader(() => tabularLoader);
       await tabularLoader;

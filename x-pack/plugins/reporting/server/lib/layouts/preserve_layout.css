@@ -37,7 +37,6 @@ filter-bar,
 discover-app .dscTimechart,
 discover-app .dscSidebar__container,
 discover-app .kbnCollapsibleSidebar__collapseButton,
-discover-app navbar[name=discover-search],
 discover-app .discover-table-footer {
   display: none;
 }

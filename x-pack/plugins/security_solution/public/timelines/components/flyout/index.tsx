@@ -36,7 +36,6 @@ const Visible = styled.div<{ show?: boolean }>`
 Visible.displayName = 'Visible';
 
 interface OwnProps {
-  flyoutHeight: number;
   timelineId: string;
   usersViewing: string[];
 }
@@ -44,7 +43,7 @@ interface OwnProps {
 type Props = OwnProps & ProsFromRedux;
 
 export const FlyoutComponent = React.memo<Props>(
-  ({ dataProviders, flyoutHeight, show = true, showTimeline, timelineId, usersViewing, width }) => {
+  ({ dataProviders, show = true, showTimeline, timelineId, usersViewing, width }) => {
     const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
       showTimeline,
       timelineId,
@@ -57,12 +56,7 @@ export const FlyoutComponent = React.memo<Props>(
     return (
       <>
         <Visible show={show}>
-          <Pane
-            flyoutHeight={flyoutHeight}
-            onClose={handleClose}
-            timelineId={timelineId}
-            width={width}
-          >
+          <Pane onClose={handleClose} timelineId={timelineId} width={width}>
             <StatefulTimeline onClose={handleClose} usersViewing={usersViewing} id={timelineId} />
           </Pane>
         </Visible>

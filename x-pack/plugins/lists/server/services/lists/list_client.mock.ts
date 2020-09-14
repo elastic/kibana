@@ -11,6 +11,7 @@ import { getListResponseMock } from '../../../common/schemas/response/list_schem
 import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import {
   IMPORT_BUFFER_SIZE,
+  IMPORT_TIMEOUT,
   LIST_INDEX,
   LIST_ITEM_INDEX,
   MAX_IMPORT_PAYLOAD_BYTES,
@@ -65,6 +66,7 @@ export const getListClientMock = (): ListClient => {
     config: {
       enabled: true,
       importBufferSize: IMPORT_BUFFER_SIZE,
+      importTimeout: IMPORT_TIMEOUT,
       listIndex: LIST_INDEX,
       listItemIndex: LIST_ITEM_INDEX,
       maxImportPayloadBytes: MAX_IMPORT_PAYLOAD_BYTES,

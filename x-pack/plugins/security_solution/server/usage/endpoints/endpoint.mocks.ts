@@ -13,7 +13,9 @@ import { Agent } from '../../../../ingest_manager/common';
 import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 
 const testAgentId = 'testAgentId';
-const testConfigId = 'testConfigId';
+const testAgentPolicyId = 'testAgentPolicyId';
+const testHostId = 'randoHostId';
+const testHostName = 'testDesktop';
 
 /** Mock OS Platform for endpoint telemetry */
 export const MockOSPlatform = 'somePlatform';
@@ -30,6 +32,7 @@ export const MockOSFullName = 'somePlatformFullName';
  * @description We request the install and OS related telemetry information from the 'fleet-agents' saved objects in ingest_manager. This mocks that response
  */
 export const mockFleetObjectsResponse = (
+  hasDuplicates = true,
   lastCheckIn = new Date().toISOString()
 ): SavedObjectsFindResponse<Agent> => ({
   page: 1,
@@ -42,7 +45,7 @@ export const mockFleetObjectsResponse = (
       attributes: {
         active: true,
         id: testAgentId,
-        config_id: 'randoConfigId',
+        policy_id: 'randoAgentPolicyId',
         type: 'PERMANENT',
         user_provided_metadata: {},
         enrolled_at: lastCheckIn,
@@ -54,9 +57,46 @@ export const mockFleetObjectsResponse = (
             },
           },
           host: {
-            hostname: 'testDesktop',
-            name: 'testDesktop',
-            id: 'randoHostId',
+            hostname: testHostName,
+            name: testHostName,
+            id: testHostId,
+          },
+          os: {
+            platform: MockOSPlatform,
+            version: MockOSVersion,
+            name: MockOSName,
+            full: MockOSFullName,
+          },
+        },
+        packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
+        last_checkin: lastCheckIn,
+      },
+      references: [],
+      updated_at: lastCheckIn,
+      version: 'WzI4MSwxXQ==',
+      score: 0,
+    },
+    {
+      type: AGENT_SAVED_OBJECT_TYPE,
+      id: testAgentId,
+      attributes: {
+        active: true,
+        id: 'oldTestAgentId',
+        policy_id: 'randoAgentPolicyId',
+        type: 'PERMANENT',
+        user_provided_metadata: {},
+        enrolled_at: lastCheckIn,
+        current_error_events: [],
+        local_metadata: {
+          elastic: {
+            agent: {
+              id: 'oldTestAgentId',
+            },
+          },
+          host: {
+            hostname: hasDuplicates ? testHostName : 'oldRandoHostName',
+            name: hasDuplicates ? testHostName : 'oldRandoHostName',
+            id: hasDuplicates ? testHostId : 'oldRandoHostId',
           },
           os: {
             platform: MockOSPlatform,
@@ -76,7 +116,10 @@ export const mockFleetObjectsResponse = (
   ],
 });
 
-const mockPolicyPayload = (malwareStatus: 'success' | 'warning' | 'failure') =>
+const mockPolicyPayload = (
+  policyStatus: 'success' | 'warning' | 'failure',
+  policyMode: 'prevent' | 'detect' | 'off' = 'prevent'
+) =>
   JSON.stringify({
     'endpoint-security': {
       Endpoint: {
@@ -105,7 +148,7 @@ const mockPolicyPayload = (malwareStatus: 'success' | 'warning' | 'failure') =>
                     file: 'info',
                   },
                   malware: {
-                    mode: 'prevent',
+                    mode: policyMode,
                   },
                 },
                 windows: {
@@ -122,7 +165,7 @@ const mockPolicyPayload = (malwareStatus: 'success' | 'warning' | 'failure') =>
                     file: 'info',
                   },
                   malware: {
-                    mode: 'prevent',
+                    mode: policyMode,
                   },
                 },
               },
@@ -151,11 +194,11 @@ const mockPolicyPayload = (malwareStatus: 'success' | 'warning' | 'failure') =>
                     'detect_file_open_events',
                     'detect_sync_image_load_events',
                   ],
-                  status: `${malwareStatus}`,
+                  status: `${policyStatus}`,
                 },
               },
             },
-            status: `${malwareStatus}`,
+            status: `${policyStatus}`,
           },
         },
       },
@@ -186,7 +229,9 @@ const mockPolicyPayload = (malwareStatus: 'success' | 'warning' | 'failure') =>
  */
 export const mockFleetEventsObjectsResponse = (
   running?: boolean,
-  updatedDate = new Date().toISOString()
+  updatedDate = new Date().toISOString(),
+  policyStatus: 'success' | 'failure' = running ? 'success' : 'failure',
+  policyMode: 'prevent' | 'detect' | 'off' = 'prevent'
 ): SavedObjectsFindResponse<AgentEventSOAttributes> => {
   return {
     page: 1,
@@ -204,8 +249,8 @@ export const mockFleetEventsObjectsResponse = (
           message: `Application: endpoint-security--8.0.0[d8f7f6e8-9375-483c-b456-b479f1d7a4f2]: State changed to ${
             running ? 'RUNNING' : 'FAILED'
           }: `,
-          payload: mockPolicyPayload(running ? 'success' : 'failure'),
-          config_id: testConfigId,
+          payload: running ? mockPolicyPayload(policyStatus, policyMode) : undefined,
+          policy_id: testAgentPolicyId,
         },
         references: [],
         updated_at: updatedDate,
@@ -222,7 +267,7 @@ export const mockFleetEventsObjectsResponse = (
           subtype: 'STARTING',
           message:
             'Application: endpoint-security--8.0.0[d8f7f6e8-9375-483c-b456-b479f1d7a4f2]: State changed to STARTING: Starting',
-          config_id: testConfigId,
+          policy_id: testAgentPolicyId,
         },
         references: [],
         updated_at: updatedDate,

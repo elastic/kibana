@@ -105,10 +105,16 @@ describe('useEditorUpdates', () => {
       to: 'now',
     };
     mockFilters = ['mockFilters'];
+    const mockQuery = {
+      query: '',
+      language: 'kuery',
+    };
     // @ts-expect-error
     mockServices.data.query.timefilter.timefilter.getTime.mockImplementation(() => timeRange);
     // @ts-expect-error
     mockServices.data.query.filterManager.getFilters.mockImplementation(() => mockFilters);
+    // @ts-expect-error
+    mockServices.data.query.queryString.getQuery.mockImplementation(() => mockQuery);
   });
 
   test('should set up current app state and render the editor', () => {

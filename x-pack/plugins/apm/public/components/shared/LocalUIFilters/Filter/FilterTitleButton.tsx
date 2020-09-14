@@ -24,7 +24,7 @@ const Button = styled(EuiButtonEmpty).attrs(() => ({
 
 type Props = React.ComponentProps<typeof Button>;
 
-export const FilterTitleButton = (props: Props) => {
+export function FilterTitleButton(props: Props) {
   return (
     <Button {...props}>
       <EuiTitle size="xxxs" textTransform="uppercase">
@@ -32,4 +32,4 @@ export const FilterTitleButton = (props: Props) => {
       </EuiTitle>
     </Button>
   );
-};
+}

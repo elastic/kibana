@@ -1,15 +1,15 @@
 [[kibana-debugging]]
-=== Debugging {kib}
+== Debugging {kib}
 
 For information about how to debug unit tests, refer to <<debugging-unit-tests>>.
 
-[float]
-==== Server Code
+[discrete]
+=== Server Code
 
 `yarn debug` will start the server with Node's inspect flag. {kib}'s development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each {kib} process in Chrome's developer tools connection tab.
 
-[float]
-==== Instrumenting with Elastic APM
+[discrete]
+=== Instrumenting with Elastic APM
 
 {kib} ships with the
 https://github.com/elastic/apm-agent-nodejs[Elastic APM Node.js Agent]
@@ -18,7 +18,7 @@ built-in for debugging purposes.
 Its default configuration is meant to be used by core {kib} developers
 only, but it can easily be re-configured to your needs. In its default
 configuration it’s disabled and will, once enabled, send APM data to a
-centrally managed Elasticsearch cluster accessible only to Elastic
+centrally managed {es} cluster accessible only to Elastic
 employees.
 
 To change the location where data is sent, use the

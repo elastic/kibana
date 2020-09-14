@@ -13,12 +13,12 @@ import { SetupPlugins } from '../../plugin';
 import { MINIMUM_ML_LICENSE } from '../../../common/constants';
 import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
 import { isMlRule } from '../../../common/machine_learning/helpers';
-import { RuleType } from '../../../common/detection_engine/types';
 import { Validation } from './validation';
 import { cache } from './cache';
+import { Type } from '../../../common/detection_engine/schemas/common/schemas';
 
 export interface MlAuthz {
-  validateRuleType: (type: RuleType) => Promise<Validation>;
+  validateRuleType: (type: Type) => Promise<Validation>;
 }
 
 /**
@@ -40,7 +40,7 @@ export const buildMlAuthz = ({
   request: KibanaRequest;
 }): MlAuthz => {
   const cachedValidate = cache(() => validateMlAuthz({ license, ml, request }));
-  const validateRuleType = async (type: RuleType): Promise<Validation> => {
+  const validateRuleType = async (type: Type): Promise<Validation> => {
     if (!isMlRule(type)) {
       return { valid: true, message: undefined };
     } else {
@@ -114,7 +114,6 @@ export const isMlAdmin = async ({
   request: KibanaRequest;
   ml: MlPluginSetup;
 }): Promise<boolean> => {
-  const scopedMlClient = ml.mlClient.asScoped(request);
-  const mlCapabilities = await ml.mlSystemProvider(scopedMlClient, request).mlCapabilities();
+  const mlCapabilities = await ml.mlSystemProvider(request).mlCapabilities();
   return hasMlAdminPermissions(mlCapabilities);
 };

@@ -22,5 +22,3 @@ export const PositiveIntegerGreaterThanZero = new t.Type<number, number, unknown
   },
   t.identity
 );
-
-export type PositiveIntegerGreaterThanZeroC = typeof PositiveIntegerGreaterThanZero;

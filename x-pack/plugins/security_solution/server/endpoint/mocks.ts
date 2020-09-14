@@ -6,37 +6,31 @@
 
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loggerMock } from 'src/core/server/logging/logger.mock';
 import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
   IngestManagerStartContract,
   ExternalCallback,
 } from '../../../ingest_manager/server';
-import { createPackageConfigServiceMock } from '../../../ingest_manager/server/mocks';
-import { ConfigType } from '../config';
+import { createPackagePolicyServiceMock } from '../../../ingest_manager/server/mocks';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
   EndpointAppContextServiceStartContract,
 } from './endpoint_app_context_services';
-import {
-  ManifestManagerMock,
-  getManifestManagerMock,
-} from './services/artifacts/manifest_manager/manifest_manager.mock';
+import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
+import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
 
 /**
  * Creates a mocked EndpointAppContext.
  */
 export const createMockEndpointAppContext = (
-  mockManifestManager?: ManifestManagerMock
+  mockManifestManager?: ManifestManager
 ): EndpointAppContext => {
   return {
     logFactory: loggingSystemMock.create(),
-    // @ts-ignore
-    config: createMockConfig() as ConfigType,
+    config: () => Promise.resolve(createMockConfig()),
     service: createMockEndpointAppContextService(mockManifestManager),
   };
 };
@@ -45,16 +39,15 @@ export const createMockEndpointAppContext = (
  * Creates a mocked EndpointAppContextService
  */
 export const createMockEndpointAppContextService = (
-  mockManifestManager?: ManifestManagerMock
+  mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  return {
+  return ({
     start: jest.fn(),
     stop: jest.fn(),
     getAgentService: jest.fn(),
-    // @ts-ignore
-    getManifestManager: mockManifestManager ?? jest.fn(),
+    getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getScopedSavedObjectsClient: jest.fn(),
-  };
+  } as unknown) as jest.Mocked<EndpointAppContextService>;
 };
 
 /**
@@ -65,7 +58,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 > => {
   return {
     agentService: createMockAgentService(),
-    logger: loggerMock.create(),
+    logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
     manifestManager: getManifestManagerMock(),
     registerIngestCallback: jest.fn<
@@ -103,7 +96,7 @@ export const createMockIngestManagerStartContract = (
     },
     agentService: createMockAgentService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    packageConfigService: createPackageConfigServiceMock(),
+    packagePolicyService: createPackagePolicyServiceMock(),
   };
 };
 

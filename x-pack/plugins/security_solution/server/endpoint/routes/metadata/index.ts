@@ -9,11 +9,12 @@ import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 import Boom from 'boom';
 
-import { metadataIndexPattern } from '../../../../common/endpoint/constants';
+import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
   HostInfo,
   HostMetadata,
+  HostMetadataDetails,
   HostResultList,
   HostStatus,
 } from '../../../../common/endpoint/types';
@@ -21,10 +22,7 @@ import { EndpointAppContext } from '../../types';
 import { AgentService } from '../../../../../ingest_manager/server';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
-
-interface HitSource {
-  _source: HostMetadata;
-}
+import { findAgentIDsByStatus } from './support/agent_status';
 
 interface MetadataRequestContext {
   agentService: AgentService;
@@ -35,6 +33,7 @@ interface MetadataRequestContext {
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['online', HostStatus.ONLINE],
   ['offline', HostStatus.OFFLINE],
+  ['unenrolling', HostStatus.UNENROLLING],
 ]);
 
 /**
@@ -50,6 +49,21 @@ const IGNORED_ELASTIC_AGENT_IDS = [
 const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
 };
+
+/* Filters that can be applied to the endpoint fetch route */
+export const endpointFilters = schema.object({
+  kql: schema.nullable(schema.string()),
+  host_status: schema.nullable(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal(HostStatus.ONLINE.toString()),
+        schema.literal(HostStatus.OFFLINE.toString()),
+        schema.literal(HostStatus.UNENROLLING.toString()),
+        schema.literal(HostStatus.ERROR.toString()),
+      ])
+    )
+  ),
+});
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const logger = getLogger(endpointAppContext);
@@ -75,10 +89,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
                 ])
               )
             ),
-            /**
-             * filter to be applied, it could be a kql expression or discrete filter to be implemented
-             */
-            filter: schema.nullable(schema.oneOf([schema.string()])),
+            filters: endpointFilters,
           })
         ),
       },
@@ -102,19 +113,28 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           context.core.savedObjects.client
         );
 
+        const statusIDs = req.body?.filters?.host_status?.length
+          ? await findAgentIDsByStatus(
+              agentService,
+              context.core.savedObjects.client,
+              req.body?.filters?.host_status
+            )
+          : undefined;
+
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
-          metadataIndexPattern,
+          metadataCurrentIndexPattern,
           {
             unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
+            statusAgentIDs: statusIDs,
           }
         );
 
         const response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
           queryParams
-        )) as SearchResponse<HostMetadata>;
+        )) as SearchResponse<HostMetadataDetails>;
 
         return res.ok({
           body: await mapToHostResultList(queryParams, response, metadataRequestContext),
@@ -170,17 +190,17 @@ export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const query = getESQueryHostMetadataByID(id, metadataIndexPattern);
+  const query = getESQueryHostMetadataByID(id, metadataCurrentIndexPattern);
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
     'search',
     query
-  )) as SearchResponse<HostMetadata>;
+  )) as SearchResponse<HostMetadataDetails>;
 
   if (response.hits.hits.length === 0) {
     return undefined;
   }
 
-  const hostMetadata: HostMetadata = response.hits.hits[0]._source;
+  const hostMetadata: HostMetadata = response.hits.hits[0]._source.HostDetails;
   const agent = await findAgent(metadataRequestContext, hostMetadata);
 
   if (agent && !agent.active) {
@@ -200,7 +220,11 @@ async function findAgent(
       hostMetadata.elastic.agent.id
     );
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
+        e
+      )
+    ) {
       metadataRequestContext.logger.warn(
         `agent with id ${hostMetadata.elastic.agent.id} not found`
       );
@@ -214,19 +238,19 @@ async function findAgent(
 async function mapToHostResultList(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   queryParams: Record<string, any>,
-  searchResponse: SearchResponse<HostMetadata>,
+  searchResponse: SearchResponse<HostMetadataDetails>,
   metadataRequestContext: MetadataRequestContext
 ): Promise<HostResultList> {
-  const totalNumberOfHosts = searchResponse?.aggregations?.total?.value || 0;
+  const totalNumberOfHosts =
+    ((searchResponse.hits?.total as unknown) as { value: number; relation: string }).value || 0;
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
       request_page_index: queryParams.from,
       hosts: await Promise.all(
-        searchResponse.hits.hits
-          .map((response) => response.inner_hits.most_recent.hits.hits)
-          .flatMap((data) => data as HitSource)
-          .map(async (entry) => enrichHostMetadata(entry._source, metadataRequestContext))
+        searchResponse.hits.hits.map(async (entry) =>
+          enrichHostMetadata(entry._source.HostDetails, metadataRequestContext)
+        )
       ),
       total: totalNumberOfHosts,
     };
@@ -263,7 +287,11 @@ async function enrichHostMetadata(
     );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
+        e
+      )
+    ) {
       log.warn(`agent with id ${elasticAgentId} not found`);
     } else {
       log.error(e);

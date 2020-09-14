@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -16,9 +16,18 @@ import {
 import { HomeLink } from '../../shared/Links/apm/HomeLink';
 import { useLocation } from '../../../hooks/useLocation';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
-export const Settings: React.FC = (props) => {
+export function Settings(props: { children: ReactNode }) {
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
+  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
   const { search, pathname } = useLocation();
+
+  function getSettingsHref(path: string) {
+    return getAPMHref({ basePath, path: `/settings${path}`, search });
+  }
+
   return (
     <>
       <HomeLink>
@@ -43,28 +52,33 @@ export const Settings: React.FC = (props) => {
                       defaultMessage: 'Agent Configuration',
                     }),
                     id: '1',
-                    href: getAPMHref('/settings/agent-configuration', search),
+                    href: getSettingsHref('/agent-configuration'),
                     isSelected: pathname.startsWith(
                       '/settings/agent-configuration'
                     ),
                   },
-                  {
-                    name: i18n.translate(
-                      'xpack.apm.settings.anomalyDetection',
-                      {
-                        defaultMessage: 'Anomaly detection',
-                      }
-                    ),
-                    id: '4',
-                    href: getAPMHref('/settings/anomaly-detection', search),
-                    isSelected: pathname === '/settings/anomaly-detection',
-                  },
+                  ...(canAccessML
+                    ? [
+                        {
+                          name: i18n.translate(
+                            'xpack.apm.settings.anomalyDetection',
+                            {
+                              defaultMessage: 'Anomaly detection',
+                            }
+                          ),
+                          id: '4',
+                          href: getSettingsHref('/anomaly-detection'),
+                          isSelected:
+                            pathname === '/settings/anomaly-detection',
+                        },
+                      ]
+                    : []),
                   {
                     name: i18n.translate('xpack.apm.settings.customizeApp', {
                       defaultMessage: 'Customize app',
                     }),
                     id: '3',
-                    href: getAPMHref('/settings/customize-ui', search),
+                    href: getSettingsHref('/customize-ui'),
                     isSelected: pathname === '/settings/customize-ui',
                   },
                   {
@@ -72,7 +86,7 @@ export const Settings: React.FC = (props) => {
                       defaultMessage: 'Indices',
                     }),
                     id: '2',
-                    href: getAPMHref('/settings/apm-indices', search),
+                    href: getSettingsHref('/apm-indices'),
                     isSelected: pathname === '/settings/apm-indices',
                   },
                 ],
@@ -84,4 +98,4 @@ export const Settings: React.FC = (props) => {
       </EuiPage>
     </>
   );
-};
+}

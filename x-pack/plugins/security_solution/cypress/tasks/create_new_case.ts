@@ -33,7 +33,7 @@ export const createNewCase = (newCase: TestCase) => {
   cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
   cy.get(TIMELINE).should('be.visible');
   cy.wait(300);
-  cy.get(TIMELINE).eq(1).click({ force: true });
+  cy.get(TIMELINE).eq(0).click({ force: true });
 
   cy.get(SUBMIT_BTN).click({ force: true });
   cy.get(LOADING_SPINNER).should('exist');

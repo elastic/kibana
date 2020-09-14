@@ -17,6 +17,8 @@ type DecodeParams<TParams extends Params | undefined> = {
   [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
 };
 
+export type Breadcrumbs = Array<{ text: string }>;
+
 export interface Params {
   query?: t.HasProps;
   path?: t.HasProps;

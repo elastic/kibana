@@ -140,7 +140,11 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
-        indexPatterns: { fields: [{ name: 'test name', type: 'test type' }], title: 'test title' },
+        indexPatterns: {
+          fields: [{ name: 'event.category', type: 'test type' }],
+          title: 'test title',
+          getFormatterForField: () => ({ convert: (val: unknown) => val }),
+        },
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);
@@ -331,6 +335,7 @@ describe('helpers', () => {
       const result: ListItems[] = buildSeverityDescription({
         value: 'low',
         mapping: [{ field: 'host.name', operator: 'equals', value: 'hello', severity: 'high' }],
+        isMappingChecked: true,
       });
 
       expect(result[0].title).toEqual('Severity');

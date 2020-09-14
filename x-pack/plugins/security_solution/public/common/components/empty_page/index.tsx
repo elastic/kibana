@@ -4,84 +4,114 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
-import React, { MouseEventHandler, ReactNode } from 'react';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  IconType,
+  EuiCard,
+} from '@elastic/eui';
+import React, { MouseEventHandler, ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
+  max-width: 60em;
 `;
 
 EmptyPrompt.displayName = 'EmptyPrompt';
 
+interface EmptyPageActions {
+  icon?: IconType;
+  label: string;
+  target?: string;
+  url: string;
+  descriptionTitle?: string;
+  description?: string;
+  fill?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+}
+
+export type EmptyPageActionsProps = Record<string, EmptyPageActions>;
+
 interface EmptyPageProps {
-  actionPrimaryIcon?: IconType;
-  actionPrimaryLabel: string;
-  actionPrimaryTarget?: string;
-  actionPrimaryUrl: string;
-  actionPrimaryFill?: boolean;
-  actionSecondaryIcon?: IconType;
-  actionSecondaryLabel?: string;
-  actionSecondaryTarget?: string;
-  actionSecondaryUrl?: string;
-  actionSecondaryOnClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+  actions: EmptyPageActionsProps;
   'data-test-subj'?: string;
   message?: ReactNode;
   title: string;
 }
 
-export const EmptyPage = React.memo<EmptyPageProps>(
-  ({
-    actionPrimaryIcon,
-    actionPrimaryLabel,
-    actionPrimaryTarget,
-    actionPrimaryUrl,
-    actionPrimaryFill = true,
-    actionSecondaryIcon,
-    actionSecondaryLabel,
-    actionSecondaryTarget,
-    actionSecondaryUrl,
-    actionSecondaryOnClick,
-    message,
-    title,
-    ...rest
-  }) => (
+const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title, ...rest }) => {
+  const titles = Object.keys(actions);
+  const maxItemWidth = 283;
+  const renderActions = useMemo(
+    () =>
+      Object.values(actions)
+        .filter((a) => a.label && a.url)
+        .map(
+          (
+            { icon, label, target, url, descriptionTitle, description, onClick, fill = true },
+            idx
+          ) =>
+            descriptionTitle != null || description != null ? (
+              <EuiFlexItem
+                grow={false}
+                style={{ maxWidth: maxItemWidth }}
+                key={`empty-page-${titles[idx]}-action`}
+              >
+                <EuiCard
+                  title={descriptionTitle ?? false}
+                  description={description ?? false}
+                  footer={
+                    /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+                    <EuiButton
+                      href={url}
+                      onClick={onClick}
+                      iconType={icon}
+                      target={target}
+                      fill={fill}
+                      data-test-subj={`empty-page-${titles[idx]}-action`}
+                    >
+                      {label}
+                    </EuiButton>
+                  }
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem
+                grow={false}
+                style={{ maxWidth: maxItemWidth }}
+                key={`empty-page-${titles[idx]}-action`}
+              >
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButton
+                  href={url}
+                  onClick={onClick}
+                  iconType={icon}
+                  target={target}
+                  data-test-subj={`empty-page-${titles[idx]}-action`}
+                >
+                  {label}
+                </EuiButton>
+              </EuiFlexItem>
+            )
+        ),
+    [actions, titles]
+  );
+
+  return (
     <EmptyPrompt
       iconType="logoSecurity"
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
-      actions={
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill={actionPrimaryFill}
-              href={actionPrimaryUrl}
-              iconType={actionPrimaryIcon}
-              target={actionPrimaryTarget}
-            >
-              {actionPrimaryLabel}
-            </EuiButton>
-          </EuiFlexItem>
-
-          {actionSecondaryLabel && actionSecondaryUrl && (
-            <EuiFlexItem grow={false}>
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiButton
-                href={actionSecondaryUrl}
-                onClick={actionSecondaryOnClick}
-                iconType={actionSecondaryIcon}
-                target={actionSecondaryTarget}
-                data-test-subj="empty-page-secondary-action"
-              >
-                {actionSecondaryLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      }
+      actions={<EuiFlexGroup justifyContent="center">{renderActions}</EuiFlexGroup>}
       {...rest}
     />
-  )
-);
+  );
+});
 
+EmptyPageComponent.displayName = 'EmptyPageComponent';
+
+export const EmptyPage = React.memo(EmptyPageComponent);
 EmptyPage.displayName = 'EmptyPage';

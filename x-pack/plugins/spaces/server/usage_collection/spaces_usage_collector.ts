@@ -92,6 +92,7 @@ async function getSpacesUsage(
   );
 
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     (acc, { key, doc_count }) => {
       return {
         ...acc,

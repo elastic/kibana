@@ -14,6 +14,7 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
 import {
@@ -24,7 +25,6 @@ import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import {
   getGapBetweenRuns,
-  parseScheduleDates,
   getListsClient,
   getExceptions,
   getGapMaxCatchupRatio,
@@ -120,7 +120,6 @@ export const signalRulesAlertType = ({
         enabled,
         schedule: { interval },
         throttle,
-        params: ruleParams,
       } = savedObject.attributes;
       const updatedAt = savedObject.updated_at ?? '';
       const refresh = actions.length ? 'wait_for' : false;
@@ -185,12 +184,12 @@ export const signalRulesAlertType = ({
             );
           }
 
-          const scopedClusterClient = services.getLegacyScopedClusterClient(ml.mlClient);
           // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
           // currently unused by the jobsSummary function.
-          const summaryJobs = await (
-            await ml.jobServiceProvider(scopedClusterClient, ({} as unknown) as KibanaRequest)
-          ).jobsSummary([machineLearningJobId]);
+          const fakeRequest = {} as KibanaRequest;
+          const summaryJobs = await ml
+            .jobServiceProvider(fakeRequest)
+            .jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
           if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
@@ -207,7 +206,6 @@ export const signalRulesAlertType = ({
 
           const anomalyResults = await findMlSignals({
             ml,
-            clusterClient: scopedClusterClient,
             // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
             // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,
@@ -344,7 +342,7 @@ export const signalRulesAlertType = ({
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {
-              ...ruleParams,
+              ...params,
               name,
               id: savedObject.id,
             };
@@ -356,7 +354,8 @@ export const signalRulesAlertType = ({
               from: fromInMs,
               to: toInMs,
               id: savedObject.id,
-              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string }).kibana_siem_app_url,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                ?.kibana_siem_app_url,
             });
 
             logger.info(

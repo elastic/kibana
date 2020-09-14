@@ -5,16 +5,16 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { PackageConfig } from './';
+import { PackagePolicy } from './';
 
 /**
- * Supported routing state for the create package config page routes
+ * Supported routing state for the create package policy page routes
  */
-export interface CreatePackageConfigRouteState {
-  /** On a successful save of the package config, use navigate to the given app */
+export interface CreatePackagePolicyRouteState {
+  /** On a successful save of the package policy, use navigate to the given app */
   onSaveNavigateTo?:
     | Parameters<ApplicationStart['navigateToApp']>
-    | ((newPackageConfig: PackageConfig) => Parameters<ApplicationStart['navigateToApp']>);
+    | ((newPackagePolicy: PackagePolicy) => Parameters<ApplicationStart['navigateToApp']>);
   /** On cancel, navigate to the given app */
   onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
   /** Url to be used on cancel links */
@@ -22,17 +22,17 @@ export interface CreatePackageConfigRouteState {
 }
 
 /**
- * Supported routing state for the agent config details page routes with deploy agents action
+ * Supported routing state for the agent policy details page routes with deploy agents action
  */
-export interface AgentConfigDetailsDeployAgentAction {
+export interface AgentPolicyDetailsDeployAgentAction {
   /** On done, navigate to the given app */
   onDoneNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
 }
 
 /**
- * Supported routing state for the agent config details page routes with deploy agents action
+ * Supported routing state for the agent policy details page routes with deploy agents action
  */
-export interface AgentDetailsReassignConfigAction {
+export interface AgentDetailsReassignPolicyAction {
   /** On done, navigate to the given app */
   onDoneNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
 }
@@ -41,6 +41,6 @@ export interface AgentDetailsReassignConfigAction {
  * All possible Route states.
  */
 export type AnyIntraAppRouteState =
-  | CreatePackageConfigRouteState
-  | AgentConfigDetailsDeployAgentAction
-  | AgentDetailsReassignConfigAction;
+  | CreatePackagePolicyRouteState
+  | AgentPolicyDetailsDeployAgentAction
+  | AgentDetailsReassignPolicyAction;

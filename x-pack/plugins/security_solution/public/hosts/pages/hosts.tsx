@@ -8,7 +8,6 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
@@ -26,6 +25,7 @@ import { KpiHostsQuery } from '../containers/kpi_hosts';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
+import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../graphql/types';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
@@ -34,7 +34,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
-import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
@@ -44,16 +44,20 @@ import { HostsComponentProps } from './types';
 import { filterHostData } from './navigation';
 import { hostsModel } from '../store';
 import { HostsTableType } from '../store/model';
+import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../timelines/store/timeline';
+import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../timelines/store/timeline/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
-  ({ filters, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
+  ({ filters, graphEventId, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
     const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useFullScreen();
     const capabilities = useMlCapabilities();
     const kibana = useKibana();
-    const { tabName } = useParams();
+    const { tabName } = useParams<{ tabName: string }>();
     const tabsFilters = React.useMemo(() => {
       if (tabName === HostsTableType.alerts) {
         return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
@@ -91,9 +95,9 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
     return (
       <>
         {indicesExist ? (
-          <StickyContainer>
+          <>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal>
+            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
@@ -148,7 +152,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                 hostsPagePath={hostsPagePath}
               />
             </WrapperPage>
-          </StickyContainer>
+          </>
         ) : (
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />
@@ -167,10 +171,22 @@ HostsComponent.displayName = 'HostsComponent';
 const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const mapStateToProps = (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const mapStateToProps = (state: State) => {
+    const hostsPageEventsTimeline: TimelineModel =
+      getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults;
+    const { graphEventId: hostsPageEventsGraphEventId } = hostsPageEventsTimeline;
+
+    const hostsPageExternalAlertsTimeline: TimelineModel =
+      getTimeline(state, TimelineId.hostsPageExternalAlerts) ?? timelineDefaults;
+    const { graphEventId: hostsPageExternalAlertsGraphEventId } = hostsPageExternalAlertsTimeline;
+
+    return {
+      query: getGlobalQuerySelector(state),
+      filters: getGlobalFiltersQuerySelector(state),
+      graphEventId: hostsPageEventsGraphEventId ?? hostsPageExternalAlertsGraphEventId,
+    };
+  };
 
   return mapStateToProps;
 };

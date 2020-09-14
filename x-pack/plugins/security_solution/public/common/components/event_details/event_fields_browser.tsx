@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
-import { DetailItem } from '../../../graphql/types';
+import { DetailItem } from '../../../../common/search_strategy/timeline';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 
 import { getColumns } from './columns';
@@ -55,7 +55,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     return (
       <div className="euiTable--compressed">
         <EuiInMemoryTable
-          // @ts-ignore items going in match Partial<BrowserField>, column `render` callbacks expect complete BrowserField
+          // @ts-expect-error items going in match Partial<BrowserField>, column `render` callbacks expect complete BrowserField
           items={items}
           columns={columns}
           pagination={false}

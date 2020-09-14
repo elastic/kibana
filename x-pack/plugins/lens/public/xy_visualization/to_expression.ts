@@ -7,35 +7,16 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { State, LayerConfig } from './types';
-import { FramePublicAPI, OperationMetadata } from '../types';
+import { OperationMetadata, DatasourcePublicAPI } from '../types';
 
 interface ValidLayer extends LayerConfig {
   xAccessor: NonNullable<LayerConfig['xAccessor']>;
 }
 
-function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
-  const defaults = {
-    xTitle: 'x',
-    yTitle: 'y',
-  };
-
-  if (!layer || !layer.accessors.length) {
-    return defaults;
-  }
-  const datasource = frame.datasourceLayers[layer.layerId];
-  if (!datasource) {
-    return defaults;
-  }
-  const x = layer.xAccessor ? datasource.getOperationForColumnId(layer.xAccessor) : null;
-  const y = layer.accessors[0] ? datasource.getOperationForColumnId(layer.accessors[0]) : null;
-
-  return {
-    xTitle: x ? x.label : defaults.xTitle,
-    yTitle: y ? y.label : defaults.yTitle,
-  };
-}
-
-export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
+export const toExpression = (
+  state: State,
+  datasourceLayers: Record<string, DatasourcePublicAPI>
+): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
   }
@@ -43,19 +24,20 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
   const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
   state.layers.forEach((layer) => {
     metadata[layer.layerId] = {};
-    const datasource = frame.datasourceLayers[layer.layerId];
+    const datasource = datasourceLayers[layer.layerId];
     datasource.getTableSpec().forEach((column) => {
-      const operation = frame.datasourceLayers[layer.layerId].getOperationForColumnId(
-        column.columnId
-      );
+      const operation = datasourceLayers[layer.layerId].getOperationForColumnId(column.columnId);
       metadata[layer.layerId][column.columnId] = operation;
     });
   });
 
-  return buildExpression(state, metadata, frame, xyTitles(state.layers[0], frame));
+  return buildExpression(state, metadata, datasourceLayers);
 };
 
-export function toPreviewExpression(state: State, frame: FramePublicAPI) {
+export function toPreviewExpression(
+  state: State,
+  datasourceLayers: Record<string, DatasourcePublicAPI>
+) {
   return toExpression(
     {
       ...state,
@@ -66,7 +48,7 @@ export function toPreviewExpression(state: State, frame: FramePublicAPI) {
         isVisible: false,
       },
     },
-    frame
+    datasourceLayers
   );
 }
 
@@ -99,8 +81,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  frame?: FramePublicAPI,
-  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
+  datasourceLayers?: Record<string, DatasourcePublicAPI>
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
     Boolean(layer.xAccessor && layer.accessors.length)
@@ -116,8 +97,8 @@ export const buildExpression = (
         type: 'function',
         function: 'lens_xy_chart',
         arguments: {
-          xTitle: [xTitle],
-          yTitle: [yTitle],
+          xTitle: [state.xTitle || ''],
+          yTitle: [state.yTitle || ''],
           legend: [
             {
               type: 'expression',
@@ -127,6 +108,9 @@ export const buildExpression = (
                   function: 'lens_xy_legendConfig',
                   arguments: {
                     isVisible: [state.legend.isVisible],
+                    showSingleSeries: state.legend.showSingleSeries
+                      ? [state.legend.showSingleSeries]
+                      : [],
                     position: [state.legend.position],
                   },
                 },
@@ -134,11 +118,43 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
+          showXAxisTitle: [state.showXAxisTitle ?? true],
+          showYAxisTitle: [state.showYAxisTitle ?? true],
+          tickLabelsVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_tickLabelsConfig',
+                  arguments: {
+                    x: [state?.tickLabelsVisibilitySettings?.x ?? true],
+                    y: [state?.tickLabelsVisibilitySettings?.y ?? true],
+                  },
+                },
+              ],
+            },
+          ],
+          gridlinesVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_gridlinesConfig',
+                  arguments: {
+                    x: [state?.gridlinesVisibilitySettings?.x ?? true],
+                    y: [state?.gridlinesVisibilitySettings?.y ?? true],
+                  },
+                },
+              ],
+            },
+          ],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
-            if (frame) {
-              const datasource = frame.datasourceLayers[layer.layerId];
+            if (datasourceLayers) {
+              const datasource = datasourceLayers[layer.layerId];
               layer.accessors
                 .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
                 .forEach((accessor) => {
@@ -150,8 +166,8 @@ export const buildExpression = (
             }
 
             const xAxisOperation =
-              frame &&
-              frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
+              datasourceLayers &&
+              datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
 
             const isHistogramDimension = Boolean(
               xAxisOperation &&

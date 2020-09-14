@@ -10,7 +10,6 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiImage,
   EuiSpacer,
   EuiText,
@@ -19,16 +18,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
+import { IngestManagerPanel } from '../../components/app/ingest_manager_panel';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { appsSection } from '../home/section';
-import { IngestManagerPanel } from '../../components/app/ingest_manager_panel';
 
 const EuiCardWithoutPadding = styled(EuiCard)`
   padding: 0;
 `;
 
-export const LandingPage = () => {
+export function LandingPage() {
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
 
@@ -68,7 +67,6 @@ export const LandingPage = () => {
                     <EuiCardWithoutPadding
                       display="plain"
                       layout="horizontal"
-                      icon={<EuiIcon size="l" type={app.icon} />}
                       title={
                         <EuiTitle size="xs" className="title">
                           <h3>{app.title}</h3>
@@ -126,4 +124,4 @@ export const LandingPage = () => {
       </EuiFlexGroup>
     </WithHeaderLayout>
   );
-};
+}

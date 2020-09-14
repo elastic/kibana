@@ -4,16 +4,158 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { tasks } from './tasks';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { tasks } from './tasks';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+} from '../../../../common/elasticsearch_fieldnames';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.errorIndices': 'apm-8.0.0-error',
     'apm_oss.metricsIndices': 'apm-8.0.0-metric',
     'apm_oss.spanIndices': 'apm-8.0.0-span',
     'apm_oss.transactionIndices': 'apm-8.0.0-transaction',
+    /* eslint-enable @typescript-eslint/naming-convention */
   } as ApmIndicesConfig;
+
+  describe('environments', () => {
+    const task = tasks.find((t) => t.name === 'environments');
+
+    it('returns environment information', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        aggregations: {
+          environments: {
+            buckets: [
+              {
+                key: 'production',
+              },
+              {
+                key: 'testing',
+              },
+            ],
+          },
+          service_environments: {
+            buckets: [
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-node',
+                  [SERVICE_ENVIRONMENT]: 'production',
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-node',
+                  [SERVICE_ENVIRONMENT]: null,
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-java',
+                  [SERVICE_ENVIRONMENT]: 'production',
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-rum',
+                  [SERVICE_ENVIRONMENT]: null,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      expect(await task?.executor({ search, indices } as any)).toEqual({
+        environments: {
+          services_with_multiple_environments: 1,
+          services_without_environment: 2,
+          top_environments: ['production', 'testing'],
+        },
+      });
+    });
+  });
+
+  describe('aggregated_transactions', () => {
+    const task = tasks.find((t) => t.name === 'aggregated_transactions');
+
+    describe('without transactions', () => {
+      it('returns an empty result', async () => {
+        const search = jest.fn().mockReturnValueOnce({
+          hits: {
+            hits: [],
+            total: {
+              value: 0,
+            },
+          },
+        });
+
+        expect(await task?.executor({ indices, search } as any)).toEqual({});
+      });
+    });
+
+    it('returns aggregated transaction counts', async () => {
+      const search = jest
+        .fn()
+        // The first call to `search` asks for a transaction to get
+        // a fixed date range.
+        .mockReturnValueOnce({
+          hits: {
+            hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+          },
+          total: {
+            value: 1,
+          },
+        })
+        // Later calls are all composite aggregations. We return 2 pages of
+        // results to test if scrolling works.
+        .mockImplementation((params) => {
+          let arrayLength = 1000;
+          let nextAfter: Record<string, any> = { after_key: {} };
+
+          if (params.body.aggs.transaction_metric_groups.composite.after) {
+            arrayLength = 250;
+            nextAfter = {};
+          }
+
+          return Promise.resolve({
+            hits: {
+              total: {
+                value: 5000,
+              },
+            },
+            aggregations: {
+              transaction_metric_groups: {
+                buckets: new Array(arrayLength),
+                ...nextAfter,
+              },
+            },
+          });
+        });
+
+      expect(await task?.executor({ indices, search } as any)).toEqual({
+        aggregated_transactions: {
+          current_implementation: {
+            expected_metric_document_count: 1250,
+            transaction_count: 5000,
+            ratio: 0.25,
+          },
+          no_observer_name: {
+            expected_metric_document_count: 1250,
+            transaction_count: 5000,
+            ratio: 0.25,
+          },
+          with_country: {
+            expected_metric_document_count: 1250,
+            transaction_count: 5000,
+            ratio: 0.25,
+          },
+        },
+      });
+    });
+  });
 
   describe('cloud', () => {
     const task = tasks.find((t) => t.name === 'cloud');

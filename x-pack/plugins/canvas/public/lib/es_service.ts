@@ -15,16 +15,16 @@ import { platformService } from '../services';
 const { esService: strings } = ErrorStrings;
 
 const getApiPath = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return basePath + API_ROUTE;
 };
 
 const getSavedObjectsClient = function () {
-  return platformService.getService().coreStart.savedObjects.client;
+  return platformService.getService().getSavedObjectsClient();
 };
 
 const getAdvancedSettings = function () {
-  return platformService.getService().coreStart.uiSettings;
+  return platformService.getService().getUISettings();
 };
 
 export const getFields = (index = '_all') => {

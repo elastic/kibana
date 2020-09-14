@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`index pattern listing doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('indexPatternTable');
+        await testSubjects.existOrFail('emptyIndexPatternPrompt');
         await testSubjects.missingOrFail('createIndexPatternButton');
       });
 

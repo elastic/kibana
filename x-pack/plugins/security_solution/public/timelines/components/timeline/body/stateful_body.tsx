@@ -14,7 +14,7 @@ import { RowRendererId, TimelineId } from '../../../../../common/types/timeline'
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
-import { appSelectors, State } from '../../../../common/store';
+import { appSelectors, inputsModel, State } from '../../../../common/store';
 import { appActions } from '../../../../common/store/actions';
 import { useManageTimeline } from '../../manage_timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
@@ -42,11 +42,11 @@ interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
   docValueFields: DocValueFields[];
-  height?: number;
   id: string;
   isEventViewer?: boolean;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
+  refetch: inputsModel.Refetch;
 }
 
 type StatefulBodyComponentProps = OwnProps & PropsFromRedux;
@@ -62,8 +62,8 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     data,
     docValueFields,
     eventIdToNoteIds,
+    eventType,
     excludedRowRendererIds,
-    height,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -78,6 +78,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     show,
     showCheckboxes,
     graphEventId,
+    refetch,
     sort,
     timelineType,
     toggleColumn,
@@ -171,10 +172,10 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (selectAll) {
+      if (selectAll && !isSelectAllChecked) {
         onSelectAll({ isSelected: true });
       }
-    }, [onSelectAll, selectAll]);
+    }, [isSelectAllChecked, onSelectAll, selectAll]);
 
     const enabledRowRenderers = useMemo(() => {
       if (
@@ -197,10 +198,9 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         data={data}
         docValueFields={docValueFields}
         eventIdToNoteIds={eventIdToNoteIds}
+        eventType={eventType}
         getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
-        height={height}
-        id={id}
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
         loadingEventIds={loadingEventIds}
@@ -214,11 +214,13 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
+        refetch={refetch}
         rowRenderers={enabledRowRenderers}
         selectedEventIds={selectedEventIds}
         show={id === TimelineId.active ? show : true}
         showCheckboxes={showCheckboxes}
         sort={sort}
+        timelineId={id}
         timelineType={timelineType}
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}
@@ -232,9 +234,9 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+    prevProps.eventType === nextProps.eventType &&
     prevProps.graphEventId === nextProps.graphEventId &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
-    prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&

@@ -22,6 +22,7 @@ import {
   PartitionFillLabel,
   RecursivePartial,
   LayerValue,
+  Position,
 } from '@elastic/charts';
 import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
@@ -55,6 +56,7 @@ export function PieComponent(
     numberDisplay,
     categoryDisplay,
     legendDisplay,
+    legendPosition,
     nestedLegend,
     percentDecimals,
     hideLabels,
@@ -159,7 +161,7 @@ export function PieComponent(
       // to account for in outer labels
       // This does not handle non-dashboard embeddables, which are allowed to
       // have different backgrounds.
-      textColor: chartTheme.axes?.axisTitleStyle?.fill,
+      textColor: chartTheme.axes?.axisTitle?.fill,
     },
     sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
     sectorLineWidth: 1.5,
@@ -237,6 +239,7 @@ export function PieComponent(
             (legendDisplay === 'show' ||
               (legendDisplay === 'default' && columnGroups.length > 1 && shape !== 'treemap'))
           }
+          legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={(args) => {
             const context = getFilterContext(

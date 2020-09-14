@@ -6,7 +6,14 @@
 
 import { Ecs } from '../../../../graphql/types';
 
-import { eventHasNotes, eventIsPinned, getPinTooltip, stringifyEvent } from './helpers';
+import {
+  eventHasNotes,
+  eventIsPinned,
+  getPinOnClick,
+  getPinTooltip,
+  stringifyEvent,
+  isInvestigateInResolverActionEnabled,
+} from './helpers';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 describe('helpers', () => {
@@ -240,6 +247,124 @@ describe('helpers', () => {
       const pinnedEventIds = { 'thumb-tack': true };
 
       expect(eventIsPinned({ eventId, pinnedEventIds })).toEqual(false);
+    });
+  });
+
+  describe('isInvestigateInResolverActionEnabled', () => {
+    it('returns false if agent.type does not equal endpoint', () => {
+      const data: Ecs = { _id: '1', agent: { type: ['blah'] } };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns false if agent.type does not have endpoint in first array index', () => {
+      const data: Ecs = { _id: '1', agent: { type: ['blah', 'endpoint'] } };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns false if process.entity_id is not defined', () => {
+      const data: Ecs = { _id: '1', agent: { type: ['endpoint'] } };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns true if agent.type has endpoint in first array index', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['endpoint', 'blah'] },
+        process: { entity_id: ['5'] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeTruthy();
+    });
+
+    it('returns false if multiple entity_ids', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['endpoint', 'blah'] },
+        process: { entity_id: ['5', '10'] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns false if entity_id is an empty string', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['endpoint', 'blah'] },
+        process: { entity_id: [''] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+  });
+
+  describe('getPinOnClick', () => {
+    const eventId = 'abcd';
+
+    test('it invokes `onPinEvent` with the expected eventId when the event is NOT pinned, and allowUnpinning is true', () => {
+      const isEventPinned = false; // the event is NOT pinned
+      const allowUnpinning = true;
+      const onPinEvent = jest.fn();
+
+      getPinOnClick({
+        allowUnpinning,
+        eventId,
+        onPinEvent,
+        onUnPinEvent: jest.fn(),
+        isEventPinned,
+      });
+
+      expect(onPinEvent).toBeCalledWith(eventId);
+    });
+
+    test('it does NOT invoke `onPinEvent` when the event is NOT pinned, and allowUnpinning is false', () => {
+      const isEventPinned = false; // the event is NOT pinned
+      const allowUnpinning = false;
+      const onPinEvent = jest.fn();
+
+      getPinOnClick({
+        allowUnpinning,
+        eventId,
+        onPinEvent,
+        onUnPinEvent: jest.fn(),
+        isEventPinned,
+      });
+
+      expect(onPinEvent).not.toBeCalled();
+    });
+
+    test('it invokes `onUnPinEvent` with the expected eventId when the event is pinned, and allowUnpinning is true', () => {
+      const isEventPinned = true; // the event is pinned
+      const allowUnpinning = true;
+      const onUnPinEvent = jest.fn();
+
+      getPinOnClick({
+        allowUnpinning,
+        eventId,
+        onPinEvent: jest.fn(),
+        onUnPinEvent,
+        isEventPinned,
+      });
+
+      expect(onUnPinEvent).toBeCalledWith(eventId);
+    });
+
+    test('it does NOT invoke `onUnPinEvent` when the event is pinned, and allowUnpinning is false', () => {
+      const isEventPinned = true; // the event is pinned
+      const allowUnpinning = false;
+      const onUnPinEvent = jest.fn();
+
+      getPinOnClick({
+        allowUnpinning,
+        eventId,
+        onPinEvent: jest.fn(),
+        onUnPinEvent,
+        isEventPinned,
+      });
+
+      expect(onUnPinEvent).not.toBeCalled();
     });
   });
 });

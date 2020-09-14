@@ -10,42 +10,28 @@ import { SecurityServiceProvider } from '../../../../test/common/services/securi
 type SecurityService = PromiseReturnType<typeof SecurityServiceProvider>;
 
 export enum ApmUser {
+  noAccessUser = 'no_access_user',
   apmReadUser = 'apm_read_user',
   apmWriteUser = 'apm_write_user',
   apmAnnotationsWriteUser = 'apm_annotations_write_user',
 }
 
 const roles = {
+  [ApmUser.noAccessUser]: {},
   [ApmUser.apmReadUser]: {
-    elasticsearch: {
-      cluster: [],
-      indices: [
-        { names: ['observability-annotations'], privileges: ['read', 'view_index_metadata'] },
-      ],
-    },
     kibana: [
       {
         base: [],
-        feature: {
-          apm: ['read'],
-        },
+        feature: { apm: ['read'], ml: ['read'] },
         spaces: ['*'],
       },
     ],
   },
   [ApmUser.apmWriteUser]: {
-    elasticsearch: {
-      cluster: [],
-      indices: [
-        { names: ['observability-annotations'], privileges: ['read', 'view_index_metadata'] },
-      ],
-    },
     kibana: [
       {
         base: [],
-        feature: {
-          apm: ['all'],
-        },
+        feature: { apm: ['all'], ml: ['all'] },
         spaces: ['*'],
       },
     ],
@@ -71,6 +57,9 @@ const roles = {
 };
 
 const users = {
+  [ApmUser.noAccessUser]: {
+    roles: [],
+  },
   [ApmUser.apmReadUser]: {
     roles: ['apm_user', ApmUser.apmReadUser],
   },

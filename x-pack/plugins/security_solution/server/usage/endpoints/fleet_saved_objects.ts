@@ -16,8 +16,18 @@ export const FLEET_ENDPOINT_PACKAGE_CONSTANT = FleetDefaultPackages.endpoint;
 
 export const getFleetSavedObjectsMetadata = async (savedObjectsClient: ISavedObjectsRepository) =>
   savedObjectsClient.find<Agent>({
+    // Get up to 10000 agents with endpoint installed
     type: AGENT_SAVED_OBJECT_TYPE,
-    fields: ['packages', 'last_checkin', 'local_metadata'],
+    fields: [
+      'packages',
+      'last_checkin',
+      'local_metadata.agent.id',
+      'local_metadata.host.id',
+      'local_metadata.host.name',
+      'local_metadata.host.hostname',
+      'local_metadata.elastic.agent.id',
+      'local_metadata.os',
+    ],
     filter: `${AGENT_SAVED_OBJECT_TYPE}.attributes.packages: ${FLEET_ENDPOINT_PACKAGE_CONSTANT}`,
     perPage: 10000,
     sortField: 'enrolled_at',
@@ -29,9 +39,11 @@ export const getLatestFleetEndpointEvent = async (
   agentId: string
 ) =>
   savedObjectsClient.find<AgentEventSOAttributes>({
+    // Get the most recent endpoint event.
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    filter: `${AGENT_EVENT_SAVED_OBJECT_TYPE}.attributes.agent_id: ${agentId} and ${AGENT_EVENT_SAVED_OBJECT_TYPE}.attributes.message: "${FLEET_ENDPOINT_PACKAGE_CONSTANT}"`,
-    perPage: 1, // Get the most recent endpoint event.
+    fields: ['agent_id', 'subtype', 'payload'],
+    filter: `${AGENT_EVENT_SAVED_OBJECT_TYPE}.attributes.message: "${FLEET_ENDPOINT_PACKAGE_CONSTANT}"`,
+    perPage: 1,
     sortField: 'timestamp',
     sortOrder: 'desc',
     search: agentId,

@@ -30,6 +30,7 @@ import {
   createKbnUrlStateStorage,
   redirectWhenMissing,
   SavedObjectNotFound,
+  withNotifyOnErrors,
 } from '../../../kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
@@ -65,6 +66,7 @@ export function initDashboardApp(app, deps) {
     createKbnUrlStateStorage({
       history,
       useHash: deps.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(deps.core.notifications.toasts),
     })
   );
 

@@ -39,7 +39,7 @@ jest.mock('fs', () => {
   };
 });
 
-import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, KARMA_REPORT } from './__fixtures__';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, CYPRESS_REPORT } from './__fixtures__';
 import { parseTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 
@@ -270,77 +270,64 @@ it('rewrites mocha reports with minimal changes', async () => {
   `);
 });
 
-it('rewrites karma reports with minimal changes', async () => {
+it('rewrites cypress reports with minimal changes', async () => {
   const xml = await addMessagesToReport({
-    report: await parseTestReport(KARMA_REPORT),
     messages: [
       {
-        name:
-          'CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should initialize OK',
-        classname: 'Browser Unit Tests.CoordinateMapsVisualizationTest',
-        message: 'foo bar',
+        classname: '"after each" hook for "toggles open the timeline"',
+        name: 'timeline flyout button "after each" hook for "toggles open the timeline"',
+        message: 'Some extra content\n',
       },
     ],
+    report: await parseTestReport(CYPRESS_REPORT),
     log,
-    reportPath: Path.resolve(__dirname, './__fixtures__/karma_report.xml'),
+    reportPath: Path.resolve(__dirname, './__fixtures__/cypress_report.xml'),
   });
 
-  expect(createPatch('karma.xml', KARMA_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
-    Index: karma.xml
+  expect(createPatch('cypress.xml', CYPRESS_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
+    Index: cypress.xml
     ===================================================================
-    --- karma.xml	[object Object]
-    +++ karma.xml
-    @@ -1,5 +1,5 @@
-    -‹?xml version="1.0"?›
+    --- cypress.xml	[object Object]
+    +++ cypress.xml
+    @@ -1,25 +1,16 @@
+    -‹?xml version="1.0" encoding="UTF-8"?›
     +‹?xml version="1.0" encoding="utf-8"?›
-     ‹testsuite name="Chrome 75.0.3770 (Mac OS X 10.14.5)" package="" timestamp="2019-07-02T19:53:21" id="0" hostname="spalger.lan" tests="648" errors="0" failures="4" time="1.759"›
-       ‹properties›
-         ‹property name="browser.fullName" value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"/›
-       ‹/properties›
-    @@ -7,27 +7,31 @@
-       ‹testcase name="Vis-Editor-Agg-Params plugin directive should hide custom label parameter" time="0" classname="Browser Unit Tests.Vis-Editor-Agg-Params plugin directive"›
-         ‹skipped/›
-       ‹/testcase›
-       ‹testcase name="CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should initialize OK" time="0.265" classname="Browser Unit Tests.CoordinateMapsVisualizationTest"›
-    -    ‹failure type=""›Error: expected 7069 to be below 64
-    -    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.assert (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:13671:11)
-    -    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.lessThan.Assertion.below (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:13891:8)
-    -    at Function.lessThan (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:14078:15)
-    -    at _callee3$ (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:158985:60)
-    +    ‹failure type=""›‹![CDATA[Error: expected 7069 to be below 64
-    +    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.assert (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:13671:11)
-    +    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.lessThan.Assertion.below (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:13891:8)
-    +    at Function.lessThan (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:14078:15)
-    +    at _callee3$ (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158985:60)
-         at tryCatch (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:62:40)
-         at Generator.invoke [as _invoke] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:288:22)
-    -    at Generator.prototype.&lt;computed&gt; [as next] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:114:21)
-    -    at asyncGeneratorStep (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:158772:103)
-    -    at _next (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:158774:194)
-    -‹/failure›
-    +    at Generator.prototype.‹computed› [as next] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:114:21)
-    +    at asyncGeneratorStep (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158772:103)
-    +    at _next (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158774:194)
-    +]]›‹/failure›
-    +    ‹system-out›Failed Tests Reporter:
-    +  - foo bar
-    +
-    +‹/system-out›
-       ‹/testcase›
-       ‹testcase name="CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should toggle to Heatmap OK" time="0.055" classname="Browser Unit Tests.CoordinateMapsVisualizationTest"/›
-       ‹testcase name="VegaParser._parseSchema should warn on vega-lite version too new to be supported" time="0.001" classname="Browser Unit Tests.VegaParser·_parseSchema"/›
-       ‹system-out›
-    -    ‹![CDATA[Chrome 75.0.3770 (Mac OS X 10.14.5) LOG: 'ready to load tests for shard 1 of 4'
-    +    Chrome 75.0.3770 (Mac OS X 10.14.5) LOG: 'ready to load tests for shard 1 of 4'
-     ,Chrome 75.0.3770 (Mac OS X 10.14.5) WARN: 'Unmatched GET to http://localhost:9876/api/interpreter/fns'
-     ...
+     ‹testsuites name="Mocha Tests" time="16.198" tests="2" failures="1"›
+    -  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/integration/timeline_flyout_button.spec.ts" failures="0" time="0"›
+    -  ‹/testsuite›
+    +  ‹testsuite name="Root Suite" timestamp="2020-07-22T15:06:26" tests="0" file="cypress/integration/timeline_flyout_button.spec.ts" failures="0" time="0"/›
+       ‹testsuite name="timeline flyout button" timestamp="2020-07-22T15:06:26" tests="2" failures="1" time="16.198"›
+    -    ‹testcase name="timeline flyout button toggles open the timeline" time="8.099" classname="toggles open the timeline"›
+    -    ‹/testcase›
+    +    ‹testcase name="timeline flyout button toggles open the timeline" time="8.099" classname="toggles open the timeline"/›
+         ‹testcase name="timeline flyout button &quot;after each&quot; hook for &quot;toggles open the timeline&quot;" time="8.099" classname="&quot;after each&quot; hook for &quot;toggles open the timeline&quot;"›
+    -      ‹failure message="Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
+    +      ‹failure message="Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:&#xA;&#xA;\`&lt;button class=&quot;euiButtonEmpty euiButtonEmpty--text&quot; type=&quot;button&quot; data-test-subj=&quot;timeline-new&quot;›...&lt;/button›\`&#xA;&#xA;You can fix this problem by:&#xA;  - Passing \`{force: true}\` which disables all error checking&#xA;  - Passing \`{waitForAnimations: false}\` which disables waiting on animations&#xA;  - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity&#xA;&#xA;https://on.cypress.io/element-is-animating&#xA;&#xA;Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`" type="CypressError"›‹![CDATA[Failed Tests Reporter:
+    +  - Some extra content
 
-    -]]›
-    +
-       ‹/system-out›
-       ‹system-err/›
-    -‹/testsuite›
-    +‹/testsuite›
+    -\`&lt;button class=&quot;euiButtonEmpty euiButtonEmpty--text&quot; type=&quot;button&quot; data-test-subj=&quot;timeline-new&quot;&gt;...&lt;/button&gt;\`
+
+    -You can fix this problem by:
+    -  - Passing \`{force: true}\` which disables all error checking
+    -  - Passing \`{waitForAnimations: false}\` which disables waiting on animations
+    -  - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity
+    +CypressError: Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
+
+    -https://on.cypress.io/element-is-animating
+    -
+    -Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`" type="CypressError"›‹![CDATA[CypressError: Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
+    -
+     \`‹button class="euiButtonEmpty euiButtonEmpty--text" type="button" data-test-subj="timeline-new"›...‹/button›\`
+
+     You can fix this problem by:
+       - Passing \`{force: true}\` which disables all error checking
+    @@ -46,5 +37,5 @@
+         at Promise._settlePromise (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7057:18)
+         at Promise._settlePromise0 (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7102:10)]]›‹/failure›
+         ‹/testcase›
+       ‹/testsuite›
+    -‹/testsuites›
+    +‹/testsuites›
     \\ No newline at end of file
 
   `);

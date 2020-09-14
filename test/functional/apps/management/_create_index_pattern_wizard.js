@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const PageObjects = getPageObjects(['settings', 'common']);
 
-  // Flaky: https://github.com/elastic/kibana/issues/71501
-  describe.skip('"Create Index Pattern" wizard', function () {
+  describe('"Create Index Pattern" wizard', function () {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
@@ -66,6 +65,18 @@ export default function ({ getService, getPageObjects }) {
         });
 
         await PageObjects.settings.createIndexPattern('alias1', false);
+      });
+
+      after(async () => {
+        await es.transport.request({
+          path: '/_aliases',
+          method: 'POST',
+          body: { actions: [{ remove: { index: 'blogs', alias: 'alias1' } }] },
+        });
+        await es.transport.request({
+          path: '/blogs',
+          method: 'DELETE',
+        });
       });
     });
   });

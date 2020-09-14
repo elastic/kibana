@@ -7,12 +7,9 @@
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
-import { useWindowSize } from 'react-use';
 import { useHistory } from 'react-router-dom';
 
-import { globalHeaderHeightPx } from '../../../app/home';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -33,43 +30,42 @@ import { NoApiIntegrationKeyCallOut } from '../../components/no_api_integration_
 import { NoWriteAlertsCallOut } from '../../components/no_write_alerts_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
-import { useUserInfo } from '../../components/user_info';
-import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../common/components/events_viewer/events_viewer';
+import { useUserData } from '../../components/user_info';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
-import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
+import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 import { LinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
-import { FILTERS_GLOBAL_HEIGHT } from '../../../../common/constants';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
-import {
-  getEventsViewerBodyHeight,
-  MIN_EVENTS_VIEWER_BODY_HEIGHT,
-} from '../../../timelines/components/timeline/body/helpers';
-import { footerHeight } from '../../../timelines/components/timeline/footer';
+import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
+  graphEventId,
   query,
   setAbsoluteRangeDatePicker,
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  const { height: windowHeight } = useWindowSize();
   const { globalFullScreen } = useFullScreen();
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated: isUserAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    signalIndexName,
-    hasIndexWrite,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated: isUserAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      signalIndexName,
+      hasIndexWrite,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
@@ -139,7 +135,10 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     return (
       <WrapperPage>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-        <DetectionEngineNoIndex />
+        <DetectionEngineNoIndex
+          needsSignalsIndex={isSignalIndexExists === false}
+          needsListsIndex={needsListsConfiguration}
+        />
       </WrapperPage>
     );
   }
@@ -149,9 +148,9 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
       {indicesExist ? (
-        <StickyContainer>
+        <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -199,17 +198,6 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
               loading={loading}
               hasIndexWrite={hasIndexWrite ?? false}
               canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
-              eventsViewerBodyHeight={
-                globalFullScreen
-                  ? getEventsViewerBodyHeight({
-                      footerHeight,
-                      headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
-                      kibanaChromeHeight: globalHeaderHeightPx,
-                      otherContentHeight: FILTERS_GLOBAL_HEIGHT,
-                      windowHeight,
-                    })
-                  : MIN_EVENTS_VIEWER_BODY_HEIGHT
-              }
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
@@ -218,7 +206,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
               to={to}
             />
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
@@ -232,13 +220,19 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
 
 const makeMapStateToProps = () => {
   const getGlobalInputs = inputsSelectors.globalSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   return (state: State) => {
     const globalInputs: InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
 
+    const timeline: TimelineModel =
+      getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults;
+    const { graphEventId } = timeline;
+
     return {
       query,
       filters,
+      graphEventId,
     };
   };
 };

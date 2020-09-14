@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { throwErrors, createPlainError } from '../../../common/runtime_types';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logRateModelPlotResponseRT,
   createLogEntryRateQuery,
@@ -15,7 +12,6 @@ import {
   CompositeTimestampPartitionKey,
 } from './queries';
 import { getJobId } from '../../../common/log_analysis';
-import { NoLogAnalysisResultsIndexError } from './errors';
 import type { MlSystem } from '../../types';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
@@ -50,22 +46,14 @@ export async function getLogEntryRateBuckets(
       )
     );
 
-    if (mlModelPlotResponse._shards.total === 0) {
-      throw new NoLogAnalysisResultsIndexError(
-        `Failed to query ml result index for job ${logRateJobId}.`
-      );
-    }
-
-    const { after_key: afterKey, buckets: latestBatchBuckets } = pipe(
-      logRateModelPlotResponseRT.decode(mlModelPlotResponse),
-      map((response) => response.aggregations.timestamp_partition_buckets),
-      fold(throwErrors(createPlainError), identity)
-    );
+    const { after_key: afterKey, buckets: latestBatchBuckets = [] } =
+      decodeOrThrow(logRateModelPlotResponseRT)(mlModelPlotResponse).aggregations
+        ?.timestamp_partition_buckets ?? {};
 
     mlModelPlotBuckets = [...mlModelPlotBuckets, ...latestBatchBuckets];
     afterLatestBatchKey = afterKey;
 
-    if (latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
+    if (afterKey == null || latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
       break;
     }
   }

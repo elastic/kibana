@@ -22,10 +22,18 @@ import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { ml } from '../../../../../../../../../services/ml_api_service';
+import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
 import { Calendar } from '../../../../../../../../../../../common/types/calendars';
+import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 
 export const CalendarsSelection: FC = () => {
+  const {
+    services: {
+      application: { getUrlForApp },
+    },
+  } = useMlKibana();
+
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>(jobCreator.calendars);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<Calendar>>>(
@@ -64,7 +72,9 @@ export const CalendarsSelection: FC = () => {
     },
   };
 
-  const manageCalendarsHref = '#/settings/calendars_list';
+  const manageCalendarsHref = getUrlForApp(PLUGIN_ID, {
+    path: '/settings/calendars_list',
+  });
 
   return (
     <Description>

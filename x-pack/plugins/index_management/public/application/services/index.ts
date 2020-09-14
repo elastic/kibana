@@ -22,8 +22,8 @@ export {
   loadIndexMapping,
   loadIndexData,
   useLoadIndexTemplates,
+  simulateIndexTemplate,
 } from './api';
-export { healthToColor } from './health_to_color';
 export { sortTable } from './sort_table';
 
 export { UiMetricService } from './ui_metric';

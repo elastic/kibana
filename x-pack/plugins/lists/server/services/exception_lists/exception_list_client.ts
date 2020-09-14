@@ -20,6 +20,7 @@ import {
   CreateExceptionListItemOptions,
   CreateExceptionListOptions,
   DeleteEndpointListItemOptions,
+  DeleteExceptionListItemByIdOptions,
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
   FindEndpointListItemOptions,
@@ -40,11 +41,12 @@ import { createExceptionListItem } from './create_exception_list_item';
 import { updateExceptionList } from './update_exception_list';
 import { updateExceptionListItem } from './update_exception_list_item';
 import { deleteExceptionList } from './delete_exception_list';
-import { deleteExceptionListItem } from './delete_exception_list_item';
+import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
 import { findExceptionListsItem } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
+import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -85,6 +87,19 @@ export class ExceptionListClient {
     return createEndpointList({
       savedObjectsClient,
       user,
+      version: 1,
+    });
+  };
+
+  /**
+   * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   */
+  public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    return createEndpointTrustedAppsList({
+      savedObjectsClient,
+      user,
+      version: 1,
     });
   };
 
@@ -131,6 +146,7 @@ export class ExceptionListClient {
    */
   public updateEndpointListItem = async ({
     _tags,
+    _version,
     comments,
     description,
     entries,
@@ -145,6 +161,7 @@ export class ExceptionListClient {
     await this.createEndpointList();
     return updateExceptionListItem({
       _tags,
+      _version,
       comments,
       description,
       entries,
@@ -174,17 +191,20 @@ export class ExceptionListClient {
   public createExceptionList = async ({
     _tags,
     description,
+    immutable,
     listId,
     meta,
     name,
     namespaceType,
     tags,
     type,
+    version,
   }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
     const { savedObjectsClient, user } = this;
     return createExceptionList({
       _tags,
       description,
+      immutable,
       listId,
       meta,
       name,
@@ -193,11 +213,13 @@ export class ExceptionListClient {
       tags,
       type,
       user,
+      version,
     });
   };
 
   public updateExceptionList = async ({
     _tags,
+    _version,
     id,
     description,
     listId,
@@ -206,10 +228,12 @@ export class ExceptionListClient {
     namespaceType,
     tags,
     type,
+    version,
   }: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return updateExceptionList({
       _tags,
+      _version,
       description,
       id,
       listId,
@@ -220,6 +244,7 @@ export class ExceptionListClient {
       tags,
       type,
       user,
+      version,
     });
   };
 
@@ -270,6 +295,7 @@ export class ExceptionListClient {
 
   public updateExceptionListItem = async ({
     _tags,
+    _version,
     comments,
     description,
     entries,
@@ -284,6 +310,7 @@ export class ExceptionListClient {
     const { savedObjectsClient, user } = this;
     return updateExceptionListItem({
       _tags,
+      _version,
       comments,
       description,
       entries,
@@ -308,6 +335,18 @@ export class ExceptionListClient {
     return deleteExceptionListItem({
       id,
       itemId,
+      namespaceType,
+      savedObjectsClient,
+    });
+  };
+
+  public deleteExceptionListItemById = async ({
+    id,
+    namespaceType,
+  }: DeleteExceptionListItemByIdOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+    return deleteExceptionListItemById({
+      id,
       namespaceType,
       savedObjectsClient,
     });

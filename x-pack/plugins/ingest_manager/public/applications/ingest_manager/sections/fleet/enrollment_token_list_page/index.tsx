@@ -6,16 +6,17 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { CSSProperties } from 'styled-components';
 import {
   EuiSpacer,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiToolTip,
   EuiIcon,
   EuiText,
+  HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -23,7 +24,7 @@ import {
   useBreadcrumbs,
   usePagination,
   useGetEnrollmentAPIKeys,
-  useGetAgentConfigs,
+  useGetAgentPolicies,
   sendGetOneEnrollmentAPIKey,
   useCore,
   sendDeleteOneEnrollmentAPIKey,
@@ -32,12 +33,6 @@ import { EnrollmentAPIKey } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
 import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
-
-const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
 
 const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
   const { notifications } = useCore();
@@ -66,24 +61,42 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
   };
 
   return (
-    <EuiFlexGroup alignItems="flexStart" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        {state === 'VISIBLE' ? (
-          <EuiText color="subdued" size="xs">
-            {key}
-          </EuiText>
-        ) : (
-          <EuiText color="subdued">•••••••••••••••••••••</EuiText>
-        )}
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexItem>
+        <EuiText color="subdued" size="xs">
+          {state === 'VISIBLE'
+            ? key
+            : '•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          color="text"
-          isLoading={state === 'LOADING'}
-          onClick={toggleKey}
-          iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
-        />
+        <EuiToolTip
+          content={
+            state === 'VISIBLE'
+              ? i18n.translate('xpack.ingestManager.enrollmentTokensList.hideTokenButtonLabel', {
+                  defaultMessage: 'Hide token',
+                })
+              : i18n.translate('xpack.ingestManager.enrollmentTokensList.showTokenButtonLabel', {
+                  defaultMessage: 'Show token',
+                })
+          }
+        >
+          <EuiButtonIcon
+            aria-label={
+              state === 'VISIBLE'
+                ? i18n.translate('xpack.ingestManager.enrollmentTokensList.hideTokenButtonLabel', {
+                    defaultMessage: 'Hide token',
+                  })
+                : i18n.translate('xpack.ingestManager.enrollmentTokensList.showTokenButtonLabel', {
+                    defaultMessage: 'Show token',
+                  })
+            }
+            color="text"
+            isDisabled={state === 'LOADING'}
+            onClick={toggleKey}
+            iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -120,7 +133,23 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
           onConfirm={onConfirm}
         />
       )}
-      <EuiButtonEmpty onClick={() => setState('CONFIRM_VISIBLE')} iconType="trash" color="danger" />
+      <EuiToolTip
+        content={i18n.translate('xpack.ingestManager.enrollmentTokensList.revokeTokenButtonLabel', {
+          defaultMessage: 'Revoke token',
+        })}
+      >
+        <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.ingestManager.enrollmentTokensList.revokeTokenButtonLabel',
+            {
+              defaultMessage: 'Revoke token',
+            }
+          )}
+          onClick={() => setState('CONFIRM_VISIBLE')}
+          iconType="trash"
+          color="danger"
+        />
+      </EuiToolTip>
     </>
   );
 };
@@ -136,12 +165,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     perPage: pagination.pageSize,
     kuery: search.trim() !== '' ? search : undefined,
   });
-  const agentConfigsRequest = useGetAgentConfigs({
+  const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
   });
 
-  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
 
   const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
   const items = enrollmentAPIKeysRequest?.data?.list ?? [];
@@ -152,15 +181,11 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.enrollmentTokensList.nameTitle', {
         defaultMessage: 'Name',
       }),
-      truncateText: true,
-      textOnly: true,
-      render: (name: string) => {
-        return (
-          <EuiText size="s" style={NO_WRAP_TRUNCATE_STYLE} title={name}>
-            {name}
-          </EuiText>
-        );
-      },
+      render: (value: string) => (
+        <span className="eui-textTruncate" title={value}>
+          {value}
+        </span>
+      ),
     },
     {
       field: 'id',
@@ -173,13 +198,18 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'config_id',
-      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.configTitle', {
-        defaultMessage: 'Agent config',
+      field: 'policy_id',
+      name: i18n.translate('xpack.ingestManager.enrollmentTokensList.policyTitle', {
+        defaultMessage: 'Agent policy',
       }),
-      render: (configId: string) => {
-        const config = agentConfigs.find((c) => c.id === configId);
-        return <>{config ? config.name : configId}</>;
+      render: (policyId: string) => {
+        const agentPolicy = agentPolicies.find((c) => c.id === policyId);
+        const value = agentPolicy ? agentPolicy.name : policyId;
+        return (
+          <span className="eui-textTruncate" title={value}>
+            {value}
+          </span>
+        );
       },
     },
     {
@@ -200,12 +230,9 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Active',
       }),
       width: '70px',
+      align: 'center' as HorizontalAlignment,
       render: (active: boolean) => {
-        return (
-          <EuiText textAlign="center">
-            <EuiIcon size="m" color={active ? 'success' : 'danger'} type="dot" />
-          </EuiText>
-        );
+        return <EuiIcon size="m" color={active ? 'success' : 'danger'} type="dot" />;
       },
     },
     {
@@ -217,7 +244,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       render: (_: any, apiKey: EnrollmentAPIKey) => {
         return (
           apiKey.active && (
-            <DeleteButton apiKey={apiKey} refresh={() => enrollmentAPIKeysRequest.sendRequest()} />
+            <DeleteButton
+              apiKey={apiKey}
+              refresh={() => enrollmentAPIKeysRequest.resendRequest()}
+            />
           )
         );
       },
@@ -228,10 +258,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     <>
       {flyoutOpen && (
         <NewEnrollmentTokenFlyout
-          agentConfigs={agentConfigs}
+          agentPolicies={agentPolicies}
           onClose={() => {
             setFlyoutOpen(false);
-            enrollmentAPIKeysRequest.sendRequest();
+            enrollmentAPIKeysRequest.resendRequest();
           }}
         />
       )}
@@ -242,7 +272,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems={'center'}>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <SearchBar
             value={search}

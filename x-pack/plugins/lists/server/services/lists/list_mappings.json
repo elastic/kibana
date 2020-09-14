@@ -34,6 +34,12 @@
     },
     "updated_by": {
       "type": "keyword"
+    },
+    "version": {
+      "type": "keyword"
+    },
+    "immutable": {
+      "type": "boolean"
     }
   }
 }

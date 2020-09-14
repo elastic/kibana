@@ -20,7 +20,7 @@ import { FrameworkRequest } from '../../../framework';
 import * as noteLib from '../../../note/saved_object';
 import * as pinnedEventLib from '../../../pinned_event/saved_object';
 
-import { getTimelines } from '../../saved_object';
+import { getSelectedTimelines } from '../../saved_object';
 
 const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): ExportedNotes => {
   const initialNotes: ExportedNotes = {
@@ -55,7 +55,7 @@ const getTimelinesFromObjects = async (
   request: FrameworkRequest,
   ids?: string[] | null
 ): Promise<Array<ExportedTimelines | ExportTimelineNotFoundError>> => {
-  const { timelines, errors } = await getTimelines(request, ids);
+  const { timelines, errors } = await getSelectedTimelines(request, ids);
   const exportedIds = timelines.map((t) => t.savedObjectId);
 
   const [notes, pinnedEvents] = await Promise.all([

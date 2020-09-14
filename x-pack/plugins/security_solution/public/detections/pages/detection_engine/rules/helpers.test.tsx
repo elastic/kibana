@@ -13,8 +13,11 @@ import {
   getActionsStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
+  getPrePackagedRuleStatus,
+  getPrePackagedTimelineStatus,
   determineDetailsValue,
   userHasNoPermissions,
+  fillEmptySeverityMappings,
 } from './helpers';
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
@@ -40,7 +43,6 @@ describe('rule helpers', () => {
         rule: mockRuleWithEverything('test-id'),
       });
       const defineRuleStepData = {
-        isNew: false,
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         index: ['auditbeat-*'],
@@ -90,14 +92,13 @@ describe('rule helpers', () => {
         falsePositives: ['test'],
         isAssociatedToEndpointList: false,
         isBuildingBlock: false,
-        isNew: false,
         license: 'Elastic License',
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
-        riskScore: { value: 21, mapping: [] },
+        riskScore: { value: 21, mapping: [], isMappingChecked: false },
         ruleNameOverride: 'message',
-        severity: { value: 'low', mapping: [] },
+        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -118,11 +119,10 @@ describe('rule helpers', () => {
         ],
         timestampOverride: 'event.ingested',
       };
-      const scheduleRuleStepData = { from: '0s', interval: '5m', isNew: false };
+      const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
         enabled: true,
         throttle: 'no_actions',
-        isNew: false,
         actions: [],
       };
       const aboutRuleDataDetailsData = {
@@ -199,7 +199,6 @@ describe('rule helpers', () => {
     test('returns with saved_id if value exists on rule', () => {
       const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
       const expected = {
-        isNew: false,
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         machineLearningJobId: '',
@@ -232,7 +231,6 @@ describe('rule helpers', () => {
       delete mockedRule.saved_id;
       const result: DefineStepRule = getDefineStepsData(mockedRule);
       const expected = {
-        isNew: false,
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         machineLearningJobId: '',
@@ -308,7 +306,6 @@ describe('rule helpers', () => {
       };
       const result: ScheduleStepRule = getScheduleStepsData(mockedRule);
       const expected = {
-        isNew: false,
         interval: mockedRule.interval,
         from: '0s',
       };
@@ -341,7 +338,6 @@ describe('rule helpers', () => {
           },
         ],
         enabled: mockedRule.enabled,
-        isNew: false,
         throttle: 'no_actions',
       };
 
@@ -392,6 +388,140 @@ describe('rule helpers', () => {
       const userHasNoPermissionsExpectedResult = false;
 
       expect(result).toEqual(userHasNoPermissionsExpectedResult);
+    });
+  });
+
+  describe('getPrePackagedRuleStatus', () => {
+    test('ruleNotInstalled', () => {
+      const rulesInstalled = 0;
+      const rulesNotInstalled = 1;
+      const rulesNotUpdated = 0;
+      const result: string = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('ruleNotInstalled');
+    });
+
+    test('ruleInstalled', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 0;
+      const rulesNotUpdated = 0;
+      const result: string = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('ruleInstalled');
+    });
+
+    test('someRuleUninstall', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 1;
+      const rulesNotUpdated = 0;
+      const result: string = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('someRuleUninstall');
+    });
+
+    test('ruleNeedUpdate', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 0;
+      const rulesNotUpdated = 1;
+      const result: string = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('ruleNeedUpdate');
+    });
+
+    test('unknown', () => {
+      const rulesInstalled = null;
+      const rulesNotInstalled = null;
+      const rulesNotUpdated = null;
+      const result: string = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('unknown');
+    });
+  });
+
+  describe('getPrePackagedTimelineStatus', () => {
+    test('timelinesNotInstalled', () => {
+      const timelinesInstalled = 0;
+      const timelinesNotInstalled = 1;
+      const timelinesNotUpdated = 0;
+      const result: string = getPrePackagedTimelineStatus(
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
+      );
+
+      expect(result).toEqual('timelinesNotInstalled');
+    });
+
+    test('timelinesInstalled', () => {
+      const timelinesInstalled = 1;
+      const timelinesNotInstalled = 0;
+      const timelinesNotUpdated = 0;
+      const result: string = getPrePackagedTimelineStatus(
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
+      );
+
+      expect(result).toEqual('timelinesInstalled');
+    });
+
+    test('someTimelineUninstall', () => {
+      const timelinesInstalled = 1;
+      const timelinesNotInstalled = 1;
+      const timelinesNotUpdated = 0;
+      const result: string = getPrePackagedTimelineStatus(
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
+      );
+
+      expect(result).toEqual('someTimelineUninstall');
+    });
+
+    test('timelineNeedUpdate', () => {
+      const timelinesInstalled = 1;
+      const timelinesNotInstalled = 0;
+      const timelinesNotUpdated = 1;
+      const result: string = getPrePackagedTimelineStatus(
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
+      );
+
+      expect(result).toEqual('timelineNeedUpdate');
+    });
+
+    test('unknown', () => {
+      const timelinesInstalled = null;
+      const timelinesNotInstalled = null;
+      const timelinesNotUpdated = null;
+      const result: string = getPrePackagedTimelineStatus(
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
+      );
+
+      expect(result).toEqual('unknown');
     });
   });
 });

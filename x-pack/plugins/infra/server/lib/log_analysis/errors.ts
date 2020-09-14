@@ -6,12 +6,11 @@
 
 /* eslint-disable max-classes-per-file */
 
-export class NoLogAnalysisResultsIndexError extends Error {
-  constructor(message?: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
+import {
+  UnknownMLCapabilitiesError,
+  InsufficientMLCapabilities,
+  MLPrivilegesUninitialized,
+} from '../../../../ml/server';
 
 export class NoLogAnalysisMlJobError extends Error {
   constructor(message?: string) {
@@ -40,3 +39,11 @@ export class InsufficientAnomalyMlJobsConfigured extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+
+export const isMlPrivilegesError = (error: any) => {
+  return (
+    error instanceof UnknownMLCapabilitiesError ||
+    error instanceof InsufficientMLCapabilities ||
+    error instanceof MLPrivilegesUninitialized
+  );
+};

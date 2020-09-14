@@ -12,7 +12,7 @@ describe('getServiceMapServiceNodeInfo', () => {
   describe('with no results', () => {
     it('returns null data', async () => {
       const setup = ({
-        client: {
+        apmEventClient: {
           search: () =>
             Promise.resolve({
               hits: { total: { value: 0 } },
@@ -49,7 +49,7 @@ describe('getServiceMapServiceNodeInfo', () => {
       });
 
       const setup = ({
-        client: {
+        apmEventClient: {
           search: () =>
             Promise.resolve({
               hits: { total: { value: 1 } },

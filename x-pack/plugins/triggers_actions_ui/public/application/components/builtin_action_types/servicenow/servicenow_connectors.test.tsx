@@ -34,6 +34,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         docLinks={deps!.docLinks}
+        readOnly={false}
       />
     );
     expect(
@@ -72,6 +73,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         docLinks={deps!.docLinks}
+        readOnly={false}
         consumer={'case'}
       />
     );

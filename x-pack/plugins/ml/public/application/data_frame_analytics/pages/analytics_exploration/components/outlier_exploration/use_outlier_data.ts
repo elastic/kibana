@@ -29,7 +29,8 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
@@ -77,7 +78,6 @@ export const useOutlierData = (
   useEffect(() => {
     getIndexData(jobConfig, dataGrid, searchQuery);
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
@@ -112,7 +112,6 @@ export const useOutlierData = (
       fetchColumnChartsData();
     }
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,

@@ -45,7 +45,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           <p>
             <FormattedMessage
               id="xpack.ingestManager.alphaMessaging.feedbackText"
-              defaultMessage="We encourage you to read our {docsLink} or to ask questions and send feedback in our {forumLink}."
+              defaultMessage="Read our {docsLink} or go to our {forumLink} for questions or feedback."
               values={{
                 docsLink: (
                   <EuiLink
@@ -73,7 +73,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+        <EuiButtonEmpty onClick={onClose} flush="left">
           <FormattedMessage
             id="xpack.ingestManager.alphaMessging.closeFlyoutLabel"
             defaultMessage="Close"

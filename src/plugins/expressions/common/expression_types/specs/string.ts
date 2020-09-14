@@ -40,7 +40,8 @@ export const string: ExpressionTypeDefinition<typeof name, string> = {
     },
     datatable: (value): Datatable => ({
       type: 'datatable',
-      columns: [{ name: 'value', type: 'string' }],
+      meta: {},
+      columns: [{ id: 'value', name: 'value', meta: { type: 'string' } }],
       rows: [{ value }],
     }),
   },

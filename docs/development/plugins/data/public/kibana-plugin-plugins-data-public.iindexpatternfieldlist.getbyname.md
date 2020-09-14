@@ -7,16 +7,16 @@
 <b>Signature:</b>
 
 ```typescript
-getByName(name: Field['name']): Field | undefined;
+getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  name | <code>Field['name']</code> |  |
+|  name | <code>IndexPatternField['name']</code> |  |
 
 <b>Returns:</b>
 
-`Field | undefined`
+`IndexPatternField | undefined`
 

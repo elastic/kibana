@@ -526,6 +526,24 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         value: schema.number(),
       }),
     },
+    [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
+      name: i18n.translate('data.advancedSettings.timepicker.timeDefaultsTitle', {
+        defaultMessage: 'Time filter defaults',
+      }),
+      value: `{
+  "from": "now-15m",
+  "to": "now"
+}`,
+      type: 'json',
+      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
+        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
+      }),
+      requiresPageReload: true,
+      schema: schema.object({
+        from: schema.string(),
+        to: schema.string(),
+      }),
+    },
     [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: {
       name: i18n.translate('data.advancedSettings.timepicker.quickRangesTitle', {
         defaultMessage: 'Time filter quick ranges',

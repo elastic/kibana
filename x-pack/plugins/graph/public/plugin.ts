@@ -61,7 +61,7 @@ export class GraphPlugin
         }),
         icon: 'graphApp',
         path: '/app/graph',
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }
@@ -113,7 +113,8 @@ export class GraphPlugin
       throw new Error('Start called before setup');
     }
     this.licensing.license$.subscribe((license) => {
-      toggleNavLink(checkLicense(license), core.chrome.navLinks);
+      const licenseInformation = checkLicense(license);
+      toggleNavLink(licenseInformation, core.chrome.navLinks);
     });
   }
 

@@ -18,8 +18,9 @@ A few notable services are called out below.
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
 
-include::add-data-tutorials.asciidoc[]
+include::add-data-tutorials.asciidoc[leveloffset=+1]
 
-include::development-visualize-index.asciidoc[]
+include::development-visualize-index.asciidoc[leveloffset=+1]
 
-include::security/index.asciidoc[]
+include::security/index.asciidoc[leveloffset=+1]
+

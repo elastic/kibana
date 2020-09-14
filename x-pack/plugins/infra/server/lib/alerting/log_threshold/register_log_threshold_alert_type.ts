@@ -56,6 +56,8 @@ const criteriaSchema = schema.object({
     schema.literal(Comparator.NOT_EQ),
     schema.literal(Comparator.MATCH),
     schema.literal(Comparator.NOT_MATCH),
+    schema.literal(Comparator.MATCH_PHRASE),
+    schema.literal(Comparator.NOT_MATCH_PHRASE),
   ]),
   value: schema.oneOf([schema.number(), schema.string()]),
 });

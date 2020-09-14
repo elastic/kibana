@@ -19,7 +19,7 @@ import {
 import { RuleDetailsPageComponent } from './index';
 import { createStore, State } from '../../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { useWithSource } from '../../../../../common/containers/source';
 import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../cases/components/__mock__/router';
@@ -69,7 +69,7 @@ const store = createStore(
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
-    (useUserInfo as jest.Mock).mockReturnValue({});
+    (useUserData as jest.Mock).mockReturnValue([{}]);
     (useParams as jest.Mock).mockReturnValue({});
     (useWithSource as jest.Mock).mockReturnValue({
       indicesExist: true,
@@ -82,6 +82,7 @@ describe('RuleDetailsPageComponent', () => {
       <TestProviders store={store}>
         <Router history={mockHistory}>
           <RuleDetailsPageComponent
+            graphEventId={undefined}
             query={{ query: '', language: 'language' }}
             filters={[]}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}

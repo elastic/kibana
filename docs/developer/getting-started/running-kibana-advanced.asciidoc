@@ -1,5 +1,5 @@
 [[running-kibana-advanced]]
-=== Running {kib}
+== Running {kib}
 
 Change to your local {kib} directory. Start the development server.
 
@@ -23,8 +23,8 @@ By default, you can log in with username `elastic` and password
 `changeme`. See the `--help` options on `yarn es <command>` if
 you’d like to configure a different password.
 
-[float]
-==== Running {kib} in Open-Source mode
+[discrete]
+=== Running {kib} in Open-Source mode
 
 If you’re looking to only work with the open-source software, supply the
 license type to `yarn es`:
@@ -41,14 +41,14 @@ And start {kib} with only open-source code:
 yarn start --oss
 ----
 
-[float]
-==== Unsupported URL Type
+[discrete]
+=== Unsupported URL Type
 
 If you’re installing dependencies and seeing an error that looks
 something like
 
 ....
-Unsupported URL Type: link:packages/eslint-config-kibana
+Unsupported URL Type: link:packages/elastic-eslint-config-kibana
 ....
 
 you’re likely running `npm`. To install dependencies in {kib} you
@@ -56,9 +56,9 @@ need to run `yarn kbn bootstrap`. For more info, see
 link:#setting-up-your-development-environment[Setting Up Your
 Development Environment] above.
 
-[float]
+[discrete]
 [[customize-kibana-yml]]
-==== Customizing `config/kibana.dev.yml`
+=== Customizing `config/kibana.dev.yml`
 
 The `config/kibana.yml` file stores user configuration directives.
 Since this file is checked into source control, however, developer
@@ -70,18 +70,18 @@ non-dev version and accepts any of the
 https://www.elastic.co/guide/en/kibana/current/settings.html[standard
 settings].
 
-[float]
-==== Potential Optimization Pitfalls
+[discrete]
+=== Potential Optimization Pitfalls
 
-* Webpack is trying to include a file in the bundle that I deleted and
-is now complaining about it is missing
+* Webpack is trying to include a file in the bundle that was deleted and
+is now complaining about it being missing
 * A module id that used to resolve to a single file now resolves to a
 directory, but webpack isn’t adapting
 * (if you discover other scenarios, please send a PR!)
 
-[float]
-==== Setting Up SSL
+[discrete]
+=== Setting Up SSL
 
 {kib} includes self-signed certificates that can be used for
 development purposes in the browser and for communicating with
-Elasticsearch: `yarn start --ssl` & `yarn es snapshot --ssl`.
+{es}: `yarn start --ssl` & `yarn es snapshot --ssl`.

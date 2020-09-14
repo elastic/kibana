@@ -17,6 +17,7 @@ import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
+import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -47,6 +48,17 @@ const alertType = {
   alertParamsExpression: () => null,
   requiresAppContext: false,
 };
+const alertTypeFromApi = {
+  id: 'test_alert_type',
+  name: 'some alert type',
+  actionGroups: [{ id: 'default', name: 'Default' }],
+  actionVariables: { context: [], state: [] },
+  defaultActionGroupId: 'default',
+  producer: ALERTS_FEATURE_ID,
+  authorizedConsumers: {
+    [ALERTS_FEATURE_ID]: { read: true, all: true },
+  },
+};
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
 
@@ -73,7 +85,7 @@ describe('alerts_list component empty', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
     const mockes = coreMock.createSetup();
@@ -94,14 +106,7 @@ describe('alerts_list component empty', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-          'alerting:save': true,
-          'alerting:delete': true,
-        },
-      },
+      capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
@@ -193,7 +198,7 @@ describe('alerts_list component with items', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
@@ -213,14 +218,7 @@ describe('alerts_list component with items', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-          'alerting:save': true,
-          'alerting:delete': true,
-        },
-      },
+      capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
@@ -295,14 +293,7 @@ describe('alerts_list component empty with show only capability', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-          'alerting:save': false,
-          'alerting:delete': false,
-        },
-      },
+      capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
@@ -390,7 +381,8 @@ describe('alerts_list with show only capability', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
@@ -410,14 +402,7 @@ describe('alerts_list with show only capability', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-          'alerting:save': false,
-          'alerting:delete': false,
-        },
-      },
+      capabilities,
       history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,

@@ -112,13 +112,13 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   const currentXColumnIndex = prioritizedBuckets.findIndex(
     ({ columnId }) => columnId === currentLayer.xAccessor
   );
-  const currentXDataType =
-    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.dataType;
+  const currentXScaleType =
+    currentXColumnIndex > -1 && prioritizedBuckets[currentXColumnIndex].operation.scale;
 
   if (
-    currentXDataType &&
-    // make sure time gets mapped to x dimension even when changing current bucket/dimension mapping
-    (currentXDataType === 'date' || prioritizedBuckets[0].operation.dataType !== 'date')
+    currentXScaleType &&
+    // make sure histograms get mapped to x dimension even when changing current bucket/dimension mapping
+    (currentXScaleType === 'interval' || prioritizedBuckets[0].operation.scale !== 'interval')
   ) {
     const [x] = prioritizedBuckets.splice(currentXColumnIndex, 1);
     prioritizedBuckets.unshift(x);
@@ -318,11 +318,7 @@ function getSeriesType(
     return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
   }
 
-  if (changeType === 'initial') {
-    return defaultType;
-  }
-
-  return closestSeriesType !== defaultType ? closestSeriesType : defaultType;
+  return closestSeriesType;
 }
 
 function getSuggestionTitle(
@@ -394,17 +390,37 @@ function buildSuggestion({
         : undefined,
   };
 
+  // Maintain consistent order for any layers that were saved
   const keptLayers = currentState
-    ? currentState.layers.filter(
-        (layer) => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
-      )
+    ? currentState.layers
+        // Remove layers that aren't being suggested
+        .filter((layer) => keptLayerIds.includes(layer.layerId))
+        // Update in place
+        .map((layer) => (layer.layerId === layerId ? newLayer : layer))
+        // Replace the seriesType on all previous layers
+        .map((layer) => ({
+          ...layer,
+          seriesType,
+        }))
     : [];
 
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     fittingFunction: currentState?.fittingFunction || 'None',
+    xTitle: currentState?.xTitle,
+    yTitle: currentState?.yTitle,
+    showXAxisTitle: currentState?.showXAxisTitle ?? true,
+    showYAxisTitle: currentState?.showYAxisTitle ?? true,
+    tickLabelsVisibilitySettings: currentState?.tickLabelsVisibilitySettings || {
+      x: true,
+      y: true,
+    },
+    gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
+      x: true,
+      y: true,
+    },
     preferredSeriesType: seriesType,
-    layers: [...keptLayers, newLayer],
+    layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };
 
   return {

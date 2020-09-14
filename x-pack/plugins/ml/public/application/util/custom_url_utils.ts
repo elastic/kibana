@@ -34,7 +34,9 @@ export function replaceTokensInUrlValue(
   const urlValue = customUrlConfig.url_value;
   const timestamp = doc[timeFieldName];
   const timeRangeInterval =
-    'time_range' in customUrlConfig ? parseInterval(customUrlConfig.time_range) : null;
+    'time_range' in customUrlConfig && customUrlConfig.time_range
+      ? parseInterval(customUrlConfig.time_range)
+      : null;
   const record = { ...doc } as CustomUrlAnomalyRecordDoc;
   if (urlValue.includes('$earliest$')) {
     const earliestMoment = moment(timestamp);
@@ -76,15 +78,20 @@ export function getUrlForRecord(
 // Opens the specified URL in a new window. The behaviour (for example whether
 // it opens in a new tab or window) is determined from the original configuration
 // object which indicates whether it is opening a Kibana page running on the same server.
-// fullUrl is the complete URL, including the base path, with any dollar delimited tokens
-// from the urlConfig having been substituted with values from an anomaly record.
-export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
+// `url` is the URL with any dollar delimited tokens from the urlConfig
+// having been substituted with values from an anomaly record.
+export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath: string) {
   // Run through a regex to test whether the url_value starts with a protocol scheme.
   if (/^(?:[a-z]+:)?\/\//i.test(urlConfig.url_value) === false) {
-    window.open(fullUrl, '_blank');
+    // If `url` is a relative path, we need to prefix the base path.
+    if (url.charAt(0) !== '/') {
+      url = `${basePath}${isKibanaUrl(urlConfig) ? '/app/' : '/'}${url}`;
+    }
+
+    window.open(url, '_blank');
   } else {
     // Add noopener and noreferrr properties for external URLs.
-    const newWindow = window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
 
     // Expect newWindow to be null, but just in case if not, reset the opener link.
     if (newWindow !== undefined && newWindow !== null) {
@@ -94,13 +101,24 @@ export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
 }
 
 // Returns whether the url_value of the supplied config is for
-// a Kibana Discover or Dashboard page running on the same server as this ML plugin.
+// a Kibana Discover, Dashboard or supported solution page running
+// on the same server as this ML plugin. This is necessary so we can have
+// backwards compatibility with custom URLs created before the move to
+// BrowserRouter and URLs without hashes. If we add another solution to
+// recognize modules or with custom UI in the custom URL builder we'd
+// need to add the solution here. Manually created custom URLs for other
+// solution pages need to be prefixed with `app/` in the custom URL builder.
 function isKibanaUrl(urlConfig: UrlConfig) {
   const urlValue = urlConfig.url_value;
   return (
+    // HashRouter based plugins
     urlValue.startsWith('discover#/') ||
     urlValue.startsWith('dashboards#/') ||
-    urlValue.startsWith('apm#/')
+    urlValue.startsWith('apm#/') ||
+    // BrowserRouter based plugins
+    urlValue.startsWith('security/') ||
+    // Legacy links
+    urlValue.startsWith('siem#/')
   );
 }
 

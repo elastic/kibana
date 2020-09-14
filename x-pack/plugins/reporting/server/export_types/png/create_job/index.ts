@@ -5,18 +5,17 @@
  */
 
 import { cryptoFactory } from '../../../lib';
-import { ESQueueCreateJobFn, ScheduleTaskFnFactory } from '../../../types';
+import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPNG } from '../types';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   JobParamsPNG
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
-  const setupDeps = reporting.getPluginSetupDeps();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function scheduleTask(
+  return async function createJob(
     { objectType, title, relativeUrl, browserTimezone, layout },
     context,
     req
@@ -32,7 +31,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
       headers: serializedEncryptedHeaders,
       browserTimezone,
       layout,
-      basePath: setupDeps.basePath(req),
+      basePath: config.kbnConfig.get('server', 'basePath'),
       forceNow: new Date().toISOString(),
     };
   };

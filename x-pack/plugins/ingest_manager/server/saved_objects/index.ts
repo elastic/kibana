@@ -8,8 +8,8 @@ import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -17,6 +17,14 @@ import {
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
+import {
+  migrateAgentToV7100,
+  migrateAgentEventToV7100,
+  migrateAgentPolicyToV7100,
+  migrateEnrollmentApiKeysToV7100,
+  migratePackagePolicyToV7100,
+  migrateSettingsToV7100,
+} from './migrations/to_v7_10_0';
 
 /*
  * Saved object types and mappings
@@ -36,10 +44,13 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         agent_auto_upgrade: { type: 'keyword' },
         package_auto_upgrade: { type: 'keyword' },
-        kibana_url: { type: 'keyword' },
+        kibana_urls: { type: 'keyword' },
         kibana_ca_sha256: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
       },
+    },
+    migrations: {
+      '7.10.0': migrateSettingsToV7100,
     },
   },
   [AGENT_SAVED_OBJECT_TYPE]: {
@@ -61,17 +72,20 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         version: { type: 'keyword' },
         user_provided_metadata: { type: 'flattened' },
         local_metadata: { type: 'flattened' },
-        config_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
+        policy_revision: { type: 'integer' },
         last_updated: { type: 'date' },
         last_checkin: { type: 'date' },
         last_checkin_status: { type: 'keyword' },
-        config_revision: { type: 'integer' },
         default_api_key_id: { type: 'keyword' },
         default_api_key: { type: 'binary' },
         updated_at: { type: 'date' },
         current_error_events: { type: 'text', index: false },
         packages: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.10.0': migrateAgentToV7100,
     },
   },
   [AGENT_ACTION_SAVED_OBJECT_TYPE]: {
@@ -84,8 +98,11 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
     mappings: {
       properties: {
         agent_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
+        policy_revision: { type: 'integer' },
         type: { type: 'keyword' },
         data: { type: 'binary' },
+        ack_data: { type: 'text' },
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },
@@ -104,7 +121,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         subtype: { type: 'keyword' },
         agent_id: { type: 'keyword' },
         action_id: { type: 'keyword' },
-        config_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
         stream_id: { type: 'keyword' },
         timestamp: { type: 'date' },
         message: { type: 'text' },
@@ -112,9 +129,12 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         data: { type: 'text' },
       },
     },
+    migrations: {
+      '7.10.0': migrateAgentEventToV7100,
+    },
   },
-  [AGENT_CONFIG_SAVED_OBJECT_TYPE]: {
-    name: AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
+    name: AGENT_POLICY_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -127,12 +147,15 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
         status: { type: 'keyword' },
-        package_configs: { type: 'keyword' },
+        package_policies: { type: 'keyword' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
       },
+    },
+    migrations: {
+      '7.10.0': migrateAgentPolicyToV7100,
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
@@ -148,12 +171,15 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         type: { type: 'keyword' },
         api_key: { type: 'binary' },
         api_key_id: { type: 'keyword' },
-        config_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
         created_at: { type: 'date' },
         updated_at: { type: 'date' },
         expire_at: { type: 'date' },
         active: { type: 'boolean' },
       },
+    },
+    migrations: {
+      '7.10.0': migrateEnrollmentApiKeysToV7100,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -176,8 +202,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       },
     },
   },
-  [PACKAGE_CONFIG_SAVED_OBJECT_TYPE]: {
-    name: PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
+    name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -189,7 +215,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         enabled: { type: 'boolean' },
-        config_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
         output_id: { type: 'keyword' },
         package: {
           properties: {
@@ -211,9 +237,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
               properties: {
                 id: { type: 'keyword' },
                 enabled: { type: 'boolean' },
-                dataset: {
+                data_stream: {
                   properties: {
-                    name: { type: 'keyword' },
+                    dataset: { type: 'keyword' },
                     type: { type: 'keyword' },
                   },
                 },
@@ -230,6 +256,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         created_at: { type: 'date' },
         created_by: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.10.0': migratePackagePolicyToV7100,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -263,6 +292,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
             type: { type: 'keyword' },
           },
         },
+        install_started_at: { type: 'date' },
+        install_version: { type: 'keyword' },
+        install_status: { type: 'keyword' },
       },
     },
   },
@@ -285,7 +317,7 @@ export function registerEncryptedSavedObjects(
       'name',
       'type',
       'api_key_id',
-      'config_id',
+      'policy_id',
       'created_at',
       'updated_at',
       'expire_at',
@@ -316,12 +348,11 @@ export function registerEncryptedSavedObjects(
       'version',
       'user_provided_metadata',
       'local_metadata',
-      'config_id',
+      'policy_id',
+      'policy_revision',
       'last_updated',
       'last_checkin',
       'last_checkin_status',
-      'config_revision',
-      'config_newest_revision',
       'updated_at',
       'current_error_events',
       'unenrolled_at',

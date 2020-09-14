@@ -13,6 +13,7 @@ kibanaPipeline(timeoutMinutes: 240) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
         catchError {
           kibanaCoverage.runTests()
+          kibanaTeamAssign.load('team_assignment', "### Upload Team Assignment JSON")
           handleIngestion(TIME_STAMP)
         }
         handleFail()

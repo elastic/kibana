@@ -26,6 +26,7 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 |  [body](./kibana-plugin-core-server.kibanarequest.body.md) |  | <code>Body</code> |  |
 |  [events](./kibana-plugin-core-server.kibanarequest.events.md) |  | <code>KibanaRequestEvents</code> | Request events [KibanaRequestEvents](./kibana-plugin-core-server.kibanarequestevents.md) |
 |  [headers](./kibana-plugin-core-server.kibanarequest.headers.md) |  | <code>Headers</code> | Readonly copy of incoming request headers. |
+|  [id](./kibana-plugin-core-server.kibanarequest.id.md) |  | <code>string</code> | A identifier to identify this request. |
 |  [isSystemRequest](./kibana-plugin-core-server.kibanarequest.issystemrequest.md) |  | <code>boolean</code> | Whether or not the request is a "system request" rather than an application-level request. Can be set on the client using the <code>HttpFetchOptions#asSystemRequest</code> option. |
 |  [params](./kibana-plugin-core-server.kibanarequest.params.md) |  | <code>Params</code> |  |
 |  [query](./kibana-plugin-core-server.kibanarequest.query.md) |  | <code>Query</code> |  |

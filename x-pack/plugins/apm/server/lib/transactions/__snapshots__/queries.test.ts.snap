@@ -2,15 +2,15 @@
 
 exports[`transaction queries fetches a transaction 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
           Object {
             "term": Object {
               "transaction.id": "foo",
@@ -35,12 +35,16 @@ Object {
     },
     "size": 1,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches breakdown data for transactions 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "by_date": Object {
@@ -144,11 +148,6 @@ Object {
           Object {
             "term": Object {
               "transaction.type": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "metric",
             },
           },
           Object {
@@ -170,12 +169,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches breakdown data for transactions for a transaction name 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "by_date": Object {
@@ -279,11 +282,6 @@ Object {
           Object {
             "term": Object {
               "transaction.type": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "metric",
             },
           },
           Object {
@@ -310,12 +308,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches transaction charts 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "overall_avg_duration": Object {
@@ -376,11 +378,6 @@ Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
           Object {
             "term": Object {
               "service.name": "foo",
@@ -405,12 +402,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches transaction charts for a transaction type 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "overall_avg_duration": Object {
@@ -471,11 +472,6 @@ Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
           Object {
             "term": Object {
               "service.name": "foo",
@@ -505,12 +501,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches transaction charts for a transaction type and transaction name 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "overall_avg_duration": Object {
@@ -571,11 +571,6 @@ Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
           Object {
             "term": Object {
               "service.name": "foo",
@@ -610,12 +605,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches transaction distribution 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "stats": Object {
@@ -634,11 +633,6 @@ Object {
           },
           Object {
             "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
               "transaction.type": "baz",
             },
           },
@@ -666,6 +660,5 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;

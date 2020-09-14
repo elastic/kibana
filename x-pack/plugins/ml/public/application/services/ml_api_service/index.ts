@@ -62,7 +62,7 @@ export interface BucketSpanEstimatorResponse {
   name: string;
   ms: number;
   error?: boolean;
-  message?: { msg: string } | string;
+  message?: string;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -372,6 +372,16 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    checkIndexExists({ index }: { index: string }) {
+      const body = JSON.stringify({ index });
+
+      return httpService.http<{ exists: boolean }>({
+        path: `${basePath()}/index_exists`,
+        method: 'POST',
+        body,
+      });
+    },
+
     getFieldCaps({ index, fields }: { index: string; fields: string[] }) {
       const body = JSON.stringify({
         ...(index !== undefined ? { index } : {}),
@@ -475,7 +485,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliest?: number;
       latest?: number;
       samplerShardSize?: number;
-      interval?: string;
+      interval?: number;
       fields?: FieldRequestConfig[];
       maxExamples?: number;
     }) {

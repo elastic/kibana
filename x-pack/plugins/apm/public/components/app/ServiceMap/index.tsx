@@ -29,7 +29,7 @@ interface ServiceMapProps {
   serviceName?: string;
 }
 
-export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
+export function ServiceMap({ serviceName }: ServiceMapProps) {
   const theme = useTheme();
   const license = useLicense();
   const { urlParams } = useUrlParams();
@@ -57,7 +57,7 @@ export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
     }
   }, [license, serviceName, urlParams]);
 
-  const { ref, height, width } = useRefDimensions();
+  const { ref, height } = useRefDimensions();
 
   useTrackPageview({ app: 'apm', path: 'service_map' });
   useTrackPageview({ app: 'apm', path: 'service_map', delay: 15000 });
@@ -78,7 +78,6 @@ export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
         height={height}
         serviceName={serviceName}
         style={getCytoscapeDivStyle(theme)}
-        width={width}
       >
         <Controls />
         <BetaBadge />
@@ -101,4 +100,4 @@ export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}

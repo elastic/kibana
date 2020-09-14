@@ -1231,7 +1231,7 @@ import { npStart: { plugins } } from 'ui/new_platform';
 | `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
 | `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                           |
 | `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
-| `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive was moved to `src/plugins/kibana_legacy`.                                                                                    |
+| `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive was removed.                                                                                    |
 | `ui/saved_objects/components/saved_object_finder` | `import { SavedObjectFinder } from '../saved_objects/public'` |                                                                                                                                      |
 | `core_plugins/interpreter`                        | `plugins.data.expressions`                                           |
 | `ui/courier`                                      | `plugins.data.search`                                                |
@@ -1322,7 +1322,6 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `savedObjectTypes`           |                                                                                                                           | Part of SavedObjects, see [#33587](https://github.com/elastic/kibana/issues/33587)                                                    |
 | `search`                     |                                                                                                                           |                                                                                                                                       |
 | `shareContextMenuExtensions` |                                                                                                                           |                                                                                                                                       |
-| `styleSheetPaths`            |                                                                                                                           |                                                                                                                                       |
 | `taskDefinitions`            |                                                                                                                           | Should be an API on the taskManager plugin.                                                                                           |
 | `uiCapabilities`             | [`core.application.register`](/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md)            |                                                                                                                                       |
 | `uiSettingDefaults`          | [`core.uiSettings.register`](/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.md)                |                                                                                                                                       |
@@ -1619,14 +1618,6 @@ This will automatically mock the services in `ui/new_platform` thanks to the [he
 If others are consuming your plugin's new platform contracts via the `ui/new_platform` module, you'll want to update the helpers as well to ensure your contracts are properly mocked.
 
 > Note: The `ui/new_platform` mock is only designed for use by old Jest tests. If you are writing new tests, you should structure your code and tests such that you don't need this mock. Instead, you should import the `core` mock directly and instantiate it.
-
-#### What about karma tests?
-
-While our plan is to only provide first-class mocks for Jest tests, there are many legacy karma tests that cannot be quickly or easily converted to Jest -- particularly those which are still relying on mocking Angular services via `ngMock`.
-
-For these tests, we are maintaining a separate set of mocks. Files with a `.karma_mock.{js|ts|tsx}` extension will be loaded _globally_ before karma tests are run.
-
-It is important to note that this behavior is different from `jest.mock('ui/new_platform')`, which only mocks tests on an individual basis. If you encounter any failures in karma tests as a result of new platform migration efforts, you may need to add a `.karma_mock.js` file for the affected services, or add to the existing karma mock we are maintaining in `ui/new_platform`.
 
 ### Provide Legacy Platform API to the New platform plugin
 

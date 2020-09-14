@@ -9,7 +9,12 @@ import { createStore } from 'redux';
 import { ResolverAction } from './actions';
 import { resolverReducer } from './reducer';
 import * as selectors from './selectors';
-import { EndpointEvent, ResolverEvent, ResolverTree } from '../../../common/endpoint/types';
+import {
+  mockTreeWith2AncestorsAndNoChildren,
+  mockTreeWithNoAncestorsAnd2Children,
+} from '../mocks/resolver_tree';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
+import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 
 describe('resolver selectors', () => {
   const actions: ResolverAction[] = [];
@@ -33,13 +38,13 @@ describe('resolver selectors', () => {
         actions.push({
           type: 'serverReturnedResolverData',
           payload: {
-            result: treeWith2AncestorsAndNoChildren({
+            result: mockTreeWith2AncestorsAndNoChildren({
               originID,
               firstAncestorID,
               secondAncestorID,
             }),
             // this value doesn't matter
-            databaseDocumentID: '',
+            parameters: mockTreeFetcherParameters(),
           },
         });
       });
@@ -71,9 +76,9 @@ describe('resolver selectors', () => {
         actions.push({
           type: 'serverReturnedResolverData',
           payload: {
-            result: treeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
+            result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
             // this value doesn't matter
-            databaseDocumentID: '',
+            parameters: mockTreeFetcherParameters(),
           },
         });
       });
@@ -111,7 +116,9 @@ describe('resolver selectors', () => {
 
           // find the position of the second child
           const secondChild = selectors.processEventForID(state())(secondChildID);
-          const positionOfSecondChild = layout.processNodePositions.get(secondChild!)!;
+          const positionOfSecondChild = layout.processNodePositions.get(
+            secondChild as SafeResolverEvent
+          )!;
 
           // the child is indexed by an AABB that extends -720/2 to the left
           const leftSideOfSecondChildAABB = positionOfSecondChild[0] - 720 / 2;
@@ -127,19 +134,25 @@ describe('resolver selectors', () => {
         it('the origin should be in view', () => {
           const origin = selectors.processEventForID(state())(originID)!;
           expect(
-            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(origin)
+            selectors
+              .visibleNodesAndEdgeLines(state())(0)
+              .processNodePositions.has(origin as SafeResolverEvent)
           ).toBe(true);
         });
         it('the first child should be in view', () => {
           const firstChild = selectors.processEventForID(state())(firstChildID)!;
           expect(
-            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(firstChild)
+            selectors
+              .visibleNodesAndEdgeLines(state())(0)
+              .processNodePositions.has(firstChild as SafeResolverEvent)
           ).toBe(true);
         });
         it('the second child should not be in view', () => {
           const secondChild = selectors.processEventForID(state())(secondChildID)!;
           expect(
-            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(secondChild)
+            selectors
+              .visibleNodesAndEdgeLines(state())(0)
+              .processNodePositions.has(secondChild as SafeResolverEvent)
           ).toBe(false);
         });
         it('should return nothing as the flowto for the first child', () => {
@@ -149,111 +162,3 @@ describe('resolver selectors', () => {
     });
   });
 });
-/**
- * Simple mock endpoint event that works for tree layouts.
- */
-function mockEndpointEvent({
-  entityID,
-  name,
-  parentEntityId,
-  timestamp,
-}: {
-  entityID: string;
-  name: string;
-  parentEntityId: string;
-  timestamp: number;
-}): EndpointEvent {
-  return {
-    '@timestamp': timestamp,
-    event: {
-      type: 'start',
-      category: 'process',
-    },
-    process: {
-      entity_id: entityID,
-      name,
-      parent: {
-        entity_id: parentEntityId,
-      },
-    },
-  } as EndpointEvent;
-}
-
-function treeWith2AncestorsAndNoChildren({
-  originID,
-  firstAncestorID,
-  secondAncestorID,
-}: {
-  secondAncestorID: string;
-  firstAncestorID: string;
-  originID: string;
-}): ResolverTree {
-  const secondAncestor: ResolverEvent = mockEndpointEvent({
-    entityID: secondAncestorID,
-    name: 'a',
-    parentEntityId: 'none',
-    timestamp: 0,
-  });
-  const firstAncestor: ResolverEvent = mockEndpointEvent({
-    entityID: firstAncestorID,
-    name: 'b',
-    parentEntityId: secondAncestorID,
-    timestamp: 1,
-  });
-  const originEvent: ResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    name: 'c',
-    parentEntityId: firstAncestorID,
-    timestamp: 2,
-  });
-  return ({
-    entityID: originID,
-    children: {
-      childNodes: [],
-    },
-    ancestry: {
-      ancestors: [{ lifecycle: [secondAncestor] }, { lifecycle: [firstAncestor] }],
-    },
-    lifecycle: [originEvent],
-  } as unknown) as ResolverTree;
-}
-
-function treeWithNoAncestorsAnd2Children({
-  originID,
-  firstChildID,
-  secondChildID,
-}: {
-  originID: string;
-  firstChildID: string;
-  secondChildID: string;
-}): ResolverTree {
-  const origin: ResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    name: 'c',
-    parentEntityId: 'none',
-    timestamp: 0,
-  });
-  const firstChild: ResolverEvent = mockEndpointEvent({
-    entityID: firstChildID,
-    name: 'd',
-    parentEntityId: originID,
-    timestamp: 1,
-  });
-  const secondChild: ResolverEvent = mockEndpointEvent({
-    entityID: secondChildID,
-    name: 'e',
-    parentEntityId: originID,
-    timestamp: 2,
-  });
-
-  return ({
-    entityID: originID,
-    children: {
-      childNodes: [{ lifecycle: [firstChild] }, { lifecycle: [secondChild] }],
-    },
-    ancestry: {
-      ancestors: [],
-    },
-    lifecycle: [origin],
-  } as unknown) as ResolverTree;
-}

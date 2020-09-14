@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable complexity */
-
 import ApolloClient from 'apollo-client';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
@@ -24,7 +22,12 @@ import {
   DataProviderResult,
 } from '../../../graphql/types';
 
-import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import {
+  DataProviderType,
+  TimelineId,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/types/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -173,10 +176,6 @@ const getTemplateTimelineId = (
   duplicate: boolean,
   targetTimelineType?: TimelineType
 ) => {
-  if (!duplicate) {
-    return timeline.templateTimelineId;
-  }
-
   if (
     targetTimelineType === TimelineType.default &&
     timeline.timelineType === TimelineType.template
@@ -184,18 +183,26 @@ const getTemplateTimelineId = (
     return timeline.templateTimelineId;
   }
 
-  // TODO: MOVE TO BACKEND
-  return uuid.v4();
+  return duplicate && timeline.timelineType === TimelineType.template
+    ? // TODO: MOVE TO THE BACKEND
+      uuid.v4()
+    : timeline.templateTimelineId;
 };
 
-const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) =>
-  deepMerge(dataProvider, {
-    type: DataProviderType.default,
-    queryMatch: {
-      value:
-        dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
-    },
-  });
+const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => {
+  if (dataProvider.type === DataProviderType.template) {
+    return deepMerge(dataProvider, {
+      type: DataProviderType.default,
+      enabled: dataProvider.queryMatch!.operator !== IS_OPERATOR,
+      queryMatch: {
+        value:
+          dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
+      },
+    });
+  }
+
+  return dataProvider;
+};
 
 const getDataProviders = (
   duplicate: boolean,
@@ -212,7 +219,28 @@ const getDataProviders = (
   return dataProviders;
 };
 
-// eslint-disable-next-line complexity
+export const getTimelineTitle = (
+  timeline: TimelineResult,
+  duplicate: boolean,
+  timelineType?: TimelineType
+) => {
+  const isCreateTimelineFromAction = timelineType && timeline.timelineType !== timelineType;
+  if (isCreateTimelineFromAction) return '';
+
+  return duplicate ? `${timeline.title} - Duplicate` : timeline.title || '';
+};
+
+export const getTimelineStatus = (
+  timeline: TimelineResult,
+  duplicate: boolean,
+  timelineType?: TimelineType
+) => {
+  const isCreateTimelineFromAction = timelineType && timeline.timelineType !== timelineType;
+  if (isCreateTimelineFromAction) return TimelineStatus.draft;
+
+  return duplicate ? TimelineStatus.active : timeline.status;
+};
+
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
@@ -234,11 +262,11 @@ export const defaultTimelineToTimelineModel = (
     pinnedEventIds: setPinnedEventIds(duplicate, timeline.pinnedEventIds),
     pinnedEventsSaveObject: setPinnedEventsSaveObject(duplicate, timeline.pinnedEventsSaveObject),
     id: duplicate ? '' : timeline.savedObjectId,
-    status: duplicate ? TimelineStatus.active : timeline.status,
+    status: getTimelineStatus(timeline, duplicate, timelineType),
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     timelineType: timelineType ?? timeline.timelineType,
-    title: duplicate ? `${timeline.title} - Duplicate` : timeline.title || '',
+    title: getTimelineTitle(timeline, duplicate, timelineType),
     templateTimelineId: getTemplateTimelineId(timeline, duplicate, timelineType),
     templateTimelineVersion: duplicate && isTemplate ? 1 : timeline.templateTimelineVersion,
   };
@@ -292,7 +320,7 @@ export const queryTimelineById = <TCache>({
   updateIsLoading,
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
-  updateIsLoading({ id: 'timeline-1', isLoading: true });
+  updateIsLoading({ id: TimelineId.active, isLoading: true });
   if (apolloClient) {
     apolloClient
       .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
@@ -300,7 +328,6 @@ export const queryTimelineById = <TCache>({
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
-      // eslint-disable-next-line
       .then((result) => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
@@ -321,7 +348,7 @@ export const queryTimelineById = <TCache>({
           updateTimeline({
             duplicate,
             from,
-            id: 'timeline-1',
+            id: TimelineId.active,
             notes,
             timeline: {
               ...timeline,
@@ -333,7 +360,7 @@ export const queryTimelineById = <TCache>({
         }
       })
       .finally(() => {
-        updateIsLoading({ id: 'timeline-1', isLoading: false });
+        updateIsLoading({ id: TimelineId.active, isLoading: false });
       });
   }
 };
@@ -341,6 +368,7 @@ export const queryTimelineById = <TCache>({
 export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
   duplicate,
   id,
+  forceNotes = false,
   from,
   notes,
   timeline,
@@ -348,7 +376,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
-  dispatch(dispatchAddTimeline({ id, timeline }));
+  dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
   if (
     timeline.kqlQuery != null &&
     timeline.kqlQuery.filterQuery != null &&
@@ -385,7 +413,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }
 
-  if (!duplicate) {
+  if (!duplicate || forceNotes) {
     dispatch(
       dispatchAddNotes({
         notes:

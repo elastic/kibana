@@ -90,6 +90,7 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
               element,
               appBasePath: '',
               onAppLeave: () => undefined,
+              setHeaderActionMenu: () => undefined,
               // TODO: adapt to use Core's ScopedHistory
               history: {} as any,
             };
@@ -203,6 +204,7 @@ export function renderApp(
   });
 
   return () => {
+    chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
     unlisten();
   };

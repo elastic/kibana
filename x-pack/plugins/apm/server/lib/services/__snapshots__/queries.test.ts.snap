@@ -2,48 +2,32 @@
 
 exports[`services queries fetches the agent status 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+      "metric",
+      "sourcemap",
+      "transaction",
+    ],
+  },
   "body": Object {
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "terms": Object {
-              "processor.event": Array [
-                "error",
-                "metric",
-                "sourcemap",
-                "transaction",
-              ],
-            },
-          },
-        ],
-      },
-    },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
   "terminateAfter": 1,
 }
 `;
 
 exports[`services queries fetches the legacy data status 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-              ],
-            },
-          },
           Object {
             "range": Object {
               "observer.version_major": Object {
@@ -56,13 +40,19 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
   "terminateAfter": 1,
 }
 `;
 
 exports[`services queries fetches the service agent name 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+      "transaction",
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "agents": Object {
@@ -81,15 +71,6 @@ Object {
             },
           },
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "error",
-                "transaction",
-                "metric",
-              ],
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -103,11 +84,6 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
   "terminateAfter": 1,
 }
 `;
@@ -115,6 +91,11 @@ Object {
 exports[`services queries fetches the service items 1`] = `
 Array [
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "services": Object {
@@ -148,20 +129,20 @@ Array [
                 "my.custom.ui.filter": "foo-bar",
               },
             },
-            Object {
-              "term": Object {
-                "processor.event": "transaction",
-              },
-            },
           ],
         },
       },
       "size": 0,
     },
-    "index": "myIndex",
-    "size": 0,
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "metric",
+        "error",
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "services": Object {
@@ -198,27 +179,18 @@ Array [
                 "my.custom.ui.filter": "foo-bar",
               },
             },
-            Object {
-              "terms": Object {
-                "processor.event": Array [
-                  "metric",
-                  "error",
-                  "transaction",
-                ],
-              },
-            },
           ],
         },
       },
       "size": 0,
     },
-    "index": Array [
-      "myIndex",
-      "myIndex",
-      "myIndex",
-    ],
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "services": Object {
@@ -245,19 +217,18 @@ Array [
                 "my.custom.ui.filter": "foo-bar",
               },
             },
-            Object {
-              "term": Object {
-                "processor.event": "transaction",
-              },
-            },
           ],
         },
       },
       "size": 0,
     },
-    "index": "myIndex",
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "error",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "services": Object {
@@ -284,19 +255,20 @@ Array [
                 "my.custom.ui.filter": "foo-bar",
               },
             },
-            Object {
-              "term": Object {
-                "processor.event": "error",
-              },
-            },
           ],
         },
       },
       "size": 0,
     },
-    "index": "myIndex",
   },
   Object {
+    "apm": Object {
+      "events": Array [
+        "metric",
+        "transaction",
+        "error",
+      ],
+    },
     "body": Object {
       "aggs": Object {
         "services": Object {
@@ -330,31 +302,22 @@ Array [
                 "my.custom.ui.filter": "foo-bar",
               },
             },
-            Object {
-              "terms": Object {
-                "processor.event": Array [
-                  "transaction",
-                  "error",
-                  "metric",
-                ],
-              },
-            },
           ],
         },
       },
       "size": 0,
     },
-    "index": Array [
-      "myIndex",
-      "myIndex",
-      "myIndex",
-    ],
   },
 ]
 `;
 
 exports[`services queries fetches the service transaction types 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "types": Object {
@@ -373,13 +336,6 @@ Object {
             },
           },
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-              ],
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -393,6 +349,5 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;

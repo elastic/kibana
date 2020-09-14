@@ -34,12 +34,12 @@ const i18nTexts = {
   description: (
     <FormattedMessage
       id="xpack.idxMgmt.formWizard.stepComponents.componentsDescription"
-      defaultMessage="Components templates let you save index settings, mappings and aliases and inherit from them in index templates."
+      defaultMessage="Component templates let you save index settings, mappings and aliases and inherit from them in index templates."
     />
   ),
 };
 
-export const StepComponents = ({ defaultValue = [], onChange, esDocsBase }: Props) => {
+export const StepComponents = ({ defaultValue, onChange, esDocsBase }: Props) => {
   const [state, setState] = useState<{
     isLoadingComponents: boolean;
     components: ComponentTemplateListItem[];

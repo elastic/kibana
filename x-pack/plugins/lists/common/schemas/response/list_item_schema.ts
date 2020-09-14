@@ -6,9 +6,8 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import {
+  _versionOrUndefined,
   created_at,
   created_by,
   deserializerOrUndefined,
@@ -25,6 +24,7 @@ import {
 
 export const listItemSchema = t.exact(
   t.type({
+    _version: _versionOrUndefined,
     created_at,
     created_by,
     deserializer: deserializerOrUndefined,

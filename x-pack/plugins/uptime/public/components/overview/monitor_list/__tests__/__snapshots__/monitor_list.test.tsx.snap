@@ -213,6 +213,7 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                         },
                         "id": "foo",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "up",
                         "type": "icmp",
                       },
@@ -226,6 +227,7 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                         },
                         "id": "foo",
                         "ip": "127.0.0.2",
+                        "name": undefined,
                         "status": "up",
                         "type": "icmp",
                       },
@@ -239,6 +241,7 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                         },
                         "id": "foo",
                         "ip": "127.0.0.3",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -266,6 +269,7 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                         },
                         "id": "bar",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -279,6 +283,7 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                         },
                         "id": "bar",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -516,6 +521,7 @@ exports[`MonitorList component renders error list 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "up",
                         "type": "icmp",
                       },
@@ -529,6 +535,7 @@ exports[`MonitorList component renders error list 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.2",
+                        "name": undefined,
                         "status": "up",
                         "type": "icmp",
                       },
@@ -542,6 +549,7 @@ exports[`MonitorList component renders error list 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.3",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -569,6 +577,7 @@ exports[`MonitorList component renders error list 1`] = `
                         },
                         "id": "bar",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -582,6 +591,7 @@ exports[`MonitorList component renders error list 1`] = `
                         },
                         "id": "bar",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -714,6 +724,7 @@ exports[`MonitorList component renders loading state 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "up",
                         "type": "icmp",
                       },
@@ -727,6 +738,7 @@ exports[`MonitorList component renders loading state 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.2",
+                        "name": undefined,
                         "status": "up",
                         "type": "icmp",
                       },
@@ -740,6 +752,7 @@ exports[`MonitorList component renders loading state 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.3",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -767,6 +780,7 @@ exports[`MonitorList component renders loading state 1`] = `
                         },
                         "id": "bar",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -780,6 +794,7 @@ exports[`MonitorList component renders loading state 1`] = `
                         },
                         "id": "bar",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -813,7 +828,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
 }
 
 .c1 {
-  margin-left: auto;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+}
+
+.c0 {
+  position: relative;
 }
 
 .c4 {
@@ -825,26 +846,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
 @media (max-width:574px) {
   .c2 {
     min-width: 230px;
-  }
-}
-
-@media only screen and (max-width:768px) {
-  .c0.c0 > :first-child {
-    -webkit-flex-basis: 40% !important;
-    -ms-flex-preferred-size: 40% !important;
-    flex-basis: 40% !important;
-  }
-
-  .c0.c0 > :nth-child(2) {
-    -webkit-order: 3;
-    -ms-flex-order: 3;
-    order: 3;
-  }
-
-  .c0.c0 > :nth-child(3) {
-    -webkit-flex-basis: 60% !important;
-    -ms-flex-preferred-size: 60% !important;
-    flex-basis: 60% !important;
   }
 }
 
@@ -870,12 +871,12 @@ exports[`MonitorList component renders the monitor list 1`] = `
         class="euiFilterGroup"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
+          class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
           data-test-subj="xpack.uptime.filterBar.filterStatusAll"
           type="button"
         >
           <span
-            class="euiButtonEmpty__content"
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
             <span
               class="euiButtonEmpty__text"
@@ -891,35 +892,33 @@ exports[`MonitorList component renders the monitor list 1`] = `
           </span>
         </button>
         <button
-          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton--withNext"
+          class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--withNext"
           data-test-subj="xpack.uptime.filterBar.filterStatusUp"
           type="button"
         >
           <span
-            class="euiButtonEmpty__content"
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
             <span
               class="euiButtonEmpty__text"
             >
               <span
                 class="euiFilterButton__textShift"
+                data-text="Up"
+                title="Up"
               >
-                <span
-                  class="euiTextColor euiTextColor--default"
-                >
-                  Up
-                </span>
+                Up
               </span>
             </span>
           </span>
         </button>
         <button
-          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton"
+          class="euiButtonEmpty euiButtonEmpty--text euiFilterButton"
           data-test-subj="xpack.uptime.filterBar.filterStatusDown"
           type="button"
         >
           <span
-            class="euiButtonEmpty__content"
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
             <span
               class="euiButtonEmpty__text"
@@ -936,20 +935,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
         </button>
       </div>
     </div>
-    <div
-      class="euiFlexItem"
+    <a
+      class="c1"
+      data-test-subj="uptimeCertificatesLink"
+      href="/certificates"
     >
-      <h5
-        class="euiTitle euiTitle--xsmall c1"
-      >
-        <a
-          data-test-subj="uptimeCertificatesLink"
-          href="/certificates"
-        >
-          Certificates status
-        </a>
-      </h5>
-    </div>
+      Certificates status
+    </a>
   </div>
   <div
     class="euiSpacer euiSpacer--m"
@@ -1063,9 +1055,26 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 </span>
               </div>
             </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Status alert_5"
+              role="columnheader"
+              scope="col"
+              style="width:150px"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Status alert
+                </span>
+              </div>
+            </th>
             <td
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_monitor_id_5"
+              data-test-subj="tableHeaderCell_monitor_id_6"
               role="columnheader"
               scope="col"
               style="width:24px"
@@ -1234,6 +1243,52 @@ exports[`MonitorList component renders the monitor list 1`] = `
                     </div>
                   </div>
                 </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              style="width:150px"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Status alert
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="euiPopover euiPopover--anchorDownCenter"
+                >
+                  <div
+                    class="euiPopover__anchor"
+                  >
+                    <div
+                      class="euiSwitch euiSwitch--compressed"
+                    >
+                      <button
+                        aria-checked="false"
+                        aria-label="Enable status alert"
+                        class="euiSwitch__button"
+                        data-test-subj="uptimeDisplayDefineConnector"
+                        id="defineAlertSettingsSwitch"
+                        role="switch"
+                        type="button"
+                      >
+                        <span
+                          class="euiSwitch__body"
+                        >
+                          <span
+                            class="euiSwitch__thumb"
+                          />
+                          <span
+                            class="euiSwitch__track"
+                          />
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </td>
             <td
@@ -1414,6 +1469,52 @@ exports[`MonitorList component renders the monitor list 1`] = `
               </div>
             </td>
             <td
+              class="euiTableRowCell"
+              style="width:150px"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Status alert
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="euiPopover euiPopover--anchorDownCenter"
+                >
+                  <div
+                    class="euiPopover__anchor"
+                  >
+                    <div
+                      class="euiSwitch euiSwitch--compressed"
+                    >
+                      <button
+                        aria-checked="false"
+                        aria-label="Enable status alert"
+                        class="euiSwitch__button"
+                        data-test-subj="uptimeDisplayDefineConnector"
+                        id="defineAlertSettingsSwitch"
+                        role="switch"
+                        type="button"
+                      >
+                        <span
+                          class="euiSwitch__body"
+                        >
+                          <span
+                            class="euiSwitch__thumb"
+                          />
+                          <span
+                            class="euiSwitch__track"
+                          />
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td
               class="euiTableRowCell euiTableRowCell--isExpander"
               style="width:24px"
             >
@@ -1455,16 +1556,15 @@ exports[`MonitorList component renders the monitor list 1`] = `
           class="euiPopover__anchor"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight"
+            class="euiButtonEmpty euiButtonEmpty--text"
             data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"
             type="button"
           >
             <span
-              class="euiButtonEmpty__content"
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
             >
               <div
-                aria-hidden="true"
-                class="euiButtonEmpty__icon"
+                class="euiButtonContent__icon"
                 data-euiicon-type="arrowDown"
               />
               <span
@@ -1632,6 +1732,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "up",
                         "type": "icmp",
                       },
@@ -1645,6 +1746,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.2",
+                        "name": undefined,
                         "status": "up",
                         "type": "icmp",
                       },
@@ -1658,6 +1760,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
                         },
                         "id": "foo",
                         "ip": "127.0.0.3",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -1685,6 +1788,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
                         },
                         "id": "bar",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },
@@ -1698,6 +1802,7 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
                         },
                         "id": "bar",
                         "ip": "127.0.0.1",
+                        "name": undefined,
                         "status": "down",
                         "type": "icmp",
                       },

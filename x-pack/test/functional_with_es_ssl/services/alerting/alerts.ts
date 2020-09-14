@@ -8,6 +8,21 @@ import axios, { AxiosInstance } from 'axios';
 import util from 'util';
 import { ToolingLog } from '@kbn/dev-utils';
 
+export interface AlertInstanceSummary {
+  status: string;
+  muted: boolean;
+  enabled: boolean;
+  lastRun?: string;
+  errorMessage?: string;
+  instances: Record<string, AlertInstanceStatus>;
+}
+
+export interface AlertInstanceStatus {
+  status: string;
+  muted: boolean;
+  activeStartDate?: string;
+}
+
 export class Alerts {
   private log: ToolingLog;
   private axios: AxiosInstance;
@@ -43,7 +58,7 @@ export class Alerts {
       name,
       tags,
       alertTypeId,
-      consumer: consumer ?? 'bar',
+      consumer: consumer ?? 'alerts',
       schedule: schedule ?? { interval: '1m' },
       throttle: throttle ?? '1m',
       actions: actions ?? [],
@@ -68,7 +83,7 @@ export class Alerts {
       name,
       tags: ['foo'],
       alertTypeId: 'test.noop',
-      consumer: 'consumer-noop',
+      consumer: 'alerting_fixture',
       schedule: { interval: '1m' },
       throttle: '1m',
       actions: [],
@@ -101,7 +116,7 @@ export class Alerts {
       name,
       tags: ['foo'],
       alertTypeId: 'test.always-firing',
-      consumer: 'bar',
+      consumer: 'alerts',
       schedule: { interval: '1m' },
       throttle: '1m',
       actions,
@@ -141,10 +156,10 @@ export class Alerts {
     this.log.debug(`deleted alert ${alert.id}`);
   }
 
-  public async getAlertState(id: string) {
+  public async getAlertInstanceSummary(id: string): Promise<AlertInstanceSummary> {
     this.log.debug(`getting alert ${id} state`);
 
-    const { data } = await this.axios.get(`/api/alerts/alert/${id}/state`);
+    const { data } = await this.axios.get(`/api/alerts/alert/${id}/_instance_summary`);
     return data;
   }
 

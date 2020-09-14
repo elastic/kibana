@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScheduledTaskParams } from '../../types';
+import { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
@@ -28,10 +28,8 @@ export interface IndexPatternSavedObject {
   };
 }
 
-export interface JobParamsDiscoverCsv {
-  browserTimezone: string;
+export interface JobParamsDiscoverCsv extends BaseParams {
   indexPatternId: string;
-  objectType: string;
   title: string;
   searchRequest: SearchRequest;
   fields: string[];
@@ -39,7 +37,7 @@ export interface JobParamsDiscoverCsv {
   conflictedTypesFields: string[];
 }
 
-export interface ScheduledTaskParamsCSV extends ScheduledTaskParams<JobParamsDiscoverCsv> {
+export interface TaskPayloadCSV extends BasePayload<JobParamsDiscoverCsv> {
   basePath: string;
   searchRequest: any;
   fields: any;

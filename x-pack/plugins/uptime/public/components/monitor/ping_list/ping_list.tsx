@@ -237,6 +237,7 @@ export const PingListComponent = (props: Props) => {
       render: (item: Ping) => {
         return (
           <EuiButtonIcon
+            data-test-subj="uptimePingListExpandBtn"
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
             disabled={!item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
             aria-label={
@@ -267,7 +268,7 @@ export const PingListComponent = (props: Props) => {
 
   return (
     <EuiPanel>
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <h4>
           <FormattedMessage id="xpack.uptime.pingList.checkHistoryTitle" defaultMessage="History" />
         </h4>

@@ -37,7 +37,7 @@ const SeeMoreButton = styled.button<{ show: boolean }>`
   }
 `;
 
-export const CustomLink = ({
+export function CustomLink({
   customLinks,
   status,
   onCreateCustomLinkClick,
@@ -49,7 +49,7 @@ export const CustomLink = ({
   onCreateCustomLinkClick: () => void;
   onSeeMoreClick: () => void;
   transaction: Transaction;
-}) => {
+}) {
   const renderEmptyPrompt = (
     <>
       <EuiText size="xs" grow={false} style={{ width: px(300) }}>
@@ -125,4 +125,4 @@ export const CustomLink = ({
       )}
     </>
   );
-};
+}

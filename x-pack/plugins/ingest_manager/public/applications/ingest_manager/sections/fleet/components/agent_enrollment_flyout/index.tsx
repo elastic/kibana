@@ -8,6 +8,8 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,18 +20,18 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../../types';
+import { AgentPolicy } from '../../../../types';
 import { ManagedInstructions } from './managed_instructions';
 import { StandaloneInstructions } from './standalone_instructions';
 
 interface Props {
   onClose: () => void;
-  agentConfigs?: AgentConfig[];
+  agentPolicies?: AgentPolicy[];
 }
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
-  agentConfigs,
+  agentPolicies,
 }) => {
   const [mode, setMode] = useState<'managed' | 'standalone'>('managed');
 
@@ -44,17 +46,25 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             />
           </h2>
         </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.ingestManager.agentEnrollment.agentDescription"
+            defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack."
+          />
+        </EuiText>
+        <EuiSpacer size="l" />
         <EuiTabs style={{ marginBottom: '-25px' }}>
           <EuiTab isSelected={mode === 'managed'} onClick={() => setMode('managed')}>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.enrollFleetTabLabel"
-              defaultMessage="Enroll with Fleet"
+              defaultMessage="Enroll in Fleet"
             />
           </EuiTab>
           <EuiTab isSelected={mode === 'standalone'} onClick={() => setMode('standalone')}>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.enrollStandaloneTabLabel"
-              defaultMessage="Standalone mode"
+              defaultMessage="Run standalone"
             />
           </EuiTab>
         </EuiTabs>
@@ -62,15 +72,15 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 
       <EuiFlyoutBody>
         {mode === 'managed' ? (
-          <ManagedInstructions agentConfigs={agentConfigs} />
+          <ManagedInstructions agentPolicies={agentPolicies} />
         ) : (
-          <StandaloneInstructions agentConfigs={agentConfigs} />
+          <StandaloneInstructions agentPolicies={agentPolicies} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
                 id="xpack.ingestManager.agentEnrollment.cancelButtonLabel"
                 defaultMessage="Cancel"

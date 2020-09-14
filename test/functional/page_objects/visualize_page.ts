@@ -352,6 +352,16 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.existOrFail('visualizesaveAndReturnButton');
       await testSubjects.click('visualizesaveAndReturnButton');
     }
+
+    public async linkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizesaveAndReturnButton');
+    }
+
+    public async notLinkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('visualizesaveAndReturnButton');
+    }
   }
 
   return new VisualizePage();

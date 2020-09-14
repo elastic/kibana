@@ -59,10 +59,14 @@ export async function addMessagesToReport(options: {
     log.info(`${classname} - ${name}:${messageList}`);
     const output = `Failed Tests Reporter:${messageList}\n\n`;
 
-    if (!testCase['system-out']) {
-      testCase['system-out'] = [output];
+    if (typeof testCase.failure[0] === 'object' && testCase.failure[0].$.message) {
+      // failure with "messages" ignore the system-out on jenkins
+      // so we instead extend the failure message
+      testCase.failure[0]._ = output + testCase.failure[0]._;
+    } else if (!testCase['system-out']) {
+      testCase['system-out'] = [{ _: output }];
     } else if (typeof testCase['system-out'][0] === 'string') {
-      testCase['system-out'][0] = output + String(testCase['system-out'][0]);
+      testCase['system-out'][0] = { _: output + testCase['system-out'][0] };
     } else {
       testCase['system-out'][0]._ = output + testCase['system-out'][0]._;
     }

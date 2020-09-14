@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 export const ENDPOINT_POLICY = i18n.translate(
   'xpack.securitySolution.host.details.endpoint.endpointPolicy',
   {
-    defaultMessage: 'Endpoint policy',
+    defaultMessage: 'Integration',
   }
 );
 
 export const POLICY_STATUS = i18n.translate(
   'xpack.securitySolution.host.details.endpoint.policyStatus',
   {
-    defaultMessage: 'Policy status',
+    defaultMessage: 'Configuration Status',
   }
 );
 

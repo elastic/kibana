@@ -5,12 +5,18 @@
  */
 
 import { map } from 'lodash';
-import { AlertAction, State, Context, AlertType } from '../types';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import {
+  AlertAction,
+  AlertInstanceState,
+  AlertInstanceContext,
+  AlertType,
+  AlertTypeParams,
+} from '../types';
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
@@ -24,13 +30,14 @@ interface CreateExecutionHandlerOptions {
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
+  alertParams: AlertTypeParams;
 }
 
 interface ExecutionHandlerOptions {
   actionGroup: string;
   alertInstanceId: string;
-  context: Context;
-  state: State;
+  context: AlertInstanceContext;
+  state: AlertInstanceState;
 }
 
 export function createExecutionHandler({
@@ -45,6 +52,7 @@ export function createExecutionHandler({
   alertType,
   eventLogger,
   request,
+  alertParams,
 }: CreateExecutionHandlerOptions) {
   const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
@@ -66,6 +74,7 @@ export function createExecutionHandler({
             context,
             actionParams: action.params,
             state,
+            alertParams,
           }),
         };
       });

@@ -11,7 +11,7 @@ import { useAvgDurationByCountry } from '../../../../../hooks/useAvgDurationByCo
 
 import { ChoroplethMap } from '../ChoroplethMap';
 
-export const DurationByCountryMap: React.FC = () => {
+export function DurationByCountryMap() {
   const { data } = useAvgDurationByCountry();
 
   return (
@@ -30,4 +30,4 @@ export const DurationByCountryMap: React.FC = () => {
       <ChoroplethMap items={data} />
     </>
   );
-};
+}

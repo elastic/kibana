@@ -14,13 +14,14 @@ import {
   Description,
   DescriptionOrUndefined,
   EntriesArray,
-  EntriesArrayOrUndefined,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   FilterOrUndefined,
+  Id,
   IdOrUndefined,
+  Immutable,
   ItemId,
   ItemIdOrUndefined,
   ListId,
@@ -36,8 +37,11 @@ import {
   Tags,
   TagsOrUndefined,
   UpdateCommentsArray,
+  Version,
+  VersionOrUndefined,
   _Tags,
   _TagsOrUndefined,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 
 export interface ConstructorOptions {
@@ -60,10 +64,13 @@ export interface CreateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: Tags;
   type: ExceptionListType;
+  immutable: Immutable;
+  version: Version;
 }
 
 export interface UpdateExceptionListOptions {
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   id: IdOrUndefined;
   listId: ListIdOrUndefined;
   namespaceType: NamespaceType;
@@ -72,6 +79,7 @@ export interface UpdateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
   type: ExceptionListTypeOrUndefined;
+  version: VersionOrUndefined;
 }
 
 export interface DeleteExceptionListOptions {
@@ -83,6 +91,11 @@ export interface DeleteExceptionListOptions {
 export interface DeleteExceptionListItemOptions {
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface DeleteExceptionListItemByIdOptions {
+  id: Id;
   namespaceType: NamespaceType;
 }
 
@@ -130,8 +143,9 @@ export interface CreateEndpointListItemOptions {
 
 export interface UpdateExceptionListItemOptions {
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
-  entries: EntriesArrayOrUndefined;
+  entries: EntriesArray;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   namespaceType: NamespaceType;
@@ -144,8 +158,9 @@ export interface UpdateExceptionListItemOptions {
 
 export interface UpdateEndpointListItemOptions {
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
-  entries: EntriesArrayOrUndefined;
+  entries: EntriesArray;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   name: NameOrUndefined;

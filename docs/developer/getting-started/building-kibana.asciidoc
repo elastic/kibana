@@ -1,7 +1,7 @@
 [[building-kibana]]
-=== Building a {kib} distributable
+== Building a {kib} distributable
 
-The following commands will build a {kib} production distributable.
+The following command will build a {kib} production distributable:
 
 [source,bash]
 ----
@@ -15,8 +15,8 @@ You can get all build options using the following command:
 yarn build --help
 ----
 
-[float]
-==== Building OS packages
+[discrete]
+=== Building OS packages
 
 Packages are built using fpm, dpkg, and rpm.  Package building has only been tested on Linux and is not supported on any other platform.
 

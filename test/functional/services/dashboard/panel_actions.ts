@@ -70,6 +70,17 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await PageObjects.common.waitForTopNavToBeVisible();
     }
 
+    async editPanelByTitle(title?: string) {
+      log.debug(`editPanelByTitle(${title})`);
+      if (title) {
+        const panelOptions = await this.getPanelHeading(title);
+        await this.openContextMenu(panelOptions);
+      } else {
+        await this.openContextMenu();
+      }
+      await testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+    }
+
     async clickExpandPanelToggle() {
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }

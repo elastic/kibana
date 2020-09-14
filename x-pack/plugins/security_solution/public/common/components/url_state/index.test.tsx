@@ -21,7 +21,8 @@ import {
 } from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
-import { wait } from '../../lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -194,29 +195,32 @@ describe('UrlStateContainer', () => {
           }).relativeTimeSearch.undefinedQuery,
         });
         wrapper.update();
-        await wait();
 
         if (CONSTANTS.detectionsPage === page) {
-          expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({
-            from: '2020-01-01T00:00:00.000Z',
-            fromStr: 'now-1d/d',
-            kind: 'relative',
-            to: '2020-01-01T00:00:00.000Z',
-            toStr: 'now-1d/d',
-            id: 'global',
-          });
+          await waitFor(() => {
+            expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({
+              from: '2020-01-01T00:00:00.000Z',
+              fromStr: 'now-1d/d',
+              kind: 'relative',
+              to: '2020-01-01T00:00:00.000Z',
+              toStr: 'now-1d/d',
+              id: 'global',
+            });
 
-          expect(mockSetRelativeRangeDatePicker.mock.calls[2][0]).toEqual({
-            from: 1558732849370,
-            fromStr: 'now-15m',
-            kind: 'relative',
-            to: 1558733749370,
-            toStr: 'now',
-            id: 'timeline',
+            expect(mockSetRelativeRangeDatePicker.mock.calls[2][0]).toEqual({
+              from: 1558732849370,
+              fromStr: 'now-15m',
+              kind: 'relative',
+              to: 1558733749370,
+              toStr: 'now',
+              id: 'timeline',
+            });
           });
         } else {
-          // There is no change in url state, so that's expected we only have two actions
-          expect(mockSetRelativeRangeDatePicker.mock.calls.length).toEqual(2);
+          await waitFor(() => {
+            // There is no change in url state, so that's expected we only have two actions
+            expect(mockSetRelativeRangeDatePicker.mock.calls.length).toEqual(2);
+          });
         }
       }
     );

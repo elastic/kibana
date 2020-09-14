@@ -39,6 +39,7 @@ describe('telemetry_ops_stats', () => {
   const callCluster = jest.fn();
 
   const metric: OpsMetrics = {
+    collected_at: new Date('2020-01-01 01:00:00'),
     process: {
       memory: {
         heap: {

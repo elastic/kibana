@@ -6,9 +6,9 @@
 
 import { IRouter } from 'kibana/server';
 
-import { ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   CreateEndpointListItemSchemaDecoded,
   createEndpointListItemSchema,
@@ -16,12 +16,13 @@ import {
 } from '../../common/schemas';
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
+import { validateExceptionListSize } from './validate';
 
 export const createEndpointListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {
@@ -71,6 +72,18 @@ export const createEndpointListItemRoute = (router: IRouter): void => {
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
+            const listSizeError = await validateExceptionListSize(
+              exceptionLists,
+              ENDPOINT_LIST_ID,
+              'agnostic'
+            );
+            if (listSizeError != null) {
+              await exceptionLists.deleteExceptionListItemById({
+                id: createdList.id,
+                namespaceType: 'agnostic',
+              });
+              return siemResponse.error(listSizeError);
+            }
             return response.ok({ body: validated ?? {} });
           }
         }

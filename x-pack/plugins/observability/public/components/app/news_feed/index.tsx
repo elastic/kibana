@@ -23,7 +23,7 @@ interface Props {
   items: INewsItem[];
 }
 
-export const NewsFeed = ({ items }: Props) => {
+export function NewsFeed({ items }: Props) {
   return (
     // The news feed is manually added/edited, to prevent any errors caused by typos or missing fields,
     // wraps the component with EuiErrorBoundary to avoid breaking the entire page.
@@ -46,11 +46,11 @@ export const NewsFeed = ({ items }: Props) => {
       </EuiFlexGroup>
     </EuiErrorBoundary>
   );
-};
+}
 
 const limitString = (string: string, limit: number) => truncate(string, { length: limit });
 
-const NewsItem = ({ item }: { item: INewsItem }) => {
+function NewsItem({ item }: { item: INewsItem }) {
   const theme = useContext(ThemeContext);
 
   return (
@@ -70,13 +70,13 @@ const NewsItem = ({ item }: { item: INewsItem }) => {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiLink href={item.link_url.en} target="_blank">
-                  <EuiText size="xs">
+                <EuiText size="xs">
+                  <EuiLink href={item.link_url.en} target="_blank" external>
                     {i18n.translate('xpack.observability.news.readFullStory', {
                       defaultMessage: 'Read full story',
                     })}
-                  </EuiText>
-                </EuiLink>
+                  </EuiLink>
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -98,4 +98,4 @@ const NewsItem = ({ item }: { item: INewsItem }) => {
       <EuiHorizontalRule margin="s" />
     </EuiFlexGroup>
   );
-};
+}

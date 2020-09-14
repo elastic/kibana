@@ -6,77 +6,99 @@
 
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
-import { createPackageConfigMock } from '../../../../../../ingest_manager/common/mocks';
-import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
-import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { PackagePolicyServiceInterface } from '../../../../../../ingest_manager/server';
+import { createPackagePolicyServiceMock } from '../../../../../../ingest_manager/server/mocks';
+import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
-import {
-  ExceptionsCache,
-  Manifest,
-  buildArtifact,
-  getFullEndpointExceptionList,
-} from '../../../lib/artifacts';
-import { ManifestConstants } from '../../../lib/artifacts/common';
-import { InternalArtifactSchema } from '../../../schemas/artifacts';
+import LRU from 'lru-cache';
 import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager } from './manifest_manager';
+import {
+  createPackagePolicyWithManifestMock,
+  createPackagePolicyWithInitialManifestMock,
+  getMockManifest,
+  getMockArtifactsWithDiff,
+  getEmptyMockArtifacts,
+} from '../../../lib/artifacts/mocks';
 
-async function mockBuildExceptionListArtifacts(
-  os: string,
-  schemaVersion: string
-): Promise<InternalArtifactSchema[]> {
-  const mockExceptionClient = listMock.getExceptionListClient();
-  const first = getFoundExceptionListItemSchemaMock();
-  mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-  const exceptions = await getFullEndpointExceptionList(mockExceptionClient, os, schemaVersion);
-  return [await buildArtifact(exceptions, os, schemaVersion)];
-}
-
-export class ManifestManagerMock extends ManifestManager {
-  protected buildExceptionListArtifacts = jest
-    .fn()
-    .mockResolvedValue(mockBuildExceptionListArtifacts('linux', 'v1'));
-
-  public getLastDispatchedManifest = jest
-    .fn()
-    .mockResolvedValue(new Manifest(new Date(), 'v1', ManifestConstants.INITIAL_VERSION));
-
-  protected getManifestClient = jest
-    .fn()
-    .mockReturnValue(getManifestClientMock(this.savedObjectsClient));
+export enum ManifestManagerMockType {
+  InitialSystemState,
+  ListClientPromiseRejection,
+  NormalFlow,
 }
 
 export const getManifestManagerMock = (opts?: {
-  cache?: ExceptionsCache;
-  packageConfigService?: jest.Mocked<PackageConfigServiceInterface>;
+  mockType?: ManifestManagerMockType;
+  cache?: LRU<string, Buffer>;
+  exceptionListClient?: ExceptionListClient;
+  packagePolicyService?: jest.Mocked<PackagePolicyServiceInterface>;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
-}): ManifestManagerMock => {
-  let cache = new ExceptionsCache(5);
-  if (opts?.cache !== undefined) {
+}): ManifestManager => {
+  let cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
+  if (opts?.cache != null) {
     cache = opts.cache;
   }
 
-  let packageConfigService = createPackageConfigServiceMock();
-  if (opts?.packageConfigService !== undefined) {
-    packageConfigService = opts.packageConfigService;
+  let exceptionListClient = listMock.getExceptionListClient();
+  if (opts?.exceptionListClient != null) {
+    exceptionListClient = opts.exceptionListClient;
   }
-  packageConfigService.list = jest.fn().mockResolvedValue({
+
+  let packagePolicyService = createPackagePolicyServiceMock();
+  if (opts?.packagePolicyService != null) {
+    packagePolicyService = opts.packagePolicyService;
+  }
+  packagePolicyService.list = jest.fn().mockResolvedValue({
     total: 1,
-    items: [{ version: 'abcd', ...createPackageConfigMock() }],
+    items: [
+      { version: 'policy-1-version', ...createPackagePolicyWithManifestMock() },
+      { version: 'policy-2-version', ...createPackagePolicyWithInitialManifestMock() },
+      { version: 'policy-3-version', ...createPackagePolicyWithInitialManifestMock() },
+    ],
   });
 
   let savedObjectsClient = savedObjectsClientMock.create();
-  if (opts?.savedObjectsClient !== undefined) {
+  if (opts?.savedObjectsClient != null) {
     savedObjectsClient = opts.savedObjectsClient;
+  }
+
+  class ManifestManagerMock extends ManifestManager {
+    protected buildExceptionListArtifacts = jest.fn().mockImplementation(() => {
+      const mockType = opts?.mockType ?? ManifestManagerMockType.NormalFlow;
+      switch (mockType) {
+        case ManifestManagerMockType.InitialSystemState:
+          return getEmptyMockArtifacts();
+        case ManifestManagerMockType.ListClientPromiseRejection:
+          exceptionListClient.findExceptionListItem = jest
+            .fn()
+            .mockRejectedValue(new Error('unexpected thing happened'));
+          return super.buildExceptionListArtifacts('v1');
+        case ManifestManagerMockType.NormalFlow:
+          return getMockArtifactsWithDiff();
+      }
+    });
+
+    public getLastComputedManifest = jest.fn().mockImplementation(() => {
+      const mockType = opts?.mockType ?? ManifestManagerMockType.NormalFlow;
+      switch (mockType) {
+        case ManifestManagerMockType.InitialSystemState:
+          return null;
+        case ManifestManagerMockType.NormalFlow:
+          return getMockManifest({ compress: true });
+      }
+    });
+
+    protected getManifestClient = jest
+      .fn()
+      .mockReturnValue(getManifestClientMock(this.savedObjectsClient));
   }
 
   const manifestManager = new ManifestManagerMock({
     artifactClient: getArtifactClientMock(savedObjectsClient),
     cache,
-    packageConfigService,
-    exceptionListClient: listMock.getExceptionListClient(),
+    packagePolicyService,
+    exceptionListClient,
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
     savedObjectsClient,
   });

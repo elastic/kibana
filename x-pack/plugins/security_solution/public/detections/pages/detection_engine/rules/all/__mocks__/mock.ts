@@ -8,6 +8,7 @@ import { esFilters } from '../../../../../../../../../../src/plugins/data/public
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
+import { fillEmptySeverityMappings } from '../../helpers';
 
 export const mockQueryBar: FieldValueQueryBar = {
   query: {
@@ -164,8 +165,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
 });
 
 // TODO: update types mapping
-export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
-  isNew,
+export const mockAboutStepRule = (): AboutStepRule => ({
   author: ['Elastic'],
   isAssociatedToEndpointList: false,
   isBuildingBlock: false,
@@ -174,8 +174,8 @@ export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   license: 'Elastic License',
   name: 'Query with rule-id',
   description: '24/7',
-  severity: { value: 'low', mapping: [] },
-  riskScore: { value: 21, mapping: [] },
+  riskScore: { value: 21, mapping: [], isMappingChecked: false },
+  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   references: ['www.test.co'],
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],
@@ -199,16 +199,14 @@ export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   note: '# this is some markdown documentation',
 });
 
-export const mockActionsStepRule = (isNew = false, enabled = false): ActionsStepRule => ({
-  isNew,
+export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
   actions: [],
   kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
   enabled,
   throttle: 'no_actions',
 });
 
-export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
-  isNew,
+export const mockDefineStepRule = (): DefineStepRule => ({
   ruleType: 'query',
   anomalyThreshold: 50,
   machineLearningJobId: '',
@@ -224,8 +222,7 @@ export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   },
 });
 
-export const mockScheduleStepRule = (isNew = false): ScheduleStepRule => ({
-  isNew,
+export const mockScheduleStepRule = (): ScheduleStepRule => ({
   interval: '5m',
   from: '6m',
   to: 'now',

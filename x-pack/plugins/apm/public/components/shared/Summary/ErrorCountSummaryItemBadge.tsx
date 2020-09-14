@@ -19,7 +19,7 @@ const Badge = (styled(EuiBadge)`
   margin-top: ${px(units.eighth)};
 ` as unknown) as typeof EuiBadge;
 
-export const ErrorCountSummaryItemBadge = ({ count }: Props) => {
+export function ErrorCountSummaryItemBadge({ count }: Props) {
   const theme = useTheme();
 
   return (
@@ -31,4 +31,4 @@ export const ErrorCountSummaryItemBadge = ({ count }: Props) => {
       })}
     </Badge>
   );
-};
+}

@@ -9,8 +9,8 @@ import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
-import { uniquePidForProcess } from '../models/process_event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -54,6 +54,14 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
 /**
+ * Whether or not a given entity id is in the set of termination events.
+ */
+export const isProcessTerminated = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isProcessTerminated
+);
+
+/**
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
@@ -76,14 +84,14 @@ export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSele
 /**
  * If we need to fetch, this is the entity ID to fetch.
  */
-export const databaseDocumentIDToFetch = composeSelectors(
+export const treeParametersToFetch = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToFetch
+  dataSelectors.treeParametersToFetch
 );
 
-export const databaseDocumentIDToAbort = composeSelectors(
+export const treeRequestParametersToAbort = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToAbort
+  dataSelectors.treeRequestParametersToAbort
 );
 
 export const resolverComponentInstanceID = composeSelectors(
@@ -99,9 +107,23 @@ export const terminatedProcesses = composeSelectors(
 /**
  * Returns a map of `ResolverEvent` entity_id to their related event and alert statistics
  */
-export const relatedEventsStats = composeSelectors(
+export const relatedEventsStats: (
+  state: ResolverState
+) => (nodeID: string) => ResolverNodeStats | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsStats
+);
+
+/**
+ * This returns the "aggregate total" for related events, tallied as the sum
+ * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
+ * towards the aggregate total.
+ */
+export const relatedEventAggregateTotalByEntityId: (
+  state: ResolverState
+) => (nodeID: string) => number = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventAggregateTotalByEntityId
 );
 
 /**
@@ -110,6 +132,15 @@ export const relatedEventsStats = composeSelectors(
 export const relatedEventsByEntityId = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsByEntityId
+);
+
+/**
+ * Returns a function that returns the information needed to display related event details based on
+ * the related event's entityID and its own ID.
+ */
+export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventDisplayInfoByEntityAndSelfID
 );
 
 /**
@@ -142,26 +173,15 @@ export const relatedEventInfoByEntityId = composeSelectors(
 /**
  * Returns the id of the "current" tree node (fake-focused)
  */
-export const uiActiveDescendantId = composeSelectors(
+export const ariaActiveDescendant = composeSelectors(
   uiStateSelector,
-  uiSelectors.activeDescendantId
+  uiSelectors.ariaActiveDescendant
 );
 
 /**
- * Returns the id of the "selected" tree node (the node that is currently "pressed" and possibly controlling other popups / components)
+ * Returns the nodeID of the selected node
  */
-export const uiSelectedDescendantId = composeSelectors(
-  uiStateSelector,
-  uiSelectors.selectedDescendantId
-);
-
-/**
- * Returns the entity_id of the "selected" tree node's process
- */
-export const uiSelectedDescendantProcessId = composeSelectors(
-  uiStateSelector,
-  uiSelectors.selectedDescendantProcessId
-);
+export const selectedNode = composeSelectors(uiStateSelector, uiSelectors.selectedNode);
 
 /**
  * Returns the camera state from within ResolverState
@@ -187,12 +207,15 @@ function uiStateSelector(state: ResolverState) {
 /**
  * Whether or not the resolver is pending fetching data
  */
-export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
+export const isTreeLoading = composeSelectors(dataStateSelector, dataSelectors.isTreeLoading);
 
 /**
  * Whether or not the resolver encountered an error while fetching data
  */
-export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+export const hadErrorLoadingTree = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingTree
+);
 
 /**
  * True if the children cursor is not null
@@ -211,17 +234,6 @@ export const graphableProcesses = composeSelectors(
   dataStateSelector,
   dataSelectors.graphableProcesses
 );
-
-/**
- * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
- * concern-specific selector. `selector` should return the concern-specific state.
- */
-function composeSelectors<OuterState, InnerState, ReturnValue>(
-  selector: (state: OuterState) => InnerState,
-  secondSelector: (state: InnerState) => ReturnValue
-): (state: OuterState) => ReturnValue {
-  return (state) => secondSelector(selector(state));
-}
 
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
@@ -246,6 +258,7 @@ export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundi
   boundingBox
   /* eslint-enable no-shadow */
 ) {
+  // `boundingBox` and `nodesAndEdgelines` are each memoized.
   return (time: number) => nodesAndEdgelines(boundingBox(time));
 });
 
@@ -260,30 +273,65 @@ export const ariaLevel: (
 );
 
 /**
+ * the node ID of the node representing the databaseDocumentID
+ */
+export const originID: (state: ResolverState) => string | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.originID
+);
+
+/**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
- * If the node has a following sibling that is currently visible, that will be returned, otherwise null.
+ * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
 export const ariaFlowtoNodeID: (
   state: ResolverState
 ) => (time: number) => (nodeID: string) => string | null = createSelector(
   visibleNodesAndEdgeLines,
-  composeSelectors(dataStateSelector, dataSelectors.followingSibling),
-  (visibleNodesAndEdgeLinesAtTime, followingSibling) => {
+  composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
+  (visibleNodesAndEdgeLinesAtTime, ariaFlowtoCandidate) => {
     return defaultMemoize((time: number) => {
       // get the visible nodes at `time`
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
 
       // get a `Set` containing their node IDs
-      const nodesVisibleAtTime: Set<string> = new Set(
-        [...processNodePositions.keys()].map(uniquePidForProcess)
-      );
+      const nodesVisibleAtTime: Set<string> = new Set();
+      // NB: in practice, any event that has been graphed is guaranteed to have an entity_id
+      for (const visibleEvent of processNodePositions.keys()) {
+        const nodeID = entityIDSafeVersion(visibleEvent);
+        if (nodeID !== undefined) {
+          nodesVisibleAtTime.add(nodeID);
+        }
+      }
 
       // return the ID of `nodeID`'s following sibling, if it is visible
       return (nodeID: string): string | null => {
-        const sibling: string | null = followingSibling(nodeID);
+        const flowtoNode: string | null = ariaFlowtoCandidate(nodeID);
 
-        return sibling === null || nodesVisibleAtTime.has(sibling) === false ? null : sibling;
+        return flowtoNode === null || nodesVisibleAtTime.has(flowtoNode) === false
+          ? null
+          : flowtoNode;
       };
     });
   }
 );
+
+/**
+ * The legacy `crumbEvent` and `crumbId` parameters.
+ * @deprecated
+ */
+export const breadcrumbParameters = composeSelectors(
+  uiStateSelector,
+  uiSelectors.breadcrumbParameters
+);
+
+/**
+ * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
+ * concern-specific selector. `selector` should return the concern-specific state.
+ */
+function composeSelectors<OuterState, InnerState, ReturnValue>(
+  selector: (state: OuterState) => InnerState,
+  secondSelector: (state: InnerState) => ReturnValue
+): (state: OuterState) => ReturnValue {
+  return (state) => secondSelector(selector(state));
+}

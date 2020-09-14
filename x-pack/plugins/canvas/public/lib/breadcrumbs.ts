@@ -24,6 +24,5 @@ export const getWorkpadBreadcrumb = ({
 };
 
 export const setBreadcrumb = (paths: ChromeBreadcrumb | ChromeBreadcrumb[]) => {
-  const setBreadCrumbs = platformService.getService().coreStart.chrome.setBreadcrumbs;
-  setBreadCrumbs(Array.isArray(paths) ? paths : [paths]);
+  platformService.getService().setBreadcrumbs(Array.isArray(paths) ? paths : [paths]);
 };

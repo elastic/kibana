@@ -9,7 +9,6 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { StickyContainer } from 'react-sticky';
 
 import { esQuery } from '../../../../../../src/plugins/data/public';
 import { SecurityPageName } from '../../app/types';
@@ -41,6 +40,11 @@ import { OverviewEmpty } from '../../overview/components/overview_empty';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
 import { NetworkRouteType } from './navigation/types';
+import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../timelines/store/timeline';
+import { TimelineId } from '../../../common/types/timeline';
+import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../timelines/store/timeline/model';
 
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
@@ -48,6 +52,7 @@ const sourceId = 'default';
 const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
   ({
     filters,
+    graphEventId,
     query,
     setAbsoluteRangeDatePicker,
     networkPagePath,
@@ -57,7 +62,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
     const { to, from, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useFullScreen();
     const kibana = useKibana();
-    const { tabName } = useParams();
+    const { tabName } = useParams<{ tabName: string }>();
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.alerts) {
@@ -98,9 +103,9 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
     return (
       <>
         {indicesExist ? (
-          <StickyContainer>
+          <>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal>
+            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
@@ -171,7 +176,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
                 <NetworkRoutesLoading />
               )}
             </WrapperPage>
-          </StickyContainer>
+          </>
         ) : (
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />
@@ -189,10 +194,18 @@ NetworkComponent.displayName = 'NetworkComponent';
 const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const mapStateToProps = (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const mapStateToProps = (state: State) => {
+    const timeline: TimelineModel =
+      getTimeline(state, TimelineId.networkPageExternalAlerts) ?? timelineDefaults;
+    const { graphEventId } = timeline;
+
+    return {
+      query: getGlobalQuerySelector(state),
+      filters: getGlobalFiltersQuerySelector(state),
+      graphEventId,
+    };
+  };
   return mapStateToProps;
 };
 

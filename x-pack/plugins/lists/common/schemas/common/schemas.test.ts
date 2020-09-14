@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import {
   EsDataTypeGeoPoint,
@@ -16,6 +16,8 @@ import {
   EsDataTypeRangeTerm,
   EsDataTypeSingle,
   EsDataTypeUnion,
+  ExceptionListTypeEnum,
+  OperatorEnum,
   Type,
   esDataTypeGeoPoint,
   esDataTypeGeoPointRange,
@@ -25,60 +27,10 @@ import {
   esDataTypeUnion,
   exceptionListType,
   operator,
-  operator_type as operatorType,
   type,
 } from './schemas';
 
 describe('Common schemas', () => {
-  describe('operatorType', () => {
-    test('it should validate for "match"', () => {
-      const payload = 'match';
-      const decoded = operatorType.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
-    test('it should validate for "match_any"', () => {
-      const payload = 'match_any';
-      const decoded = operatorType.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
-    test('it should validate for "list"', () => {
-      const payload = 'list';
-      const decoded = operatorType.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
-    test('it should validate for "exists"', () => {
-      const payload = 'exists';
-      const decoded = operatorType.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
-    test('it should contain 4 keys', () => {
-      // Might seem like a weird test, but its meant to
-      // ensure that if operatorType is updated, you
-      // also update the OperatorTypeEnum, a workaround
-      // for io-ts not yet supporting enums
-      // https://github.com/gcanti/io-ts/issues/67
-      const keys = Object.keys(operatorType.keys);
-
-      expect(keys.length).toEqual(4);
-    });
-  });
-
   describe('operator', () => {
     test('it should validate for "included"', () => {
       const payload = 'included';
@@ -98,15 +50,16 @@ describe('Common schemas', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should contain 2 keys', () => {
+    test('it should contain same amount of keys as enum', () => {
       // Might seem like a weird test, but its meant to
       // ensure that if operator is updated, you
       // also update the operatorEnum, a workaround
       // for io-ts not yet supporting enums
       // https://github.com/gcanti/io-ts/issues/67
-      const keys = Object.keys(operator.keys);
+      const keys = Object.keys(operator.keys).sort().join(',').toLowerCase();
+      const enumKeys = Object.keys(OperatorEnum).sort().join(',').toLowerCase();
 
-      expect(keys.length).toEqual(2);
+      expect(keys).toEqual(enumKeys);
     });
   });
 
@@ -129,15 +82,16 @@ describe('Common schemas', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should contain 2 keys', () => {
+    test('it should contain same amount of keys as enum', () => {
       // Might seem like a weird test, but its meant to
       // ensure that if exceptionListType is updated, you
       // also update the ExceptionListTypeEnum, a workaround
       // for io-ts not yet supporting enums
       // https://github.com/gcanti/io-ts/issues/67
-      const keys = Object.keys(exceptionListType.keys);
+      const keys = Object.keys(exceptionListType.keys).sort().join(',').toLowerCase();
+      const enumKeys = Object.keys(ExceptionListTypeEnum).sort().join(',').toLowerCase();
 
-      expect(keys.length).toEqual(2);
+      expect(keys).toEqual(enumKeys);
     });
   });
 

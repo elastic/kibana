@@ -7,8 +7,8 @@ export * from './plugin';
 export * from './routes';
 
 export * from './agent';
-export * from './agent_config';
-export * from './package_config';
+export * from './agent_policy';
+export * from './package_policy';
 export * from './epm';
 export * from './output';
 export * from './enrollment_api_key';

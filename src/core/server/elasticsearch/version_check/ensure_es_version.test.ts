@@ -28,8 +28,8 @@ const mockLogger = mockLoggerFactory.get('mock logger');
 
 const KIBANA_VERSION = '5.1.0';
 
-const createEsSuccess = elasticsearchClientMock.createClientResponse;
-const createEsError = elasticsearchClientMock.createClientError;
+const createEsSuccess = elasticsearchClientMock.createSuccessTransportRequestPromise;
+const createEsError = elasticsearchClientMock.createErrorTransportRequestPromise;
 
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;

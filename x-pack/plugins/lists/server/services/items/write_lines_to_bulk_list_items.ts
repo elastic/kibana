@@ -16,6 +16,7 @@ import {
   MetaOrUndefined,
   SerializerOrUndefined,
   Type,
+  Version,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 
@@ -34,6 +35,7 @@ export interface ImportListItemsToStreamOptions {
   type: Type;
   user: string;
   meta: MetaOrUndefined;
+  version: Version;
 }
 
 export const importListItemsToStream = ({
@@ -48,6 +50,7 @@ export const importListItemsToStream = ({
   type,
   user,
   meta,
+  version,
 }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
   return new Promise<ListSchema | null>((resolve) => {
     const readBuffer = new BufferLines({ bufferSize: config.importBufferSize, input: stream });
@@ -62,12 +65,14 @@ export const importListItemsToStream = ({
           description: `File uploaded from file system of ${fileNameEmitted}`,
           deserializer,
           id: fileNameEmitted,
+          immutable: false,
           listIndex,
           meta,
           name: fileNameEmitted,
           serializer,
           type,
           user,
+          version,
         });
       }
       readBuffer.resume();

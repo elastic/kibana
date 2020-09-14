@@ -5,7 +5,9 @@
  */
 
 // Exports to be shared with plugins
+export { withOptionalSignal } from './common/with_optional_signal';
 export { useIsMounted } from './common/hooks/use_is_mounted';
+export { useAsync } from './common/hooks/use_async';
 export { useApi } from './exceptions/hooks/use_api';
 export { usePersistExceptionItem } from './exceptions/hooks/persist_exception_item';
 export { usePersistExceptionList } from './exceptions/hooks/persist_exception_list';

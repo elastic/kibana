@@ -20,7 +20,7 @@ interface Props {
   appLink?: AppLink;
 }
 
-export const SectionContainer = ({ title, appLink, children, hasError }: Props) => {
+export function SectionContainer({ title, appLink, children, hasError }: Props) {
   const { core } = usePluginContext();
   return (
     <EuiAccordion
@@ -55,4 +55,4 @@ export const SectionContainer = ({ title, appLink, children, hasError }: Props) 
       </>
     </EuiAccordion>
   );
-};
+}

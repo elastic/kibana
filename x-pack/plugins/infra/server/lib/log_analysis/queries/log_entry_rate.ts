@@ -162,7 +162,7 @@ export const logRateModelPlotBucketRT = rt.type({
 
 export type LogRateModelPlotBucket = rt.TypeOf<typeof logRateModelPlotBucketRT>;
 
-export const logRateModelPlotResponseRT = rt.type({
+export const logRateModelPlotResponseRT = rt.partial({
   aggregations: rt.type({
     timestamp_partition_buckets: rt.intersection([
       rt.type({

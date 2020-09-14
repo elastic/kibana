@@ -12,19 +12,17 @@ import styled from 'styled-components';
 
 import { useKibana } from '../../lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
-import { hasMlAdminPermissions } from '../../../../common/machine_learning/has_ml_admin_permissions';
 import { errorToToaster, useStateToaster, ActionToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
 import { filterJobs } from './helpers';
-import { useSiemJobs } from './hooks/use_siem_jobs';
 import { JobsTableFilters } from './jobs_table/filters/jobs_table_filters';
 import { JobsTable } from './jobs_table/jobs_table';
 import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
 import * as i18n from './translations';
-import { JobsFilters, SiemJob } from './types';
+import { JobsFilters, SecurityJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
-import { useMlCapabilities } from './hooks/use_ml_capabilities';
+import { useSecurityJobs } from './hooks/use_security_jobs';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
@@ -87,24 +85,25 @@ export const MlPopover = React.memo(() => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
+  const { isMlAdmin, isLicensed, loading: isLoadingSecurityJobs, jobs } = useSecurityJobs(
+    refreshToggle
+  );
   const [, dispatchToaster] = useStateToaster();
-  const capabilities = useMlCapabilities();
   const docLinks = useKibana().services.docLinks;
   const handleJobStateChange = useCallback(
-    (job: SiemJob, latestTimestampMs: number, enable: boolean) =>
+    (job: SecurityJob, latestTimestampMs: number, enable: boolean) =>
       enableDatafeed(job, latestTimestampMs, enable, dispatch, dispatchToaster),
     [dispatch, dispatchToaster]
   );
 
   const filteredJobs = filterJobs({
-    jobs: siemJobs,
+    jobs,
     ...filterProperties,
   });
 
-  const incompatibleJobCount = siemJobs.filter((j) => !j.isCompatible).length;
+  const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
 
-  if (!capabilities.isPlatinumOrTrialLicense) {
+  if (!isLicensed) {
     // If the user does not have platinum show upgrade UI
     return (
       <EuiPopover
@@ -127,7 +126,7 @@ export const MlPopover = React.memo(() => {
         <UpgradeContents />
       </EuiPopover>
     );
-  } else if (hasMlAdminPermissions(capabilities)) {
+  } else if (isMlAdmin) {
     // If the user has Platinum License & ML Admin Permissions, show Anomaly Detection button & full config UI
     return (
       <EuiPopover
@@ -156,7 +155,7 @@ export const MlPopover = React.memo(() => {
 
           <EuiSpacer />
 
-          <JobsTableFilters siemJobs={siemJobs} onFilterChanged={setFilterProperties} />
+          <JobsTableFilters securityJobs={jobs} onFilterChanged={setFilterProperties} />
 
           <ShowingCount filterResultsLength={filteredJobs.length} />
 
@@ -194,7 +193,7 @@ export const MlPopover = React.memo(() => {
           )}
 
           <JobsTable
-            isLoading={isLoadingSiemJobs || isLoading}
+            isLoading={isLoadingSecurityJobs || isLoading}
             jobs={filteredJobs}
             onJobStateChange={handleJobStateChange}
           />
@@ -209,7 +208,7 @@ export const MlPopover = React.memo(() => {
 
 // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
 const enableDatafeed = async (
-  job: SiemJob,
+  job: SecurityJob,
   latestTimestampMs: number,
   enable: boolean,
   dispatch: Dispatch<Action>,
@@ -257,7 +256,7 @@ const enableDatafeed = async (
   dispatch({ type: 'refresh' });
 };
 
-const submitTelemetry = (job: SiemJob, enabled: boolean) => {
+const submitTelemetry = (job: SecurityJob, enabled: boolean) => {
   // Report type of job enabled/disabled
   track(
     METRIC_TYPE.COUNT,

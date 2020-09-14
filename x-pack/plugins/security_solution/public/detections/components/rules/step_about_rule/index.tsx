@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
   RuleStepProps,
   RuleStep,
@@ -20,13 +22,14 @@ import { AddMitreThreat } from '../mitre';
 import {
   Field,
   Form,
-  FormDataProvider,
   getUseField,
   UseField,
   useForm,
+  useFormData,
+  FieldHook,
 } from '../../../../shared_imports';
 
-import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
+import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema } from './schema';
@@ -58,26 +61,6 @@ const TagContainer = styled.div`
 
 TagContainer.displayName = 'TagContainer';
 
-const AdvancedSettingsAccordion = styled(EuiAccordion)`
-  .euiAccordion__iconWrapper {
-    display: none;
-  }
-
-  .euiAccordion__childWrapper {
-    transition-duration: 1ms; /* hack to fire Step accordion to set proper content's height */
-  }
-
-  &.euiAccordion-isOpen .euiButtonEmpty__content > svg {
-    transform: rotate(90deg);
-  }
-`;
-
-const AdvancedSettingsAccordionButton = (
-  <EuiButtonEmpty flush="left" size="s" iconType="arrowRight">
-    {I18n.ADVANCED_SETTINGS}
-  </EuiButtonEmpty>
-);
-
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
   defaultValues,
@@ -86,42 +69,69 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isReadOnlyView,
   isUpdateView = false,
   isLoading,
+  onSubmit,
   setForm,
-  setStepData,
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
-  const [myStepData, setMyStepData] = useState<AboutStepRule>(initialState);
+  const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    defineRuleData?.index ?? []
+    defineRuleData?.index ?? [],
+    RuleStep.aboutRule
   );
+  const canUseExceptions =
+    defineRuleData?.ruleType &&
+    !isMlRule(defineRuleData.ruleType) &&
+    !isThresholdRule(defineRuleData.ruleType);
 
-  const { form } = useForm({
+  const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, submit } = form;
+  const { getFields, getFormData, submit } = form;
+  const [{ severity: formSeverity }] = (useFormData({
+    form,
+    watch: ['severity'],
+  }) as unknown) as [Partial<AboutStepRule>];
 
-  const onSubmit = useCallback(async () => {
-    if (setStepData) {
-      setStepData(RuleStep.aboutRule, null, false);
-      const { isValid, data } = await submit();
-      if (isValid) {
-        setStepData(RuleStep.aboutRule, data, isValid);
-        setMyStepData({ ...data, isNew: false } as AboutStepRule);
+  useEffect(() => {
+    const formSeverityValue = formSeverity?.value;
+    if (formSeverityValue != null && formSeverityValue !== severityValue) {
+      setSeverityValue(formSeverityValue);
+
+      const newRiskScoreValue = defaultRiskScoreBySeverity[formSeverityValue];
+      if (newRiskScoreValue != null) {
+        const riskScoreField = getFields().riskScore as FieldHook<AboutStepRule['riskScore']>;
+        riskScoreField.setValue({ ...riskScoreField.value, value: newRiskScoreValue });
       }
     }
-  }, [setStepData, submit]);
+  }, [formSeverity?.value, getFields, severityValue]);
+
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result?.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
+
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit();
+    }
+  }, [onSubmit]);
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.aboutRule, form);
+      setForm(RuleStep.aboutRule, getData);
     }
-  }, [setForm, form]);
+  }, [getData, setForm]);
 
-  return isReadOnlyView && myStepData.name != null ? (
+  return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={initialState} />
     </StepContentWrapper>
   ) : (
     <>
@@ -157,7 +167,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="severity"
               component={SeverityField}
               componentProps={{
-                'data-test-subj': 'detectionEngineStepAboutRuleSeverityField',
+                dataTestSubj: 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
@@ -171,7 +181,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="riskScore"
               component={RiskScoreField}
               componentProps={{
-                'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
+                dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
                 indices: indexPatterns,
@@ -193,10 +203,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
           </TagContainer>
           <EuiSpacer size="l" />
-          <AdvancedSettingsAccordion
+          <EuiAccordion
             data-test-subj="advancedSettings"
             id="advancedSettingsAccordion"
-            buttonContent={AdvancedSettingsAccordionButton}
+            buttonContent={I18n.ADVANCED_SETTINGS}
           >
             <EuiSpacer size="l" />
             <UseField
@@ -274,8 +284,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   euiFieldProps: {
-                    fullWidth: true,
-                    isDisabled: isLoading,
+                    disabled: isLoading || !canUseExceptions,
                   },
                 }}
               />
@@ -287,8 +296,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleBuildingBlock',
                   'data-test-subj': 'detectionEngineStepAboutRuleBuildingBlock',
                   euiFieldProps: {
-                    fullWidth: true,
-                    isDisabled: isLoading,
+                    disabled: isLoading,
                   },
                 }}
               />
@@ -319,27 +327,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 placeholder: '',
               }}
             />
-          </AdvancedSettingsAccordion>
-          <FormDataProvider pathsToWatch="severity">
-            {({ severity }) => {
-              const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-              const severityField = getFields().severity;
-              const riskScoreField = getFields().riskScore;
-              if (
-                severityField.value !== severity &&
-                newRiskScore != null &&
-                riskScoreField.value !== newRiskScore
-              ) {
-                riskScoreField.setValue(newRiskScore);
-              }
-              return null;
-            }}
-          </FormDataProvider>
+          </EuiAccordion>
         </Form>
       </StepContentWrapper>
 
       {!isUpdateView && (
-        <NextStep dataTestSubj="about-continue" onClick={onSubmit} isDisabled={isLoading} />
+        <NextStep dataTestSubj="about-continue" onClick={handleSubmit} isDisabled={isLoading} />
       )}
     </>
   );

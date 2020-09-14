@@ -72,6 +72,7 @@ export function runFailedTestsReporterCli() {
       }
 
       const patterns = flags._.length ? flags._ : DEFAULT_PATTERNS;
+      log.info('Searching for reports at', patterns);
       const reportPaths = await globby(patterns, {
         absolute: true,
       });
@@ -80,6 +81,7 @@ export function runFailedTestsReporterCli() {
         throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
       }
 
+      log.info('found', reportPaths.length, 'junit reports', reportPaths);
       const newlyCreatedIssues: Array<{
         failure: TestFailure;
         newIssue: GithubIssueMini;

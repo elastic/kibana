@@ -55,6 +55,13 @@ function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
 interface Options {
   /** absolute path to root of the repo/build */
   repoRoot: string;
+  /**
+   * absolute path to the root directory where output should be written to. This
+   * defaults to the repoRoot but can be customized to write output somewhere else.
+   *
+   * This is how we write output to the build directory in the Kibana build tasks.
+   */
+  outputRoot?: string;
   /** enable to run the optimizer in watch mode */
   watch?: boolean;
   /** the maximum number of workers that will be created */
@@ -107,8 +114,9 @@ interface Options {
   themes?: ThemeTag | '*' | ThemeTag[];
 }
 
-interface ParsedOptions {
+export interface ParsedOptions {
   repoRoot: string;
+  outputRoot: string;
   watch: boolean;
   maxWorkerCount: number;
   profileWebpack: boolean;
@@ -137,6 +145,11 @@ export class OptimizerConfig {
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
       throw new TypeError('repoRoot must be an absolute path');
+    }
+
+    const outputRoot = options.outputRoot ?? repoRoot;
+    if (!Path.isAbsolute(outputRoot)) {
+      throw new TypeError('outputRoot must be an absolute path');
     }
 
     /**
@@ -182,6 +195,7 @@ export class OptimizerConfig {
       watch,
       dist,
       repoRoot,
+      outputRoot,
       maxWorkerCount,
       profileWebpack,
       cache,
@@ -206,11 +220,11 @@ export class OptimizerConfig {
               publicDirNames: ['public', 'public/utils'],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
-              outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
+              outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
             }),
           ]
         : []),
-      ...getPluginBundles(plugins, options.repoRoot),
+      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
     ];
 
     return new OptimizerConfig(

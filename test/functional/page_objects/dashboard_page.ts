@@ -294,6 +294,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
 
         if (saveOptions.needsConfirm) {
+          await this.ensureDuplicateTitleCallout();
           await this.clickSave();
         }
 

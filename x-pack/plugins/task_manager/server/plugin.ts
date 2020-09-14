@@ -42,7 +42,7 @@ export class TaskManagerPlugin
       .toPromise();
 
     setupSavedObjects(core.savedObjects, this.config);
-    this.taskManagerId = core.uuid.getInstanceUuid();
+    this.taskManagerId = this.initContext.env.instanceUuid;
 
     return {
       addMiddleware: (middleware: Middleware) => {

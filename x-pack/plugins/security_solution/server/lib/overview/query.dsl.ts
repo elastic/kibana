@@ -142,57 +142,167 @@ export const buildOverviewHostQuery = ({
         },
         endgame_module: {
           filter: {
-            term: {
-              'event.module': 'endgame',
+            bool: {
+              should: [
+                {
+                  term: { 'event.module': 'endpoint' },
+                },
+                {
+                  term: {
+                    'event.module': 'endgame',
+                  },
+                },
+              ],
             },
           },
           aggs: {
             dns_event_count: {
               filter: {
-                term: {
-                  'endgame.event_type_full': 'dns_event',
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          { term: { 'network.protocol': 'dns' } },
+                          { term: { 'event.category': 'network' } },
+                        ],
+                      },
+                    },
+                    {
+                      term: {
+                        'endgame.event_type_full': 'dns_event',
+                      },
+                    },
+                  ],
                 },
               },
             },
             file_event_count: {
               filter: {
-                term: {
-                  'endgame.event_type_full': 'file_event',
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'event.category': 'file',
+                      },
+                    },
+                    {
+                      term: {
+                        'endgame.event_type_full': 'file_event',
+                      },
+                    },
+                  ],
                 },
               },
             },
             image_load_event_count: {
               filter: {
-                term: {
-                  'endgame.event_type_full': 'image_load_event',
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            term: {
+                              'event.category': 'library',
+                            },
+                          },
+                          {
+                            term: {
+                              'event.category': 'driver',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      term: {
+                        'endgame.event_type_full': 'image_load_event',
+                      },
+                    },
+                  ],
                 },
               },
             },
             network_event_count: {
               filter: {
-                term: {
-                  'endgame.event_type_full': 'network_event',
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            bool: {
+                              must_not: {
+                                term: { 'network.protocol': 'dns' },
+                              },
+                            },
+                          },
+                          {
+                            term: { 'event.category': 'network' },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      term: {
+                        'endgame.event_type_full': 'network_event',
+                      },
+                    },
+                  ],
                 },
               },
             },
             process_event_count: {
               filter: {
-                term: {
-                  'endgame.event_type_full': 'process_event',
+                bool: {
+                  should: [
+                    {
+                      term: { 'event.category': 'process' },
+                    },
+                    {
+                      term: {
+                        'endgame.event_type_full': 'process_event',
+                      },
+                    },
+                  ],
                 },
               },
             },
             registry_event: {
               filter: {
-                term: {
-                  'endgame.event_type_full': 'registry_event',
+                bool: {
+                  should: [
+                    {
+                      term: { 'event.category': 'registry' },
+                    },
+                    {
+                      term: {
+                        'endgame.event_type_full': 'registry_event',
+                      },
+                    },
+                  ],
                 },
               },
             },
             security_event_count: {
               filter: {
-                term: {
-                  'endgame.event_type_full': 'security_event',
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          { term: { 'event.category': 'session' } },
+                          { term: { 'event.category': 'authentication' } },
+                        ],
+                      },
+                    },
+                    {
+                      term: {
+                        'endgame.event_type_full': 'security_event',
+                      },
+                    },
+                  ],
                 },
               },
             },

@@ -7,7 +7,7 @@ import { getDerivedServiceAnnotations } from './get_derived_service_annotations'
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../../public/utils/testHelpers';
+} from '../../../utils/test_helpers';
 import noVersions from './__fixtures__/no_versions.json';
 import oneVersion from './__fixtures__/one_version.json';
 import multipleVersions from './__fixtures__/multiple_versions.json';

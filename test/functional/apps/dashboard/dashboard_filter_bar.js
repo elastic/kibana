@@ -30,8 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/71987
-  describe.skip('dashboard filter bar', () => {
+  describe('dashboard filter bar', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -68,7 +67,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('uses default index pattern on an empty dashboard', async () => {
         await testSubjects.click('addFilter');
-        await dashboardExpect.fieldSuggestions(['bytes']);
+        await dashboardExpect.fieldSuggestions(['agent']);
+        await filterBar.ensureFieldEditorModalIsClosed();
       });
 
       it('shows index pattern of vis when one is added', async () => {
@@ -77,6 +77,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
         await dashboardExpect.fieldSuggestions(['animal']);
+        await filterBar.ensureFieldEditorModalIsClosed();
       });
 
       it('works when a vis with no index pattern is added', async () => {
@@ -171,8 +172,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('saved search filtering', function () {
-      // https://github.com/elastic/kibana/issues/47286#issuecomment-644687577
-      this.tags('skipCoverage');
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();

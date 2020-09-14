@@ -55,6 +55,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
             )
           );
         }
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 

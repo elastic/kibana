@@ -75,7 +75,11 @@ export const DetailsStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
           <EuiDescriptionList compressed listItems={detailsFirstCol} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiDescriptionList compressed listItems={detailsSecondCol} />
+          <EuiDescriptionList
+            style={{ wordBreak: 'break-word' }}
+            compressed
+            listItems={detailsSecondCol}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiDescriptionList compressed listItems={detailsThirdCol} />

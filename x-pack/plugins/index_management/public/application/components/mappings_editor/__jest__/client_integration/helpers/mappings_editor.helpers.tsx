@@ -7,9 +7,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
+import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import { registerTestBed, TestBed } from '../../../../../../../../../test_utils';
 import { getChildFieldsName } from '../../../lib';
 import { MappingsEditor } from '../../../mappings_editor';
+import { MappingsEditorProvider } from '../../../mappings_editor_context';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -50,6 +52,8 @@ jest.mock('@elastic/eui', () => {
     ),
   };
 });
+
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export interface DomFields {
   [key: string]: {
@@ -247,7 +251,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 };
 
 export const setup = (props: any = { onUpdate() {} }): MappingsEditorTestBed => {
-  const setupTestBed = registerTestBed<TestSubjects>(MappingsEditor, {
+  const ComponentToTest = (propsOverride: { [key: string]: any }) => (
+    <MappingsEditorProvider>
+      <GlobalFlyoutProvider>
+        <MappingsEditor {...props} {...propsOverride} />
+      </GlobalFlyoutProvider>
+    </MappingsEditorProvider>
+  );
+
+  const setupTestBed = registerTestBed<TestSubjects>(ComponentToTest, {
     memoryRouter: {
       wrapComponent: false,
     },

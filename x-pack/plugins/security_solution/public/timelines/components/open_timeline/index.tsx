@@ -11,6 +11,7 @@ import { Dispatch } from 'redux';
 
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../graphql/types';
 import { State } from '../../../common/store';
+import { TimelineId } from '../../../../common/types/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -126,7 +127,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     });
     const {
       timelineStatus,
-      templateTimelineType,
       templateTimelineFilter,
       installPrepackagedTimelines,
     } = useTimelineStatus({
@@ -147,7 +147,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         },
         onlyUserFavorite: onlyFavorites,
         timelineType,
-        templateTimelineType,
         status: timelineStatus,
       });
     }, [
@@ -159,7 +158,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       sortDirection,
       timelineType,
       timelineStatus,
-      templateTimelineType,
       onlyFavorites,
     ]);
 
@@ -195,7 +193,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
         if (timelineIds.includes(timeline.savedObjectId || '')) {
-          createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
+          createNewTimeline({ id: TimelineId.active, columns: defaultHeaders, show: false });
         }
 
         await apolloClient.mutate<
@@ -329,6 +327,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sortField={sortField}
         templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
+        timelineStatus={timelineStatus}
         timelineFilter={timelineTabs}
         title={title}
         totalSearchResultsCount={totalCount}
@@ -359,6 +358,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sortField={sortField}
         templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
+        timelineStatus={timelineStatus}
         timelineFilter={timelineFilters}
         title={title}
         totalSearchResultsCount={totalCount}
@@ -370,7 +370,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
-    const timeline = getTimeline(state, 'timeline-1') ?? timelineDefaults;
+    const timeline = getTimeline(state, TimelineId.active) ?? timelineDefaults;
     return {
       timeline,
     };

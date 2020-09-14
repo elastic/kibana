@@ -47,14 +47,14 @@ export const OverviewDatastreamSection: React.FC = () => {
     <EuiFlexItem component="section">
       <OverviewPanel
         title={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTitle', {
-          defaultMessage: 'Datasets',
+          defaultMessage: 'Data streams',
         })}
         tooltip={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTooltip', {
-          defaultMessage: 'Data that your agents collect are organized into various datasets.',
+          defaultMessage: 'Data that your agents collect are organized into various data streams.',
         })}
         linkTo={getHref('data_streams')}
         linkToText={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelAction', {
-          defaultMessage: 'View datasets',
+          defaultMessage: 'View data streams',
         })}
       >
         <OverviewStats>
@@ -65,7 +65,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewDatastreamTotalTitle"
-                  defaultMessage="Datasets"
+                  defaultMessage="Data streams"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>

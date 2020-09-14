@@ -3,20 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { createHashHistory } from 'history';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
 import { PluginContext } from '../context/plugin_context';
-import { useRouteParams } from '../hooks/use_route_params';
-import { routes } from '../routes';
 import { usePluginContext } from '../hooks/use_plugin_context';
+import { useRouteParams } from '../hooks/use_route_params';
+import { Breadcrumbs, routes } from '../routes';
 
-const App = () => {
+const observabilityLabelBreadcrumb = {
+  text: i18n.translate('xpack.observability.observability.breadcrumb.', {
+    defaultMessage: 'Observability',
+  }),
+};
+
+function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
+  return breadcrumbs.map(({ text }) => text).reverse();
+}
+
+function App() {
   return (
     <>
       <Switch>
@@ -25,16 +34,12 @@ const App = () => {
           const route = routes[path];
           const Wrapper = () => {
             const { core } = usePluginContext();
+
+            const breadcrumb = [observabilityLabelBreadcrumb, ...route.breadcrumb];
             useEffect(() => {
-              core.chrome.setBreadcrumbs([
-                {
-                  text: i18n.translate('xpack.observability.observability.breadcrumb.', {
-                    defaultMessage: 'Observability',
-                  }),
-                },
-                ...route.breadcrumb,
-              ]);
-            }, [core]);
+              core.chrome.setBreadcrumbs(breadcrumb);
+              core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumb));
+            }, [core, breadcrumb]);
 
             const { query, path: pathParams } = useRouteParams(route.params);
             return route.handler({ query, path: pathParams });
@@ -44,12 +49,12 @@ const App = () => {
       </Switch>
     </>
   );
-};
+}
 
-export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
+export const renderApp = (core: CoreStart, { element, history }: AppMountParameters) => {
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
-  const history = createHashHistory();
+
   ReactDOM.render(
     <PluginContext.Provider value={{ core }}>
       <Router history={history}>

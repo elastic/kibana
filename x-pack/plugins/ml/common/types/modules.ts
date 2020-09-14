@@ -30,6 +30,7 @@ export interface KibanaObject {
   title: string;
   config: KibanaObjectConfig;
   exists?: boolean;
+  error?: any;
 }
 
 export interface KibanaObjects {

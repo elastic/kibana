@@ -5,7 +5,7 @@
  */
 import React, { useMemo, useCallback, useRef } from 'react';
 
-import { useMappingsState, useDispatch } from '../../../mappings_state';
+import { useMappingsState, useDispatch } from '../../../mappings_state_context';
 import { NormalizedField } from '../../../types';
 import { FieldsListItem } from './fields_list_item';
 

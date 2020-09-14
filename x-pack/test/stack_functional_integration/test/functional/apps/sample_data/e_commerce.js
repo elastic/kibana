@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
-      await PageObjects.common.navigateToUrl('home', '/home/tutorial_directory/sampleData', {
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
         insertTimestamp: false,
       });

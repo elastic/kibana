@@ -5,7 +5,7 @@
  */
 
 import { Request, Server } from 'hapi';
-import { PLUGIN } from '../common/constants';
+import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
@@ -35,51 +35,42 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
+    management: {
+      insightsAndAlerting: ['triggersActions'],
+    },
+    alerting: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
     privileges: {
       all: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: [
-          'uptime-read',
-          'uptime-write',
-          'actions-read',
-          'actions-all',
-          'alerting-read',
-          'alerting-all',
-        ],
+        api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
-          all: [umDynamicSettings.name, 'alert', 'action', 'action_task_params'],
+          all: [umDynamicSettings.name, 'alert'],
           read: [],
         },
-        ui: [
-          'save',
-          'configureSettings',
-          'show',
-          'alerting:show',
-          'actions:show',
-          'alerting:save',
-          'actions:save',
-          'alerting:delete',
-          'actions:delete',
-        ],
+        alerting: {
+          all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+        },
+        management: {
+          insightsAndAlerting: ['triggersActions'],
+        },
+        ui: ['save', 'configureSettings', 'show', 'alerting:save'],
       },
       read: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+        api: ['uptime-read', 'lists-read'],
         savedObject: {
-          all: ['alert', 'action', 'action_task_params'],
+          all: ['alert'],
           read: [umDynamicSettings.name],
         },
-        ui: [
-          'show',
-          'alerting:show',
-          'actions:show',
-          'alerting:save',
-          'actions:save',
-          'alerting:delete',
-          'actions:delete',
-        ],
+        alerting: {
+          all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+        },
+        management: {
+          insightsAndAlerting: ['triggersActions'],
+        },
+        ui: ['show', 'alerting:save'],
       },
     },
   });

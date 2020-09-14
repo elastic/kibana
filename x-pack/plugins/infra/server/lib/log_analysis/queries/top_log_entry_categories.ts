@@ -159,7 +159,7 @@ export type LogEntryCategoryBucket = rt.TypeOf<typeof logEntryCategoryBucketRT>;
 
 export const topLogEntryCategoriesResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
-  rt.type({
+  rt.partial({
     aggregations: rt.type({
       terms_category_id: rt.type({
         buckets: rt.array(logEntryCategoryBucketRT),

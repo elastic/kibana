@@ -19,7 +19,7 @@ import {
 } from '../../../common/mock';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { DetectionEnginePageComponent } from './detection_engine';
-import { useUserInfo } from '../../components/user_info';
+import { useUserData } from '../../components/user_info';
 import { useWithSource } from '../../../common/containers/source';
 import { createStore, State } from '../../../common/store';
 import { mockHistory, Router } from '../../../cases/components/__mock__/router';
@@ -53,6 +53,9 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
+jest.mock('../../components/alerts_info', () => ({
+  useAlertInfo: jest.fn().mockReturnValue([]),
+}));
 
 const state: State = {
   ...mockGlobalState,
@@ -70,7 +73,7 @@ const store = createStore(
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
     (useParams as jest.Mock).mockReturnValue({});
-    (useUserInfo as jest.Mock).mockReturnValue({});
+    (useUserData as jest.Mock).mockReturnValue([{}]);
     (useWithSource as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
@@ -82,6 +85,7 @@ describe('DetectionEnginePageComponent', () => {
       <TestProviders store={store}>
         <Router history={mockHistory}>
           <DetectionEnginePageComponent
+            graphEventId={undefined}
             query={{ query: 'query', language: 'language' }}
             filters={[]}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}

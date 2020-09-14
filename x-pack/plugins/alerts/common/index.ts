@@ -9,6 +9,7 @@ export * from './alert_type';
 export * from './alert_instance';
 export * from './alert_task_instance';
 export * from './alert_navigation';
+export * from './alert_instance_summary';
 
 export interface ActionGroup {
   id: string;
@@ -21,3 +22,4 @@ export interface AlertingFrameworkHealth {
 }
 
 export const BASE_ALERT_API_PATH = '/api/alerts';
+export const ALERTS_FEATURE_ID = 'alerts';

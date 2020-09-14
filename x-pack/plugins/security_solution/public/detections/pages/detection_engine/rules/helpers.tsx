@@ -9,10 +9,12 @@ import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
-import { RuleAlertAction, RuleType } from '../../../../../common/detection_engine/types';
+import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
+import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
@@ -22,6 +24,12 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import {
+  SeverityMapping,
+  Type,
+  Severity,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -60,7 +68,6 @@ export const getActionsStepsData = (
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
-    isNew: false,
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
@@ -68,7 +75,6 @@ export const getActionsStepsData = (
 };
 
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
-  isNew: false,
   ruleType: rule.type,
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? '',
@@ -93,7 +99,6 @@ export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
   const fromHumanizedValue = getHumanizedDuration(from, interval);
 
   return {
-    isNew: false,
     interval,
     from: fromHumanizedValue,
   };
@@ -135,9 +140,8 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   } = rule;
 
   return {
-    isNew: false,
     author,
-    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === 'endpoint_list') ?? false,
+    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === ENDPOINT_LIST_ID) ?? false,
     isBuildingBlock: buildingBlockType !== undefined,
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
@@ -147,17 +151,37 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     note: note!,
     references,
     severity: {
-      value: severity,
-      mapping: severityMapping,
+      value: severity as Severity,
+      mapping: fillEmptySeverityMappings(severityMapping),
+      isMappingChecked: severityMapping.length > 0,
     },
     tags,
     riskScore: {
       value: riskScore,
       mapping: riskScoreMapping,
+      isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
     threat: threat as IMitreEnterpriseAttack[],
   };
+};
+
+const severitySortMapping = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3,
+};
+
+export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMapping => {
+  const missingMappings: SeverityMapping = severityOptions.flatMap((so) =>
+    mappings.find((mapping) => mapping.severity === so.value) == null
+      ? [{ field: '', value: '', operator: 'equals', severity: so.value }]
+      : []
+  );
+  return [...mappings, ...missingMappings].sort(
+    (a, b) => severitySortMapping[a.severity] - severitySortMapping[b.severity]
+  );
 };
 
 export const determineDetailsValue = (
@@ -283,7 +307,7 @@ export const redirectToDetections = (
   hasEncryptionKey === false ||
   needsListsConfiguration;
 
-const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
+const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
   const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
 
   if (isMlRule(ruleType)) {
@@ -297,7 +321,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
   return queryRuleParams;
 };
 
-export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
+export const getActionMessageRuleParams = (ruleType: Type): string[] => {
   const commonRuleParamsKeys = [
     'id',
     'name',
@@ -325,16 +349,19 @@ export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   return ruleParamsKeys;
 };
 
-export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined): string[] => {
+export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariable[] => {
   if (!ruleType) {
     return [];
   }
   const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
 
   return [
-    'state.signals_count',
-    '{context.results_link}',
-    ...actionMessageRuleParams.map((param) => `context.rule.${param}`),
+    { name: 'state.signals_count', description: 'state.signals_count' },
+    { name: '{context.results_link}', description: 'context.results_link' },
+    ...actionMessageRuleParams.map((param) => {
+      const extendedParam = `context.rule.${param}`;
+      return { name: extendedParam, description: extendedParam };
+    }),
   ];
 });
 

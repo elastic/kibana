@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty, union } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { BrowserFields, DocValueFields } from '../../containers/source';
@@ -22,7 +22,7 @@ import { StatefulBody } from '../../../timelines/components/timeline/body/statef
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
 import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import { combineQueries, resolverIsShowing } from '../../../timelines/components/timeline/helpers';
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
@@ -50,18 +50,18 @@ const TitleText = styled.span`
   margin-right: 12px;
 `;
 
-const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
-
 const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
+  display: flex;
+  flex-direction: column;
+
   ${({ $isFullScreen }) =>
     $isFullScreen &&
-    css`
+    `
       border: 0;
       box-shadow: none;
       padding-top: 0;
       padding-bottom: 0;
-    `}
-  max-width: 100%;
+  `}
 `;
 
 const TitleFlexGroup = styled(EuiFlexGroup)`
@@ -70,7 +70,18 @@ const TitleFlexGroup = styled(EuiFlexGroup)`
 
 const EventsContainerLoading = styled.div`
   width: 100%;
-  overflow: auto;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+/**
+ * Hides stateful headerFilterGroup implementations, but prevents the component
+ * from being unmounted, to preserve the state of the component
+ */
+const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
+  ${({ show }) => (show ? '' : 'visibility: hidden;')}
 `;
 
 interface Props {
@@ -109,7 +120,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   end,
   filters,
   headerFilterGroup,
-  height = DEFAULT_EVENTS_VIEWER_HEIGHT,
   id,
   indexPattern,
   isLive,
@@ -212,6 +222,7 @@ const EventsViewerComponent: React.FC<Props> = ({
             sourceId="default"
             startDate={start}
             endDate={end}
+            queryDeduplication="events_viewer"
           >
             {({
               events,
@@ -234,14 +245,21 @@ const EventsViewerComponent: React.FC<Props> = ({
               return (
                 <>
                   <HeaderSection
-                    id={id}
+                    id={!resolverIsShowing(graphEventId) ? id : undefined}
                     height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
                     subtitle={utilityBar ? undefined : subtitle}
                     title={inspect ? justTitle : titleWithExitFullScreen}
                   >
-                    {headerFilterGroup}
+                    {headerFilterGroup && (
+                      <HeaderFilterGroupWrapper
+                        data-test-subj="header-filter-group-wrapper"
+                        show={!resolverIsShowing(graphEventId)}
+                      >
+                        {headerFilterGroup}
+                      </HeaderFilterGroupWrapper>
+                    )}
                   </HeaderSection>
-                  {utilityBar && (
+                  {utilityBar && !resolverIsShowing(graphEventId) && (
                     <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
                   )}
                   <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
@@ -259,7 +277,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                       docValueFields={docValueFields}
                       id={id}
                       isEventViewer={true}
-                      height={height}
+                      refetch={refetch}
                       sort={sort}
                       toggleColumn={toggleColumn}
                     />
@@ -307,7 +325,7 @@ export const EventsViewer = React.memo(
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     deepEqual(prevProps.filters, nextProps.filters) &&
-    prevProps.height === nextProps.height &&
+    prevProps.headerFilterGroup === nextProps.headerFilterGroup &&
     prevProps.id === nextProps.id &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     prevProps.isLive === nextProps.isLive &&

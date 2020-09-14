@@ -27,9 +27,6 @@ MIT License http://www.opensource.org/licenses/mit-license.php
 Author Tobias Koppers @sokra
 
 ---
-This product has relied on ASTExplorer that is licensed under MIT.
-
----
 This product includes code that is based on Ace editor, which was available
 under a "BSD" license.
 
@@ -283,6 +280,13 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+---
+This product includes code in the function applyCubicBezierStyles that was
+inspired by a public Codepen, which was available under a "MIT" license.
+
+Copyright (c) 2020 by Guillaume (https://codepen.io/guillaumethomas/pen/xxbbBKO)
+MIT License http://www.opensource.org/licenses/mit-license
 
 ---
 This product includes code that is adapted from mapbox-gl-js, which is

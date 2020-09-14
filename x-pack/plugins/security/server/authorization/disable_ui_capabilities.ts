@@ -5,7 +5,7 @@
  */
 
 import { flatten, isObject, mapValues } from 'lodash';
-import { UICapabilities } from 'ui/capabilities';
+import type { Capabilities as UICapabilities } from '../../../../../src/core/types';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { Feature } from '../../../features/server';
 
@@ -18,12 +18,11 @@ export function disableUICapabilitiesFactory(
   logger: Logger,
   authz: AuthorizationServiceSetup
 ) {
-  // nav links are sourced from two places:
-  // 1) The `navLinkId` property. This is deprecated and will be removed (https://github.com/elastic/kibana/issues/66217)
-  // 2) The apps property. The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
-  //    This behavior is replacing the `navLinkId` property above.
+  // nav links are sourced from the apps property.
+  // The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
+  // This behavior is replacing the `navLinkId` property.
   const featureNavLinkIds = features
-    .flatMap((feature) => [feature.navLinkId, ...feature.app])
+    .flatMap((feature) => feature.app)
     .filter((navLinkId) => navLinkId != null);
 
   const shouldDisableFeatureUICapability = (

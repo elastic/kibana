@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * Engine Overview
- */
 .engineOverview {
-  width: 100%;
+  padding: $euiSize;
 
-  &__body {
-    padding: $euiSize;
-
-    @include euiBreakpoint('m', 'l', 'xl') {
-      padding: $euiSizeXL;
-    }
+  @include euiBreakpoint('m', 'l', 'xl') {
+    padding: $euiSizeXL;
   }
 }
 
 .engineIcon {
   display: inline-block;
   width: $euiSize;
-  height: $euiSize;
+  // Use line-height of EuiTitle - SVG will vertically center accordingly
+  height: map-get(map-get($euiTitles, 's'), 'line-height');
+  vertical-align: top;
   margin-right: $euiSizeXS;
 }

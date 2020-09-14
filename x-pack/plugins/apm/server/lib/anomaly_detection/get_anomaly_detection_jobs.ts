@@ -5,27 +5,24 @@
  */
 
 import { Logger } from 'kibana/server';
+import Boom from 'boom';
+import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { Setup } from '../helpers/setup_request';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
 export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
   const { ml } = setup;
+
   if (!ml) {
-    return [];
+    throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
-  if (
-    !(
-      mlCapabilities.mlFeatureEnabledInSpace &&
-      mlCapabilities.isPlatinumOrTrialLicense
-    )
-  ) {
-    logger.warn('Anomaly detection integration is not availble for this user.');
-    return [];
+  if (!mlCapabilities.mlFeatureEnabledInSpace) {
+    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
-  const response = await getMlJobsWithAPMGroup(ml);
+  const response = await getMlJobsWithAPMGroup(ml.anomalyDetectors);
   return response.jobs
     .filter((job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2)
     .map((job) => {

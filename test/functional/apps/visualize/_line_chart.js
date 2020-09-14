@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visChart.waitForVisualization();
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initLineChart);
       const axisId = 'ValueAxis-1';
 
@@ -191,57 +191,25 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show ticks on selecting square root scale', async () => {

@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-import { TooltipIcon as Component } from './tooltip_icon';
-export { IconType } from './tooltip_icon';
-
-export const TooltipIcon = pure(Component);
+export { TooltipIcon, IconType } from './tooltip_icon';

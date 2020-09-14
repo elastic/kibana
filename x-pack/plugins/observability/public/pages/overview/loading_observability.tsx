@@ -20,7 +20,7 @@ const CentralizedFlexGroup = styled(EuiFlexGroup)`
   min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
 `;
 
-export const LoadingObservability = () => {
+export function LoadingObservability() {
   const theme = useContext(ThemeContext);
 
   return (
@@ -50,4 +50,4 @@ export const LoadingObservability = () => {
       </CentralizedFlexGroup>
     </WithHeaderLayout>
   );
-};
+}

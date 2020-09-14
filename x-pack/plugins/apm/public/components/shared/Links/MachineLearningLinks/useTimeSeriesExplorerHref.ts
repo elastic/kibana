@@ -22,12 +22,14 @@ export function useTimeSeriesExplorerHref({
 }) {
   const { core } = useApmPluginContext();
   const location = useLocation();
+  const { time, refreshInterval } = getTimepickerRisonData(location.search);
 
   const search = querystring.stringify(
     {
       _g: rison.encode({
         ml: { jobIds: [jobId] },
-        ...getTimepickerRisonData(location.search),
+        time,
+        refreshInterval,
       }),
       ...(serviceName && transactionType
         ? {
@@ -37,6 +39,7 @@ export function useTimeSeriesExplorerHref({
                   'service.name': serviceName,
                   'transaction.type': transactionType,
                 },
+                zoom: time,
               },
             }),
           }

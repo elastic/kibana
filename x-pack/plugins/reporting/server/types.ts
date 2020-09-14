@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CancellationToken } from '../../../plugins/reporting/common';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { JobStatus } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
@@ -19,24 +18,12 @@ import { LevelLogger } from './lib';
 import { LayoutInstance } from './lib/layouts';
 
 /*
- * Routing / API types
+ * Routing types
  */
-
-interface ListQuery {
-  page: string;
-  size: string;
-  ids?: string; // optional field forbids us from extending RequestQuery
-}
-
-interface GenerateQuery {
-  jobParams: string;
-}
-
-export type ReportingRequestQuery = ListQuery | GenerateQuery;
 
 export interface ReportingRequestPre {
   management: {
-    jobTypes: any;
+    jobTypes: string[];
   };
   user: string;
 }
@@ -54,12 +41,14 @@ export interface TimeRangeParams {
   max?: Date | string | number | null;
 }
 
+// the "raw" data coming from the client, unencrypted
 export interface JobParamPostPayload {
   timerange?: TimeRangeParams;
 }
 
-export interface ScheduledTaskParams<JobParamsType> {
-  headers?: string; // serialized encrypted headers
+// the pre-processed, encrypted data ready for storage
+export interface BasePayload<JobParamsType> {
+  headers: string; // serialized encrypted headers
   jobParams: JobParamsType;
   title: string;
   type: string;
@@ -71,16 +60,16 @@ export interface JobSource<JobParamsType> {
   _source: {
     jobtype: string;
     output: TaskRunResult;
-    payload: ScheduledTaskParams<JobParamsType>;
+    payload: BasePayload<JobParamsType>;
     status: JobStatus;
   };
 }
 
 export interface TaskRunResult {
-  content_type: string;
+  content_type: string | null;
   content: string | null;
-  size: number;
   csv_contains_formulas?: boolean;
+  size: number;
   max_size_reached?: boolean;
   warnings?: string[];
 }
@@ -96,62 +85,6 @@ export interface ConditionalHeaders {
   headers: Record<string, string>;
   conditions: ConditionalHeadersConditions;
 }
-
-/*
- * Screenshots
- */
-
-export interface ScreenshotObservableOpts {
-  logger: LevelLogger;
-  urls: string[];
-  conditionalHeaders: ConditionalHeaders;
-  layout: LayoutInstance;
-  browserTimezone: string;
-}
-
-export interface AttributesMap {
-  [key: string]: any;
-}
-
-export interface ElementPosition {
-  boundingClientRect: {
-    // modern browsers support x/y, but older ones don't
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  };
-  scroll: {
-    x: number;
-    y: number;
-  };
-}
-
-export interface ElementsPositionAndAttribute {
-  position: ElementPosition;
-  attributes: AttributesMap;
-}
-
-export interface Screenshot {
-  base64EncodedData: string;
-  title: string;
-  description: string;
-}
-
-export interface ScreenshotResults {
-  timeRange: string | null;
-  screenshots: Screenshot[];
-  error?: Error;
-  elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
-}
-
-export type ScreenshotsObservableFn = ({
-  logger,
-  urls,
-  conditionalHeaders,
-  layout,
-  browserTimezone,
-}: ScreenshotObservableOpts) => Rx.Observable<ScreenshotResults[]>;
 
 /*
  * Plugin Contract
@@ -174,25 +107,38 @@ export type ReportingSetup = object;
  * Internal Types
  */
 
+export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
+
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export type ESQueueCreateJobFn<JobParamsType> = (
+export interface BaseParams {
+  browserTimezone: string;
+  layout?: LayoutInstance; // for screenshot type reports
+  objectType: string;
+}
+
+export interface BaseParamsEncryptedFields extends BaseParams {
+  basePath?: string; // for screenshot type reports
+  headers: string; // encrypted headers
+}
+
+export type CreateJobFn<JobParamsType extends BaseParams> = (
   jobParams: JobParamsType,
   context: RequestHandlerContext,
   request: KibanaRequest
-) => Promise<JobParamsType>;
+) => Promise<JobParamsType & BaseParamsEncryptedFields>;
 
-export type ESQueueWorkerExecuteFn<ScheduledTaskParamsType> = (
+export type RunTaskFn<TaskPayloadType> = (
   jobId: string,
-  job: ScheduledTaskParamsType,
+  job: TaskPayloadType,
   cancellationToken: CancellationToken
-) => Promise<any>;
+) => Promise<TaskRunResult>;
 
-export type ScheduleTaskFnFactory<ScheduleTaskFnType> = (
+export type CreateJobFnFactory<CreateJobFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
-) => ScheduleTaskFnType;
+) => CreateJobFnType;
 
 export type RunTaskFnFactory<RunTaskFnType> = (
   reporting: ReportingCore,
@@ -201,7 +147,7 @@ export type RunTaskFnFactory<RunTaskFnType> = (
 
 export interface ExportTypeDefinition<
   JobParamsType,
-  ScheduleTaskFnType,
+  CreateJobFnType,
   JobPayloadType,
   RunTaskFnType
 > {
@@ -210,7 +156,13 @@ export interface ExportTypeDefinition<
   jobType: string;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  scheduleTaskFnFactory: ScheduleTaskFnFactory<ScheduleTaskFnType>;
+  createJobFnFactory: CreateJobFnFactory<CreateJobFnType>;
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
+}
+
+export interface DiagnosticResponse {
+  help: string[];
+  success: boolean;
+  logs: string;
 }

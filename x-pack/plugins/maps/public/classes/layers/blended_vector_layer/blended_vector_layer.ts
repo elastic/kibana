@@ -33,6 +33,8 @@ import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
+  StylePropertyOptions,
+  LayerDescriptor,
   VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';
 import { IStyle } from '../../styles/style';
@@ -44,7 +46,7 @@ interface CountData {
   isSyncClustered: boolean;
 }
 
-function getAggType(dynamicProperty: IDynamicStyleProperty): AGG_TYPE {
+function getAggType(dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>): AGG_TYPE {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
 }
 
@@ -54,6 +56,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
   });
+  clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,
@@ -99,53 +102,59 @@ function getClusterStyleDescriptor(
         },
       },
     },
+    isTimeAware: true,
   };
-  documentStyle.getAllStyleProperties().forEach((styleProperty: IStyleProperty) => {
-    const styleName = styleProperty.getStyleName();
-    if (
-      [VECTOR_STYLES.LABEL_TEXT, VECTOR_STYLES.ICON_SIZE].includes(styleName) &&
-      (!styleProperty.isDynamic() || !styleProperty.isComplete())
-    ) {
-      // Do not migrate static label and icon size properties to provide unique cluster styling out of the box
-      return;
-    }
+  documentStyle
+    .getAllStyleProperties()
+    .forEach((styleProperty: IStyleProperty<StylePropertyOptions>) => {
+      const styleName = styleProperty.getStyleName();
+      if (
+        [VECTOR_STYLES.LABEL_TEXT, VECTOR_STYLES.ICON_SIZE].includes(styleName) &&
+        (!styleProperty.isDynamic() || !styleProperty.isComplete())
+      ) {
+        // Do not migrate static label and icon size properties to provide unique cluster styling out of the box
+        return;
+      }
 
-    if (styleName === VECTOR_STYLES.SYMBOLIZE_AS || styleName === VECTOR_STYLES.LABEL_BORDER_SIZE) {
-      // copy none static/dynamic styles to cluster style
-      clusterStyleDescriptor.properties[styleName] = {
+      if (
+        styleName === VECTOR_STYLES.SYMBOLIZE_AS ||
+        styleName === VECTOR_STYLES.LABEL_BORDER_SIZE
+      ) {
+        // copy none static/dynamic styles to cluster style
+        clusterStyleDescriptor.properties[styleName] = {
+          // @ts-expect-error
+          options: { ...styleProperty.getOptions() },
+        };
+      } else if (styleProperty.isDynamic()) {
+        // copy dynamic styles to cluster style
+        const options = styleProperty.getOptions() as DynamicStylePropertyOptions;
+        const field =
+          options && options.field && options.field.name
+            ? {
+                ...options.field,
+                name: clusterSource.getAggKey(
+                  getAggType(styleProperty as IDynamicStyleProperty<DynamicStylePropertyOptions>),
+                  options.field.name
+                ),
+              }
+            : undefined;
         // @ts-expect-error
-        options: { ...styleProperty.getOptions() },
-      };
-    } else if (styleProperty.isDynamic()) {
-      // copy dynamic styles to cluster style
-      const options = styleProperty.getOptions() as DynamicStylePropertyOptions;
-      const field =
-        options && options.field && options.field.name
-          ? {
-              ...options.field,
-              name: clusterSource.getAggKey(
-                getAggType(styleProperty as IDynamicStyleProperty),
-                options.field.name
-              ),
-            }
-          : undefined;
-      // @ts-expect-error
-      clusterStyleDescriptor.properties[styleName] = {
-        type: STYLE_TYPE.DYNAMIC,
-        options: {
-          ...options,
-          field,
-        },
-      };
-    } else {
-      // copy static styles to cluster style
-      // @ts-expect-error
-      clusterStyleDescriptor.properties[styleName] = {
-        type: STYLE_TYPE.STATIC,
-        options: { ...styleProperty.getOptions() },
-      };
-    }
-  });
+        clusterStyleDescriptor.properties[styleName] = {
+          type: STYLE_TYPE.DYNAMIC,
+          options: {
+            ...options,
+            field,
+          },
+        };
+      } else {
+        // copy static styles to cluster style
+        // @ts-expect-error
+        clusterStyleDescriptor.properties[styleName] = {
+          type: STYLE_TYPE.STATIC,
+          options: { ...styleProperty.getOptions() },
+        };
+      }
+    });
 
   return clusterStyleDescriptor;
 }
@@ -209,7 +218,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     }
   }
 
-  async getDisplayName(source: ISource) {
+  async getDisplayName(source?: ISource) {
     const displayName = await super.getDisplayName(source);
     return this._isClustered
       ? i18n.translate('xpack.maps.blendedVectorLayer.clusteredLayerName', {
@@ -229,6 +238,23 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
   getJoins() {
     return [];
+  }
+
+  hasJoins() {
+    return false;
+  }
+
+  async cloneDescriptor(): Promise<LayerDescriptor> {
+    const clonedDescriptor = await super.cloneDescriptor();
+
+    // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'
+    const displayName = await super.getDisplayName();
+    clonedDescriptor.label = `Clone of ${displayName}`;
+
+    // sourceDescriptor must be document source descriptor
+    clonedDescriptor.sourceDescriptor = this._documentSource.cloneDescriptor();
+
+    return clonedDescriptor;
   }
 
   getSource() {

@@ -65,6 +65,13 @@ describe('PieVisualization component', () => {
       };
     }
 
+    test('it shows legend on correct side', () => {
+      const component = shallow(
+        <PieComponent args={{ ...args, legendPosition: 'top' }} {...getDefaultArgs()} />
+      );
+      expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+    });
+
     test('it shows legend for 2 groups using default legendDisplay', () => {
       const component = shallow(<PieComponent args={args} {...getDefaultArgs()} />);
       expect(component.find(Settings).prop('showLegend')).toEqual(true);

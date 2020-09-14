@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
 import { capabilitiesProvider } from './check_capabilities';
 import { MlLicense } from '../../../common/license';
@@ -24,16 +24,28 @@ const mlIsEnabled = async () => true;
 const mlIsNotEnabled = async () => false;
 
 const mlClusterClientNonUpgrade = ({
-  callAsInternalUser: async () => ({
-    upgrade_mode: false,
-  }),
-} as unknown) as ILegacyScopedClusterClient;
+  asInternalUser: {
+    ml: {
+      info: async () => ({
+        body: {
+          upgrade_mode: false,
+        },
+      }),
+    },
+  },
+} as unknown) as IScopedClusterClient;
 
 const mlClusterClientUpgrade = ({
-  callAsInternalUser: async () => ({
-    upgrade_mode: true,
-  }),
-} as unknown) as ILegacyScopedClusterClient;
+  asInternalUser: {
+    ml: {
+      info: async () => ({
+        body: {
+          upgrade_mode: true,
+        },
+      }),
+    },
+  },
+} as unknown) as IScopedClusterClient;
 
 describe('check_capabilities', () => {
   describe('getCapabilities() - right number of capabilities', () => {

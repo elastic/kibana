@@ -1,10 +1,10 @@
 [[stability]]
-=== Stability
+== Stability
 
 Ensure your feature will work under all possible {kib} scenarios.
 
-[float]
-==== Environmental configuration scenarios
+[discrete]
+=== Environmental configuration scenarios
 
 * Cloud
 ** Does the feature work on *cloud environment*?
@@ -32,16 +32,16 @@ non-standard {kib} indices. (create their own custom roles)
 sessions. (we have had many discuss/SDH tickets around this)
 * If a proxy/loadbalancer is running between ES and {kib}
 
-[float]
-==== Kibana.yml settings
+[discrete]
+=== Kibana.yml settings
 
 * Using a custom {kib} index alias
 * When optional dependencies are disabled
 ** Ensure all your required dependencies are listed in kibana.json
 dependency list!
 
-[float]
-==== Test coverage
+[discrete]
+=== Test coverage
 
 * Does the feature have sufficient unit test coverage? (does it handle
 storeinSessions?)
@@ -49,18 +49,18 @@ storeinSessions?)
 * Does the feature have sufficient Rest API coverage test coverage?
 * Does the feature have sufficient Integration test coverage?
 
-[float]
-==== Browser coverage
+[discrete]
+=== Browser coverage
 
-Refer to the list of browsers and OS {kib} supports
+Refer to the list of browsers and OS {kib} supports:
 https://www.elastic.co/support/matrix
 
 Does the feature work efficiently on the list of supported browsers? 
 
-[float]
-==== Upgrade Scenarios - Migration scenarios- 
+[discrete]
+=== Upgrade and Migration scenarios
 
-Does the feature affect old
-indices, saved objects ? - Has the feature been tested with {kib}
-aliases - Read/Write privileges of the indices before and after the
+* Does the feature affect old indices or saved objects?
+* Has the feature been tested with {kib} aliases?
+* Read/Write privileges of the indices before and after the
 upgrade?

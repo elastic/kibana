@@ -23,6 +23,7 @@ import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
+import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -35,6 +36,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
+
+  const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
   const {
     fetchJobStatus,
@@ -70,7 +73,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
 
   const showLoadDataErrorNotification = useCallback(
     (error: Error) => {
-      // eslint-disable-next-line no-unused-expressions
       services.notifications?.toasts.addError(error, {
         title: loadDataErrorTitle,
       });
@@ -197,6 +199,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
             <CategoryJobNoticesSection
               hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
               hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
+              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
               hasStoppedJobs={hasStoppedJobs}
               isFirstUse={isFirstUse}
               moduleName={moduleDescriptor.moduleName}
@@ -209,6 +212,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
             <EuiPanel paddingSize="m">
               <TopCategoriesSection
                 availableDatasets={logEntryCategoryDatasets}
+                hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
                 isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
                 isLoadingTopCategories={isLoadingTopLogEntryCategories}
                 jobId={jobIds['log-entry-categories-count']}
