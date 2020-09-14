@@ -5,12 +5,12 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformPivotConfig } from '../../../../plugins/transform/public/app/common';
+import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
   return {
-    id: `ec_2_${date}`,
+    id: `ec_cloning_${date}`,
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
-      await transform.api.createAndRunTransform(transformConfig);
+      await transform.api.createAndRunTransform(transformConfig.id, transformConfig);
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();

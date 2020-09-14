@@ -212,6 +212,10 @@ Object {
     },
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:0:1",
       },
       "points": Array [
@@ -227,6 +231,10 @@ Object {
     },
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:0:2",
       },
       "points": Array [
@@ -242,6 +250,10 @@ Object {
     },
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:0:8",
       },
       "points": Array [
@@ -287,6 +299,10 @@ Object {
     },
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:1:3",
       },
       "points": Array [
@@ -302,6 +318,10 @@ Object {
     },
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:1:4",
       },
       "points": Array [
@@ -347,6 +367,10 @@ Object {
     },
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:2:5",
       },
       "points": Array [
@@ -362,6 +386,10 @@ Object {
     },
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:2:6",
       },
       "points": Array [
@@ -377,6 +405,10 @@ Object {
     },
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:6:7",
       },
       "points": Array [
@@ -584,6 +616,10 @@ Object {
   "edgeLineSegments": Array [
     Object {
       "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
         "uniqueId": "edge:0:1",
       },
       "points": Array [
