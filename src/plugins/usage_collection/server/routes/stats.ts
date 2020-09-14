@@ -75,9 +75,7 @@ export function registerStatsRoute({
     {
       path: '/api/stats',
       options: {
-        // Even when allowAnonymous is true, we attempt to authenticate in order to deny anonymous users access to
-        // extended stats.
-        authRequired: config.allowAnonymous ? 'optional' : true,
+        authRequired: !config.allowAnonymous,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
       validate: {
