@@ -77,7 +77,7 @@ import { BehaviorSubject } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, ISearchGeneric } from '../..';
+import { IIndexPattern, IndexPatternField, ISearchGeneric } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import {
   RequestFailure,
@@ -466,7 +466,9 @@ export class SearchSource {
     searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};
-
+    const fieldsToFetch =
+      fields || index ? index.fields.getAll().map((f: IndexPatternField) => f.name) : [];
+    body.fields = fieldsToFetch;
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
     extend(body.script_fields, computedFields.scriptFields);
