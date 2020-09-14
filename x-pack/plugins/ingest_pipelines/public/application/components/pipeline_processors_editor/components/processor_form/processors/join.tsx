@@ -6,8 +6,6 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode } from '@elastic/eui';
 
 import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
@@ -55,17 +53,7 @@ export const Join: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.separator} component={Field} path="fields.separator" />
 
-      <TargetField
-        helpText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.joinForm.targetFieldHelpText"
-            defaultMessage="Field used to contain the joined value. Defaults to {field}."
-            values={{
-              field: <EuiCode>{'field'}</EuiCode>,
-            }}
-          />
-        }
-      />
+      <TargetField />
     </>
   );
 };

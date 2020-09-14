@@ -11,7 +11,7 @@ import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capab
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { FlowTarget } from '../../graphql/types';
 
-import { IPDetails } from './ip_details';
+import { NetworkDetails } from './details';
 import { Network } from './network';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
@@ -49,14 +49,9 @@ const NetworkContainerComponent: React.FC<Props> = () => {
           hasMlUserPermissions={userHasMlUserPermissions}
         />
       </Route>
-      <Route
-        path={`${ipDetailsPageBasePath}/:flowTarget`}
-        render={({
-          match: {
-            params: { detailName, flowTarget },
-          },
-        }) => <IPDetails detailName={detailName} flowTarget={flowTarget} />}
-      />
+      <Route path={`${ipDetailsPageBasePath}/:flowTarget`}>
+        <NetworkDetails />
+      </Route>
       <Route
         path={ipDetailsPageBasePath}
         render={({

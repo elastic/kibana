@@ -53,3 +53,6 @@ export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
   isPartial?: boolean;
   rawResponse: SearchResponse<Source>;
 }
+
+export const isEsResponse = (response: any): response is IEsSearchResponse =>
+  response && response.rawResponse;

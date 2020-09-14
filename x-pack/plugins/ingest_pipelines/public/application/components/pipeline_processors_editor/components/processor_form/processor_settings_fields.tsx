@@ -38,13 +38,13 @@ export const ProcessorSettingsFields: FunctionComponent<Props> = ({
           if (type?.length) {
             const formDescriptor = getProcessorDescriptor(type as any);
 
-            if (formDescriptor?.FieldsComponent) {
-              const renderedFields = (
+            if (formDescriptor) {
+              const renderedFields = formDescriptor.FieldsComponent ? (
                 <formDescriptor.FieldsComponent
                   key={type}
                   initialFieldValues={processor?.options}
                 />
-              );
+              ) : null;
               return (
                 <>
                   {renderedFields ? (

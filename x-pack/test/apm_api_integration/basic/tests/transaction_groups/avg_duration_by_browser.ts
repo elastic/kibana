@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import expectedAvgDurationByBrowser from './expectation/avg_duration_by_browser.json';
-import expectedAvgDurationByBrowserWithTransactionName from './expectation/avg_duration_by_browser_transaction_name.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -38,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedAvgDurationByBrowser);
+        expectSnapshot(response.body).toMatch();
       });
       it('returns the average duration by browser filtering by transaction name', async () => {
         const response = await supertest.get(
@@ -46,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedAvgDurationByBrowserWithTransactionName);
+        expectSnapshot(response.body).toMatch();
       });
     });
   });

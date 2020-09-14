@@ -721,6 +721,35 @@ const migrateTsvbDefaultColorPalettes: SavedObjectMigrationFn<any, any> = (doc) 
   return doc;
 };
 
+// [TSVB] Remove serialized search source as it's not used in TSVB visualizations
+const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics' && searchSourceJSON !== '{}') {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          kibanaSavedObjectMeta: {
+            ...get(doc, 'attributes.kibanaSavedObjectMeta'),
+            searchSourceJSON: '{}',
+          },
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -752,5 +781,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.4.2': flow(transformSplitFiltersStringToQueryObject),
   '7.7.0': flow(migrateOperatorKeyTypo, migrateSplitByChartRow),
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
-  '7.10.0': flow(migrateFilterRatioQuery),
+  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
 };

@@ -184,5 +184,14 @@ describe('Pipeline Editor', () => {
       expect(find('processors>0.moveItemButton').props().disabled).toBe(true);
       expect(find('processors>1.moveItemButton').props().disabled).toBe(true);
     });
+
+    it('can move a processor into an empty tree', () => {
+      const { actions } = testBed;
+      actions.moveProcessor('processors>0', 'onFailure.dropButtonEmptyTree');
+      const [onUpdateResult2] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+      const data = onUpdateResult2.getData();
+      expect(data.processors).toEqual([testProcessors.processors[1]]);
+      expect(data.on_failure).toEqual([testProcessors.processors[0]]);
+    });
   });
 });

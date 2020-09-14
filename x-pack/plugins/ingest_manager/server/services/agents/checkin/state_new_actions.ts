@@ -5,6 +5,7 @@
  */
 
 import { timer, from, Observable, TimeoutError } from 'rxjs';
+import { omit } from 'lodash';
 import {
   shareReplay,
   distinctUntilKeyChanged,
@@ -16,14 +17,7 @@ import {
   take,
 } from 'rxjs/operators';
 import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import {
-  Agent,
-  AgentAction,
-  AgentSOAttributes,
-  AgentPolicy,
-  FullAgentPolicy,
-} from '../../../types';
-import { agentPolicyService } from '../../agent_policy';
+import { Agent, AgentAction, AgentPolicyAction, AgentSOAttributes } from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
   AGENT_SAVED_OBJECT_TYPE,
@@ -31,7 +25,11 @@ import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
 } from '../../../constants';
-import { createAgentAction, getNewActionsSince } from '../actions';
+import {
+  getNewActionsSince,
+  getLatestConfigChangeAction,
+  getAgentPolicyActionByIds,
+} from '../actions';
 import { appContextService } from '../../app_context';
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
@@ -54,27 +52,27 @@ function getInternalUserSOClient() {
   return appContextService.getInternalUserSOClient(fakeRequest);
 }
 
-function createAgentPolicySharedObservable(agentPolicyId: string) {
+function createNewActionsSharedObservable(): Observable<AgentAction[]> {
   const internalSOClient = getInternalUserSOClient();
+
   return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
-    switchMap(() =>
-      from(agentPolicyService.get(internalSOClient, agentPolicyId) as Promise<AgentPolicy>)
-    ),
-    distinctUntilKeyChanged('revision'),
-    switchMap((data) =>
-      from(agentPolicyService.getFullAgentPolicy(internalSOClient, agentPolicyId))
-    ),
+    switchMap(() => {
+      return from(getNewActionsSince(internalSOClient, new Date().toISOString()));
+    }),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
 }
 
-function createNewActionsSharedObservable(): Observable<AgentAction[]> {
-  return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
-    switchMap(() => {
-      const internalSOClient = getInternalUserSOClient();
+function createAgentPolicyActionSharedObservable(agentPolicyId: string) {
+  const internalSOClient = getInternalUserSOClient();
 
-      return from(getNewActionsSince(internalSOClient, new Date().toISOString()));
-    }),
+  return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
+    switchMap(() => from(getLatestConfigChangeAction(internalSOClient, agentPolicyId))),
+    filter((data): data is AgentPolicyAction => data !== undefined),
+    distinctUntilKeyChanged('id'),
+    switchMap((data) =>
+      from(getAgentPolicyActionByIds(internalSOClient, [data.id]).then((r) => r[0]))
+    ),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
 }
@@ -102,47 +100,35 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   return outputAPIKey.key;
 }
 
-function shouldCreateAgentPolicyAction(agent: Agent, agentPolicy: FullAgentPolicy | null): boolean {
-  if (!agentPolicy || !agentPolicy.revision) {
-    return false;
-  }
-  const isAgentPolicyOutdated =
-    !agent.policy_revision || agent.policy_revision < agentPolicy.revision;
-  if (!isAgentPolicyOutdated) {
-    return false;
-  }
-
-  return true;
-}
-
-async function createAgentActionFromAgentPolicy(
+async function createAgentActionFromPolicyAction(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  policy: FullAgentPolicy | null
+  policyAction: AgentPolicyAction
 ) {
-  // Deep clone !not supporting Date, and undefined value.
-  const newAgentPolicy = JSON.parse(JSON.stringify(policy));
+  const newAgentAction: AgentAction = Object.assign(
+    omit(
+      // Faster than clone
+      JSON.parse(JSON.stringify(policyAction)) as AgentPolicyAction,
+      'policy_id',
+      'policy_revision'
+    ),
+    {
+      agent_id: agent.id,
+    }
+  );
 
   // Mutate the policy to set the api token for this agent
-  newAgentPolicy.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(
+  newAgentAction.data.config.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(
     soClient,
     agent
   );
 
-  const policyChangeAction = await createAgentAction(soClient, {
-    agent_id: agent.id,
-    type: 'CONFIG_CHANGE',
-    data: { config: newAgentPolicy } as any,
-    created_at: new Date().toISOString(),
-    sent_at: undefined,
-  });
-
-  return [policyChangeAction];
+  return [newAgentAction];
 }
 
 export function agentCheckinStateNewActionsFactory() {
   // Shared Observables
-  const agentPolicies$ = new Map<string, Observable<FullAgentPolicy | null>>();
+  const agentPolicies$ = new Map<string, Observable<AgentPolicyAction>>();
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
   const rateLimiter = createRateLimiter(
@@ -162,7 +148,7 @@ export function agentCheckinStateNewActionsFactory() {
     }
     const agentPolicyId = agent.policy_id;
     if (!agentPolicies$.has(agentPolicyId)) {
-      agentPolicies$.set(agentPolicyId, createAgentPolicySharedObservable(agentPolicyId));
+      agentPolicies$.set(agentPolicyId, createAgentPolicyActionSharedObservable(agentPolicyId));
     }
     const agentPolicy$ = agentPolicies$.get(agentPolicyId);
     if (!agentPolicy$) {
@@ -174,15 +160,22 @@ export function agentCheckinStateNewActionsFactory() {
         // Set a timeout 3s before the real timeout to have a chance to respond an empty response before socket timeout
         Math.max((appContextService.getConfig()?.fleet.pollingRequestTimeout ?? 0) - 3000, 3000)
       ),
-      filter((agentPolicy) => shouldCreateAgentPolicyAction(agent, agentPolicy)),
+      filter(
+        (action) =>
+          agent.policy_id !== undefined &&
+          action.policy_revision !== undefined &&
+          action.policy_id !== undefined &&
+          action.policy_id === agent.policy_id &&
+          (!agent.policy_revision || action.policy_revision > agent.policy_revision)
+      ),
       rateLimiter(),
-      mergeMap((agentPolicy) => createAgentActionFromAgentPolicy(soClient, agent, agentPolicy)),
+      mergeMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
       merge(newActions$),
       mergeMap(async (data) => {
         if (!data) {
           return;
         }
-        const newActions = data.filter((action) => action.agent_id);
+        const newActions = data.filter((action) => action.agent_id === agent.id);
         if (newActions.length === 0) {
           return;
         }

@@ -17,7 +17,7 @@ import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
 
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
-import { Index } from '../application/services/policies/types';
+import { Index } from '../../common/types';
 
 const stepPath = 'ilm.step';
 

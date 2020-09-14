@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
@@ -38,6 +39,7 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
   position: absolute;
   top: ${(props) => `${props.topPct}%`};
   width: auto;
+  pointer-events: all;
 `;
 
 interface StyledDescriptionText {
@@ -59,6 +61,11 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   text-align: left;
   text-transform: uppercase;
   width: fit-content;
+`;
+
+const StyledOuterGroup = styled.g`
+  fill: none;
+  pointer-events: visiblePainted;
 `;
 
 /**
@@ -113,6 +120,7 @@ const UnstyledProcessEventDot = React.memo(
     // Node (html id=) IDs
     const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
     const selectedNode = useSelector(selectors.selectedNode);
+    const originID = useSelector(selectors.originID);
     const nodeID: string | undefined = eventModel.entityIDSafeVersion(event);
     if (nodeID === undefined) {
       // NB: this component should be taking nodeID as a `string` instead of handling this logic here
@@ -225,6 +233,7 @@ const UnstyledProcessEventDot = React.memo(
 
     const isAriaCurrent = nodeID === ariaActiveDescendant;
     const isAriaSelected = nodeID === selectedNode;
+    const isOrigin = nodeID === originID;
 
     const dispatch = useResolverDispatch();
 
@@ -329,6 +338,7 @@ const UnstyledProcessEventDot = React.memo(
           }
           role="img"
           aria-labelledby={labelHTMLID}
+          fill="none"
           style={{
             display: 'block',
             width: '100%',
@@ -338,9 +348,10 @@ const UnstyledProcessEventDot = React.memo(
             left: '0',
             outline: 'transparent',
             border: 'none',
+            pointerEvents: 'none',
           }}
         >
-          <g>
+          <StyledOuterGroup>
             <use
               xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover
@@ -351,6 +362,20 @@ const UnstyledProcessEventDot = React.memo(
               height={markerSize * 1.5}
               className="backing"
             />
+            {isOrigin && (
+              <use
+                xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+                fill="transparent" // Transparent so we don't double up on the default hover
+                x={-15.35}
+                y={-15.35}
+                stroke={strokeColor}
+                strokeOpacity={0.35}
+                strokeDashoffset={0}
+                width={markerSize * 1.5}
+                height={markerSize * 1.5}
+                className="origin"
+              />
+            )}
             <use
               role="presentation"
               xlinkHref={cubeSymbol}
@@ -372,7 +397,7 @@ const UnstyledProcessEventDot = React.memo(
                 ref={animationTarget}
               />
             </use>
-          </g>
+          </StyledOuterGroup>
         </svg>
         <StyledActionsContainer
           color={colorMap.full}
@@ -384,7 +409,14 @@ const UnstyledProcessEventDot = React.memo(
             color={colorMap.descriptionText}
             isDisplaying={isShowingDescriptionText}
           >
-            {descriptionText}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.processDescription"
+              defaultMessage="{originText}{descriptionText}"
+              values={{
+                originText: isOrigin ? 'Analyzed Event · ' : '',
+                descriptionText,
+              }}
+            />
           </StyledDescriptionText>
           <div
             className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
@@ -464,6 +496,7 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   min-width: 280px;
   min-height: 90px;
   overflow-y: visible;
+  pointer-events: none;
 
   //dasharray & dashoffset should be equal to "pull" the stroke back
   //when it is transitioned.

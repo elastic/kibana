@@ -93,6 +93,16 @@ const indexPattern1 = ({
       searchable: true,
       esTypes: ['keyword'],
     },
+    {
+      name: 'scripted',
+      displayName: 'Scripted',
+      type: 'string',
+      searchable: true,
+      aggregatable: true,
+      scripted: true,
+      lang: 'painless',
+      script: '1234',
+    },
     documentField,
   ],
 } as unknown) as IndexPattern;
@@ -156,12 +166,13 @@ const indexPattern2 = ({
       aggregatable: true,
       searchable: true,
       scripted: true,
+      lang: 'painless',
+      script: '1234',
       aggregationRestrictions: {
         terms: {
           agg: 'terms',
         },
       },
-      esTypes: ['keyword'],
     },
     documentField,
   ],

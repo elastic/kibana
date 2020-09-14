@@ -9,7 +9,7 @@ import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elasti
 import * as RuleI18n from '../../../pages/detection_engine/rules/translations';
 
 interface NextStepProps {
-  onClick: () => Promise<void>;
+  onClick: () => void;
   isDisabled: boolean;
   dataTestSubj?: string;
 }
