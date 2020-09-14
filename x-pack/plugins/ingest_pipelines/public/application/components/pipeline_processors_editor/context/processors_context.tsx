@@ -106,13 +106,6 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     validate: () => Promise.resolve(true),
   });
 
-  // We need to keep track of the processor form state if the user
-  // has made config changes, navigated between tabs (Configuration vs. Output)
-  // and has not yet submitted the form
-  const [unsavedProcessorFormData, setUnsavedProcessorFormData] = useState<
-    Omit<ProcessorInternal, 'id'> | undefined
-  >(undefined);
-
   const onFormUpdate = useCallback<(arg: OnFormUpdateArg<any>) => void>(
     ({ isValid, validate }) => {
       setFormState({
@@ -156,8 +149,6 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
           });
           break;
         case 'managingProcessor':
-          setUnsavedProcessorFormData(processorTypeAndOptions);
-
           processorsDispatch({
             type: 'updateProcessor',
             payload: {
@@ -179,7 +170,6 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   const onCloseSettingsForm = useCallback(() => {
     setMode({ id: 'idle' });
     setFormState({ validate: () => Promise.resolve(true) });
-    setUnsavedProcessorFormData(undefined);
   }, [setFormState, setMode]);
 
   const onTreeAction = useCallback<OnActionHandler>(
@@ -250,7 +240,6 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
           onClose={onCloseSettingsForm}
-          unsavedFormData={unsavedProcessorFormData}
         />
       ) : undefined}
       {mode.id === 'removingProcessor' && (

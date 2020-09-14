@@ -33,7 +33,6 @@ export interface Props {
   form: FormHook<Fields>;
   onOpen: () => void;
   esDocsBasePath: string;
-  getDefaultProcessorOptions: () => Fields;
   closeFlyout: () => void;
   handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
 }
@@ -67,7 +66,6 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
   onOpen,
   form,
   esDocsBasePath,
-  getDefaultProcessorOptions,
   closeFlyout,
   handleSubmit,
 }) => {
@@ -110,7 +108,7 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <ProcessorSettingsFields getDefaultProcessorOptions={getDefaultProcessorOptions} />
+          <ProcessorSettingsFields />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">

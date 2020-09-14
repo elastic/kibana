@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useCallback, useEffect } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useRef } from 'react';
 
 import { useForm, OnFormUpdateArg, FormData, useKibana } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
@@ -29,34 +29,36 @@ interface Props {
   onOpen: () => void;
   onClose: () => void;
   processor?: ProcessorInternal;
-  unsavedFormData?: Omit<ProcessorInternal, 'id'>;
 }
 
 export const ProcessorFormContainer: FunctionComponent<Props> = ({
   processor,
   onFormUpdate,
   onSubmit,
-  unsavedFormData,
   onClose,
   ...rest
 }) => {
   const { services } = useKibana();
 
-  const getDefaultProcessorOptions = (): Fields => {
-    let defaultFields;
+  // We need to keep track of the processor form state if the user
+  // has made config changes, navigated between tabs (Configuration vs. Output)
+  // and has not yet submitted the form
+  const unsavedFormState = useRef<ProcessorInternal['options'] | undefined>();
 
-    if (unsavedFormData) {
-      const { options } = unsavedFormData;
-      defaultFields = { fields: options };
+  const getProcessor = useCallback((): ProcessorInternal => {
+    let options;
+
+    if (unsavedFormState?.current) {
+      options = unsavedFormState.current;
     } else {
-      defaultFields = { fields: processor?.options ?? {} };
+      options = processor?.options ?? {};
     }
 
-    return defaultFields;
-  };
+    return { ...processor, options } as ProcessorInternal;
+  }, [processor, unsavedFormState]);
 
   const { form } = useForm({
-    defaultValue: getDefaultProcessorOptions(),
+    defaultValue: { fields: getProcessor().options },
   });
 
   const handleSubmit = useCallback(
@@ -65,9 +67,13 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
 
       if (isValid) {
         const { type, customOptions, fields } = data as FormData;
+        const options = customOptions ? customOptions : fields;
+
+        unsavedFormState.current = options;
+
         onSubmit({
           type,
-          options: customOptions ? customOptions : fields,
+          options,
         });
 
         if (shouldCloseFlyout) {
@@ -78,12 +84,12 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
     [form, onClose, onSubmit]
   );
 
-  const resetProcessors = () => {
+  const resetProcessors = useCallback(() => {
     onSubmit({
       type: processor!.type,
       options: processor?.options || {},
     });
-  };
+  }, [onSubmit, processor]);
 
   useEffect(() => {
     const subscription = form.subscribe(onFormUpdate);
@@ -99,9 +105,8 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
     return (
       <EditProcessorForm
         {...rest}
-        processor={processor!}
         form={form}
-        getDefaultProcessorOptions={getDefaultProcessorOptions}
+        getProcessor={getProcessor}
         esDocsBasePath={services.documentation.getEsDocsBasePath()}
         closeFlyout={onClose}
         resetProcessors={resetProcessors}
@@ -113,7 +118,6 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
       <AddProcessorForm
         {...rest}
         form={form}
-        getDefaultProcessorOptions={getDefaultProcessorOptions}
         esDocsBasePath={services.documentation.getEsDocsBasePath()}
         closeFlyout={onClose}
         handleSubmit={handleSubmit}

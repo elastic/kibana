@@ -112,7 +112,13 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
   const getOutputContent = () => {
     switch (status) {
       case 'skipped':
-        return <EuiCallOut title={i18nTexts.skippedCalloutTitle} iconType={SkippedIcon} />;
+        return (
+          <EuiCallOut
+            title={i18nTexts.skippedCalloutTitle}
+            iconType={SkippedIcon}
+            className="processorOutput__callOut processorOutput__callOut--customIcon"
+          />
+        );
       case 'dropped':
         return <EuiCallOut title={i18nTexts.droppedCalloutTitle} iconType="indexClose" />;
       case 'success':
@@ -127,11 +133,16 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
         return <NoOutputCallOut />;
       case 'error':
         return (
-          <EuiCallOut iconType={ErrorIcon} title={i18nTexts.processorErrorTitle} color="danger">
+          <EuiCallOut
+            iconType={ErrorIcon}
+            title={i18nTexts.processorErrorTitle}
+            color="danger"
+            className="processorOutput__callOut processorOutput__callOut--customIcon"
+          >
             <EuiCodeBlock
               language="json"
               paddingSize="none"
-              className="processorOutput__callOutCodeBlock"
+              className="processorOutput__callOut__codeBlock"
               transparentBackground
             >
               {JSON.stringify(error, null, 2)}
@@ -144,9 +155,10 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
             iconType={ErrorIgnoredIcon}
             title={i18nTexts.processorIgnoredErrorTitle}
             color="warning"
+            className="processorOutput__callOut processorOutput__callOut--customIcon"
           >
             <EuiCodeBlock
-              className="processorOutput__callOutCodeBlock"
+              className="processorOutput__callOut__codeBlock"
               language="json"
               paddingSize="none"
               transparentBackground

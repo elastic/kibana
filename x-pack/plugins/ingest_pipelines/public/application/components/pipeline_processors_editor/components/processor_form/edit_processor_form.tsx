@@ -34,14 +34,13 @@ import { Fields } from './processor_form.container';
 
 export interface Props {
   isOnFailure: boolean;
-  processor: ProcessorInternal;
   form: FormHook<Fields>;
   onOpen: () => void;
   esDocsBasePath: string;
-  getDefaultProcessorOptions: () => Fields;
   closeFlyout: () => void;
   resetProcessors: () => void;
   handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
+  getProcessor: () => ProcessorInternal;
 }
 
 const updateButtonLabel = i18n.translate(
@@ -94,12 +93,11 @@ const getFlyoutTitle = (isOnFailure: boolean) => {
 };
 
 export const EditProcessorForm: FunctionComponent<Props> = ({
-  processor,
+  getProcessor,
   form,
   isOnFailure,
   onOpen,
   esDocsBasePath,
-  getDefaultProcessorOptions,
   closeFlyout,
   handleSubmit,
   resetProcessors,
@@ -110,6 +108,8 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
     config: { selectedDocumentIndex, documents },
     isExecutingPipeline,
   } = testPipelineData;
+
+  const processor = getProcessor();
 
   const processorOutput =
     processor &&
@@ -149,12 +149,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
       />
     );
   } else {
-    flyoutContent = (
-      <ProcessorSettingsFields
-        processor={processor}
-        getDefaultProcessorOptions={getDefaultProcessorOptions}
-      />
-    );
+    flyoutContent = <ProcessorSettingsFields processor={processor} />;
   }
 
   return (
@@ -203,7 +198,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
                   if (tab.id === 'output') {
                     await handleSubmit(false);
                   } else {
-                    form.reset({ defaultValue: getDefaultProcessorOptions() });
+                    form.reset({ defaultValue: { fields: processor.options } });
                   }
                   setActiveTab(tab.id);
                 }}

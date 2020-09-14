@@ -17,9 +17,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Document } from '../../types';
+import { Document } from '../../../types';
 
-import { TestPipelineFlyoutTab } from '../test_pipeline/test_pipeline_flyout_tabs';
+import { TestPipelineFlyoutTab } from '../test_pipeline_flyout_tabs';
+
+import './documents_dropdown.scss';
 
 const i18nTexts = {
   dropdownLabel: i18n.translate(
@@ -82,6 +84,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       withTitle
       repositionOnScroll
       data-test-subj="documentsDropdown"
+      panelClassName="documentsDropdownPanel"
     >
       <EuiSelectable
         singleSelection
