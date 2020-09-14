@@ -149,21 +149,23 @@ export const sampleDocWithAncestors = (): SignalSearchResponse => {
   delete sampleDoc._source.source;
   sampleDoc._source.signal = {
     parent: {
-      rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
       type: 'event',
       index: 'myFakeSignalIndex',
-      depth: 1,
+      depth: 0,
     },
     ancestors: [
       {
-        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
         index: 'myFakeSignalIndex',
-        depth: 1,
+        depth: 0,
       },
     ],
+    rule: {
+      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    },
+    depth: 1,
   };
 
   return {

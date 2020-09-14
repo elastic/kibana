@@ -25,7 +25,7 @@ export function useGetAgentStatus(policyId?: string, options?: RequestOptions) {
     isLoading: agentStatusRequest.isLoading,
     data: agentStatusRequest.data,
     error: agentStatusRequest.error,
-    refreshAgentStatus: () => agentStatusRequest.sendRequest,
+    refreshAgentStatus: () => agentStatusRequest.resendRequest,
   };
 }
 
