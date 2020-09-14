@@ -460,7 +460,7 @@ export function XYChart({
         }}
       />
 
-      {yAxesConfiguration.map((axis, index) => (
+      {yAxesConfiguration.map((axis) => (
         <Axis
           key={axis.groupId}
           id={axis.groupId}
@@ -469,7 +469,9 @@ export function XYChart({
           title={getYAxesTitles(axis.series, axis.groupId)}
           gridLine={{
             visible:
-              index > 0 ? gridlinesVisibilitySettings?.yRight : gridlinesVisibilitySettings?.yLeft,
+              axis.groupId === 'right'
+                ? gridlinesVisibilitySettings?.yRight
+                : gridlinesVisibilitySettings?.yLeft,
           }}
           hide={filteredLayers[0].hide}
           tickFormat={(d) => axis.formatter?.convert(d) || ''}
