@@ -30,6 +30,8 @@ import { IJoin } from '../../../joins/join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
 
+export type RawValue = string | number | undefined | null;
+
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
   getField(): IField | null;
@@ -55,7 +57,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   // The combination of both will inform what field-name (e.g. the "raw" field name from the properties, the "computed field-name" for an on-the-fly created property (e.g. for feature-state or field-formatting).
   // todo: There is an existing limitation to .mvt backed sources, where the field-formatters are not applied. Here, the raw-data needs to be accessed.
   getMbPropertyName(): string;
-  getMbPropertyValue(value: string | number | null | undefined): string | number | null | undefined;
+  getMbPropertyValue(value: RawValue): RawValue;
 }
 
 export type FieldFormatter = (value: string | number | undefined) => string | number;
@@ -367,23 +369,19 @@ export class DynamicStyleProperty<T>
       // They just re-use the original property-name
       targetName = this._field.getName();
     } else {
-      if (this._field.canReadFromGeoJson()) {
+      if (this._field.canReadFromGeoJson() && this._field.supportsAutoDomain()) {
         // Geojson-sources can support rewrite
         // e.g. field-formatters will create duplicate field
-        targetName = this._field.supportsAutoDomain()
-          ? getComputedFieldName(this.getStyleName(), this._field.getName())
-          : this._field.getName();
+        targetName = getComputedFieldName(this.getStyleName(), this._field.getName());
       } else {
-        // Non-geojson sources (e.g. mvt)
+        // Non-geojson sources (e.g. 3rd party mvt or ES-source as mvt)
         targetName = this._field.getName();
       }
     }
     return targetName;
   }
 
-  getMbPropertyValue(
-    rawValue: string | number | null | undefined
-  ): string | number | null | undefined {
+  getMbPropertyValue(rawValue: RawValue): RawValue {
     return this.supportsMbFeatureState() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
   }
 }

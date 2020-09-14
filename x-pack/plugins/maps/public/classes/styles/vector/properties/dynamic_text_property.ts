@@ -5,14 +5,18 @@
  */
 
 import { Map as MbMap } from 'mapbox-gl';
-import { DynamicStyleProperty } from './dynamic_style_property';
+import { DynamicStyleProperty, RawValue } from './dynamic_style_property';
 import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
 
 export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOptions> {
   syncTextFieldWithMb(mbLayerId: string, mbMap: MbMap) {
     if (this._field && this._field.isValid()) {
       const targetName = this.getMbPropertyName();
-      mbMap.setLayoutProperty(mbLayerId, 'text-field', ['coalesce', ['get', targetName], '']);
+      mbMap.setLayoutProperty(mbLayerId, 'text-field', [
+        'coalesce',
+        [this.getMbLookupFunction(), targetName],
+        '',
+      ]);
     } else {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', null);
     }
@@ -30,9 +34,7 @@ export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOption
     return false;
   }
 
-  getMbPropertyValue(
-    rawValue: string | number | null | undefined
-  ): string | number | null | undefined {
+  getMbPropertyValue(rawValue: RawValue): RawValue {
     return this.formatField(rawValue);
   }
 }
