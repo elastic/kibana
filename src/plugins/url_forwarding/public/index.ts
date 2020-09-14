@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export * from './kbn_base_url';
-export * from './migrate_legacy_query';
+import { UrlForwardingPlugin } from './plugin';
+
+export const plugin = () => new UrlForwardingPlugin();
+
+export * from './plugin';

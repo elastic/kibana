@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { KibanaLegacyPlugin } from './plugin';
+import { has } from 'lodash';
+import { Query } from 'src/plugins/data/public';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new KibanaLegacyPlugin(initializerContext);
+/**
+ * Creates a standardized query object from old queries that were either strings or pure ES query DSL
+ *
+ * @param query - a legacy query, what used to be stored in SearchSource's query property
+ * @return Object
+ */
 
-export * from './plugin';
+export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
+  // Lucene was the only option before, so language-less queries are all lucene
+  if (!has(query, 'language')) {
+    return { query, language: 'lucene' };
+  }
 
-export { initAngularBootstrap } from './angular_bootstrap';
-export { PaginateDirectiveProvider, PaginateControlsDirectiveProvider } from './paginate/paginate';
-export * from './angular';
-export * from './notify';
-export * from './utils';
+  return query as Query;
+}
