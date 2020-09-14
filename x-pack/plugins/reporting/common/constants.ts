@@ -16,6 +16,7 @@ export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 export const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
 export const API_LIST_URL = '/api/reporting/jobs';
 export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
+export const API_DIAGNOSE_URL = `${API_BASE_URL}/diagnose`;
 
 export const CONTENT_TYPE_CSV = 'text/csv';
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';

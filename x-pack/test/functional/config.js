@@ -266,6 +266,16 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        global_dashboard_all: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         global_maps_all: {
           kibana: [
             {
@@ -351,6 +361,65 @@ export default async function ({ readConfigFile }) {
               spaces: ['default'],
             },
           ],
+        },
+
+        manage_security: {
+          elasticsearch: {
+            cluster: ['manage_security'],
+          },
+        },
+
+        ccr_user: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+        },
+
+        manage_ilm: {
+          elasticsearch: {
+            cluster: ['manage_ilm'],
+          },
+        },
+
+        index_management_user: {
+          elasticsearch: {
+            cluster: ['monitor', 'manage_index_templates'],
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        ingest_pipelines_user: {
+          elasticsearch: {
+            cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+          },
+        },
+
+        license_management_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+        },
+
+        logstash_read_user: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['.logstash*'],
+                privileges: ['read'],
+              },
+            ],
+          },
+        },
+
+        remote_clusters_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
         },
       },
       defaultRoles: ['superuser'],
