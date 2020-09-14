@@ -12,7 +12,6 @@ export class DynamicOrientationProperty extends DynamicStyleProperty<Orientation
   syncIconRotationWithMb(symbolLayerId: string, mbMap: MbMap) {
     if (this._field && this._field.isValid()) {
       const targetName = this._field.getMbPropertyName(this.getStyleName());
-      // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', ['coalesce', ['get', targetName], 0]);
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', 0);
