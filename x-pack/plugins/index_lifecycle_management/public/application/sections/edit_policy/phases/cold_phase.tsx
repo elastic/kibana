@@ -43,7 +43,7 @@ const i18nTexts = {
         { defaultMessage: 'No nodes assigned to the cold tier' }
       ),
       body: i18n.translate(
-        'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
+        'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableBody',
         {
           defaultMessage:
             'This policy will not complete allocation because there are no cold nodes. Assign at least one node to the cold tier.',
@@ -102,7 +102,7 @@ export const ColdPhase: FunctionComponent<Props> = ({
                 data-test-subj="enablePhaseSwitch-cold"
                 label={
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateWarmPhaseSwitchLabel"
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseSwitchLabel"
                     defaultMessage="Activate cold phase"
                   />
                 }

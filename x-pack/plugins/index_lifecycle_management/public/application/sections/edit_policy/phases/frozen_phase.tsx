@@ -42,7 +42,7 @@ const i18nTexts = {
         { defaultMessage: 'No nodes assigned to the frozen tier' }
       ),
       body: i18n.translate(
-        'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
+        'xpack.indexLifecycleMgmt.frozenPhase.dataTier.defaultAllocationNotAvailableBody',
         {
           defaultMessage:
             'This policy will not complete allocation because there are no frozen nodes. Assign at least one node to the frozen tier.',

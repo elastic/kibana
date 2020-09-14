@@ -49,7 +49,7 @@ const i18nTexts = {
     title: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.title', {
       defaultMessage: 'Move data to warm tier',
     }),
-    description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.title', {
+    description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.description', {
       defaultMessage: 'Store data accessed less frequently on less-costly hardware.',
     }),
     defaultAllocationNotAvailable: {
