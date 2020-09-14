@@ -38,6 +38,7 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
   position: absolute;
   top: ${(props) => `${props.topPct}%`};
   width: auto;
+  pointer-events: all;
 `;
 
 interface StyledDescriptionText {
@@ -59,6 +60,11 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
   text-align: left;
   text-transform: uppercase;
   width: fit-content;
+`;
+
+const StyledOuterGroup = styled.g`
+  fill: none;
+  pointer-events: visiblePainted;
 `;
 
 /**
@@ -329,6 +335,7 @@ const UnstyledProcessEventDot = React.memo(
           }
           role="img"
           aria-labelledby={labelHTMLID}
+          fill="none"
           style={{
             display: 'block',
             width: '100%',
@@ -338,9 +345,10 @@ const UnstyledProcessEventDot = React.memo(
             left: '0',
             outline: 'transparent',
             border: 'none',
+            pointerEvents: 'none',
           }}
         >
-          <g>
+          <StyledOuterGroup>
             <use
               xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
               fill={backingFill} // Only visible on hover
@@ -372,7 +380,7 @@ const UnstyledProcessEventDot = React.memo(
                 ref={animationTarget}
               />
             </use>
-          </g>
+          </StyledOuterGroup>
         </svg>
         <StyledActionsContainer
           color={colorMap.full}
@@ -464,6 +472,7 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   min-width: 280px;
   min-height: 90px;
   overflow-y: visible;
+  pointer-events: none;
 
   //dasharray & dashoffset should be equal to "pull" the stroke back
   //when it is transitioned.
