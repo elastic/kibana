@@ -87,4 +87,71 @@ describe('create_rules_type_dependents', () => {
     const errors = createRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
   });
+
+  test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validates with it', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threat_match',
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "type" is "threat_match", "threat_index" is required',
+      'when "type" is "threat_match", "threat_query" is required',
+      'when "type" is "threat_match", "threat_mapping" is required',
+    ]);
+  });
+
+  test('validates with threat_index, threat_query, and threat_mapping when type is "threat_match"', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threat_match',
+      threat_index: 'index-123',
+      threat_mapping: [{ entries: [{ field: '', type: 'mapping', value: '' }] }],
+      threat_query: '*:*',
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([]);
+  });
+
+  test('does NOT validate when threat_mapping is an empty array', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threat_match',
+      threat_index: 'index-123',
+      threat_mapping: [],
+      threat_query: '*:*',
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['threat_mapping" must have at least one element']);
+  });
+
+  test('validates with threat_index, threat_query, threat_mapping, and an optional threat_filters, when type is "threat_match"', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threat_match',
+      threat_index: 'index-123',
+      threat_mapping: [{ entries: [{ field: '', type: 'mapping', value: '' }] }],
+      threat_query: '*:*',
+      threat_filters: [
+        {
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: 'host.name: linux',
+                  analyze_wildcard: true,
+                  time_zone: 'Zulu',
+                },
+              },
+            ],
+            filter: [],
+            should: [],
+            must_not: [],
+          },
+        },
+      ],
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([]);
+  });
 });
