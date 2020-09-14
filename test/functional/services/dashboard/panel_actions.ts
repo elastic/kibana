@@ -63,6 +63,11 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await this.expectContextMenuToBeOpen();
     }
 
+    async openContextMenuMorePanel(parent?: WebElementWrapper) {
+      await this.openContextMenu(parent);
+      await testSubjects.click('embeddablePanelMore-mainMenu');
+    }
+
     async clickEdit() {
       log.debug('clickEdit');
       await testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
@@ -106,9 +111,9 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       log.debug(`replacePanel(${title})`);
       if (title) {
         const panelOptions = await this.getPanelHeading(title);
-        await this.openContextMenu(panelOptions);
+        await this.openContextMenuMorePanel(panelOptions);
       } else {
-        await this.openContextMenu();
+        await this.openContextMenuMorePanel();
       }
       await testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
