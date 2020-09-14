@@ -225,47 +225,12 @@ interface IndexMappings {
   };
 }
 
-export async function getDataTelemetry(
-  callCluster: LegacyAPICaller,
-  esClient: ElasticsearchClient
-) {
-  const useLegacy = false;
+export async function getDataTelemetry(esClient: ElasticsearchClient) {
   try {
     const index = [
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
       '*-*-*', // Include data-streams aliases `{type}-{dataset}-{namespace}`
     ];
-    if (useLegacy) {
-      const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([
-        // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
-        callCluster('indices.getMapping', {
-          index: '*', // Request all indices because filter_path already filters out the indices without any of those fields
-          filterPath: [
-            // _meta.beat tells the shipper
-            '*.mappings._meta.beat',
-            // _meta.package.name tells the Ingest Manager's package
-            '*.mappings._meta.package.name',
-            // _meta.managed_by is usually populated by Ingest Manager for the UI to identify it
-            '*.mappings._meta.managed_by',
-            // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
-            '*.mappings.properties.ecs.properties.version.type',
-
-            // If `data_stream.type` is a `constant_keyword`, it can be reported as a type
-            '*.mappings.properties.data_stream.properties.type.value',
-            // If `data_stream.dataset` is a `constant_keyword`, it can be reported as the dataset
-            '*.mappings.properties.data_stream.properties.dataset.value',
-          ],
-        }),
-        // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
-        callCluster<IndexStats>('indices.stats', {
-          index,
-          level: 'indices',
-          metric: ['docs', 'store'],
-          filterPath: ['indices.*.total'],
-        }),
-      ]);
-      const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
-    }
 
     const indexMappingsParams: RequestParams.IndicesGetMapping = {
       index: '*',

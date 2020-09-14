@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 // This can be removed when the ES client improves the types
 export interface ESClusterInfo {
@@ -35,13 +35,7 @@ export interface ESClusterInfo {
     minimum_index_compatibility_version: string;
   };
 }
-export interface ESClusterInfoResponse {
-  body: ESClusterInfo;
-  statusCode: number;
-  headers: object;
-  warnings: string[];
-  meta: object;
-}
+
 export async function clusterInfoGetter(esClient: ElasticsearchClient) {
   const { body } = await esClient.info<ESClusterInfo>();
   return body;
@@ -51,20 +45,8 @@ export async function clusterInfoGetter(esClient: ElasticsearchClient) {
  *
  * This is the equivalent to GET /
  *
- * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
  * @param {function} esClient The asInternalUser handler (exposed for testing)
- *
- * TODO: needs work on using the new client
- * The new client always returns an object of the shape, regardless of an error during the request execution:
- * {
- *  body: object | boolean
- *  statusCode: number
- *  headers: object
- *  warnings: [string],
- *  meta: object
- * }
  */
-export function getClusterInfo(callCluster: LegacyAPICaller, esClient: ElasticsearchClient) {
-  const useLegacy = false;
-  return useLegacy ? callCluster<ESClusterInfo>('info') : clusterInfoGetter(esClient);
+export function getClusterInfo(esClient: ElasticsearchClient) {
+  return clusterInfoGetter(esClient);
 }

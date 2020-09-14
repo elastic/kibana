@@ -76,11 +76,11 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
       const [clusterInfo, clusterStats, nodesUsage, kibana, dataTelemetry] = await Promise.all([
-        getClusterInfo(callCluster, esClient), // cluster info -> careful here: the new ESClient
-        getClusterStats(callCluster, esClient), // cluster stats (not to be confused with cluster _state_)
-        getNodesUsage(callCluster, esClient), // nodes_usage info
+        getClusterInfo(esClient), // cluster info -> careful here: the new ESClient
+        getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
+        getNodesUsage(esClient), // nodes_usage info
         getKibana(usageCollection, callCluster, esClient),
-        getDataTelemetry(callCluster, esClient),
+        getDataTelemetry(esClient),
       ]);
       return handleLocalStats(
         clusterInfo,

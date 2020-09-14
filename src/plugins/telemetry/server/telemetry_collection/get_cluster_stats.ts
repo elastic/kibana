@@ -18,26 +18,22 @@
  */
 
 import { ClusterDetailsGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { TIMEOUT } from './constants';
 /**
  * Get the cluster stats from the connected cluster.
  *
  * This is the equivalent to GET /_cluster/stats?timeout=30s.
  */
-export async function getClusterStats(callCluster: LegacyAPICaller, esClient: ElasticsearchClient) {
-  const useLegacy = false;
-  const legacyClusterStats = await callCluster('cluster.stats', {
-    timeout: TIMEOUT,
-  });
+export async function getClusterStats(esClient: ElasticsearchClient) {
   const { body } = await esClient.cluster.stats({ timeout: TIMEOUT });
-  return useLegacy ? legacyClusterStats : body;
+  return body;
 }
 
 /**
  * Get the cluster uuids from the connected cluster.
  */
-export const getClusterUuids: ClusterDetailsGetter = async ({ callCluster, esClient }) => {
-  const result = await getClusterStats(callCluster, esClient);
+export const getClusterUuids: ClusterDetailsGetter = async ({ esClient }) => {
+  const result = await getClusterStats(esClient);
   return [{ clusterUuid: result.cluster_uuid }];
 };
