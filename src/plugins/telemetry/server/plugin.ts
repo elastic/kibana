@@ -131,7 +131,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public async start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsStart) {
+  public async start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
     const { savedObjects, uiSettings, elasticsearch } = core;
     this.savedObjectsClient = savedObjects.createInternalRepository();
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);

@@ -45,7 +45,7 @@ import { getLocalLicense } from './get_local_license';
 export function registerCollection(
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
   esCluster: ILegacyClusterClient,
-  esClientGetter: () => IClusterClient | undefined
+  esClientGetter: () => IClusterClient
 ) {
   // Tina TODO: use the new ES client internally for clusterDetailsGetter, licenceGetter and, potentially, statsGetter.
   telemetryCollectionManager.setCollection({

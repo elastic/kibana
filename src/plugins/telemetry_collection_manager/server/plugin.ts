@@ -153,6 +153,7 @@ export class TelemetryCollectionManagerPlugin
       return [];
     }
     for (const collection of this.collections) {
+      // first fetch the client and make sure it's not undefined.
       const collectionEsClient = collection.esClientGetter();
       if (collectionEsClient !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
@@ -207,11 +208,11 @@ export class TelemetryCollectionManagerPlugin
     if (!this.usageCollection) {
       return [];
     }
-    // This is right before we loop through the collectors to call their fetch methods.
-    // before looping through each collector and calling its fetch method, we ensure that the esClientGetter returns something, if it doesn't, we skip the collection set (local, xpack_local, monitoring).
+    // TINA notes: This is right before we loop through the collectors to call their fetch methods.
+    // TINA notes: before looping through each collector and calling its fetch method, we ensure that the esClientGetter returns something, if it doesn't, we skip the collection set (local, xpack_local, monitoring).
 
     for (const collection of this.collections) {
-      // looping through each of the three collections options we have (grouping of usage collection)
+      // TINA notes: looping through each of the three collections options we have (grouping of usage collection) to make sure we have the es Client
       const collectionEsClient = collection.esClientGetter();
       if (collectionEsClient !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
