@@ -18,5 +18,5 @@ export function getEditPath(id: string) {
 }
 
 export function getFullPath(id: string) {
-  return `/app/${PLUGIN_ID}#/edit/${encodeURIComponent(id)}`;
+  return `/app/${PLUGIN_ID}${getEditPath(id)}`;
 }
