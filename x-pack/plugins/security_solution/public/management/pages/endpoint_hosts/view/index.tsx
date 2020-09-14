@@ -283,7 +283,7 @@ export const EndpointList = () => {
       },
       {
         field: 'host_status',
-        width: '10%',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Agent Status',
         }),
@@ -328,7 +328,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.Endpoint.policy.applied',
-        width: '10%',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
@@ -403,6 +403,7 @@ export const EndpointList = () => {
       },
       {
         field: '',
+        width: '5%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
           defaultMessage: 'Actions',
         }),
