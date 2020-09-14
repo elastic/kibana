@@ -57,8 +57,6 @@ export interface StatItems {
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
   fields: StatItem[];
-  grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
-  index: number;
   key: string;
   statKey?: string;
 }

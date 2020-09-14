@@ -42,7 +42,6 @@ export const mockData: { KpiNetwork: KpiNetworkData } = {
 
 const mockMappingItems: StatItems = {
   key: 'UniqueIps',
-  index: 0,
   fields: [
     {
       key: 'uniqueSourcePrivateIps',
@@ -64,7 +63,6 @@ const mockMappingItems: StatItems = {
   description: 'Unique private IPs',
   enableAreaChart: true,
   enableBarChart: true,
-  grow: 2,
 };
 
 export const mockNoChartMappings: Readonly<StatItems[]> = [
@@ -97,7 +95,6 @@ export const mockDisableChartsInitialData = {
   description: 'Unique private IPs',
   enableAreaChart: false,
   enableBarChart: false,
-  grow: 2,
   areaChart: undefined,
   barChart: undefined,
 };
@@ -124,7 +121,6 @@ export const mockEnableChartsInitialData = {
   description: 'Unique private IPs',
   enableAreaChart: true,
   enableBarChart: true,
-  grow: 2,
   areaChart: [],
   barChart: [
     {
@@ -221,9 +217,7 @@ export const mockEnableChartsData = {
     },
   ],
   from: '2019-06-15T06:00:00.000Z',
-  grow: 2,
   id: 'statItem',
-  index: 2,
   statKey: 'UniqueIps',
   to: '2019-06-18T06:00:00.000Z',
   narrowDateRange: mockNarrowDateRange,
