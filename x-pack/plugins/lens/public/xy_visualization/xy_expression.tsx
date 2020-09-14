@@ -313,9 +313,9 @@ export function XYChart({
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
-    index: number
+    groupId: string
   ) => {
-    const yTitle = index > 0 ? args.yRightTitle : args.yTitle;
+    const yTitle = groupId === 'right' ? args.yRightTitle : args.yTitle;
     return (
       yTitle ||
       axisSeries
@@ -327,15 +327,19 @@ export function XYChart({
     );
   };
 
-  const getYAxesStyle = (index: number) => {
+  const getYAxesStyle = (groupId: string) => {
     const style = {
       tickLabel: {
         visible:
-          index > 0 ? tickLabelsVisibilitySettings?.yRight : tickLabelsVisibilitySettings?.yLeft,
+          groupId === 'right'
+            ? tickLabelsVisibilitySettings?.yRight
+            : tickLabelsVisibilitySettings?.yLeft,
       },
       axisTitle: {
         visible:
-          index > 0 ? axisTitlesVisibilitySettings?.yRight : axisTitlesVisibilitySettings?.yLeft,
+          groupId === 'right'
+            ? axisTitlesVisibilitySettings?.yRight
+            : axisTitlesVisibilitySettings?.yLeft,
       },
     };
     return style;
@@ -462,14 +466,14 @@ export function XYChart({
           id={axis.groupId}
           groupId={axis.groupId}
           position={axis.position}
-          title={getYAxesTitles(axis.series, index)}
+          title={getYAxesTitles(axis.series, axis.groupId)}
           gridLine={{
             visible:
               index > 0 ? gridlinesVisibilitySettings?.yRight : gridlinesVisibilitySettings?.yLeft,
           }}
           hide={filteredLayers[0].hide}
           tickFormat={(d) => axis.formatter?.convert(d) || ''}
-          style={getYAxesStyle(index)}
+          style={getYAxesStyle(axis.groupId)}
         />
       ))}
 
