@@ -49,15 +49,18 @@ export function RumDashboard() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={3}>
+        <EuiFlexGroup gutterSize="s" wrap>
+          <EuiFlexItem style={{ flexBasis: 650 }}>
+            <EuiPanel>
               <PageLoadDistribution />
-              <EuiSpacer size="m" />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem style={{ flexBasis: 650 }}>
+            <EuiPanel>
               <PageViewsTrend />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiPanel>
           <EuiFlexGroup justifyContent="spaceBetween">

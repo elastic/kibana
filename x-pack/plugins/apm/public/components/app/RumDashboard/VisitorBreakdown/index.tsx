@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
-import { VisitorBreakdownLabel } from '../translations';
+import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 
@@ -37,27 +37,24 @@ export function VisitorBreakdown() {
 
   return (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <h3>{VisitorBreakdownLabel}</h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{I18LABELS.browser}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <VisitorBreakdownChart options={data?.browsers} />
-          <EuiTitle size="xs" className="eui-textCenter">
-            <h4>Browser</h4>
-          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{I18LABELS.operatingSystem}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <VisitorBreakdownChart options={data?.os} />
-          <EuiTitle size="xs" className="eui-textCenter">
-            <h4>Operating System</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <VisitorBreakdownChart options={data?.devices} />
-          <EuiTitle size="xs" className="eui-textCenter">
-            <h4>Device</h4>
-          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

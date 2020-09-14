@@ -55,6 +55,15 @@ export const I18LABELS = {
   coreWebVitals: i18n.translate('xpack.apm.rum.filterGroup.coreWebVitals', {
     defaultMessage: 'Core web vitals',
   }),
+  browser: i18n.translate('xpack.apm.rum.visitorBreakdown.browser', {
+    defaultMessage: 'Browser',
+  }),
+  operatingSystem: i18n.translate(
+    'xpack.apm.rum.visitorBreakdown.operatingSystem',
+    {
+      defaultMessage: 'Operating system',
+    }
+  ),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(
