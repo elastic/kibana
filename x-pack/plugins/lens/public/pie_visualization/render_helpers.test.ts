@@ -6,13 +6,15 @@
 
 import { Datatable } from 'src/plugins/expressions/public';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import { ColumnGroups } from './types';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 describe('render helpers', () => {
   describe('#getSliceValueWithFallback', () => {
     describe('without fallback', () => {
-      const columnGroups = [
-        { col: { id: 'a', name: 'A' }, metrics: [] },
-        { col: { id: 'b', name: 'C' }, metrics: [] },
+      const columnGroups: ColumnGroups = [
+        { col: { id: 'a', name: 'A', meta: { type: ES_FIELD_TYPES.STRING } }, metrics: [] },
+        { col: { id: 'b', name: 'C', meta: { type: ES_FIELD_TYPES.STRING } }, metrics: [] },
       ];
 
       it('returns the metric when positive number', () => {
@@ -20,6 +22,7 @@ describe('render helpers', () => {
           getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: 5 }, columnGroups, {
             id: 'c',
             name: 'C',
+            meta: { type: ES_FIELD_TYPES.INTEGER },
           })
         ).toEqual(5);
       });
@@ -29,6 +32,7 @@ describe('render helpers', () => {
           getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: -100 }, columnGroups, {
             id: 'c',
             name: 'C',
+            meta: { type: ES_FIELD_TYPES.INTEGER },
           })
         ).toEqual(-100);
       });
@@ -38,15 +42,19 @@ describe('render helpers', () => {
           getSliceValueWithFallback({ a: 'Cat', b: 'Home', c: 0 }, columnGroups, {
             id: 'c',
             name: 'C',
+            meta: { type: ES_FIELD_TYPES.INTEGER },
           })
         ).toEqual(Number.EPSILON);
       });
     });
 
     describe('fallback behavior', () => {
-      const columnGroups = [
-        { col: { id: 'a', name: 'A' }, metrics: [{ id: 'a_subtotal', name: '' }] },
-        { col: { id: 'b', name: 'C' }, metrics: [] },
+      const columnGroups: ColumnGroups = [
+        {
+          col: { id: 'a', name: 'A', meta: { type: 'string' } },
+          metrics: [{ id: 'a_subtotal', name: '', meta: { type: ES_FIELD_TYPES.INTEGER } }],
+        },
+        { col: { id: 'b', name: 'C', meta: { type: ES_FIELD_TYPES.STRING } }, metrics: [] },
       ];
 
       it('falls back to metric from previous column if available', () => {
@@ -54,7 +62,7 @@ describe('render helpers', () => {
           getSliceValueWithFallback(
             { a: 'Cat', a_subtotal: 5, b: 'Home', c: undefined },
             columnGroups,
-            { id: 'c', name: 'C' }
+            { id: 'c', name: 'C', meta: { type: ES_FIELD_TYPES.INTEGER } }
           )
         ).toEqual(5);
       });
@@ -64,7 +72,7 @@ describe('render helpers', () => {
           getSliceValueWithFallback(
             { a: 'Cat', a_subtotal: 0, b: 'Home', c: undefined },
             columnGroups,
-            { id: 'c', name: 'C' }
+            { id: 'c', name: 'C', meta: { type: ES_FIELD_TYPES.INTEGER } }
           )
         ).toEqual(Number.EPSILON);
       });
@@ -74,7 +82,7 @@ describe('render helpers', () => {
           getSliceValueWithFallback(
             { a: 'Cat', a_subtotal: undefined, b: 'Home', c: undefined },
             columnGroups,
-            { id: 'c', name: 'C' }
+            { id: 'c', name: 'C', meta: { type: ES_FIELD_TYPES.INTEGER } }
           )
         ).toEqual(Number.EPSILON);
       });
@@ -86,8 +94,8 @@ describe('render helpers', () => {
       const table: Datatable = {
         type: 'datatable',
         columns: [
-          { id: 'a', name: 'A', meta: { type: 'string' } },
-          { id: 'b', name: 'B', meta: { type: 'number' } },
+          { id: 'a', name: 'A', meta: { type: ES_FIELD_TYPES.STRING } },
+          { id: 'b', name: 'B', meta: { type: ES_FIELD_TYPES.INTEGER } },
         ],
         rows: [
           { a: 'Hi', b: 2 },
@@ -111,9 +119,9 @@ describe('render helpers', () => {
       const table: Datatable = {
         type: 'datatable',
         columns: [
-          { id: 'a', name: 'A', meta: { type: 'string' } },
-          { id: 'b', name: 'B', meta: { type: 'string' } },
-          { id: 'c', name: 'C', meta: { type: 'number' } },
+          { id: 'a', name: 'A', meta: { type: ES_FIELD_TYPES.STRING } },
+          { id: 'b', name: 'B', meta: { type: ES_FIELD_TYPES.STRING } },
+          { id: 'c', name: 'C', meta: { type: ES_FIELD_TYPES.INTEGER } },
         ],
         rows: [
           { a: 'Hi', b: 'Two', c: 2 },
@@ -137,9 +145,9 @@ describe('render helpers', () => {
       const table: Datatable = {
         type: 'datatable',
         columns: [
-          { id: 'a', name: 'A', meta: { type: 'string' } },
-          { id: 'b', name: 'B', meta: { type: 'string' } },
-          { id: 'c', name: 'C', meta: { type: 'number' } },
+          { id: 'a', name: 'A', meta: { type: ES_FIELD_TYPES.STRING } },
+          { id: 'b', name: 'B', meta: { type: ES_FIELD_TYPES.STRING } },
+          { id: 'c', name: 'C', meta: { type: ES_FIELD_TYPES.INTEGER } },
         ],
         rows: [
           { a: 'Hi', b: 'Two', c: 2 },

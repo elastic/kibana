@@ -71,19 +71,28 @@ const getOtherBucketFilterTerms = (
  * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
 const createFilter = async (
-  table: Pick<Datatable, 'meta' | 'rows' | 'columns'>,
+  table: Pick<Datatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number
 ) => {
-  if (!table || !table.columns || !table.columns[columnIndex] || !table.meta || table.meta.type !== 'esaggs' || !table.meta.source) {
+  if (
+    !table ||
+    !table.columns ||
+    !table.columns[columnIndex] ||
+    !table.columns[columnIndex].meta ||
+    table.columns[columnIndex].meta.source !== 'esaggs' ||
+    !table.columns[columnIndex].meta.sourceParams?.indexPatternId
+  ) {
     return;
   }
   const column = table.columns[columnIndex];
-  if (!column.meta || !column.meta.params) {
-    return;
-  }
-  const aggConfigs = getSearchService().aggs.createAggConfigs(await getIndexPatterns().get(table.meta.source), [ column.meta.params as AggConfigSerialized ]);
-  const aggConfig = aggConfigs.aggs[0];
+  const { indexPatternId, ...aggConfigParams } = table.columns[columnIndex].meta
+    .sourceParams as any;
+  const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
+    await getIndexPatterns().get(indexPatternId),
+    [aggConfigParams as AggConfigSerialized]
+  );
+  const aggConfig = aggConfigsInstance.aggs[0];
   let filter: Filter[] = [];
   const value: any = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {

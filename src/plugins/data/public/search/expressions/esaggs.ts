@@ -192,11 +192,9 @@ const handleCourierRequest = async ({
       : undefined,
   };
 
-  (searchSource as any).tabifiedResponse = tabifyAggResponse(
-    aggs,
-    (searchSource as any).finalResponse,
-    tabifyParams
-  );
+  const response = tabifyAggResponse(aggs, (searchSource as any).finalResponse, tabifyParams);
+
+  (searchSource as any).tabifiedResponse = response;
 
   inspectorAdapters.data.setTabularLoader(
     () =>
@@ -207,7 +205,7 @@ const handleCourierRequest = async ({
     { returnsFormattedValues: true }
   );
 
-  return (searchSource as any).tabifiedResponse;
+  return response;
 };
 
 export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
@@ -280,20 +278,22 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
 
     const table: Datatable = {
       type: 'datatable',
-      meta: {
-        type: 'esaggs',
-        source: indexPattern.id,
-      },
       rows: response.rows,
-      columns: response.columns.map((column: any) => {
+      columns: response.columns.map((column) => {
         const cleanedColumn: DatatableColumn = {
           id: column.id,
           name: column.name,
           meta: {
             type: column.aggConfig.params.field?.type || 'number',
             field: column.aggConfig.params.field?.name,
-            params: column.aggConfig.serialize(),
-          }
+            index: indexPattern.title,
+            params: column.aggConfig.toSerializedFieldFormat(),
+            source: 'esaggs',
+            sourceParams: {
+              indexPatternId: indexPattern.id,
+              ...column.aggConfig.serialize(),
+            },
+          },
         };
         return cleanedColumn;
       }),

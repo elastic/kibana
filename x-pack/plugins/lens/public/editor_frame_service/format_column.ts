@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  Datatable,
+  DatatableColumnType,
+} from 'src/plugins/expressions/public';
 
 interface FormatColumn {
   format: string;
@@ -75,14 +79,21 @@ export const formatColumn: ExpressionFunctionDefinition<
               ...col,
               meta: {
                 ...col.meta,
-                type: format,
-                params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
+                params: {
+                  id: format,
+                  params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
+                },
               },
             };
           } else {
             return {
               ...col,
-              formatHint: { id: format, params: {} },
+              meta: {
+                ...col.meta,
+                params: {
+                  id: format,
+                },
+              },
             };
           }
         }

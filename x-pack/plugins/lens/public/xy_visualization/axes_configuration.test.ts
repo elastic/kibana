@@ -7,6 +7,7 @@
 import { LayerArgs } from './types';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {
@@ -94,18 +95,17 @@ describe('axes_configuration', () => {
           yAccessorId4: 4,
         },
       ],
-      meta: {
-        type: 'esaggs',
-        source: 'indexPatternId',
-      },
       columns: [
         {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: 'date',
+            type: ES_FIELD_TYPES.DATE,
             field: 'order_date',
-            params: {
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
               type: 'date_histogram',
               params: {
                 field: 'order_date',
@@ -117,16 +117,19 @@ describe('axes_configuration', () => {
                 min_doc_count: 0,
                 extended_bounds: {},
               },
-            }
+            },
           },
         },
         {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: 'string',
+            type: ES_FIELD_TYPES.STRING,
             field: 'category.keyword',
-            params: {
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
               type: 'terms',
               params: {
                 field: 'category.keyword',
@@ -138,15 +141,18 @@ describe('axes_configuration', () => {
                 missingBucket: false,
                 missingBucketLabel: 'Missing',
               },
-            }
+            },
           },
         },
         {
           id: 'yAccessorId',
           name: 'Count of records',
           meta: {
-            type: 'number',
-            params: {
+            type: ES_FIELD_TYPES.INTEGER,
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
               type: 'count',
             },
           },
@@ -155,9 +161,12 @@ describe('axes_configuration', () => {
           id: 'yAccessorId2',
           name: 'Other column',
           meta: {
-            type: 'number',
-            params: {
-              type: 'average'
+            type: ES_FIELD_TYPES.INTEGER,
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'average',
             },
           },
         },
@@ -165,9 +174,12 @@ describe('axes_configuration', () => {
           id: 'yAccessorId3',
           name: 'Other column',
           meta: {
-            type: 'number',
-            params: {
-              type: 'average'
+            type: ES_FIELD_TYPES.INTEGER,
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'average',
             },
           },
         },
@@ -175,9 +187,12 @@ describe('axes_configuration', () => {
           id: 'yAccessorId4',
           name: 'Other column',
           meta: {
-            type: 'number',
-            params: {
-              type: 'average'
+            type: ES_FIELD_TYPES.INTEGER,
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'average',
             },
           },
         },

@@ -110,8 +110,8 @@ export function MetricChart({
     const row = firstTable.rows[0];
     if (row[accessor]) {
       value =
-        column && column.formatHint
-          ? formatFactory(column.formatHint).convert(row[accessor])
+        column && column.meta?.params
+          ? formatFactory(column.meta?.params).convert(row[accessor])
           : Number(Number(row[accessor]).toFixed(3)).toString();
     }
   }

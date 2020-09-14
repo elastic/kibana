@@ -159,14 +159,16 @@ export function DatatableComponent(props: DatatableRenderProps) {
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
   firstTable.columns.forEach((column) => {
-    formatters[column.id] = props.formatFactory(column.formatHint);
+    formatters[column.id] = props.formatFactory(column.meta?.params);
   });
 
   const { onClickValue } = props;
   const handleFilterClick = useMemo(
     () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
       const col = firstTable.columns[colIndex];
-      const isDate = col.meta?.params?.type === 'date_histogram' || col.meta?.params?.type === 'date_range';
+      const isDate =
+        col.meta?.sourceParams?.type === 'date_histogram' ||
+        col.meta?.sourceParams?.type === 'date_range';
       const timeFieldName = negate && isDate ? undefined : col?.meta?.field;
       const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
 
@@ -189,7 +191,10 @@ export function DatatableComponent(props: DatatableRenderProps) {
 
   const bucketColumns = firstTable.columns
     .filter((col) => {
-      return col?.meta?.params?.type && props.getType(col.meta.params.type)?.type === 'buckets';
+      return (
+        col?.meta?.sourceParams?.type &&
+        props.getType(col.meta.sourceParams.type as string)?.type === 'buckets'
+      );
     })
     .map((col) => col.id);
 

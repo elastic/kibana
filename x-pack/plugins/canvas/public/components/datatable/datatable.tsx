@@ -13,7 +13,7 @@ import { Datatable as DatatableType, DatatableColumn } from '../../../types';
 
 type IconType = 'string' | 'number' | 'date' | 'boolean' | 'null';
 
-const getIcon = (type: IconType) => {
+const getIcon = (type: IconType | null) => {
   if (type === null) {
     return;
   }

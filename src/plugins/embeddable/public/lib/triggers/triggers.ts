@@ -29,7 +29,7 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
   data: {
     data: Array<{
-      table: Pick<Datatable, 'meta' | 'rows' | 'columns'>;
+      table: Pick<Datatable, 'rows' | 'columns'>;
       column: number;
       row: number;
       value: any;

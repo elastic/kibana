@@ -18,16 +18,43 @@ import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 
 function sampleArgs() {
+  const indexPatternId = 'indexPatternId';
   const data: LensMultiTable = {
     type: 'lens_multitable',
     tables: {
       l1: {
         type: 'datatable',
-        meta: { type: 'esaggs', source: 'indexPatternId' },
         columns: [
-          { id: 'a', name: 'a', meta: { type: 'string', params: { type: 'terms' } } },
-          { id: 'b', name: 'b', meta: { type: 'date', params: { type: 'date_histogram', params: { field: 'b' } } } },
-          { id: 'c', name: 'c', meta: { type: 'number', params: { type: 'count' } } },
+          {
+            id: 'a',
+            name: 'a',
+            meta: {
+              type: 'string',
+              source: 'esaggs',
+              sourceParams: { indexPatternId, aggConfigs: { type: 'terms' } },
+            },
+          },
+          {
+            id: 'b',
+            name: 'b',
+            meta: {
+              type: 'date',
+              source: 'esaggs',
+              sourceParams: {
+                indexPatternId,
+                aggConfigs: { type: 'date_histogram', params: { field: 'b' } },
+              },
+            },
+          },
+          {
+            id: 'c',
+            name: 'c',
+            meta: {
+              type: 'number',
+              source: 'esaggs',
+              sourceParams: { indexPatternId, aggConfigs: { type: 'count' } },
+            },
+          },
         ],
         rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
       },
@@ -151,10 +178,22 @@ describe('datatable_expression', () => {
         type: 'lens_multitable',
         tables: {
           l1: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a', meta: { type: 'date_range', aggConfigParams: { field: 'a' } } },
-              { id: 'b', name: 'b', meta: { type: 'count' } },
+              {
+                id: 'a',
+                name: 'a',
+                meta: {
+                  type: 'date',
+                  source: 'esaggs',
+                  sourceParams: { type: 'date_range', aggConfigParams: { field: 'a' } },
+                },
+              },
+              {
+                id: 'b',
+                name: 'b',
+                meta: { type: 'number', source: 'esaggs', sourceParams: { type: 'count' } },
+              },
             ],
             rows: [{ a: 1588024800000, b: 3 }],
           },

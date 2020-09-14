@@ -22,6 +22,7 @@ import { map, pick, zipObject } from 'lodash';
 import { ExpressionTypeDefinition } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
+import { ES_FIELD_TYPES } from '../../../../data/common';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
@@ -42,7 +43,7 @@ export const isDatatable = (datatable: unknown): datatable is Datatable =>
 /**
  * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
  */
-export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
+export type DatatableColumnType = ES_FIELD_TYPES;
 
 /**
  * This type represents a row in a `Datatable`.

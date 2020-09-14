@@ -23,7 +23,7 @@ import { isColorDark } from '@elastic/eui';
 import { MetricVisValue } from './metric_vis_value';
 import { Input } from '../metric_vis_fn';
 import { FieldFormatsContentType, IFieldFormat } from '../../../data/public';
-import { Datatable,  } from '../../../expressions/public';
+import { Datatable } from '../../../expressions/public';
 import { getHeatmapColors } from '../../../charts/public';
 import { VisParams, MetricVisMetric } from '../types';
 import { getFormatService } from '../services';

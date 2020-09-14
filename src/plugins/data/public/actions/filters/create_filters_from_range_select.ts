@@ -31,9 +31,12 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectConte
     return [];
   }
 
-  const indexPattern = await getIndexPatterns().get(column.meta.indexPatternId);
-  const aggConfigs = getSearchService().aggs.createAggConfigs(indexPattern, [column.meta.params as AggConfigSerialized]);
-  const aggConfig = aggConfigs.aggs[0];
+  const { indexPatternId, ...aggConfigs } = column.meta.sourceParams;
+  const indexPattern = await getIndexPatterns().get(indexPatternId);
+  const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
+    aggConfigs as AggConfigSerialized,
+  ]);
+  const aggConfig = aggConfigsInstance.aggs[0];
   const field: IFieldType = aggConfig.params.field;
 
   if (!field || event.range.length <= 1) {

@@ -7,14 +7,15 @@
 import { renameColumns } from './rename_columns';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 describe('rename_columns', () => {
   it('should rename columns of a given datatable', () => {
     const input: Datatable = {
       type: 'datatable',
       columns: [
-        { id: 'a', name: 'A', meta: { type: 'number' } },
-        { id: 'b', name: 'B', meta: { type: 'number' } },
+        { id: 'a', name: 'A', meta: { type: ES_FIELD_TYPES.INTEGER } },
+        { id: 'b', name: 'B', meta: { type: ES_FIELD_TYPES.INTEGER } },
       ],
       rows: [
         { a: 1, b: 2 },
@@ -79,7 +80,7 @@ describe('rename_columns', () => {
   it('should replace "" with a visible value', () => {
     const input: Datatable = {
       type: 'datatable',
-      columns: [{ id: 'a', name: 'A', meta: { type: 'string' } }],
+      columns: [{ id: 'a', name: 'A', meta: { type: ES_FIELD_TYPES.STRING } }],
       rows: [{ a: '' }],
     };
 

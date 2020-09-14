@@ -107,10 +107,7 @@ export class LensPlugin {
       editorFrame: editorFrameSetupInterface,
       formatFactory: core
         .getStartServices()
-        .then(([_, { data: dataStart }]) => (params) => {
-          const aggConfig = dataStart.search.aggs.createAggConfigs()
-          dataStart.fieldFormats.deserialize
-        }),
+        .then(([_, { data: dataStart }]) => dataStart.fieldFormats.deserialize),
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);

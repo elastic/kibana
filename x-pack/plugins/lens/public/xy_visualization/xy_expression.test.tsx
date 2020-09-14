@@ -35,6 +35,7 @@ import {
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -98,18 +99,17 @@ const dateHistogramData: LensMultiTable = {
           yAccessorId: 1,
         },
       ],
-      meta: {
-        type: 'esaggs',
-        source: 'indexPatternId',
-      },
       columns: [
         {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: 'date',
+            type: ES_FIELD_TYPES.DATE,
             field: 'order_date',
-            params: {
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
               type: 'date_histogram',
               params: {
                 field: 'order_date',
@@ -120,7 +120,7 @@ const dateHistogramData: LensMultiTable = {
                 drop_partials: false,
                 min_doc_count: 0,
                 extended_bounds: {},
-              }
+              },
             },
           },
         },
@@ -128,9 +128,12 @@ const dateHistogramData: LensMultiTable = {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: 'string',
+            type: ES_FIELD_TYPES.STRING,
             field: 'category.keyword',
-            params: {
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
               type: 'terms',
               params: {
                 field: 'category.keyword',
@@ -141,7 +144,7 @@ const dateHistogramData: LensMultiTable = {
                 otherBucketLabel: 'Other',
                 missingBucket: false,
                 missingBucketLabel: 'Missing',
-              }
+              },
             },
           },
         },
@@ -149,11 +152,14 @@ const dateHistogramData: LensMultiTable = {
           id: 'yAccessorId',
           name: 'Count of records',
           meta: {
-            type: 'count',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: ES_FIELD_TYPES.INTEGER,
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              params: {},
+            },
           },
-          formatHint: { id: 'number' },
         },
       ],
     },
@@ -182,15 +188,18 @@ const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable => ({
     {
       id: 'a',
       name: 'a',
-      meta: { type: 'number' }
+      meta: { type: ES_FIELD_TYPES.INTEGER },
     },
-    { id: 'b', name: 'b', meta: { type: 'number', params: { pattern: '000,0' } } },
+    { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER, params: { pattern: '000,0' } } },
     {
       id: 'c',
       name: 'c',
-      meta: { type: 'date', params: { type: 'date-histogram', params: { interval: 'auto' } } },
+      meta: {
+        type: ES_FIELD_TYPES.DATE,
+        params: { type: 'date-histogram', params: { interval: 'auto' } },
+      },
     },
-    { id: 'd', name: 'ColD', meta: { type: 'string' } },
+    { id: 'd', name: 'ColD', meta: { type: ES_FIELD_TYPES.STRING } },
   ],
   rows,
 });
@@ -343,10 +352,10 @@ describe('xy_expression', () => {
         first: {
           type: 'datatable',
           columns: [
-            { id: 'a', name: 'a', meta: { type: 'number' } },
-            { id: 'b', name: 'b', meta: { type: 'number' } },
-            { id: 'c', name: 'c', meta: { type: 'string' } },
-            { id: 'd', name: 'd', meta: { type: 'string' } },
+            { id: 'a', name: 'a', meta: { type: ES_FIELD_TYPES.INTEGER } },
+            { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER } },
+            { id: 'c', name: 'c', meta: { type: ES_FIELD_TYPES.STRING } },
+            { id: 'd', name: 'd', meta: { type: ES_FIELD_TYPES.STRING } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -361,10 +370,10 @@ describe('xy_expression', () => {
         first: {
           type: 'datatable',
           columns: [
-            { id: 'a', name: 'a', meta: { type: 'number' } },
-            { id: 'b', name: 'b', meta: { type: 'number' } },
-            { id: 'c', name: 'c', meta: { type: 'string' } },
-            { id: 'd', name: 'd', meta: { type: 'string' } },
+            { id: 'a', name: 'a', meta: { type: ES_FIELD_TYPES.INTEGER } },
+            { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER } },
+            { id: 'c', name: 'c', meta: { type: ES_FIELD_TYPES.STRING } },
+            { id: 'd', name: 'd', meta: { type: ES_FIELD_TYPES.STRING } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -1553,9 +1562,9 @@ describe('xy_expression', () => {
           first: {
             type: 'datatable',
             columns: [
-              { id: 'a', name: 'a', meta: { type: 'number' } },
-              { id: 'b', name: 'b', meta: { type: 'number' } },
-              { id: 'c', name: 'c', meta: { type: 'string' } },
+              { id: 'a', name: 'a', meta: { type: ES_FIELD_TYPES.INTEGER } },
+              { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER } },
+              { id: 'c', name: 'c', meta: { type: ES_FIELD_TYPES.STRING } },
             ],
             rows: [
               { a: undefined, b: 2, c: 'I', d: 'Row 1' },
@@ -1565,9 +1574,9 @@ describe('xy_expression', () => {
           second: {
             type: 'datatable',
             columns: [
-              { id: 'a', name: 'a', meta: { type: 'number' } },
-              { id: 'b', name: 'b', meta: { type: 'number' } },
-              { id: 'c', name: 'c', meta: { type: 'string' } },
+              { id: 'a', name: 'a', meta: { type: ES_FIELD_TYPES.INTEGER } },
+              { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER } },
+              { id: 'c', name: 'c', meta: { type: ES_FIELD_TYPES.STRING } },
             ],
             rows: [
               { a: undefined, b: undefined, c: undefined },
@@ -1647,9 +1656,9 @@ describe('xy_expression', () => {
           first: {
             type: 'datatable',
             columns: [
-              { id: 'a', name: 'a', meta: { type: 'number' } },
-              { id: 'b', name: 'b', meta: { type: 'number' } },
-              { id: 'c', name: 'c', meta: { type: 'number' } },
+              { id: 'a', name: 'a', meta: { type: ES_FIELD_TYPES.INTEGER } },
+              { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER } },
+              { id: 'c', name: 'c', meta: { type: ES_FIELD_TYPES.STRING } },
             ],
             rows: [
               { a: 0, b: 2, c: 5 },
@@ -1719,9 +1728,9 @@ describe('xy_expression', () => {
           first: {
             type: 'datatable',
             columns: [
-              { id: 'a', name: 'a', meta: { type: 'number' } },
-              { id: 'b', name: 'b', meta: { type: 'number' } },
-              { id: 'c', name: 'c', meta: { type: 'string' } },
+              { id: 'a', name: 'a', meta: { type: ES_FIELD_TYPES.INTEGER } },
+              { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER } },
+              { id: 'c', name: 'c', meta: { type: ES_FIELD_TYPES.STRING } },
             ],
             rows: [{ a: 1, b: 5, c: 'J' }],
           },

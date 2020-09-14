@@ -21,7 +21,12 @@ import moment from 'moment';
 
 import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
-import { fieldFormats, FieldFormatsGetConfigFn, IndexPatternsContract, RangeFilter } from '../../../public';
+import {
+  fieldFormats,
+  FieldFormatsGetConfigFn,
+  IndexPatternsContract,
+  RangeFilter,
+} from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
@@ -68,17 +73,17 @@ describe('brushEvent', () => {
       column: 0,
       table: {
         type: 'datatable',
-        meta: {
-          type: 'esaggs',
-          source: 'indexPatternId',
-        },
         columns: [
           {
             id: '1',
             name: '1',
             meta: {
               type: 'date',
-              params: serializedAggConfig,
+              sourceParams: {
+                indexPatternId: 'indexPatternId',
+                ...serializedAggConfig,
+              },
+              source: 'esaggs',
             },
           },
         ],

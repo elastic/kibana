@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { IFieldFormat } from '../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES, IFieldFormat } from '../../../../../src/plugins/data/public';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -19,9 +19,9 @@ function sampleArgs() {
       l1: {
         type: 'datatable',
         columns: [
-          { id: 'a', name: 'a', meta: { type: 'number' } },
-          { id: 'b', name: 'b', meta: { type: 'number' } },
-          { id: 'c', name: 'c', meta: { type: 'number' } },
+          { id: 'a', name: 'a', meta: { type: ES_FIELD_TYPES.INTEGER } },
+          { id: 'b', name: 'b', meta: { type: ES_FIELD_TYPES.INTEGER } },
+          { id: 'c', name: 'c', meta: { type: ES_FIELD_TYPES.INTEGER } },
         ],
         rows: [{ a: 10110, b: 2, c: 3 }],
       },

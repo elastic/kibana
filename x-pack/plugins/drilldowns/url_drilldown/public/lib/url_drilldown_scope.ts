@@ -131,7 +131,7 @@ function getEventScopeFromRangeSelectTriggerContext(
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
   return cleanEmptyKeys({
-    key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string,
+    key: toPrimitiveOrUndefined(column?.meta.field) as string,
     from: toPrimitiveOrUndefined(range[0]) as string | number | undefined,
     to: toPrimitiveOrUndefined(range[range.length - 1]) as string | number | undefined,
   });
@@ -145,7 +145,7 @@ function getEventScopeFromValueClickTriggerContext(
     const column = table.columns[columnIndex];
     return {
       value: toPrimitiveOrUndefined(value) as Primitive,
-      key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
+      key: column?.meta?.field,
     };
   });
 

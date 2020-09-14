@@ -7,14 +7,15 @@
 import moment from 'moment';
 import { mergeTables } from './merge_tables';
 import { Datatable } from 'src/plugins/expressions';
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 describe('lens_merge_tables', () => {
   it('should produce a row with the nested table as defined', () => {
     const sampleTable1: Datatable = {
       type: 'datatable',
       columns: [
-        { id: 'bucket', name: 'A', meta: { type: 'string' } },
-        { id: 'count', name: 'Count', meta: { type: 'number' } },
+        { id: 'bucket', name: 'A', meta: { type: ES_FIELD_TYPES.STRING } },
+        { id: 'count', name: 'Count', meta: { type: ES_FIELD_TYPES.INTEGER } },
       ],
       rows: [
         { bucket: 'a', count: 5 },
@@ -25,8 +26,8 @@ describe('lens_merge_tables', () => {
     const sampleTable2: Datatable = {
       type: 'datatable',
       columns: [
-        { id: 'bucket', name: 'C', meta: { type: 'string' } },
-        { id: 'avg', name: 'Average', meta: { type: 'number' } },
+        { id: 'bucket', name: 'C', meta: { type: ES_FIELD_TYPES.STRING } },
+        { id: 'avg', name: 'Average', meta: { type: ES_FIELD_TYPES.INTEGER } },
       ],
       rows: [
         { bucket: 'a', avg: 2.5 },
