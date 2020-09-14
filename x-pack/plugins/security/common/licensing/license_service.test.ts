@@ -13,6 +13,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(undefined as any),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(false);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: false,
@@ -34,6 +35,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(rawLicenseMock),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(false);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: false,
@@ -60,6 +62,7 @@ describe('license features', function () {
     const subscriptionHandler = jest.fn();
     const subscription = serviceSetup.license.features$.subscribe(subscriptionHandler);
     try {
+      expect(serviceSetup.license.isLicenseAvailable()).toEqual(false);
       expect(subscriptionHandler).toHaveBeenCalledTimes(1);
       expect(subscriptionHandler.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -80,6 +83,7 @@ describe('license features', function () {
       `);
 
       rawLicense$.next(licenseMock.createLicenseMock());
+      expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
       expect(subscriptionHandler).toHaveBeenCalledTimes(2);
       expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
@@ -112,6 +116,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,
@@ -136,6 +141,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: false,
       allowLogin: false,
@@ -159,6 +165,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,
@@ -182,6 +189,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,
@@ -205,6 +213,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,

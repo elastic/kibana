@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { eventId } from '../../../../plugins/security_solution/common/endpoint/models/event';
-import { ResolverRelatedEvents } from '../../../../plugins/security_solution/common/endpoint/types';
+import { eventIDSafeVersion } from '../../../../plugins/security_solution/common/endpoint/models/event';
+import { SafeResolverRelatedEvents } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   Tree,
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MyJ9';
 
       it('should return details for the root node', async () => {
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns no values when there is no more data', async () => {
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           // after is set to the document id of the last event so there shouldn't be any more after it
           .post(
             `/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}&afterEvent=${cursor}`
@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return the first page of information when the cursor is invalid', async () => {
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(
             `/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}&afterEvent=blah`
           )
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return no results for an invalid endpoint ID', async () => {
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=foo`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -120,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('endpoint events', () => {
       it('should not find any events', async () => {
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(`/api/endpoint/resolver/5555/events`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return details for the root node', async () => {
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -140,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should allow for the events to be filtered', async () => {
         const filter = `event.category:"${RelatedEventCategory.Driver}"`;
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -156,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return paginated results for the root node', async () => {
-        let { body }: { body: ResolverRelatedEvents } = await supertest
+        let { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(`/api/endpoint/resolver/${tree.origin.id}/events?events=2`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -185,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return the first page of information when the cursor is invalid', async () => {
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(`/api/endpoint/resolver/${tree.origin.id}/events?afterEvent=blah`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -195,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should sort the events in descending order', async () => {
-        const { body }: { body: ResolverRelatedEvents } = await supertest
+        const { body }: { body: SafeResolverRelatedEvents } = await supertest
           .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -204,8 +204,8 @@ export default function ({ getService }: FtrProviderContext) {
         // the last element in the array so let's reverse it
         const relatedEvents = tree.origin.relatedEvents.reverse();
         for (let i = 0; i < body.events.length; i++) {
-          expect(body.events[i].event?.category).to.equal(relatedEvents[i].event.category);
-          expect(eventId(body.events[i])).to.equal(relatedEvents[i].event.id);
+          expect(body.events[i].event?.category).to.equal(relatedEvents[i].event?.category);
+          expect(eventIDSafeVersion(body.events[i])).to.equal(relatedEvents[i].event?.id);
         }
       });
     });
