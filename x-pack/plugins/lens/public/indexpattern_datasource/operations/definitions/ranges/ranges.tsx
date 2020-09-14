@@ -110,7 +110,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.ranges', {
     defaultMessage: 'Ranges',
   }),
-  priority: 4, // Higher than any metric
+  priority: 4, // Higher than terms, so numbers get histogram
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'number' &&
