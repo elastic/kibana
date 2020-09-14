@@ -16,6 +16,7 @@ import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 
 export const analyticsJobsCreationRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/data_frame_analytics/new_job',
@@ -36,7 +37,10 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     sort: false,
   });
 
-  const { context } = useResolver(index, savedSearchId, deps.config, basicResolvers(deps));
+  const { context } = useResolver(index, savedSearchId, deps.config, {
+    ...basicResolvers(deps),
+    jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),
+  });
 
   return (
     <PageLoader context={context}>
