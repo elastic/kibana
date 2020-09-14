@@ -46,7 +46,7 @@ const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
     lt: isValidNumber(range.to) ? range.to : TO_PLACEHOLDER,
   });
 
-const RangePopover = ({
+export const RangePopover = ({
   range,
   setRange,
   Button,

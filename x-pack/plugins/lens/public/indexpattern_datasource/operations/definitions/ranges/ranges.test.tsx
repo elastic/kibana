@@ -17,6 +17,12 @@ import { RangeIndexPatternColumn } from './ranges';
 import { autoInterval } from 'src/plugins/data/common';
 import { MODES, DEFAULT_INTERVAL, TYPING_DEBOUNCE_TIME } from './constants';
 
+const dataPluginMockValue = dataPluginMock.createStartContract();
+// need to overwrite the formatter field first
+dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(() => {
+  return { convert: ({ gte, lt }: { gte: string; lt: string }) => `${gte} - ${lt}` };
+});
+
 const defaultOptions = {
   storage: {} as IStorageWrapper,
   // need this for MAX_HISTOGRAM value
@@ -28,7 +34,7 @@ const defaultOptions = {
     fromDate: 'now-1y',
     toDate: 'now',
   },
-  data: dataPluginMock.createStartContract(),
+  data: dataPluginMockValue,
   http: {} as HttpSetup,
 };
 
@@ -51,12 +57,12 @@ describe('ranges', () => {
     column.params.type = MODES.Range;
   }
 
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
+  function disableAutoMode() {
+    (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.interval = '';
+  }
 
-  beforeEach(() => {
-    state = {
+  function getDefaultState(): IndexPatternPrivateState {
+    return {
       indexPatternRefs: [],
       indexPatterns: {},
       existingFields: {},
@@ -93,6 +99,14 @@ describe('ranges', () => {
         },
       },
     };
+  }
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  beforeEach(() => {
+    state = getDefaultState();
   });
 
   describe('toEsAggConfig', () => {
@@ -165,6 +179,10 @@ describe('ranges', () => {
 
   describe('paramEditor', () => {
     describe('Modify intervals in basic mode', () => {
+      beforeEach(() => {
+        state = getDefaultState();
+      });
+
       it('should start with auto interval', () => {
         const setStateSpy = jest.fn();
         const instance = mount(
@@ -178,12 +196,9 @@ describe('ranges', () => {
           />
         );
         expect(instance.find(EuiSwitch).prop('checked')).toBe(true);
-        expect(
-          instance
-            .find('input')
-            .find('[data-test-subj="lns-indexPattern-range-maxBars-field"]')
-            .prop('value')
-        ).toBe('');
+
+        // check that the value is set to 100 to start with
+        expect(instance.find(EuiRange).prop('value')).toEqual(100);
       });
 
       it('should update state when changing Max bars number', () => {
@@ -199,6 +214,7 @@ describe('ranges', () => {
             layerId="first"
           />
         );
+
         act(() => {
           instance.find(EuiRange).prop('onChange')!(
             {
@@ -231,6 +247,51 @@ describe('ranges', () => {
         });
       });
 
+      it('should not update the state when Max bars number is out of range', () => {
+        const setStateSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        // below the lower bound
+        act(() => {
+          instance.find(EuiRange).prop('onChange')!(
+            {
+              currentTarget: {
+                value: '0',
+              },
+            } as React.ChangeEvent<HTMLInputElement>,
+            true
+          );
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+          expect(setStateSpy).not.toHaveBeenCalled();
+        });
+
+        // above the higher bound
+        act(() => {
+          instance.find(EuiRange).prop('onChange')!(
+            {
+              currentTarget: {
+                value: '1000',
+              },
+            } as React.ChangeEvent<HTMLInputElement>,
+            true
+          );
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+          expect(setStateSpy).not.toHaveBeenCalled();
+        });
+      });
+
       it('should pass to granularity mode when disabling auto interval', () => {
         const setStateSpy = jest.fn();
         const instance = mount(
@@ -259,13 +320,62 @@ describe('ranges', () => {
         });
       });
 
-      it('should update state when changing granularity interval', () => {});
+      it('should update state when changing granularity interval', () => {
+        const setStateSpy = jest.fn();
+
+        disableAutoMode();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        act(() => {
+          instance.find(EuiFieldNumber).prop('onChange')!({
+            target: {
+              value: '50',
+            },
+          } as React.ChangeEvent<HTMLInputElement>);
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+          expect(setStateSpy).toHaveBeenCalledWith({
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    ...state.layers.first.columns.col1,
+                    params: {
+                      ...state.layers.first.columns.col1.params,
+                      interval: 50,
+                    },
+                  },
+                },
+              },
+            },
+          });
+        });
+      });
     });
 
     describe('Specify range intervals manually', () => {
       it('should show one range interval to start with', () => {});
 
       it('should add a new range', () => {});
+
+      it('should reflect the edit immediately to the state', () => {});
+
+      it('should not accept not valid ranges', () => {});
+
+      it('should set custom labels on ranges', () => {});
     });
   });
 });

@@ -25,6 +25,16 @@ import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, AUTO_BARS, MODES } from './constants';
 
+function getMaxBarsValueToShow(value: string, maxValue: number) {
+  if (value === '') {
+    return '';
+  }
+  if (value === AUTO_BARS) {
+    return maxValue;
+  }
+  return value;
+}
+
 const BaseRangeEditor = ({
   autoIntervalEnabled,
   maxBars,
@@ -63,8 +73,12 @@ const BaseRangeEditor = ({
 
   useDebounce(
     () => {
-      if (maxBarsValue !== AUTO_BARS) {
-        onMaxBarsChange(maxBarsValue === '' ? AUTO_BARS : Number(maxBarsValue));
+      if (
+        maxBarsValue !== '' &&
+        Number(maxBarsValue) <= maxHistogramBars &&
+        Number(maxBarsValue) > 0
+      ) {
+        onMaxBarsChange(Number(maxBarsValue));
       }
     },
     TYPING_DEBOUNCE_TIME,
@@ -100,10 +114,10 @@ const BaseRangeEditor = ({
               min={1}
               max={maxHistogramBars}
               step={1}
-              value={maxBarsValue === AUTO_BARS ? '' : maxBarsValue}
+              value={getMaxBarsValueToShow(maxBarsValue, maxHistogramBars)}
               onChange={({ currentTarget }) => setMaxBarsValue(currentTarget.value)}
               placeholder={i18n.translate('xpack.lens.indexPattern.ranges.autoIntervals', {
-                defaultMessage: 'Auto',
+                defaultMessage: 'Enter the max interval',
               })}
               prepend={
                 <>
