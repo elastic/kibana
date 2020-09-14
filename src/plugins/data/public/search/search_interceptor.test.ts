@@ -95,6 +95,39 @@ describe('SearchInterceptor', () => {
       await flushPromises();
     });
 
+    test('Should not timeout if requestTimeout is undefined', async () => {
+      searchInterceptor = new SearchInterceptor({
+        startServices: mockCoreSetup.getStartServices(),
+        uiSettings: mockCoreSetup.uiSettings,
+        http: mockCoreSetup.http,
+        toasts: mockCoreSetup.notifications.toasts,
+      });
+      mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
+        return new Promise((resolve, reject) => {
+          options.signal.addEventListener('abort', () => {
+            reject(new AbortError());
+          });
+
+          setTimeout(resolve, 5000);
+        });
+      });
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
+
+      expect.assertions(1);
+      const next = jest.fn();
+      const complete = () => {
+        expect(next).toBeCalled();
+      };
+      response.subscribe({ next, complete });
+
+      jest.advanceTimersByTime(5000);
+
+      await flushPromises();
+    });
+
     test('Observable should fail if user aborts (test merged signal)', async () => {
       const abortController = new AbortController();
       mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
@@ -125,7 +158,7 @@ describe('SearchInterceptor', () => {
       await flushPromises();
     });
 
-    test('Immediatelly aborts if passed an aborted abort signal', async (done) => {
+    test('Immediately aborts if passed an aborted abort signal', async (done) => {
       const abort = new AbortController();
       const mockRequest: IEsSearchRequest = {
         params: {},
@@ -139,46 +172,6 @@ describe('SearchInterceptor', () => {
         done();
       };
       response.subscribe({ error });
-    });
-  });
-
-  describe('getPendingCount$', () => {
-    test('should observe the number of pending requests', () => {
-      const pendingCount$ = searchInterceptor.getPendingCount$();
-      const pendingNext = jest.fn();
-      pendingCount$.subscribe(pendingNext);
-
-      const mockResponse: any = { result: 200 };
-      mockCoreSetup.http.fetch.mockResolvedValue(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
-
-      response.subscribe({
-        complete: () => {
-          expect(pendingNext.mock.calls).toEqual([[0], [1], [0]]);
-        },
-      });
-    });
-
-    test('should observe the number of pending requests on error', () => {
-      const pendingCount$ = searchInterceptor.getPendingCount$();
-      const pendingNext = jest.fn();
-      pendingCount$.subscribe(pendingNext);
-
-      const mockResponse: any = { result: 500 };
-      mockCoreSetup.http.fetch.mockRejectedValue(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
-
-      response.subscribe({
-        complete: () => {
-          expect(pendingNext.mock.calls).toEqual([[0], [1], [0]]);
-        },
-      });
     });
   });
 });

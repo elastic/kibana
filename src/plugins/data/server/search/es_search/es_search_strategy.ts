@@ -52,10 +52,11 @@ export const esSearchStrategyProvider = (
       });
 
       try {
-        const esResponse = (await context.core.elasticsearch.client.asCurrentUser.search(
-          params
-        )) as ApiResponse<SearchResponse<any>>;
-        const rawResponse = esResponse.body;
+        // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
+        const promise = context.core.elasticsearch.client.asCurrentUser.search(params);
+        if (options?.abortSignal)
+          options.abortSignal.addEventListener('abort', () => promise.abort());
+        const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
 
         if (usage) usage.trackSuccess(rawResponse.took);
 
