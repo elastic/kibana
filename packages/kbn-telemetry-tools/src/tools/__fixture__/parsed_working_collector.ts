@@ -32,6 +32,20 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
         my_str: {
           type: 'text',
         },
+        my_index_signature_prop: {
+          avg: {
+            type: 'number',
+          },
+          count: {
+            type: 'number',
+          },
+          max: {
+            type: 'number',
+          },
+          min: {
+            type: 'number',
+          },
+        },
         my_objects: {
           total: {
             type: 'number',
@@ -59,6 +73,14 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
         my_str: {
           kind: SyntaxKind.StringKeyword,
           type: 'StringKeyword',
+        },
+        my_index_signature_prop: {
+          '': {
+            '@@INDEX@@': {
+              kind: SyntaxKind.NumberKeyword,
+              type: 'NumberKeyword',
+            },
+          },
         },
         my_objects: {
           total: {

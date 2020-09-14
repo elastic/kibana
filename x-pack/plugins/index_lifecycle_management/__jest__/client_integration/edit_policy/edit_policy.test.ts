@@ -40,8 +40,8 @@ describe('<EditPolicy />', () => {
     test('wait for snapshot policy field should correctly display snapshot policy name', () => {
       expect(testBed.find('snapshotPolicyCombobox').prop('data-currentvalue')).toEqual([
         {
-          label: DELETE_PHASE_POLICY.policy.phases.delete.actions.wait_for_snapshot.policy,
-          value: DELETE_PHASE_POLICY.policy.phases.delete.actions.wait_for_snapshot.policy,
+          label: DELETE_PHASE_POLICY.policy.phases.delete?.actions.wait_for_snapshot?.policy,
+          value: DELETE_PHASE_POLICY.policy.phases.delete?.actions.wait_for_snapshot?.policy,
         },
       ]);
     });
@@ -59,7 +59,7 @@ describe('<EditPolicy />', () => {
           delete: {
             ...DELETE_PHASE_POLICY.policy.phases.delete,
             actions: {
-              ...DELETE_PHASE_POLICY.policy.phases.delete.actions,
+              ...DELETE_PHASE_POLICY.policy.phases.delete?.actions,
               wait_for_snapshot: {
                 policy: NEW_SNAPSHOT_POLICY_NAME,
               },
@@ -96,11 +96,12 @@ describe('<EditPolicy />', () => {
           delete: {
             ...DELETE_PHASE_POLICY.policy.phases.delete,
             actions: {
-              ...DELETE_PHASE_POLICY.policy.phases.delete.actions,
+              ...DELETE_PHASE_POLICY.policy.phases.delete?.actions,
             },
           },
         },
       };
+
       delete expected.phases.delete.actions.wait_for_snapshot;
 
       const latestRequest = server.requests[server.requests.length - 1];

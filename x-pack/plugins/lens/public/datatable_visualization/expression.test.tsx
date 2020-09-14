@@ -144,6 +144,58 @@ describe('datatable_expression', () => {
       });
     });
 
+    test('it invokes executeTriggerActions with correct context on click on timefield from range', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          l1: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a', meta: { type: 'date_range', aggConfigParams: { field: 'a' } } },
+              { id: 'b', name: 'b', meta: { type: 'count' } },
+            ],
+            rows: [{ a: 1588024800000, b: 3 }],
+          },
+        },
+      };
+
+      const args: DatatableProps['args'] = {
+        title: '',
+        columns: { columnIds: ['a', 'b'], type: 'lens_datatable_columns' },
+      };
+
+      const wrapper = mountWithIntl(
+        <DatatableComponent
+          data={{
+            ...data,
+            dateRange: {
+              fromDate: new Date('2020-04-20T05:00:00.000Z'),
+              toDate: new Date('2020-05-03T05:00:00.000Z'),
+            },
+          }}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          onClickValue={onClickValue}
+          getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        />
+      );
+
+      wrapper.find('[data-test-subj="lensDatatableFilterFor"]').at(1).simulate('click');
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: data.tables.l1,
+            value: 1588024800000,
+          },
+        ],
+        negate: false,
+        timeFieldName: 'a',
+      });
+    });
+
     test('it shows emptyPlaceholder for undefined bucketed data', () => {
       const { args, data } = sampleArgs();
       const emptyData: LensMultiTable = {

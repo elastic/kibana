@@ -50,7 +50,7 @@ export const Tabs: React.FunctionComponent<Props> = ({
           isSelected={tab.id === selectedTab}
           key={tab.id}
           disabled={getIsDisabled(tab.id)}
-          data-test-subj={tab.id.toLowerCase() + '_tab'}
+          data-test-subj={tab.id.toLowerCase() + 'Tab'}
         >
           {tab.name}
         </EuiTab>

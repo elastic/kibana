@@ -88,6 +88,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     size="xl"
   />
   <EuiSwitch
+    data-test-subj="mlCalendarApplyToAllJobsSwitch"
     disabled={false}
     label={
       <FormattedMessage

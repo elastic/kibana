@@ -13,6 +13,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -47,6 +48,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     private readonly options: EncryptedSavedObjectsClientOptions,
     public readonly errors = options.baseClient.errors
   ) {}
+
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options?: SavedObjectsBaseOptions
+  ) {
+    return await this.options.baseClient.checkConflicts(objects, options);
+  }
 
   public async create<T>(
     type: string,
@@ -142,14 +150,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // sequential processing.
     const encryptedObjects = await Promise.all(
       objects.map(async (object) => {
-        const { type, id, attributes } = object;
+        const { type, id, attributes, namespace: objectNamespace } = object;
         if (!this.options.service.isRegistered(type)) {
           return object;
         }
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           type,
-          options?.namespace
+          objectNamespace ?? options?.namespace
         );
         return {
           ...object,

@@ -17,7 +17,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../mock';
-import { createUseUiSetting$Mock } from '../../mock/kibana_react';
+import { createUseUiSetting$Mock } from '../../lib/kibana/kibana_react.mock';
 import { createStore, State } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';

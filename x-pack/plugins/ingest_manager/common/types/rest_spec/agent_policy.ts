@@ -19,7 +19,6 @@ export interface GetAgentPoliciesResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface GetOneAgentPolicyRequest {
@@ -30,7 +29,6 @@ export interface GetOneAgentPolicyRequest {
 
 export interface GetOneAgentPolicyResponse {
   item: AgentPolicy;
-  success: boolean;
 }
 
 export interface CreateAgentPolicyRequest {
@@ -39,7 +37,6 @@ export interface CreateAgentPolicyRequest {
 
 export interface CreateAgentPolicyResponse {
   item: AgentPolicy;
-  success: boolean;
 }
 
 export type UpdateAgentPolicyRequest = GetOneAgentPolicyRequest & {
@@ -48,7 +45,6 @@ export type UpdateAgentPolicyRequest = GetOneAgentPolicyRequest & {
 
 export interface UpdateAgentPolicyResponse {
   item: AgentPolicy;
-  success: boolean;
 }
 
 export interface CopyAgentPolicyRequest {
@@ -57,7 +53,6 @@ export interface CopyAgentPolicyRequest {
 
 export interface CopyAgentPolicyResponse {
   item: AgentPolicy;
-  success: boolean;
 }
 
 export interface DeleteAgentPolicyRequest {
@@ -68,7 +63,6 @@ export interface DeleteAgentPolicyRequest {
 
 export interface DeleteAgentPolicyResponse {
   id: string;
-  success: boolean;
 }
 
 export interface GetFullAgentPolicyRequest {
@@ -79,5 +73,4 @@ export interface GetFullAgentPolicyRequest {
 
 export interface GetFullAgentPolicyResponse {
   item: FullAgentPolicy;
-  success: boolean;
 }

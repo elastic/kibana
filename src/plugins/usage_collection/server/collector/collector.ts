@@ -35,8 +35,8 @@ export interface SchemaField {
 }
 
 export type RecursiveMakeSchemaFrom<U> = U extends object
-  ? { type?: 'object'; isArray?: boolean } & MakeSchemaFrom<U>
-  : { type: AllowedSchemaTypes; isArray?: boolean };
+  ? MakeSchemaFrom<U>
+  : { type: AllowedSchemaTypes };
 
 export type MakeSchemaFrom<Base> = {
   [Key in keyof Base]: Base[Key] extends Array<infer U>
@@ -48,7 +48,7 @@ export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
   schema?: MakeSchemaFrom<Required<T>>; // Using Required to enforce all optional keys in the object
-  fetch: (callCluster: LegacyAPICaller) => Promise<T | undefined> | T | undefined;
+  fetch: (callCluster: LegacyAPICaller) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for

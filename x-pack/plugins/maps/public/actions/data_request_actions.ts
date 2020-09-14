@@ -15,7 +15,6 @@ import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../comm
 import {
   getDataFilters,
   getDataRequestDescriptor,
-  getFittableLayers,
   getLayerById,
   getLayerList,
 } from '../selectors/map_selectors';
@@ -324,13 +323,16 @@ export function fitToLayerExtent(layerId: string) {
 
 export function fitToDataBounds(onNoBounds?: () => void) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const layerList = getFittableLayers(getState());
+    const layerList = getLayerList(getState());
 
     if (!layerList.length) {
       return;
     }
 
     const boundsPromises = layerList.map(async (layer: ILayer) => {
+      if (!(await layer.isFittable())) {
+        return null;
+      }
       return layer.getBounds(getDataRequestContext(dispatch, getState, layer.getId()));
     });
 

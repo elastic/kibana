@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Buttons } from './Buttons';
 import { render } from '@testing-library/react';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
+}
 
 describe('Popover Buttons', () => {
   it('renders', () => {
     expect(() =>
-      render(<Buttons selectedNodeServiceName="test service name" />)
+      render(<Buttons selectedNodeServiceName="test service name" />, {
+        wrapper: Wrapper,
+      })
     ).not.toThrowError();
   });
 
@@ -21,7 +28,8 @@ describe('Popover Buttons', () => {
       <Buttons
         onFocusClick={onFocusClick}
         selectedNodeServiceName="test service name"
-      />
+      />,
+      { wrapper: Wrapper }
     );
     const focusButton = await result.findByText('Focus map');
 

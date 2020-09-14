@@ -54,7 +54,7 @@ export function runTelemetryCheck() {
         throw createFailError(
           `${chalk.white.bgRed(
             ' TELEMETRY ERROR '
-          )} --fix is incompatible with --ignore-incompatible flag.`
+          )} --fix is incompatible with --ignore-stored-json flag.`
         );
       }
 
@@ -90,7 +90,8 @@ export function runTelemetryCheck() {
         {
           enabled: (_) => !!ignoreStoredJson,
           title: 'Checking Matching collector.schema against stored json files',
-          task: (context) => new Listr(checkMatchingSchemasTask(context), { exitOnError: true }),
+          task: (context) =>
+            new Listr(checkMatchingSchemasTask(context, !fix), { exitOnError: true }),
         },
         {
           enabled: (_) => fix,

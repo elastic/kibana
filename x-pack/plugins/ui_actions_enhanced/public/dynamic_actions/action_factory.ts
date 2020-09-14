@@ -13,8 +13,13 @@ import {
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import { BaseActionFactoryContext, SerializedAction } from './types';
-import { ILicense } from '../../../licensing/public';
+import { ILicense, LicensingPluginStart } from '../../../licensing/public';
 import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
+
+export interface ActionFactoryDeps {
+  readonly getLicense: () => ILicense;
+  readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'];
+}
 
 export class ActionFactory<
   Config extends object = object,
@@ -31,11 +36,18 @@ export class ActionFactory<
       FactoryContext,
       ActionContext
     >,
-    protected readonly getLicence: () => ILicense
-  ) {}
+    protected readonly deps: ActionFactoryDeps
+  ) {
+    if (def.minimalLicense && !def.licenseFeatureName) {
+      throw new Error(
+        `ActionFactory [actionFactory.id = ${def.id}] "licenseFeatureName" is required, if "minimalLicense" is provided`
+      );
+    }
+  }
 
   public readonly id = this.def.id;
   public readonly minimalLicense = this.def.minimalLicense;
+  public readonly licenseFeatureName = this.def.licenseFeatureName;
   public readonly order = this.def.order || 0;
   public readonly MenuItem? = this.def.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
@@ -65,13 +77,13 @@ export class ActionFactory<
   }
 
   /**
-   * Does this action factory licence requirements
+   * Does this action factory license requirements
    * compatible with current license?
    */
-  public isCompatibleLicence() {
+  public isCompatibleLicense() {
     if (!this.minimalLicense) return true;
-    const licence = this.getLicence();
-    return licence.isAvailable && licence.isActive && licence.hasAtLeast(this.minimalLicense);
+    const license = this.deps.getLicense();
+    return license.isAvailable && license.isActive && license.hasAtLeast(this.minimalLicense);
   }
 
   public create(
@@ -81,14 +93,31 @@ export class ActionFactory<
     return {
       ...action,
       isCompatible: async (context: ActionContext): Promise<boolean> => {
-        if (!this.isCompatibleLicence()) return false;
+        if (!this.isCompatibleLicense()) return false;
         if (!action.isCompatible) return true;
         return action.isCompatible(context);
+      },
+      execute: async (context: ActionContext): Promise<void> => {
+        this.notifyFeatureUsage();
+        return action.execute(context);
       },
     };
   }
 
   public supportedTriggers(): SupportedTriggers[] {
     return this.def.supportedTriggers();
+  }
+
+  private notifyFeatureUsage(): void {
+    if (!this.minimalLicense || !this.licenseFeatureName) return;
+    this.deps
+      .getFeatureUsageStart()
+      .notifyUsage(this.licenseFeatureName)
+      .catch(() => {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `ActionFactory [actionFactory.id = ${this.def.id}] fail notify feature usage.`
+        );
+      });
   }
 }

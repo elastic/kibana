@@ -26,6 +26,20 @@ import {
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 
+const originalConsoleWarn = console.warn; // eslint-disable-line no-console
+/**
+ *  A dependency we're using is using deprecated react methods. Override the
+ * console to hide the warnings. These should go away when we switch to
+ * Elastic Charts
+ */
+export function disableConsoleWarning(messageToDisable: string) {
+  return jest.spyOn(console, 'warn').mockImplementation((message) => {
+    if (!message.startsWith(messageToDisable)) {
+      originalConsoleWarn(message);
+    }
+  });
+}
+
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
     noKey: true,
@@ -151,7 +165,20 @@ export async function inspectSearchParams(
     end: 1528977600000,
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
-    config: new Proxy({}, { get: () => 'myIndex' }) as APMConfig,
+    config: new Proxy(
+      {},
+      {
+        get: (_, key) => {
+          switch (key) {
+            default:
+              return 'myIndex';
+
+            case 'xpack.apm.metricsInterval':
+              return 30;
+          }
+        },
+      }
+    ) as APMConfig,
     uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */

@@ -78,7 +78,7 @@ interface Usage {
 usageCollection.makeUsageCollector<Usage>({
   schema: {
     someStat: {
-      type: 'number'
+      type: 'long'
     }
   },
   ...

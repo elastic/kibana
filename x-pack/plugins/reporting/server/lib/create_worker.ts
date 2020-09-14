@@ -8,7 +8,7 @@ import { CancellationToken } from '../../common';
 import { PLUGIN_ID } from '../../common/constants';
 import { ReportingCore } from '../../server';
 import { LevelLogger } from '../../server/lib';
-import { ExportTypeDefinition, JobSource, WorkerExecuteFn } from '../../server/types';
+import { ExportTypeDefinition, JobSource, RunTaskFn } from '../../server/types';
 import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
@@ -22,18 +22,18 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
   // Once more document types are added, this will need to be passed in
   return async function createWorker(queue: ESQueueInstance) {
     // export type / execute job map
-    const jobExecutors: Map<string, WorkerExecuteFn<unknown>> = new Map();
+    const jobExecutors: Map<string, RunTaskFn<unknown>> = new Map();
 
     for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
-      ExportTypeDefinition<JobParamsType, unknown, unknown, WorkerExecuteFn<unknown>>
+      ExportTypeDefinition<JobParamsType, unknown, unknown, RunTaskFn<unknown>>
     >) {
       const jobExecutor = exportType.runTaskFnFactory(reporting, logger);
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
-    const workerFn = <ScheduledTaskParamsType>(
-      jobSource: JobSource<ScheduledTaskParamsType>,
-      jobParams: ScheduledTaskParamsType,
+    const workerFn = <TaskPayloadType>(
+      jobSource: JobSource<TaskPayloadType>,
+      jobParams: TaskPayloadType,
       cancellationToken: CancellationToken
     ) => {
       const {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq } from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsBulkUpdateResponse } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DEFAULT_AGENT_POLICY,
@@ -21,10 +21,11 @@ import {
   ListWithKuery,
 } from '../types';
 import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
-import { listAgents } from './agents';
+import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
+import { getSettings } from './settings';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -65,6 +66,10 @@ class AgentPolicyService {
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
+
+    if (options.bumpRevision) {
+      await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+    }
 
     return (await this.get(soClient, id)) as AgentPolicy;
   }
@@ -260,6 +265,25 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     return this._update(soClient, id, {}, options?.user);
   }
+  public async bumpAllAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>>> {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      fields: ['revision'],
+    });
+    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+      policy.attributes = {
+        ...policy.attributes,
+        revision: policy.attributes.revision + 1,
+        updated_at: new Date().toISOString(),
+        updated_by: options?.user ? options.user.username : 'system',
+      };
+      return policy;
+    });
+    return soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
+  }
 
   public async assignPackagePolicies(
     soClient: SavedObjectsClientContract,
@@ -360,8 +384,33 @@ class AgentPolicyService {
     await this.triggerAgentPolicyUpdatedEvent(soClient, 'deleted', id);
     return {
       id,
-      success: true,
     };
+  }
+
+  public async createFleetPolicyChangeAction(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ) {
+    const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
+    if (!policy || !policy.revision) {
+      return;
+    }
+    const packages = policy.inputs.reduce<string[]>((acc, input) => {
+      const packageName = input.meta?.package?.name;
+      if (packageName && acc.indexOf(packageName) < 0) {
+        acc.push(packageName);
+      }
+      return acc;
+    }, []);
+
+    await createAgentPolicyAction(soClient, {
+      type: 'CONFIG_CHANGE',
+      data: { config: policy } as any,
+      ack_data: { packages },
+      created_at: new Date().toISOString(),
+      policy_id: policy.id,
+      policy_revision: policy.revision,
+    });
   }
 
   public async getFullAgentPolicy(
@@ -370,6 +419,7 @@ class AgentPolicyService {
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
     let agentPolicy;
+    const standalone = options?.standalone;
 
     try {
       agentPolicy = await this.get(soClient, id);
@@ -434,6 +484,22 @@ class AgentPolicyService {
             },
           }),
     };
+
+    // only add settings if not in standalone
+    if (!standalone) {
+      let settings;
+      try {
+        settings = await getSettings(soClient);
+      } catch (error) {
+        throw new Error('Default settings is not setup');
+      }
+      if (!settings.kibana_urls) throw new Error('kibana_urls is missing');
+      fullAgentPolicy.fleet = {
+        kibana: {
+          hosts: settings.kibana_urls,
+        },
+      };
+    }
 
     return fullAgentPolicy;
   }

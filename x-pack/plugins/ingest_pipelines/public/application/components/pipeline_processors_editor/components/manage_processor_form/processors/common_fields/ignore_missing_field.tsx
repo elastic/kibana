@@ -22,7 +22,7 @@ export const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
     deserializer: to.booleanOrUndef,
-    serializer: from.defaultBoolToUndef(false),
+    serializer: from.undefinedIfValue(false),
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreMissingFieldLabel',
       {
@@ -32,7 +32,7 @@ export const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.commonFields.ignoreMissingFieldHelpText"
-        defaultMessage="Ignore documents with a missing {field}"
+        defaultMessage="Ignore documents with a missing {field}."
         values={{
           field: <EuiCode>{'field'}</EuiCode>,
         }}

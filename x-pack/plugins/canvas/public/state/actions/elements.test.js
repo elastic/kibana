@@ -12,7 +12,7 @@ describe('getSiblingContext', () => {
       resolvedArgs: {
         'element-foo': {
           expressionContext: {
-            '0': {
+            0: {
               state: 'ready',
               value: {
                 type: 'datatable',
@@ -28,7 +28,7 @@ describe('getSiblingContext', () => {
               },
               error: null,
             },
-            '1': {
+            1: {
               state: 'ready',
               value: {
                 type: 'datatable',
@@ -44,7 +44,7 @@ describe('getSiblingContext', () => {
               },
               error: null,
             },
-            '2': {
+            2: {
               state: 'ready',
               value: {
                 type: 'pointseries',

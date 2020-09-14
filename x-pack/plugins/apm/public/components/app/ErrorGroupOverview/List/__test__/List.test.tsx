@@ -6,10 +6,11 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockUrlParamsContextProvider } from '../../../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 import { mockMoment, toJson } from '../../../../../utils/testHelpers';
 import { ErrorGroupList } from '../index';
 import props from './props.json';
-import { MockUrlParamsContextProvider } from '../../../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -26,7 +27,7 @@ describe('ErrorGroupOverview -> List', () => {
     const storeState = {};
     const wrapper = mount(
       <MockUrlParamsContextProvider>
-        <ErrorGroupList items={[]} />
+        <ErrorGroupList items={[]} serviceName="opbeans-python" />
       </MockUrlParamsContextProvider>,
       storeState
     );
@@ -36,9 +37,11 @@ describe('ErrorGroupOverview -> List', () => {
 
   it('should render with data', () => {
     const wrapper = mount(
-      <MockUrlParamsContextProvider>
-        <ErrorGroupList items={props.items} />
-      </MockUrlParamsContextProvider>
+      <MockApmPluginContextWrapper>
+        <MockUrlParamsContextProvider>
+          <ErrorGroupList items={props.items} serviceName="opbeans-python" />
+        </MockUrlParamsContextProvider>
+      </MockApmPluginContextWrapper>
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();

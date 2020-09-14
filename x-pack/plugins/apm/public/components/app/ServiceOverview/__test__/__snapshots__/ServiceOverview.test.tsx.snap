@@ -156,7 +156,7 @@ NodeList [
         >
           <a
             class="euiLink euiLink--primary c0"
-            href="#/services/My Go Service/transactions?"
+            href="/basepath/app/apm/services/My Go Service/transactions"
             rel="noreferrer"
           >
             My Go Service
@@ -262,7 +262,7 @@ NodeList [
         >
           <a
             class="euiLink euiLink--primary c0"
-            href="#/services/My Python Service/transactions?"
+            href="/basepath/app/apm/services/My Python Service/transactions"
             rel="noreferrer"
           >
             My Python Service

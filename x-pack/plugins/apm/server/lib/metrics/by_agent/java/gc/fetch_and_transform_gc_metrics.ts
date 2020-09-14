@@ -42,7 +42,7 @@ export async function fetchAndTransformGcMetrics({
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const { bucketSize } = getBucketSize(start, end, 'auto');
 
@@ -75,7 +75,11 @@ export async function fetchAndTransformGcMetrics({
           },
           aggs: {
             over_time: {
-              date_histogram: getMetricsDateHistogramParams(start, end),
+              date_histogram: getMetricsDateHistogramParams(
+                start,
+                end,
+                config['xpack.apm.metricsInterval']
+              ),
               aggs: {
                 // get the max value
                 max: {

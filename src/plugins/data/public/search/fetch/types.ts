@@ -17,21 +17,23 @@
  * under the License.
  */
 
+import { HttpStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { GetConfigFn } from '../../../common';
-import { ISearchStartLegacy } from '../types';
 
-export type SearchRequest = any;
-export type SearchResponse = any;
-
-export interface FetchOptions {
-  abortSignal?: AbortSignal;
-  searchStrategyId?: string;
-}
+/**
+ * @internal
+ *
+ * This type is used when flattenning a SearchSource and passing it down to legacy search.
+ * Once legacy search is removed, this type should become internal to `SearchSource`,
+ * where `ISearchRequestParams` is used externally instead.
+ */
+export type SearchRequest = Record<string, any>;
 
 export interface FetchHandlers {
-  legacySearchService: ISearchStartLegacy;
   config: { get: GetConfigFn };
-  esShardTimeout: number;
+  http: HttpStart;
+  loadingCount$: BehaviorSubject<number>;
 }
 
 export interface SearchError {

@@ -18,7 +18,7 @@ import {
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
 import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
-import { ExtraActionFactoryContext } from '../types';
+import { ActionFactoryPlaceContext } from '../types';
 
 export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
@@ -44,9 +44,17 @@ export interface FlyoutDrilldownWizardProps<
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
 
-  extraActionFactoryContext?: ExtraActionFactoryContext<ActionFactoryContext>;
+  actionFactoryPlaceContext?: ActionFactoryPlaceContext<ActionFactoryContext>;
 
+  /**
+   * General overview of drilldowns
+   */
   docsLink?: string;
+
+  /**
+   * Link that explains different triggers
+   */
+  triggerPickerDocsLink?: string;
 
   getTrigger: (triggerId: TriggerId) => Trigger;
 
@@ -143,8 +151,9 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   showWelcomeMessage = true,
   onWelcomeHideClick,
   drilldownActionFactories,
-  extraActionFactoryContext,
+  actionFactoryPlaceContext,
   docsLink,
+  triggerPickerDocsLink,
   getTrigger,
   supportedTriggers,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
@@ -152,16 +161,16 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
     wizardConfig,
     { setActionFactory, setActionConfig, setName, setSelectedTriggers },
   ] = useWizardConfigState(
-    { ...extraActionFactoryContext, triggers: supportedTriggers },
+    { ...actionFactoryPlaceContext, triggers: supportedTriggers },
     initialDrilldownWizardConfig
   );
 
   const actionFactoryContext: BaseActionFactoryContext = useMemo(
     () => ({
-      ...extraActionFactoryContext,
+      ...actionFactoryPlaceContext,
       triggers: wizardConfig.selectedTriggers ?? [],
     }),
-    [extraActionFactoryContext, wizardConfig.selectedTriggers]
+    [actionFactoryPlaceContext, wizardConfig.selectedTriggers]
   );
 
   const isActionValid = (
@@ -217,7 +226,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         onSelectedTriggersChange={setSelectedTriggers}
         supportedTriggers={supportedTriggers}
         getTriggerInfo={getTrigger}
-        triggerPickerDocsLink={docsLink}
+        triggerPickerDocsLink={triggerPickerDocsLink}
       />
       {mode === 'edit' && (
         <>

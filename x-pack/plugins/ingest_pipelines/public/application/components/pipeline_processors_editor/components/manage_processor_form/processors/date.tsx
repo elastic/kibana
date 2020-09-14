@@ -33,7 +33,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText', {
       defaultMessage:
-        'An array of the expected date formats. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N.',
+        'Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats.',
     }),
     validations: [
       {
@@ -59,7 +59,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.timezoneHelpText"
-        defaultMessage="The timezone to use when parsing the date. Default value is {timezone}."
+        defaultMessage="Timezone for the date. Defaults to {timezone}."
         values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
       />
     ),
@@ -73,7 +73,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.localeHelpText"
-        defaultMessage="The locale to use when parsing the date, relevant when parsing month names or week days. Default value is {timezone}."
+        defaultMessage="Locale for the date. Useful when parsing month or day names. Defaults to {timezone}."
         values={{ timezone: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
       />
     ),
@@ -89,7 +89,7 @@ export const DateProcessor: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dateForm.fieldNameHelpText',
-          { defaultMessage: 'The field to get the date from.' }
+          { defaultMessage: 'Field to convert.' }
         )}
       />
 
@@ -99,7 +99,7 @@ export const DateProcessor: FunctionComponent = () => {
         helpText={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldHelpText"
-            defaultMessage="The field that will hold the parsed date. Default field is {defaultField}."
+            defaultMessage="Output field. If empty, the input field is updated in place. Defaults to {defaultField}."
             values={{
               defaultField: <EuiCode inline>{'@timestamp'}</EuiCode>,
             }}

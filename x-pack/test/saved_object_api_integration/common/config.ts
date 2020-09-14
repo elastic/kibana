@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import path from 'path';
+
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+
 import { services } from './services';
 
 interface CreateTestConfigOptions {
@@ -20,7 +22,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
-        api: await readConfigFile(resolveKibanaPath('test/api_integration/config.js')),
+        api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
         functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
       },
       xpack: {

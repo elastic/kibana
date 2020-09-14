@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/* eslint-disable react/display-name */
+
 import React, { memo, useContext, useCallback, useMemo } from 'react';
 import {
   EuiBasicTableColumn,
@@ -16,12 +19,13 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
-import { CrumbInfo, formatter, StyledBreadcrumbs } from './panel_content_utilities';
+import { formatter, StyledBreadcrumbs } from './panel_content_utilities';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './cube_for_process';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
+import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 
 const StyledLimitWarning = styled(LimitWarning)`
   flex-flow: row wrap;
@@ -45,14 +49,8 @@ const StyledLimitWarning = styled(LimitWarning)`
 
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
- *
- * @param {function} pushToQueryparams A function to update the hash value in the URL to control panel state
  */
-export const ProcessListWithCounts = memo(function ProcessListWithCounts({
-  pushToQueryParams,
-}: {
-  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
-}) {
+export const ProcessListWithCounts = memo(() => {
   interface ProcessTableView {
     name?: string;
     timestamp?: Date;
@@ -62,6 +60,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   const dispatch = useResolverDispatch();
   const { timestamp } = useContext(SideEffectContext);
   const isProcessTerminated = useSelector(selectors.isProcessTerminated);
+  const pushToQueryParams = useReplaceBreadcrumbParameters();
   const handleBringIntoViewClick = useCallback(
     (processTableViewItem) => {
       dispatch({

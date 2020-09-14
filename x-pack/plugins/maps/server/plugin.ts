@@ -27,6 +27,7 @@ import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
+import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -50,7 +51,7 @@ export class MapsPlugin implements Plugin {
   _initHomeData(
     home: HomeServerPluginSetup,
     prependBasePath: (path: string) => string,
-    mapConfig: any
+    mapsLegacyConfig: MapsLegacyConfig
   ) {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
@@ -123,7 +124,7 @@ export class MapsPlugin implements Plugin {
       home.tutorials.registerTutorial(
         emsBoundariesSpecProvider({
           prependBasePath,
-          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
+          emsLandingPageUrl: mapsLegacyConfig.emsLandingPageUrl,
         })
       );
     }
@@ -160,7 +161,7 @@ export class MapsPlugin implements Plugin {
       }
     });
 
-    this._initHomeData(home, core.http.basePath.prepend, currentConfig);
+    this._initHomeData(home, core.http.basePath.prepend, mapsLegacyConfig);
 
     features.registerFeature({
       id: APP_ID,

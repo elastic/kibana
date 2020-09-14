@@ -6,7 +6,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import expectedBreakdown from './expectation/breakdown.json';
-import expectedBreakdownWithTransactionName from './expectation/breakdown_transaction_name.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ kpis: [], timeseries: [] });
+        expect(response.body).to.eql({ timeseries: [] });
       });
     });
 
@@ -47,15 +46,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedBreakdownWithTransactionName);
+        const { timeseries } = response.body;
+        const { title, color, type, data, hideLegend, legendValue } = timeseries[0];
+        expect(data).to.eql([
+          { x: 1593413100000, y: null },
+          { x: 1593413130000, y: null },
+          { x: 1593413160000, y: null },
+          { x: 1593413190000, y: null },
+          { x: 1593413220000, y: null },
+          { x: 1593413250000, y: null },
+          { x: 1593413280000, y: null },
+          { x: 1593413310000, y: 1 },
+          { x: 1593413340000, y: null },
+        ]);
+        expect(title).to.be('app');
+        expect(color).to.be('#54b399');
+        expect(type).to.be('areaStacked');
+        expect(hideLegend).to.be(false);
+        expect(legendValue).to.be('100%');
       });
-      it('returns the top 4 by percentage and sorts them by name', async () => {
+      it('returns the transaction breakdown sorted by name', async () => {
         const response = await supertest.get(
           `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body.kpis.map((kpi: { name: string }) => kpi.name)).to.eql([
+        expect(response.body.timeseries.map((serie: { title: string }) => serie.title)).to.eql([
           'app',
           'http',
           'postgresql',

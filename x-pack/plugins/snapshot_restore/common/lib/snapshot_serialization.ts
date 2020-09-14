@@ -131,10 +131,10 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
 export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): SnapshotConfigEs {
   const { indices, ignoreUnavailable, includeGlobalState, partial, metadata } = snapshotConfig;
 
-  const indicesArray = csvToArray(indices);
+  const maybeIndicesArray = csvToArray(indices);
 
   const snapshotConfigEs: SnapshotConfigEs = {
-    indices: indicesArray,
+    indices: maybeIndicesArray,
     ignore_unavailable: ignoreUnavailable,
     include_global_state: includeGlobalState,
     partial,

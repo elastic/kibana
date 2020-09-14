@@ -91,6 +91,7 @@ export const deserializeVerboseTestOutput = (
         // The tag is added programatically as a way to map
         // the results to each processor
         // It is not something we need to surface to the user, so we delete it
+        // @ts-expect-error
         delete result.tag;
 
         processorResultsById[resultId] = result;

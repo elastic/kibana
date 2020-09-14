@@ -24,21 +24,29 @@ import normalizePath from 'normalize-path';
 import { REPO_ROOT } from '../repo_root';
 import { Plugins } from './discover_plugins';
 
-function* printPlugins(plugins: Plugins) {
+function* printPlugins(plugins: Plugins, includes: string[]) {
   for (const plugin of plugins) {
     const path = plugin.relativeReadmePath || plugin.relativeDir;
     yield '';
-    yield `- {kib-repo}blob/{branch}/${path}[${plugin.id}]`;
+
+    if (plugin.readmeAsciidocAnchor) {
+      yield `|<<${plugin.readmeAsciidocAnchor}>>`;
+
+      includes.push(`include::{kibana-root}/${path}[leveloffset=+1]`);
+    } else {
+      yield `|{kib-repo}blob/{branch}/${path}[${plugin.id}]`;
+    }
 
     if (!plugin.relativeReadmePath || plugin.readmeSnippet) {
-      yield '';
-      yield plugin.readmeSnippet || 'WARNING: Missing README.';
+      yield plugin.readmeSnippet ? `|${plugin.readmeSnippet}` : '|WARNING: Missing README.';
       yield '';
     }
   }
 }
 
 export function generatePluginList(ossPlugins: Plugins, xpackPlugins: Plugins) {
+  const includes: string[] = [];
+
   return `////
 
 NOTE:
@@ -53,32 +61,33 @@ NOTE:
 
 ////
 
-[[code-exploration]]
-== Exploring Kibana code
-
-The goals of our folder heirarchy are:
-
-- Easy for developers to know where to add new services, plugins and applications.
-- Easy for developers to know where to find the code from services, plugins and applications.
-- Easy to browse and understand our folder structure.
-
-To that aim, we strive to:
-
-- Avoid too many files in any given folder.
-- Choose clear, unambigious folder names.
-- Organize by domain.
-- Every folder should contain a README that describes the contents of that folder.
+[[plugin-list]]
+== List of {kib} plugins
 
 [discrete]
-[[kibana-services-applications]]
-=== Services and Applications
+=== src/plugins
+
+[%header,cols=2*] 
+|===
+|Name
+|Description
+
+${Array.from(printPlugins(ossPlugins, includes)).join('\n')}
+
+|===
 
 [discrete]
-==== src/plugins
-${Array.from(printPlugins(ossPlugins)).join('\n')}
+=== x-pack/plugins
 
-[discrete]
-==== x-pack/plugins
-${Array.from(printPlugins(xpackPlugins)).join('\n')}
+[%header,cols=2*] 
+|===
+|Name
+|Description
+
+${Array.from(printPlugins(xpackPlugins, includes)).join('\n')}
+
+|===
+
+${Array.from(includes).join('\n')}
 `;
 }

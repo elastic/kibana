@@ -9,6 +9,7 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -75,6 +76,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const savedObject = await this.baseClient.create(type, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
+  }
+
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    const types = this.getUniqueObjectTypes(objects);
+    const args = { objects, options };
+    await this.ensureAuthorized(types, 'bulk_create', options.namespace, args, 'checkConflicts');
+
+    const response = await this.baseClient.checkConflicts(objects, options);
+    return response;
   }
 
   public async bulkCreate<T = unknown>(
@@ -186,12 +199,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkUpdateObject<T>> = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    await this.ensureAuthorized(
-      this.getUniqueObjectTypes(objects),
-      'bulk_update',
-      options && options.namespace,
-      { objects, options }
-    );
+    const objectNamespaces = objects
+      // The repository treats an `undefined` object namespace is treated as the absence of a namespace, falling back to options.namespace;
+      // in this case, filter it out here so we don't accidentally check for privileges in the Default space when we shouldn't be doing so.
+      .filter(({ namespace }) => namespace !== undefined)
+      .map(({ namespace }) => namespace!);
+    const namespaces = [options?.namespace, ...objectNamespaces];
+    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
+      objects,
+      options,
+    });
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
     return await this.redactSavedObjectsNamespaces(response);
@@ -199,7 +216,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private async checkPrivileges(
     actions: string | string[],
-    namespaceOrNamespaces?: string | string[]
+    namespaceOrNamespaces?: string | Array<undefined | string>
   ) {
     try {
       return await this.checkSavedObjectsPrivilegesAsCurrentUser(actions, namespaceOrNamespaces);
@@ -211,7 +228,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private async ensureAuthorized(
     typeOrTypes: string | string[],
     action: string,
-    namespaceOrNamespaces?: string | string[],
+    namespaceOrNamespaces?: string | Array<undefined | string>,
     args?: Record<string, unknown>,
     auditAction: string = action,
     requiresAll = true
