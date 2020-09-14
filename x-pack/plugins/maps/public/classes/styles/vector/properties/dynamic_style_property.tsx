@@ -28,6 +28,7 @@ import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IJoin } from '../../../joins/join';
 import { IVectorStyle } from '../vector_style';
+import { getComputedFieldName } from '../style_util';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
@@ -46,6 +47,14 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
+
+  // Returns the name that should be used for accessing the data from the mb-style rule
+  // Depending on
+  // - whether the field is used for labeling, icon-orientation, or other properties (color, size, ...), `feature-state` and or `get` is used
+  // - whether the field was run through a field-formatter, a new dynamic field is created with the formatted-value
+  // The combination of both will inform what field-name (e.g. the "raw" field name from the properties, the "computed field-name" for an on-the-fly created property (e.g. for feature-state or field-formatting).
+  // todo: There is an existing limitation to .mvt backed sources, where the field-formatters are not applied. Here, the raw-data needs to be accessed.
+  getMbPropertyName(): string;
   getMbPropertyValue(value: string | number | null | undefined): string | number | null | undefined;
 }
 
@@ -345,6 +354,31 @@ export class DynamicStyleProperty<T>
         switchDisabled={switchDisabled}
       />
     );
+  }
+
+  getMbPropertyName() {
+    if (!this._field) {
+      return '';
+    }
+
+    let targetName;
+    if (this.supportsMbFeatureState()) {
+      // Base case for any properties that can support feature-state (e.g. color, size, ...)
+      // They just re-use the original property-name
+      targetName = this._field.getName();
+    } else {
+      if (this._field.canReadFromGeoJson()) {
+        // Geojson-sources can support rewrite
+        // e.g. field-formatters will create duplicate field
+        targetName = this._field.supportsAutoDomain()
+          ? getComputedFieldName(this.getStyleName(), this._field.getName())
+          : this._field.getName();
+      } else {
+        // Non-geojson sources (e.g. mvt)
+        targetName = this._field.getName();
+      }
+    }
+    return targetName;
   }
 
   getMbPropertyValue(

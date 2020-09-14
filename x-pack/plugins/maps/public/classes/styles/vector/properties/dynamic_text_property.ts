@@ -11,7 +11,7 @@ import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
 export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOptions> {
   syncTextFieldWithMb(mbLayerId: string, mbMap: MbMap) {
     if (this._field && this._field.isValid()) {
-      const targetName = this._field.getMbPropertyName(this.getStyleName());
+      const targetName = this.getMbPropertyName();
       mbMap.setLayoutProperty(mbLayerId, 'text-field', ['coalesce', ['get', targetName], '']);
     } else {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', null);

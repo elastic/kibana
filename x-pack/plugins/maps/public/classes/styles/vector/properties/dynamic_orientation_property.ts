@@ -11,7 +11,7 @@ import { OrientationDynamicOptions } from '../../../../../common/descriptor_type
 export class DynamicOrientationProperty extends DynamicStyleProperty<OrientationDynamicOptions> {
   syncIconRotationWithMb(symbolLayerId: string, mbMap: MbMap) {
     if (this._field && this._field.isValid()) {
-      const targetName = this._field.getMbPropertyName(this.getStyleName());
+      const targetName = this.getMbPropertyName();
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', ['coalesce', ['get', targetName], 0]);
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', 0);

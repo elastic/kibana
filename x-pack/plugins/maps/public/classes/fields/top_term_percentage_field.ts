@@ -84,8 +84,4 @@ export class TopTermPercentageField implements IESAggField {
   canReadFromGeoJson(): boolean {
     return true;
   }
-
-  getMbPropertyName(styleName: VECTOR_STYLES): string {
-    return getMbPropertyName(this, styleName);
-  }
 }

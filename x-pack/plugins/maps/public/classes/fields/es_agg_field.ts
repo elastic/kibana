@@ -138,10 +138,6 @@ export class ESAggField implements IESAggField {
   canReadFromGeoJson(): boolean {
     return true;
   }
-
-  getMbPropertyName(styleName: VECTOR_STYLES): string {
-    return getMbPropertyName(this, styleName);
-  }
 }
 
 export function esAggFieldsFactory(

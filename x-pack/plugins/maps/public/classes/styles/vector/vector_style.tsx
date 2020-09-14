@@ -29,7 +29,7 @@ import {
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
-import { getComputedFieldName, isOnlySingleFeatureType } from './style_util';
+import { isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -613,8 +613,7 @@ export class VectorStyle implements IVectorStyle {
 
       for (let j = 0; j < dynamicStyleProps.length; j++) {
         const dynamicStyleProp = dynamicStyleProps[j];
-        const field = dynamicStyleProp.getField();
-        const targetMbName = field.getMbPropertyName(dynamicStyleProp.getStyleName());
+        const targetMbName = dynamicStyleProp.getMbPropertyName();
         const rawValue = feature.properties
           ? feature.properties[dynamicStyleProp.getFieldName()]
           : undefined;
