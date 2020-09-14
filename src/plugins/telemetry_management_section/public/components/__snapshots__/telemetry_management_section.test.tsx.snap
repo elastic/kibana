@@ -228,7 +228,6 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "getIsOptedIn": [Function],
       "getOptInStatusUrl": [Function],
       "getTelemetryUrl": [Function],
-      "getUserHasSeenOptedInNotice": [Function],
       "http": Object {
         "addLoadingCountSource": [MockFunction],
         "anonymousPaths": Object {
@@ -430,7 +429,6 @@ exports[`TelemetryManagementSectionComponent renders null because query does not
       "getIsOptedIn": [Function],
       "getOptInStatusUrl": [Function],
       "getTelemetryUrl": [Function],
-      "getUserHasSeenOptedInNotice": [Function],
       "http": Object {
         "addLoadingCountSource": [MockFunction],
         "anonymousPaths": Object {

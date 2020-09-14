@@ -4,6 +4,8 @@
 
 ## DataPublicPluginStart.query property
 
+query service [QueryStart](./kibana-plugin-plugins-data-public.querystart.md)
+
 <b>Signature:</b>
 
 ```typescript
