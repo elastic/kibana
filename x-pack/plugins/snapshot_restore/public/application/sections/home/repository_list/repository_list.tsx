@@ -40,7 +40,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         name: undefined,
       },
     },
-    sendRequest: reload,
+    resendRequest: reload,
   } = useLoadRepositories();
 
   const { uiMetricService } = useServices();

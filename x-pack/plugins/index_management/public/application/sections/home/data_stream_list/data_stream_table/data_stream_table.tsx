@@ -11,7 +11,7 @@ import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elas
 import { ScopedHistory } from 'kibana/public';
 
 import { DataStream } from '../../../../../../common/types';
-import { reactRouterNavigate } from '../../../../../shared_imports';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { encodePathForReactRouter } from '../../../../services/routing';
 import { DataHealth } from '../../../../components';
 import { Section } from '../../../home';
@@ -20,7 +20,7 @@ import { humanizeTimeStamp } from '../humanize_time_stamp';
 
 interface Props {
   dataStreams?: DataStream[];
-  reload: () => {};
+  reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
   includeStats: boolean;
   filters?: string;
