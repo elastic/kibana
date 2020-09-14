@@ -103,7 +103,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       id: 'apm',
       title: 'APM',
       order: 8300,
-      euiIconType: 'apmApp',
+      euiIconType: 'logoObservability',
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -123,6 +123,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       id: 'csm',
       title: 'Client Side Monitoring',
       order: 8500,
+      euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
 
       async mount(params: AppMountParameters<unknown>) {

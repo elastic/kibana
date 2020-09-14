@@ -341,6 +341,10 @@ and actions.
 or dashboards from the Kibana instance, from both server and client-side plugins
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/global_search_bar/README.md[globalSearchBar]
+|The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.)
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search_providers[globalSearchProviders]
 |WARNING: Missing README.
 

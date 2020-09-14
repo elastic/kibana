@@ -54,6 +54,7 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
+  setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
   getScopedHistory,
@@ -240,7 +241,7 @@ export class DiscoverPlugin
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: -1004,
-      euiIconType: 'discoverApp',
+      euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
@@ -251,6 +252,7 @@ export class DiscoverPlugin
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
         setScopedHistory(params.history);
+        setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
         const {
@@ -264,6 +266,7 @@ export class DiscoverPlugin
         params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
+          params.element.classList.remove('dscAppWrapper');
           unmount();
           appUnMounted();
         };
