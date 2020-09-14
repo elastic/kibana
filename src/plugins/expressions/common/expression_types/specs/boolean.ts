@@ -41,7 +41,6 @@ export const boolean: ExpressionTypeDefinition<'boolean', boolean> = {
     },
     datatable: (value): Datatable => ({
       type: 'datatable',
-      meta: {},
       columns: [{ id: 'value', name: 'value', meta: { type: name } }],
       rows: [{ value }],
     }),

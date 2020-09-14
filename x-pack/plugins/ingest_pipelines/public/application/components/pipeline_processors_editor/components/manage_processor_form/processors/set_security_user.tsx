@@ -44,7 +44,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.setForm.propertiesFieldHelpText"
-        defaultMessage="User properties to add. Defaults to {value}."
+        defaultMessage="User details to add. Defaults to: {value}"
         values={{
           value: <EuiCode>[{helpTextValues}]</EuiCode>,
         }}
@@ -60,7 +60,7 @@ export const SetSecurityUser: FunctionComponent = () => {
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.setSecurityUserForm.fieldNameField',
           {
-            defaultMessage: 'Field to store the user information',
+            defaultMessage: 'Output field.',
           }
         )}
       />

@@ -98,8 +98,11 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
     mappings: {
       properties: {
         agent_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
+        policy_revision: { type: 'integer' },
         type: { type: 'keyword' },
         data: { type: 'binary' },
+        ack_data: { type: 'text' },
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },

@@ -127,7 +127,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       };
     });
 
-    plugins.features.registerFeature(APM_FEATURE);
+    plugins.features.registerKibanaFeature(APM_FEATURE);
     plugins.licensing.featureUsage.register(
       APM_SERVICE_MAPS_FEATURE_NAME,
       APM_SERVICE_MAPS_LICENSE_TYPE
