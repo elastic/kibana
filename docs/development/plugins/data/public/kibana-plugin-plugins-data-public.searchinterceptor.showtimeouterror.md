@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-protected showTimeoutError: ((e: Error) => void) & import("lodash").Cancelable;
+protected showTimeoutError: import("lodash").DebouncedFunc<(e: Error) => void>;
 ```

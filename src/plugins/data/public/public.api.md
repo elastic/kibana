@@ -1342,7 +1342,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
     // (undocumented)
     componentWillUnmount(): void;
     // (undocumented)
-    debouncedFetch: ((searchValue: string) => Promise<void>) & _.Cancelable;
+    debouncedFetch: _.DebouncedFunc<(searchValue: string) => Promise<void>>;
     // (undocumented)
     fetchOptions: (searchValue?: string) => void;
     // (undocumented)
@@ -1952,7 +1952,7 @@ export class SearchInterceptor {
         cleanup: () => void;
     };
     // (undocumented)
-    protected showTimeoutError: ((e: Error) => void) & import("lodash").Cancelable;
+    protected showTimeoutError: import("lodash").DebouncedFunc<(e: Error) => void>;
     // @internal
     protected timeoutSubscriptions: Subscription;
 }

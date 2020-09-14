@@ -20,7 +20,7 @@ export declare class IndexPatternSelect extends Component<IndexPatternSelectProp
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [debouncedFetch](./kibana-plugin-plugins-data-public.indexpatternselect.debouncedfetch.md) |  | <code>((searchValue: string) =&gt; Promise&lt;void&gt;) &amp; _.Cancelable</code> |  |
+|  [debouncedFetch](./kibana-plugin-plugins-data-public.indexpatternselect.debouncedfetch.md) |  | <code>_.DebouncedFunc&lt;(searchValue: string) =&gt; Promise&lt;void&gt;&gt;</code> |  |
 |  [fetchOptions](./kibana-plugin-plugins-data-public.indexpatternselect.fetchoptions.md) |  | <code>(searchValue?: string) =&gt; void</code> |  |
 |  [fetchSelectedIndexPattern](./kibana-plugin-plugins-data-public.indexpatternselect.fetchselectedindexpattern.md) |  | <code>(indexPatternId: string) =&gt; Promise&lt;void&gt;</code> |  |
 |  [onChange](./kibana-plugin-plugins-data-public.indexpatternselect.onchange.md) |  | <code>(selectedOptions: any) =&gt; void</code> |  |

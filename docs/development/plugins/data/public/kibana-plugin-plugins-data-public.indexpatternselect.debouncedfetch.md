@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-debouncedFetch: ((searchValue: string) => Promise<void>) & _.Cancelable;
+debouncedFetch: _.DebouncedFunc<(searchValue: string) => Promise<void>>;
 ```
