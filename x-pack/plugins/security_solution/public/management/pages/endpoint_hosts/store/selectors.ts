@@ -8,6 +8,7 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
+import { decode } from 'rison-node';
 import {
   Immutable,
   HostPolicyResponseAppliedAction,
@@ -21,6 +22,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
+import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -56,6 +58,13 @@ export const endpointPackageVersion = createSelector(
   endpointPackageInfo,
   (info) => info?.version ?? undefined
 );
+
+/**
+ * Returns the index patterns for the SearchBar to use for autosuggest
+ */
+export const patterns = (state: Immutable<EndpointState>) => state.patterns;
+
+export const patternsError = (state: Immutable<EndpointState>) => state.patternsError;
 
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
@@ -142,7 +151,11 @@ export const uiQueryParams: (
       const query = querystring.parse(location.search.slice(1));
       const paginationParams = extractListPaginationParams(query);
 
-      const keys: Array<keyof EndpointIndexUIQueryParams> = ['selected_endpoint', 'show'];
+      const keys: Array<keyof EndpointIndexUIQueryParams> = [
+        'selected_endpoint',
+        'show',
+        'admin_query',
+      ];
 
       for (const key of keys) {
         const value: string | undefined =
@@ -210,3 +223,27 @@ export const nonExistingPolicies: (
  */
 export const endpointsExist: (state: Immutable<EndpointState>) => boolean = (state) =>
   state.endpointsExist;
+
+/**
+ * Returns query text from query bar
+ */
+export const searchBarQuery: (state: Immutable<EndpointState>) => Query = createSelector(
+  uiQueryParams,
+  ({ admin_query: adminQuery }) => {
+    const decodedQuery: Query = { query: '', language: 'kuery' };
+    if (adminQuery) {
+      const urlDecodedQuery = (decode(adminQuery) as unknown) as Query;
+      if (urlDecodedQuery && typeof urlDecodedQuery.query === 'string') {
+        decodedQuery.query = urlDecodedQuery.query;
+      }
+      if (
+        urlDecodedQuery &&
+        typeof urlDecodedQuery.language === 'string' &&
+        (urlDecodedQuery.language === 'kuery' || urlDecodedQuery.language === 'lucene')
+      ) {
+        decodedQuery.language = urlDecodedQuery.language;
+      }
+    }
+    return decodedQuery;
+  }
+);
