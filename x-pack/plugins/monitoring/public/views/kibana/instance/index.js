@@ -66,6 +66,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
     constructor($injector, $scope) {
       super({
         title: `Kibana - ${get($scope.pageData, 'kibanaSummary.name')}`,
+        telemetryPageViewTitle: 'kibana_instance',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringKibanaInstanceApp',
@@ -85,7 +86,6 @@ uiRoutes.when('/kibana/instances/:uuid', {
           if (!data || !data.metrics) {
             return;
           }
-
           this.setTitle(`Kibana - ${get(data, 'kibanaSummary.name')}`);
 
           this.renderReact(

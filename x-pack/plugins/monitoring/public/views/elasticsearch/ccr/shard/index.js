@@ -48,13 +48,12 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
       $scope.$watch(
         () => this.data,
         (data) => {
-          this.renderReact(data);
+          if (!data) {
+            return;
+          }
+          this.renderReact(<CcrShard {...data} />);
         }
       );
-
-      this.renderReact = (props) => {
-        super.renderReact(<CcrShard {...props} />);
-      };
     }
   },
 });

@@ -12,7 +12,8 @@
     "triggers_actions_ui",
     "alerts",
     "actions",
-    "encryptedSavedObjects"
+    "encryptedSavedObjects",
+    "observability"
   ],
   "optionalPlugins": ["infra", "telemetryCollectionManager", "usageCollection", "home", "cloud"],
   "server": true,

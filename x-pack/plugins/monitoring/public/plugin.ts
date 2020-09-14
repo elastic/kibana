@@ -13,6 +13,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -28,6 +29,7 @@ interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export class MonitoringPlugin
@@ -93,6 +95,7 @@ export class MonitoringPlugin
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
           triggersActionsUi: plugins.triggers_actions_ui,
+          usageCollection: plugins.usageCollection,
         };
 
         pluginsStart.kibanaLegacy.loadFontAwesome();

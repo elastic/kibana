@@ -13,6 +13,7 @@ import { Legacy } from '../legacy_shims';
 import { PromiseWithCancel } from '../../common/cancel_promise';
 import { SetupModeFeature } from '../../common/enums';
 import { updateSetupModeData, isSetupModeFeatureEnabled } from '../lib/setup_mode';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 /**
  * Given a timezone, this function will calculate the offset in milliseconds
@@ -88,6 +89,7 @@ export class MonitoringViewBaseController {
     options = {},
     alerts = { shouldFetch: false, options: {} },
     fetchDataImmediately = true,
+    telemetryPageViewTitle = '',
   }) {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
@@ -99,6 +101,7 @@ export class MonitoringViewBaseController {
     $scope.pageData = this.data = { ...defaultData };
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
+    this.telemetryPageViewTitle = telemetryPageViewTitle || title;
 
     let deferTimer;
     let zoomInLevel = 0;
@@ -204,6 +207,8 @@ export class MonitoringViewBaseController {
         deferTimer = setTimeout(() => addPopstateHandler(), 10);
       };
 
+      // Render loading state
+      this.renderReact(null, true);
       fetchDataImmediately && this.updateData();
     });
 
@@ -225,15 +230,26 @@ export class MonitoringViewBaseController {
     this.setTitle = (title) => titleService($scope.cluster, title);
   }
 
-  renderReact(component) {
+  renderReact(component, trackPageView = false) {
     const renderElement = document.getElementById(this.reactNodeId);
     if (!renderElement) {
       console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
       return;
     }
+    const services = {
+      usageCollection: Legacy.shims.usageCollection,
+    };
     const I18nContext = Legacy.shims.I18nContext;
     const wrappedComponent = (
-      <I18nContext>{!this._isDataInitialized ? <PageLoading /> : component}</I18nContext>
+      <KibanaContextProvider services={services}>
+        <I18nContext>
+          {!this._isDataInitialized ? (
+            <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
+          ) : (
+            component
+          )}
+        </I18nContext>
+      </KibanaContextProvider>
     );
     render(wrappedComponent, renderElement);
   }

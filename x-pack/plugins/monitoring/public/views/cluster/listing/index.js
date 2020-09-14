@@ -48,6 +48,7 @@ uiRoutes
           $scope,
           $injector,
           reactNodeId: 'monitoringClusterListingApp',
+          telemetryPageViewTitle: 'cluster_listing',
         });
 
         const $route = $injector.get('$route');

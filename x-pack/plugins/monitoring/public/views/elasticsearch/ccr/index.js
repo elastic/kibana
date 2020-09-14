@@ -39,13 +39,12 @@ uiRoutes.when('/elasticsearch/ccr', {
       $scope.$watch(
         () => this.data,
         (data) => {
-          this.renderReact(data);
+          if (!data) {
+            return;
+          }
+          this.renderReact(<Ccr data={data.data} />);
         }
       );
-
-      this.renderReact = ({ data }) => {
-        super.renderReact(<Ccr data={data} />);
-      };
     }
   },
 });

@@ -51,6 +51,7 @@ uiRoutes.when('/overview', {
         alerts: {
           shouldFetch: true,
         },
+        telemetryPageViewTitle: 'cluster_overview',
       });
 
       this.init = () => this.renderReact(null);
