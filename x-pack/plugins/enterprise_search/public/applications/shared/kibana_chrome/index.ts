@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SetAppSearchChrome, SetWorkplaceSearchChrome } from './set_chrome';
+export {
+  SetEnterpriseSearchChrome,
+  SetAppSearchChrome,
+  SetWorkplaceSearchChrome,
+} from './set_chrome';

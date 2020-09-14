@@ -35,6 +35,7 @@ import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
+import { installTransformForDataset } from '../elasticsearch/transform/install';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -191,23 +192,28 @@ export async function installPackage({
   // update current backing indices of each data stream
   await updateCurrentWriteIndices(callCluster, installedTemplates);
 
+  const installedTransforms = await installTransformForDataset(
+    registryPackageInfo,
+    paths,
+    callCluster,
+    savedObjectsClient
+  );
+
   // if this is an update or retrying an update, delete the previous version's pipelines
-  if (installType === 'update' || installType === 'reupdate') {
+  if ((installType === 'update' || installType === 'reupdate') && installedPkg) {
     await deletePreviousPipelines(
       callCluster,
       savedObjectsClient,
       pkgName,
-      // @ts-ignore installType conditions already check for existence of installedPkg
       installedPkg.attributes.version
     );
   }
   // pipelines from a different version may have installed during a failed update
-  if (installType === 'rollback') {
+  if (installType === 'rollback' && installedPkg) {
     await deletePreviousPipelines(
       callCluster,
       savedObjectsClient,
       pkgName,
-      // @ts-ignore installType conditions already check for existence of installedPkg
       installedPkg.attributes.install_version
     );
   }
@@ -216,13 +222,19 @@ export async function installPackage({
     type: ElasticsearchAssetType.indexTemplate,
   }));
   await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
+
   // update to newly installed version when all assets are successfully installed
   if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     install_version: pkgVersion,
     install_status: 'installed',
   });
-  return [...installedKibanaAssetsRefs, ...installedPipelines, ...installedTemplateRefs];
+  return [
+    ...installedKibanaAssetsRefs,
+    ...installedPipelines,
+    ...installedTemplateRefs,
+    ...installedTransforms,
+  ];
 }
 
 const updateVersion = async (
@@ -340,17 +352,32 @@ export async function ensurePackagesCompletedInstall(
   return installingPackages;
 }
 
-export function getInstallType({
-  pkgVersion,
-  installedPkg,
-}: {
+interface NoPkgArgs {
   pkgVersion: string;
-  installedPkg: SavedObject<Installation> | undefined;
-}): InstallType {
-  const isInstalledPkg = !!installedPkg;
-  const currentPkgVersion = installedPkg?.attributes.version;
-  const lastStartedInstallVersion = installedPkg?.attributes.install_version;
-  if (!isInstalledPkg) return 'install';
+  installedPkg?: undefined;
+}
+
+interface HasPkgArgs {
+  pkgVersion: string;
+  installedPkg: SavedObject<Installation>;
+}
+
+type OnlyInstall = Extract<InstallType, 'install'>;
+type NotInstall = Exclude<InstallType, 'install'>;
+
+// overloads
+export function getInstallType(args: NoPkgArgs): OnlyInstall;
+export function getInstallType(args: HasPkgArgs): NotInstall;
+export function getInstallType(args: NoPkgArgs | HasPkgArgs): OnlyInstall | NotInstall;
+
+// implementation
+export function getInstallType(args: NoPkgArgs | HasPkgArgs): OnlyInstall | NotInstall {
+  const { pkgVersion, installedPkg } = args;
+  if (!installedPkg) return 'install';
+
+  const currentPkgVersion = installedPkg.attributes.version;
+  const lastStartedInstallVersion = installedPkg.attributes.install_version;
+
   if (pkgVersion === currentPkgVersion && pkgVersion !== lastStartedInstallVersion)
     return 'rollback';
   if (pkgVersion === currentPkgVersion) return 'reinstall';

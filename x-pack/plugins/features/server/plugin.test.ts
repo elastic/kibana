@@ -28,19 +28,19 @@ describe('Features Plugin', () => {
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
   });
 
-  it('returns OSS + registered features', async () => {
+  it('returns OSS + registered kibana features', async () => {
     const plugin = new Plugin(initContext);
-    const { registerFeature } = await plugin.setup(coreSetup, {});
-    registerFeature({
+    const { registerKibanaFeature } = await plugin.setup(coreSetup, {});
+    registerKibanaFeature({
       id: 'baz',
       name: 'baz',
       app: [],
       privileges: null,
     });
 
-    const { getFeatures } = await plugin.start(coreStart);
+    const { getKibanaFeatures } = plugin.start(coreStart);
 
-    expect(getFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
+    expect(getKibanaFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
       Array [
         "baz",
         "discover",
@@ -54,9 +54,9 @@ describe('Features Plugin', () => {
     `);
   });
 
-  it('returns OSS + registered features with timelion when available', async () => {
+  it('returns OSS + registered kibana features with timelion when available', async () => {
     const plugin = new Plugin(initContext);
-    const { registerFeature } = await plugin.setup(coreSetup, {
+    const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup, {
       visTypeTimelion: { uiEnabled: true },
     });
     registerFeature({
@@ -66,9 +66,9 @@ describe('Features Plugin', () => {
       privileges: null,
     });
 
-    const { getFeatures } = await plugin.start(coreStart);
+    const { getKibanaFeatures } = plugin.start(coreStart);
 
-    expect(getFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
+    expect(getKibanaFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
       Array [
         "baz",
         "discover",
@@ -83,17 +83,39 @@ describe('Features Plugin', () => {
     `);
   });
 
-  it('registers not hidden saved objects types', async () => {
+  it('registers kibana features with not hidden saved objects types', async () => {
     const plugin = new Plugin(initContext);
     await plugin.setup(coreSetup, {});
-    const { getFeatures } = await plugin.start(coreStart);
+    const { getKibanaFeatures } = plugin.start(coreStart);
 
     const soTypes =
-      getFeatures().find((f) => f.id === 'savedObjectsManagement')?.privileges?.all.savedObject
-        .all || [];
+      getKibanaFeatures().find((f) => f.id === 'savedObjectsManagement')?.privileges?.all
+        .savedObject.all || [];
 
     expect(soTypes.includes('foo')).toBe(true);
     expect(soTypes.includes('bar')).toBe(false);
+  });
+
+  it('returns registered elasticsearch features', async () => {
+    const plugin = new Plugin(initContext);
+    const { registerElasticsearchFeature } = await plugin.setup(coreSetup, {});
+    registerElasticsearchFeature({
+      id: 'baz',
+      privileges: [
+        {
+          requiredClusterPrivileges: ['all'],
+          ui: ['baz-ui'],
+        },
+      ],
+    });
+
+    const { getElasticsearchFeatures } = plugin.start(coreStart);
+
+    expect(getElasticsearchFeatures().map((f) => f.id)).toMatchInlineSnapshot(`
+      Array [
+        "baz",
+      ]
+    `);
   });
 
   it('registers a capabilities provider', async () => {

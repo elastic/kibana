@@ -212,8 +212,11 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
+  toSnakeCase,
   getDefaultSearchParams,
+  getShardTimeout,
   getTotalLoaded,
+  shimHitsTotal,
   usageProvider,
   SearchUsage,
 } from './search';

@@ -23,6 +23,8 @@ import {
 } from './hosts';
 import {
   NetworkQueries,
+  NetworkDetailsStrategyResponse,
+  NetworkDetailsRequestOptions,
   NetworkDnsStrategyResponse,
   NetworkDnsRequestOptions,
   NetworkTlsStrategyResponse,
@@ -35,6 +37,8 @@ import {
   NetworkTopCountriesRequestOptions,
   NetworkTopNFlowStrategyResponse,
   NetworkTopNFlowRequestOptions,
+  NetworkUsersStrategyResponse,
+  NetworkUsersRequestOptions,
 } from './network';
 import {
   MatrixHistogramQuery,
@@ -87,6 +91,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostUncommonProcessesStrategyResponse
+  : T extends NetworkQueries.details
+  ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
   ? NetworkDnsStrategyResponse
   : T extends NetworkQueries.http
@@ -99,6 +105,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTopCountriesStrategyResponse
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowStrategyResponse
+  : T extends NetworkQueries.users
+  ? NetworkUsersStrategyResponse
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramStrategyResponse
   : never;
@@ -115,6 +123,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostUncommonProcessesRequestOptions
+  : T extends NetworkQueries.details
+  ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
   ? NetworkDnsRequestOptions
   : T extends NetworkQueries.http
@@ -127,6 +137,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTopCountriesRequestOptions
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowRequestOptions
+  : T extends NetworkQueries.users
+  ? NetworkUsersRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
   : never;
