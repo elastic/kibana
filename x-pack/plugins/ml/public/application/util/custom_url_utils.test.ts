@@ -274,6 +274,52 @@ describe('ML - custom URL utils', () => {
       );
     });
 
+    test('correctly encodes special characters inside of a query string', () => {
+      const testUrl = {
+        url_name: 'Show dashboard',
+        time_range: 'auto',
+        url_value: `dashboards#/view/351de820-f2bb-11ea-ab06-cb93221707e9?_a=(filters:!(),query:(language:kuery,query:'at@name:"$at@name$" and singlequote!'name:"$singlequote!'name$"'))&_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))`,
+      };
+
+      const testRecord = {
+        job_id: 'spec-char',
+        result_type: 'record',
+        probability: 0.0028099428534745633,
+        multi_bucket_impact: 5,
+        record_score: 49.00785814424704,
+        initial_record_score: 49.00785814424704,
+        bucket_span: 900,
+        detector_index: 0,
+        is_interim: false,
+        timestamp: 1549593000000,
+        partition_field_name: 'at@name',
+        partition_field_value: "contains a ' quote",
+        function: 'mean',
+        function_description: 'mean',
+        typical: [1993.2657340111837],
+        actual: [1808.3334418402778],
+        field_name: 'metric%$£&!{(]field',
+        influencers: [
+          {
+            influencer_field_name: "singlequote'name",
+            influencer_field_values: ["contains a ' quote"],
+          },
+          {
+            influencer_field_name: 'at@name',
+            influencer_field_values: ["contains a ' quote"],
+          },
+        ],
+        "singlequote'name": ["contains a ' quote"],
+        'at@name': ["contains a ' quote"],
+        earliest: '2019-02-08T00:00:00.000Z',
+        latest: '2019-02-08T23:59:59.999Z',
+      };
+
+      expect(getUrlForRecord(testUrl, testRecord)).toBe(
+        `dashboards#/view/351de820-f2bb-11ea-ab06-cb93221707e9?_a=(filters:!(),query:(language:kuery,query:'at@name:"contains%20a%20!'%20quote" AND singlequote!'name:"contains%20a%20!'%20quote"'))&_g=(filters:!(),time:(from:'2019-02-08T00:00:00.000Z',mode:absolute,to:'2019-02-08T23:59:59.999Z'))`
+      );
+    });
+
     test('replaces tokens with nesting', () => {
       const testUrlApache: KibanaUrlConfig = {
         url_name: 'Raw data',
