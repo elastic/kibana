@@ -115,11 +115,7 @@ migrations.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a7
 2. The simplicity of idempotent, coordination-free migrations outweighs the
    restrictions this will impose on the kinds of migrations we're able to
    support in the future. See (4.2.1)
-3. For 8.x, in-place migrations to support > 10k saved objects, reduce the
-   downtime window, and slightly improve the reliability is more important
-   than (2.7) _maintain read-only functionality during the downtime
-   window_. See (4.5.1).
-4. A saved object type (and it's associated migrations) will only ever be
+3. A saved object type (and it's associated migrations) will only ever be
    owned by one plugin. If pluginA registers saved object type `plugin_a_type`
    then pluginB must never register that same type, even if pluginA is
    disabled. Although we cannot enforce it on third-party plugins, breaking
@@ -201,10 +197,20 @@ Note:
   and source index.
 - Every version performs a migration even if mappings or documents aren't outdated.
 
-1. Locate the source index by fetching aliases (including `.kibana` for versions prior to v7.10.0) `GET '/_alias/.kibana_current,.kibana_7.10.0,.kibana'`. The source index is the index the `.kibana_current` alias points to, or if it doesn’t exist, the index the `.kibana` alias points to.
+1. Locate the source index by fetching aliases (including `.kibana` for
+   versions prior to v7.10.0)
+   
+   ```
+   GET '/_alias/.kibana_current,.kibana_7.10.0,.kibana'
+   ```
+   
+   The source index is:
+   1. the index the `.kibana_current` alias points to, or if it doesn’t exist, 
+   2. the index the `.kibana` alias points to, or if it doesn't exist,
+   3. the v6.x `.kibana` index
 2. If `.kibana_current` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
    1. Because the same version can have plugins enabled at any point in time, perform the mappings update in step (6).
-   3. Skip to step (9) to start serving traffic.
+   2. Skip to step (9) to start serving traffic.
 3. Fail the migration if:
    1. `.kibana_current` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001`
    2. The source index contains documents that belong to an unknown Saved Object type (from a disabled plugin). Log an error explaining that the plugin that created these documents needs to be enabled again or that these objects should be deleted. See section (4.2.1.4).
