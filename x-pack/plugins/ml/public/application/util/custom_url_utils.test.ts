@@ -458,7 +458,7 @@ describe('ML - custom URL utils', () => {
 
     test('return expected url for Security app', () => {
       const urlConfig = {
-        url_name: 'Hosts Overview by process name',
+        url_name: 'Hosts Details by process name',
         url_value:
           "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
       };
