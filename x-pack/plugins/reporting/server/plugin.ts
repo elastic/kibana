@@ -11,7 +11,7 @@ import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from '../common/constants';
 import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, ReportingConfigType } from './config';
-import { createQueueFactory, LevelLogger, ReportingStore, runValidations } from './lib';
+import { createQueueFactory, LevelLogger, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
@@ -108,7 +108,6 @@ export class ReportingPlugin
     setFieldFormats(plugins.data.fieldFormats);
 
     const { logger, reportingCore } = this;
-    const { elasticsearch } = reportingCore.getPluginSetupDeps();
 
     // async background start
     (async () => {
@@ -126,9 +125,6 @@ export class ReportingPlugin
         esqueue,
         store,
       });
-
-      // run self-check validations
-      runValidations(config, elasticsearch, browserDriverFactory, this.logger);
 
       this.logger.debug('Start complete');
     })().catch((e) => {

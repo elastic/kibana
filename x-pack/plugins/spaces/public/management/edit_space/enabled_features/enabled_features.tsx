@@ -139,6 +139,7 @@ export class EnabledFeatures extends Component<Props, {}> {
                 values={{
                   rolesLink: (
                     <EuiLink
+                      data-test-subj="goToRoles"
                       href={this.props.getUrlForApp('management', { path: 'security/roles' })}
                     >
                       <FormattedMessage

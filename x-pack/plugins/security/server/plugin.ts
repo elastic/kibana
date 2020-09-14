@@ -7,6 +7,7 @@
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   deepFreeze,
   CoreSetup,
@@ -34,6 +35,7 @@ import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from '.
 import { securityFeatures } from './features';
 import { ElasticsearchService } from './elasticsearch';
 import { SessionManagementService } from './session_management';
+import { registerSecurityUsageCollector } from './usage_collector';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -81,6 +83,7 @@ export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface PluginStartDependencies {
@@ -130,7 +133,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup<PluginStartDependencies>,
-    { features, licensing, taskManager }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection }: PluginSetupDependencies
   ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -161,6 +164,8 @@ export class Plugin {
     });
 
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
+
+    registerSecurityUsageCollector({ usageCollection, config, license });
 
     const audit = this.auditService.setup({ license, config: config.audit });
     const auditLogger = new SecurityAuditLogger(audit.getLogger());

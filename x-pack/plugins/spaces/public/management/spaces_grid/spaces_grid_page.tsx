@@ -140,7 +140,11 @@ export class SpacesGridPage extends Component<Props, State> {
 
   public getPrimaryActionButton() {
     return (
-      <EuiButton fill {...reactRouterNavigate(this.props.history, '/create')}>
+      <EuiButton
+        fill
+        {...reactRouterNavigate(this.props.history, '/create')}
+        data-test-subj="createSpace"
+      >
         <FormattedMessage
           id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
           defaultMessage="Create a space"
@@ -334,6 +338,7 @@ export class SpacesGridPage extends Component<Props, State> {
           {
             render: (record: Space) => (
               <EuiButtonIcon
+                data-test-subj={`${record.name}-editSpace`}
                 aria-label={i18n.translate(
                   'xpack.spaces.management.spacesGridPage.editSpaceActionName',
                   {
@@ -351,6 +356,7 @@ export class SpacesGridPage extends Component<Props, State> {
             available: (record: Space) => !isReservedSpace(record),
             render: (record: Space) => (
               <EuiButtonIcon
+                data-test-subj={`${record.name}-deleteSpace`}
                 aria-label={i18n.translate(
                   'xpack.spaces.management.spacesGridPage.deleteActionName',
                   {

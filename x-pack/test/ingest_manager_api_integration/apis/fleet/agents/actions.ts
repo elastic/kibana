@@ -28,13 +28,12 @@ export default function (providerContext: FtrProviderContext) {
           action: {
             type: 'CONFIG_CHANGE',
             data: { data: 'action_data' },
-            sent_at: '2020-03-18T19:45:02.620Z',
           },
         })
         .expect(200);
 
+      expect(apiResponse.item.type).to.eql('CONFIG_CHANGE');
       expect(apiResponse.item.data).to.eql({ data: 'action_data' });
-      expect(apiResponse.item.sent_at).to.be('2020-03-18T19:45:02.620Z');
     });
 
     it('should return a 400 when request does not have type information', async () => {

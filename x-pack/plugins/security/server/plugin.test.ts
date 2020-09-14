@@ -110,6 +110,7 @@ describe('Security Plugin', () => {
                   },
                   "getFeatures": [Function],
                   "isEnabled": [Function],
+                  "isLicenseAvailable": [Function],
                 },
                 "registerSpacesService": [Function],
               }
