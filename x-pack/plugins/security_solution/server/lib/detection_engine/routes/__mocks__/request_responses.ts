@@ -15,6 +15,7 @@ import {
   INTERNAL_RULE_ID_KEY,
   INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
+  DETECTION_ENGINE_EQL_VALIDATION_URL,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
 import {
@@ -28,6 +29,7 @@ import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engin
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { getEqlValidationSchemaMock } from '../../../../../common/detection_engine/schemas/request/eql_validation_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -143,6 +145,13 @@ export const getPrepackagedRulesStatusRequest = () =>
   requestMock.create({
     method: 'get',
     path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+  });
+
+export const eqlValidationRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_EQL_VALIDATION_URL,
+    body: getEqlValidationSchemaMock(),
   });
 
 export interface FindHit<T = RuleAlertType> {
