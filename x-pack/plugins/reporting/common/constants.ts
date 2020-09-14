@@ -23,7 +23,7 @@ export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 export const CSV_BOM_CHARS = '\ufeff';
 export const CSV_FORMULA_CHARS = ['=', '+', '-', '@'];
 
-export const WHITELISTED_JOB_CONTENT_TYPES = [
+export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
   CONTENT_TYPE_CSV,

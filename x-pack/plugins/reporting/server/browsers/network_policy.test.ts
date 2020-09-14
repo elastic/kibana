@@ -109,7 +109,7 @@ describe('Network Policy', () => {
     expect(allowRequest(url, rules)).toEqual(false);
   });
 
-  it('allows requests when hosts are whitelisted IP addresses', () => {
+  it('allows requests when hosts are allowed IP addresses', () => {
     const url = 'http://192.168.1.1/cool/route/bro';
     const rules = [{ allow: true, host: '192.168.1.1' }, { allow: false }];
 
@@ -138,7 +138,7 @@ describe('Network Policy', () => {
   });
 
   describe('Common cases', () => {
-    it('allows whitelisting of certain routes based upon protocol', () => {
+    it('allows certain routes based upon protocol', () => {
       const rules = [
         { allow: true, host: 'kibana.com', protocol: 'http:' },
         { allow: true, protocol: 'https:' },
@@ -158,7 +158,7 @@ describe('Network Policy', () => {
       expect(allowRequest('https://169.254.0.0/some/route', rules)).toEqual(false);
     });
 
-    it('allows whitelisting a single host on https', () => {
+    it('allows single host on https', () => {
       const rules = [{ allow: true, host: 'kibana.com', protocol: 'https:' }, { allow: false }];
 
       expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(false);
@@ -166,7 +166,7 @@ describe('Network Policy', () => {
       expect(allowRequest('https://kibana.com/some/route', rules)).toEqual(true);
     });
 
-    it('allows whitelisting a single protocol to http', () => {
+    it('allows single protocol to http', () => {
       const rules = [{ allow: true, protocol: 'https:' }, { allow: false }];
 
       expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(false);
@@ -174,7 +174,7 @@ describe('Network Policy', () => {
       expect(allowRequest('https://good.com/some/route', rules)).toEqual(true);
     });
 
-    it('allows whitelisting a single domain', () => {
+    it('allows single domain', () => {
       const rules = [{ allow: true, host: 'kibana.com' }, { allow: false }];
 
       expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(true);
