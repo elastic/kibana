@@ -18,13 +18,13 @@ import { formatHumanReadableDateTimeSeconds } from '../../shared_imports';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import {
-  getErrorMessage,
   multiColumnSortFactory,
   useDataGrid,
   RenderCellValue,
   UseIndexDataReturnType,
   INDEX_STATUS,
 } from '../../shared_imports';
+import { getErrorMessage } from '../../../common/utils/errors';
 
 import {
   getPreviewRequestBody,
