@@ -6,13 +6,13 @@
 
 import { omitBlacklistedHeaders } from './index';
 
-test(`omits blacklisted headers`, async () => {
+test(`omits banned headers`, async () => {
   const permittedHeaders = {
     foo: 'bar',
     baz: 'quix',
   };
 
-  const blacklistedHeaders = {
+  const bannedHeaders = {
     'accept-encoding': '',
     connection: 'upgrade',
     'content-length': '',
@@ -36,7 +36,7 @@ test(`omits blacklisted headers`, async () => {
     },
     decryptedHeaders: {
       ...permittedHeaders,
-      ...blacklistedHeaders,
+      ...bannedHeaders,
     },
   });
 
