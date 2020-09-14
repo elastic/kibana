@@ -103,7 +103,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       search,
       searchSource: {
+        /**
+         * creates searchsource based on serialized search source fields
+         */
         create: createSearchSource(indexPatterns, searchSourceDependencies),
+        /**
+         * creates an enpty search source
+         */
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },
