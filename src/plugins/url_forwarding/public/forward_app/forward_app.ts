@@ -20,10 +20,10 @@
 import { App, AppMountParameters, CoreSetup } from 'kibana/public';
 import { AppNavLinkStatus } from '../../../../core/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
-import { ForwardDefinition, KibanaLegacyStart } from '../plugin';
+import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 
 export const createLegacyUrlForwardApp = (
-  core: CoreSetup<{}, KibanaLegacyStart>,
+  core: CoreSetup<{}, UrlForwardingStart>,
   forwards: ForwardDefinition[]
 ): App => ({
   id: 'kibana',

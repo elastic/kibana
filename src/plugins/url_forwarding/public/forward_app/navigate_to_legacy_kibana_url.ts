@@ -19,7 +19,7 @@
 
 import { ApplicationStart, IBasePath } from 'kibana/public';
 import { ForwardDefinition } from '../index';
-import { normalizePath } from '../utils/normalize_path';
+import { normalizePath } from './normalize_path';
 
 export const navigateToLegacyKibanaUrl = (
   path: string,
