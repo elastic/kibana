@@ -63,13 +63,46 @@ export interface ISearchSetup {
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
+/**
+ * high level search service
+ * @public
+ */
+export interface ISearchStartSearchSource {
+  /**
+   * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
+   * @param fields
+   */
+  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+  /**
+   * creates empty {@link SearchSource}
+   */
+  createEmpty: () => ISearchSource;
+}
+/**
+ * search service
+ * @public
+ */
 export interface ISearchStart {
+  /**
+   * agg config sub service
+   * {@link AggsStart}
+   *
+   */
   aggs: AggsStart;
+  /**
+   * low level search
+   * {@link ISearchGeneric}
+   */
   search: ISearchGeneric;
-  searchSource: {
-    create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
-    createEmpty: () => ISearchSource;
-  };
+  /**
+   * high level search
+   * {@link ISearchStartSearchSource}
+   */
+  searchSource: ISearchStartSearchSource;
+  /**
+   * session management
+   * {@link ISessionService}
+   */
   session: ISessionService;
 }
 

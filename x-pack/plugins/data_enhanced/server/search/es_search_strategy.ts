@@ -5,24 +5,21 @@
  */
 
 import { first } from 'rxjs/operators';
-import { mapKeys, snakeCase } from 'lodash';
-import { Observable } from 'rxjs';
 import { SearchResponse } from 'elasticsearch';
+import { Observable } from 'rxjs';
+import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { SharedGlobalConfig, RequestHandlerContext, Logger } from '../../../../../src/core/server';
 import {
-  SharedGlobalConfig,
-  RequestHandlerContext,
-  ElasticsearchClient,
-  Logger,
-} from '../../../../../src/core/server';
-import {
-  getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
   SearchUsage,
   isCompleteResponse,
+  getDefaultSearchParams,
+  getShardTimeout,
+  toSnakeCase,
+  shimHitsTotal,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
-import { shimHitsTotal } from './shim_hits_total';
 import { ISearchOptions, IEsSearchResponse } from '../../../../../src/plugins/data/common/search';
 
 function isEnhancedEsSearchResponse(response: any): response is IEsSearchResponse {
@@ -40,17 +37,13 @@ export const enhancedEsSearchStrategyProvider = (
     options?: ISearchOptions
   ) => {
     logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
-    const config = await config$.pipe(first()).toPromise();
-    const client = context.core.elasticsearch.client.asCurrentUser;
-    const defaultParams = getDefaultSearchParams(config);
-    const params = { ...defaultParams, ...request.params };
 
     const isAsync = request.indexType !== 'rollup';
 
     try {
       const response = isAsync
-        ? await asyncSearch(client, { ...request, params }, options)
-        : await rollupSearch(client, { ...request, params }, options);
+        ? await asyncSearch(context, request, options)
+        : await rollupSearch(context, request, options);
 
       if (
         usage &&
@@ -75,72 +68,84 @@ export const enhancedEsSearchStrategyProvider = (
     });
   };
 
-  return { search, cancel };
-};
+  async function asyncSearch(
+    context: RequestHandlerContext,
+    request: IEnhancedEsSearchRequest,
+    options?: ISearchOptions
+  ): Promise<IEsSearchResponse> {
+    let promise: TransportRequestPromise<any>;
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const uiSettingsClient = await context.core.uiSettings.client;
 
-async function asyncSearch(
-  client: ElasticsearchClient,
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
-): Promise<IEsSearchResponse> {
-  let esResponse;
+    const asyncOptions = {
+      waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
+      keepAlive: '1m', // Extend the TTL for this search request by one minute
+    };
 
-  const asyncOptions = {
-    waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
-    keepAlive: '1m', // Extend the TTL for this search request by one minute
-  };
+    // If we have an ID, then just poll for that ID, otherwise send the entire request body
+    if (!request.id) {
+      const submitOptions = toSnakeCase({
+        batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+        ...(await getDefaultSearchParams(uiSettingsClient)),
+        ...asyncOptions,
+        ...request.params,
+      });
 
-  // If we have an ID, then just poll for that ID, otherwise send the entire request body
-  if (!request.id) {
-    const submitOptions = toSnakeCase({
-      batchedReduceSize: 64, // Only report partial results every 64 shards; this should be reduced when we actually display partial results
-      trackTotalHits: true, // Get the exact count of hits
-      ...asyncOptions,
-      ...request.params,
-    });
+      promise = esClient.asyncSearch.submit(submitOptions);
+    } else {
+      promise = esClient.asyncSearch.get({
+        id: request.id,
+        ...toSnakeCase(asyncOptions),
+      });
+    }
 
-    esResponse = await client.asyncSearch.submit(submitOptions);
-  } else {
-    esResponse = await client.asyncSearch.get({
-      id: request.id,
-      ...toSnakeCase(asyncOptions),
-    });
+    // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
+    if (options?.abortSignal) options.abortSignal.addEventListener('abort', () => promise.abort());
+    const esResponse = await promise;
+    const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
+    return {
+      id,
+      isPartial,
+      isRunning,
+      rawResponse: shimHitsTotal(response),
+      ...getTotalLoaded(response._shards),
+    };
   }
 
-  const { id, response, is_partial: isPartial, is_running: isRunning } = esResponse.body;
-  return {
-    id,
-    isPartial,
-    isRunning,
-    rawResponse: shimHitsTotal(response),
-    ...getTotalLoaded(response._shards),
+  const rollupSearch = async function (
+    context: RequestHandlerContext,
+    request: IEnhancedEsSearchRequest,
+    options?: ISearchOptions
+  ): Promise<IEsSearchResponse> {
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const uiSettingsClient = await context.core.uiSettings.client;
+    const config = await config$.pipe(first()).toPromise();
+    const { body, index, ...params } = request.params!;
+    const method = 'POST';
+    const path = encodeURI(`/${index}/_rollup_search`);
+    const querystring = toSnakeCase({
+      ...getShardTimeout(config),
+      ...(await getDefaultSearchParams(uiSettingsClient)),
+      ...params,
+    });
+
+    const promise = esClient.transport.request({
+      method,
+      path,
+      body,
+      querystring,
+    });
+
+    // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
+    if (options?.abortSignal) options.abortSignal.addEventListener('abort', () => promise.abort());
+    const esResponse = await promise;
+
+    const response = esResponse.body as SearchResponse<any>;
+    return {
+      rawResponse: response,
+      ...getTotalLoaded(response._shards),
+    };
   };
-}
 
-async function rollupSearch(
-  client: ElasticsearchClient,
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
-): Promise<IEsSearchResponse> {
-  const { body, index, ...params } = request.params!;
-  const method = 'POST';
-  const path = encodeURI(`/${index}/_rollup_search`);
-  const querystring = toSnakeCase(params);
-
-  const esResponse = await client.transport.request({
-    method,
-    path,
-    body,
-    querystring,
-  });
-
-  const response = esResponse.body as SearchResponse<any>;
-  return {
-    rawResponse: shimHitsTotal(response),
-    ...getTotalLoaded(response._shards),
-  };
-}
-
-function toSnakeCase(obj: Record<string, any>) {
-  return mapKeys(obj, (value, key) => snakeCase(key));
-}
+  return { search, cancel };
+};

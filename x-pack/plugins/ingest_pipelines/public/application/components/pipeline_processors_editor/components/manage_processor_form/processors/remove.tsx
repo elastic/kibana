@@ -29,7 +29,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Fields',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameHelpText', {
-      defaultMessage: 'Fields to be removed.',
+      defaultMessage: 'Fields to remove.',
     }),
     validations: [
       {

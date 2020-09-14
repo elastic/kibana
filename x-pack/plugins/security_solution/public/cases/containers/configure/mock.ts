@@ -77,7 +77,7 @@ export const connectorsMock: Connector[] = [
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping: [
           {
             source: 'title',

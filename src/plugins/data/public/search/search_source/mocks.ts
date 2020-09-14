@@ -54,7 +54,6 @@ export const searchSourceMock = {
 export const createSearchSourceMock = (fields?: SearchSourceFields) =>
   new SearchSource(fields, {
     getConfig: uiSettingsServiceMock.createStartContract().get,
-    esShardTimeout: 30000,
     search: jest.fn(),
     session: searchServiceMock.createStartContract().session,
     http: httpServiceMock.createStartContract(),

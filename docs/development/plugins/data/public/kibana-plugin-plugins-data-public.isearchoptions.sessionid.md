@@ -4,6 +4,8 @@
 
 ## ISearchOptions.sessionId property
 
+A session ID, grouping multiple search requests into a single session.
+
 <b>Signature:</b>
 
 ```typescript

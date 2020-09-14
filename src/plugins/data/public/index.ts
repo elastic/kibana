@@ -172,7 +172,7 @@ import {
 } from '../common/field_formats';
 
 import { DateNanosFormat, DateFormat } from './field_formats';
-export { baseFormattersPublic } from './field_formats';
+export { baseFormattersPublic, FieldFormatsStart } from './field_formats';
 
 // Field formats helpers namespace:
 export const fieldFormats = {
@@ -276,6 +276,7 @@ export {
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
+  AutocompleteStart,
 } from './autocomplete';
 
 /*
@@ -313,6 +314,7 @@ import {
 
 export {
   // aggs
+  AggConfigSerialized,
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
@@ -337,6 +339,8 @@ export {
   TabbedTable,
 } from '../common';
 
+export type { AggConfigs, AggConfig } from '../common';
+
 export {
   // search
   ES_SEARCH_STRATEGY,
@@ -350,6 +354,9 @@ export {
   IKibanaSearchResponse,
   injectSearchSourceReferences,
   ISearch,
+  ISearchSetup,
+  ISearchStart,
+  ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
   parseSearchSourceJSON,
@@ -366,6 +373,7 @@ export {
 } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export type { SearchSource } from './search';
 
 // Search namespace
 export const search = {
@@ -429,7 +437,11 @@ export {
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
+  QueryStateChange,
+  QueryStart,
 } from './query';
+
+export { AggsStart } from './search/aggs';
 
 export {
   getTime,
@@ -454,7 +466,13 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new DataPublicPlugin(initializerContext);
 }
 
-export { DataPublicPluginSetup, DataPublicPluginStart, IDataPluginServices } from './types';
+export {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  IDataPluginServices,
+  DataPublicPluginStartUi,
+  DataPublicPluginStartActions,
+} from './types';
 
 // Export plugin after all other imports
 export { DataPublicPlugin as Plugin };

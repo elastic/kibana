@@ -32,6 +32,9 @@ export interface ISearchOptions {
    */
   strategy?: string;
 
+  /**
+   * A session ID, grouping multiple search requests into a single session.
+   */
   sessionId?: string;
 }
 
@@ -55,3 +58,6 @@ export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
   isPartial?: boolean;
   rawResponse: SearchResponse<Source>;
 }
+
+export const isEsResponse = (response: any): response is IEsSearchResponse =>
+  response && response.rawResponse;

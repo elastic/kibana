@@ -38,7 +38,6 @@ describe('createSearchSource', () => {
       getConfig: jest.fn(),
       search: jest.fn(),
       session: searchMock.session,
-      esShardTimeout: 30000,
       http: coreMock.createStart().http,
       loadingCount$: new BehaviorSubject(0),
     };

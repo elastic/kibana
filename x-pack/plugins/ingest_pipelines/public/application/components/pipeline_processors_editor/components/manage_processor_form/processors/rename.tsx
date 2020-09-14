@@ -21,7 +21,7 @@ export const Rename: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.renameForm.fieldNameHelpText',
-          { defaultMessage: 'Field to be renamed.' }
+          { defaultMessage: 'Field to rename.' }
         )}
       />
 
@@ -31,7 +31,7 @@ export const Rename: FunctionComponent = () => {
         })}
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.renameForm.targetFieldHelpText',
-          { defaultMessage: 'Name of the new field.' }
+          { defaultMessage: 'New field name. This field cannot already exist.' }
         )}
         validations={[
           {

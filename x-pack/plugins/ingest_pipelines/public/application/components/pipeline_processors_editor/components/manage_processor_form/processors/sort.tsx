@@ -24,7 +24,8 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Order',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.sortForm.orderFieldHelpText', {
-      defaultMessage: 'Sort order to use',
+      defaultMessage:
+        'Sort order. Arrays containing a mix of strings and numbers are sorted lexicographically.',
     }),
   },
 };
@@ -35,7 +36,7 @@ export const Sort: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.sortForm.fieldNameHelpText',
-          { defaultMessage: 'Field to sort' }
+          { defaultMessage: 'Field containing array values to sort.' }
         )}
       />
 
