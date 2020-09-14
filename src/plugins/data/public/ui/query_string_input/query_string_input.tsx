@@ -19,6 +19,7 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import classNames from 'classnames';
 import {
   EuiTextArea,
@@ -63,6 +64,7 @@ interface Props {
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
+  isInvalid?: boolean;
 }
 
 interface State {
@@ -591,6 +593,7 @@ export class QueryStringInputUI extends Component<Props, State> {
       'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
       this.props.className
     );
+
     return (
       <div className={className}>
         {this.props.prepend}
@@ -607,7 +610,7 @@ export class QueryStringInputUI extends Component<Props, State> {
           >
             <div
               role="search"
-              className="euiFormControlLayout__childrenWrapper kuiLocalSearchAssistedInput"
+              className="euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap"
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiTextArea
@@ -651,6 +654,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 }
                 role="textbox"
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
+                isInvalid={this.props.isInvalid}
               >
                 {this.getQueryString()}
               </EuiTextArea>
