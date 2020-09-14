@@ -8,6 +8,8 @@ import { Action } from 'redux';
 
 import { AsyncResourceState, TrustedAppsListData } from '../state';
 
+export type TrustedAppsListDataOutdated = Action<'trustedAppsListDataOutdated'>;
+
 interface ResourceStateChanged<T, D = null> extends Action<T> {
   payload: { newState: AsyncResourceState<D> };
 }
@@ -17,4 +19,6 @@ export type TrustedAppsListResourceStateChanged = ResourceStateChanged<
   TrustedAppsListData
 >;
 
-export type TrustedAppsPageAction = TrustedAppsListResourceStateChanged;
+export type TrustedAppsPageAction =
+  | TrustedAppsListDataOutdated
+  | TrustedAppsListResourceStateChanged;

@@ -18,7 +18,7 @@ import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../common/constants';
 
-import { TrustedAppsListResourceStateChanged } from './action';
+import { TrustedAppsListDataOutdated, TrustedAppsListResourceStateChanged } from './action';
 import { TrustedAppsListPageState } from '../state';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
@@ -34,6 +34,16 @@ const isTrustedAppsPageLocation = (location: Immutable<AppLocation>) => {
       exact: true,
     }) !== null
   );
+};
+
+const trustedAppsListDataOutdated: CaseReducer<TrustedAppsListDataOutdated> = (state, action) => {
+  return {
+    ...state,
+    listView: {
+      ...state.listView,
+      freshDataTimestamp: new Date().getTime(),
+    },
+  };
 };
 
 const trustedAppsListResourceStateChanged: CaseReducer<TrustedAppsListResourceStateChanged> = (
@@ -86,6 +96,9 @@ export const trustedAppsPageReducer: StateReducer = (
   action
 ) => {
   switch (action.type) {
+    case 'trustedAppsListDataOutdated':
+      return trustedAppsListDataOutdated(state, action);
+
     case 'trustedAppsListResourceStateChanged':
       return trustedAppsListResourceStateChanged(state, action);
 
