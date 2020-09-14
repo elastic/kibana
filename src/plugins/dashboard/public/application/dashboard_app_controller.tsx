@@ -493,8 +493,9 @@ export class DashboardAppController {
                 const input = incomingEmbeddable.input;
                 // @ts-expect-error
                 delete input.id;
-                const placeholderTitle = input.placeholderTitle;
-                delete input.placeholderTitle;
+                const placeholderTitle = i18n.translate('dashboard.embeddable.placeholderTitle', {
+                  defaultMessage: '[No Title]',
+                });
                 const explicitInput = {
                   savedVis: input,
                   placeholderTitle,

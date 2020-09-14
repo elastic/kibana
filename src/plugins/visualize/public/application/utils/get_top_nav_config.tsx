@@ -170,7 +170,6 @@ export const getTopNavConfig = (
       input: {
         ...vis.serialize(),
         id: embeddableId ? embeddableId : uuid.v4(),
-        placeholderTitle: '[No Title]',
       },
       type: VISUALIZE_EMBEDDABLE_TYPE,
       embeddableId: '',

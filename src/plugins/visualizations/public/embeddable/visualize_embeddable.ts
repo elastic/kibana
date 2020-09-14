@@ -228,14 +228,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.updateOutput({ placeholderTitle: this.placeholderTitle });
     }
 
-    /* if (this.output.placeholderTitle !== this.placeholderTitle) {
-      this.placeholderTitle = this.output.placeholderTitle;
-
-      if (this.domNode) {
-        this.domNode.setAttribute('data-placeholder-title', this.placeholderTitle);
-      }
-    }*/
-
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
