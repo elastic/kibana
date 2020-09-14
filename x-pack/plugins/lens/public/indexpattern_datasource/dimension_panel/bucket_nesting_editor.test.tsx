@@ -16,6 +16,12 @@ const fieldMap = {
   c: { displayName: 'c' } as IndexPatternField,
 };
 
+const columnLabelMap = {
+  a: 'a',
+  b: 'b',
+  c: 'c',
+};
+
 describe('BucketNestingEditor', () => {
   function mockCol(col: Partial<IndexPatternColumn> = {}): IndexPatternColumn {
     const result = {
@@ -39,6 +45,7 @@ describe('BucketNestingEditor', () => {
   it('should display the top level grouping when at the root', () => {
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         fieldMap={fieldMap}
         columnId="a"
         layer={{
@@ -53,8 +60,8 @@ describe('BucketNestingEditor', () => {
         setColumns={jest.fn()}
       />
     );
-    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
-    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
+    const control1 = component.find('[data-test-subj="indexPattern-nesting-topCopy"]').first();
+    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomCopy"]').first();
 
     expect(control1.prop('checked')).toBeTruthy();
     expect(control2.prop('checked')).toBeFalsy();
@@ -63,6 +70,7 @@ describe('BucketNestingEditor', () => {
   it('should display the bottom level grouping when appropriate', () => {
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         columnId="a"
         fieldMap={fieldMap}
         layer={{
@@ -78,8 +86,8 @@ describe('BucketNestingEditor', () => {
       />
     );
 
-    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
-    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
+    const control1 = component.find('[data-test-subj="indexPattern-nesting-topCopy"]').first();
+    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomCopy"]').first();
 
     expect(control1.prop('checked')).toBeFalsy();
     expect(control2.prop('checked')).toBeTruthy();
@@ -89,6 +97,7 @@ describe('BucketNestingEditor', () => {
     const setColumns = jest.fn();
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         columnId="a"
         fieldMap={fieldMap}
         layer={{
@@ -103,7 +112,7 @@ describe('BucketNestingEditor', () => {
         setColumns={setColumns}
       />
     );
-    const control1 = component.find('[data-test-subj="indexPattern-nesting-topLevel"]').first();
+    const control1 = component.find('[data-test-subj="indexPattern-nesting-topCopy"]').first();
 
     (control1.prop('onChange') as () => {})();
 
@@ -122,7 +131,7 @@ describe('BucketNestingEditor', () => {
       },
     });
 
-    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomLevel"]').first();
+    const control2 = component.find('[data-test-subj="indexPattern-nesting-bottomCopy"]').first();
 
     (control2.prop('onChange') as () => {})();
 
@@ -133,6 +142,7 @@ describe('BucketNestingEditor', () => {
   it('should display nothing if there are no buckets', () => {
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         columnId="a"
         fieldMap={fieldMap}
         layer={{
@@ -154,6 +164,7 @@ describe('BucketNestingEditor', () => {
   it('should display nothing if there is one bucket', () => {
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         columnId="a"
         fieldMap={fieldMap}
         layer={{
@@ -175,6 +186,7 @@ describe('BucketNestingEditor', () => {
   it('should display a dropdown with the parent column selected if 3+ buckets', () => {
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         columnId="a"
         fieldMap={fieldMap}
         layer={{
@@ -199,6 +211,7 @@ describe('BucketNestingEditor', () => {
     const setColumns = jest.fn();
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         columnId="a"
         fieldMap={fieldMap}
         layer={{
@@ -226,6 +239,7 @@ describe('BucketNestingEditor', () => {
     const setColumns = jest.fn();
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         columnId="a"
         fieldMap={fieldMap}
         layer={{
@@ -253,6 +267,7 @@ describe('BucketNestingEditor', () => {
     const setColumns = jest.fn();
     const component = mount(
       <BucketNestingEditor
+        columnLabelMap={columnLabelMap}
         fieldMap={fieldMap}
         columnId="b"
         layer={{

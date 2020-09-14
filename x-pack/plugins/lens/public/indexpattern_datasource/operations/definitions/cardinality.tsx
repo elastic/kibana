@@ -33,6 +33,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     defaultMessage: 'Unique count',
   }),
   input: 'field',
+  canAggOrderChangeResult: false,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&

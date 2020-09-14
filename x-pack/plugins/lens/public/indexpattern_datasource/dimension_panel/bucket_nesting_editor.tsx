@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiHorizontalRule, EuiRadio, EuiSelect, htmlIdGenerator } from '@elastic/eui';
 import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
-import { IndexPatternColumn } from '../operations';
+import { IndexPatternColumn, operationDefinitionMap } from '../operations';
 
 const generator = htmlIdGenerator('lens-nesting');
 
@@ -31,11 +31,13 @@ export function BucketNestingEditor({
   layer,
   setColumns,
   fieldMap,
+  columnLabelMap,
 }: {
   columnId: string;
   layer: IndexPatternLayer;
   setColumns: (columns: string[]) => void;
   fieldMap: Record<string, IndexPatternField>;
+  columnLabelMap: Record<string, string>;
 }) {
   const column = layer.columns[columnId];
   const columns = Object.entries(layer.columns);
@@ -56,9 +58,15 @@ export function BucketNestingEditor({
 
   const prevColumn = layer.columnOrder[layer.columnOrder.indexOf(columnId) - 1];
 
-  if (aggColumns.length === 1) {
-    const [target] = aggColumns;
+  const operationDefinition = operationDefinitionMap[column.operationType];
 
+  const [target] = aggColumns;
+
+  const canAggOrderChangeResult =
+    operationDefinition.canAggOrderChangeResult ||
+    operationDefinitionMap[target.operationType].canAggOrderChangeResult;
+
+  if (aggColumns.length === 1 && canAggOrderChangeResult && operationDefinition.getAggOrderCopy) {
     function toggleNesting() {
       if (prevColumn) {
         setColumns(nestColumn(layer.columnOrder, columnId, target.value));
@@ -67,43 +75,11 @@ export function BucketNestingEditor({
       }
     }
 
-    // todo: move the copy to operations
-    const topLevelCopy: Record<string, string> = {
-      terms: i18n.translate('xpack.lens.indexPattern.groupingOverallTerms', {
-        defaultMessage: 'Overall top {field}',
-        values: { field: fieldName },
-      }),
-      filters: i18n.translate('xpack.lens.indexPattern.groupingOverallFilters', {
-        defaultMessage: 'Top values for each filter',
-      }),
-      date_histogram: i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
-        defaultMessage: 'Top values for each {field}',
-        values: { field: fieldName },
-      }),
-      range: i18n.translate('xpack.lens.indexPattern.groupingOverallRanges', {
-        defaultMessage: 'Top values for each {field}',
-        values: { field: fieldName },
-      }),
-    };
-
-    const bottomLevelCopy: Record<string, string> = {
-      terms: i18n.translate('xpack.lens.indexPattern.groupingSecondTerms', {
-        defaultMessage: 'Top values for each {target}',
-        values: { target: target.fieldName },
-      }),
-      filters: i18n.translate('xpack.lens.indexPattern.groupingSecondFilters', {
-        defaultMessage: 'Overall top {target}',
-        values: { target: target.fieldName },
-      }),
-      date_histogram: i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
-        defaultMessage: 'Overall top {target}',
-        values: { target: target.fieldName },
-      }),
-      range: i18n.translate('xpack.lens.indexPattern.groupingSecondRanges', {
-        defaultMessage: 'Overall top {target}',
-        values: { target: target.fieldName },
-      }),
-    };
+    const copy = operationDefinition.getAggOrderCopy(
+      fieldName,
+      target.fieldName,
+      target.operationType
+    );
 
     return (
       <>
@@ -116,16 +92,16 @@ export function BucketNestingEditor({
         >
           <>
             <EuiRadio
-              id={generator('topLevel')}
-              data-test-subj="indexPattern-nesting-topLevel"
-              label={topLevelCopy[column.operationType]}
+              id={generator('topCopy')}
+              data-test-subj="indexPattern-nesting-topCopy"
+              label={copy.topCopy}
               checked={!prevColumn}
               onChange={toggleNesting}
             />
             <EuiRadio
-              id={generator('bottomLevel')}
-              data-test-subj="indexPattern-nesting-bottomLevel"
-              label={bottomLevelCopy[column.operationType]}
+              id={generator('bottomCopy')}
+              data-test-subj="indexPattern-nesting-bottomCopy"
+              label={copy.bottomCopy}
               checked={!!prevColumn}
               onChange={toggleNesting}
             />

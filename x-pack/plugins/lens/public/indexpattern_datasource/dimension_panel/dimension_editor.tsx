@@ -14,10 +14,10 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiListGroupItemProps,
+  EuiFormLabel
 } from '@elastic/eui';
-import { EuiFormLabel } from '@elastic/eui';
-import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from './dimension_panel';
+import { IndexPatternColumn, OperationType, uniqueLabels } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,

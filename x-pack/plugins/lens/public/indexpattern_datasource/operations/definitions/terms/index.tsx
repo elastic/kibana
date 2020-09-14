@@ -44,6 +44,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   }),
   priority: 3, // Higher than any metric
   input: 'field',
+  canAggOrderChangeResult: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&
@@ -62,6 +63,23 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         newField.aggregatable &&
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
     );
+  },
+  getAggOrderCopy: (fieldName, otherFieldName, otherOperationType) => {
+    return {
+      topCopy: i18n.translate('xpack.lens.indexPattern.groupingOverallTerms', {
+        defaultMessage: 'Overall top {field}',
+        values: { field: fieldName },
+      }),
+      bottomCopy:
+        otherOperationType === 'filters'
+          ? i18n.translate('xpack.lens.indexPattern.groupingSecondTermsWithFilters', {
+              defaultMessage: 'Top values for each custom query',
+            })
+          : i18n.translate('xpack.lens.indexPattern.groupingSecondTerms', {
+              defaultMessage: 'Top values for each {otherFieldName}',
+              values: { otherFieldName },
+            }),
+    };
   },
   buildColumn({ suggestedPriority, columns, field }) {
     const existingMetricColumn = Object.entries(columns)

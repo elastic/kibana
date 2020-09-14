@@ -131,6 +131,19 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * present on the new index pattern.
    */
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+  /**
+   * defines if changing the aggregations order in case of nested aggregations
+   * can change the data coming from es
+   */
+  canAggOrderChangeResult: boolean;
+  /**
+   * copy for bucketNestingEditor in case of two nested aggregations
+   */
+  getAggOrderCopy?: (
+    fieldName: string,
+    otherFieldName: string,
+    operationType: OperationType
+  ) => { topCopy: string; bottomCopy: string };
 }
 
 interface BaseBuildColumnArgs {
