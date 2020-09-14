@@ -19,10 +19,8 @@
 
 import expect from '@kbn/expect';
 import { enumeratePatterns } from '../team_assignment/enumerate_patterns';
-import { resolve } from 'path';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 
-const ROOT = resolve(__dirname, '../../../../..');
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
@@ -30,7 +28,7 @@ const log = new ToolingLog({
 
 describe(`enumeratePatterns`, () => {
   it(`should resolve x-pack/plugins/reporting/server/browsers/extract/unzip.js to kibana-reporting`, () => {
-    const actual = enumeratePatterns(ROOT)(log)(
+    const actual = enumeratePatterns(REPO_ROOT)(log)(
       new Map([['x-pack/plugins/reporting', ['kibana-reporting']]])
     );
 
