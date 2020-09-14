@@ -416,10 +416,6 @@ using the CURL scripts in the scripts folder.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/oss_telemetry[ossTelemetry]
-|WARNING: Missing README.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/painless_lab[painlessLab]
 |WARNING: Missing README.
 
