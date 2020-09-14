@@ -8,9 +8,7 @@ import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useCore, sendRequest } from '../../../hooks';
-import { PostAgentUnenrollResponse } from '../../../types';
-import { agentRouteService } from '../../../services';
+import { useCore, sendPostAgentUnenroll } from '../../../hooks';
 
 interface Props {
   children: (unenrollAgents: UnenrollAgents) => React.ReactElement;
@@ -66,12 +64,8 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({
 
     try {
       const agentId = agents[0];
-      const { error } = await sendRequest<PostAgentUnenrollResponse>({
-        path: agentRouteService.getUnenrollPath(agentId),
-        method: 'post',
-        body: {
-          force: forceUnenroll,
-        },
+      const { error } = await sendPostAgentUnenroll(agentId, {
+        force: forceUnenroll,
       });
 
       if (error) {

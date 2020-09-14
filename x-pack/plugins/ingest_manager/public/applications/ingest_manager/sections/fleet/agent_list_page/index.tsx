@@ -539,7 +539,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setSelectionMode('manual');
           }
         }}
-        refreshAgents={() => agentsRequest.sendRequest()}
+        refreshAgents={() => agentsRequest.resendRequest()}
       />
       <EuiSpacer size="xs" />
       <EuiHorizontalRule margin="none" />

@@ -7,6 +7,7 @@ import { Observable, Subscription } from 'rxjs';
 import { ILicense } from '../../../../../licensing/public';
 import { useSetupDeps } from './use_deps';
 
+// TODO: Make this better lol
 class LicenseService {
   private observable: Observable<ILicense> | null = null;
   private subscription: Subscription | null = null;

@@ -23,6 +23,7 @@ import {
   PostAgentAcksRequestParamsJSONSchema,
   PostAgentAcksRequestBodyJSONSchema,
   PostAgentUnenrollRequestSchema,
+  PostBulkAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
   PostNewAgentActionRequestSchema,
   PutAgentReassignRequestSchema,
@@ -44,8 +45,8 @@ import {
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
-import { appContextService } from '../../services';
-import { postAgentsUnenrollHandler } from './unenroll_handler';
+import { appContextService, licenseService } from '../../services';
+import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { IngestManagerConfigType } from '../..';
 
 const ajv = new Ajv({
@@ -183,7 +184,7 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       validate: PostAgentUnenrollRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    postAgentsUnenrollHandler
+    postAgentUnenrollHandler
   );
 
   router.put(
@@ -193,15 +194,6 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     putAgentsReassignHandler
-  );
-
-  router.post(
-    {
-      path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
-      validate: PostBulkAgentReassignRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
-    },
-    postBulkAgentsReassignHandler
   );
 
   // Get agent events
@@ -223,4 +215,25 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     },
     getAgentStatusForAgentPolicyHandler
   );
+
+  // Bulk agent actions (license-protected)
+  if (licenseService.isGoldPlus()) {
+    router.post(
+      {
+        path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+        validate: PostBulkAgentReassignRequestSchema,
+        options: { tags: [`access:${PLUGIN_ID}-all`] },
+      },
+      postBulkAgentsReassignHandler
+    );
+
+    router.post(
+      {
+        path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+        validate: PostBulkAgentUnenrollRequestSchema,
+        options: { tags: [`access:${PLUGIN_ID}-all`] },
+      },
+      postBulkAgentsUnenrollHandler
+    );
+  }
 };

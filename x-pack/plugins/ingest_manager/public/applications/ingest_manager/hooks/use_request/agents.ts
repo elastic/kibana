@@ -10,6 +10,10 @@ import {
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
   GetOneAgentEventsRequest,
+  PostAgentUnenrollRequest,
+  PostBulkAgentUnenrollRequest,
+  PostBulkAgentUnenrollResponse,
+  PostAgentUnenrollResponse,
   PutAgentReassignRequest,
   PutAgentReassignResponse,
   PostBulkAgentReassignRequest,
@@ -93,6 +97,31 @@ export function sendPostBulkAgentReassign(
   return sendRequest<PostBulkAgentReassignResponse>({
     method: 'post',
     path: agentRouteService.getBulkReassignPath(),
+    body,
+    ...options,
+  });
+}
+
+export function sendPostAgentUnenroll(
+  agentId: string,
+  body: PostAgentUnenrollRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostAgentUnenrollResponse>({
+    path: agentRouteService.getUnenrollPath(agentId),
+    method: 'post',
+    body,
+    ...options,
+  });
+}
+
+export function sendPostBulkAgentUnenroll(
+  body: PostBulkAgentUnenrollRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostBulkAgentUnenrollResponse>({
+    path: agentRouteService.getBulkUnenrollPath(),
+    method: 'post',
     body,
     ...options,
   });
