@@ -411,7 +411,11 @@ const UnstyledProcessEventDot = React.memo(
           >
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.processDescription"
-              defaultMessage={`${isOrigin ? 'Analyzed Event · ' : ''}${descriptionText}`}
+              defaultMessage="{originText}{descriptionText}"
+              values={{
+                originText: isOrigin ? 'Analyzed Event · ' : '',
+                descriptionText,
+              }}
             />
           </StyledDescriptionText>
           <div
