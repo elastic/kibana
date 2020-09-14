@@ -305,6 +305,7 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        // using this role even for remote clusters
         global_ccr_role: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],
