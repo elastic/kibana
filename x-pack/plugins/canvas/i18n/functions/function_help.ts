@@ -50,7 +50,6 @@ import { help as markdown } from './dict/markdown';
 import { help as math } from './dict/math';
 import { help as metric } from './dict/metric';
 import { help as neq } from './dict/neq';
-import { help as palette } from './dict/palette';
 import { help as pie } from './dict/pie';
 import { help as plot } from './dict/plot';
 import { help as ply } from './dict/ply';
@@ -205,7 +204,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   math,
   metric,
   neq,
-  palette,
   pie,
   plot,
   ply,

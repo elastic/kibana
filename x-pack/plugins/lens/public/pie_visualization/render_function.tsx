@@ -21,7 +21,7 @@ import {
   Position,
   Settings,
 } from '@elastic/charts';
-import { FormatFactory, LensFilterEvent, SeriesLayer } from '../types';
+import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
@@ -29,7 +29,7 @@ import { getFilterContext, getSliceValueWithFallback } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, SeriesLayer } from '../../../../../src/plugins/charts/public';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -128,6 +128,7 @@ export function PieComponent(
               rankAtDepth: tempParent.sortIndex,
               totalSeries: totalSeriesCount,
               totalSeriesAtDepth: tempParent.parent.children.length,
+              behindText: categoryDisplay !== 'hide',
             });
             tempParent = tempParent.parent;
           }

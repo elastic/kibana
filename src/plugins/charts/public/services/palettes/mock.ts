@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { ChartsServerPlugin } from './plugin';
-export {
-  PaletteOutput,
-  CustomPaletteArguments,
-  CustomPaletteState,
-  SystemPaletteArguments,
-} from '../common';
+import { PaletteService } from './service';
 
-export const plugin = () => new ChartsServerPlugin();
+export const paletteServiceMock: PaletteService = {
+  setup() {
+    return {
+      default: {
+        id: 'default',
+        title: 'My Palette',
+        getColor: () => 'black',
+        getColors: () => ['red', 'black'],
+      },
+    };
+  },
+};

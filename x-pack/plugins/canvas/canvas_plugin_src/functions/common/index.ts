@@ -37,7 +37,6 @@ import { mapColumn } from './mapColumn';
 import { math } from './math';
 import { metric } from './metric';
 import { neq } from './neq';
-import { palette } from './palette';
 import { pie } from './pie';
 import { plot } from './plot';
 import { ply } from './ply';
@@ -95,7 +94,6 @@ export const functions = [
   math,
   metric,
   neq,
-  palette,
   pie,
   plot,
   ply,

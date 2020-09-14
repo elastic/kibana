@@ -18,12 +18,18 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/public';
+import { ExpressionsSetup } from '../../expressions/public';
+import { palette, systemPalette } from '../common';
 
 import { ThemeService, LegacyColorsService } from './services';
 import { PaletteService } from './services/palettes/service';
 
 export type Theme = Omit<ThemeService, 'init'>;
 export type Color = Omit<LegacyColorsService, 'init'>;
+
+interface SetupDependencies {
+  expressions: ExpressionsSetup;
+}
 
 /** @public */
 export interface ChartsPluginSetup {
@@ -43,7 +49,9 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
 
   private palettes: undefined | ReturnType<PaletteService['setup']>;
 
-  public setup(core: CoreSetup): ChartsPluginSetup {
+  public setup(core: CoreSetup, dependencies: SetupDependencies): ChartsPluginSetup {
+    dependencies.expressions.registerFunction(palette);
+    dependencies.expressions.registerFunction(systemPalette);
     this.themeService.init(core.uiSettings);
     this.legacyColorsService.init(core.uiSettings);
     this.palettes = this.paletteService.setup(core, this.legacyColorsService);

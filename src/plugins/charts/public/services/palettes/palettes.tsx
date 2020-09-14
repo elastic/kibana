@@ -105,7 +105,7 @@ export const buildPalettes: (
   };
   return {
     default: {
-      title: i18n.translate('xpack.lens.palettes.defaultPaletteLabel', {
+      title: i18n.translate('charts.palettes.defaultPaletteLabel', {
         defaultMessage: 'default',
       }),
       ...buildRoundRobinCategorical(
@@ -115,29 +115,29 @@ export const buildPalettes: (
       ),
     },
     kibana_palette: {
-      title: i18n.translate('xpack.lens.palettes.kibanaPaletteLabel', {
+      title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
         defaultMessage: 'legacy',
       }),
       ...buildSyncedKibanaPalette(legacyColorsService),
     },
     negative: {
-      title: i18n.translate('xpack.lens.palettes.negativeLabel', { defaultMessage: 'negative' }),
+      title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'negative' }),
       ...buildRoundRobinCategorical('negative', euiPaletteNegative),
     },
     positive: {
-      title: i18n.translate('xpack.lens.palettes.positiveLabel', { defaultMessage: 'positive' }),
+      title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'positive' }),
       ...buildRoundRobinCategorical('positive', euiPalettePositive),
     },
     cool: {
-      title: i18n.translate('xpack.lens.palettes.coolLabel', { defaultMessage: 'cool' }),
+      title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'cool' }),
       ...buildRoundRobinCategorical('cool', euiPaletteCool),
     },
     warm: {
-      title: i18n.translate('xpack.lens.palettes.warmLabel', { defaultMessage: 'warm' }),
+      title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'warm' }),
       ...buildRoundRobinCategorical('warm', euiPaletteWarm),
     },
     gray: {
-      title: i18n.translate('xpack.lens.palettes.grayLabel', { defaultMessage: 'gray' }),
+      title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'gray' }),
       ...buildRoundRobinCategorical('gray', euiPaletteGray),
     },
   };

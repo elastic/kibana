@@ -24,6 +24,7 @@ import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { WorkspacePanel } from './workspace_panel';
 
@@ -57,10 +58,9 @@ function getDefaultProps() {
       uiActions: uiActionsPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
+      charts: chartPluginMock.createStartContract(),
     },
-    palettes: {
-      default: createMockPaletteDefinition(),
-    },
+    palettes: chartPluginMock.createSetupContract().palettes,
     showNoDataPopover: jest.fn(),
   };
 }

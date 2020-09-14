@@ -25,3 +25,9 @@ export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
 export * from './static';
 export * from './services/palettes/types';
+export {
+  PaletteOutput,
+  CustomPaletteArguments,
+  CustomPaletteState,
+  SystemPaletteArguments,
+} from '../common';
