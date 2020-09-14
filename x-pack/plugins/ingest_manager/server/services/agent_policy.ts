@@ -21,6 +21,7 @@ import {
   ListWithKuery,
 } from '../types';
 import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
+import { normalizeKuery } from './saved_object';
 import { listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -162,13 +163,7 @@ class AgentPolicyService {
       sortOrder,
       page,
       perPage,
-      // To ensure users don't need to know about SO data structure...
-      filter: kuery
-        ? kuery.replace(
-            new RegExp(`${SAVED_OBJECT_TYPE}\.`, 'g'),
-            `${SAVED_OBJECT_TYPE}.attributes.`
-          )
-        : undefined,
+      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
     const agentPolicies = await Promise.all(
