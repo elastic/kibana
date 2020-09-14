@@ -144,7 +144,7 @@ export function DiscoverLegacy({
     [setFixedScrollEl]
   );
   const sidebarClassName = classNames({
-    isSidebarClosed: true,
+    closed: isSidebarClosed,
   });
 
   return (
