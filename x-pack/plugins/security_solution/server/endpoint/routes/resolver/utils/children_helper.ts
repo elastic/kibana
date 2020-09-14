@@ -159,7 +159,7 @@ export class ChildrenNodesHelper {
     return nodesToQueryNext.get(largestAncestryArray);
   }
 
-  private setPaginationForNodes(nodes: Set<string>, startEvents: SafeResolverEvent[]) {
+  private setPaginationForNodes(nodes: Set<string>, startEvents: ChildEvent[]) {
     for (const nodeEntityID of nodes.values()) {
       const cachedNode = this.entityToNodeCache.get(nodeEntityID);
       if (cachedNode) {

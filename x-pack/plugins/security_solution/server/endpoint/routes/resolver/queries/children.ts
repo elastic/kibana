@@ -9,6 +9,11 @@ import { ResolverQuery } from './base';
 import { ChildrenPaginationBuilder } from '../utils/children_pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
+/**
+ * This type represents the document returned from ES when using the ChildrenQuery to fetch legacy events.
+ * It contains only the necessary fields that the children api needs to process the results before
+ * it requests the full lifecycle information for the children in a later query.
+ */
 export type LegacyChildEvent = Partial<{
   '@timestamp': ECSField<number>;
   event: Partial<{
@@ -26,7 +31,7 @@ export type EndpointChildEvent = Partial<{
   '@timestamp': ECSField<number>;
   event: Partial<{
     type: ECSField<string>;
-    sequence: ECSField<string>;
+    sequence: ECSField<number>;
   }>;
   process: Partial<{
     entity_id: ECSField<string>;
@@ -61,6 +66,8 @@ export class ChildrenQuery extends ResolverQuery<ChildEvent[], ChildEvent> {
         'endgame.serial_event_id',
         'endgame.unique_pid',
         'endgame.unique_ppid',
+        'event.type',
+        'event.action',
       ],
       collapse: {
         field: 'endgame.unique_pid',
@@ -102,10 +109,13 @@ export class ChildrenQuery extends ResolverQuery<ChildEvent[], ChildEvent> {
   }
 
   protected query(entityIDs: string[]): JsonObject {
+    // we don't have to include the `event.id` in the source response because it is not needed for processing
+    // the data returned, or for breaking ties when ES is doing the search
     const paginationFields = this.pagination.buildQueryFields('event.id');
     return {
       _source: [
         '@timestamp',
+        'event.type',
         'event.sequence',
         'process.entity_id',
         'process.parent.entity_id',

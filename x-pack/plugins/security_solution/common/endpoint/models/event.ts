@@ -3,13 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  LegacyEndpointEvent,
-  ResolverEvent,
-  SafeResolverEvent,
-  SafeLegacyEndpointEvent,
-  ECSField,
-} from '../types';
+import { LegacyEndpointEvent, ResolverEvent, SafeResolverEvent, ECSField } from '../types';
 import { firstNonNullValue, hasValue, values } from './ecs_safety_helpers';
 
 interface LegacyEvent {
@@ -32,16 +26,14 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-type LegacyProcessRunningFields = Partial<{
-  endgame: object;
-  event: Partial<{
-    type: ECSField<string>;
-    action: ECSField<string>;
-  }>;
-}>;
-
 type ProcessRunningFields = Partial<
-  | LegacyProcessRunningFields
+  | {
+      endgame: object;
+      event: Partial<{
+        type: ECSField<string>;
+        action: ECSField<string>;
+      }>;
+    }
   | {
       event: Partial<{
         type: ECSField<string>;
@@ -150,7 +142,20 @@ export function entityId(event: ResolverEvent): string {
   return event.process.entity_id;
 }
 
-export function entityIDSafeVersion(event: SafeResolverEvent): string | undefined {
+type EntityIDFields = Partial<
+  | {
+      endgame: Partial<{
+        unique_pid: ECSField<number>;
+      }>;
+    }
+  | {
+      process: Partial<{
+        entity_id: ECSField<string>;
+      }>;
+    }
+>;
+
+export function entityIDSafeVersion(event: EntityIDFields): string | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return event.endgame?.unique_pid === undefined
       ? undefined
@@ -167,14 +172,42 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
   return event.process.parent?.entity_id;
 }
 
-export function parentEntityIDSafeVersion(event: SafeResolverEvent): string | undefined {
+type ParentEntityIDFields = Partial<
+  | {
+      endgame: Partial<{
+        unique_ppid: ECSField<number>;
+      }>;
+    }
+  | {
+      process: Partial<{
+        parent: Partial<{
+          entity_id: ECSField<string>;
+        }>;
+      }>;
+    }
+>;
+
+export function parentEntityIDSafeVersion(event: ParentEntityIDFields): string | undefined {
   if (isLegacyEventSafeVersion(event)) {
-    return String(firstNonNullValue(event.endgame.unique_ppid));
+    return String(firstNonNullValue(event.endgame?.unique_ppid));
   }
   return firstNonNullValue(event.process?.parent?.entity_id);
 }
 
-export function ancestryArray(event: SafeResolverEvent): string[] | undefined {
+type AncestryArrayFields = Partial<
+  | {
+      endgame: object;
+    }
+  | {
+      process: Partial<{
+        Ext: Partial<{
+          ancestry: ECSField<string>;
+        }>;
+      }>;
+    }
+>;
+
+export function ancestryArray(event: AncestryArrayFields): string[] | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return undefined;
   }
@@ -183,7 +216,9 @@ export function ancestryArray(event: SafeResolverEvent): string[] | undefined {
   return values(event.process?.Ext?.ancestry);
 }
 
-export function getAncestryAsArray(event: SafeResolverEvent | undefined): string[] {
+type GetAncestryArrayFields = AncestryArrayFields & ParentEntityIDFields;
+
+export function getAncestryAsArray(event: GetAncestryArrayFields | undefined): string[] {
   if (!event) {
     return [];
   }
