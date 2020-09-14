@@ -18,6 +18,7 @@ import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
 import { UXMetrics } from './UXMetrics';
+import { VisitorBreakdownMap } from './VisitorBreakdownMap';
 
 export function RumDashboard() {
   return (
@@ -56,6 +57,9 @@ export function RumDashboard() {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={3}>
               <VisitorBreakdown />
+            </EuiFlexItem>
+            <EuiFlexItem grow={3}>
+              <VisitorBreakdownMap />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

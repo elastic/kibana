@@ -56,8 +56,6 @@ const StepsWithLessPadding = styled(EuiSteps)`
 export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const {
     notifications,
-    chrome: { getIsNavDrawerLocked$ },
-    uiSettings,
     application: { navigateToApp },
   } = useCore();
   const {
@@ -70,15 +68,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const history = useHistory();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const from: CreatePackagePolicyFrom = policyId ? 'policy' : 'package';
-  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-
-  useEffect(() => {
-    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-      setIsNavDrawerLocked(newIsNavDrawerLocked);
-    });
-
-    return () => subscription.unsubscribe();
-  });
 
   // Agent policy and package info states
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
@@ -398,16 +387,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           )}
       <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="l" />
-      {/* TODO #64541 - Remove classes */}
-      <EuiBottomBar
-        className={
-          uiSettings.get('pageNavigation') === 'legacy'
-            ? isNavDrawerLocked
-              ? 'ingestManager__bottomBar-isNavDrawerLocked'
-              : 'ingestManager__bottomBar'
-            : undefined
-        }
-      >
+      <EuiBottomBar>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             {!isLoadingSecondStep && agentPolicy && packageInfo && formState === 'INVALID' ? (
