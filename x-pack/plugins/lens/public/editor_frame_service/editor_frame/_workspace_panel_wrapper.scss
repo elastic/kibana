@@ -6,6 +6,7 @@
   margin-bottom: $euiSize;
   display: flex;
   flex-direction: column;
+  position: relative; // For positioning the dnd overlay
 
   .lnsWorkspacePanelWrapper__pageContentHeader {
     @include euiTitle('xs');
@@ -25,7 +26,7 @@
     align-items: stretch;
     justify-content: stretch;
     overflow: auto;
-    position: relative;
+    // position: relative; // Check loading and error state
 
     > * {
       flex: 1 1 100%;
@@ -37,6 +38,62 @@
   }
 }
 
+.lnsWorkspacePanel__dragDrop {
+  background-color: transparent !important;
+}
+
+.lnsExpressionRenderer {
+  // position: relative;
+
+  .lnsDragDrop-isDropTarget & {
+    transition: filter $euiAnimSpeedNormal ease-in-out, opacity $euiAnimSpeedNormal ease-in-out;
+    filter: blur(5px);
+    opacity: .25;
+  }
+}
+
+.lnsWorkspacePanel__emptyContent {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color $euiAnimSpeedNormal ease-in-out;
+
+  .lnsDragDrop-isDropTarget & {
+    background-color: transparentize($euiColorSecondary, .9);
+
+    p {
+      transition: filter $euiAnimSpeedNormal ease-in-out;
+      filter: blur(5px);
+    }
+  }
+
+  .lnsDragDrop-isActiveDropTarget & {
+    background-color: transparentize($euiColorSecondary, .75);
+
+  }
+
+  &.lnsWorkspacePanel__emptyContent-onTop p {
+    display: none;
+  }
+}
+
+
 .lnsWorkspacePanelWrapper__toolbar {
   margin-bottom: 0;
+}
+
+
+.lnsDropIllustration__adjustFill {
+  fill: $euiColorFullShade;
+}
+
+.lnsWorkspacePanel__dropIllustration {
+  filter: drop-shadow(0 2.7px 9px rgba(0, 0, 0, 0.13))
+    drop-shadow(0 9.4px 24px rgba(0, 0, 0, 0.09))
+    drop-shadow(0 21.8px 43px rgba(0, 0, 0, 0.08));
 }

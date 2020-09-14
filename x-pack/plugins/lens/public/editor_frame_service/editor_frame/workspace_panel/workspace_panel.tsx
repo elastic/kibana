@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
+import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,6 +40,8 @@ import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/publ
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
+// @ts-ignore
+import { DropIllustration } from '../../../assets/drop_illustration';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -210,41 +213,42 @@ export function InnerWorkspacePanel({
 
   function renderEmptyWorkspace() {
     return (
-      <div className="eui-textCenter">
-        <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
-          <h3>
-            <FormattedMessage
-              id="xpack.lens.editorFrame.emptyWorkspace"
-              defaultMessage="Drop some fields here to start"
-            />
-          </h3>
-          <EuiImage
-            style={{ width: 360 }}
-            url={core.http.basePath.prepend(emptyStateGraphicURL)}
-            alt=""
+      <EuiText
+        className={classNames('lnsWorkspacePanel__emptyContent', {
+          'lnsWorkspacePanel__emptyContent-onTop': expression !== null,
+        })}
+        textAlign="center"
+        color="subdued"
+        data-test-subj="empty-workspace"
+      >
+        <h3>
+          <FormattedMessage
+            id="xpack.lens.editorFrame.emptyWorkspace"
+            defaultMessage="Drop some fields here to start"
           />
-          <p>
-            <FormattedMessage
-              id="xpack.lens.editorFrame.emptyWorkspaceHeading"
-              defaultMessage="Lens is a new tool for creating visualizations"
-            />
-          </p>
-          <p>
-            <small>
-              <EuiLink
-                href="https://www.elastic.co/products/kibana/feedback"
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.lens.editorFrame.goToForums"
-                  defaultMessage="Make requests and give feedback"
-                />
-              </EuiLink>
-            </small>
-          </p>
-        </EuiText>
-      </div>
+        </h3>
+        <DropIllustration className="lnsWorkspacePanel__dropIllustration" />
+        <p>
+          <FormattedMessage
+            id="xpack.lens.editorFrame.emptyWorkspaceHeading"
+            defaultMessage="Lens is a new tool for creating visualizations"
+          />
+        </p>
+        <p>
+          <small>
+            <EuiLink
+              href="https://www.elastic.co/products/kibana/feedback"
+              target="_blank"
+              external
+            >
+              <FormattedMessage
+                id="xpack.lens.editorFrame.goToForums"
+                defaultMessage="Make requests and give feedback"
+              />
+            </EuiLink>
+          </small>
+        </p>
+      </EuiText>
     );
   }
 
@@ -330,12 +334,14 @@ export function InnerWorkspacePanel({
       visualizationMap={visualizationMap}
     >
       <DragDrop
+        className="lnsWorkspacePanel__dragDrop"
         data-test-subj="lnsWorkspace"
         draggable={false}
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
       >
         {renderVisualization()}
+        {Boolean(suggestionForDraggedField) && renderEmptyWorkspace()}
       </DragDrop>
     </WorkspacePanelWrapper>
   );
