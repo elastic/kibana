@@ -40,10 +40,6 @@ import { createTableRowDirective } from './application/angular/doc_table/compone
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
-// @ts-ignore
-import { FixedScrollProvider } from './application/angular/directives/fixed_scroll';
-// @ts-ignore
-import { DebounceProviderTimeout } from './application/angular/directives/debounce/debounce';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
   initAngularBootstrap,
@@ -121,8 +117,7 @@ export function initializeInnerAngularModule(
       ])
       .config(watchMultiDecorator)
       .directive('icon', (reactDirective) => reactDirective(EuiIcon))
-      .directive('renderComplete', createRenderCompleteDirective)
-      .service('debounce', ['$timeout', DebounceProviderTimeout]);
+      .directive('renderComplete', createRenderCompleteDirective);
   }
 
   return angular
@@ -141,11 +136,9 @@ export function initializeInnerAngularModule(
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverLegacy', createDiscoverLegacyDirective)
-    .directive('contextErrorMessage', createContextErrorMessageDirective)
-    .service('debounce', ['$timeout', DebounceProviderTimeout]);
+    .directive('contextErrorMessage', createContextErrorMessageDirective);
 }
 
 function createLocalPromiseModule() {

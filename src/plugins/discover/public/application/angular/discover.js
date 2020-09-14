@@ -29,6 +29,7 @@ import { getState, splitState } from './discover_state';
 import { RequestAdapter } from '../../../../inspector/public';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
 import { getSortArray, getSortForSearchSource } from './doc_table';
+import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
@@ -598,6 +599,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
     config: config,
+    fixedScroll: createFixedScroll($scope, $timeout),
   };
 
   const shouldSearchOnPageLoad = () => {

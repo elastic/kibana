@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import classNames from 'classnames';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -72,6 +73,7 @@ export interface DiscoverLegacyProps {
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
     timefield: string;
     sampleSize: number;
+    fixedScroll: (el: HTMLElement) => void;
   };
   resetQuery: () => void;
   resultState: string;
@@ -127,6 +129,23 @@ export function DiscoverLegacy({
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
+  const [fixedScrollEl, setFixedScrollEl] = useState<HTMLElement | undefined>();
+
+  useEffect(() => (fixedScrollEl ? opts.fixedScroll(fixedScrollEl) : undefined), [
+    fixedScrollEl,
+    opts,
+  ]);
+  const fixedScrollRef = useCallback(
+    (node: HTMLElement) => {
+      if (node !== null) {
+        setFixedScrollEl(node);
+      }
+    },
+    [setFixedScrollEl]
+  );
+  const sidebarClassName = classNames({
+    isSidebarClosed: true,
+  });
 
   return (
     <I18nProvider>
@@ -149,9 +168,7 @@ export function DiscoverLegacy({
         <main className="container-fluid">
           <div className="row">
             <div
-              className={`col-md-2 dscSidebar__container collapsible-sidebar ${
-                isSidebarClosed ? 'closed' : ''
-              }`}
+              className={`col-md-2 dscSidebar__container collapsible-sidebar ${sidebarClassName}`}
               id="discover-sidebar"
               data-test-subj="discover-sidebar"
             >
@@ -237,7 +254,11 @@ export function DiscoverLegacy({
                   )}
 
                   <div className="dscResults">
-                    <section className="dscTable" aria-labelledby="documentsAriaLabel">
+                    <section
+                      className="dscTable fixed-scroll"
+                      aria-labelledby="documentsAriaLabel"
+                      ref={fixedScrollRef}
+                    >
                       <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
                         <FormattedMessage
                           id="discover.documentsAriaLabel"
