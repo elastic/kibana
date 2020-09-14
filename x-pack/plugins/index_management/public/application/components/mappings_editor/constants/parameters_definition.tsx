@@ -863,6 +863,26 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
             { allowEmptyString: true }
           ),
         },
+        {
+          validator: ({ value }: ValidationFuncArg<any, string>) => {
+            if (typeof value !== 'string' || value.trim() === '') {
+              return;
+            }
+
+            const json = JSON.parse(value);
+
+            if (Array.isArray(json)) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorArraysNotAllowedError',
+                  {
+                    defaultMessage: 'Arrays are not allowed.',
+                  }
+                ),
+              };
+            }
+          },
+        },
       ],
       deserializer: (value: any) => {
         if (value === '') {
@@ -871,17 +891,12 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         return JSON.stringify(value, null, 2);
       },
       serializer: (value: string) => {
-        try {
-          const parsed = JSON.parse(value);
-          // If an empty object was passed, strip out this value entirely.
-          if (!Object.keys(parsed).length) {
-            return undefined;
-          }
-          return parsed;
-        } catch (error) {
-          // swallow error and return non-parsed value;
-          return value;
+        const parsed = JSON.parse(value);
+        // If an empty object was passed, strip out this value entirely.
+        if (!Object.keys(parsed).length) {
+          return undefined;
         }
+        return parsed;
       },
     },
     schema: t.any,

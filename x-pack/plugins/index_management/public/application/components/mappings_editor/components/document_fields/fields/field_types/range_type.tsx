@@ -20,10 +20,6 @@ import { BasicParametersSection, AdvancedParametersSection } from '../edit_field
 import { FormDataProvider } from '../../../../shared_imports';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
-  if (param === 'meta') {
-    return field[param] !== undefined && field[param] !== '';
-  }
-
   return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 

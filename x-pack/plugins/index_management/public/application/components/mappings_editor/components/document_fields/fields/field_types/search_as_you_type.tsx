@@ -27,11 +27,9 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'similarity':
     case 'term_vector':
+    case 'meta':
     case 'max_shingle_size': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
-    }
-    case 'meta': {
-      return field[param] !== undefined && field[param] !== '';
     }
     case 'analyzers': {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;

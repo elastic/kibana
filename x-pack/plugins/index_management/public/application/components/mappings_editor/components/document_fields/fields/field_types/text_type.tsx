@@ -41,13 +41,13 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
     case 'boost':
     case 'position_increment_gap':
     case 'similarity':
+    case 'meta':
     case 'term_vector': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'analyzers': {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;
     }
-    case 'meta':
     case 'copy_to': {
       return field[param] !== undefined && field[param] !== '';
     }

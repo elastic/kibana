@@ -15,11 +15,9 @@ import { EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
+    case 'meta':
     case 'max_input_length': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
-    }
-    case 'meta': {
-      return field[param] !== undefined && field[param] !== '';
     }
     case 'analyzers': {
       return field.search_analyzer !== undefined && field.search_analyzer !== field.analyzer;

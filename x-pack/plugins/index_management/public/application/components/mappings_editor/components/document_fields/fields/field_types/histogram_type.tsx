@@ -6,6 +6,7 @@
 import React from 'react';
 
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
+import { getFieldConfig } from '../../../../lib';
 import { IgnoreMalformedParameter, MetaParameter } from '../../field_parameters';
 import { AdvancedParametersSection } from '../edit_field';
 
@@ -14,7 +15,7 @@ interface Props {
 }
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
-  return field[param] !== undefined;
+  return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 
 export const HistogramType = ({ field }: Props) => {

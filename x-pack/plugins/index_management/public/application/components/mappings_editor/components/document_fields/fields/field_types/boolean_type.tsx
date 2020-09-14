@@ -22,12 +22,12 @@ import { BasicParametersSection, AdvancedParametersSection } from '../edit_field
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
+    case 'meta':
     case 'boost': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
-    case 'meta':
     case 'null_value': {
-      return field[param] !== undefined && field[param] !== '';
+      return field.null_value !== undefined && field.null_value !== '';
     }
     default:
       return false;
