@@ -4,25 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 
-import { TransformEndpointRequest, TransformEndpointResult } from '../../../common';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
-import { useToastNotifications } from '../app_dependencies';
-import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
+import type { StopTransformsRequestSchema } from '../../../common/api_schemas/stop_transforms';
+import { isStopTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
+
+import { getErrorMessage } from '../../../common/utils/errors';
+
+import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
+import { ToastNotificationText } from '../components';
 
 import { useApi } from './use_api';
 
 export const useStopTransforms = () => {
+  const deps = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
-  return async (transforms: TransformListRow[]) => {
-    const transformsInfo: TransformEndpointRequest[] = transforms.map((df) => ({
-      id: df.config.id,
-      state: df.stats.state,
-    }));
-    const results: TransformEndpointResult = await api.stopTransforms(transformsInfo);
+  return async (transformsInfo: StopTransformsRequestSchema) => {
+    const results = await api.stopTransforms(transformsInfo);
+
+    if (!isStopTransformsResponseSchema(results)) {
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.transform.transformList.stopTransformResponseSchemaErrorMessage',
+          {
+            defaultMessage: 'An error occurred called the stop transforms request.',
+          }
+        ),
+        text: toMountPoint(
+          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(results)} />
+        ),
+      });
+      return;
+    }
 
     for (const transformId in results) {
       // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
