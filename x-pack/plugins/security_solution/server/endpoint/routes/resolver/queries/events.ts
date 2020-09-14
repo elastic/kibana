@@ -5,7 +5,7 @@
  */
 import { SearchResponse } from 'elasticsearch';
 import { esKuery } from '../../../../../../../../src/plugins/data/server';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
 import { PaginationBuilder } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
@@ -13,7 +13,7 @@ import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/com
 /**
  * Builds a query for retrieving related events for a node.
  */
-export class EventsQuery extends ResolverQuery<ResolverEvent[]> {
+export class EventsQuery extends ResolverQuery<SafeResolverEvent[]> {
   private readonly kqlQuery: JsonObject[] = [];
 
   constructor(
@@ -83,7 +83,7 @@ export class EventsQuery extends ResolverQuery<ResolverEvent[]> {
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
+  formatResponse(response: SearchResponse<SafeResolverEvent>): SafeResolverEvent[] {
     return this.getResults(response);
   }
 }

@@ -9,12 +9,12 @@
 import {
   ServiceNowConnectorConfiguration,
   JiraConnectorConfiguration,
+  ResilientConnectorConfiguration,
 } from '../../../../../triggers_actions_ui/public/common';
-import { connector as resilientConnectorConfig } from './resilient/config';
 import { ConnectorConfiguration } from './types';
 
 export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
   '.servicenow': ServiceNowConnectorConfiguration as ConnectorConfiguration,
   '.jira': JiraConnectorConfiguration as ConnectorConfiguration,
-  '.resilient': resilientConnectorConfig,
+  '.resilient': ResilientConnectorConfiguration as ConnectorConfiguration,
 };
