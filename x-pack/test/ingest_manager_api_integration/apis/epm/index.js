@@ -9,7 +9,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./file'));
-    loadTestFile(require.resolve('./template'));
+    //loadTestFile(require.resolve('./template'));
     loadTestFile(require.resolve('./ilm'));
     loadTestFile(require.resolve('./install_overrides'));
     loadTestFile(require.resolve('./install_prerelease'));
