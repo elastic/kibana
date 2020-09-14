@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function rumServicesApiTests({ getService }: FtrProviderContext) {
@@ -40,7 +41,12 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expect(response.status).to.be(200);
 
-        expect(response.body).to.eql(['client', 'opbean-client-rum']);
+        expectSnapshot(response.body).toMatchInline(`
+          Array [
+            "client",
+            "opbean-client-rum",
+          ]
+        `);
       });
     });
   });
