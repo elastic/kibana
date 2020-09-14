@@ -4,7 +4,7 @@
       "schema": {
         "type": "string"
       },
-      "name": "osType",
+      "name": "os_type",
       "in": "path",
       "required": true
     }
@@ -13,6 +13,6 @@
     "summary": "Fleet - Get OS install script",
     "tags": [],
     "responses": {},
-    "operationId": "get-fleet-install-osType"
+    "operationId": "get-fleet-install-os_type"
   }
 }

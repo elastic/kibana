@@ -71,11 +71,17 @@
     "/fleet/agent-status": {
       "$ref": "./paths/fleet/agent-status/index.json"
     },
+    "/fleet/enrollment-api-keys": {
+      "$ref": "./paths/fleet/enrollment_api_keys/index.json"
+    },
+    "/fleet/enrollment-api-keys/{key_id}": {
+      "$ref": "./paths/fleet/enrollment_api_keys/{key_id}/index.json"
+    },
     "/setup": {
       "$ref": "./paths/setup/index.json"
     },
-    "/fleet/install/{osType}": {
-      "$ref": "./paths/fleet/install/{osType}/index.json"
+    "/fleet/install/{os_type}": {
+      "$ref": "./paths/fleet/install/{os_type}/index.json"
     }
   },
   "components": {

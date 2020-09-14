@@ -1233,13 +1233,13 @@
         ]
       }
     },
-    "/fleet/install/{osType}": {
+    "/fleet/install/{os_type}": {
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "osType",
+          "name": "os_type",
           "in": "path",
           "required": true
         }
@@ -1248,7 +1248,7 @@
         "summary": "Fleet - Get OS install script",
         "tags": [],
         "responses": {},
-        "operationId": "get-fleet-install-osType"
+        "operationId": "get-fleet-install-os_type"
       }
     }
   },
@@ -1894,8 +1894,11 @@
         "in": "header",
         "description": "e.g. Authorization: ApiKey base64EnrollmentApiKey"
       },
-      "Access_API_Key": {
-        "$ref": "./components/security_schemes/Access_API_Key.json"
+      "access_api_key": {
+        "name": "Authorization",
+        "type": "apiKey",
+        "in": "header",
+        "description": "e.g. Authorization: ApiKey base64AccessApiKey"
       }
     }
   },

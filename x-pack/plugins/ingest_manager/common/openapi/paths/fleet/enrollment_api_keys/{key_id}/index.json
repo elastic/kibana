@@ -1,0 +1,29 @@
+{
+  "parameters": [
+    {
+      "schema": {
+        "type": "string"
+      },
+      "name": "key_id",
+      "in": "path",
+      "required": true
+    }
+  ],
+  "get": {
+    "summary": "Enrollment - Info",
+    "tags": [],
+    "responses": {},
+    "operationId": "get-fleet-enrollment-api-keys-key_id"
+  },
+  "delete": {
+    "summary": "Enrollment - Delete",
+    "tags": [],
+    "responses": {},
+    "operationId": "delete-fleet-enrollment-api-keys-key_id",
+    "parameters": [
+      {
+        "$ref": "../../../../components/parameters/xsrf_header.json"
+      }
+    ]
+  }
+}
