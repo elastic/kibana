@@ -45,18 +45,26 @@ const i18nTexts = {
       defaultMessage: 'Move to warm phase on rollover',
     }
   ),
-  defaultAllocationNotAvailable: {
-    title: i18n.translate(
-      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableTitle',
-      { defaultMessage: 'No nodes assigned to the warm tier' }
-    ),
-    body: i18n.translate(
-      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
-      {
-        defaultMessage:
-          'This policy will not complete allocation because there are no warm nodes. Assign at least one node to the warm tier.',
-      }
-    ),
+  dataTierAllocation: {
+    title: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.title', {
+      defaultMessage: 'Move data to warm tier',
+    }),
+    description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.title', {
+      defaultMessage: 'Store data accessed less frequently on less-costly hardware.',
+    }),
+    defaultAllocationNotAvailable: {
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableTitle',
+        { defaultMessage: 'No nodes assigned to the warm tier' }
+      ),
+      body: i18n.translate(
+        'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
+        {
+          defaultMessage:
+            'This policy will not complete allocation because there are no warm nodes. Assign at least one node to the warm tier.',
+        }
+      ),
+    },
   },
 };
 
@@ -164,18 +172,18 @@ export const WarmPhase: FunctionComponent<Props> = ({
           <Fragment>
             {/* Data tier allocation section */}
             <DataTierAllocationField
-              description={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.dataTierAllocationDescription"
-                  defaultMessage="Allocate warm data to nodes in the cluster."
-                />
-              }
+              title={i18nTexts.dataTierAllocation.title}
+              description={i18nTexts.dataTierAllocation.description}
               phase={warmProperty}
               setPhaseData={setPhaseData}
               isShowingErrors={isShowingErrors}
               phaseData={phaseData}
-              defaultAllocationWarningTitle={i18nTexts.defaultAllocationNotAvailable.title}
-              defaultAllocationWarningBody={i18nTexts.defaultAllocationNotAvailable.body}
+              defaultAllocationWarningTitle={
+                i18nTexts.dataTierAllocation.defaultAllocationNotAvailable.title
+              }
+              defaultAllocationWarningBody={
+                i18nTexts.dataTierAllocation.defaultAllocationNotAvailable.body
+              }
             />
 
             <DescribedFormField

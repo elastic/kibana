@@ -25,23 +25,30 @@ import {
 } from '../components';
 import { DataTierAllocationField } from './shared';
 
-const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.freezeIndexLabel', {
-  defaultMessage: 'Freeze index',
-});
-
 const i18nTexts = {
-  defaultAllocationNotAvailable: {
-    title: i18n.translate(
-      'xpack.indexLifecycleMgmt.frozenPhase.dataTier.defaultAllocationNotAvailableTitle',
-      { defaultMessage: 'No nodes assigned to the frozen tier' }
-    ),
-    body: i18n.translate(
-      'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
-      {
-        defaultMessage:
-          'This policy will not complete allocation because there are no frozen nodes. Assign at least one node to the frozen tier.',
-      }
-    ),
+  freezeLabel: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.freezeIndexLabel', {
+    defaultMessage: 'Freeze index',
+  }),
+  dataTierAllocation: {
+    title: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.dataTier.title', {
+      defaultMessage: 'Move data to frozen tier',
+    }),
+    description: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.dataTier.description', {
+      defaultMessage: 'Store the least frequently accessed data on the least-costly hardware.',
+    }),
+    defaultAllocationNotAvailable: {
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.frozenPhase.dataTier.defaultAllocationNotAvailableTitle',
+        { defaultMessage: 'No nodes assigned to the frozen tier' }
+      ),
+      body: i18n.translate(
+        'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotAvailableBody',
+        {
+          defaultMessage:
+            'This policy will not complete allocation because there are no frozen nodes. Assign at least one node to the frozen tier.',
+        }
+      ),
+    },
   },
 };
 
@@ -124,18 +131,18 @@ export const FrozenPhase: FunctionComponent<Props> = ({
           <Fragment>
             {/* Data tier allocation section */}
             <DataTierAllocationField
-              description={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.dataTierAllocationDescription"
-                  defaultMessage="Allocate frozen data to nodes in the cluster."
-                />
-              }
+              title={i18nTexts.dataTierAllocation.title}
+              description={i18nTexts.dataTierAllocation.description}
               phase={frozenProperty}
               setPhaseData={setPhaseData}
               isShowingErrors={isShowingErrors}
               phaseData={phaseData}
-              defaultAllocationWarningTitle={i18nTexts.defaultAllocationNotAvailable.title}
-              defaultAllocationWarningBody={i18nTexts.defaultAllocationNotAvailable.body}
+              defaultAllocationWarningTitle={
+                i18nTexts.dataTierAllocation.defaultAllocationNotAvailable.title
+              }
+              defaultAllocationWarningBody={
+                i18nTexts.dataTierAllocation.defaultAllocationNotAvailable.body
+              }
             />
 
             {/* Replicas section */}
@@ -220,8 +227,8 @@ export const FrozenPhase: FunctionComponent<Props> = ({
                 onChange={(e) => {
                   setPhaseData(phaseProperty('freezeEnabled'), e.target.checked);
                 }}
-                label={freezeLabel}
-                aria-label={freezeLabel}
+                label={i18nTexts.freezeLabel}
+                aria-label={i18nTexts.freezeLabel}
               />
             </EuiDescribedFormGroup>
             <SetPriorityInput<FrozenPhaseInterface>

@@ -8,13 +8,9 @@ import React, { FunctionComponent } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { PhaseWithAllocation } from '../../../../../../common/types';
-
 import { i18nTexts } from './data_tier_allocation';
 
-export const NoNodeAttributesWarning: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
-  phase,
-}) => {
+export const NoNodeAttributesWarning: FunctionComponent = () => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -33,7 +29,7 @@ export const NoNodeAttributesWarning: FunctionComponent<{ phase: PhaseWithAlloca
           id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingDescription"
           defaultMessage="You must define custom node attributes to control shard allocation. {defaultOption} allocation will be used."
           values={{
-            defaultOption: <b>{i18nTexts.allocationOptions.default[phase]}</b>,
+            defaultOption: <b>{i18nTexts.allocationOptions.default.input}</b>,
           }}
         />
       </EuiCallOut>

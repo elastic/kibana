@@ -19,25 +19,27 @@ type SelectOptions = EuiSuperSelectOption<DataTierAllocationType>;
 export const i18nTexts = {
   allocationFieldLabel: i18n.translate(
     'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.allocationFieldLabel',
-    { defaultMessage: 'Data tier allocation' }
+    { defaultMessage: 'Data tier options' }
   ),
   allocationOptions: {
     default: {
-      warm: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.defaultOption.input.warm',
-        { defaultMessage: 'Warm tier nodes (recommended)' }
-      ),
-      cold: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.defaultOption.input.warm',
-        { defaultMessage: 'Cold tier nodes (recommended)' }
-      ),
-      frozen: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.defaultOption.input.warm',
-        { defaultMessage: 'Frozen tier nodes (recommended)' }
+      input: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.defaultOption.input',
+        { defaultMessage: 'Default' }
       ),
       helpText: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.autoOption.helpText',
-        { defaultMessage: 'Data role-based allocation.' }
+        { defaultMessage: 'Recommended for most cases.' }
+      ),
+    },
+    none: {
+      inputDisplay: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.input',
+        { defaultMessage: 'Off' }
+      ),
+      helpText: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.helpText',
+        { defaultMessage: 'Data will not be moved in this phase.' }
       ),
     },
     custom: {
@@ -47,17 +49,7 @@ export const i18nTexts = {
       ),
       helpText: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.customOption.helpText',
-        { defaultMessage: 'Node attribute-based allocation.' }
-      ),
-    },
-    none: {
-      inputDisplay: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.input',
-        { defaultMessage: 'None' }
-      ),
-      helpText: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.helpText',
-        { defaultMessage: 'Do not re-allocate data in this phase.' }
+        { defaultMessage: 'Configure node attribute-based allocation.' }
       ),
     },
   },
@@ -80,13 +72,27 @@ export const DataTierAllocation = (
             [
               {
                 value: 'default',
-                inputDisplay: i18nTexts.allocationOptions.default[phase],
+                inputDisplay: i18nTexts.allocationOptions.default.input,
                 dropdownDisplay: (
                   <>
-                    <strong>{i18nTexts.allocationOptions.default[phase]}</strong>
+                    <strong>{i18nTexts.allocationOptions.default.input}</strong>
                     <EuiText size="s" color="subdued">
                       <p className="euiTextColor--subdued">
                         {i18nTexts.allocationOptions.default.helpText}
+                      </p>
+                    </EuiText>
+                  </>
+                ),
+              },
+              {
+                value: 'none',
+                inputDisplay: i18nTexts.allocationOptions.none.inputDisplay,
+                dropdownDisplay: (
+                  <>
+                    <strong>{i18nTexts.allocationOptions.none.inputDisplay}</strong>
+                    <EuiText size="s" color="subdued">
+                      <p className="euiTextColor--subdued">
+                        {i18nTexts.allocationOptions.none.helpText}
                       </p>
                     </EuiText>
                   </>
@@ -102,20 +108,6 @@ export const DataTierAllocation = (
                     <EuiText size="s" color="subdued">
                       <p className="euiTextColor--subdued">
                         {i18nTexts.allocationOptions.custom.helpText}
-                      </p>
-                    </EuiText>
-                  </>
-                ),
-              },
-              {
-                value: 'none',
-                inputDisplay: i18nTexts.allocationOptions.none.inputDisplay,
-                dropdownDisplay: (
-                  <>
-                    <strong>{i18nTexts.allocationOptions.none.inputDisplay}</strong>
-                    <EuiText size="s" color="subdued">
-                      <p className="euiTextColor--subdued">
-                        {i18nTexts.allocationOptions.none.helpText}
                       </p>
                     </EuiText>
                   </>

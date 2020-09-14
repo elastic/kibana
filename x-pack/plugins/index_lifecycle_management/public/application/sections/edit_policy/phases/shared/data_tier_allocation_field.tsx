@@ -6,7 +6,6 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../common/types';
 
@@ -20,6 +19,7 @@ import { PhaseValidationErrors } from '../../../../services/policies/policy_vali
 import { isPhaseDefaultDataAllocationCompatible } from '../../../../lib/data_tiers';
 
 interface Props {
+  title: React.ReactNode;
   description: React.ReactNode;
   phase: PhaseWithAllocation;
   setPhaseData: (dataKey: keyof PhaseWithAllocationAction, value: string) => void;
@@ -34,10 +34,11 @@ interface Props {
  * Top-level layout control for the data tier allocation field.
  */
 export const DataTierAllocationField: FunctionComponent<Props> = ({
+  title,
   description,
+  phase,
   phaseData,
   setPhaseData,
-  phase,
   isShowingErrors,
   errors,
   defaultAllocationWarningBody,
@@ -50,18 +51,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
         const hasNodeAttrs = Boolean(Object.keys(nodesData.nodesByAttributes ?? {}).length);
 
         return (
-          <EuiDescribedFormGroup
-            title={
-              <h3>
-                {i18n.translate(
-                  'xpack.indexLifecycleMgmt.editPolicy.coldPhase.dataTierAllocationTitle',
-                  { defaultMessage: 'Data tier allocation' }
-                )}
-              </h3>
-            }
-            description={description}
-            fullWidth
-          >
+          <EuiDescribedFormGroup title={<h3>{title}</h3>} description={description} fullWidth>
             <EuiFormRow>
               <>
                 <DataTierAllocation
@@ -84,7 +74,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                 )}
 
                 {phaseData.dataTierAllocationType === 'custom' && !hasNodeAttrs && (
-                  <NoNodeAttributesWarning phase={phase} />
+                  <NoNodeAttributesWarning />
                 )}
               </>
             </EuiFormRow>
