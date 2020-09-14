@@ -21,8 +21,6 @@ import {
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { ReactElement } from 'react';
 
-jest.mock('ui/new_platform');
-
 const createOpenModalMock = () => {
   const mock = jest.fn();
   mock.mockReturnValue({ close: jest.fn() });

@@ -71,7 +71,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         "href": "Custom link",
         "id": "Custom link",
         "isActive": true,
-        "legacy": false,
         "title": "Custom link",
       },
       "closed": false,
@@ -123,7 +122,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
   id="collapsibe-nav"
   isLocked={false}
   isOpen={true}
-  legacyMode={false}
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -140,7 +138,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "href": "discover",
           "id": "discover",
           "isActive": true,
-          "legacy": false,
           "title": "discover",
         },
         Object {
@@ -155,7 +152,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "href": "siem",
           "id": "siem",
           "isActive": true,
-          "legacy": false,
           "title": "siem",
         },
         Object {
@@ -170,7 +166,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "href": "metrics",
           "id": "metrics",
           "isActive": true,
-          "legacy": false,
           "title": "metrics",
         },
         Object {
@@ -184,7 +179,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "href": "monitoring",
           "id": "monitoring",
           "isActive": true,
-          "legacy": false,
           "title": "monitoring",
         },
         Object {
@@ -199,7 +193,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "href": "visualize",
           "id": "visualize",
           "isActive": true,
-          "legacy": false,
           "title": "visualize",
         },
         Object {
@@ -214,7 +207,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "href": "dashboard",
           "id": "dashboard",
           "isActive": true,
-          "legacy": false,
           "title": "dashboard",
         },
         Object {
@@ -224,7 +216,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "href": "canvas",
           "id": "canvas",
           "isActive": true,
-          "legacy": false,
           "title": "canvas",
         },
         Object {
@@ -239,7 +230,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "href": "logs",
           "id": "logs",
           "isActive": true,
-          "legacy": false,
           "title": "logs",
         },
       ],
@@ -650,6 +640,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >
@@ -901,6 +893,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-kibana"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -1188,6 +1182,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-observability"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -1436,6 +1432,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-securitySolution"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -1636,6 +1634,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   data-test-subj="collapsibleNavGroup-management"
                   id="mockId"
                   initialIsOpen={true}
+                  isLoading={false}
+                  isLoadingMessage={false}
                   onToggle={[Function]}
                   paddingSize="none"
                 >
@@ -2106,7 +2106,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   id="collapsibe-nav"
   isLocked={false}
   isOpen={false}
-  legacyMode={false}
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -2341,7 +2340,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   id="collapsibe-nav"
   isLocked={false}
   isOpen={true}
-  legacyMode={false}
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -2624,6 +2622,8 @@ exports[`CollapsibleNav renders the default nav 2`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >
@@ -3026,7 +3026,6 @@ exports[`CollapsibleNav renders the default nav 3`] = `
   id="collapsibe-nav"
   isLocked={true}
   isOpen={true}
-  legacyMode={false}
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -3305,6 +3304,8 @@ exports[`CollapsibleNav renders the default nav 3`] = `
               data-test-subj="collapsibleNavGroup-recentlyViewed"
               id="mockId"
               initialIsOpen={true}
+              isLoading={false}
+              isLoadingMessage={false}
               onToggle={[Function]}
               paddingSize="none"
             >

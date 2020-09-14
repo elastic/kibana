@@ -1022,6 +1022,8 @@ export interface SignalField {
   rule?: Maybe<RuleField>;
 
   original_time?: Maybe<string[] | string>;
+
+  status?: Maybe<string[] | string>;
 }
 
 export interface RuleField {
@@ -4930,6 +4932,8 @@ export namespace SignalFieldResolvers {
     rule?: RuleResolver<Maybe<RuleField>, TypeParent, TContext>;
 
     original_time?: OriginalTimeResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    status?: StatusResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
   export type RuleResolver<
@@ -4938,6 +4942,11 @@ export namespace SignalFieldResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type OriginalTimeResolver<
+    R = Maybe<string[] | string>,
+    Parent = SignalField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type StatusResolver<
     R = Maybe<string[] | string>,
     Parent = SignalField,
     TContext = SiemContext

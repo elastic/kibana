@@ -8,7 +8,7 @@ import React, { PureComponent, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { DeletePhase as DeletePhaseInterface, Phases } from '../../../services/policies/types';
+import { DeletePhase as DeletePhaseInterface, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {
