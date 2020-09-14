@@ -18,6 +18,7 @@ import {
   TRUSTED_APPS_LIST_API,
 } from '../../../../common/endpoint/constants';
 import {
+  DeleteTrustedAppsRequestParams,
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
 } from '../../../../common/endpoint/types';
@@ -27,7 +28,6 @@ import { EndpointAppContext } from '../../types';
 import { ExceptionListClient, ListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
-import { DeleteTrustedAppsRequestParams } from './types';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 type RequestHandlerContextWithLists = ReturnType<typeof xpackMocks.createRequestHandlerContext> & {
