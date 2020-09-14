@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { FeatureConfig } from '../../../../../../plugins/features/public';
+import { KibanaFeatureConfig } from '../../../../../../plugins/features/public';
 import { Space } from '../../../../common/model/space';
 import { ToggleAllFeatures } from './toggle_all_features';
 
 interface Props {
   space: Partial<Space>;
-  features: FeatureConfig[];
+  features: KibanaFeatureConfig[];
   onChange: (space: Partial<Space>) => void;
 }
 
@@ -70,8 +70,8 @@ export class FeatureTable extends Component<Props, {}> {
         defaultMessage: 'Feature',
       }),
       render: (
-        feature: FeatureConfig,
-        _item: { feature: FeatureConfig; space: Props['space'] }
+        feature: KibanaFeatureConfig,
+        _item: { feature: KibanaFeatureConfig; space: Props['space'] }
       ) => {
         return (
           <EuiText>

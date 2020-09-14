@@ -82,7 +82,7 @@ export class AlertsAuthorization {
         (disabledFeatures) =>
           new Set(
             features
-              .getFeatures()
+              .getKibanaFeatures()
               .filter(
                 ({ id, alerting }) =>
                   // ignore features which are disabled in the user's space
@@ -133,20 +133,21 @@ export class AlertsAuthorization {
       const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
 
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, username, privileges } = await checkPrivileges(
-        shouldAuthorizeConsumer && consumer !== alertType.producer
-          ? [
-              // check for access at consumer level
-              requiredPrivilegesByScope.consumer,
-              // check for access at producer level
-              requiredPrivilegesByScope.producer,
-            ]
-          : [
-              // skip consumer privilege checks under `alerts` as all alert types can
-              // be created under `alerts` if you have producer level privileges
-              requiredPrivilegesByScope.producer,
-            ]
-      );
+      const { hasAllRequested, username, privileges } = await checkPrivileges({
+        kibana:
+          shouldAuthorizeConsumer && consumer !== alertType.producer
+            ? [
+                // check for access at consumer level
+                requiredPrivilegesByScope.consumer,
+                // check for access at producer level
+                requiredPrivilegesByScope.producer,
+              ]
+            : [
+                // skip consumer privilege checks under `alerts` as all alert types can
+                // be created under `alerts` if you have producer level privileges
+                requiredPrivilegesByScope.producer,
+              ],
+      });
 
       if (!isAvailableConsumer) {
         /**
@@ -177,7 +178,7 @@ export class AlertsAuthorization {
         );
       } else {
         const authorizedPrivileges = map(
-          privileges.filter((privilege) => privilege.authorized),
+          privileges.kibana.filter((privilege) => privilege.authorized),
           'privilege'
         );
         const unauthorizedScopes = mapValues(
@@ -341,9 +342,9 @@ export class AlertsAuthorization {
         }
       }
 
-      const { username, hasAllRequested, privileges } = await checkPrivileges([
-        ...privilegeToAlertType.keys(),
-      ]);
+      const { username, hasAllRequested, privileges } = await checkPrivileges({
+        kibana: [...privilegeToAlertType.keys()],
+      });
 
       return {
         username,
@@ -352,7 +353,7 @@ export class AlertsAuthorization {
           ? // has access to all features
             this.augmentWithAuthorizedConsumers(alertTypes, await this.allPossibleConsumers)
           : // only has some of the required privileges
-            privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
+            privileges.kibana.reduce((authorizedAlertTypes, { authorized, privilege }) => {
               if (authorized && privilegeToAlertType.has(privilege)) {
                 const [
                   alertType,

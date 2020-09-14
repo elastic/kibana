@@ -16,6 +16,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
     describe('Services', function () {
       loadTestFile(require.resolve('./services/annotations'));
       loadTestFile(require.resolve('./services/rum_services.ts'));
+      loadTestFile(require.resolve('./services/top_services.ts'));
     });
 
     describe('Settings', function () {

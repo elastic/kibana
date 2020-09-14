@@ -6,7 +6,7 @@
 
 import { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { KibanaFeature, FeatureKibanaPrivileges } from '../../../../../features/server';
 
 const version = '1.0.0-zeta1';
 
@@ -29,7 +29,7 @@ describe(`feature_privilege_builder`, () => {
         ui: [],
       };
 
-      const feature = new Feature({
+      const feature = new KibanaFeature({
         id: 'my-feature',
         name: 'my-feature',
         app: [],
@@ -60,7 +60,7 @@ describe(`feature_privilege_builder`, () => {
           ui: [],
         };
 
-        const feature = new Feature({
+        const feature = new KibanaFeature({
           id: 'my-feature',
           name: 'my-feature',
           app: [],
@@ -97,7 +97,7 @@ describe(`feature_privilege_builder`, () => {
           ui: [],
         };
 
-        const feature = new Feature({
+        const feature = new KibanaFeature({
           id: 'my-feature',
           name: 'my-feature',
           app: [],
@@ -144,7 +144,7 @@ describe(`feature_privilege_builder`, () => {
           ui: [],
         };
 
-        const feature = new Feature({
+        const feature = new KibanaFeature({
           id: 'my-feature',
           name: 'my-feature',
           app: [],
