@@ -117,7 +117,7 @@ export class ChildrenQuery extends ResolverQuery<ChildEvent[], ChildEvent> {
 
   protected query(entityIDs: string[]): JsonObject {
     // we don't have to include the `event.id` in the source response because it is not needed for processing
-    // the data returned, or for breaking ties when ES is doing the search
+    // the data returned by ES, it is only used for breaking ties when ES is doing the search
     const paginationFields = this.pagination.buildQueryFields('event.id');
     return {
       _source: [
