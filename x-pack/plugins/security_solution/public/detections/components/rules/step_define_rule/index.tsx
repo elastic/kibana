@@ -232,6 +232,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
               {isEqlRule(ruleType) ? (
                 <UseField
+                  key="EqlQueryBar"
                   path="queryBar"
                   component={EqlQueryBar}
                   componentProps={{
@@ -243,6 +244,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 />
               ) : (
                 <UseField
+                  key="QueryBarDefineRule"
                   path="queryBar"
                   config={{
                     ...schema.queryBar,
