@@ -160,3 +160,9 @@ export interface ExportTypeDefinition<
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
+
+export interface DiagnosticResponse {
+  help: string[];
+  success: boolean;
+  logs: string;
+}

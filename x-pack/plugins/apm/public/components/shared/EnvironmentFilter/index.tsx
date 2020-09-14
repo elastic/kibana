@@ -8,7 +8,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -63,10 +63,11 @@ function getOptions(environments: string[]) {
 export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { uiFilters, urlParams } = useUrlParams();
 
   const { environment } = uiFilters;
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
   const { environments, status = 'loading' } = useEnvironments({
     serviceName,
     start,

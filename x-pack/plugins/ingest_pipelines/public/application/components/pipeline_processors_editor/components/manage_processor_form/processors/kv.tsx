@@ -33,9 +33,15 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.fieldSplitFieldLabel', {
       defaultMessage: 'Field split',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.fieldSplitHelpText', {
-      defaultMessage: 'Regex pattern for splitting key-value pairs.',
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.kvForm.fieldSplitHelpText"
+        defaultMessage="Regex pattern used to delimit the key-value pairs. Typically a space character ({space})."
+        values={{
+          space: <EuiCode>{'" "'}</EuiCode>,
+        }}
+      />
+    ),
     validations: [
       {
         validator: emptyField(
@@ -52,9 +58,15 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.valueSplitFieldLabel', {
       defaultMessage: 'Value split',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.valueSplitHelpText', {
-      defaultMessage: 'Regex pattern for splitting the key from the value within a key-value pair.',
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.kvForm.valueSplitHelpText"
+        defaultMessage="Regex pattern used to split keys and values. Typically an assignment operator ({equal})."
+        values={{
+          equal: <EuiCode>{'"="'}</EuiCode>,
+        }}
+      />
+    ),
     validations: [
       {
         validator: emptyField(
@@ -75,8 +87,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Include keys',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.includeKeysHelpText', {
-      defaultMessage:
-        'List of keys to filter and insert into document. Defaults to including all keys.',
+      defaultMessage: 'List of extracted keys to include in the output. Defaults to all keys.',
     }),
   },
 
@@ -88,7 +99,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Exclude keys',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.excludeKeysHelpText', {
-      defaultMessage: 'List of keys to exclude from document.',
+      defaultMessage: 'List of extracted keys to exclude from the output.',
     }),
   },
 
@@ -99,7 +110,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Prefix',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.prefixHelpText', {
-      defaultMessage: 'Prefix to be added to extracted keys.',
+      defaultMessage: 'Prefix to add to extracted keys.',
     }),
   },
 
@@ -136,7 +147,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.kvForm.stripBracketsHelpText"
-        defaultMessage="If true, strip brackets {paren}, {angle}, {square} as well as quotes {singleQuote} and {doubleQuote} from extracted values."
+        defaultMessage="Remove brackets ( {paren}, {angle}, {square}) and quotes ({singleQuote}, {doubleQuote}) from extracted values."
         values={{
           paren: <EuiCode>{'()'}</EuiCode>,
           angle: <EuiCode>&lt;&gt;</EuiCode>,
@@ -154,7 +165,7 @@ export const Kv: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.kvForm.fieldNameHelpText', {
-          defaultMessage: 'Field to be parsed.',
+          defaultMessage: 'Field containing a string of key-value pairs.',
         })}
       />
 
@@ -166,8 +177,7 @@ export const Kv: FunctionComponent = () => {
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.kvForm.targetFieldHelpText',
           {
-            defaultMessage:
-              'Field to insert the extracted keys into. Defaults to the root of the document.',
+            defaultMessage: 'Output field for the extracted fields. Defaults to the document root.',
           }
         )}
       />

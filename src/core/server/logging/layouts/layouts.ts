@@ -26,7 +26,7 @@ import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';
 
 const { oneOf } = schema;
 
-type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
+export type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
 
 /**
  * Entity that can format `LogRecord` instance into a string.

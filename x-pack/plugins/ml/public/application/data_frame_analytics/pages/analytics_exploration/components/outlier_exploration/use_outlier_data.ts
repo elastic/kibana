@@ -29,7 +29,8 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
