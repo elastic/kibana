@@ -2047,6 +2047,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
     attributes: Partial<T>;
     id: string;
+    namespace?: string;
     type: string;
 }
 
@@ -2628,6 +2629,12 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
     attributes: Partial<T>;
     // (undocumented)
     references: SavedObjectReference[] | undefined;
+}
+
+// @public (undocumented)
+export class SavedObjectsUtils {
+    static namespaceIdToString: (namespace?: string | undefined) => string;
+    static namespaceStringToId: (namespace: string) => string | undefined;
 }
 
 // @public
