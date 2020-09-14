@@ -169,31 +169,31 @@ def uploadCombinedReports() {
   )
 }
 
-def ingestData(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title) {
+def ingestData(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, unknownTeamsLogPath, title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh
     yarn kbn bootstrap --prefer-offline
     # Using existing target/kibana-coverage folder
-    . src/dev/code_coverage/shell_scripts/generate_team_assignments_and_ingest_coverage.sh '${jobName}' ${buildNum} '${buildUrl}' '${previousSha}' '${teamAssignmentsPath}'
+    . src/dev/code_coverage/shell_scripts/generate_team_assignments_and_ingest_coverage.sh '${jobName}' ${buildNum} '${buildUrl}' '${previousSha}' '${teamAssignmentsPath}' '${unknownTeamsLogPath}'
   """, title)
 }
 
-def ingestWithVault(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title) {
+def ingestWithVault(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, unknownTeamsLogPath, title) {
   def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-        ingestData(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title)
+        ingestData(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, unknownTeamsLogPath, title)
       }
     }
   }
 }
 
-def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmentsPath, title) {
+def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmentsPath, unknownTeamsLogPath, title) {
   withEnv([
     "TIME_STAMP=${timestamp}",
   ]) {
-    ingestWithVault(jobName, buildNumber, buildUrl, previousSha, teamAssignmentsPath, title)
+    ingestWithVault(jobName, buildNumber, buildUrl, previousSha, teamAssignmentsPath, unknownTeamsLogPath, title)
   }
 }
 

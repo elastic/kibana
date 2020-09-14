@@ -85,6 +85,8 @@ describe(`Transform fn`, () => {
     });
   });
   describe(`teamAssignment`, () => {
+    const unknownTeamsLogPath =
+      'src/dev/code_coverage/ingest_coverage/team_assignment/unknown_team_paths.txt';
     const teamAssignmentsPathMOCK =
       'src/dev/code_coverage/ingest_coverage/__tests__/mocks/team_assign_mock.txt';
     const coveredFilePath = 'x-pack/plugins/reporting/server/browsers/extract/unzip.js';
@@ -97,7 +99,7 @@ describe(`Transform fn`, () => {
     describe(`with a coveredFilePath of ${coveredFilePath}`, () => {
       const expected = 'kibana-reporting';
       it(`should resolve to ${expected}`, async () => {
-        const actual = await teamAssignment(teamAssignmentsPathMOCK)(log)(obj);
+        const actual = await teamAssignment(teamAssignmentsPathMOCK)(unknownTeamsLogPath)(log)(obj);
         const { team } = actual;
         expect(team).to.eql(expected);
       });

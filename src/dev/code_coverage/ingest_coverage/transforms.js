@@ -22,6 +22,8 @@ import * as Maybe from './maybe';
 import { always, id, noop, pink } from './utils';
 import execa from 'execa';
 import { resolve } from 'path';
+import { appendUtf8 } from './team_assignment/enumeration_helpers';
+import { writeFileSync } from 'fs';
 
 const ROOT_DIR = resolve(__dirname, '../../../..');
 
@@ -107,22 +109,28 @@ const findTeam = (x) => x.match(/.+\s{1,3}(.+)$/, 'gm');
 export const pluckIndex = (idx) => (xs) => xs[idx];
 const pluckTeam = pluckIndex(1);
 
-export const teamAssignment = (teamAssignmentsPath) => (log) => async (obj) => {
+export const teamAssignment = (teamAssignmentsPath) => (unknownTeamsLogPath) => (log) => async (
+  obj
+) => {
   const { coveredFilePath } = obj;
   const isTotal = Either.fromNullable(obj.isTotal);
 
-  return isTotal.isRight() ? obj : await assignTeam(teamAssignmentsPath, coveredFilePath, log, obj);
+  return isTotal.isRight()
+    ? obj
+    : await assignTeam(teamAssignmentsPath, coveredFilePath, unknownTeamsLogPath, log, obj);
 };
-async function assignTeam(teamAssignmentsPath, coveredFilePath, log, obj) {
+async function assignTeam(teamAssignmentsPath, coveredFilePath, unknownTeamsLogPath, log, obj) {
   const params = [coveredFilePath, teamAssignmentsPath];
 
   let grepResponse;
+  const logUnknowns = writeFileSync.bind(null, unknownTeamsLogPath);
 
   try {
     const { stdout } = await execa('grep', params, { cwd: ROOT_DIR });
     grepResponse = stdout;
   } catch (e) {
     log.error(`\n!!! Unknown Team for path: \n\t\t${pink(coveredFilePath)}\n`);
+    logUnknowns(`${coveredFilePath}\n`, appendUtf8);
   }
 
   return Either.fromNullable(grepResponse)

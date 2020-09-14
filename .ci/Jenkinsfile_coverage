@@ -29,7 +29,7 @@ def handleIngestion(timestamp) {
   kibanaCoverage.collectVcsInfo("### Collect VCS Info")
   kibanaCoverage.generateReports("### Merge coverage reports")
   kibanaCoverage.uploadCombinedReports()
-  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, teamAssignmentsPath(), '### Ingest && Upload')
+  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, teamAssignmentsPath(), unknownTeamsLogPath(), '### Generate Team Assignments && Ingest')
   kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
@@ -52,4 +52,9 @@ def handleFail() {
 def teamAssignmentsPath() {
   return 'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt'
 }
+
+def unknownTeamsLogPath() {
+  return 'src/dev/code_coverage/ingest_coverage/team_assignment/unknown_team_paths.txt'
+}
+
 

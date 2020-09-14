@@ -23,6 +23,7 @@ import { flush } from './flush';
 import { enumeratePatterns } from './enumerate_patterns';
 import { push } from './enumeration_helpers';
 import { pipe } from '../utils';
+import { resolve } from 'path';
 
 const flags = {
   string: ['src', 'dest'],
@@ -47,7 +48,7 @@ export const generateTeamAssignments = () => {
         () =>
           pipe(
             logSuccess(flags.src, log),
-            enumeratePatterns(REPO_ROOT)(log),
+            enumeratePatterns(notFoundPath())(log),
             flush(flags.dest)(log)
           )(new Map(data))
       );
@@ -70,4 +71,8 @@ function logSuccess(src, log) {
     log.verbose(`\n### Parsing [${src}] Complete`);
     return dataObj;
   };
+}
+function notFoundPath() {
+  const x = 'src/dev/code_coverage/ingest_coverage/team_assignment/not_found_team_assignments.txt';
+  return resolve(REPO_ROOT, x);
 }

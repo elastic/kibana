@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { readdirSync, statSync } from 'fs';
+import { readdirSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
+
 import {
   push,
   prokGlob,
@@ -28,14 +30,18 @@ import {
   isDir,
   tryPath,
   dropEmpty,
-  notFound,
+  encoding,
+  collectAndLogNotFound,
 } from './enumeration_helpers';
 import { stripLeading } from '../transforms';
 
-export const enumeratePatterns = (rootPath) => (log) => (patterns) => {
+export const enumeratePatterns = (notFoundLogPath) => (log) => (patterns) => {
+  const writeToFile = writeFileSync.bind(null, notFoundLogPath);
+  const blank = '';
+  writeToFile(blank, { encoding });
+
   const res = [];
   const resPush = push(res);
-  const logNotFound = notFound(log);
 
   for (const entry of patterns) {
     const [pathPattern, teams] = entry;
@@ -43,25 +49,26 @@ export const enumeratePatterns = (rootPath) => (log) => (patterns) => {
     const owner = teams[0];
     const existsWithOwner = pathExists(owner);
 
-    const collect = (x) => existsWithOwner(x).forEach(resPush);
-    tryPath(cleaned).fold(logNotFound, collect);
+    const collectNotFound = collectAndLogNotFound(writeToFile);
+    const collectFound = (x) => existsWithOwner(x).forEach(resPush);
+    tryPath(cleaned).fold(collectNotFound(log), collectFound);
   }
 
   return res;
 
   function pathExists(owner) {
-    const creeper = (x) => creepFsSync(x, [], rootPath, owner);
+    const creeper = (x) => creepFsSync(x, [], owner);
     return function creepAllAsGlobs(pathPattern) {
       return prokGlob(pathPattern).map(creeper).filter(dropEmpty);
     };
   }
 };
 
-function creepFsSync(aPath, xs, rootPath, owner) {
+function creepFsSync(aPath, xs, owner) {
   xs = xs || [];
 
-  const joinRoot = join.bind(null, rootPath);
-  const trimRoot = trim(rootPath);
+  const joinRoot = join.bind(null, REPO_ROOT);
+  const trimRoot = trim(REPO_ROOT);
   const joined = joinRoot(aPath);
   const isADir = isDir(joined);
 
@@ -73,7 +80,7 @@ function creepFsSync(aPath, xs, rootPath, owner) {
     const full = isADir ? join(aPath, entry) : entry;
     const fullIsDir = statSync(full).isDirectory();
 
-    if (fullIsDir && !isBlackListedDir(full)) xs = creepFsSync(full, xs, rootPath, owner);
+    if (fullIsDir && !isBlackListedDir(full)) xs = creepFsSync(full, xs, owner);
     else if (isWhiteListedFile(full)) xs.push(`${trimRoot(full)} ${owner}`);
   }
 }

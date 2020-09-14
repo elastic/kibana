@@ -29,6 +29,8 @@ export DELAY
 
 TEAM_ASSIGN_PATH=$5
 
+UNKNOWN_TEAMS_LOG_PATH=$6
+
 # Build team assignments dat file
 node scripts/generate_team_assignments.js --verbose --src .github/CODEOWNERS --dest $TEAM_ASSIGN_PATH
 
@@ -37,14 +39,14 @@ for x in jest functional; do
 
   COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
 
-  node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
+  node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH --unknownTeamsLogPath $UNKNOWN_TEAMS_LOG_PATH
 done
 
 # Need to override COVERAGE_INGESTION_KIBANA_ROOT since mocha json file has original intake worker path
 COVERAGE_SUMMARY_FILE=target/kibana-coverage/mocha-combined/coverage-summary.json
 export COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
 
-node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
+node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH --unknownTeamsLogPath $UNKNOWN_TEAMS_LOG_PATH
 
 echo "###  Ingesting Code Coverage - Complete"
 echo ""

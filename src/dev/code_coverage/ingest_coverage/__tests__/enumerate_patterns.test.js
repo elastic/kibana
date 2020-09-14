@@ -20,15 +20,21 @@
 import expect from '@kbn/expect';
 import { enumeratePatterns } from '../team_assignment/enumerate_patterns';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { resolve } from 'path';
+import shell from 'shelljs';
+import { tryCatch } from '../either';
 
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
 });
+const notFoundLogPath =
+  'src/dev/code_coverage/ingest_coverage/team_assignment/not_found_team_assignments.txt';
+const resolved = resolve(REPO_ROOT, notFoundLogPath);
 
 describe(`enumeratePatterns`, () => {
-  it(`should resolve x-pack/plugins/reporting/server/browsers/extract/unzip.js to kibana-reporting`, () => {
-    const actual = enumeratePatterns(REPO_ROOT)(log)(
+  it(`should resolve to kibana-reporting`, () => {
+    const actual = enumeratePatterns(resolved)(log)(
       new Map([['x-pack/plugins/reporting', ['kibana-reporting']]])
     );
 
@@ -37,5 +43,7 @@ describe(`enumeratePatterns`, () => {
         'x-pack/plugins/reporting/server/browsers/extract/unzip.js kibana-reporting'
       )
     ).to.be(true);
+
+    tryCatch(() => shell.rm(resolved));
   });
 });

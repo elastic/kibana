@@ -38,14 +38,18 @@ const env = {
 describe('Ingesting coverage', () => {
   const teamAssignmentsPath =
     'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt';
+  const unknownTeamsLogPath =
+    'src/dev/code_coverage/ingest_coverage/team_assignment/unknown_team_paths.txt';
 
-  const verboseArgs = [
+  const ingestCoveragParams = [
     'scripts/ingest_coverage.js',
     '--verbose',
     '--teamAssignmentsPath',
     teamAssignmentsPath,
     '--vcsInfoPath',
     'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+    '--unknownTeamsLogPath',
+    unknownTeamsLogPath,
     '--path',
   ];
 
@@ -53,18 +57,19 @@ describe('Ingesting coverage', () => {
   const resolved = resolve(MOCKS_DIR, summaryPath);
 
   beforeAll(async () => {
-    const params = [
+    const generateTeamAssignmentsParams = [
       'scripts/generate_team_assignments.js',
       '--src',
       '.github/CODEOWNERS',
       '--dest',
       teamAssignmentsPath,
     ];
-    await execa(process.execPath, params, { cwd: ROOT_DIR, env });
+    await execa(process.execPath, generateTeamAssignmentsParams, { cwd: ROOT_DIR, env });
   });
 
   afterAll(() => {
     shell.rm(teamAssignmentsPath);
+    shell.rm(unknownTeamsLogPath);
   });
 
   describe(`staticSiteUrl`, () => {
@@ -72,7 +77,7 @@ describe('Ingesting coverage', () => {
     const siteUrlRegex = /"staticSiteUrl":\s*(.+,)/;
 
     beforeAll(async () => {
-      const opts = [...verboseArgs, resolved];
+      const opts = [...ingestCoveragParams, resolved];
       const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
       actualUrl = siteUrlRegex.exec(stdout)[1];
     });
