@@ -60,7 +60,7 @@ export const ResultsLinks: FC<Props> = ({
     await navigateToPath(path);
   }, [indexPatternId, globalState]);
 
-  const createNewMlJob = useCallback(async () => {
+  const redirectToADCreateJobsSelectTypePage = useCallback(async () => {
     const path = await mlUrlGenerator.createUrl({
       page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
       pageState: {
@@ -138,12 +138,12 @@ export const ResultsLinks: FC<Props> = ({
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
               title={
                 <FormattedMessage
-                  id="xpack.ml.fileDatavisualizer.resultsLinks.createNewMLJobTitle"
+                  id="xpack.ml.fileDatavisualizer.resultsLinks.redirectToADCreateJobsSelectTypePageTitle"
                   defaultMessage="Create new ML job"
                 />
               }
               description=""
-              onClick={createNewMlJob}
+              onClick={redirectToADCreateJobsSelectTypePage}
             />
           </EuiFlexItem>
         )}

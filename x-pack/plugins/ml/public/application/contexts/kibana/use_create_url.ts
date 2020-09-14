@@ -26,12 +26,19 @@ export const useMlLink = (params: MlUrlGeneratorState): string => {
   const [href, setHref] = useState<string>(params.page);
   const mlUrlGenerator = useMlUrlGenerator();
 
-  const generateUrl = useCallback(async () => {
-    const url = await mlUrlGenerator.createUrl(params);
-    setHref(url);
+  const generateUrl = useCallback(async (_params: MlUrlGeneratorState, isCancelled: boolean) => {
+    if (!isCancelled) {
+      const url = await mlUrlGenerator.createUrl(_params);
+      setHref(url);
+    }
   }, []);
+
   useEffect(() => {
-    generateUrl();
+    let isCancelled = false;
+    generateUrl(params, isCancelled);
+    return () => {
+      isCancelled = true;
+    };
   }, [params]);
 
   return href;
@@ -49,21 +56,24 @@ export const useCreateAndNavigateToMlLink = (
     },
   } = useMlKibana();
 
-  const redirectToMlPage = async (_page: MlUrlGeneratorState['page']) => {
-    const pageState =
-      globalState?.refreshInterval !== undefined
-        ? {
-            globalState: {
-              refreshInterval: globalState.refreshInterval,
-            },
-          }
-        : undefined;
+  const redirectToMlPage = useCallback(
+    async (_page: MlUrlGeneratorState['page']) => {
+      const pageState =
+        globalState?.refreshInterval !== undefined
+          ? {
+              globalState: {
+                refreshInterval: globalState.refreshInterval,
+              },
+            }
+          : undefined;
 
-    // @ts-ignore
-    const url = await mlUrlGenerator.createUrl({ page: _page, pageState });
-    await navigateToUrl(url);
-  };
+      // @ts-ignore
+      const url = await mlUrlGenerator.createUrl({ page: _page, pageState });
+      await navigateToUrl(url);
+    },
+    [mlUrlGenerator, navigateToUrl]
+  );
 
   // returns the onClick callback
-  return useCallback(() => redirectToMlPage(page), [mlUrlGenerator, page]);
+  return useCallback(() => redirectToMlPage(page), [redirectToMlPage, page]);
 };
