@@ -66,7 +66,3 @@ export function createDebounceProviderTimeout($timeout) {
     return debounce;
   };
 }
-
-export function DebounceProvider(debounce) {
-  return debounce;
-}
