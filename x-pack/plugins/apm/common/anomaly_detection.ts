@@ -62,7 +62,6 @@ export function getSeverityLabel(severity?: Severity) {
           defaultMessage: 'Critical',
         }
       );
-      break;
 
     case Severity.major:
     case Severity.minor:
@@ -72,7 +71,6 @@ export function getSeverityLabel(severity?: Severity) {
           defaultMessage: 'Warning',
         }
       );
-      break;
 
     case Severity.warning:
       return i18n.translate(
@@ -81,7 +79,6 @@ export function getSeverityLabel(severity?: Severity) {
           defaultMessage: 'Healthy',
         }
       );
-      break;
 
     default:
       return i18n.translate(
@@ -90,7 +87,6 @@ export function getSeverityLabel(severity?: Severity) {
           defaultMessage: 'Unknown',
         }
       );
-      break;
   }
 }
 

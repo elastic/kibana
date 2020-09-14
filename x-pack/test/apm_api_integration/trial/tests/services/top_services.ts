@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives_metadata from '../../../common/archives_metadata';
@@ -56,15 +57,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(severityScores.filter(Boolean).length).to.be.greaterThan(0);
 
-          expect(severityScores).to.eql([
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            'warning',
-            undefined,
-          ]);
+          expectSnapshot(severityScores).toMatchInline(`
+            Array [
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              "warning",
+              undefined,
+            ]
+          `);
         });
       });
     });

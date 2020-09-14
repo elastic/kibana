@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { isEmpty, pick } from 'lodash';
 import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives_metadata from '../../../common/archives_metadata';
 
@@ -61,19 +62,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns the correct service names', () => {
-          expect(response.body.items.map((item: any) => item.serviceName)).to.eql([
-            'opbeans-python',
-            'opbeans-node',
-            'opbeans-ruby',
-            'opbeans-go',
-            'opbeans-dotnet',
-            'opbeans-java',
-            'opbeans-rum',
-          ]);
+          expectSnapshot(response.body.items.map((item: any) => item.serviceName)).toMatchInline(`
+            Array [
+              "opbeans-python",
+              "opbeans-node",
+              "opbeans-ruby",
+              "opbeans-go",
+              "opbeans-dotnet",
+              "opbeans-java",
+              "opbeans-rum",
+            ]
+          `);
         });
 
         it('returns the correct metrics averages', () => {
-          expect(
+          expectSnapshot(
             response.body.items.map((item: any) =>
               pick(
                 item,
@@ -82,54 +85,113 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 'transactionsPerMinute.value'
               )
             )
-          ).to.eql([
-            {
-              transactionErrorRate: { value: 0.041666666666666664 },
-              avgResponseTime: { value: 208079.9121184089 },
-              transactionsPerMinute: { value: 18.016666666666666 },
-            },
-            {
-              transactionErrorRate: { value: 0.03317535545023697 },
-              avgResponseTime: { value: 578297.1431623931 },
-              transactionsPerMinute: { value: 7.8 },
-            },
-            {
-              transactionErrorRate: { value: 0.013123359580052493 },
-              avgResponseTime: { value: 60518.587926509186 },
-              transactionsPerMinute: { value: 6.35 },
-            },
-            {
-              transactionErrorRate: { value: 0.014577259475218658 },
-              avgResponseTime: { value: 25259.78717201166 },
-              transactionsPerMinute: { value: 5.716666666666667 },
-            },
-            {
-              transactionErrorRate: { value: 0.01532567049808429 },
-              avgResponseTime: { value: 527290.3218390804 },
-              transactionsPerMinute: { value: 4.35 },
-            },
-            {
-              transactionErrorRate: { value: 0.15384615384615385 },
-              avgResponseTime: { value: 530245.8571428572 },
-              transactionsPerMinute: { value: 3.033333333333333 },
-            },
-            {
-              avgResponseTime: { value: 896134.328358209 },
-              transactionsPerMinute: { value: 2.2333333333333334 },
-            },
-          ]);
+          ).toMatchInline(`
+            Array [
+              Object {
+                "avgResponseTime": Object {
+                  "value": 208079.9121184089,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.041666666666666664,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 18.016666666666666,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 578297.1431623931,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.03317535545023697,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 7.8,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 60518.587926509186,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.013123359580052493,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 6.35,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 25259.78717201166,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.014577259475218658,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 5.716666666666667,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 527290.3218390804,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.01532567049808429,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 4.35,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 530245.8571428572,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.15384615384615385,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 3.033333333333333,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 896134.328358209,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 2.2333333333333334,
+                },
+              },
+            ]
+          `);
         });
 
         it('returns environments', () => {
-          expect(response.body.items.map((item: any) => item.environments ?? [])).to.eql([
-            ['production'],
-            ['testing'],
-            ['production'],
-            ['testing'],
-            ['production'],
-            ['production'],
-            ['testing'],
-          ]);
+          expectSnapshot(response.body.items.map((item: any) => item.environments ?? []))
+            .toMatchInline(`
+            Array [
+              Array [
+                "production",
+              ],
+              Array [
+                "testing",
+              ],
+              Array [
+                "production",
+              ],
+              Array [
+                "testing",
+              ],
+              Array [
+                "production",
+              ],
+              Array [
+                "production",
+              ],
+              Array [
+                "testing",
+              ],
+            ]
+          `);
         });
 
         it(`RUM services don't report any transaction error rates`, () => {
