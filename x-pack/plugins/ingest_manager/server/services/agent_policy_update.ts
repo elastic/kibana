@@ -8,6 +8,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
 import { unenrollForAgentPolicyId } from './agents';
 import { outputService } from './output';
+import { agentPolicyService } from './agent_policy';
 
 export async function agentPolicyUpdateEventHandler(
   soClient: SavedObjectsClientContract,
@@ -15,8 +16,9 @@ export async function agentPolicyUpdateEventHandler(
   agentPolicyId: string
 ) {
   const adminUser = await outputService.getAdminUser(soClient);
-  // If no admin user fleet is not enabled just skip this hook
-  if (!adminUser) {
+  const outputId = await outputService.getDefaultOutputId(soClient);
+  // If no admin user and no default output fleet is not enabled just skip this hook
+  if (!adminUser || !outputId) {
     return;
   }
 
@@ -24,6 +26,11 @@ export async function agentPolicyUpdateEventHandler(
     await generateEnrollmentAPIKey(soClient, {
       agentPolicyId,
     });
+    await agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicyId);
+  }
+
+  if (action === 'updated') {
+    await agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicyId);
   }
 
   if (action === 'deleted') {

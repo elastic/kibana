@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { getErrorMessage } from '../../../../../shared_imports';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import {
   refreshTransformList$,

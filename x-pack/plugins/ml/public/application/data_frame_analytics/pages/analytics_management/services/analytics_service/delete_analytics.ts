@@ -85,12 +85,11 @@ export const deleteAnalyticsAndDestIndex = async (
       );
     }
     if (status.destIndexDeleted?.error) {
-      const error = extractErrorMessage(status.destIndexDeleted.error);
-      toastNotificationService.displayDangerToast(
+      toastNotificationService.displayErrorToast(
+        status.destIndexDeleted.error,
         i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexErrorMessage', {
-          defaultMessage:
-            'An error occurred deleting destination index {destinationIndex}: {error}',
-          values: { destinationIndex, error },
+          defaultMessage: 'An error occurred deleting destination index {destinationIndex}',
+          values: { destinationIndex },
         })
       );
     }
