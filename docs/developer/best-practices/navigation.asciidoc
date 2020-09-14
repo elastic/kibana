@@ -25,7 +25,7 @@ Assuming you want to link from your app to *Discover*. When building such URL th
 
 ==== Prepending a proper `basePath`
 
-To prepend a {kib} `basePath` use `core.http.basePath.prepend` helper: 
+To prepend {kib}'s `basePath` use {kib-repo}tree/{branch}/docs/development/core/public/kibana-plugin-core-public.ibasepath.prepend.md[core.http.basePath.prepend] helper: 
 
 [source,typescript jsx]
 ----
@@ -55,13 +55,13 @@ Other apps should use those URL generators for creating URLs.
 const discoverUrl = discoverUrlGenerator.createUrl({filters, timeRange});
 ----
 
-To get a better idea, take a look at *Discover* URL generator {kib-repo}tree/{branch}/src/discover/public/url_generator.ts[implementation].
+To get a better idea, take a look at *Discover* URL generator {kib-repo}tree/{branch}/src/plugins/discover/public/url_generator.ts[implementation].
 It allows specifying various **Discover** app state pieces like: index pattern, filters, query, time range and more.
 
 There are two ways to access other's app URL generator in your code:
 
-1. *(preferred)* From a plugin contract of a destination app.
-2. (in case an explicit plugin dependency is not possible) Using URL generator service instance on `share` plugin contract.
+1. From a plugin contract of a destination app *(preferred)*. 
+2. Using URL generator service instance on `share` plugin contract (in case an explicit plugin dependency is not possible).
 
 In case you want other apps to link to your app, then you should create a URL generator and expose it on your plugin's contract.
 
