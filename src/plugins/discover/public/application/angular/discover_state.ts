@@ -28,7 +28,7 @@ import {
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
 import { esFilters, Filter, Query } from '../../../../data/public';
-import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
+import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 
 export interface AppState {
   /**

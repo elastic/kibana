@@ -43,6 +43,7 @@ import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 
 export interface DiscoverServices {
@@ -61,6 +62,7 @@ export interface DiscoverServices {
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
@@ -106,6 +108,7 @@ export async function buildServices(
     navigation: plugins.navigation,
     share: plugins.share,
     kibanaLegacy: plugins.kibanaLegacy,
+    urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
