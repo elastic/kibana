@@ -1,18 +1,18 @@
-Feature: RUM Dashboard
+Feature: CSM Dashboard
 
   Scenario: Client metrics
     When a user browses the APM UI application for RUM Data
     Then should have correct client metrics
 
-  Scenario Outline: Rum page filters
+  Scenario Outline: CSM page filters
     When the user filters by "<filterName>"
-    Then it filters the client metrics
+    Then it filters the client metrics "<filterName>"
     Examples:
       | filterName |
       | os         |
       | location   |
 
-  Scenario: Display RUM Data components
+  Scenario: Display CSM Data components
     When a user browses the APM UI application for RUM Data
     Then should display percentile for page load chart
       And should display tooltip on hover

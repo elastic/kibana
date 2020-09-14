@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMEOUT } from './rum_dashboard';
+import { DEFAULT_TIMEOUT } from './csm_dashboard';
 
 /**
  * Verifies the behavior of the client metrics component

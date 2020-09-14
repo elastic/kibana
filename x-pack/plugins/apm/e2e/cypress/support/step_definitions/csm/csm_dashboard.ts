@@ -15,14 +15,14 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
   // open service overview page
   const RANGE_FROM = 'now-24h';
   const RANGE_TO = 'now';
-  loginAndWaitForPage(`/app/apm#/rum-preview`, {
+  loginAndWaitForPage(`/app/csm`, {
     from: RANGE_FROM,
     to: RANGE_TO,
   });
 });
 
 Then(`should have correct client metrics`, () => {
-  const metrics = ['0.01 sec', '0.08 sec', '55 '];
+  const metrics = ['4 ms', '0.06 s', '55 '];
 
   verifyClientMetrics(metrics, true);
 });
@@ -54,8 +54,7 @@ Then(`should display chart legend`, () => {
 
   cy.get(chartLegend, { timeout: DEFAULT_TIMEOUT })
     .eq(0)
-    .invoke('text')
-    .snapshot();
+    .should('have.text', 'Overall');
 });
 
 Then(`should display tooltip on hover`, () => {
