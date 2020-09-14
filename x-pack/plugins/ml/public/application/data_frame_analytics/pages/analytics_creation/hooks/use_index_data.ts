@@ -25,7 +25,7 @@ import {
   SearchResponse7,
   UseIndexDataReturnType,
 } from '../../../../components/data_grid';
-import { getErrorMessage } from '../../../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
 
@@ -94,7 +94,7 @@ export const useIndexData = (
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+      setErrorMessage(extractErrorMessage(e));
       setStatus(INDEX_STATUS.ERROR);
     }
   };
