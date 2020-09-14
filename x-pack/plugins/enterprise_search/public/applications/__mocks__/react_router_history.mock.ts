@@ -9,7 +9,7 @@
  * Jest to accept its use within a jest.mock()
  */
 export const mockHistory = {
-  createHref: jest.fn(({ pathname }) => `/enterprise_search${pathname}`),
+  createHref: jest.fn(({ pathname }) => `/app/enterprise_search${pathname}`),
   push: jest.fn(),
   location: {
     pathname: '/current-path',

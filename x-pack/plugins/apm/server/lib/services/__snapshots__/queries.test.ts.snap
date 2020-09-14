@@ -105,6 +105,24 @@ Array [
                 "field": "transaction.duration.us",
               },
             },
+            "timeseries": Object {
+              "aggs": Object {
+                "average": Object {
+                  "avg": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
           },
           "terms": Object {
             "field": "service.name",
@@ -194,6 +212,19 @@ Array [
     "body": Object {
       "aggs": Object {
         "services": Object {
+          "aggs": Object {
+            "timeseries": Object {
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
           "terms": Object {
             "field": "service.name",
             "size": 500,
@@ -226,12 +257,37 @@ Array [
   Object {
     "apm": Object {
       "events": Array [
-        "error",
+        "transaction",
       ],
     },
     "body": Object {
       "aggs": Object {
         "services": Object {
+          "aggs": Object {
+            "outcomes": Object {
+              "terms": Object {
+                "field": "event.outcome",
+              },
+            },
+            "timeseries": Object {
+              "aggs": Object {
+                "outcomes": Object {
+                  "terms": Object {
+                    "field": "event.outcome",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
           "terms": Object {
             "field": "service.name",
             "size": 500,
@@ -253,6 +309,14 @@ Array [
             Object {
               "term": Object {
                 "my.custom.ui.filter": "foo-bar",
+              },
+            },
+            Object {
+              "terms": Object {
+                "event.outcome": Array [
+                  "failure",
+                  "success",
+                ],
               },
             },
           ],

@@ -15,6 +15,13 @@ export enum NetworkTopTablesFields {
   source_ips = 'source_ips',
 }
 
+export enum FlowTarget {
+  client = 'client',
+  destination = 'destination',
+  server = 'server',
+  source = 'source',
+}
+
 export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
