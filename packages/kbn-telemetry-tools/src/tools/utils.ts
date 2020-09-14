@@ -241,8 +241,9 @@ export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
   return { [keyPath.join('.')]: obj };
 };
 
+type ObjectDict = Record<string, any>;
 export function difference(actual: any, expected: any) {
-  function changes(obj: { [key: string]: any }, base: { [key: string]: any }) {
+  function changes(obj: ObjectDict, base: ObjectDict) {
     return transform(
       obj,
       function (result, value, key) {
@@ -270,7 +271,7 @@ export function difference(actual: any, expected: any) {
           result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
         }
       },
-      {}
+      {} as ObjectDict
     );
   }
   return changes(actual, expected);
