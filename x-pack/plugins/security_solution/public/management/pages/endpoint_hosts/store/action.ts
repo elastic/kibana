@@ -108,6 +108,11 @@ interface AppRequestedEndpointList {
   type: 'appRequestedEndpointList';
 }
 
+interface ServerReturnedAgenstWithEndpointsTotal {
+  type: 'serverReturnedAgenstWithEndpointsTotal';
+  payload: number;
+}
+
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
@@ -126,4 +131,5 @@ export type EndpointAction =
   | ServerFailedToReturnMetadataPatterns
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies
-  | UserUpdatedEndpointListRefreshOptions;
+  | UserUpdatedEndpointListRefreshOptions
+  | ServerReturnedAgenstWithEndpointsTotal;
