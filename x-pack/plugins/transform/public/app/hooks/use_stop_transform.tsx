@@ -13,7 +13,7 @@ import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public'
 import type { StopTransformsRequestSchema } from '../../../common/api_schemas/stop_transforms';
 import { isStopTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
 
-import { getErrorMessage } from '../../shared_imports';
+import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';

@@ -17,7 +17,6 @@ import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
-  getErrorMessage,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
@@ -25,6 +24,7 @@ import {
   UseIndexDataReturnType,
   INDEX_STATUS,
 } from '../../shared_imports';
+import { getErrorMessage } from '../../../common/utils/errors';
 
 import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
 

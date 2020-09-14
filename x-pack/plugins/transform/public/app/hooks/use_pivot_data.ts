@@ -20,13 +20,13 @@ import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import {
   formatHumanReadableDateTimeSeconds,
-  getErrorMessage,
   multiColumnSortFactory,
   useDataGrid,
   RenderCellValue,
   UseIndexDataReturnType,
   INDEX_STATUS,
 } from '../../shared_imports';
+import { getErrorMessage } from '../../../common/utils/errors';
 
 import {
   getPreviewTransformRequestBody,

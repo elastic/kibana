@@ -26,7 +26,7 @@ import {
 import { isPostTransformsUpdateResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
-import { getErrorMessage } from '../../../../../shared_imports';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 import { useToastNotifications } from '../../../../app_dependencies';

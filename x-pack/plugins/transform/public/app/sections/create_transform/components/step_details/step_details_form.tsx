@@ -20,7 +20,7 @@ import {
 import { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
-import { getErrorMessage } from '../../../../../shared_imports';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';

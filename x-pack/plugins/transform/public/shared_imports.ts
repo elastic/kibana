@@ -15,7 +15,6 @@ export {
 
 export {
   getFieldType,
-  getErrorMessage,
   extractErrorMessage,
   formatHumanReadableDateTimeSeconds,
   getDataGridSchemaFromKibanaFieldType,
