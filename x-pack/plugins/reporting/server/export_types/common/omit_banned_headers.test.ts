@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omitBlacklistedHeaders } from './index';
+import { omitBannedHeaders } from './index';
 
 test(`omits banned headers`, async () => {
   const permittedHeaders = {
@@ -24,7 +24,7 @@ test(`omits banned headers`, async () => {
     trailer: 's are for trucks',
   };
 
-  const filteredHeaders = await omitBlacklistedHeaders({
+  const filteredHeaders = await omitBannedHeaders({
     job: {
       title: 'cool-job-bro',
       type: 'csv',
