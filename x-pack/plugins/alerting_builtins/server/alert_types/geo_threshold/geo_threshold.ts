@@ -20,6 +20,7 @@ function transformResults(results, dateField, geoField) {
         shapeLocationId: bucketKey,
         entityName: subBucket.key,
         dateInShape: _.get(subBucket, `entityHits.hits.hits[0].fields.${dateField}[0]`, null),
+        docId: _.get(subBucket, `entityHits.hits.hits[0]._id`),
       }));
     })
     .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
@@ -40,7 +41,7 @@ function getMovedEntities(
   return (
     currLocationArr
       // Check if shape has a previous location and has moved
-      .reduce((accu, { entityName, shapeLocationId, dateInShape, location }) => {
+      .reduce((accu, { entityName, shapeLocationId, dateInShape, location, docId }) => {
         const prevLocationObj = prevLocationArr.find(
           (locationObj) => locationObj.entityName === entityName
         );
@@ -54,11 +55,13 @@ function getMovedEntities(
               location,
               shapeId: shapeLocationId,
               date: dateInShape,
+              docId,
             },
             prevLocation: {
               location: prevLocationObj.location,
               shapeId: prevLocationObj.shapeLocationId,
               date: prevLocationObj.dateInShape,
+              docId: prevLocationObj.docId,
             },
           });
         }
@@ -118,7 +121,7 @@ export const getGeoThresholdExecutor = ({ logger: log }: { logger: Logger }) =>
         currentBoundaryId: currLocation.shapeId,
         previousLocation: prevLocation.location,
         previousBoundaryId: prevLocation.shapeId,
-        crossingDocumentId: null,
+        crossingDocumentId: currLocation.docId,
         timeOfDetection: currIntervalEndTime,
       })
     );
