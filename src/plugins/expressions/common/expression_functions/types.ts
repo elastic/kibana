@@ -99,6 +99,12 @@ export interface ExpressionFunctionDefinition<
    * migrate function
    * @param state any previous or current version of the ast for this function
    */
+  telemetry?(state: ExpressionAstFunction, telemetryData: Record<string, any>): void;
+
+  /**
+   * migrate function
+   * @param state any previous or current version of the ast for this function
+   */
   migrate?(state: ExpressionAstFunction): ExpressionAstFunction;
 
   /**

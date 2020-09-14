@@ -252,6 +252,12 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     });
   }
 
+  public telemetry(ast: ExpressionAstExpression, telemetryData: Record<string, any>) {
+    return this.walkAst(ast, (fn, link) => {
+      fn.telemetry(link, telemetryData);
+    });
+  }
+
   public fork(): Executor<Context> {
     const initialState = this.state.get();
     const fork = new Executor<Context>(initialState);

@@ -266,6 +266,17 @@ export class ExpressionsService {
   };
 
   /**
+   * Extracts telemetry from expression AST
+   * @param state expression AST to extract references from
+   */
+  public readonly telemetry = (
+    state: ExpressionAstExpression,
+    telemetryData: Record<string, any> = {}
+  ) => {
+    return this.executor.telemetry(state, telemetryData);
+  };
+
+  /**
    * Extracts saved object references from expression AST
    * @param state expression AST to extract references from
    * @returns new expression AST with references removed and array of references

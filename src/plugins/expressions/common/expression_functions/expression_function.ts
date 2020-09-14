@@ -64,6 +64,7 @@ export class ExpressionFunction {
   inputTypes: string[] | undefined;
 
   disabled: boolean;
+  telemetry: (state: ExpressionAstFunction, telemetryData: Record<string, any>) => void;
   migrate: (state: ExpressionAstFunction) => ExpressionAstFunction;
   extract: (
     state: ExpressionAstFunction['arguments']
@@ -84,6 +85,7 @@ export class ExpressionFunction {
       inputTypes,
       context,
       disabled,
+      telemetry,
       migrate,
       inject,
       extract,
@@ -97,6 +99,7 @@ export class ExpressionFunction {
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
     this.disabled = disabled || false;
+    this.telemetry = telemetry || (() => {});
     this.migrate = migrate || identity;
     this.inject = inject || identity;
     this.extract = extract || ((s) => ({ args: s, references: [] }));
