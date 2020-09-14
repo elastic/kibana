@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omitBannedHeaders } from './index';
+import { omitBlockedHeaders } from './index';
 
-test(`omits banned headers`, async () => {
+test(`omits blocked headers`, async () => {
   const permittedHeaders = {
     foo: 'bar',
     baz: 'quix',
   };
 
-  const bannedHeaders = {
+  const blockedHeaders = {
     'accept-encoding': '',
     connection: 'upgrade',
     'content-length': '',
@@ -24,7 +24,7 @@ test(`omits banned headers`, async () => {
     trailer: 's are for trucks',
   };
 
-  const filteredHeaders = await omitBannedHeaders({
+  const filteredHeaders = await omitBlockedHeaders({
     job: {
       title: 'cool-job-bro',
       type: 'csv',
@@ -36,7 +36,7 @@ test(`omits banned headers`, async () => {
     },
     decryptedHeaders: {
       ...permittedHeaders,
-      ...bannedHeaders,
+      ...blockedHeaders,
     },
   });
 

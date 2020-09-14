@@ -116,14 +116,14 @@ describe('Network Policy', () => {
     expect(allowRequest(url, rules)).toEqual(true);
   });
 
-  it('denies requests when hosts are from banned IP addresses', () => {
+  it('denies requests when hosts are from blocked IP addresses', () => {
     const url = 'http://192.168.1.1/cool/route/bro';
     const rules = [{ allow: false, host: '192.168.1.1' }, { allow: true }];
 
     expect(allowRequest(url, rules)).toEqual(false);
   });
 
-  it('allows requests when hosts are IP addresses not banned', () => {
+  it('allows requests when hosts are IP addresses that are not blocked', () => {
     const url = 'http://192.168.2.1/cool/route/bro';
     const rules = [{ allow: false, host: '192.168.1.1' }, { allow: true }];
 
@@ -150,7 +150,7 @@ describe('Network Policy', () => {
       expect(allowRequest('http://bad.com/some/route', rules)).toEqual(false);
     });
 
-    it('allows banning of certain IPs', () => {
+    it('allows blocking of certain IPs', () => {
       const rules = [{ allow: false, host: '169.254.0.0' }, { allow: true }];
 
       expect(allowRequest('http://kibana.com/some/route', rules)).toEqual(true);

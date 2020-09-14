@@ -5,11 +5,11 @@
  */
 import { omitBy } from 'lodash';
 import {
-  KBN_SCREENSHOT_HEADER_DENY_LIST,
-  KBN_SCREENSHOT_HEADER_DENY_LIST_STARTS_WITH_PATTERN,
+  KBN_SCREENSHOT_HEADER_BLOCK_LIST,
+  KBN_SCREENSHOT_HEADER_BLOCK_LIST_STARTS_WITH_PATTERN,
 } from '../../../common/constants';
 
-export const omitBannedHeaders = <TaskPayloadType>({
+export const omitBlockedHeaders = <TaskPayloadType>({
   job,
   decryptedHeaders,
 }: {
@@ -20,8 +20,8 @@ export const omitBannedHeaders = <TaskPayloadType>({
     decryptedHeaders,
     (_value, header: string) =>
       header &&
-      (KBN_SCREENSHOT_HEADER_DENY_LIST.includes(header) ||
-        KBN_SCREENSHOT_HEADER_DENY_LIST_STARTS_WITH_PATTERN.some((pattern) =>
+      (KBN_SCREENSHOT_HEADER_BLOCK_LIST.includes(header) ||
+        KBN_SCREENSHOT_HEADER_BLOCK_LIST_STARTS_WITH_PATTERN.some((pattern) =>
           header?.startsWith(pattern)
         ))
   );

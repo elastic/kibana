@@ -14,7 +14,7 @@ import {
   getConditionalHeaders,
   getCustomLogo,
   getFullUrls,
-  omitBannedHeaders,
+  omitBlockedHeaders,
 } from '../../common';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
@@ -40,7 +40,7 @@ export const runTaskFnFactory: QueuedPdfExecutorFactory = function executeJobFac
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
-      map((decryptedHeaders) => omitBannedHeaders({ job, decryptedHeaders })),
+      map((decryptedHeaders) => omitBlockedHeaders({ job, decryptedHeaders })),
       map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
       mergeMap((conditionalHeaders) =>
         getCustomLogo({ reporting, config, job, conditionalHeaders })
