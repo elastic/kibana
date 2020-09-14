@@ -11,9 +11,9 @@ import {
   HostsFields,
   NetworkDnsFields,
   NetworkTopTablesFields,
-  TlsFields,
-  UsersFields,
-} from '../../graphql/types';
+  NetworkTlsFields,
+  NetworkUsersFields,
+} from '../../../common/search_strategy';
 import { State } from '../store';
 
 import { defaultHeaders } from './header';
@@ -100,7 +100,7 @@ export const mockGlobalState: State = {
         [networkModel.NetworkTableType.tls]: {
           activePage: 0,
           limit: 10,
-          sort: { field: TlsFields._id, direction: Direction.desc },
+          sort: { field: NetworkTlsFields._id, direction: Direction.desc },
         },
         [networkModel.NetworkTableType.http]: {
           activePage: 0,
@@ -116,37 +116,37 @@ export const mockGlobalState: State = {
     details: {
       flowTarget: FlowTarget.source,
       queries: {
-        [networkModel.IpDetailsTableType.topCountriesDestination]: {
+        [networkModel.NetworkDetailsTableType.topCountriesDestination]: {
           activePage: 0,
           limit: 10,
           sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
-        [networkModel.IpDetailsTableType.topCountriesSource]: {
+        [networkModel.NetworkDetailsTableType.topCountriesSource]: {
           activePage: 0,
           limit: 10,
           sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
-        [networkModel.IpDetailsTableType.topNFlowSource]: {
+        [networkModel.NetworkDetailsTableType.topNFlowSource]: {
           activePage: 0,
           limit: 10,
           sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
-        [networkModel.IpDetailsTableType.topNFlowDestination]: {
+        [networkModel.NetworkDetailsTableType.topNFlowDestination]: {
           activePage: 0,
           limit: 10,
           sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
-        [networkModel.IpDetailsTableType.tls]: {
+        [networkModel.NetworkDetailsTableType.tls]: {
           activePage: 0,
           limit: 10,
-          sort: { field: TlsFields._id, direction: Direction.desc },
+          sort: { field: NetworkTlsFields._id, direction: Direction.desc },
         },
-        [networkModel.IpDetailsTableType.users]: {
+        [networkModel.NetworkDetailsTableType.users]: {
           activePage: 0,
           limit: 10,
-          sort: { field: UsersFields.name, direction: Direction.asc },
+          sort: { field: NetworkUsersFields.name, direction: Direction.asc },
         },
-        [networkModel.IpDetailsTableType.http]: {
+        [networkModel.NetworkDetailsTableType.http]: {
           activePage: 0,
           limit: 10,
           sort: { direction: Direction.desc },
