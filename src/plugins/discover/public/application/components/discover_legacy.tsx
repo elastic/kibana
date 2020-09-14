@@ -147,6 +147,16 @@ export function DiscoverLegacy({
     closed: isSidebarClosed,
   });
 
+  const mainSectionClassName = classNames({
+    'col-md-10': !isSidebarClosed,
+    'col-md-12': isSidebarClosed,
+  });
+
+  const sidebarCloseIcon = classNames({
+    'fa-chevron-circle-right': isSidebarClosed,
+    'fa-chevron-circle-left': !isSidebarClosed,
+  });
+
   return (
     <I18nProvider>
       <div className="app-container" data-fetch-counter={fetchCounter}>
@@ -172,19 +182,21 @@ export function DiscoverLegacy({
               id="discover-sidebar"
               data-test-subj="discover-sidebar"
             >
-              <div className="dscFieldChooser">
-                <DiscoverSidebar
-                  columns={state.columns || []}
-                  fieldCounts={fieldCounts}
-                  hits={rows}
-                  indexPatternList={indexPatternList}
-                  onAddField={addColumn}
-                  onAddFilter={onAddFilter}
-                  onRemoveField={onRemoveColumn}
-                  selectedIndexPattern={searchSource && searchSource.getField('index')}
-                  setIndexPattern={setIndexPattern}
-                />
-              </div>
+              {!isSidebarClosed && (
+                <div className="dscFieldChooser">
+                  <DiscoverSidebar
+                    columns={state.columns || []}
+                    fieldCounts={fieldCounts}
+                    hits={rows}
+                    indexPatternList={indexPatternList}
+                    onAddField={addColumn}
+                    onAddFilter={onAddFilter}
+                    onRemoveField={onRemoveColumn}
+                    selectedIndexPattern={searchSource && searchSource.getField('index')}
+                    setIndexPattern={setIndexPattern}
+                  />
+                </div>
+              )}
               <button
                 onClick={() => setIsSidebarClosed(!isSidebarClosed)}
                 data-test-subj="collapseSideBarButton"
@@ -193,14 +205,10 @@ export function DiscoverLegacy({
                 aria-label="Toggle sidebar"
                 className="kuiCollapseButton kbnCollapsibleSidebar__collapseButton"
               >
-                <span
-                  className={`kuiIcon ${
-                    isSidebarClosed ? 'fa-chevron-circle-right' : 'fa-chevron-circle-left'
-                  }`}
-                />
+                <span className={`kuiIcon ${sidebarCloseIcon}`} />
               </button>
             </div>
-            <div className={`dscWrapper col-md-${isSidebarClosed ? '12' : '10'}`}>
+            <div className={`dscWrapper ${mainSectionClassName}`}>
               {resultState === 'none' && (
                 <DiscoverNoResults
                   timeFieldName={opts.timefield}
@@ -208,14 +216,13 @@ export function DiscoverLegacy({
                 />
               )}
               {resultState === 'uninitialized' && <DiscoverUninitialized onRefresh={fetch} />}
-
+              {/* @TODO: Solved in the Angular way to satisfy functional test - should be improved*/}
               <span style={{ display: resultState !== 'loading' ? 'none' : '' }}>
                 {fetchError && <DiscoverFetchError fetchError={fetchError} />}
                 <div className="dscOverlay" style={{ display: fetchError ? 'none' : '' }}>
                   <LoadingSpinner />
                 </div>
               </span>
-
               {resultState === 'ready' && (
                 <div className="dscWrapper__content">
                   <SkipBottomButton onClick={onSkipBottomButtonClick} />
