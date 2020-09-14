@@ -20,11 +20,11 @@ import {
   PluginInitializerContext,
   ILegacyScopedClusterClient,
   SharedGlobalConfig,
-  KibanaRequest,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
+import { ReqFacade } from '../../../../src/plugins/vis_type_timeseries/server';
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
 import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
@@ -117,7 +117,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     });
 
     if (visTypeTimeseries) {
-      const getRollupService = async (request: KibanaRequest) => {
+      const getRollupService = async (request: ReqFacade) => {
         this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
         return this.rollupEsClient.asScoped(request);
       };

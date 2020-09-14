@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { keyBy, isString } from 'lodash';
-
+import { ILegacyScopedClusterClient } from 'src/core/server';
 import { ReqFacade } from '../../../../../../src/plugins/vis_type_timeseries/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/server';
 import { mergeCapabilitiesWithFields } from '../merge_capabilities_with_fields';
@@ -19,7 +19,7 @@ const isIndexPatternValid = (indexPattern: string) =>
 export const getRollupSearchStrategy = (
   AbstractSearchStrategy: any,
   RollupSearchCapabilities: any,
-  getRollupService: any
+  getRollupService: (reg: ReqFacade) => Promise<ILegacyScopedClusterClient>
 ) =>
   class RollupSearchStrategy extends AbstractSearchStrategy {
     name = 'rollup';

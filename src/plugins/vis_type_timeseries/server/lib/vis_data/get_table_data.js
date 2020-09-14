@@ -53,8 +53,6 @@ export async function getTableData(req, panel) {
       []
     );
 
-    console.log(buckets);
-
     return {
       ...meta,
       series: buckets.map(processBucket(panel)),
