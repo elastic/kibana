@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Maps', 'Stack Management']);
+        expect(navLinks).to.eql(['Maps']);
       });
 
       it(`allows a map to be created`, async () => {
@@ -170,7 +170,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Maps', 'Stack Management']);
+        expect(navLinks).to.eql(['Maps']);
       });
 
       it(`does not show create new button`, async () => {

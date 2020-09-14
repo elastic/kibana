@@ -8,6 +8,7 @@
 
 import { get, flow } from 'lodash';
 import moment from 'moment';
+import rison, { RisonObject, RisonValue } from 'rison-node';
 
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
@@ -131,13 +132,70 @@ function escapeForKQL(value: string | number): string {
 
 type GetResultTokenValue = (v: string) => string;
 
+export const isRisonObject = (value: RisonValue): value is RisonObject => {
+  return value !== null && typeof value === 'object';
+};
+
+const getQueryStringResultProvider = (
+  record: CustomUrlAnomalyRecordDoc,
+  getResultTokenValue: GetResultTokenValue
+) => (resultPrefix: string, queryString: string, resultPostfix: string): string => {
+  const URL_LENGTH_LIMIT = 2000;
+
+  let availableCharactersLeft = URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
+
+  // URL template might contain encoded characters
+  const queryFields = queryString
+    // Split query string by AND operator.
+    .split(/\sand\s/i)
+    // Get property name from `influencerField:$influencerField$` string.
+    .map((v) => String(v.split(/:(.+)?\$/)[0]).trim());
+
+  const queryParts: string[] = [];
+  const joinOperator = ' AND ';
+
+  fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
+    const field = queryFields[i];
+    // Use lodash get to allow nested JSON fields to be retrieved.
+    let tokenValues: string[] | string | null = get(record, field) || null;
+    if (tokenValues === null) {
+      continue;
+    }
+    tokenValues = Array.isArray(tokenValues) ? tokenValues : [tokenValues];
+
+    // Create a pair `influencerField:value`.
+    // In cases where there are multiple influencer field values for an anomaly
+    // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
+    let result = '';
+    for (let j = 0; j < tokenValues.length; j++) {
+      const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(tokenValues[j])}"`;
+
+      // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
+      if (availableCharactersLeft < part.length) {
+        if (result.length > 0) {
+          queryParts.push(j > 0 ? `(${result})` : result);
+        }
+        break fieldsLoop;
+      }
+
+      result += part;
+
+      availableCharactersLeft -= result.length;
+    }
+
+    if (result.length > 0) {
+      queryParts.push(tokenValues.length > 1 ? `(${result})` : result);
+    }
+  }
+  return queryParts.join(joinOperator);
+};
+
 /**
  * Builds a Kibana dashboard or Discover URL from the supplied config, with any
  * dollar delimited tokens substituted from the supplied anomaly record.
  */
 function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc) {
   const urlValue = urlConfig.url_value;
-  const URL_LENGTH_LIMIT = 2000;
 
   const isLuceneQueryLanguage = urlValue.includes('language:lucene');
 
@@ -145,11 +203,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
     ? escapeForElasticsearchQuery
     : escapeForKQL;
 
-  const commonEscapeCallback = flow(
-    // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
-    (v: string): string => v.replace(/[!']/g, '!$&'),
-    encodeURIComponent
-  );
+  const commonEscapeCallback = flow(encodeURIComponent);
 
   const replaceSingleTokenValues = (str: string) => {
     const getResultTokenValue: GetResultTokenValue = flow(
@@ -172,65 +226,34 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
   return flow(
     (str: string) => str.replace('$earliest$', record.earliest).replace('$latest$', record.latest),
     // Process query string content of the URL
+    decodeURIComponent,
     (str: string) => {
       const getResultTokenValue: GetResultTokenValue = flow(
         queryLanguageEscapeCallback,
         commonEscapeCallback
       );
+
+      const getQueryStringResult = getQueryStringResultProvider(record, getResultTokenValue);
+
+      const match = str.match(/(.+)(\(.*\blanguage:(?:lucene|kuery)\b.*?\))(.+)/);
+
+      if (match !== null && match[2] !== undefined) {
+        const [, prefix, queryDef, postfix] = match;
+
+        const q = rison.decode(queryDef);
+
+        if (isRisonObject(q) && q.hasOwnProperty('query')) {
+          const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
+          const resultQuery = getQueryStringResult(resultPrefix, q.query as string, resultPostfix);
+          return `${resultPrefix}${rison.encode({ ...q, query: resultQuery })}${resultPostfix}`;
+        }
+      }
+
       return str.replace(
-        /(.+query:'|.+&kuery=)([^']*)(['&].+)/,
+        /(.+&kuery=)(.*?)[^!](&.+)/,
         (fullMatch, prefix: string, queryString: string, postfix: string) => {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
-
-          let availableCharactersLeft =
-            URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
-          const queryFields = queryString
-            // Split query string by AND operator.
-            .split(/\sand\s/i)
-            // Get property name from `influencerField:$influencerField$` string.
-            .map((v) => v.split(':')[0]);
-
-          const queryParts: string[] = [];
-          const joinOperator = ' AND ';
-
-          fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
-            const field = queryFields[i];
-            // Use lodash get to allow nested JSON fields to be retrieved.
-            let tokenValues: string[] | string | null = get(record, field) || null;
-            if (tokenValues === null) {
-              continue;
-            }
-            tokenValues = Array.isArray(tokenValues) ? tokenValues : [tokenValues];
-
-            // Create a pair `influencerField:value`.
-            // In cases where there are multiple influencer field values for an anomaly
-            // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
-            let result = '';
-            for (let j = 0; j < tokenValues.length; j++) {
-              const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(
-                tokenValues[j]
-              )}"`;
-
-              // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
-              if (availableCharactersLeft < part.length) {
-                if (result.length > 0) {
-                  queryParts.push(j > 0 ? `(${result})` : result);
-                }
-                break fieldsLoop;
-              }
-
-              result += part;
-
-              availableCharactersLeft -= result.length;
-            }
-
-            if (result.length > 0) {
-              queryParts.push(tokenValues.length > 1 ? `(${result})` : result);
-            }
-          }
-
-          const resultQuery = queryParts.join(joinOperator);
-
+          const resultQuery = getQueryStringResult(resultPrefix, queryString, resultPostfix);
           return `${resultPrefix}${resultQuery}${resultPostfix}`;
         }
       );
