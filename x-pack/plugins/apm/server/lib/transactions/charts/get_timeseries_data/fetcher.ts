@@ -35,7 +35,7 @@ export function timeseriesFetcher({
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, apmEventClient } = setup;
-  const { intervalString } = getBucketSize(start, end, 'auto');
+  const { intervalString } = getBucketSize(start, end);
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
