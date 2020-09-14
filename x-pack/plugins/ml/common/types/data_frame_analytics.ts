@@ -79,3 +79,9 @@ export interface DataFrameAnalyticsConfig {
   version: string;
   allow_lazy_start?: boolean;
 }
+
+export enum ANALYSIS_CONFIG_TYPE {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
+}
