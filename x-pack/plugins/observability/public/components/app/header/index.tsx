@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -58,12 +57,7 @@ export function Header({
               <h1>
                 {i18n.translate('xpack.observability.home.title', {
                   defaultMessage: 'Observability',
-                })}{' '}
-                <EuiBetaBadge
-                  className="eui-alignMiddle"
-                  label={i18n.translate('xpack.observability.beta', { defaultMessage: 'Beta' })}
-                  tooltipContent="This feature is in beta. Please help us improve it by reporting any bugs or give us feedback."
-                />
+                })}
               </h1>
             </EuiTitle>
           </EuiFlexItem>

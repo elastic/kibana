@@ -13706,7 +13706,6 @@
     "xpack.monitoring.updateLicenseTitle": "ライセンスの更新",
     "xpack.monitoring.useAvailableLicenseDescription": "既に新しいライセンスがある場合は、今すぐアップロードしてください。",
     "xpack.monitoring.wedLabel": "水",
-    "xpack.observability.beta": "ベータ",
     "xpack.observability.emptySection.apps.alert.description": "503エラーが累積していますか?サービスは応答していますか?CPUとRAMの使用量が跳ね上がっていますか?このような警告を、事後にではなく、発生と同時に把握しましょう。",
     "xpack.observability.emptySection.apps.alert.link": "アラートの作成",
     "xpack.observability.emptySection.apps.alert.title": "アラートが見つかりません。",

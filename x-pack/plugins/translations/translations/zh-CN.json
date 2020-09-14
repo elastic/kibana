@@ -13715,7 +13715,6 @@
     "xpack.monitoring.updateLicenseTitle": "更新您的许可证",
     "xpack.monitoring.useAvailableLicenseDescription": "如果已有新的许可证，请立即上传。",
     "xpack.monitoring.wedLabel": "周三",
-    "xpack.observability.beta": "公测版",
     "xpack.observability.emptySection.apps.alert.description": "503 错误是否越来越多？服务是否响应？CPU 和 RAM 利用率是否激增？实时查看警告，而不是事后再进行剖析。",
     "xpack.observability.emptySection.apps.alert.link": "创建告警",
     "xpack.observability.emptySection.apps.alert.title": "未找到告警。",
