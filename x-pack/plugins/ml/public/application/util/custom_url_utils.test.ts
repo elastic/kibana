@@ -414,7 +414,7 @@ describe('ML - custom URL utils', () => {
       const urlConfig = {
         url_name: 'Hosts Overview by process name',
         url_value:
-          "security/hosts/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
+          "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))",
       };
 
       const testRecords = {
@@ -458,7 +458,7 @@ describe('ML - custom URL utils', () => {
       };
 
       expect(getUrlForRecord(urlConfig, testRecords)).toBe(
-        "security/hosts/ml-hosts?_g=()&query=(language:kuery,query:'process.name:\"seq\"')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-02-01T16:00:00.000Z',kind:absolute,to:'2019-02-01T18:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-02-01T16%3A00%3A00.000Z',kind:absolute,to:'2019-02-01T18%3A59%3A59.999Z')))"
+        "security/hosts/ml-hosts/showcase?_g=()&query=(language:kuery,query:'process.name:\"seq\"')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-02-01T16:00:00.000Z',kind:absolute,to:'2019-02-01T18:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-02-01T16%3A00%3A00.000Z',kind:absolute,to:'2019-02-01T18%3A59%3A59.999Z')))"
       );
     });
 

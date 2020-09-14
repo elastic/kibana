@@ -203,11 +203,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
     ? escapeForElasticsearchQuery
     : escapeForKQL;
 
-  const commonEscapeCallback = flow(
-    // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
-    (v: string): string => v.replace(/[!']/g, '!$&'),
-    encodeURIComponent
-  );
+  const commonEscapeCallback = flow(encodeURIComponent);
 
   const replaceSingleTokenValues = (str: string) => {
     const getResultTokenValue: GetResultTokenValue = flow(
