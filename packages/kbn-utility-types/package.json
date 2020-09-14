@@ -16,7 +16,7 @@
     "utility-types": "^3.10.0"
   },
   "devDependencies": {
-    "del-cli": "^3.0.0",
-    "tsd": "^0.7.4"
+    "del-cli": "^3.0.1",
+    "tsd": "^0.13.1"
   }
 }

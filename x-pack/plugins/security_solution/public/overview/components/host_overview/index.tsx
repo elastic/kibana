@@ -10,6 +10,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
+import { HostItem } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -19,9 +20,8 @@ import {
   hostIdRenderer,
 } from '../../../timelines/components/field_renderers/field_renderers';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
-import { HostItem } from '../../../graphql/types';
 import { Loader } from '../../../common/components/loader';
-import { IPDetailsLink } from '../../../common/components/links';
+import { NetworkDetailsLink } from '../../../common/components/links';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
@@ -154,7 +154,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
                 idPrefix="host-overview"
-                render={(ip) => (ip != null ? <IPDetailsLink ip={ip} /> : getEmptyTagValue())}
+                render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
             ),
           },

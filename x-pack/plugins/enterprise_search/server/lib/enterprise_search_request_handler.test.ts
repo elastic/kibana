@@ -5,6 +5,7 @@
  */
 
 import { mockConfig, mockLogger } from '../__mocks__';
+import { JSON_HEADER } from '../../common/constants';
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
@@ -150,18 +151,26 @@ describe('EnterpriseSearchRequestHandler', () => {
       );
     });
 
-    it('returns an error when user authentication to Enterprise Search fails', async () => {
-      EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/login' });
-      const requestHandler = enterpriseSearchRequestHandler.createRequest({
-        path: '/api/unauthenticated',
+    describe('user authentication errors', () => {
+      afterEach(async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/unauthenticated',
+        });
+        await makeAPICall(requestHandler);
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/unauthenticated');
+        expect(responseMock.customError).toHaveBeenCalledWith({
+          body: 'Error connecting to Enterprise Search: Cannot authenticate Enterprise Search user',
+          statusCode: 502,
+        });
       });
 
-      await makeAPICall(requestHandler);
-      EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/unauthenticated');
+      it('errors when redirected to /login', async () => {
+        EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/login' });
+      });
 
-      expect(responseMock.customError).toHaveBeenCalledWith({
-        body: 'Error connecting to Enterprise Search: Cannot authenticate Enterprise Search user',
-        statusCode: 502,
+      it('errors when redirected to /ent/select', async () => {
+        EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/ent/select' });
       });
     });
   });
@@ -185,7 +194,7 @@ const makeAPICall = (handler: Function, params = {}) => {
 const EnterpriseSearchAPI = {
   shouldHaveBeenCalledWith(expectedUrl: string, expectedParams = {}) {
     expect(fetchMock).toHaveBeenCalledWith(expectedUrl, {
-      headers: { Authorization: 'Basic 123' },
+      headers: { Authorization: 'Basic 123', ...JSON_HEADER },
       method: 'GET',
       body: undefined,
       ...expectedParams,
