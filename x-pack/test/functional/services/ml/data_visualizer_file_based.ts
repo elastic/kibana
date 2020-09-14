@@ -54,6 +54,13 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       await testSubjects.existOrFail('mlFileDataVisFileStatsPanel');
     },
 
+    async assertNumberOfFieldCards(number: number) {
+      const cards = await testSubjects.findAll('mlPageFileDataVisFieldDataCard');
+      if (cards.length !== number) {
+        throw new Error(`expected ${number} field cards to exist, but found ${cards.length}`);
+      }
+    },
+
     async assertImportButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlFileDataVisOpenImportPageButton');
       expect(isEnabled).to.eql(
