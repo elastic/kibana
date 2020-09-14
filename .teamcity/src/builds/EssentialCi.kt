@@ -37,6 +37,7 @@ object EssentialCi : BuildType({
     DefaultVisualRegression,
     DefaultCiGroups,
     DefaultFirefox,
-    DefaultAccessibility
+    DefaultAccessibility,
+    DefaultSecuritySolution
   )
 })
