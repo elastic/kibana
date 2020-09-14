@@ -383,6 +383,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'eql_query': {
+      return [
+        {
+          title: label,
+          description: 'placeholder to get rid of typecheck error',
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }

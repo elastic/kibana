@@ -103,6 +103,9 @@ export const getFilter = async ({
         'Unsupported Rule of type "machine_learning" supplied to getFilter'
       );
     }
+    case 'eql_query': {
+      throw new BadRequestError('Unsupported Rule of type "eql_query" supplied to getFilter');
+    }
     default: {
       return assertUnreachable(type);
     }

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pickBy } from 'lodash/fp';
+import { SavedObject } from 'src/core/types';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { buildRiskScoreFromMapping } from './mappings/build_risk_score_from_mapping';
-import { SignalSourceHit } from './types';
+import { SignalSourceHit, RuleAlertAttributes } from './types';
 import { buildSeverityFromMapping } from './mappings/build_severity_from_mapping';
 import { buildRuleNameFromMapping } from './mappings/build_rule_name_from_mapping';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
@@ -44,7 +44,7 @@ export const buildRule = ({
   interval,
   tags,
   throttle,
-}: BuildRuleParams): Partial<RulesSchema> => {
+}: BuildRuleParams): RulesSchema => {
   const { riskScore, riskScoreMeta } = buildRiskScoreFromMapping({
     doc,
     riskScore: ruleParams.riskScore,
@@ -65,7 +65,7 @@ export const buildRule = ({
 
   const meta = { ...ruleParams.meta, ...riskScoreMeta, ...severityMeta, ...ruleNameMeta };
 
-  const rule = pickBy<RulesSchema>((value: unknown) => value != null, {
+  const rule = {
     id,
     rule_id: ruleParams.ruleId ?? '(unknown rule_id)',
     actions,
@@ -111,15 +111,69 @@ export const buildRule = ({
     machine_learning_job_id: ruleParams.machineLearningJobId,
     anomaly_threshold: ruleParams.anomalyThreshold,
     threshold: ruleParams.threshold,
-  });
+  };
   return removeInternalTagsFromRule(rule);
 };
 
-export const removeInternalTagsFromRule = (rule: Partial<RulesSchema>): Partial<RulesSchema> => {
+export const buildRuleWithoutOverrides = (
+  ruleSO: SavedObject<RuleAlertAttributes>
+): RulesSchema => {
+  const ruleParams = ruleSO.attributes.params;
+  const rule = {
+    id: ruleSO.id,
+    rule_id: ruleParams.ruleId,
+    actions: ruleSO.attributes.actions,
+    author: ruleParams.author ?? [],
+    building_block_type: ruleParams.buildingBlockType,
+    false_positives: ruleParams.falsePositives,
+    saved_id: ruleParams.savedId,
+    timeline_id: ruleParams.timelineId,
+    timeline_title: ruleParams.timelineTitle,
+    meta: ruleParams.meta,
+    max_signals: ruleParams.maxSignals,
+    risk_score: ruleParams.riskScore,
+    risk_score_mapping: ruleParams.riskScoreMapping ?? [],
+    output_index: ruleParams.outputIndex,
+    description: ruleParams.description,
+    note: ruleParams.note,
+    from: ruleParams.from,
+    immutable: ruleParams.immutable,
+    index: ruleParams.index,
+    interval: ruleSO.attributes.schedule.interval,
+    language: ruleParams.language,
+    license: ruleParams.license,
+    name: ruleSO.attributes.name,
+    query: ruleParams.query,
+    references: ruleParams.references,
+    rule_name_override: ruleParams.ruleNameOverride,
+    severity: ruleParams.severity,
+    severity_mapping: ruleParams.severityMapping ?? [],
+    tags: ruleSO.attributes.tags,
+    type: ruleParams.type,
+    to: ruleParams.to,
+    enabled: ruleSO.attributes.enabled,
+    filters: ruleParams.filters,
+    created_by: ruleSO.attributes.createdBy,
+    updated_by: ruleSO.attributes.updatedBy,
+    threat: ruleParams.threat ?? [],
+    timestamp_override: ruleParams.timestampOverride, // TODO: Timestamp Override via timestamp_override
+    throttle: ruleSO.attributes.throttle,
+    version: ruleParams.version,
+    created_at: ruleSO.attributes.createdAt,
+    updated_at: ruleSO.updated_at ?? '',
+    exceptions_list: ruleParams.exceptionsList ?? [],
+    machine_learning_job_id: ruleParams.machineLearningJobId,
+    anomaly_threshold: ruleParams.anomalyThreshold,
+    threshold: ruleParams.threshold,
+  };
+  return removeInternalTagsFromRule(rule);
+};
+
+export const removeInternalTagsFromRule = (rule: RulesSchema): RulesSchema => {
   if (rule.tags == null) {
     return rule;
   } else {
-    const ruleWithoutInternalTags: Partial<RulesSchema> = {
+    const ruleWithoutInternalTags: RulesSchema = {
       ...rule,
       tags: rule.tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER)),
     };

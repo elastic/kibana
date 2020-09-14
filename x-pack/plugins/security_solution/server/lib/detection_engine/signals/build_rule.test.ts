@@ -9,7 +9,10 @@ import { sampleDocNoSortId, sampleRuleAlertParams, sampleRuleGuid } from './__mo
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { getPartialRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import {
+  getPartialRulesSchemaMock,
+  getRulesSchemaMock,
+} from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 
 describe('buildRule', () => {
   beforeEach(() => {
@@ -274,7 +277,7 @@ describe('buildRule', () => {
   });
 
   test('it removes internal tags from a typical rule', () => {
-    const rule = getPartialRulesSchemaMock();
+    const rule = getRulesSchemaMock();
     rule.tags = [
       'some fake tag 1',
       'some fake tag 2',
@@ -286,7 +289,7 @@ describe('buildRule', () => {
   });
 
   test('it works with an empty array', () => {
-    const rule = getPartialRulesSchemaMock();
+    const rule = getRulesSchemaMock();
     rule.tags = [];
     const noInternals = removeInternalTagsFromRule(rule);
     const expected = getPartialRulesSchemaMock();
@@ -294,17 +297,8 @@ describe('buildRule', () => {
     expect(noInternals).toEqual(expected);
   });
 
-  test('it works if tags does not exist', () => {
-    const rule = getPartialRulesSchemaMock();
-    delete rule.tags;
-    const noInternals = removeInternalTagsFromRule(rule);
-    const expected = getPartialRulesSchemaMock();
-    delete expected.tags;
-    expect(noInternals).toEqual(expected);
-  });
-
   test('it works if tags contains normal values and no internal values', () => {
-    const rule = getPartialRulesSchemaMock();
+    const rule = getRulesSchemaMock();
     const noInternals = removeInternalTagsFromRule(rule);
     expect(noInternals).toEqual(rule);
   });

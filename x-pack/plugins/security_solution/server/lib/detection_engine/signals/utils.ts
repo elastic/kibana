@@ -12,7 +12,7 @@ import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
-import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
+import { BulkResponse, BulkResponseErrorAggregation, isValidUnit, SignalHit } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
@@ -212,6 +212,16 @@ export const generateId = (
   version: string,
   ruleId: string
 ): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+
+// TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
+export const generateSignalId = (newSignal: SignalHit) =>
+  createHash('sha256')
+    .update(
+      newSignal.signal.parents
+        .reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
+        .concat(newSignal.signal.rule.id)
+    )
+    .digest('hex');
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {

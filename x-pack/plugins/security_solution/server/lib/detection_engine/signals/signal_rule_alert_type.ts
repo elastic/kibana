@@ -8,6 +8,7 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
+import { SavedObject } from 'src/core/types';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -22,7 +23,15 @@ import {
   SearchAfterAndBulkCreateReturnType,
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
-import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
+import {
+  SignalRuleAlertTypeDefinition,
+  RuleAlertAttributes,
+  EqlSignalSearchResponse,
+  SignalSource,
+  Signal,
+  SignalHit,
+  BaseSignalHit,
+} from './types';
 import {
   getGapBetweenRuns,
   getListsClient,
@@ -44,6 +53,16 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
+import { buildExceptionListQueries } from '../../../../common/detection_engine/build_exceptions_query';
+import { buildExceptionFilter } from '../../../../common/detection_engine/get_query_filter';
+import { IIndexPattern, EsQueryConfig, Filter } from '../../../../../../../src/plugins/data/common';
+import { EqlSequence } from '../../types';
+import { buildRuleWithoutOverrides } from './build_rule';
+import { buildSignal, additionalSignalFields } from './build_signal';
+import { buildEventTypeSignal } from './build_event_type_signal';
+import { bulkInsertSignals, filterDuplicateSignals } from './single_bulk_create';
 
 export const signalRulesAlertType = ({
   logger,
@@ -298,7 +317,7 @@ export const signalRulesAlertType = ({
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
-        } else {
+        } else if (type === 'query' || type === 'saved_query') {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -337,6 +356,53 @@ export const signalRulesAlertType = ({
             throttle,
             buildRuleMessage,
           });
+        } else if (type === 'eql_query') {
+          if (query === undefined) {
+            throw new Error('eql query rule must have a query defined');
+          }
+          const inputIndex = await getInputIndex(services, version, index);
+          const request = buildEqlQueryRequest({
+            query,
+            index: inputIndex,
+            from: params.from,
+            to: params.to,
+            size: searchAfterSize,
+            timestampOverride: params.timestampOverride,
+            exceptionLists: exceptionItems ?? [],
+          });
+          const response: EqlSignalSearchResponse = await services.callCluster(
+            'transport.request',
+            request
+          );
+          let newSignals: SignalHit[] | undefined;
+          if (response.hits.sequences !== undefined) {
+            newSignals = response.hits.sequences.map((sequence) =>
+              buildSignalFromSequence(sequence, savedObject)
+            );
+          } else if (response.hits.events !== undefined) {
+            newSignals = response.hits.events.map((event) =>
+              buildSignalFromEvent(event, savedObject)
+            );
+          } else {
+            throw new Error(
+              'eql query response should have either `sequences` or `events` but had neither'
+            );
+          }
+          const filteredSignals = filterDuplicateSignals(alertId, newSignals);
+          if (filteredSignals.length > 0) {
+            const insertResult = await bulkInsertSignals(
+              filteredSignals,
+              outputIndex,
+              logger,
+              services,
+              refresh
+            );
+            result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
+            result.createdSignalsCount += insertResult.createdItemsCount;
+          }
+          result.success = true;
+        } else {
+          throw new Error(`unknown rule type ${type}`);
         }
 
         if (result.success) {
@@ -413,4 +479,99 @@ export const signalRulesAlertType = ({
       }
     },
   };
+};
+
+interface BuildEqlSearchQuery {
+  query: string;
+  index: string[];
+  from: string;
+  to: string;
+  size: number;
+  timestampOverride: TimestampOverrideOrUndefined;
+  exceptionLists: ExceptionListItemSchema[];
+}
+
+export const buildEqlQueryRequest = ({
+  query,
+  index,
+  from,
+  to,
+  size,
+  timestampOverride,
+  exceptionLists,
+}: BuildEqlSearchQuery) => {
+  const timestamp = timestampOverride ?? '@timestamp';
+  // TODO: share this exception logic with getQueryFilter in a better way
+  const indexPattern: IIndexPattern = {
+    fields: [],
+    title: index.join(),
+  };
+  const config: EsQueryConfig = {
+    allowLeadingWildcards: true,
+    queryStringOptions: { analyze_wildcard: true },
+    ignoreFilterIfFieldNotInIndex: false,
+    dateFormatTZ: 'Zulu',
+  };
+  const exceptionQueries = buildExceptionListQueries({ language: 'kuery', lists: exceptionLists });
+  let exceptionFilter: Filter | undefined;
+  if (exceptionQueries.length > 0) {
+    // Assume that `indices.query.bool.max_clause_count` is at least 1024 (the default value),
+    // allowing us to make 1024-item chunks of exception list items.
+    // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
+    // very conservative value.
+    exceptionFilter = buildExceptionFilter(exceptionQueries, indexPattern, config, true, 1024);
+  }
+  const indexString = index.join();
+  return {
+    method: 'POST',
+    path: `/${indexString}/_eql/search`,
+    body: {
+      size,
+      query,
+      filter: {
+        range: {
+          [timestamp]: {
+            gte: from,
+            lte: to,
+          },
+        },
+        bool: exceptionFilter?.query.bool,
+      },
+    },
+  };
+};
+
+export const buildSignalFromSequence = (
+  sequence: EqlSequence<SignalSource>,
+  ruleSO: SavedObject<RuleAlertAttributes>
+): SignalHit => {
+  const rule = buildRuleWithoutOverrides(ruleSO);
+  const signal: Signal = buildSignal(sequence.events, rule);
+  return {
+    '@timestamp': new Date().toISOString(),
+    event: {
+      kind: 'signal',
+    },
+    signal,
+  };
+};
+
+export const buildSignalFromEvent = (
+  event: BaseSignalHit,
+  ruleSO: SavedObject<RuleAlertAttributes>
+): SignalHit => {
+  const rule = buildRuleWithoutOverrides(ruleSO);
+  const signal: Signal = {
+    ...buildSignal([event], rule),
+    ...additionalSignalFields(event),
+  };
+  const eventFields = buildEventTypeSignal(event);
+  // TODO: better naming for SignalHit - it's really a new signal to be inserted
+  const signalHit: SignalHit = {
+    ...event._source,
+    '@timestamp': new Date().toISOString(),
+    event: eventFields,
+    signal,
+  };
+  return signalHit;
 };
