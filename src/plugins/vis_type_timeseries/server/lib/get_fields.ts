@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniqBy } from 'lodash';
+import { uniqBy, get } from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
-// @ts-ignore
-import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
 import { indexPatterns } from '../../../data/server';
 import { Framework } from '../plugin';
 import { IndexPatternFieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
@@ -73,7 +71,13 @@ export async function getFields(
         .toPromise();
     },
   };
-  const { indexPatternString } = await getIndexPatternObject(reqFacade, indexPattern);
+  let indexPatternString = indexPattern;
+
+  if (!indexPatternString) {
+    const index = await reqFacade.getUiSettingsService().get('defaultIndex');
+    indexPatternString = get(index, 'title', '');
+  }
+
   const {
     searchStrategy,
     capabilities,
