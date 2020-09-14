@@ -7,9 +7,9 @@
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
+import { deepFreeze } from '@kbn/std';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
-  deepFreeze,
   CoreSetup,
   CoreStart,
   Logger,

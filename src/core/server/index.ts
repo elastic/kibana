@@ -323,15 +323,6 @@ export {
 } from './metrics';
 
 export { DEFAULT_APP_CATEGORIES } from '../utils';
-export {
-  getFlattenedObject,
-  URLMeaningfulParts,
-  modifyUrl,
-  isRelativeUrl,
-  Freezable,
-  deepFreeze,
-  assertNever,
-} from '@kbn/std';
 
 export {
   SavedObject,
