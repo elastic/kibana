@@ -21,7 +21,7 @@ import {
   ListWithKuery,
 } from '../types';
 import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
-import { listAgents } from './agents';
+import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -66,6 +66,10 @@ class AgentPolicyService {
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
+
+    if (options.bumpRevision) {
+      await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+    }
 
     return (await this.get(soClient, id)) as AgentPolicy;
   }
@@ -381,6 +385,32 @@ class AgentPolicyService {
     return {
       id,
     };
+  }
+
+  public async createFleetPolicyChangeAction(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ) {
+    const policy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
+    if (!policy || !policy.revision) {
+      return;
+    }
+    const packages = policy.inputs.reduce<string[]>((acc, input) => {
+      const packageName = input.meta?.package?.name;
+      if (packageName && acc.indexOf(packageName) < 0) {
+        acc.push(packageName);
+      }
+      return acc;
+    }, []);
+
+    await createAgentPolicyAction(soClient, {
+      type: 'CONFIG_CHANGE',
+      data: { config: policy } as any,
+      ack_data: { packages },
+      created_at: new Date().toISOString(),
+      policy_id: policy.id,
+      policy_revision: policy.revision,
+    });
   }
 
   public async getFullAgentPolicy(
