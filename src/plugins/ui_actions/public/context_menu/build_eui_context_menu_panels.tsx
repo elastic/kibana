@@ -18,11 +18,7 @@
  */
 
 import * as React from 'react';
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
@@ -48,8 +44,15 @@ interface ActionWithContext<Context extends BaseContext = BaseContext> {
   trigger: Trigger;
 }
 
-type ItemDescriptor = EuiContextMenuPanelItemDescriptor & { _order: number };
-type PanelDescriptor = EuiContextMenuPanelDescriptor & { _level?: number; items: ItemDescriptor[] };
+type ItemDescriptor = EuiContextMenuPanelItemDescriptor & {
+  _order: number;
+};
+
+type PanelDescriptor = EuiContextMenuPanelDescriptor & {
+  _level?: number;
+  _icon?: string;
+  items: ItemDescriptor[];
+};
 
 const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
   event: React.MouseEvent
@@ -73,7 +76,7 @@ const onClick = (action: Action, context: ActionExecutionContext<object>, close:
  * This method adds "More" item to panels, which have more than 4 items; and
  * moves all items after the thrird one into that "More" sub-menu.
  */
-const wrapPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
+const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
   const panel = panels[id];
   if (!panel) return;
   const maxItemsBeforeWrapping = 4;
@@ -110,7 +113,7 @@ const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemD
 const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDescriptor[] => {
   const euiPanels: EuiContextMenuPanelDescriptor[] = [];
   for (const panel of panels) {
-    const { _level: omit, ...rest } = panel;
+    const { _level: omit, _icon: omit2, ...rest } = panel;
     euiPanels.push({ ...rest, items: removeItemMetaFields(rest.items) });
   }
   return euiPanels;
@@ -155,6 +158,7 @@ export async function buildContextMenuForActions({
             title: name,
             items: [],
             _level: i,
+            _icon: group.getIconType ? group.getIconType(context) : 'empty',
           };
           if (parentPanel) {
             panels[parentPanel].items!.push({
@@ -187,13 +191,21 @@ export async function buildContextMenuForActions({
     panel.items = items.sort((a, b) => (a._order < b._order ? 1 : -1));
   }
 
-  wrapPanelItemsIntoSubmenu(panels, 'mainMenu');
+  wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
       // TODO: Add separator line here once it is available in EUI.
       // See https://github.com/elastic/eui/pull/4018
-      panels.mainMenu.items.push(...panel.items);
+      if (panel.items.length > 3) {
+        panels.mainMenu.items.push({
+          name: panel.title || panel.id,
+          icon: panel._icon || 'empty',
+          panel: panel.id,
+        });
+      } else {
+        panels.mainMenu.items.push(...panel.items);
+      }
     }
   }
 

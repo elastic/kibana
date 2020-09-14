@@ -92,6 +92,7 @@ export const PanelViewWithSharing: React.FC = () => {
               {
                 id: 'sharing',
                 getDisplayName: () => 'Sharing',
+                getIconType: () => 'share',
                 order: 50,
               },
             ],
@@ -112,6 +113,7 @@ export const PanelViewWithSharing: React.FC = () => {
               {
                 id: 'sharing',
                 getDisplayName: () => 'Sharing',
+                getIconType: () => 'share',
                 order: 50,
               },
             ],
