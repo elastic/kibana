@@ -95,7 +95,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_legacy/README.md[kibanaLegacy]
-|This plugin will contain several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
+|This plugin contains several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
 
 
 |{kib-repo}blob/{branch}/src/plugins/kibana_react/README.md[kibanaReact]
@@ -170,6 +170,10 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 
 |{kib-repo}blob/{branch}/src/plugins/ui_actions/README.md[uiActions]
 |An API for:
+
+
+|{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
+|This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 
 
 |{kib-repo}blob/{branch}/src/plugins/usage_collection/README.md[usageCollection]

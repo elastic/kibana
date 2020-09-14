@@ -12,7 +12,7 @@ import { ScopedHistory } from 'kibana/public';
 
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { SendRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { encodePathForReactRouter } from '../../../../services/routing';
 import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
@@ -21,7 +21,7 @@ import { TemplateTypeIndicator } from '../components';
 
 interface Props {
   templates: TemplateListItem[];
-  reload: () => Promise<SendRequestResponse>;
+  reload: UseRequestResponse['resendRequest'];
   editTemplate: (name: string) => void;
   cloneTemplate: (name: string) => void;
   history: ScopedHistory;
