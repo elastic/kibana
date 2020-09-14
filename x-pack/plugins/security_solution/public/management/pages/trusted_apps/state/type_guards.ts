@@ -10,7 +10,12 @@ import {
   TrustedAppCreateFailure,
   TrustedAppCreateSuccess,
 } from './trusted_apps_list_page_state';
-import { Immutable } from '../../../../../common/endpoint/types';
+import {
+  Immutable,
+  NewTrustedApp,
+  WindowsConditionEntry,
+} from '../../../../../common/endpoint/types';
+import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../common/endpoint/constants';
 
 type CreateViewPossibleStates =
   | TrustedAppsListPageState['createView']
@@ -33,3 +38,18 @@ export const isTrustedAppCreateFailureState = (
 ): data is TrustedAppCreateFailure => {
   return data?.type === 'failure';
 };
+
+export const isWindowsTrustedApp = <T extends NewTrustedApp = NewTrustedApp>(
+  trustedApp: T
+): trustedApp is T & { os: 'windows' } => {
+  return trustedApp.os === 'windows';
+};
+
+export const isWindowsTrustedAppCondition = (condition: {
+  field: string;
+}): condition is WindowsConditionEntry => {
+  return condition.field === 'process.code_signature' || true;
+};
+
+export const isTrustedAppSupportedOs = (os: string): os is NewTrustedApp['os'] =>
+  TRUSTED_APPS_SUPPORTED_OS_TYPES.includes(os);

@@ -17,9 +17,18 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../../common/endpoint/constants';
 import { LogicalConditionBuilder } from './logical_condition';
-import { NewTrustedApp, TrustedApp } from '../../../../../../common/endpoint/types';
+import {
+  MacosLinuxConditionEntry,
+  NewTrustedApp,
+  TrustedApp,
+} from '../../../../../../common/endpoint/types';
 import { LogicalConditionBuilderProps } from './logical_condition/logical_condition_builder';
 import { OS_TITLES } from '../constants';
+import {
+  isTrustedAppSupportedOs,
+  isWindowsTrustedApp,
+  isWindowsTrustedAppCondition,
+} from '../../state/type_guards';
 
 const generateNewEntry = (): NewTrustedApp['entries'][0] => {
   return {
@@ -92,53 +101,98 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       description: '',
     });
     const handleAndClick = useCallback(() => {
-      setFormValues((prevState) => {
-        return {
-          ...prevState,
-          entries: [...prevState.entries, generateNewEntry()],
-        };
-      });
+      setFormValues(
+        (prevState): NewTrustedApp => {
+          if (isWindowsTrustedApp(prevState)) {
+            return {
+              ...prevState,
+              entries: [...prevState.entries, generateNewEntry()].filter((entry) =>
+                isWindowsTrustedAppCondition(entry)
+              ),
+            };
+          } else {
+            return {
+              ...prevState,
+              entries: [
+                ...prevState.entries.filter((entry) => !isWindowsTrustedAppCondition(entry)),
+                generateNewEntry(),
+              ] as MacosLinuxConditionEntry[],
+            };
+          }
+        }
+      );
     }, [setFormValues]);
     const handleDomChangeEvents = useCallback<
       ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>
     >(({ target: { name, value } }) => {
-      setFormValues((prevState) => {
-        return {
-          ...prevState,
-          [name]: value,
-        };
-      });
+      setFormValues(
+        (prevState): NewTrustedApp => {
+          return {
+            ...prevState,
+            [name]: value,
+          };
+        }
+      );
     }, []);
     const handleOsChange = useCallback<(v: string) => void>((newOsValue) => {
-      setFormValues((prevState) => {
-        return {
-          ...prevState,
-          os: newOsValue as NewTrustedApp['os'],
-        };
-        // FIXME:PT need to adjust `entries` (potentially) based on OS being windows
-      });
+      setFormValues(
+        (prevState): NewTrustedApp => {
+          if (isTrustedAppSupportedOs(newOsValue)) {
+            const updatedState: NewTrustedApp = {
+              ...prevState,
+              entries: [],
+              os: newOsValue,
+            };
+            if (!isWindowsTrustedApp(updatedState)) {
+              updatedState.entries.push(
+                ...(prevState.entries.filter(
+                  (entry) => !isWindowsTrustedAppCondition(entry)
+                ) as MacosLinuxConditionEntry[])
+              );
+            }
+            return updatedState;
+          }
+          return prevState;
+        }
+      );
     }, []);
     const handleEntryRemove = useCallback((entry: NewTrustedApp['entries'][0]) => {
-      setFormValues((prevState) => {
-        return {
-          ...prevState,
-          entries: prevState.entries.filter((item) => item !== entry),
-        };
-      });
+      setFormValues(
+        (prevState): NewTrustedApp => {
+          return {
+            ...prevState,
+            entries: prevState.entries.filter((item) => item !== entry),
+          } as NewTrustedApp;
+        }
+      );
     }, []);
     const handleEntryChange = useCallback<LogicalConditionBuilderProps['onEntryChange']>(
       (newEntry, oldEntry) => {
-        setFormValues((prevState) => {
-          return {
-            ...prevState,
-            entries: prevState.entries.map((item) => {
-              if (item === oldEntry) {
-                return newEntry;
-              }
-              return item;
-            }),
-          };
-        });
+        setFormValues(
+          (prevState): NewTrustedApp => {
+            if (isWindowsTrustedApp(prevState)) {
+              return {
+                ...prevState,
+                entries: prevState.entries.map((item) => {
+                  if (item === oldEntry) {
+                    return newEntry;
+                  }
+                  return item;
+                }),
+              } as NewTrustedApp;
+            } else {
+              return {
+                ...prevState,
+                entries: prevState.entries.map((item) => {
+                  if (item === oldEntry) {
+                    return newEntry;
+                  }
+                  return item;
+                }),
+              } as NewTrustedApp;
+            }
+          }
+        );
       },
       []
     );

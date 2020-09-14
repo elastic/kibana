@@ -7,7 +7,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { TrustedApp } from '../../../../../../../../common/endpoint/types';
+import { NewTrustedApp, TrustedApp } from '../../../../../../../../common/endpoint/types';
 import { ConditionEntry, ConditionEntryProps } from './condition_entry';
 import { AndOrBadge } from '../../../../../../../common/components/and_or_badge';
 
@@ -31,7 +31,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
           </AndBadgeFlexItem>
         )}
         <EuiFlexItem grow={1}>
-          {entries.map((entry, index) => (
+          {(entries as (NewTrustedApp & { os: 'windows' })['entries']).map((entry, index) => (
             <ConditionEntry
               key={index}
               os={os}
