@@ -14,6 +14,7 @@ import {
   Logger,
 } from 'src/core/server';
 import { ConfigType } from '../index';
+import { JSON_HEADER } from '../../common/constants';
 
 interface IConstructorDependencies {
   config: ConfigType;
@@ -25,7 +26,7 @@ interface IRequestParams<ResponseBody> {
   hasValidData?: (body?: ResponseBody) => boolean;
 }
 export interface IEnterpriseSearchRequestHandler {
-  createRequest(requestParams?: object): RequestHandler<unknown, Readonly<{}>, unknown>;
+  createRequest(requestParams?: object): RequestHandler<unknown, unknown, unknown>;
 }
 
 /**
@@ -52,12 +53,12 @@ export class EnterpriseSearchRequestHandler {
   }: IRequestParams<ResponseBody>) {
     return async (
       _context: RequestHandlerContext,
-      request: KibanaRequest<unknown, Readonly<{}>, unknown>,
+      request: KibanaRequest<unknown, unknown, unknown>,
       response: KibanaResponseFactory
     ) => {
       try {
         // Set up API URL
-        const queryParams = { ...request.query, ...params };
+        const queryParams = { ...(request.query as object), ...params };
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
@@ -65,7 +66,7 @@ export class EnterpriseSearchRequestHandler {
 
         // Set up API options
         const { method } = request.route;
-        const headers = { Authorization: request.headers.authorization as string };
+        const headers = { Authorization: request.headers.authorization as string, ...JSON_HEADER };
         const body = !this.isEmptyObj(request.body as object)
           ? JSON.stringify(request.body)
           : undefined;
@@ -73,7 +74,7 @@ export class EnterpriseSearchRequestHandler {
         // Call the Enterprise Search API and pass back response to the front-end
         const apiResponse = await fetch(url, { method, headers, body });
 
-        if (apiResponse.url.endsWith('/login')) {
+        if (apiResponse.url.endsWith('/login') || apiResponse.url.endsWith('/ent/select')) {
           throw new Error('Cannot authenticate Enterprise Search user');
         }
 

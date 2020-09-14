@@ -49,7 +49,7 @@ const rawConfigService = rawConfigServiceMock.create({});
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
   mockPluginsService.discover.mockResolvedValue({
-    pluginTree: new Map(),
+    pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 });
@@ -98,7 +98,7 @@ test('injects legacy dependency to context#setup()', async () => {
     [pluginB, [pluginA]],
   ]);
   mockPluginsService.discover.mockResolvedValue({
-    pluginTree: pluginDependencies,
+    pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 

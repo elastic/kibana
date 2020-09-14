@@ -8,15 +8,18 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 
 const createSetup = (): jest.Mocked<PluginSetupContract> => {
   return {
-    getFeatures: jest.fn(),
+    getKibanaFeatures: jest.fn(),
+    getElasticsearchFeatures: jest.fn(),
     getFeaturesUICapabilities: jest.fn(),
-    registerFeature: jest.fn(),
+    registerKibanaFeature: jest.fn(),
+    registerElasticsearchFeature: jest.fn(),
   };
 };
 
 const createStart = (): jest.Mocked<PluginStartContract> => {
   return {
-    getFeatures: jest.fn(),
+    getKibanaFeatures: jest.fn(),
+    getElasticsearchFeatures: jest.fn(),
   };
 };
 

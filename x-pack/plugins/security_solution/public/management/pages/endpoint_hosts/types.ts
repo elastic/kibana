@@ -14,6 +14,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../ingest_manager/common';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export interface EndpointState {
   /** list of host **/
@@ -54,6 +55,10 @@ export interface EndpointState {
   nonExistingPolicies: Record<string, boolean>;
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
+  /** index patterns for query bar */
+  patterns: IIndexPattern[];
+  /** api error from retrieving index patters for query bar */
+  patternsError?: ServerApiError;
   /** Is auto-refresh enabled */
   isAutoRefreshEnabled: boolean;
   /** The current auto refresh interval for data in ms */
@@ -72,4 +77,6 @@ export interface EndpointIndexUIQueryParams {
   page_index?: string;
   /** show the policy response or host details */
   show?: 'policy_response' | 'details';
+  /** Query text from search bar*/
+  admin_query?: string;
 }

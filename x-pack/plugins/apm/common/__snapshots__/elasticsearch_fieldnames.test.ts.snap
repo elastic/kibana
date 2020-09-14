@@ -478,7 +478,7 @@ exports[`Transaction TRANSACTION_TIME_TO_FIRST_BYTE 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
-exports[`Transaction TRANSACTION_URL 1`] = `undefined`;
+exports[`Transaction TRANSACTION_URL 1`] = `"http://www.elastic.co"`;
 
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
 
