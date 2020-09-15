@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './dns';
-export * from './network_events';
-export * from './tls_handshakes';
-export * from './unique_flows';
-export * from './unique_private_ips';
+import { i18n } from '@kbn/i18n';
+
+export const UNIQUE_FLOW_IDS = i18n.translate(
+  'xpack.securitySolution.kpiNetwork.uniqueFlowIds.title',
+  {
+    defaultMessage: 'Unique flow IDs',
+  }
+);
