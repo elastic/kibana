@@ -130,8 +130,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async enterMarkdown(markdown: string) {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
-      await input.type(markdown, { charByChar: true });
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await input.type(markdown);
+      await PageObjects.common.sleep(3000);
     }
 
     public async clearMarkdown() {
