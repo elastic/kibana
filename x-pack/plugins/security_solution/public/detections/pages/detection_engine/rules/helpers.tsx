@@ -27,6 +27,7 @@ import {
 import {
   SeverityMapping,
   Type,
+  Severity,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
@@ -67,7 +68,6 @@ export const getActionsStepsData = (
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
-    isNew: false,
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
@@ -75,7 +75,6 @@ export const getActionsStepsData = (
 };
 
 export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
-  isNew: false,
   ruleType: rule.type,
   anomalyThreshold: rule.anomaly_threshold ?? 50,
   machineLearningJobId: rule.machine_learning_job_id ?? '',
@@ -100,7 +99,6 @@ export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
   const fromHumanizedValue = getHumanizedDuration(from, interval);
 
   return {
-    isNew: false,
     interval,
     from: fromHumanizedValue,
   };
@@ -142,7 +140,6 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   } = rule;
 
   return {
-    isNew: false,
     author,
     isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === ENDPOINT_LIST_ID) ?? false,
     isBuildingBlock: buildingBlockType !== undefined,
@@ -154,7 +151,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     note: note!,
     references,
     severity: {
-      value: severity,
+      value: severity as Severity,
       mapping: fillEmptySeverityMappings(severityMapping),
       isMappingChecked: severityMapping.length > 0,
     },

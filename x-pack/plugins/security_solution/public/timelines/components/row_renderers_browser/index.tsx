@@ -102,12 +102,10 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
   const handleDisableAll = useCallback(() => {
-    // eslint-disable-next-line no-unused-expressions
     tableRef?.current?.setSelection([]);
   }, [tableRef]);
 
   const handleEnableAll = useCallback(() => {
-    // eslint-disable-next-line no-unused-expressions
     tableRef?.current?.setSelection(renderers);
   }, [tableRef]);
 

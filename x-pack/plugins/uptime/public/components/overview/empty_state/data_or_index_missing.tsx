@@ -69,7 +69,7 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiButton color="primary" href={`${basePath}/app/uptime#/settings`}>
+                  <EuiButton color="primary" href={`${basePath}/app/uptime/settings`}>
                     <FormattedMessage
                       id="xpack.uptime.emptyState.updateIndexPattern"
                       defaultMessage="Update index pattern settings"

@@ -6,6 +6,8 @@
 
 export const ABOUT_CONTINUE_BTN = '[data-test-subj="about-continue"]';
 
+export const ABOUT_EDIT_BUTTON = '[data-test-subj="edit-about-rule"]';
+
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -25,6 +27,8 @@ export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
+
+export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';
 
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';

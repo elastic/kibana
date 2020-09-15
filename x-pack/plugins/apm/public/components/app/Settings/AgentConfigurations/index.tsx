@@ -15,10 +15,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../../observability/public';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { useLocation } from '../../../../hooks/useLocation';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 import { AgentConfigurationList } from './List';
 

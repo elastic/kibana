@@ -5,7 +5,7 @@
  */
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
 
@@ -68,13 +68,18 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
+        let description: string | ReactNode = '';
+
         if (typeField.value?.length) {
           const type = typeField.value;
-          const descriptor = getProcessorDescriptor(type);
-          selectedOptions = descriptor
-            ? [{ label: descriptor.label, value: type }]
-            : // If there is no label for this processor type, just use the type as the label
-              [{ label: type, value: type }];
+          const processorDescriptor = getProcessorDescriptor(type);
+          if (processorDescriptor) {
+            description = processorDescriptor.description || '';
+            selectedOptions = [{ label: processorDescriptor.label, value: type }];
+          } else {
+            // If there is no label for this processor type, just use the type as the label
+            selectedOptions = [{ label: type, value: type }];
+          }
         } else {
           selectedOptions = [];
         }
@@ -102,9 +107,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
           <EuiFormRow
             label={typeField.label}
             labelAppend={typeField.labelAppend}
-            helpText={
-              typeof typeField.helpText === 'function' ? typeField.helpText() : typeField.helpText
-            }
+            helpText={typeof description === 'function' ? description() : description}
             error={error}
             isInvalid={isInvalid}
             fullWidth

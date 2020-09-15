@@ -20,7 +20,7 @@ import {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
-import { formatAuthenticationData, getHits } from './helpers';
+import { authenticationFields, formatAuthenticationData, getHits } from './helpers';
 
 export const authentications: SecuritySolutionFactory<HostsQueries.authentications> = {
   buildDsl: (options: HostAuthenticationsRequestOptions) => {
@@ -40,7 +40,7 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHits(response);
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationData(hit, auditdFieldsMap)
+      formatAuthenticationData(authenticationFields, hit, auditdFieldsMap)
     );
 
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
