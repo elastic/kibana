@@ -325,7 +325,7 @@ export class DynamicStyleProperty<T>
     };
   }
 
-  formatField(value: string | number | undefined | null): string | number {
+  formatField(value: RawValue): string | number {
     if (this.getField()) {
       const fieldName = this.getFieldName();
       const fieldFormatter = this._getFieldFormatter(fieldName);
