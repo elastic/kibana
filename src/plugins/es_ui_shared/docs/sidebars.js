@@ -33,6 +33,11 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'Examples',
+      items: ['form_lib/examples/validation'],
+    },
+    {
+      type: 'category',
       label: 'Core',
       items: [
         'form_lib/core/about',
