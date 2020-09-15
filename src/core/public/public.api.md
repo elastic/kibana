@@ -7,6 +7,8 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
+import { ConfigPath } from '@kbn/config';
+import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -19,8 +21,11 @@ import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
+import { Logger } from '@kbn/logging';
+import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
+import { PackageInfo } from '@kbn/config';
 import { ParsedQuery } from 'query-string';
 import { Path } from 'history';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -583,15 +588,7 @@ export interface DocLinksStart {
     };
 }
 
-// @public (undocumented)
-export interface EnvironmentMode {
-    // (undocumented)
-    dev: boolean;
-    // (undocumented)
-    name: 'development' | 'production';
-    // (undocumented)
-    prod: boolean;
-}
+export { EnvironmentMode }
 
 // @public
 export interface ErrorToastOptions extends ToastOptions {
@@ -935,19 +932,7 @@ export interface OverlayStart {
     openModal: OverlayModalStart['open'];
 }
 
-// @public (undocumented)
-export interface PackageInfo {
-    // (undocumented)
-    branch: string;
-    // (undocumented)
-    buildNum: number;
-    // (undocumented)
-    buildSha: string;
-    // (undocumented)
-    dist: boolean;
-    // (undocumented)
-    version: string;
-}
+export { PackageInfo }
 
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
