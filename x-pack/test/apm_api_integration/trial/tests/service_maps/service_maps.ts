@@ -262,6 +262,162 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             }
           `);
         });
+
+        it('returns service map elements filtering by environment not defined', async () => {
+          const start = encodeURIComponent('2020-06-28T10:24:46.055Z');
+          const end = encodeURIComponent('2020-06-29T10:24:46.055Z');
+          const environment = 'ENVIRONMENT_NOT_DEFINED';
+          const response = await supertest.get(
+            `/api/apm/service-map?start=${start}&end=${end}&environment=${environment}`
+          );
+          expect(response.status).to.be(200);
+          expectSnapshot(response.body).toMatchInline(`
+            Object {
+              "elements": Array [
+                Object {
+                  "data": Object {
+                    "id": "client~opbeans-node",
+                    "source": "client",
+                    "sourceData": Object {
+                      "agent.name": "rum-js",
+                      "id": "client",
+                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                      "service.name": "client",
+                    },
+                    "target": "opbeans-node",
+                    "targetData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                      "service.name": "opbeans-node",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "id": "opbeans-java~>postgresql",
+                    "source": "opbeans-java",
+                    "sourceData": Object {
+                      "agent.name": "java",
+                      "id": "opbeans-java",
+                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                      "service.name": "opbeans-java",
+                    },
+                    "target": ">postgresql",
+                    "targetData": Object {
+                      "id": ">postgresql",
+                      "label": "postgresql",
+                      "span.destination.service.resource": "postgresql",
+                      "span.subtype": "postgresql",
+                      "span.type": "db",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "id": "opbeans-node~>postgresql",
+                    "source": "opbeans-node",
+                    "sourceData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                      "service.name": "opbeans-node",
+                    },
+                    "target": ">postgresql",
+                    "targetData": Object {
+                      "id": ">postgresql",
+                      "label": "postgresql",
+                      "span.destination.service.resource": "postgresql",
+                      "span.subtype": "postgresql",
+                      "span.type": "db",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "id": "opbeans-node~>redis",
+                    "source": "opbeans-node",
+                    "sourceData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                      "service.name": "opbeans-node",
+                    },
+                    "target": ">redis",
+                    "targetData": Object {
+                      "id": ">redis",
+                      "label": "redis",
+                      "span.destination.service.resource": "redis",
+                      "span.subtype": "redis",
+                      "span.type": "cache",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "id": "opbeans-node~opbeans-java",
+                    "source": "opbeans-node",
+                    "sourceData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                      "service.name": "opbeans-node",
+                    },
+                    "target": "opbeans-java",
+                    "targetData": Object {
+                      "agent.name": "java",
+                      "id": "opbeans-java",
+                      "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                      "service.name": "opbeans-java",
+                    },
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "agent.name": "rum-js",
+                    "id": "client",
+                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                    "service.name": "client",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "agent.name": "nodejs",
+                    "id": "opbeans-node",
+                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                    "service.name": "opbeans-node",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "id": ">redis",
+                    "label": "redis",
+                    "span.destination.service.resource": "redis",
+                    "span.subtype": "redis",
+                    "span.type": "cache",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "agent.name": "java",
+                    "id": "opbeans-java",
+                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
+                    "service.name": "opbeans-java",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "id": ">postgresql",
+                    "label": "postgresql",
+                    "span.destination.service.resource": "postgresql",
+                    "span.subtype": "postgresql",
+                    "span.type": "db",
+                  },
+                },
+              ],
+            }
+          `);
+        });
       });
     });
 
