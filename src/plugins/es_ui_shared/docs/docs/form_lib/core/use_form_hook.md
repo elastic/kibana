@@ -128,7 +128,7 @@ export const MyComponent = ({ fetchedData }: Props) => {
     defaultValue: fetchedData,
     deserializer
   });
-  const [{ showAddress }] = useFormData({ form, watch: 'showAddress' })
+  const [{ showAddress }] = useFormData({ form, watch: 'showAddress' });
 
   // We can now use our "showAddress" internal field in the UI
   return (
