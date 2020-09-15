@@ -6,15 +6,13 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { CursorPosition } from '../../../../common/components/markdown_editor';
-import { FormData, FormHook } from '../../../../shared_imports';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { setInsertTimeline } from '../../../store/timeline/actions';
-import { State } from '../../../../common/store';
 
-export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldName: string) => {
+export const useInsertTimeline = (value: string, onChange: (newValue: string) => void) => {
   const basePath = window.location.origin + useBasePath();
   const dispatch = useDispatch();
   const [cursorPosition, setCursorPosition] = useState<CursorPosition>({
@@ -22,9 +20,7 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
     end: 0,
   });
 
-  const insertTimeline = useSelector((state: State) => {
-    return timelineSelectors.selectInsertTimeline(state);
-  });
+  const insertTimeline = useSelector(timelineSelectors.selectInsertTimeline, shallowEqual);
 
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null, graphEventId?: string) => {
@@ -32,18 +28,17 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
         !isEmpty(graphEventId) ? `,graphEventId:'${graphEventId}'` : ''
       },isOpen:!t)`;
 
-      const currentValue = form.getFormData()[fieldName];
       const newValue: string = [
-        currentValue.slice(0, cursorPosition.start),
+        value.slice(0, cursorPosition.start),
         cursorPosition.start === cursorPosition.end
           ? `[${title}](${builtLink})`
-          : `[${currentValue.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
-        currentValue.slice(cursorPosition.end),
+          : `[${value.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
+        value.slice(cursorPosition.end),
       ].join('');
 
-      form.setFieldValue(fieldName, newValue);
+      onChange(newValue);
     },
-    [basePath, cursorPosition, fieldName, form]
+    [value, onChange, basePath, cursorPosition]
   );
 
   const handleCursorChange = useCallback((cp: CursorPosition) => {
@@ -53,8 +48,7 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
   // insertTimeline selector is defined to attached a timeline to a case outside of the case page.
   // FYI, if you are in the case page we only use handleOnTimelineChange to attach a timeline to a case.
   useEffect(() => {
-    const currentValue = form.getFormData()[fieldName];
-    if (insertTimeline != null && currentValue != null) {
+    if (insertTimeline != null && value != null) {
       dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
       handleOnTimelineChange(
         insertTimeline.timelineTitle,
@@ -63,7 +57,7 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
       );
       dispatch(setInsertTimeline(null));
     }
-  }, [insertTimeline, dispatch, form, handleOnTimelineChange, fieldName]);
+  }, [insertTimeline, dispatch, handleOnTimelineChange, value]);
 
   return {
     cursorPosition,
