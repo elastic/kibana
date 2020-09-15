@@ -205,6 +205,7 @@ export const mockGlobalState: State = {
         id: 'test',
         savedObjectId: null,
         columns: defaultHeaders,
+        indexesName: DEFAULT_INDEX_PATTERN,
         itemsPerPage: 5,
         dataProviders: [],
         description: '',

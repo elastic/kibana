@@ -287,8 +287,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: indicesName },
             {
-              strategy: 'securitySolutionIndexFields',
               abortSignal: abortCtrl.current.signal,
+              strategy: 'securitySolutionIndexFields',
             }
           )
           .subscribe({
@@ -301,6 +301,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                     sourcererActions.setSource({
                       id: sourcererScopeName,
                       payload: {
+                        allExistingIndexPatterns: response.indicesExists.sort(),
                         browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                         docValueFields: getDocValueFields2(stringifyIndices, response.indexFields),
                         errorMessage: null,
@@ -308,7 +309,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                         indexPattern: getIndexFields(stringifyIndices, response.indexFields),
                         indicesExist: response.indicesExists.length > 0,
                         loading: false,
-                        allExistingIndexPatterns: response.indicesExists.sort(),
                       },
                     })
                   );
@@ -327,7 +327,10 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
               }
 
               if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({ title: i18n.FAIL_BEAT_FIELDS, text: msg.message });
+                notifications.toasts.addDanger({
+                  text: msg.message,
+                  title: i18n.FAIL_BEAT_FIELDS,
+                });
               }
             },
           });
