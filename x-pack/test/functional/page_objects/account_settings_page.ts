@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-//import { map as mapAsync } from 'bluebird';
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function AccountSettingProvider({ getService }) {
+export function AccountSettingProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const userMenu = getService('userMenu');
 
   class AccountSettingsPage {
-    async verifyAccountSettings(expectedEmail, expectedUserName) {
+    async verifyAccountSettings(expectedEmail: string, expectedUserName: string) {
       await userMenu.clickProvileLink();
 
       const usernameField = await testSubjects.find('username');
@@ -25,7 +25,7 @@ export function AccountSettingProvider({ getService }) {
       await userMenu.closeMenu();
     }
 
-    async changePassword(currentPassword, newPassword) {
+    async changePassword(currentPassword: string, newPassword: string) {
       await testSubjects.setValue('currentPassword', currentPassword);
       await testSubjects.setValue('newPassword', newPassword);
       await testSubjects.setValue('confirmNewPassword', newPassword);
