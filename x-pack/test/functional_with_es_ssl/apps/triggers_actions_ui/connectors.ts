@@ -78,7 +78,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
 
-      await find.clickByCssSelector('[data-test-subj="saveEditedActionButton"]:not(disabled)');
+      await find.clickByCssSelector(
+        '[data-test-subj="saveAndCloseEditedActionButton"]:not(disabled)'
+      );
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
@@ -94,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('should test a connector', async () => {
+    it('should test a connector and display a successful result', async () => {
       const connectorName = generateUniqueKey();
       const indexName = generateUniqueKey();
       await createIndexConnector(connectorName, indexName);
@@ -117,10 +119,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.find('executionSuccessfulResult');
       });
 
-      // test failure
-      await testSubjects.setValue('documentsJsonEditor', '{ "": "value" }', {
-        clearWithKeyboard: true,
-      });
+      await find.clickByCssSelector(
+        '[data-test-subj="cancelSaveEditedConnectorButton"]:not(disabled)'
+      );
+    });
+
+    it('should test a connector and display a failure result', async () => {
+      const connectorName = generateUniqueKey();
+      const indexName = generateUniqueKey();
+      await createIndexConnector(connectorName, indexName);
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+
+      await testSubjects.setValue('documentsJsonEditor', '{ "": "value" }');
 
       await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
 
@@ -130,6 +148,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           /error indexing documents/
         );
       });
+
+      await find.clickByCssSelector(
+        '[data-test-subj="cancelSaveEditedConnectorButton"]:not(disabled)'
+      );
     });
 
     it('should reset connector when canceling an edit', async () => {
@@ -233,7 +255,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
-      expect(await testSubjects.exists('saveEditedActionButton')).to.be(false);
+      expect(await testSubjects.exists('saveAndCloseEditedActionButton')).to.be(false);
     });
   });
 
