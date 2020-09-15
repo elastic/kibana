@@ -133,7 +133,8 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       onChange={onChange}
       options={options}
       searchProps={{
-        onSearch: setSearchValue,
+        onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
+          setSearchValue(e.currentTarget.value),
         'data-test-subj': 'header-search',
         inputRef: setSearchRef,
         compressed: true,
