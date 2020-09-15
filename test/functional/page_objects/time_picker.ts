@@ -39,7 +39,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const find = getService('find');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const { header, common } = getPageObjects(['header', 'common']);
+  const { header } = getPageObjects(['header']);
   const kibanaServer = getService('kibanaServer');
 
   class TimePicker {
@@ -127,7 +127,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
-      await common.sleep(500);
+      await browser.pressKeys(browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
 
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');

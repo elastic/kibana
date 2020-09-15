@@ -7,7 +7,6 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
-import { ErrorToastOptions as ErrorToastOptions_2 } from 'src/core/public/notifications';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -24,13 +23,12 @@ import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
 import { ParsedQuery } from 'query-string';
 import { Path } from 'history';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { ShallowPromise } from '@kbn/utility-types';
-import { ToastInputFields as ToastInputFields_2 } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -273,9 +271,12 @@ export interface ChromeNavControl {
 // @public
 export interface ChromeNavControls {
     // @internal (undocumented)
+    getCenter$(): Observable<ChromeNavControl[]>;
+    // @internal (undocumented)
     getLeft$(): Observable<ChromeNavControl[]>;
     // @internal (undocumented)
     getRight$(): Observable<ChromeNavControl[]>;
+    registerCenter(navControl: ChromeNavControl): void;
     registerLeft(navControl: ChromeNavControl): void;
     registerRight(navControl: ChromeNavControl): void;
 }
@@ -345,7 +346,6 @@ export interface ChromeStart {
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
-    getNavType$(): Observable<NavType>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
@@ -490,6 +490,9 @@ export interface DocLinksStart {
     readonly links: {
         readonly dashboard: {
             readonly drilldowns: string;
+            readonly drilldownsTriggerPicker: string;
+            readonly urlDrilldownTemplateSyntax: string;
+            readonly urlDrilldownVariables: string;
         };
         readonly filebeat: {
             readonly base: string;
