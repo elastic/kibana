@@ -292,7 +292,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
       rendered.update();
-      const forcemergeInput = rendered.find('input#hot-selectedForceMergeSegments');
+      const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '0' } });
       rendered.update();
       save(rendered);
@@ -303,7 +303,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
       rendered.update();
-      const forcemergeInput = rendered.find('input#hot-selectedForceMergeSegments');
+      const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '-1' } });
       rendered.update();
       save(rendered);
@@ -400,7 +400,7 @@ describe('edit policy', () => {
       setPhaseAfter(rendered, 'warm', '1');
       findTestSubject(rendered, 'warm-forceMergeSwitch').simulate('click');
       rendered.update();
-      const forcemergeInput = rendered.find('input#warm-selectedForceMergeSegments');
+      const forcemergeInput = findTestSubject(rendered, 'warm-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '0' } });
       rendered.update();
       save(rendered);
@@ -414,7 +414,7 @@ describe('edit policy', () => {
       setPhaseAfter(rendered, 'warm', '1');
       findTestSubject(rendered, 'warm-forceMergeSwitch').simulate('click');
       rendered.update();
-      const forcemergeInput = rendered.find('input#warm-selectedForceMergeSegments');
+      const forcemergeInput = findTestSubject(rendered, 'warm-selectedForceMergeSegments');
       forcemergeInput.simulate('change', { target: { value: '-1' } });
       rendered.update();
       save(rendered);

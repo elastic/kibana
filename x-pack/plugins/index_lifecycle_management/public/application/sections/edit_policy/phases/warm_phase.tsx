@@ -259,7 +259,7 @@ export class WarmPhase extends PureComponent<Props> {
                 </div>
               </Fragment>
             </EuiDescribedFormGroup>
-            <Forcemerge<WarmPhaseInterface>
+            <Forcemerge
               phase={'warm'}
               phaseData={phaseData}
               setPhaseData={setPhaseData}

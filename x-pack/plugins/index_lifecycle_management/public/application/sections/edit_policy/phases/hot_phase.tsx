@@ -315,7 +315,7 @@ export class HotPhase extends PureComponent<Props> {
           ) : null}
         </EuiDescribedFormGroup>
         {phaseData.rolloverEnabled ? (
-          <Forcemerge<HotPhaseInterface>
+          <Forcemerge
             phase={'hot'}
             phaseData={phaseData}
             setPhaseData={setPhaseData}

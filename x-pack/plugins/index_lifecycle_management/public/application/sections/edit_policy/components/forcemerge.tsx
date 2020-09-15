@@ -17,28 +17,26 @@ import React from 'react';
 import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { Phases, PhaseWithForcemergeAction } from '../../../../../common/types';
-import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
+import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 const forcemergeLabel = i18n.translate('xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel', {
   defaultMessage: 'Force merge data',
 });
 
-interface Props<T extends PhaseWithForcemergeAction> {
-  errors?: PhaseValidationErrors<T>;
+interface Props {
+  errors?: PhaseValidationErrors<PhaseWithForcemergeAction>;
   phase: keyof Phases & string;
-  phaseData: T;
-  setPhaseData: (dataKey: keyof T & string, value: boolean | string) => void;
+  phaseData: PhaseWithForcemergeAction;
+  setPhaseData: (dataKey: keyof PhaseWithForcemergeAction, value: boolean | string) => void;
   isShowingErrors: boolean;
 }
-export const Forcemerge = <T extends PhaseWithForcemergeAction>({
+export const Forcemerge: React.FunctionComponent<Props> = ({
   errors,
   phaseData,
   phase,
   setPhaseData,
   isShowingErrors,
-}: React.PropsWithChildren<Props<T>>) => {
-  const phaseForcemergeEnabledProperty = propertyof<T>('forceMergeEnabled');
-  const phaseForcemergeSegmentsProperty = propertyof<T>('selectedForceMergeSegments');
+}) => {
   return (
     <EuiDescribedFormGroup
       title={
@@ -67,7 +65,7 @@ export const Forcemerge = <T extends PhaseWithForcemergeAction>({
         aria-label={forcemergeLabel}
         checked={phaseData.forceMergeEnabled}
         onChange={(e) => {
-          setPhaseData(phaseForcemergeEnabledProperty, e.target.checked);
+          setPhaseData('forceMergeEnabled', e.target.checked);
         }}
         aria-controls="forcemergeContent"
       />
@@ -76,7 +74,7 @@ export const Forcemerge = <T extends PhaseWithForcemergeAction>({
       <div id="forcemergeContent" aria-live="polite" role="region">
         {phaseData.forceMergeEnabled ? (
           <ErrableFormRow
-            id={`${phase}-${phaseForcemergeSegmentsProperty}`}
+            id={`${phase}-selectedForceMergeSegments`}
             label={i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel', {
               defaultMessage: 'Number of segments',
             })}
@@ -84,10 +82,10 @@ export const Forcemerge = <T extends PhaseWithForcemergeAction>({
             errors={errors?.selectedForceMergeSegments}
           >
             <EuiFieldNumber
-              id={`${phase}-${phaseForcemergeSegmentsProperty}`}
+              data-test-subj={`${phase}-selectedForceMergeSegments`}
               value={phaseData.selectedForceMergeSegments}
               onChange={(e) => {
-                setPhaseData(phaseForcemergeSegmentsProperty, e.target.value);
+                setPhaseData('selectedForceMergeSegments', e.target.value);
               }}
               min={1}
             />
