@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServerApiError } from '../../../../common/types';
 import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 
 import {
@@ -87,8 +88,12 @@ export const isDeletionInProgress = (state: Immutable<TrustedAppsListPageState>)
   return isLoadingResourceState(state.deletionDialog.submissionResourceState);
 };
 
-export const hasDeletionError = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  return isFailedResourceState(state.deletionDialog.submissionResourceState);
+export const getDeletionError = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<ServerApiError> | undefined => {
+  const submissionResourceState = state.deletionDialog.submissionResourceState;
+
+  return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
 };
 
 export const getDeletionSubmissionResourceState = (

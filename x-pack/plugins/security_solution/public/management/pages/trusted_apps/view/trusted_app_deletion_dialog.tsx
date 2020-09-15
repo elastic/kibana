@@ -39,7 +39,7 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   mainMessage: (
     <FormattedMessage
       id="xpack.securitySolution.trustedapps.deletionDialog.mainMessage"
-      defaultMessage="You are removing trusted application {name}."
+      defaultMessage='You are removing trusted application "{name}".'
       values={{ name: <strong>{entry?.name}</strong> }}
     />
   ),

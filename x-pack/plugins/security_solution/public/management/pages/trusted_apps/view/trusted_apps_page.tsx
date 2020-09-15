@@ -4,33 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { hasDeletionError } from '../store/selectors';
-import { useToasts } from '../../../../common/lib/kibana';
-import { useTrustedAppsSelector } from './hooks';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { TrustedAppsList } from './trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
-
-const getDeletionError = () => {
-  return {
-    title: i18n.translate('xpack.securitySolution.trustedapps.deletionError.title', {
-      defaultMessage: 'Could not delete the entry',
-    }),
-    text: i18n.translate('xpack.securitySolution.trustedapps.deletionError.text', {
-      defaultMessage: 'Please try refreshing the list and performing operation again.',
-    }),
-  };
-};
+import { TrustedAppsNotifications } from './trusted_apps_notifications';
 
 export const TrustedAppsPage = memo(() => {
-  const toasts = useToasts();
-
-  if (useTrustedAppsSelector(hasDeletionError)) {
-    toasts.addDanger(getDeletionError());
-  }
-
   return (
     <AdministrationListPage
       beta={true}
@@ -47,6 +27,7 @@ export const TrustedAppsPage = memo(() => {
         />
       }
     >
+      <TrustedAppsNotifications />
       <TrustedAppDeletionDialog />
       <TrustedAppsList />
     </AdministrationListPage>
