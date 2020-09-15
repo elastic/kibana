@@ -72,6 +72,7 @@ export function App({
   originatingApp,
   navigation,
   onAppLeave,
+  setHeaderActionMenu,
   history,
   getAppNameFromId,
 }: {
@@ -85,6 +86,7 @@ export function App({
   redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
   originatingApp?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: History;
   getAppNameFromId?: (appId: string) => string | undefined;
 }) {
@@ -419,6 +421,7 @@ export function App({
         <div className="lnsApp">
           <div className="lnsApp__header">
             <TopNavMenu
+              setMenuMountPoint={setHeaderActionMenu}
               config={[
                 ...(!!state.originatingApp && lastKnownDoc?.id
                   ? [
