@@ -34,6 +34,7 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
 import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
+import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -194,11 +195,11 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
+          <TooltipWrapper
+            tooltipContent={i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
               defaultMessage: 'This setting only applies to line and area charts.',
             })}
-            delay="long"
+            condition={!hasNonBarSeries}
           >
             <ToolbarPopover
               title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
@@ -237,7 +238,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 />
               </EuiFormRow>
             </ToolbarPopover>
-          </EuiToolTip>
+          </TooltipWrapper>
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
@@ -272,12 +273,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <EuiToolTip
-            anchorClassName="eui-displayBlock"
-            content={i18n.translate('xpack.lens.xyChart.leftAxisDisabledHelpText', {
+          <TooltipWrapper
+            tooltipContent={i18n.translate('xpack.lens.xyChart.leftAxisDisabledHelpText', {
               defaultMessage: 'This setting only applies when left axis is enabled.',
             })}
-            delay="long"
+            condition={
+              Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
+            }
           >
             <AxisSettingsPopover
               axis="yLeft"
@@ -294,7 +296,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             />
-          </EuiToolTip>
+          </TooltipWrapper>
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
@@ -307,12 +309,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
           />
-          <EuiToolTip
-            anchorClassName="eui-displayBlock"
-            content={i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
+          <TooltipWrapper
+            tooltipContent={i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
               defaultMessage: 'This setting only applies when right axis is enabled.',
             })}
-            delay="long"
+            condition={
+              Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length === 0
+            }
           >
             <AxisSettingsPopover
               axis="yRight"
@@ -330,7 +333,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             />
-          </EuiToolTip>
+          </TooltipWrapper>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
