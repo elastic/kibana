@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformPivotConfig } from '../../../../common';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
 
 import {
   applyFormFieldsToTransformConfig,
@@ -86,9 +86,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
   });
 
   test('should include previously nonexisting attributes', () => {
-    const transformConfigMock = getTransformConfigMock();
-    delete transformConfigMock.description;
-    delete transformConfigMock.frequency;
+    const { description, frequency, ...transformConfigMock } = getTransformConfigMock();
 
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock('the-new-description'),
