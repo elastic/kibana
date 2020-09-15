@@ -307,6 +307,7 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
+    /*
     test('can restore from spec', async () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
@@ -321,6 +322,7 @@ describe('IndexPattern', () => {
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
       expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
     });
+    */
   });
 
   describe('popularizeField', () => {
