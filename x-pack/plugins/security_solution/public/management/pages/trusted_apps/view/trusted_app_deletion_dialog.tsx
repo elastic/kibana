@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,30 +17,57 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
+  EuiText,
 } from '@elastic/eui';
 
+import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { useTrustedAppsSelector } from './hooks';
-import { isDeletionDialogOpen, isDeletionInProgress } from '../store/selectors';
+import {
+  getDeletionDialogEntry,
+  isDeletionDialogOpen,
+  isDeletionInProgress,
+} from '../store/selectors';
 
-const TRANSLATIONS = {
-  title: i18n.translate('xpack.securitySolution.trustedapps.deletionDialog.title', {
-    defaultMessage: 'Remove trusted application',
-  }),
-  message: i18n.translate('xpack.securitySolution.trustedapps.deletionDialog.message', {
-    defaultMessage: 'This action cannot be undone. Are you sure you wish to continue?',
-  }),
-  cancelButton: i18n.translate('xpack.securitySolution.trustedapps.deletionDialog.cancelButton', {
-    defaultMessage: 'Cancel',
-  }),
-  confirmButton: i18n.translate('xpack.securitySolution.trustedapps.deletionDialog.confirmButton', {
-    defaultMessage: 'Remove trusted application',
-  }),
-};
+const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
+  title: (
+    <FormattedMessage
+      id="xpack.securitySolution.trustedapps.deletionDialog.title"
+      defaultMessage="Remove trusted application"
+    />
+  ),
+  mainMessage: (
+    <FormattedMessage
+      id="xpack.securitySolution.trustedapps.deletionDialog.mainMessage"
+      defaultMessage="You are removing trusted application {name}."
+      values={{ name: <strong>{entry?.name}</strong> }}
+    />
+  ),
+  subMessage: (
+    <FormattedMessage
+      id="xpack.securitySolution.trustedapps.deletionDialog.subMessage"
+      defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+    />
+  ),
+  cancelButton: (
+    <FormattedMessage
+      id="xpack.securitySolution.trustedapps.deletionDialog.cancelButton"
+      defaultMessage="Cancel"
+    />
+  ),
+  confirmButton: (
+    <FormattedMessage
+      id="xpack.securitySolution.trustedapps.deletionDialog.confirmButton"
+      defaultMessage="Remove trusted application"
+    />
+  ),
+});
 
 export const TrustedAppDeletionDialog = memo(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const isBusy = useTrustedAppsSelector(isDeletionInProgress);
+  const entry = useTrustedAppsSelector(getDeletionDialogEntry);
+  const translations = useMemo(() => getTranslations(entry), [entry]);
   const onConfirm = useCallback(() => {
     dispatch({ type: 'trustedAppDeletionDialogConfirmed' });
   }, [dispatch]);
@@ -55,20 +82,23 @@ export const TrustedAppDeletionDialog = memo(() => {
       <EuiOverlayMask>
         <EuiModal onClose={onCancel}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{TRANSLATIONS.title}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>{translations.title}</EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            <p>{TRANSLATIONS.message}</p>
+            <EuiText>
+              <p>{translations.mainMessage}</p>
+              <p>{translations.subMessage}</p>
+            </EuiText>
           </EuiModalBody>
 
           <EuiModalFooter>
             <EuiButtonEmpty onClick={onCancel} isDisabled={isBusy}>
-              {TRANSLATIONS.cancelButton}
+              {translations.cancelButton}
             </EuiButtonEmpty>
 
             <EuiButton fill onClick={onConfirm} isLoading={isBusy}>
-              {TRANSLATIONS.confirmButton}
+              {translations.confirmButton}
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>

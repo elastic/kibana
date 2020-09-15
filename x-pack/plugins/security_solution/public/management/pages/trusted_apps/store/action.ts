@@ -6,6 +6,7 @@
 
 import { Action } from 'redux';
 
+import { TrustedApp } from '../../../../../common/endpoint/types';
 import { AsyncResourceState, TrustedAppsListData } from '../state';
 
 export type TrustedAppsListDataOutdated = Action<'trustedAppsListDataOutdated'>;
@@ -25,7 +26,7 @@ export type TrustedAppDeletionSubmissionResourceStateChanged = ResourceStateChan
 
 export type TrustedAppDeletionDialogStarted = Action<'trustedAppDeletionDialogStarted'> & {
   payload: {
-    entryId: string;
+    entry: TrustedApp;
   };
 };
 

@@ -83,7 +83,7 @@ const trustedAppDeletionDialogStarted: CaseReducer<TrustedAppDeletionDialogStart
   return {
     ...state,
     deletionDialog: {
-      entryId: action.payload.entryId,
+      entry: action.payload.entry,
       confirmed: false,
       submissionResourceState: { type: 'UninitialisedResourceState' },
     },

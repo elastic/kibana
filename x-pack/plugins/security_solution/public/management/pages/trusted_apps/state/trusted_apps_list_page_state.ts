@@ -26,7 +26,7 @@ export interface TrustedAppsListPageState {
     freshDataTimestamp: number;
   };
   deletionDialog: {
-    entryId?: string;
+    entry?: TrustedApp;
     confirmed: boolean;
     submissionResourceState: AsyncResourceState;
   };

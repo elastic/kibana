@@ -30,7 +30,7 @@ import {
 
 import {
   getCurrentListResourceState,
-  getDeletionDialogEntryId,
+  getDeletionDialogEntry,
   getDeletionSubmissionResourceState,
   getLastLoadedListResourceState,
   getListCurrentPageIndex,
@@ -103,9 +103,9 @@ const submitDeletionIfNeeded = async (
   trustedAppsService: TrustedAppsService
 ) => {
   const submissionResourceState = getDeletionSubmissionResourceState(store.getState());
-  const entryId = getDeletionDialogEntryId(store.getState());
+  const entry = getDeletionDialogEntry(store.getState());
 
-  if (isStaleResourceState(submissionResourceState) && entryId !== undefined) {
+  if (isStaleResourceState(submissionResourceState) && entry !== undefined) {
     store.dispatch(
       createTrustedAppDeletionSubmissionResourceStateChanged({
         type: 'LoadingResourceState',
@@ -114,7 +114,7 @@ const submitDeletionIfNeeded = async (
     );
 
     try {
-      await trustedAppsService.deleteTrustedApp({ id: entryId });
+      await trustedAppsService.deleteTrustedApp({ id: entry.id });
 
       store.dispatch(
         createTrustedAppDeletionSubmissionResourceStateChanged({

@@ -64,7 +64,7 @@ const COLUMN_TITLES: Readonly<
 
 type ActionsList = EuiTableActionsColumnType<Immutable<TrustedApp>>['actions'];
 
-const getActionDefinitions = (dispatch: Dispatch<AppAction>): ActionsList => [
+const getActionDefinitions = (dispatch: Dispatch<Immutable<AppAction>>): ActionsList => [
   {
     name: i18n.translate('xpack.securitySolution.trustedapps.list.actions.delete', {
       defaultMessage: 'Delete',
@@ -81,7 +81,7 @@ const getActionDefinitions = (dispatch: Dispatch<AppAction>): ActionsList => [
     onClick: (item: Immutable<TrustedApp>) => {
       dispatch({
         type: 'trustedAppDeletionDialogStarted',
-        payload: { entryId: item.id },
+        payload: { entry: item },
       });
     },
     isPrimary: true,
@@ -90,7 +90,7 @@ const getActionDefinitions = (dispatch: Dispatch<AppAction>): ActionsList => [
 
 type ColumnsList = Array<EuiBasicTableColumn<Immutable<TrustedApp>>>;
 
-const getColumnDefinitions = (dispatch: Dispatch<AppAction>): ColumnsList => [
+const getColumnDefinitions = (dispatch: Dispatch<Immutable<AppAction>>): ColumnsList => [
   {
     field: 'name',
     name: COLUMN_TITLES.name,
