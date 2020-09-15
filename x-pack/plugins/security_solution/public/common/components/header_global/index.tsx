@@ -21,12 +21,7 @@ import * as i18n from './translations';
 import { useWithSource } from '../../containers/source';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { useKibana } from '../../lib/kibana';
-import {
-  APP_ID,
-  ADD_DATA_PATH,
-  APP_DETECTIONS_PATH,
-  GLOBAL_HEADER_HEIGHT,
-} from '../../../../common/constants';
+import { APP_ID, ADD_DATA_PATH, APP_DETECTIONS_PATH } from '../../../../common/constants';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 import { LinkAnchor } from '../links';
 
