@@ -33,7 +33,6 @@ export const executeScript = async ({
   // Using _msearch because _search with index name in path dorks everything up
   const header = {
     index: indexPatternTitle,
-    ignore_unavailable: true,
   };
 
   const search = {
@@ -61,10 +60,12 @@ export const executeScript = async ({
     search.query = query;
   }
 
-  const body = `${JSON.stringify(header)}\n${JSON.stringify(search)}\n`;
-  const esResp = await http.fetch('/elasticsearch/_msearch', { method: 'POST', body });
+  const res = await http.post('/internal/_msearch', {
+    body: JSON.stringify({ searches: [{ header, body: search }] }),
+  });
+
   // unwrap _msearch response
-  return esResp.responses[0];
+  return res?.body?.responses[0];
 };
 
 export const isScriptValid = async ({
