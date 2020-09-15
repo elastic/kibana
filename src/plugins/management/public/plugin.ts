@@ -74,7 +74,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         defaultMessage: 'Stack Management',
       }),
       order: 9040,
-      euiIconType: 'managementApp',
+      euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
