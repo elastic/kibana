@@ -9691,7 +9691,6 @@
     "xpack.lens.pieChart.legendDisplayLegend": "凡例表示",
     "xpack.lens.pieChart.nestedLegendLabel": "ネストされた凡例",
     "xpack.lens.pieChart.numberLabels": "ラベル値",
-    "xpack.lens.pieChart.percentDecimalsLabel": "割合の小数点桁数",
     "xpack.lens.pieChart.showCategoriesLabel": "内部または外部",
     "xpack.lens.pieChart.showFormatterValuesLabel": "値を表示",
     "xpack.lens.pieChart.showPercentValuesLabel": "割合を表示",
