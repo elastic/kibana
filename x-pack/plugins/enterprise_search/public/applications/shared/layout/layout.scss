@@ -7,8 +7,11 @@
 .enterpriseSearchLayout {
   $sideBarWidth: $euiSize * 15;
   $sideBarMobileHeight: $euiSize * 4.75;
+  $consoleHeaderHeight: 98px; // NOTE: Keep an eye on this for changes
 
   display: block;
+  background-color: $euiColorEmptyShade;
+  height: calc(100vh - #{$consoleHeaderHeight});
   position: relative;
   left: $sideBarWidth;
   width: calc(100% - #{$sideBarWidth});
@@ -44,8 +47,7 @@
     overflow-y: auto;
     overflow-x: hidden;
 
-    $kibanaHeader: 49px; // NOTE: Keep an eye on this for changes
-    height: calc(100vh - #{$kibanaHeader});
+    height: calc(100vh - #{$consoleHeaderHeight});
     width: $sideBarWidth;
 
     background-color: $euiColorLightestShade;
