@@ -6,15 +6,15 @@ import failedTestReporter
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
+import kibanaAgent
 
 object XPackJest : BuildType({
   name = "X-Pack Jest Unit"
   paused = true
   description = "Executes X-Pack Jest Unit Tests"
 
-  requirements {
-    startsWith("teamcity.agent.name", "kibana-standard-8-", "RQ_AGENT_NAME")
-  }
+  // TODO temporarily run on a larger machine
+  kibanaAgent(16)
 
   steps {
     script {
