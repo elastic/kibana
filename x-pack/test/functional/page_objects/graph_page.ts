@@ -200,7 +200,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
     }
 
     async getSearchFilter() {
-      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      const searchFilter = await find.allByCssSelector('main .euiFieldSearch');
       return searchFilter[0];
     }
 
