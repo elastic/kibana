@@ -11,6 +11,7 @@ import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/publ
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
+import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
@@ -31,6 +32,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { searchProvider } from './search_provider';
 
 import './index.scss';
 
@@ -41,6 +43,7 @@ export interface LensPluginSetupDependencies {
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -78,6 +81,7 @@ export class LensPlugin {
       embeddable,
       visualizations,
       charts,
+      globalSearch,
     }: LensPluginSetupDependencies
   ) {
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
@@ -115,6 +119,10 @@ export class LensPlugin {
         return mountApp(core, params, this.createEditorFrame!);
       },
     });
+
+    if (globalSearch) {
+      globalSearch.registerResultProvider(searchProvider);
+    }
 
     urlForwarding.forwardApp('lens', 'lens');
   }
