@@ -24,7 +24,6 @@ import { EmbeddablePublicPlugin } from './plugin';
 
 export {
   ACTION_ADD_PANEL,
-  ACTION_APPLY_FILTER,
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
