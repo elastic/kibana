@@ -79,32 +79,18 @@ function getParamsForNewMode(
   };
 }
 
-// Be careful with labels and add the "key" value only if the label is defined
-function injectLabelIfAvailable(rangeRecord: Partial<RangeType>, label: string) {
-  if (label) {
-    rangeRecord.key = label;
-  }
-  return rangeRecord;
-}
-
 function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
   if (params.type === MODES.Range) {
     return {
       field: sourceField,
       ranges: params.ranges.filter(isValidRange).map<Partial<RangeType>>((range) => {
         if (isFullRange(range)) {
-          return injectLabelIfAvailable(
-            {
-              from: range.from,
-              to: range.to,
-            },
-            range.label
-          );
+          return { from: range.from, to: range.to };
         }
         // create a copy with only the valid numeric range prop
         const prop = isValidNumber(range.from) ? 'from' : 'to';
         const value = isValidNumber(range.from) ? range.from : range.to;
-        return injectLabelIfAvailable({ [prop]: value }, range.label);
+        return { [prop]: value };
       }),
     };
   }
