@@ -29,6 +29,7 @@ import {
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
 } from '../../types';
+import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
@@ -279,9 +280,11 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       kuery: request.query.kuery,
     });
-    const totalInactive = await AgentService.countInactiveAgents(soClient, {
-      kuery: request.query.kuery,
-    });
+    const totalInactive = request.query.showInactive
+      ? await AgentService.countInactiveAgents(soClient, {
+          kuery: request.query.kuery,
+        })
+      : 0;
 
     const body: GetAgentsResponse = {
       list: agents.map((agent) => ({
@@ -326,6 +329,13 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
+  if (!licenseService.isGoldPlus()) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: 'Requires Gold license' },
+    });
+  }
+
   const soClient = context.core.savedObjects.client;
   try {
     // Reassign by array of IDs

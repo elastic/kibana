@@ -8,6 +8,7 @@ import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { PostAgentUnenrollResponse, PostBulkAgentUnenrollResponse } from '../../../common/types';
 import { PostAgentUnenrollRequestSchema, PostBulkAgentUnenrollRequestSchema } from '../../types';
+import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 
 export const postAgentUnenrollHandler: RequestHandler<
@@ -38,6 +39,12 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentUnenrollRequestSchema.body>
 > = async (context, request, response) => {
+  if (!licenseService.isGoldPlus()) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: 'Requires Gold license' },
+    });
+  }
   const soClient = context.core.savedObjects.client;
   const unenrollAgents =
     request.body?.force === true ? AgentService.forceUnenrollAgents : AgentService.unenrollAgents;

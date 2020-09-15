@@ -45,7 +45,7 @@ import {
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
-import { appContextService, licenseService } from '../../services';
+import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { IngestManagerConfigType } from '../..';
 
@@ -216,24 +216,23 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
     getAgentStatusForAgentPolicyHandler
   );
 
-  // Bulk agent actions (license-protected)
-  if (licenseService.isGoldPlus()) {
-    router.post(
-      {
-        path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
-        validate: PostBulkAgentReassignRequestSchema,
-        options: { tags: [`access:${PLUGIN_ID}-all`] },
-      },
-      postBulkAgentsReassignHandler
-    );
+  // Bulk reassign
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+      validate: PostBulkAgentReassignRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsReassignHandler
+  );
 
-    router.post(
-      {
-        path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
-        validate: PostBulkAgentUnenrollRequestSchema,
-        options: { tags: [`access:${PLUGIN_ID}-all`] },
-      },
-      postBulkAgentsUnenrollHandler
-    );
-  }
+  // Bulk unenroll
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+      validate: PostBulkAgentUnenrollRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postBulkAgentsUnenrollHandler
+  );
 };

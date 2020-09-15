@@ -99,7 +99,7 @@ export async function forceUnenrollAgents(
         kuery: string;
       }
 ) {
-  // Filter to agents that do not already unenrolled, or unenrolling
+  // Filter to agents that are not already unenrolled
   const agents =
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
@@ -109,9 +109,7 @@ export async function forceUnenrollAgents(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = agents.filter(
-    (agent) => !agent.unenrollment_started_at && !agent.unenrolled_at
-  );
+  const agentsToUpdate = agents.filter((agent) => !agent.unenrolled_at);
   const now = new Date().toISOString();
   const apiKeys: string[] = [];
 
