@@ -349,6 +349,32 @@ describe('configureClient', () => {
           ]
         `);
       });
+
+      it('when request body is null', () => {
+        const client = configureClient(
+          createFakeConfig({
+            logQueries: true,
+          }),
+          { logger, scoped: false }
+        );
+
+        const response = createResponseWithBody(null);
+
+        client.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "200
+          GET /foo?hello=dolly",
+              Object {
+                "tags": Array [
+                  "query",
+                ],
+              },
+            ],
+          ]
+        `);
+      });
     });
 
     it('properly encode queries', () => {
