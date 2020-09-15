@@ -53,6 +53,7 @@ Object {
           "groupBy0": Object {
             "terms": Object {
               "field": "host.name",
+              "order": "asc",
             },
           },
         },

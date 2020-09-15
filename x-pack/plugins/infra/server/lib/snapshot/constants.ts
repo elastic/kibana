@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const META_KEY = '__metadata__';
+// TODO: Make SNAPSHOT_COMPOSITE_REQUEST_SIZE configurable from kibana.yml
+
+export const SNAPSHOT_COMPOSITE_REQUEST_SIZE = 75;

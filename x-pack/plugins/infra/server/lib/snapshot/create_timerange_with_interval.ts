@@ -5,16 +5,14 @@
  */
 
 import { uniq } from 'lodash';
-import { InfraTimerangeInput } from '../../../../common/http_api';
-import { ESSearchClient } from '../../../lib/metrics/types';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
-import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
-import { getMetricsAggregations, InfraSnapshotRequestOptions } from './get_metrics_aggregations';
-import {
-  MetricsUIAggregation,
-  ESBasicMetricAggRT,
-} from '../../../../common/inventory_models/types';
-import { getDatasetForField } from '../../metrics_explorer/lib/get_dataset_for_field';
+import { InfraSnapshotRequestOptions } from './types';
+import { getMetricsAggregations } from './query_helpers';
+import { calculateMetricInterval } from '../../utils/calculate_metric_interval';
+import { MetricsUIAggregation, ESBasicMetricAggRT } from '../../../common/inventory_models/types';
+import { getDatasetForField } from '../../routes/metrics_explorer/lib/get_dataset_for_field';
+import { InfraTimerangeInput } from '../../../common/http_api/snapshot_api';
+import { ESSearchClient } from '.';
+import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 
 const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequestOptions) => {
   const { timerange } = options;

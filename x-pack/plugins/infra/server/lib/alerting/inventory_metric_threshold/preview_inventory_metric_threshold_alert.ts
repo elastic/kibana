@@ -26,7 +26,7 @@ interface InventoryMetricThresholdParams {
 interface PreviewInventoryMetricThresholdAlertParams {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   params: InventoryMetricThresholdParams;
-  source: InfraSource;
+  config: InfraSource['configuration'];
   lookback: Unit;
   alertInterval: string;
 }
@@ -34,7 +34,7 @@ interface PreviewInventoryMetricThresholdAlertParams {
 export const previewInventoryMetricThresholdAlert = async ({
   callCluster,
   params,
-  source,
+  config,
   lookback,
   alertInterval,
 }: PreviewInventoryMetricThresholdAlertParams) => {
@@ -55,7 +55,7 @@ export const previewInventoryMetricThresholdAlert = async ({
   try {
     const results = await Promise.all(
       criteria.map((c) =>
-        evaluateCondition(c, nodeType, source, callCluster, filterQuery, lookbackSize)
+        evaluateCondition(c, nodeType, config, callCluster, filterQuery, lookbackSize)
       )
     );
 

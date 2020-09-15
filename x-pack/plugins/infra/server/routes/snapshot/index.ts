@@ -10,10 +10,10 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
+import { parseFilterQuery } from '../../utils/serialized_query';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
 import { throwErrors } from '../../../common/runtime_types';
 import { createSearchClient } from '../../lib/create_search_client';
-import { getNodes } from './lib/get_nodes';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -30,22 +30,43 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const snapshotRequest = pipe(
+        const {
+          filterQuery,
+          nodeType,
+          groupBy,
+          sourceId,
+          metrics,
+          timerange,
+          accountId,
+          region,
+          includeTimeseries,
+          overrideCompositeSize,
+        } = pipe(
           SnapshotRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-
         const source = await libs.sources.getSourceConfiguration(
           requestContext.core.savedObjects.client,
-          snapshotRequest.sourceId
+          sourceId
         );
+        UsageCollector.countNode(nodeType);
+        const options = {
+          filterQuery: parseFilterQuery(filterQuery),
+          accountId,
+          region,
+          nodeType,
+          groupBy,
+          sourceConfiguration: source.configuration,
+          metrics,
+          timerange,
+          includeTimeseries,
+          overrideCompositeSize,
+        };
 
-        UsageCollector.countNode(snapshotRequest.nodeType);
         const client = createSearchClient(requestContext, framework);
-        const snapshotResponse = await getNodes(client, snapshotRequest, source);
-
+        const nodesWithInterval = await libs.snapshot.getNodes(client, options);
         return response.ok({
-          body: SnapshotNodeResponseRT.encode(snapshotResponse),
+          body: SnapshotNodeResponseRT.encode(nodesWithInterval),
         });
       } catch (error) {
         return response.internalError({

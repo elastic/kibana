@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESSearchClient } from '../metrics/types';
+import { ESSearchClient } from '../snapshot';
 
 export const hasData = async (index: string, client: ESSearchClient) => {
   const params = {

@@ -33,6 +33,7 @@ export const MetricsAPIRequestRT = rt.intersection([
     afterKey: rt.union([rt.null, afterKeyObjectRT]),
     limit: rt.union([rt.number, rt.null, rt.undefined]),
     filters: rt.array(rt.object),
+    forceInterval: rt.boolean,
     dropLastBucket: rt.boolean,
     alignDataToEnd: rt.boolean,
   }),
@@ -58,10 +59,7 @@ export const MetricsAPIRowRT = rt.intersection([
   rt.type({
     timestamp: rt.number,
   }),
-  rt.record(
-    rt.string,
-    rt.union([rt.string, rt.number, rt.null, rt.undefined, rt.array(rt.object)])
-  ),
+  rt.record(rt.string, rt.union([rt.string, rt.number, rt.null, rt.undefined])),
 ]);
 
 export const MetricsAPISeriesRT = rt.intersection([

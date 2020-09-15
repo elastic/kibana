@@ -19,6 +19,7 @@ import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_sta
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
+import { InfraSnapshot } from './lib/snapshot';
 import { InfraSourceStatus } from './lib/source_status';
 import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
@@ -104,6 +105,7 @@ export class InfraServerPlugin {
         sources,
       }
     );
+    const snapshot = new InfraSnapshot();
 
     // register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
@@ -127,6 +129,7 @@ export class InfraServerPlugin {
     this.libs = {
       configuration: this.config,
       framework,
+      snapshot,
       sources,
       sourceStatus,
       ...domainLibs,

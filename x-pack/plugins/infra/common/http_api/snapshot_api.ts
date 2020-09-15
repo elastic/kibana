@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
-import { MetricsAPISeriesRT } from './metrics_api';
+import { metricsExplorerSeriesRT } from './metrics_explorer';
 
 export const SnapshotNodePathRT = rt.intersection([
   rt.type({
@@ -22,7 +22,7 @@ const SnapshotNodeMetricOptionalRT = rt.partial({
   value: rt.union([rt.number, rt.null]),
   avg: rt.union([rt.number, rt.null]),
   max: rt.union([rt.number, rt.null]),
-  timeseries: MetricsAPISeriesRT,
+  timeseries: metricsExplorerSeriesRT,
 });
 
 const SnapshotNodeMetricRequiredRT = rt.type({
@@ -36,7 +36,6 @@ export const SnapshotNodeMetricRT = rt.intersection([
 export const SnapshotNodeRT = rt.type({
   metrics: rt.array(SnapshotNodeMetricRT),
   path: rt.array(SnapshotNodePathRT),
-  name: rt.string,
 });
 
 export const SnapshotNodeResponseRT = rt.type({

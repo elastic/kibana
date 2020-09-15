@@ -5,7 +5,6 @@
  */
 
 import { get, values, first } from 'lodash';
-import * as rt from 'io-ts';
 import {
   MetricsAPIRequest,
   MetricsAPISeries,
@@ -14,20 +13,15 @@ import {
 } from '../../../../common/http_api/metrics_api';
 import {
   HistogramBucket,
+  MetricValueType,
   BasicMetricValueRT,
   NormalizedMetricValueRT,
   PercentilesTypeRT,
   PercentilesKeyedTypeRT,
-  TopHitsTypeRT,
-  MetricValueTypeRT,
 } from '../types';
-
 const BASE_COLUMNS = [{ name: 'timestamp', type: 'date' }] as MetricsAPIColumn[];
 
-const ValueObjectTypeRT = rt.union([rt.string, rt.number, MetricValueTypeRT]);
-type ValueObjectType = rt.TypeOf<typeof ValueObjectTypeRT>;
-
-const getValue = (valueObject: ValueObjectType) => {
+const getValue = (valueObject: string | number | MetricValueType) => {
   if (NormalizedMetricValueRT.is(valueObject)) {
     return valueObject.normalized_value || valueObject.value;
   }
@@ -56,10 +50,6 @@ const getValue = (valueObject: ValueObjectType) => {
     return valueObject.value;
   }
 
-  if (TopHitsTypeRT.is(valueObject)) {
-    return valueObject.hits.hits.map((hit) => hit._source);
-  }
-
   return null;
 };
 
@@ -71,8 +61,8 @@ const convertBucketsToRows = (
     const ids = options.metrics.map((metric) => metric.id);
     const metrics = ids.reduce((acc, id) => {
       const valueObject = get(bucket, [id]);
-      return { ...acc, [id]: ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null };
-    }, {} as Record<string, number | null | object[]>);
+      return { ...acc, [id]: getValue(valueObject) };
+    }, {} as Record<string, number | null>);
     return { timestamp: bucket.key as number, ...metrics };
   });
 };

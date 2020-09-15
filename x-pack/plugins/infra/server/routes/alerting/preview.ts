@@ -82,7 +82,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               callCluster,
               params: { criteria, filterQuery, nodeType },
               lookback,
-              source,
+              config: source.configuration,
               alertInterval,
             });
 
