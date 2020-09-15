@@ -27,7 +27,6 @@ import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { asDecimal, tpmUnit } from '../../../../utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { BrowserLineChart } from './BrowserLineChart';
-import { DurationByCountryMap } from './DurationByCountryMap';
 import { ErroneousTransactionsRateChart } from '../ErroneousTransactionsRateChart';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
 import {
@@ -124,18 +123,13 @@ export function TransactionCharts({
       {transactionType === TRANSACTION_PAGE_LOAD && (
         <>
           <EuiSpacer size="s" />
-          <EuiFlexGrid columns={2} gutterSize="s">
-            <EuiFlexItem>
-              <EuiPanel>
-                <DurationByCountryMap />
-              </EuiPanel>
-            </EuiFlexItem>
+          <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <EuiPanel>
                 <BrowserLineChart />
               </EuiPanel>
             </EuiFlexItem>
-          </EuiFlexGrid>
+          </EuiFlexGroup>
         </>
       )}
     </>
