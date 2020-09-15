@@ -35,6 +35,7 @@ import {
   IndexPatternSpec,
   IndexPatternAttributes,
   FieldSpec,
+  FieldFormatMap,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
@@ -239,13 +240,18 @@ export class IndexPatternsService {
     return fields;
   };
 
-  get = async (id: string): Promise<IndexPattern> => {
-    const cache = indexPatternCache.get(id);
-    if (cache) {
-      return cache;
-    }
+  private mergeFieldsAndFormats = (fieldSpecs: FieldSpec[], fieldFormatMap: FieldFormatMap) => {
+    Object.entries(fieldFormatMap).forEach(([fieldName, value]) => {
+      const field = fieldSpecs.find((fld: FieldSpec) => fld.name === fieldName);
+      if (field) {
+        field.format = value;
+      }
+    });
+  };
 
+  savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
     const {
+      id,
       version,
       attributes: {
         title,
@@ -257,27 +263,59 @@ export class IndexPatternsService {
         typeMeta,
         type,
       },
-    } = await this.savedObjectsClient.get<IndexPatternAttributes>(savedObjectType, id);
+    } = savedObject;
 
-    if (!version) {
+    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
+    const parsedFields = fields ? JSON.parse(fields) : [];
+    const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
+    const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
+
+    this.mergeFieldsAndFormats(parsedFields, parsedFieldFormatMap);
+    return {
+      id,
+      version,
+      title,
+      intervalName,
+      timeFieldName,
+      sourceFilters: parsedSourceFilters,
+      fields: parsedFields,
+      typeMeta: parsedTypeMeta,
+      type,
+    };
+  };
+
+  get = async (id: string): Promise<IndexPattern> => {
+    const cache = indexPatternCache.get(id);
+    if (cache) {
+      return cache;
+    }
+
+    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
+      savedObjectType,
+      id
+    );
+
+    if (!savedObject.version) {
       throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
     }
 
-    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
-    let parsedFields = fields ? JSON.parse(fields) : [];
-    const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
+    const spec = this.savedObjectToSpec(savedObject);
+    const { title, type, typeMeta } = spec;
+    const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
+      ? JSON.parse(savedObject.attributes.fieldFormatMap)
+      : {};
 
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(parsedFields);
+    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
     let isSaveRequired = isFieldRefreshRequired;
     try {
-      parsedFields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecArray(parsedFields, id, title, {
+      spec.fields = isFieldRefreshRequired
+        ? await this.refreshFieldSpecArray(spec.fields || [], id, spec.title as string, {
             pattern: title,
             metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
             type,
-            params: parsedTypeMeta && parsedTypeMeta.params,
+            params: typeMeta && typeMeta.params,
           })
-        : parsedFields;
+        : spec.fields;
     } catch (err) {
       isSaveRequired = false;
       if (err instanceof IndexPatternMissingIndices) {
@@ -296,24 +334,12 @@ export class IndexPatternsService {
       }
     }
 
-    Object.entries(parsedFieldFormatMap).forEach(([fieldName, value]) => {
-      const field = parsedFields.find((fld: FieldSpec) => fld.name === fieldName);
+    Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
+      const field = (spec.fields || []).find((fld: FieldSpec) => fld.name === fieldName);
       if (field) {
         field.format = value;
       }
     });
-
-    const spec: IndexPatternSpec = {
-      id,
-      version,
-      title,
-      timeFieldName,
-      intervalName,
-      fields: parsedFields,
-      sourceFilters: sourceFilters ? JSON.parse(sourceFilters) : undefined,
-      typeMeta: parsedTypeMeta,
-      type,
-    };
 
     const indexPattern = await this.specToIndexPattern(spec);
     indexPatternCache.set(id, indexPattern);
