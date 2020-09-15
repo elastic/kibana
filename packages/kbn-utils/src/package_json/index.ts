@@ -17,11 +17,11 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-const { REPO_ROOT } = require('@kbn/utils');
+import { dirname, resolve } from 'path';
+import { REPO_ROOT } from '../repo_root';
 
-exports.ASSET_DIR = resolve(REPO_ROOT, 'built_assets/storybook');
-exports.CURRENT_CONFIG = resolve(exports.ASSET_DIR, 'current.config.js');
-exports.STORY_ENTRY_PATH = resolve(exports.ASSET_DIR, 'stories.entry.js');
-exports.DLL_DIST_DIR = resolve(exports.ASSET_DIR, 'dll');
-exports.DLL_NAME = 'storybook_dll';
+export const kibanaPackageJSON = {
+  __filename: resolve(REPO_ROOT, 'package.json'),
+  __dirname: dirname(resolve(REPO_ROOT, 'package.json')),
+  ...require(resolve(REPO_ROOT, 'package.json')),
+};
