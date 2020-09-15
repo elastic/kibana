@@ -480,6 +480,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return this.getScrollTop();
     }
 
+    public async setScrollTopKibanaBody() {
+      await driver.executeScript('document.getElementById("kibana-body").scrollTo(0,0)');
+      // return this.getScrollTop();
+    }
+
     public async setScrollLeft(scrollSize: number | string) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
