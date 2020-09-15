@@ -20,7 +20,6 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
 import { Appenders } from './appenders/appenders';
-import { Appenders, DisposableAppender } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
