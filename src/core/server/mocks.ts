@@ -51,6 +51,7 @@ export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_object
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
+export { contextServiceMock } from './context/context_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {

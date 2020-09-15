@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('xpack_main', () => {
+  describe('xpack_legacy', () => {
     loadTestFile(require.resolve('./settings'));
   });
 }
