@@ -50,6 +50,7 @@ function PageLoadingUI() {
 function PageLoadingTracking({ pageViewTitle }) {
   const path = pageViewTitle.toLowerCase().replace(/-/g, '').replace(/\s+/g, '_');
   useTrackPageview({ app: 'stack_monitoring', path });
+  useTrackPageview({ app: 'stack_monitoring', path, delay: 15000 });
   return <PageLoadingUI />;
 }
 
