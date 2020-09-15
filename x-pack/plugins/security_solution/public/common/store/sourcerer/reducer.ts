@@ -8,8 +8,9 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   setIndexPatternsList,
-  setIsIndexPatternsLoading,
+  setSourcererScopeLoading,
   setSelectedIndexPatterns,
+  setSignalIndexName,
   setSource,
 } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
@@ -22,9 +23,19 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     kibanaIndexPatterns,
     allIndexPatterns,
   }))
-  .case(setIsIndexPatternsLoading, (state, { payload }) => ({
+  .case(setSignalIndexName, (state, { signalIndexName }) => ({
     ...state,
-    isIndexPatternsLoading: payload,
+    signalIndexName,
+  }))
+  .case(setSourcererScopeLoading, (state, { id, loading }) => ({
+    ...state,
+    sourcererScopes: {
+      ...state.sourcererScopes,
+      [id]: {
+        ...state.sourcererScopes[id],
+        loading,
+      },
+    },
   }))
   .case(setSelectedIndexPatterns, (state, { id, selectedPatterns }) => {
     return {

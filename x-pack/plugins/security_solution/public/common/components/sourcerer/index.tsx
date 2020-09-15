@@ -15,6 +15,7 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import debounce from 'lodash/debounce';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -146,7 +147,10 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
           searchable
           isLoading={loading}
           options={options}
-          onChange={onChange}
+          onChange={debounce(onChange, 300, {
+            leading: true,
+            trailing: false,
+          })}
           renderOption={renderOption}
           searchProps={{
             compressed: true,

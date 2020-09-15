@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 
 import { TimelineId } from '../../../common/types/timeline';
@@ -70,8 +70,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              {/** This is temporary to make sure I do not see any use of useWithSource */}
-              {/* <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} /> */}
+              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
             </>
           )}
 

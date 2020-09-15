@@ -14,7 +14,7 @@ import { BrowserFields, DocValueFields } from '../../../common/containers/source
 import { TimelineQuery } from '../../containers/index';
 import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
@@ -99,20 +99,18 @@ export interface Props {
   dataProviders: DataProvider[];
   docValueFields: DocValueFields[];
   end: string;
-  eventType?: EventType;
   filters: Filter[];
   graphEventId?: string;
   id: string;
   indexPattern: IIndexPattern;
-  indexToAdd: string[];
+  indexesName: string[];
   isLive: boolean;
-  isLoadingSource: boolean;
+  loadingSourcerer: boolean;
   isSaving: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   kqlQueryExpression: string;
-  loadingIndexName: boolean;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onClose: () => void;
   onDataProviderEdited: OnDataProviderEdited;
@@ -137,20 +135,18 @@ export const TimelineComponent: React.FC<Props> = ({
   dataProviders,
   docValueFields,
   end,
-  eventType,
   filters,
   graphEventId,
   id,
   indexPattern,
-  indexToAdd,
+  indexesName,
   isLive,
-  isLoadingSource,
+  loadingSourcerer,
   isSaving,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
-  loadingIndexName,
   onChangeItemsPerPage,
   onClose,
   onDataProviderEdited,
@@ -204,11 +200,11 @@ export const TimelineComponent: React.FC<Props> = ({
   const canQueryTimeline = useMemo(
     () =>
       combinedQueries != null &&
-      isLoadingSource != null &&
-      !isLoadingSource &&
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
       !isEmpty(start) &&
       !isEmpty(end),
-    [isLoadingSource, combinedQueries, start, end]
+    [loadingSourcerer, combinedQueries, start, end]
   );
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => {
@@ -223,23 +219,17 @@ export const TimelineComponent: React.FC<Props> = ({
     [sort.columnId, sort.sortDirection]
   );
   const [isQueryLoading, setIsQueryLoading] = useState(false);
-  const { initializeTimeline, setIndexToAdd, setIsTimelineLoading } = useManageTimeline();
+  const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
     initializeTimeline({
       filterManager,
       id,
-      indexToAdd,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initializeTimeline, filterManager, id]);
 
   useEffect(() => {
-    setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
-  }, [loadingIndexName, id, isQueryLoading, setIsTimelineLoading]);
-
-  useEffect(() => {
-    setIndexToAdd({ id, indexToAdd });
-  }, [id, indexToAdd, setIndexToAdd]);
+    setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingSourcerer });
+  }, [loadingSourcerer, id, isQueryLoading, setIsTimelineLoading]);
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -277,9 +267,8 @@ export const TimelineComponent: React.FC<Props> = ({
         <TimelineQuery
           docValueFields={docValueFields}
           endDate={end}
-          eventType={eventType}
           id={id}
-          indexToAdd={indexToAdd}
+          indexesName={indexesName}
           fields={timelineQueryFields}
           sourceId="default"
           limit={itemsPerPage}
@@ -336,7 +325,7 @@ export const TimelineComponent: React.FC<Props> = ({
                         height={footerHeight}
                         id={id}
                         isLive={isLive}
-                        isLoading={loading || loadingIndexName}
+                        isLoading={loading || loadingSourcerer}
                         itemsCount={events.length}
                         itemsPerPage={itemsPerPage}
                         itemsPerPageOptions={itemsPerPageOptions}

@@ -74,6 +74,7 @@ export interface HeaderPageProps extends HeaderProps {
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
+  hideSourcerer?: boolean;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
@@ -86,6 +87,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   border,
   children,
   draggableArguments,
+  hideSourcerer = false,
   isLoading,
   subtitle,
   subtitle2,
@@ -140,7 +142,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           </FlexItem>
         )}
       </EuiFlexGroup>
-      <Sourcerer scope={SourcererScopeName.default} />
+      {!hideSourcerer && <Sourcerer scope={SourcererScopeName.default} />}
     </Header>
   );
 };

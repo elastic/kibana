@@ -20,8 +20,12 @@ export const setIndexPatternsList = actionCreator<{
   allIndexPatterns: string[];
 }>('SET_INDEX_PATTERNS_LIST');
 
-export const setIsIndexPatternsLoading = actionCreator<{ payload: boolean }>(
-  'SET_IS_INDEX_PATTERNS_LOADING'
+export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
+  'SET_SIGNAL_INDEX_NAME'
+);
+
+export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; loading: boolean }>(
+  'SET_SOURCERER_SCOPE_LOADING'
 );
 
 export const setSelectedIndexPatterns = actionCreator<{

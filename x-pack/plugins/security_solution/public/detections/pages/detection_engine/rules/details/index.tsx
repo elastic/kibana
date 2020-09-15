@@ -495,7 +495,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
                     onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                    signalsIndex={signalIndexName ?? ''}
                     to={to}
                   />
                 )}

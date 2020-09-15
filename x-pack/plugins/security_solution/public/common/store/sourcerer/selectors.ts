@@ -11,6 +11,9 @@ import { SourcererScopeById, KibanaIndexPatterns, SourcererScopeName, ManageScop
 export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
 
+export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
+  sourcerer.signalIndexName;
+
 export const sourcererallIndexPatternsSelector = ({ sourcerer }: State): string[] =>
   sourcerer.allIndexPatterns;
 
@@ -24,6 +27,9 @@ export const kibanaIndexPatternsSelector = () =>
     sourcererKibanaIndexPatternsSelector,
     (kibanaIndexPatterns) => kibanaIndexPatterns
   );
+
+export const signalIndexNameSelector = () =>
+  createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
 
 export const allIndexPatternsSelector = () =>
   createSelector(

@@ -270,12 +270,19 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     shallowEqual
   );
 
+  const setLoading = useCallback(
+    (loading: boolean) => {
+      dispatch(sourcererActions.setSourcererScopeLoading({ id: sourcererScopeName, loading }));
+    },
+    [dispatch, sourcererScopeName]
+  );
+
   const indexFieldsSearch = useCallback(
     (indicesName) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
-
+        setLoading(true);
         const searchSubscription$ = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: indicesName },
@@ -307,13 +314,18 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                   );
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (!didCancel && response.isPartial && !response.isRunning) {
                 // TODO: Make response error status clearer
+                setLoading(false);
                 notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
+
               if (!(msg instanceof AbortError)) {
                 notifications.toasts.addDanger({ title: i18n.FAIL_BEAT_FIELDS, text: msg.message });
               }
@@ -327,7 +339,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
         abortCtrl.current.abort();
       };
     },
-    [data.search, dispatch, notifications.toasts, sourcererScopeName]
+    [data.search, dispatch, notifications.toasts, setLoading, sourcererScopeName]
   );
 
   useEffect(() => {

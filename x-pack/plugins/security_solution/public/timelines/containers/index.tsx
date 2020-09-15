@@ -11,8 +11,6 @@ import { Query } from 'react-apollo';
 import { compose, Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import {
   GetTimelineQuery,
   PageInfo,
@@ -24,7 +22,6 @@ import { inputsModel, inputsSelectors, State } from '../../common/store';
 import { withKibana, WithKibanaProps } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../common/containers/query_template';
-import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
@@ -48,10 +45,7 @@ export interface CustomReduxProps {
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
   endDate: string;
-  eventType?: EventType;
   id: string;
-  indexPattern?: IIndexPattern;
-  indexToAdd?: string[];
   limit: number;
   sortField: SortField;
   fields: string[];
@@ -81,12 +75,9 @@ class TimelineQueryComponent extends QueryTemplate<
       clearSignalsState,
       docValueFields,
       endDate,
-      eventType = 'raw',
       id,
-      indexPattern,
-      indexToAdd = [],
+      indexesName,
       isInspected,
-      kibana,
       limit,
       fields,
       filterQuery,
@@ -95,14 +86,6 @@ class TimelineQueryComponent extends QueryTemplate<
       startDate,
       queryDeduplication,
     } = this.props;
-    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-    const defaultIndex =
-      indexPattern == null || (indexPattern != null && indexPattern.title === '')
-        ? [
-            ...(['all', 'raw'].includes(eventType) ? defaultKibanaIndex : []),
-            ...(['all', 'alert', 'signal'].includes(eventType) ? indexToAdd : []),
-          ]
-        : indexPattern?.title.split(',') ?? [];
     // Fun fact: When using this hook multiple times within a component (e.g. add_exception_modal & edit_exception_modal),
     // the apolloClient will perform queryDeduplication and prevent the first query from executing. A deep compare is not
     // performed on `indices`, so another field must be passed to circumvent this.
@@ -118,7 +101,7 @@ class TimelineQueryComponent extends QueryTemplate<
       },
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex,
+      defaultIndex: indexesName,
       docValueFields: docValueFields ?? [],
       inspect: isInspected,
       queryDeduplication,
@@ -129,7 +112,7 @@ class TimelineQueryComponent extends QueryTemplate<
         query={timelineQuery}
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
-        skip={skipQueryForDetectionsPage(id, defaultIndex)}
+        skip={skipQueryForDetectionsPage(id, indexesName)}
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {

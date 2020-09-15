@@ -35,7 +35,7 @@ export const dedupeIndexName = (kibanaIndex: string[], configIndex: string[]) =>
 export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeName.default) => {
   const dispatch = useDispatch();
 
-  const { isSignalIndexExists, signalIndexName } = useUserInfo();
+  const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const getkibanaIndexPatternsSelector = useMemo(
     () => sourcererSelectors.kibanaIndexPatternsSelector(),
@@ -67,6 +67,13 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
   );
 
   useEffect(() => {
+    if (!loadingSignalIndex && signalIndexName != null) {
+      dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
+    }
+  }, [allIndexPatterns, dispatch, loadingSignalIndex, kibanaIndexPatterns, scopeId, setIndexPatternsList]);
+
+  // Related to the detection page
+  useEffect(() => {
     if (
       scopeId === SourcererScopeName.detections &&
       isSignalIndexExists &&
@@ -78,8 +85,9 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
           selectedPatterns: [signalIndexName],
         })
       );
+      setIndexPatternsList(kibanaIndexPatterns, allIndexPatterns);
     }
-  }, [dispatch, isSignalIndexExists, scopeId, signalIndexName]);
+  }, [allIndexPatterns, dispatch, kibanaIndexPatterns, isSignalIndexExists, scopeId, signalIndexName]);
 
   useEffect(() => {
     if (scopeId !== SourcererScopeName.detections) {
