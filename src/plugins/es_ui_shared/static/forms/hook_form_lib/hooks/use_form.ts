@@ -24,9 +24,8 @@ import { set } from '@elastic/safer-lodash-set';
 import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
 import { mapFormFields, unflattenObject, Subject, Subscription } from '../lib';
 
-const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 const DEFAULT_OPTIONS = {
-  errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT,
+  valueChangeDebounceTime: 500,
   stripEmptyFields: true,
 };
 
@@ -61,13 +60,13 @@ export function useForm<T extends FormData = FormData>(
 
   const defaultValueDeserialized = useRef(defaultValueMemoized);
 
-  const { errorDisplayDelay, stripEmptyFields: doStripEmptyFields } = options ?? {};
+  const { valueChangeDebounceTime, stripEmptyFields: doStripEmptyFields } = options ?? {};
   const formOptions = useMemo(
     () => ({
       stripEmptyFields: doStripEmptyFields ?? DEFAULT_OPTIONS.stripEmptyFields,
-      errorDisplayDelay: errorDisplayDelay ?? DEFAULT_OPTIONS.errorDisplayDelay,
+      valueChangeDebounceTime: valueChangeDebounceTime ?? DEFAULT_OPTIONS.valueChangeDebounceTime,
     }),
-    [errorDisplayDelay, doStripEmptyFields]
+    [valueChangeDebounceTime, doStripEmptyFields]
   );
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -93,7 +92,7 @@ export function useForm<T extends FormData = FormData>(
     return formData$.current;
   }, []);
 
-  const fieldsToArray = useCallback(() => Object.values(fieldsRefs.current), []);
+  const fieldsToArray = useCallback<() => FieldHook[]>(() => Object.values(fieldsRefs.current), []);
 
   const getFieldsForOutput = useCallback(
     (fields: FieldsMap, opts: { stripEmptyFields: boolean }): FieldsMap => {
@@ -175,8 +174,29 @@ export function useForm<T extends FormData = FormData>(
 
   const isFieldValid = (field: FieldHook) => field.isValid && !field.isValidating;
 
+  const waitForFieldsToFinishValidating = useCallback(async () => {
+    let areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
+    if (!areSomeFieldValidating) {
+      return;
+    }
+
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
+        if (areSomeFieldValidating) {
+          // Recursively wait for all the fields to finish validating.
+          return waitForFieldsToFinishValidating().then(resolve);
+        }
+        resolve();
+      }, 100);
+    });
+  }, [fieldsToArray]);
+
   const validateFields: FormHook<T>['__validateFields'] = useCallback(
     async (fieldNames) => {
+      // Meanwhile the fields are being validated, the form validity is undefined
+      setIsValid(undefined);
+
       const fieldsToValidate = fieldNames
         .map((name) => fieldsRefs.current[name])
         .filter((field) => field !== undefined);
@@ -204,18 +224,25 @@ export function useForm<T extends FormData = FormData>(
       // To know the current form validity, we will then merge the "validationResult" _with_ the fieldsRefs object state,
       // the "validationResult" taking presedence over the fieldsRefs values.
       const formFieldsValidity = fieldsToArray().map((field) => {
+        const hasUpdatedValidity = validationResultByPath[field.path] !== undefined;
         const _isValid = validationResultByPath[field.path] ?? field.isValid;
-        const _isValidated =
-          validationResultByPath[field.path] !== undefined ? true : field.isValidated;
-        return [_isValid, _isValidated];
+        const _isValidated = hasUpdatedValidity ? true : field.isValidated;
+        const _isValidating = hasUpdatedValidity ? false : field.isValidating;
+        return {
+          isValid: _isValid,
+          isValidated: _isValidated,
+          isValidating: _isValidating,
+        };
       });
 
-      const areAllFieldsValidated = formFieldsValidity.every(({ 1: isValidated }) => isValidated);
+      const areAllFieldsValidated = formFieldsValidity.every((field) => field.isValidated);
+      const areSomeFieldValidating = formFieldsValidity.some((field) => field.isValidating);
 
       // If *not* all the fiels have been validated, the validity of the form is unknown, thus still "undefined"
-      const isFormValid = areAllFieldsValidated
-        ? formFieldsValidity.every(([_isValid]) => _isValid)
-        : undefined;
+      const isFormValid =
+        areAllFieldsValidated && areSomeFieldValidating === false
+          ? formFieldsValidity.every((field) => field.isValid)
+          : undefined;
 
       setIsValid(isFormValid);
 
@@ -225,6 +252,14 @@ export function useForm<T extends FormData = FormData>(
   );
 
   const validateAllFields = useCallback(async (): Promise<boolean> => {
+    // Maybe some field are being validated because of their async validation(s).
+    // We make sure those validations have finished executing before proceeding.
+    await waitForFieldsToFinishValidating();
+
+    if (!isMounted.current) {
+      return false;
+    }
+
     const fieldsArray = fieldsToArray();
     const fieldsToValidate = fieldsArray.filter((field) => !field.isValidated);
 
@@ -238,7 +273,7 @@ export function useForm<T extends FormData = FormData>(
 
     setIsValid(isFormValid);
     return isFormValid!;
-  }, [fieldsToArray, validateFields]);
+  }, [fieldsToArray, validateFields, waitForFieldsToFinishValidating]);
 
   const addField: FormHook<T>['__addField'] = useCallback(
     (field) => {
