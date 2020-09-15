@@ -28,7 +28,7 @@ import {
   IndexPatternsContract,
   syncQueryStateWithUrl,
 } from '../../../../../src/plugins/data/public';
-import { LENS_EMBEDDABLE_TYPE } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
 import {
@@ -278,6 +278,13 @@ export function App({
           type: LENS_EMBEDDABLE_TYPE,
         };
 
+        if (attributeService.inputIsRefType(initialInput)) {
+          chrome.recentlyAccessed.add(
+            getFullPath(initialInput.savedObjectId),
+            attributes.title,
+            initialInput.savedObjectId
+          );
+        }
         getAllIndexPatterns(
           _.uniq(doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)),
           data.indexPatterns,
@@ -319,6 +326,7 @@ export function App({
     initialInput,
     attributeService,
     redirectTo,
+    chrome.recentlyAccessed,
     state.persistedDoc?.savedObjectId,
     state.persistedDoc?.state,
   ]);
@@ -378,6 +386,11 @@ export function App({
         attributeService.inputIsRefType(newInput) &&
         newInput.savedObjectId !== originalSavedObjectId
       ) {
+        chrome.recentlyAccessed.add(
+          getFullPath(newInput.savedObjectId),
+          docToSave.title,
+          newInput.savedObjectId
+        );
         setState((s) => ({
           ...s,
           isSaveModalVisible: false,

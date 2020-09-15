@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { deepFreeze } from '@kbn/std';
 import {
   CoreSetup,
   CoreStart,
@@ -12,7 +13,6 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/server';
 import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/vis_type_timelion/server';
 import { FeatureRegistry } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';

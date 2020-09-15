@@ -474,6 +474,19 @@ describe('Lens App', () => {
       expect(props.redirectTo).toHaveBeenCalled();
     });
 
+    it('adds to the recently viewed list on load', async () => {
+      const { component, services } = mountWith({});
+
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
+      });
+      expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
+        '/app/lens#/edit/1234',
+        'An extremely cool default document!',
+        '1234'
+      );
+    });
+
     describe('save buttons', () => {
       interface SaveProps {
         newCopyOnSave: boolean;
@@ -669,6 +682,19 @@ describe('Lens App', () => {
           component.setProps({ initialInput: { savedObjectId: 'aaa' } });
         });
         expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
+      });
+
+      it('adds to the recently viewed list on save', async () => {
+        const { services } = await save({
+          initialSavedObjectId: undefined,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+        expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
+          '/app/lens#/edit/aaa',
+          'hello there',
+          'aaa'
+        );
       });
 
       it('saves the latest doc as a copy', async () => {

@@ -130,6 +130,7 @@ export async function mountApp(
         redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
         redirectToOrigin={redirectToOrigin}
         onAppLeave={params.onAppLeave}
+        setHeaderActionMenu={params.setHeaderActionMenu}
         history={routeProps.history}
       />
     );
