@@ -26,16 +26,15 @@ export const useMlLink = (params: MlUrlGeneratorState): string => {
   const [href, setHref] = useState<string>(params.page);
   const mlUrlGenerator = useMlUrlGenerator();
 
-  const generateUrl = useCallback(async (_params: MlUrlGeneratorState, isCancelled: boolean) => {
-    if (!isCancelled) {
-      const url = await mlUrlGenerator.createUrl(_params);
-      setHref(url);
-    }
-  }, []);
-
   useEffect(() => {
     let isCancelled = false;
-    generateUrl(params, isCancelled);
+    const generateUrl = async (_params: MlUrlGeneratorState) => {
+      const url = await mlUrlGenerator.createUrl(_params);
+      if (!isCancelled) {
+        setHref(url);
+      }
+    };
+    generateUrl(params);
     return () => {
       isCancelled = true;
     };
@@ -67,6 +66,7 @@ export const useCreateAndNavigateToMlLink = (
             }
           : undefined;
 
+      // TODO: fix ts only interpreting it as MlUrlGenericState if pageState is passed
       // @ts-ignore
       const url = await mlUrlGenerator.createUrl({ page: _page, pageState });
       await navigateToUrl(url);
