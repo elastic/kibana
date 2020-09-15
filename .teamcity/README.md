@@ -15,10 +15,15 @@
 - DSL Extensions of various kinds to easily share common configuration between build configurations in the same repo
 - Barebones Slack notifications via plugin
 - Dynamically creating environment variables / secrets at runtime for subsequent steps
+- "Baseline CI" job that runs a subset of CI for every commit
+- "Full CI" job that runs full CI hourly, if changes are detected. Re-uses builds that ran during "Baseline CI" for same commit
+- Performance monitoring enabled for all jobs
 
 ## Kibana Builds
 
-### Essential CI
+### Baseline CI
+
+### Full CI
 
 So far:
 
@@ -29,12 +34,14 @@ So far:
 Not yet implemented. Notes in progress.
 
 Build Configurations:
+
 - Build Elasticsearch Snapshot
 - Test Builds (e.g. OSS CI Group 1, Default CI Group 3, etc)
 - Verify Elasticsearch Snapshot - Composite build
 - Promote Elasticsearch Snapshot
 
 Desires:
+
 - Build ES snapshot on a daily basis, run E2E tests against it, promote when successful
 - Ability to easily promote old builds that have been verified
 - Ability to run verification without promoting it
@@ -57,10 +64,12 @@ Desires:
 - set `env.ES_SNAPSHOT_MANIFEST` = `dep.<BUILD_ES_BUILD_ID>.ES_SNAPSHOT_MANIFEST_URL`
 
 #### Verify Elasticsearch Snapshot
+
 - composite build
 - contains all of the CI Groups and such
 
 #### Promote Elasticsearch Snapshot
+
 - snapshot dependency on `Verify Elasticsearch Snapshot`
 - uses scripts from Kibana repo to promote elasticsearch snapshot from `Verify Elasticsearch Snapshot`
 - daily trigger
