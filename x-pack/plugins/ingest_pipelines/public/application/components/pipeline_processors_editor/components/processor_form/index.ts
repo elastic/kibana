@@ -5,9 +5,7 @@
  */
 
 export {
-  getProcessorDescriptor,
-  mapProcessorTypeToDescriptor,
-  ProcessorType,
-} from './map_processor_type_to_form';
-
-export { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from './status_icons';
+  ProcessorFormContainer as ProcessorForm,
+  ProcessorFormOnSubmitArg,
+  OnSubmitHandler,
+} from './processor_form.container';
