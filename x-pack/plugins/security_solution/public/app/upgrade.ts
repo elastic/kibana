@@ -11,7 +11,6 @@ import {
   GetInfoResponse,
   epmRouteService,
   PackageInfo,
-  InstallPackageRequest,
   InstallationStatus,
   appRoutesService,
   CheckPermissionsResponse,
