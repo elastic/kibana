@@ -76,6 +76,21 @@ export const I18LABELS = {
       defaultMessage: 'Page load duration by region',
     }
   ),
+  searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
+    defaultMessage: 'Search by url',
+  }),
+  searchResults: i18n.translate('xpack.apm.rum.filters.searchResults', {
+    defaultMessage: 'Search results',
+  }),
+  topPages: i18n.translate('xpack.apm.rum.filters.searchResults', {
+    defaultMessage: 'Top pages',
+  }),
+  select: i18n.translate('xpack.apm.rum.filters.searchResults', {
+    defaultMessage: 'Select',
+  }),
+  url: i18n.translate('xpack.apm.rum.filters.url', {
+    defaultMessage: 'Url',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(
