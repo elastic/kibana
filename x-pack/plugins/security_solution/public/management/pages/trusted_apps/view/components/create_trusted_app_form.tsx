@@ -86,6 +86,7 @@ export type CreateTrustedAppFormProps = Pick<
 };
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
   ({ fullWidth, onChange, ...formProps }) => {
+    const dataTestSubj = formProps['data-test-subj'];
     const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
       return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
         return {
@@ -100,6 +101,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       entries: [generateNewEntry()],
       description: '',
     });
+    const getTestId = useCallback(
+      (suffix: string): string | undefined => {
+        if (dataTestSubj) {
+          return `${dataTestSubj}-${suffix}`;
+        }
+      },
+      [dataTestSubj]
+    );
     const handleAndClick = useCallback(() => {
       setFormValues(
         (prevState): NewTrustedApp => {
@@ -212,12 +221,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             defaultMessage: 'Name your trusted app application',
           })}
           fullWidth={fullWidth}
+          data-test-subj={getTestId('nameRow')}
         >
           <EuiFieldText
             name="name"
             value={formValues.name}
             onChange={handleDomChangeEvents}
             fullWidth
+            data-test-subj={getTestId('nameTextField')}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -225,6 +236,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             defaultMessage: 'Select operating system',
           })}
           fullWidth={fullWidth}
+          data-test-subj={getTestId('OsRow')}
         >
           <EuiSuperSelect
             name="os"
@@ -232,15 +244,17 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             valueOfSelected={formValues.os}
             onChange={handleOsChange}
             fullWidth
+            data-test-subj={getTestId('osSelectField')}
           />
         </EuiFormRow>
-        <EuiFormRow fullWidth={fullWidth}>
+        <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('conditionsRow')}>
           <LogicalConditionBuilder
             entries={formValues.entries}
             os={formValues.os}
             onAndClicked={handleAndClick}
             onEntryRemove={handleEntryRemove}
             onEntryChange={handleEntryChange}
+            data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -248,12 +262,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             defaultMessage: 'Description',
           })}
           fullWidth={fullWidth}
+          data-test-subj={getTestId('descriptionRow')}
         >
           <EuiTextArea
             name="description"
             value={formValues.description}
             onChange={handleDomChangeEvents}
             fullWidth
+            data-test-subj={getTestId('descriptionField')}
           />
         </EuiFormRow>
       </EuiForm>

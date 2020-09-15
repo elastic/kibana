@@ -78,7 +78,9 @@ describe('TrustedAppsPage', () => {
 
     it('should initially have the flyout Add button disabled', async () => {
       const { getByTestId } = await renderAndClickAddButton();
-      expect(getByTestId('addTrustedAppFlyout-createButton').disabled).toBe(true);
+      expect((getByTestId('addTrustedAppFlyout-createButton') as HTMLButtonElement).disabled).toBe(
+        true
+      );
     });
 
     it('should close flyout if cancel button is clicked', async () => {
@@ -102,7 +104,21 @@ describe('TrustedAppsPage', () => {
     });
 
     describe('and when the form data is valid', () => {
-      it.todo('should enable the Flyout Add button');
+      const fillInCreateForm = ({ getByTestId }: ReturnType<AppContextTestRender['render']>) => {
+        getByTestId('addTrustedAppFlyout-createForm-nameTextField').setAttribute(
+          'value',
+          'trusted app A'
+        );
+        getByTestId('addTrustedAppFlyout-createForm-descriptionField').setAttribute(
+          'value',
+          'let this be'
+        );
+      };
+
+      it('should enable the Flyout Add button', async () => {
+        const renderResult = await renderAndClickAddButton();
+        fillInCreateForm(renderResult);
+      });
 
       describe('and the Flyout Add button is clicked', () => {
         it.todo('should disable the Cancel button');
