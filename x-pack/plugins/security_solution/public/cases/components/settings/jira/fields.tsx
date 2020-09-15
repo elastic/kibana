@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { map } from 'lodash/fp';
 import {
   EuiFormRow,
-  EuiComboBox,
   EuiSelectOption,
-  EuiHorizontalRule,
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,12 +22,10 @@ import { JiraSettingFields } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 
-const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingFields>> = ({
-  fields,
-  connector,
-  onChange,
-}) => {
-  const { issueType, priority, labels } = fields || {};
+const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
+  JiraSettingFields
+>> = ({ fields, connector, onChange }) => {
+  const { issueType, priority } = fields || {};
 
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [firstLoad, setFirstLoad] = useState(false);
@@ -53,10 +49,6 @@ const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingF
     issueType,
   });
 
-  const hasLabels = useMemo(
-    () => Object.prototype.hasOwnProperty.call(fieldsByIssueType, 'labels'),
-    [fieldsByIssueType]
-  );
   const hasPriority = useMemo(
     () => Object.prototype.hasOwnProperty.call(fieldsByIssueType, 'priority'),
     [fieldsByIssueType]
@@ -85,10 +77,6 @@ const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingF
     }
   }, [fieldsByIssueType, issueType]);
 
-  const labelOptions = useMemo(() => (labels ? labels.map((label: string) => ({ label })) : []), [
-    labels,
-  ]);
-
   // Reset parameters when changing connector
   useEffect(() => {
     if (!firstLoad) {
@@ -96,7 +84,9 @@ const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingF
     }
 
     setIssueTypesSelectOptions([]);
-    onChange('fields', {});
+    onChange('issueType', null);
+    onChange('labels', null);
+    onChange('priority', null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector]);
 
@@ -107,14 +97,16 @@ const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingF
     }
 
     setPrioritiesSelectOptions([]);
-    onChange('fields', { issueType });
+    onChange('issueType', issueType);
+    onChange('labels', null);
+    onChange('priority', null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issueType]);
 
   // Set default issue type
   useEffect(() => {
     if (!issueType && issueTypesSelectOptions.length > 0) {
-      onChange('fields', { ...fields, issueType: issueTypesSelectOptions[0].value as string });
+      onChange('issueType', issueTypesSelectOptions[0].value as string);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issueTypes, issueTypesSelectOptions]);
@@ -122,7 +114,7 @@ const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingF
   // Set default priority
   useEffect(() => {
     if (!priority && prioritiesSelectOptions.length > 0) {
-      onChange('fields', { ...fields, priority: prioritiesSelectOptions[0].value as string });
+      onChange('priority', prioritiesSelectOptions[0].value as string);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector, issueType, prioritiesSelectOptions]);
@@ -146,11 +138,11 @@ const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingF
           options={issueTypesSelectOptions}
           value={issueType}
           onChange={(e) => {
-            onChange('fields', { ...fields, issueType: e.target.value });
+            onChange('issueType', e.target.value);
           }}
         />
       </EuiFormRow>
-      <EuiHorizontalRule />
+      <EuiSpacer size="m" />
       <>
         {hasPriority && (
           <>
@@ -173,62 +165,12 @@ const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingF
                     options={prioritiesSelectOptions}
                     value={priority}
                     onChange={(e) => {
-                      onChange('fields', { ...fields, priority: e.target.value });
+                      onChange('priority', e.target.value);
                     }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {hasLabels && (
-          <>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFormRow
-                  fullWidth
-                  label={i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.impactSelectFieldLabel',
-                    {
-                      defaultMessage: 'Labels (optional)',
-                    }
-                  )}
-                >
-                  <EuiComboBox
-                    noSuggestions
-                    fullWidth
-                    isLoading={isLoadingFields}
-                    isDisabled={isLoadingIssueTypes || isLoadingFields}
-                    selectedOptions={labelOptions}
-                    onCreateOption={(searchValue: string) => {
-                      const newOptions = [...labelOptions, { label: searchValue }];
-                      onChange('fields', {
-                        ...fields,
-                        labels: newOptions.map((newOption) => newOption.label),
-                      });
-                    }}
-                    onChange={(selectedOptions: Array<{ label: string }>) => {
-                      onChange('fields', {
-                        ...fields,
-                        labels: selectedOptions.map((selectedOption) => selectedOption.label),
-                      });
-                    }}
-                    onBlur={() => {
-                      if (!labels) {
-                        onChange('fields', {
-                          ...fields,
-                          labels: [],
-                        });
-                      }
-                    }}
-                    isClearable={true}
-                    data-test-subj="labelsComboBox"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
           </>
         )}
       </>
@@ -237,4 +179,4 @@ const JiraSettingFields: React.FunctionComponent<SettingFieldsProps<JiraSettingF
 };
 
 // eslint-disable-next-line import/no-default-export
-export { JiraSettingFields as default };
+export { JiraSettingFieldsComponent as default };
