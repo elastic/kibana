@@ -194,6 +194,9 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const validateFields: FormHook<T>['__validateFields'] = useCallback(
     async (fieldNames) => {
+      // Meanwhile the fields are being validated, the form validity is undefined
+      setIsValid(undefined);
+
       const fieldsToValidate = fieldNames
         .map((name) => fieldsRefs.current[name])
         .filter((field) => field !== undefined);
