@@ -11,7 +11,9 @@ object OssBuild : BuildType({
   paused = true
   description = "Generates OSS Build Distribution artifact"
 
-  kibanaAgent(16)
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-c2-16-", "RQ_AGENT_NAME")
+  }
 
   steps {
     script {

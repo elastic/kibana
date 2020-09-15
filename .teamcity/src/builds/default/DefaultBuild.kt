@@ -21,7 +21,9 @@ object DefaultBuild : BuildType({
     +:test/**/target/public/**/* => kibana-default-plugins.tar.gz!/test/
   """.trimIndent()
 
-  kibanaAgent(16)
+  requirements {
+    startsWith("teamcity.agent.name", "kibana-c2-16-", "RQ_AGENT_NAME")
+  }
 
   steps {
     script {
