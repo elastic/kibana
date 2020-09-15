@@ -16,6 +16,7 @@ describe('HttpLogic', () => {
     http: null,
     httpInterceptors: [],
     errorConnecting: false,
+    readOnlyMode: false,
   };
 
   beforeEach(() => {
@@ -31,12 +32,17 @@ describe('HttpLogic', () => {
   describe('initializeHttp()', () => {
     it('sets values based on passed props', () => {
       HttpLogic.mount();
-      HttpLogic.actions.initializeHttp({ http: mockHttp, errorConnecting: true });
+      HttpLogic.actions.initializeHttp({
+        http: mockHttp,
+        errorConnecting: true,
+        readOnlyMode: true,
+      });
 
       expect(HttpLogic.values).toEqual({
         http: mockHttp,
         httpInterceptors: [],
         errorConnecting: true,
+        readOnlyMode: true,
       });
     });
   });

@@ -7,20 +7,16 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpSetup, HttpInterceptorResponseError } from 'src/core/public';
+import { IHttpProviderProps } from './http_provider';
 
 export interface IHttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
   errorConnecting: boolean;
+  readOnlyMode: boolean;
 }
 export interface IHttpActions {
-  initializeHttp({
-    http,
-    errorConnecting,
-  }: {
-    http: HttpSetup;
-    errorConnecting?: boolean;
-  }): { http: HttpSetup; errorConnecting?: boolean };
+  initializeHttp({ http, errorConnecting, readOnlyMode }: IHttpProviderProps): IHttpProviderProps;
   initializeHttpInterceptors(): void;
   setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
   setErrorConnecting(errorConnecting: boolean): { errorConnecting: boolean };
@@ -28,7 +24,7 @@ export interface IHttpActions {
 
 export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
   actions: {
-    initializeHttp: ({ http, errorConnecting }) => ({ http, errorConnecting }),
+    initializeHttp: (props) => props,
     initializeHttpInterceptors: () => null,
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
     setErrorConnecting: (errorConnecting) => ({ errorConnecting }),
@@ -51,6 +47,12 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
       {
         initializeHttp: (_, { errorConnecting }) => !!errorConnecting,
         setErrorConnecting: (_, { errorConnecting }) => errorConnecting,
+      },
+    ],
+    readOnlyMode: [
+      false,
+      {
+        initializeHttp: (_, { readOnlyMode }) => !!readOnlyMode,
       },
     ],
   },
