@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
@@ -24,8 +25,6 @@ import { distinctUntilChanged, first, map, shareReplay, take } from 'rxjs/operat
 import { Logger, LoggerFactory } from '@kbn/logging';
 
 import { Config, ConfigPath, Env } from '.';
-
-import type { PublicMethodsOf } from './types';
 import { hasConfigPathIntersection } from './config';
 import { RawConfigurationProvider } from './raw/raw_config_service';
 import {
