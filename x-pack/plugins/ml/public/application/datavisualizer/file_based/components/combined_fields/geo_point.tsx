@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 
@@ -24,10 +25,16 @@ import {
 } from '@elastic/eui';
 
 import { CombinedField } from './types';
-import { createGeoPointCombinedField, isWithinLatRange, isWithinLonRange } from './utils';
+import {
+  createGeoPointCombinedField,
+  isWithinLatRange,
+  isWithinLonRange,
+  getNameCollisionMsg,
+} from './utils';
 
 interface Props {
   addCombinedField: (combinedField: CombinedField) => void;
+  hasNameCollision: (name: string) => boolean;
   results: unknown;
 }
 
@@ -77,18 +84,18 @@ export class GeoPointForm extends Component<Props, State> {
 
   onGeoPointFieldChange = (e) => {
     const geoPointField = e.target.value;
-    const hasNameCollision = this.props.results.column_names.includes(geoPointField);
-    this.setState({
-      geoPointField,
-      geoPointFieldError: this.props.results.column_names.includes(geoPointField)
-        ? i18n.translate('xpack.ml.fileDatavisualizer.nameCollisionError', {
-            defaultMessage:
-              '"{geoPointField}" column already exists, please provide a unique column name',
-            values: { geoPointField },
-          })
-        : '',
-    });
+    this.setState({ geoPointField });
+    this.hasNameCollisionn(geoPointField);
   };
+
+  hasNameCollisionn = _.debounce((name) => {
+    try {
+      const geoPointFieldError = this.props.hasNameCollision(name) ? getNameCollisionMsg(name) : '';
+      this.setState({ geoPointFieldError });
+    } catch (error) {
+      this.setState({ submitError: error.message });
+    }
+  }, 200);
 
   onSubmit = () => {
     try {

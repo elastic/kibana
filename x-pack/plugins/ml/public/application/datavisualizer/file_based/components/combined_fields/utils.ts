@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import uuid from 'uuid/v4';
 import { CombinedField } from './types';
@@ -78,6 +79,13 @@ export function createGeoPointCombinedField(
     combinedFieldName: geoPointField,
     fieldNames: [latField, lonField],
   };
+}
+
+export function getNameCollisionMsg(name: string) {
+  return i18n.translate('xpack.ml.fileDatavisualizer.nameCollisionMsg', {
+    defaultMessage: '"{name}" already exists, please provide a unique name',
+    values: { name },
+  });
 }
 
 function getGeoPointField(results: unknown) {

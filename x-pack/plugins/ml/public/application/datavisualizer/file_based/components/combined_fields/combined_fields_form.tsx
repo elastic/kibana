@@ -12,7 +12,11 @@ import { EuiText, EuiFormRow, EuiPopover, EuiContextMenu, EuiButtonEmpty } from 
 
 import { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
-import { addCombinedFieldsToMappings, addCombinedFieldsToPipeline } from './utils';
+import {
+  addCombinedFieldsToMappings,
+  addCombinedFieldsToPipeline,
+  getNameCollisionMsg,
+} from './utils';
 
 interface Props {
   mappingsString: string;
@@ -46,17 +50,11 @@ export class CombinedFieldsForm extends Component<Props, State> {
   };
 
   addCombinedField = (combinedField) => {
-    let mappings;
-    try {
-      mappings = JSON.parse(this.props.mappingsString);
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsForm.mappingsParseError', {
-          defaultMessage: 'Error parsing mappings: {error}',
-          values: { error: error.message },
-        })
-      );
+    if (this.hasNameCollision(combinedField.combinedFieldName)) {
+      throw new Error(getNameCollisionMsg(combinedField.combinedFieldName));
     }
+
+    const mappings = this.parseMappings();
 
     let pipeline;
     try {
@@ -81,6 +79,36 @@ export class CombinedFieldsForm extends Component<Props, State> {
     this.closePopover();
   };
 
+  parseMappings() {
+    try {
+      return JSON.parse(this.props.mappingsString);
+    } catch (error) {
+      throw new Error(
+        i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsForm.mappingsParseError', {
+          defaultMessage: 'Error parsing mappings: {error}',
+          values: { error: error.message },
+        })
+      );
+    }
+  }
+
+  hasNameCollision = (name: string) => {
+    if (this.props.results.column_names.includes(name)) {
+      // collision with column name
+      return true;
+    }
+
+    if (
+      this.props.combinedFields.some((combinedField) => combinedField.combinedFieldName === name)
+    ) {
+      // collision with combined field name
+      return true;
+    }
+
+    const mappings = this.parseMappings();
+    return mappings.properties.hasOwnProperty(name);
+  };
+
   render() {
     const geoPointLabel = i18n.translate('xpack.ml.fileDatavisualizer.geoPointCombinedFieldLabel', {
       defaultMessage: 'Add geo point field',
@@ -99,7 +127,11 @@ export class CombinedFieldsForm extends Component<Props, State> {
         id: 1,
         title: geoPointLabel,
         content: (
-          <GeoPointForm addCombinedField={this.addCombinedField} results={this.props.results} />
+          <GeoPointForm
+            addCombinedField={this.addCombinedField}
+            hasNameCollision={this.hasNameCollision}
+            results={this.props.results}
+          />
         ),
       },
     ];
