@@ -46,7 +46,7 @@ export interface ServiceNodeStats {
   avgErrorRate: number | null;
 }
 
-export function isValidPlatinumLicense(license: ILicense) {
+export function isActivePlatinumLicense(license: ILicense) {
   return license.isActive && license.hasAtLeast('platinum');
 }
 

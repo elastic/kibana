@@ -21,6 +21,13 @@ Before using this feature, you should be familiar with how rollups work.
 {ref}/xpack-rollup.html[Rolling up historical data] is a good source for more detailed information.
 
 [float]
+=== Required permissions
+
+The `manage_rollup` cluster privilege is required to access *Rollup jobs*.
+
+You can add this privilege in *Stack Management > Security > Roles*.
+
+[float]
 [[create-and-manage-rollup-job]]
 === Create a rollup job
 
