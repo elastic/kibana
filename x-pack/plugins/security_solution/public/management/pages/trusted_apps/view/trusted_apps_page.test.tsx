@@ -42,9 +42,9 @@ describe('TrustedAppsPage', () => {
       ReturnType<AppContextTestRender['render']>
     > => {
       const renderResult = render();
-      const addButton = await renderResult.getByTestId('trustedAppsListAddButton');
+      const addButton = renderResult.getByTestId('trustedAppsListAddButton');
       reactTestingLibrary.act(() => {
-        fireEvent.click(addButton, { buttton: 1 });
+        fireEvent.click(addButton, { button: 1 });
       });
       return renderResult;
     };
@@ -76,11 +76,30 @@ describe('TrustedAppsPage', () => {
       expect(getByTestId('addTrustedAppFlyout-createForm')).toMatchSnapshot();
     });
 
-    it.todo('should initially have the Add button disabled');
+    it('should initially have the flyout Add button disabled', async () => {
+      const { getByTestId } = await renderAndClickAddButton();
+      expect(getByTestId('addTrustedAppFlyout-createButton').disabled).toBe(true);
+    });
 
-    it.todo('should close flyout if cancel button is clicked');
+    it('should close flyout if cancel button is clicked', async () => {
+      const { getByTestId, queryByTestId } = await renderAndClickAddButton();
+      const cancelButton = getByTestId('addTrustedAppFlyout-cancelButton');
+      reactTestingLibrary.act(() => {
+        fireEvent.click(cancelButton, { button: 1 });
+      });
+      expect(queryByTestId('addTrustedAppFlyout')).toBeNull();
+      expect(history.location.search).toBe('');
+    });
 
-    it.todo('should close flyout if flyout button is clicked');
+    it('should close flyout if flyout button is clicked', async () => {
+      const { getByTestId, queryByTestId } = await renderAndClickAddButton();
+      const flyoutCloseButton = getByTestId('euiFlyoutCloseButton');
+      reactTestingLibrary.act(() => {
+        fireEvent.click(flyoutCloseButton, { button: 1 });
+      });
+      expect(queryByTestId('addTrustedAppFlyout')).toBeNull();
+      expect(history.location.search).toBe('');
+    });
 
     describe('and when the form data is valid', () => {
       it.todo('should enable the Flyout Add button');
