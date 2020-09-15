@@ -50,7 +50,7 @@ const metricVal = (metric, format, isPercent, units) => {
   return formatMetric(metric, format, units);
 };
 
-function MetricCell({ isOnline, metric = {}, isPercent }) {
+function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
@@ -87,6 +87,7 @@ function MetricCell({ isOnline, metric = {}, isPercent }) {
         onClick={onButtonClick}
         tabIndex="0"
         type={getIcon(slope)}
+        data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
         title={i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel', {
           defaultMessage: 'More information about this metric',
         })}
@@ -94,13 +95,13 @@ function MetricCell({ isOnline, metric = {}, isPercent }) {
     );
 
     return (
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" {...props}>
         <EuiFlexItem>
           <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover ownFocus button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-            <div>
+            <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
               <EuiDescriptionList
                 type="column"
                 compressed

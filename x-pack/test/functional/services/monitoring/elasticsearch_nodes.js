@@ -35,6 +35,9 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
   const SUBJ_NODES_DISKS = `${SUBJ_TABLE_BODY} > diskFreeSpace`;
   const SUBJ_NODES_SHARDS = `${SUBJ_TABLE_BODY} > shards`;
 
+  const SUBJ_NODES_ICON_PREFIX = `monitoringCellIcon`;
+  const SUBJ_NODES_POPOVER_PREFIX = `monitoringCellPopover`;
+
   const SUBJ_NODE_LINK_PREFIX = `${SUBJ_TABLE_BODY} > nodeLink-`;
 
   return new (class ElasticsearchIndices {
@@ -77,7 +80,6 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
       await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_MEM_COL}"] > button`);
       await this.waitForTableToFinishLoading();
     }
-
     async clickDiskCol() {
       await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_DISK_COL}"] > button`);
     }
@@ -114,6 +116,29 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
       const disks = await testSubjects.getVisibleTextAll(SUBJ_NODES_DISKS);
       const shards = await testSubjects.getVisibleTextAll(SUBJ_NODES_SHARDS);
 
+      const areasWithText = {
+        cpuUsage: [],
+        loadAverage: [],
+        jvmMemory: [],
+        diskFreeSpace: [],
+      };
+
+      const table = await testSubjects.find(SUBJ_TABLE_BODY);
+      for (const key of Object.keys(areasWithText)) {
+        const text = areasWithText[key];
+        const icons = await testSubjects.findAllDescendant(
+          `${SUBJ_NODES_ICON_PREFIX}-${key}`,
+          table
+        );
+        for (const icon of icons) {
+          await icon.moveMouseTo();
+          await icon.click();
+          const _text = await testSubjects.getVisibleTextAll(`${SUBJ_NODES_POPOVER_PREFIX}-${key}`);
+          text.push(_text[0]);
+          await icon.click();
+        }
+      }
+
       // tuple-ize the icons and texts together into an array of objects
       const tableRows = await this.getRows();
       const iterator = range(tableRows.length);
@@ -124,9 +149,13 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
             name: names[current],
             status: statuses[current],
             cpu: cpus[current],
+            cpuText: areasWithText.cpuUsage[current],
             load: loads[current],
+            loadText: areasWithText.loadAverage[current],
             memory: memories[current],
+            memoryText: areasWithText.jvmMemory[current],
             disk: disks[current],
+            diskText: areasWithText.diskFreeSpace[current],
             shards: shards[current],
           },
         ];
