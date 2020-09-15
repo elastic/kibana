@@ -56,9 +56,10 @@ export function MachineLearningDataVisualizerFileBasedProvider(
 
     async assertNumberOfFieldCards(number: number) {
       const cards = await testSubjects.findAll('mlPageFileDataVisFieldDataCard');
-      if (cards.length !== number) {
-        throw new Error(`expected ${number} field cards to exist, but found ${cards.length}`);
-      }
+      expect(cards.length).to.eql(
+        number,
+        `expected ${number} field cards to exist, but found ${cards.length}`
+      );
     },
 
     async assertImportButtonEnabled(expectedValue: boolean) {
