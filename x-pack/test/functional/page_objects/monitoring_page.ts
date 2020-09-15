@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function MonitoringPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header', 'security', 'login', 'spaceSelector']);
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function MonitoringPageProvider({ getPageObjects, getService }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common', 'header', 'security', 'login']);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
   const find = getService('find');
@@ -35,34 +37,34 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
       return testSubjects.getVisibleText('accessDeniedTitle');
     }
 
-    async clickBreadcrumb(subj) {
+    async clickBreadcrumb(subj: string) {
       return testSubjects.click(subj);
     }
 
-    async assertTableNoData(subj) {
+    async assertTableNoData(subj: string) {
       if (!(await testSubjects.exists(subj))) {
         throw new Error('Expected to find the no data message');
       }
     }
 
-    async tableGetRows(subj) {
+    async tableGetRows(subj: string) {
       const table = await testSubjects.find(subj);
       return table.findAllByTagName('tr');
     }
 
-    async tableGetRowsFromContainer(subj) {
+    async tableGetRowsFromContainer(subj: string) {
       const table = await testSubjects.find(subj);
       const tbody = await table.findByTagName('tbody');
       return tbody.findAllByTagName('tr');
     }
 
-    async tableSetFilter(subj, text) {
+    async tableSetFilter(subj: string, text: string) {
       await testSubjects.setValue(subj, text);
       await PageObjects.common.pressEnterKey();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async tableClearFilter(subj) {
+    async tableClearFilter(subj: string) {
       return await testSubjects.setValue(subj, ' \uE003'); // space and backspace to trigger onChange event
     }
   })();
