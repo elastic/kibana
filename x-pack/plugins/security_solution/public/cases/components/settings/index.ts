@@ -5,11 +5,12 @@
  */
 
 import { CaseSettingsRegistry } from '../../types';
+import { getCaseSetting as getJiraCaseSetting } from './jira';
 
 export function registerCaseSettings({
   caseSettingsRegistry,
 }: {
   caseSettingsRegistry: CaseSettingsRegistry;
 }) {
-  caseSettingsRegistry.register({ id: '.test' });
+  caseSettingsRegistry.register(getJiraCaseSetting());
 }

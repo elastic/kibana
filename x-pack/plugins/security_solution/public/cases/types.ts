@@ -13,3 +13,15 @@ export interface CaseSettingsRegistry {
   register: (setting: CaseSetting) => void;
   get: (id: string) => CaseSetting;
 }
+
+export interface CaseSettingConnector {
+  id: string;
+  actionTypeId: string;
+  name: string;
+}
+
+export interface SettingFieldsProps<TFields> {
+  fields: TFields;
+  connector: CaseSettingConnector;
+  onChange: (property: string, value: unknown) => void;
+}
