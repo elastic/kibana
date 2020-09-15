@@ -33,7 +33,7 @@ Saved object type definitions should be defined in their own `my_plugin/server/s
 
 The folder should contain a file per type, named after the snake_case name of the type, and an `index.ts` file exporting all the types.
 
-src/plugins/my_plugin/server/saved_objects/dashboard_visualization.ts
+.src/plugins/my_plugin/server/saved_objects/dashboard_visualization.ts
 [source,typescript]
 ----
 import { SavedObjectsType } from 'src/core/server';
@@ -63,14 +63,14 @@ export const dashboardVisualization: SavedObjectsType = {
 public Saved Objects HTTP API, these should follow our API URL path convention
 and always be written as snake case.
 
-src/plugins/my_plugin/server/saved_objects/index.ts
+.src/plugins/my_plugin/server/saved_objects/index.ts
 [source,typescript]
 ----
 export { dashboardVisualization } from './dashboard_visualization';
 export { dashboard } from './dashboard'; 
 ----
 
-src/plugins/my_plugin/server/plugin.ts
+.src/plugins/my_plugin/server/plugin.ts
 [source,typescript]
 ----
 import { dashboard, dashboardVisualization } from './saved_objects';
@@ -91,7 +91,7 @@ by a type will be nested under a top-level field that matches the type name.
 For example, the mappings defined by the `dashboard_visualization` Saved
 Object type:
 
-src/plugins/my_plugin/server/saved_objects/dashboard_visualization.ts
+.src/plugins/my_plugin/server/saved_objects/dashboard_visualization.ts
 [source,typescript]
 ----
 import { SavedObjectsType } from 'src/core/server';
@@ -155,7 +155,7 @@ Saved Objects Export API will automatically export the target object with all
 of it's references. This makes it easy for users to export the entire
 reference graph of an object. 
 
-If a Saved Objects can't be used on it's own, that is, it needs other objects
+If a Saved Object can't be used on it's own, that is, it needs other objects
 to exist for a feature to function correctly, that Saved Object should declare
 references to all the objects it requires. For example, a `dashboard`
 object might have panels for several `visualization` objects. When these
