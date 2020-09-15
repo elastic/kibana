@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiButton, CommonProps, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ConditionGroup, ConditionGroupProps } from './components/condition_group';
@@ -27,6 +27,14 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
     onEntryChange,
     'data-test-subj': dataTestSubj,
   }) => {
+    const getTestId = useCallback(
+      (suffix: string): string | undefined => {
+        if (dataTestSubj) {
+          return `${dataTestSubj}-${suffix}`;
+        }
+      },
+      [dataTestSubj]
+    );
     return (
       <div data-test-subj={dataTestSubj} className={className}>
         <div>
@@ -38,6 +46,7 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
               entries={entries}
               onEntryRemove={onEntryRemove}
               onEntryChange={onEntryChange}
+              data-test-subj={getTestId('group1')}
             />
           )}
         </div>
@@ -47,7 +56,7 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
           size="s"
           iconType="plusInCircle"
           onClick={onAndClicked}
-          data-test-subj={`${dataTestSubj ? `${dataTestSubj}-AndButton` : undefined}`}
+          data-test-subj={getTestId('AndButton')}
           isDisabled={isAndDisabled}
           style={BUTTON_MIN_WIDTH}
         >

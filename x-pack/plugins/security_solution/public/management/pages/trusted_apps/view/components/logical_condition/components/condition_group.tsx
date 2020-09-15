@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { NewTrustedApp, TrustedApp } from '../../../../../../../../common/endpoint/types';
@@ -20,11 +20,20 @@ export interface ConditionGroupProps {
   entries: TrustedApp['entries'];
   onEntryRemove: ConditionEntryProps['onRemove'];
   onEntryChange: ConditionEntryProps['onChange'];
+  'data-test-subj'?: string;
 }
 export const ConditionGroup = memo<ConditionGroupProps>(
-  ({ os, entries, onEntryRemove, onEntryChange }) => {
+  ({ os, entries, onEntryRemove, onEntryChange, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useCallback(
+      (suffix: string): string | undefined => {
+        if (dataTestSubj) {
+          return `${dataTestSubj}-${suffix}`;
+        }
+      },
+      [dataTestSubj]
+    );
     return (
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
         {entries.length > 1 && (
           <AndBadgeFlexItem grow={false}>
             <AndOrBadge type={'and'} includeAntennas={true} />
@@ -40,6 +49,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
               isRemoveDisabled={index === 0 && entries.length <= 1}
               onRemove={onEntryRemove}
               onChange={onEntryChange}
+              data-test-subj={getTestId(`entry${index}`)}
             />
           ))}
         </EuiFlexItem>

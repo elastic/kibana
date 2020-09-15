@@ -105,19 +105,29 @@ describe('TrustedAppsPage', () => {
 
     describe('and when the form data is valid', () => {
       const fillInCreateForm = ({ getByTestId }: ReturnType<AppContextTestRender['render']>) => {
-        getByTestId('addTrustedAppFlyout-createForm-nameTextField').setAttribute(
-          'value',
-          'trusted app A'
-        );
-        getByTestId('addTrustedAppFlyout-createForm-descriptionField').setAttribute(
-          'value',
-          'let this be'
-        );
+        reactTestingLibrary.act(() => {
+          getByTestId('addTrustedAppFlyout-createForm-nameTextField').setAttribute(
+            'value',
+            'trusted app A'
+          );
+          getByTestId(
+            'addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value'
+          ).setAttribute('value', 'SOME$HASH#HERE');
+          getByTestId('addTrustedAppFlyout-createForm-descriptionField').setAttribute(
+            'value',
+            'let this be'
+          );
+        });
       };
 
-      it('should enable the Flyout Add button', async () => {
+      it.skip('should enable the Flyout Add button', async () => {
         const renderResult = await renderAndClickAddButton();
+        const { getByTestId } = renderResult;
         fillInCreateForm(renderResult);
+        const flyoutAddButton = getByTestId(
+          'addTrustedAppFlyout-createButton'
+        ) as HTMLButtonElement;
+        expect(flyoutAddButton.disabled).toBe(false);
       });
 
       describe('and the Flyout Add button is clicked', () => {

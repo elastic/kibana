@@ -41,7 +41,16 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const wasCreated = useTrustedAppsSelector(wasCreateSuccessful);
 
     const [formState, setFormState] = useState<undefined | TrustedAppFormState>();
+    const dataTestSubj = flyoutProps['data-test-subj'];
 
+    const getTestId = useCallback(
+      (suffix: string): string | undefined => {
+        if (dataTestSubj) {
+          return `${dataTestSubj}-${suffix}`;
+        }
+      },
+      [dataTestSubj]
+    );
     const handleCancelClick = useCallback(() => {
       if (pendingCreate) {
         return;
@@ -86,13 +95,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       <EuiFlyout onClose={handleCancelClick} {...flyoutProps} hideCloseButton={pendingCreate}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2
-              data-test-subj={
-                flyoutProps['data-test-subj']
-                  ? `${flyoutProps['data-test-subj']}-headerTitle`
-                  : undefined
-              }
-            >
+            <h2 data-test-subj={getTestId('headerTitle')}>
               <FormattedMessage
                 id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.title"
                 defaultMessage="Add trusted application"
@@ -107,11 +110,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             onChange={handleFormOnChange}
             isInvalid={!!apiErrors}
             error={apiErrors?.message}
-            data-test-subj={
-              flyoutProps['data-test-subj']
-                ? `${flyoutProps['data-test-subj']}-createForm`
-                : undefined
-            }
+            data-test-subj={getTestId('createForm')}
           />
         </EuiFlyoutBody>
 
@@ -122,11 +121,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
                 onClick={handleCancelClick}
                 flush="left"
                 isDisabled={pendingCreate}
-                data-test-subj={
-                  flyoutProps['data-test-subj']
-                    ? `${flyoutProps['data-test-subj']}-cancelButton`
-                    : undefined
-                }
+                data-test-subj={getTestId('cancelButton')}
               >
                 <FormattedMessage
                   id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.cancelButton"
@@ -140,11 +135,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
                 fill
                 isDisabled={!formState?.isValid || pendingCreate}
                 isLoading={pendingCreate}
-                data-test-subj={
-                  flyoutProps['data-test-subj']
-                    ? `${flyoutProps['data-test-subj']}-createButton`
-                    : undefined
-                }
+                data-test-subj={getTestId('createButton')}
               >
                 <FormattedMessage
                   id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.saveButton"

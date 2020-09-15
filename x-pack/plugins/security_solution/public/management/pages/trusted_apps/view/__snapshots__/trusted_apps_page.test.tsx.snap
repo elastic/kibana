@@ -701,12 +701,14 @@ exports[`TrustedAppsPage when the Add Trusted App button is clicked should displ
         <div>
           <div
             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+            data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1"
           >
             <div
               class="euiFlexItem euiFlexItem--flexGrow1"
             >
               <div
                 class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0"
               >
                 <div
                   class="euiFlexItem euiFlexItem--flexGrow2"
@@ -756,6 +758,7 @@ exports[`TrustedAppsPage when the Add Trusted App button is clicked should displ
                                 aria-labelledby="mockId mockId"
                                 aria-selected="true"
                                 class="euiSuperSelectControl"
+                                data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-field"
                                 role="option"
                                 type="button"
                               >
@@ -848,8 +851,9 @@ exports[`TrustedAppsPage when the Add Trusted App button is clicked should displ
                         >
                           <input
                             class="euiFieldText"
+                            data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value"
                             id="mockId"
-                            name="operator"
+                            name="value"
                             type="text"
                             value=""
                           />

@@ -43,9 +43,25 @@ export interface ConditionEntryProps {
   showLabels: boolean;
   onRemove: (entry: TrustedApp['entries'][0]) => void;
   onChange: (newEntry: TrustedApp['entries'][0], oldEntry: TrustedApp['entries'][0]) => void;
+  'data-test-subj'?: string;
 }
 export const ConditionEntry = memo<ConditionEntryProps>(
-  ({ entry, showLabels = false, onRemove, onChange, isRemoveDisabled = false }) => {
+  ({
+    entry,
+    showLabels = false,
+    onRemove,
+    onChange,
+    isRemoveDisabled = false,
+    'data-test-subj': dataTestSubj,
+  }) => {
+    const getTestId = useCallback(
+      (suffix: string): string | undefined => {
+        if (dataTestSubj) {
+          return `${dataTestSubj}-${suffix}`;
+        }
+      },
+      [dataTestSubj]
+    );
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       return [
         {
@@ -93,7 +109,12 @@ export const ConditionEntry = memo<ConditionEntryProps>(
     }, [entry, onRemove]);
 
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        direction="row"
+        data-test-subj={dataTestSubj}
+      >
         <EuiFlexItem grow={2}>
           <ConditionEntryCell
             showLabel={showLabels}
@@ -106,6 +127,7 @@ export const ConditionEntry = memo<ConditionEntryProps>(
               options={fieldOptions}
               valueOfSelected={entry.field}
               onChange={handleFieldUpdate}
+              data-test-subj={getTestId('field')}
             />
           </ConditionEntryCell>
         </EuiFlexItem>
@@ -135,7 +157,12 @@ export const ConditionEntry = memo<ConditionEntryProps>(
               { defaultMessage: 'Value' }
             )}
           >
-            <EuiFieldText name="operator" value={entry.value} onChange={handleValueUpdate} />
+            <EuiFieldText
+              name="value"
+              value={entry.value}
+              onChange={handleValueUpdate}
+              data-test-subj={getTestId('value')}
+            />
           </ConditionEntryCell>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
