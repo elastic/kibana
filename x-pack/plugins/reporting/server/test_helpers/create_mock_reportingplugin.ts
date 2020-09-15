@@ -11,13 +11,14 @@ jest.mock('../lib/create_queue');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
-import { ReportingConfigType } from '../config';
 import { ReportingConfig, ReportingCore } from '../';
+import { featuresPluginMock } from '../../../features/server/mocks';
 import {
   chromium,
   HeadlessChromiumDriverFactory,
   initializeBrowserDriverFactory,
 } from '../browsers';
+import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 import { ReportingStartDeps } from '../types';
@@ -34,6 +35,7 @@ const createMockPluginSetup = (
   setupMock?: any
 ): ReportingInternalSetup => {
   return {
+    features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
     basePath: setupMock.basePath || '/all-about-that-basepath',
     router: setupMock.router,

@@ -159,7 +159,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       );
     }
 
-    plugins.features.registerFeature(ACTIONS_FEATURE);
+    plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
     setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     this.eventLogService = plugins.eventLog;

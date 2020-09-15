@@ -57,7 +57,7 @@ export interface AttributeServiceOptions<A extends { title: string }> {
     type: string,
     attributes: A,
     savedObjectId?: string
-  ) => Promise<{ id: string }>;
+  ) => Promise<{ id?: string } | { error: Error }>;
   customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
 }
 
@@ -124,7 +124,10 @@ export class AttributeService<
           newAttributes,
           savedObjectId
         );
-        return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+        if ('id' in savedItem) {
+          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+        }
+        return { ...originalInput } as RefType;
       }
 
       if (savedObjectId) {
@@ -208,7 +211,6 @@ export class AttributeService<
           return { error };
         }
       };
-
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
         this.showSaveModal(
           <SavedObjectSaveModal
