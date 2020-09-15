@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { serverMock, requestContextMock } from '../__mocks__';
-import { eqlValidationRequest } from '../__mocks__/request_responses';
+import { eqlValidationRequest, getEmptyEqlSearchResponse } from '../__mocks__/request_responses';
 import { eqlValidationRoute } from './validation_route';
 
 describe('validate_eql route', () => {
@@ -16,7 +17,11 @@ describe('validate_eql route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.newClusterClient.asCurrentUser.eql.search.mockResolvedValue({});
+    clients.newClusterClient.asCurrentUser.eql.search.mockResolvedValue(
+      (getEmptyEqlSearchResponse() as unknown) as TransportRequestPromise<
+        ApiResponse<unknown, unknown>
+      >
+    );
     eqlValidationRoute(server.router);
   });
 
@@ -29,7 +34,7 @@ describe('validate_eql route', () => {
     test('returns the payload when doing a normal request', async () => {
       const response = await server.inject(eqlValidationRequest(), context);
       const expectedBody = {
-        is_valid: true,
+        valid: true,
         errors: [],
       };
       expect(response.status).toEqual(200);

@@ -12,7 +12,7 @@ import {
 import { DETECTION_ENGINE_EQL_VALIDATION_URL } from '../../../../../common/constants';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformError, buildSiemResponse } from '../utils';
-import { validateEql } from './helpers';
+import { validateEql } from './validate_eql';
 
 export const eqlValidationRoute = (router: IRouter) => {
   router.post(
@@ -40,7 +40,7 @@ export const eqlValidationRoute = (router: IRouter) => {
         });
 
         return response.ok({
-          body: { isValid: validation.isValid, errors: validation.errors },
+          body: { valid: validation.isValid, errors: validation.errors },
         });
       } catch (err) {
         const error = transformError(err);

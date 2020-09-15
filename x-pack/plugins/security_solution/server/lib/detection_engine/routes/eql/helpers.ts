@@ -4,21 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Validation {
-  isValid: boolean;
-  errors: string[];
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import get from 'lodash/get';
+
+const PARSING_ERROR_TYPE = 'parsing_exception';
+
+interface ErrorCause {
+  type: string;
+  reason: string;
 }
 
-export interface ValidateEqlParams {
-  client: unknown;
-  index: string[];
-  query: string;
-}
+export type ParsingError = ResponseError<{
+  error: ErrorCause & { root_cause: ErrorCause[] };
+}>;
 
-export const validateEql = async ({
-  client,
-  index,
-  query,
-}: ValidateEqlParams): Promise<Validation> => {
-  return { isValid: true, errors: [] };
-};
+export const isParsingErrorType = (type: unknown): boolean => type === PARSING_ERROR_TYPE;
+
+export const isParsingError = (error: unknown): error is ParsingError =>
+  error instanceof ResponseError && isParsingErrorType(get(error, 'meta.body.error.type'));
+
+export const getParsingErrors = (error: ParsingError): string[] =>
+  error.body.error.root_cause
+    .filter((cause) => isParsingErrorType(cause.type))
+    .map((cause) => cause.reason);
