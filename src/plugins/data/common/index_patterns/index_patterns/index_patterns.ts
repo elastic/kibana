@@ -315,7 +315,7 @@ export class IndexPatternsService {
       type,
     };
 
-    const indexPattern = await this.specToIndexPattern(spec);
+    const indexPattern = await this.newIndexPattern(spec);
     indexPatternCache.set(id, indexPattern);
     if (isSaveRequired) {
       try {
