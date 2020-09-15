@@ -164,9 +164,10 @@ describe('utils', () => {
       const rule = transformAlertToRule(threatRule);
       expect(rule).toEqual(
         expect.objectContaining({
-          threatIndex: 'index-123',
-          threatFilters,
-          threatMapping,
+          threat_index: 'index-123',
+          threat_filters: threatFilters,
+          threat_mapping: threatMapping,
+          threat_query: '*:*',
         })
       );
     });
