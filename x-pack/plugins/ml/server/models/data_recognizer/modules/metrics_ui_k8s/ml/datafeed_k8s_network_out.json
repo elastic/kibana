@@ -20,7 +20,7 @@
     "aggregations": {
         "kubernetes.namespace": {"terms": {"field": "kubernetes.namespace"},
             "aggregations": {
-                "kubernetes.pod.name": {"terms": {"field": "kubernetes.pod.name"},
+                "kubernetes.pod.uid": {"terms": {"field": "kubernetes.pod.uid"},
                     "aggregations": {
                         "buckets": {
                             "date_histogram": {"field": "@timestamp","fixed_interval": "5m"},
