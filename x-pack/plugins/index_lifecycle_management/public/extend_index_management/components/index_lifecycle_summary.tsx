@@ -26,7 +26,7 @@ import {
 
 import { ApplicationStart } from 'kibana/public';
 import { getPolicyPath } from '../../application/services/navigation';
-import { Index, IndexLifecyclePolicy } from '../../application/services/policies/types';
+import { Index, IndexLifecyclePolicy } from '../../../common/types';
 
 const getHeaders = (): Array<[keyof IndexLifecyclePolicy, string]> => {
   return [

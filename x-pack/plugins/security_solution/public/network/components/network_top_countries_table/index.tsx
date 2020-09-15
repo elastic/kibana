@@ -88,8 +88,8 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
     }
 
     return flowTargeted === FlowTargetSourceDest.source
-      ? networkModel.IpDetailsTableType.topCountriesSource
-      : networkModel.IpDetailsTableType.topCountriesDestination;
+      ? networkModel.NetworkDetailsTableType.topCountriesSource
+      : networkModel.NetworkDetailsTableType.topCountriesDestination;
   }, [flowTargeted, type]);
 
   const field =

@@ -88,8 +88,8 @@ import {
   AngularHttpError,
   KibanaLegacyStart,
   subscribeWithScope,
-  migrateLegacyQuery,
 } from '../../../kibana_legacy/public';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -153,6 +153,7 @@ export class DashboardAppController {
       i18n: i18nStart,
     },
     history,
+    setHeaderActionMenu,
     kbnUrlStateStorage,
     usageCollection,
     navigation,
@@ -709,7 +710,13 @@ export class DashboardAppController {
     };
     const dashboardNavBar = document.getElementById('dashboardChrome');
     const updateNavBar = () => {
-      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
+      ReactDOM.render(
+        <navigation.ui.TopNavMenu
+          {...getNavBarProps()}
+          {...(isEmbeddedExternally ? {} : { setMenuMountPoint: setHeaderActionMenu })}
+        />,
+        dashboardNavBar
+      );
     };
 
     const unmountNavBar = () => {

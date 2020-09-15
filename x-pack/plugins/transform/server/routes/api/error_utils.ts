@@ -10,11 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
 
-import {
-  TransformEndpointRequest,
-  TransformEndpointResult,
-  DeleteTransformEndpointResult,
-} from '../../../common';
+import { CommonResponseStatusSchema, TransformIdsSchema } from '../../../common/api_schemas/common';
+import { DeleteTransformsResponseSchema } from '../../../common/api_schemas/delete_transforms';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 
@@ -23,9 +20,9 @@ export function isRequestTimeout(error: any) {
 }
 
 interface Params {
-  results: TransformEndpointResult | DeleteTransformEndpointResult;
+  results: CommonResponseStatusSchema | DeleteTransformsResponseSchema;
   id: string;
-  items: TransformEndpointRequest[];
+  items: TransformIdsSchema;
   action: string;
 }
 
@@ -63,7 +60,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     },
   };
 
-  const newResults: TransformEndpointResult | DeleteTransformEndpointResult = {};
+  const newResults: CommonResponseStatusSchema | DeleteTransformsResponseSchema = {};
 
   return items.reduce((accumResults, currentVal) => {
     if (results[currentVal.id] === undefined) {

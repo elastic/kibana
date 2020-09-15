@@ -73,6 +73,11 @@ describe('telemetry_ui_metric', () => {
           { id: 'testAppName:testKeyName1', attributes: { count: 3 } },
           { id: 'testAppName:testKeyName2', attributes: { count: 5 } },
           { id: 'testAppName2:testKeyName3', attributes: { count: 1 } },
+          {
+            id:
+              'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+            attributes: { count: 1 },
+          },
         ],
         total: 3,
       } as any;
@@ -86,6 +91,12 @@ describe('telemetry_ui_metric', () => {
         { key: 'testKeyName2', value: 5 },
       ],
       testAppName2: [{ key: 'testKeyName3', value: 1 }],
+      'kibana-user_agent': [
+        {
+          key: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+          value: 1,
+        },
+      ],
     });
   });
 });
