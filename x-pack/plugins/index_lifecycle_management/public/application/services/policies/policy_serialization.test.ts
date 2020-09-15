@@ -133,13 +133,31 @@ describe('Policy serialization', () => {
           phases: {
             hot: { actions: {} },
             warm: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
+              actions: {
+                allocate: {
+                  include: { keep: 'this' },
+                  exclude: { keep: 'this' },
+                  require: { something: 'here' },
+                },
+              },
             },
             cold: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
+              actions: {
+                allocate: {
+                  include: { keep: 'this' },
+                  exclude: { keep: 'this' },
+                  require: { something: 'here' },
+                },
+              },
             },
             frozen: {
-              actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
+              actions: {
+                allocate: {
+                  include: { keep: 'this' },
+                  exclude: { keep: 'this' },
+                  require: { something: 'here' },
+                },
+              },
             },
           },
         }
@@ -161,8 +179,8 @@ describe('Policy serialization', () => {
         warm: {
           actions: {
             allocate: {
-              include: {},
-              exclude: {},
+              include: { keep: 'this' },
+              exclude: { keep: 'this' },
               require: {
                 another: 'thing',
               },
@@ -175,8 +193,8 @@ describe('Policy serialization', () => {
         cold: {
           actions: {
             allocate: {
-              include: {},
-              exclude: {},
+              include: { keep: 'this' },
+              exclude: { keep: 'this' },
               require: {
                 another: 'thing',
               },
@@ -190,8 +208,8 @@ describe('Policy serialization', () => {
         frozen: {
           actions: {
             allocate: {
-              include: {},
-              exclude: {},
+              include: { keep: 'this' },
+              exclude: { keep: 'this' },
               require: {
                 another: 'thing',
               },
@@ -267,6 +285,7 @@ describe('Policy serialization', () => {
         },
         warm: {
           actions: {
+            allocate: { include: {}, exclude: {}, require: { something: 'here' } },
             set_priority: {
               priority: 50,
             },
@@ -274,6 +293,7 @@ describe('Policy serialization', () => {
         },
         cold: {
           actions: {
+            allocate: { include: {}, exclude: {}, require: { something: 'here' } },
             set_priority: {
               priority: 0,
             },
@@ -282,6 +302,7 @@ describe('Policy serialization', () => {
         },
         frozen: {
           actions: {
+            allocate: { include: {}, exclude: {}, require: { something: 'here' } },
             set_priority: {
               priority: 0,
             },

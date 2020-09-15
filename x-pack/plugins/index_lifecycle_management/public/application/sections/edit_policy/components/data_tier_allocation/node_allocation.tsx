@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
@@ -30,25 +30,24 @@ const learnMoreLink = (
   />
 );
 
-export const NodeAllocation = ({
+const i18nTexts = {
+  doNotModifyAllocationOption: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.doNotModifyAllocationOption',
+    { defaultMessage: 'Do not modify allocation configuration' }
+  ),
+};
+
+export const NodeAllocation: FunctionComponent<SharedProps> = ({
   phase,
   setPhaseData,
   errors,
   phaseData,
   isShowingErrors,
   nodes,
-}: React.PropsWithChildren<SharedProps<PhaseWithAllocationAction>>) => {
+}) => {
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
     null
   );
-
-  useEffect(() => {
-    const attrs = Object.keys(nodes);
-    if (attrs.length) {
-      const [first] = attrs;
-      setPhaseData('selectedNodeAttrs', first);
-    }
-  }, [nodes, setPhaseData]);
 
   const nodeOptions = Object.keys(nodes).map((attrs) => ({
     text: `${attrs} (${nodes[attrs].length})`,
@@ -73,6 +72,10 @@ export const NodeAllocation = ({
       </EuiText>
       <EuiSpacer size="m" />
 
+      {/*
+        TODO: this field component must be revisited to support setting multiple require values and to support
+        setting `include and exclude values on ILM policies. See https://github.com/elastic/kibana/issues/77344
+      */}
       <ErrableFormRow
         id={`${phase}-${nodeAttrsProperty}`}
         label={i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel', {
@@ -100,7 +103,7 @@ export const NodeAllocation = ({
         <EuiSelect
           id={`${phase}-${nodeAttrsProperty}`}
           value={phaseData.selectedNodeAttrs || ' '}
-          options={nodeOptions}
+          options={[{ text: i18nTexts.doNotModifyAllocationOption, value: '' }].concat(nodeOptions)}
           onChange={(e) => {
             setPhaseData(nodeAttrsProperty, e.target.value);
           }}

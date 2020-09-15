@@ -27,11 +27,11 @@ export const serializePhaseWithAllocation = (
     if (esPhaseActions.allocate) {
       delete esPhaseActions.allocate;
     }
-  } else {
+  } else if (phase.dataTierAllocationType === 'default') {
     if (esPhaseActions.allocate) {
       delete esPhaseActions.allocate.require;
-      delete esPhaseActions.migrate;
     }
+    delete esPhaseActions.migrate;
   }
 
   return esPhaseActions;

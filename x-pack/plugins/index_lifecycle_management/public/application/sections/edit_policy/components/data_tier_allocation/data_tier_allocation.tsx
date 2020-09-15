@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
 
-import { DataTierAllocationType, PhaseWithAllocationAction } from '../../../../../../common/types';
+import { DataTierAllocationType } from '../../../../../../common/types';
 import { NodeAllocation } from './node_allocation';
 import { SharedProps } from './types';
 
@@ -55,9 +55,7 @@ export const i18nTexts = {
   },
 };
 
-export const DataTierAllocation = (
-  props: React.PropsWithChildren<SharedProps<PhaseWithAllocationAction>>
-) => {
+export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
   const { phaseData, setPhaseData, phase, hasNodeAttributes } = props;
 
   return (

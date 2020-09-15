@@ -11,11 +11,11 @@ import {
 } from '../../../../../../common/types';
 import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
 
-export interface SharedProps<T extends PhaseWithAllocationAction> {
+export interface SharedProps {
   phase: PhaseWithAllocation;
-  errors?: PhaseValidationErrors<T>;
-  phaseData: T;
-  setPhaseData: (dataKey: keyof T, value: string) => void;
+  errors?: PhaseValidationErrors<PhaseWithAllocationAction>;
+  phaseData: PhaseWithAllocationAction;
+  setPhaseData: (dataKey: keyof PhaseWithAllocationAction, value: string) => void;
   isShowingErrors: boolean;
   nodes: ListNodesRouteResponse['nodesByAttributes'];
   hasNodeAttributes: boolean;
