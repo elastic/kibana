@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const retry = getService('retry');
   const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
 
   describe('Kibana Home', () => {
     before(async () => {
@@ -87,6 +88,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('unDock the side nav', async () => {
       await PageObjects.home.dockTheSideNav();
+      await a11y.testAppSnapshot();
+    });
+
+    it('passes with searchbox open', async () => {
+      await testSubjects.click('header-search');
       await a11y.testAppSnapshot();
     });
   });
