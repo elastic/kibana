@@ -10,7 +10,7 @@ import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
 export { DATA_FRAME_TASK_STATE };
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
-import { DataFrameAnalyticsType } from '../../../../../../../common/types/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
@@ -108,7 +108,7 @@ export interface DataFrameAnalyticsListRow {
   checkpointing: object;
   config: DataFrameAnalyticsConfig;
   id: DataFrameAnalyticsId;
-  job_type: DataFrameAnalyticsType;
+  job_type: DataFrameAnalysisConfigType;
   mode: string;
   state: DataFrameAnalyticsStats['state'];
   stats: DataFrameAnalyticsStats;

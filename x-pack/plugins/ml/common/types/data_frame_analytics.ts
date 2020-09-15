@@ -82,4 +82,4 @@ export interface DataFrameAnalyticsConfig {
   allow_lazy_start?: boolean;
 }
 
-export type DataFrameAnalyticsType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
+export type DataFrameAnalysisConfigType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];

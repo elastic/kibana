@@ -21,7 +21,7 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
-import { DataFrameAnalyticsType } from '../../../../../../../common/types/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -140,7 +140,7 @@ export const getAnalyticsFactory = (
               checkpointing: {},
               config,
               id: config.id,
-              job_type: Object.keys(config.analysis)[0] as DataFrameAnalyticsType,
+              job_type: Object.keys(config.analysis)[0] as DataFrameAnalysisConfigType,
               mode: DATA_FRAME_MODE.BATCH,
               state: stats.state,
               stats,

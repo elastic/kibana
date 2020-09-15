@@ -15,7 +15,7 @@ import { SavedSearchQuery } from '../../contexts/ml';
 import {
   AnalysisConfig,
   ClassificationAnalysis,
-  DataFrameAnalyticsType,
+  DataFrameAnalysisConfigType,
   RegressionAnalysis,
 } from '../../../../common/types/data_frame_analytics';
 import {
@@ -430,7 +430,7 @@ interface LoadEvalDataConfig {
   predictionFieldName?: string;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
-  jobType: DataFrameAnalyticsType;
+  jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
 }
 

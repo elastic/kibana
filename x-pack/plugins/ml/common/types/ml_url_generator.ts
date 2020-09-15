@@ -7,7 +7,7 @@
 import { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import { JobId } from './anomaly_detection_jobs/job';
 import { ML_PAGES } from '../constants/ml_url_generator';
-import { DataFrameAnalyticsType } from './data_frame_analytics';
+import { DataFrameAnalysisConfigType } from './data_frame_analytics';
 
 type OptionalPageState = object | undefined;
 
@@ -163,7 +163,7 @@ export type DataFrameAnalyticsUrlState = MLPageState<
 export interface DataFrameAnalyticsExplorationQueryState {
   ml: {
     jobId: JobId;
-    analysisType: DataFrameAnalyticsType;
+    analysisType: DataFrameAnalysisConfigType;
   };
 }
 
@@ -171,7 +171,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
   typeof ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
   {
     jobId: JobId;
-    analysisType: DataFrameAnalyticsType;
+    analysisType: DataFrameAnalysisConfigType;
     globalState?: MlCommonGlobalState;
   }
 >;

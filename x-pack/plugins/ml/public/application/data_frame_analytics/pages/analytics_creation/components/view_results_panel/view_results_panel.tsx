@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { useMlUrlGenerator } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
-import { DataFrameAnalyticsType } from '../../../../../../../common/types/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 interface Props {
   jobId: string;
-  analysisType: DataFrameAnalyticsType;
+  analysisType: DataFrameAnalysisConfigType;
 }
 
 export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {

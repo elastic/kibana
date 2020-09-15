@@ -13,11 +13,11 @@ import { FeatureImportance, TopClasses } from '../../../../../common/types/featu
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common';
 import { ClassificationDecisionPath } from './decision_path_classification';
 import { useMlKibana } from '../../../contexts/kibana';
-import { DataFrameAnalyticsType } from '../../../../../common/types/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 
 interface DecisionPathPopoverProps {
   featureImportance: FeatureImportance[];
-  analysisType: DataFrameAnalyticsType;
+  analysisType: DataFrameAnalysisConfigType;
   predictionFieldName?: string;
   baseline?: number;
   predictedValue?: number | string | undefined;

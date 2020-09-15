@@ -13,7 +13,7 @@ import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 import {
   DataFrameAnalyticsConfig,
   DataFrameAnalyticsId,
-  DataFrameAnalyticsType,
+  DataFrameAnalysisConfigType,
 } from '../../../../../../../common/types/data_frame_analytics';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
@@ -29,7 +29,7 @@ export const UNSET_CONFIG_ITEM = '--';
 export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
-export type AnalyticsJobType = DataFrameAnalyticsType | undefined;
+export type AnalyticsJobType = DataFrameAnalysisConfigType | undefined;
 type IndexPatternId = string;
 export type SourceIndexMap = Record<
   IndexPatternTitle,
@@ -291,7 +291,7 @@ export function getFormStateFromJobConfig(
   analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
   isClone: boolean = true
 ): Partial<State['form']> {
-  const jobType = Object.keys(analyticsJobConfig.analysis)[0] as DataFrameAnalyticsType;
+  const jobType = Object.keys(analyticsJobConfig.analysis)[0] as DataFrameAnalysisConfigType;
 
   const resultState: Partial<State['form']> = {
     jobType,

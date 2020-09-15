@@ -38,7 +38,7 @@ import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { useExplorationResults } from './use_exploration_results';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { DataFrameAnalyticsType } from '../../../../../../../common/types/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -195,7 +195,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
                 {...classificationData}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}
-                analysisType={(analysisType as unknown) as DataFrameAnalyticsType}
+                analysisType={(analysisType as unknown) as DataFrameAnalysisConfigType}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

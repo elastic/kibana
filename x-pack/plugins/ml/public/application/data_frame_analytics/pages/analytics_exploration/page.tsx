@@ -27,11 +27,11 @@ import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
 
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalyticsType } from '../../../../../common/types/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 
 export const Page: FC<{
   jobId: string;
-  analysisType: DataFrameAnalyticsType;
+  analysisType: DataFrameAnalysisConfigType;
 }> = ({ jobId, analysisType }) => (
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />

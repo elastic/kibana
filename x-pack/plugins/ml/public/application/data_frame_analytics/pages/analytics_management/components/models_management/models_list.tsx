@@ -44,7 +44,7 @@ import {
 import { useTableSettings } from '../analytics_list/use_table_settings';
 import { filterAnalyticsModels, AnalyticsSearchBar } from '../analytics_search_bar';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
-import { DataFrameAnalyticsType } from '../../../../../../../common/types/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -288,7 +288,7 @@ export const ModelsList: FC = () => {
             jobId: item.metadata?.analytics_config.id as string,
             analysisType: Object.keys(
               item.metadata?.analytics_config.analysis
-            )[0] as DataFrameAnalyticsType,
+            )[0] as DataFrameAnalysisConfigType,
           },
         });
 
