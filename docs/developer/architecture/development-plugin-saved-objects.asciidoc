@@ -12,7 +12,7 @@ features:
  
 * Migrations can evolve your document's schema by transforming documents and
 ensuring that the field mappings on the index are always up to date.
-* An <<saved-objects-api,HTTP API>> is automatically exposed for each type (unless
+* a <<saved-objects-api,HTTP API>> is automatically exposed for each type (unless
 `hidden=true` is specified).
 * a Saved Objects client that can be used from both the server and the browser.
 * Users can import or export Saved Objects using the Saved Objects management
