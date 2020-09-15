@@ -41,7 +41,7 @@ export const LONGEST_LONG_TASK = i18n.translate(
 );
 
 export const SUM_LONG_TASKS = i18n.translate(
-  'xpack.apm.rum.uxMetrics.longestLongTasks',
+  'xpack.apm.rum.uxMetrics.sumLongTasks',
   {
     defaultMessage: 'Sum of long tasks',
   }
