@@ -26,6 +26,7 @@ import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
 import { MatrixHistogram } from './matrix_histogram';
+import { SearchTypes } from './detection_engine/signals/types';
 
 export * from './hosts';
 
@@ -64,6 +65,12 @@ export interface TotalValue {
   relation: string;
 }
 
+export interface BaseHit<T> {
+  _index: string;
+  _id: string;
+  _source: T;
+}
+
 export interface SearchResponse<T> {
   took: number;
   timed_out: boolean;
@@ -72,25 +79,41 @@ export interface SearchResponse<T> {
   hits: {
     total: TotalValue | number;
     max_score: number;
-    hits: Array<{
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-      _version?: number;
-      _explanation?: Explanation;
-      fields?: string[];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      highlight?: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      inner_hits?: any;
-      matched_queries?: string[];
-      sort?: string[];
-    }>;
+    hits: Array<
+      BaseHit<T> & {
+        _type: string;
+        _score: number;
+        _version?: number;
+        _explanation?: Explanation;
+        fields?: string[];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        highlight?: any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        inner_hits?: any;
+        matched_queries?: string[];
+        sort?: string[];
+      }
+    >;
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   aggregations?: any;
+}
+
+export interface EqlSequence<T> {
+  join_keys: SearchTypes[];
+  events: Array<BaseHit<T>>;
+}
+
+export interface EqlSearchResponse<T> {
+  is_partial: boolean;
+  is_running: boolean;
+  took: number;
+  timed_out: boolean;
+  hits: {
+    total: TotalValue;
+    sequences?: Array<EqlSequence<T>>;
+    events?: Array<BaseHit<T>>;
+  };
 }
 
 export interface ShardsResponse {
