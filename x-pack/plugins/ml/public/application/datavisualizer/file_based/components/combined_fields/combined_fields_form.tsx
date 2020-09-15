@@ -8,7 +8,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 
-import { EuiText, EuiFormRow, EuiPopover, EuiContextMenu, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFormRow,
+  EuiPopover,
+  EuiContextMenu,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
@@ -16,6 +25,8 @@ import {
   addCombinedFieldsToMappings,
   addCombinedFieldsToPipeline,
   getNameCollisionMsg,
+  removeCombinedFieldsFromMappings,
+  removeCombinedFieldsFromPipeline,
 } from './utils';
 
 interface Props {
@@ -55,18 +66,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
     }
 
     const mappings = this.parseMappings();
-
-    let pipeline;
-    try {
-      pipeline = JSON.parse(this.props.pipelineString);
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsForm.pipelineParseError', {
-          defaultMessage: 'Error parsing pipeline: {error}',
-          values: { error: error.message },
-        })
-      );
-    }
+    const pipeline = this.parsePipeline();
 
     this.props.onMappingsStringChange(
       JSON.stringify(addCombinedFieldsToMappings(mappings, [combinedField]), null, 2)
@@ -79,6 +79,29 @@ export class CombinedFieldsForm extends Component<Props, State> {
     this.closePopover();
   };
 
+  removeCombinedField = (index: number) => {
+    let mappings;
+    let pipeline;
+    try {
+      mappings = this.parseMappings();
+      pipeline = this.parsePipeline();
+    } catch (error) {
+      // how should remove error be surfaced?
+      return;
+    }
+
+    const updatedCombinedFields = [...this.props.combinedFields];
+    const removedCombinedFields = updatedCombinedFields.splice(index, 1);
+
+    this.props.onMappingsStringChange(
+      JSON.stringify(removeCombinedFieldsFromMappings(mappings, removedCombinedFields), null, 2)
+    );
+    this.props.onPipelineStringChange(
+      JSON.stringify(removeCombinedFieldsFromPipeline(pipeline, removedCombinedFields), null, 2)
+    );
+    this.props.onCombinedFieldsChange(updatedCombinedFields);
+  };
+
   parseMappings() {
     try {
       return JSON.parse(this.props.mappingsString);
@@ -86,6 +109,19 @@ export class CombinedFieldsForm extends Component<Props, State> {
       throw new Error(
         i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsForm.mappingsParseError', {
           defaultMessage: 'Error parsing mappings: {error}',
+          values: { error: error.message },
+        })
+      );
+    }
+  }
+
+  parsePipeline() {
+    try {
+      return JSON.parse(this.props.pipelineString);
+    } catch (error) {
+      throw new Error(
+        i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsForm.pipelineParseError', {
+          defaultMessage: 'Error parsing pipeline: {error}',
           values: { error: error.message },
         })
       );
@@ -146,9 +182,29 @@ export class CombinedFieldsForm extends Component<Props, State> {
       >
         <div>
           {this.props.combinedFields.map((combinedField: CombinedField, idx: number) => (
-            <EuiText key={idx} size="s">
-              {getCombinedFieldLabel(combinedField)}
-            </EuiText>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={null}>
+                <EuiText key={idx} size="s">
+                  {getCombinedFieldLabel(combinedField)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={null}>
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  onClick={this.removeCombinedField.bind(null, idx)}
+                  title={i18n.translate('xpack.ml.fileDatavisualizer.removeCombinedFieldsLabel', {
+                    defaultMessage: 'Remove combined field',
+                  })}
+                  aria-label={i18n.translate(
+                    'xpack.ml.fileDatavisualizer.removeCombinedFieldsLabel',
+                    {
+                      defaultMessage: 'Remove combined field',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ))}
           <EuiPopover
             id="combineFieldsPopover"
@@ -175,5 +231,5 @@ export class CombinedFieldsForm extends Component<Props, State> {
 function getCombinedFieldLabel(combinedField: CombinedField) {
   return `${combinedField.fieldNames.join(combinedField.delimiter)} => ${
     combinedField.combinedFieldName
-  } as ${combinedField.mappingType}`;
+  } (${combinedField.mappingType})`;
 }

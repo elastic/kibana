@@ -31,6 +31,17 @@ export function addCombinedFieldsToMappings(mappings: unknown, combinedFields: C
   return updatedMappings;
 }
 
+export function removeCombinedFieldsFromMappings(
+  mappings: unknown,
+  combinedFields: CombinedField[]
+) {
+  const updatedMappings = { ...mappings };
+  combinedFields.forEach((combinedField) => {
+    delete updatedMappings.properties[combinedField.combinedFieldName];
+  });
+  return updatedMappings;
+}
+
 export function addCombinedFieldsToPipeline(pipeline: unknown, combinedFields: CombinedField[]) {
   const updatedPipeline = _.cloneDeep(pipeline);
   combinedFields.forEach((combinedField) => {
@@ -46,6 +57,22 @@ export function addCombinedFieldsToPipeline(pipeline: unknown, combinedFields: C
     });
   });
   return updatedPipeline;
+}
+
+export function removeCombinedFieldsFromPipeline(
+  pipeline: unknown,
+  combinedFields: CombinedField[]
+) {
+  return {
+    ...pipeline,
+    processors: pipeline.processors.filter((processor: unknown) => {
+      return processor.hasOwnProperty('set')
+        ? !combinedFields.some((combinedField) => {
+            return processor.set.field === combinedField.combinedFieldName;
+          })
+        : true;
+    }),
+  };
 }
 
 export function isWithinLatRange(fieldName: string, fieldStats: unknown) {

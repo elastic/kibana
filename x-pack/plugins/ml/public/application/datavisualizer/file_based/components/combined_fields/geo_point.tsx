@@ -88,7 +88,7 @@ export class GeoPointForm extends Component<Props, State> {
     this.hasNameCollisionn(geoPointField);
   };
 
-  hasNameCollisionn = _.debounce((name) => {
+  hasNameCollisionn = _.debounce((name: string) => {
     try {
       const geoPointFieldError = this.props.hasNameCollision(name) ? getNameCollisionMsg(name) : '';
       this.setState({ geoPointFieldError });
