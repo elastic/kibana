@@ -6,6 +6,7 @@
 import expect from '@kbn/expect';
 import { first } from 'lodash';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { expectSnapshot } from '../../../common/match_snapshot';
 
 interface Chart {
   title: string;
@@ -52,10 +53,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         it('contains CPU usage and System memory usage chart data', async () => {
           expect(chartsResponse.status).to.be(200);
-          expect(chartsResponse.body.charts.map((chart) => chart.title)).to.eql([
-            'CPU usage',
-            'System memory usage',
-          ]);
+          expectSnapshot(chartsResponse.body.charts.map((chart) => chart.title)).toMatchInline(`
+            Array [
+              "CPU usage",
+              "System memory usage",
+            ]
+          `);
         });
 
         describe('CPU usage', () => {
@@ -66,21 +69,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(cpuUsageChart).to.not.empty();
-            expect(cpuUsageChart?.series.map(({ title }) => title)).to.eql([
-              'System max',
-              'System average',
-              'Process max',
-              'Process average',
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "System max",
+                "System average",
+                "Process max",
+                "Process average",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(cpuUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-              0.714,
-              0.38770000000000004,
-              0.75,
-              0.2543,
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                0.714,
+                0.38770000000000004,
+                0.75,
+                0.2543,
+              ]
+            `);
           });
         });
 
@@ -94,17 +102,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(systemMemoryUsageChart).to.not.empty();
-            expect(systemMemoryUsageChart?.series.map(({ title }) => title)).to.eql([
-              'Max',
-              'Average',
-            ]);
+            expectSnapshot(systemMemoryUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "Max",
+                "Average",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-              0.7220939209255549,
-              0.7181735467963479,
-            ]);
+            expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                0.7220939209255549,
+                0.7181735467963479,
+              ]
+            `);
           });
         });
       });
@@ -127,15 +140,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has correct chart data', async () => {
           expect(chartsResponse.status).to.be(200);
-          expect(chartsResponse.body.charts.map((chart) => chart.title)).to.eql([
-            'CPU usage',
-            'System memory usage',
-            'Heap Memory',
-            'Non-Heap Memory',
-            'Thread Count',
-            'Garbage collection per minute',
-            'Garbage collection time spent per minute',
-          ]);
+          expectSnapshot(chartsResponse.body.charts.map((chart) => chart.title)).toMatchInline(`
+            Array [
+              "CPU usage",
+              "System memory usage",
+              "Heap Memory",
+              "Non-Heap Memory",
+              "Thread Count",
+              "Garbage collection per minute",
+              "Garbage collection time spent per minute",
+            ]
+          `);
         });
 
         describe('CPU usage', () => {
@@ -146,26 +161,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(cpuUsageChart).to.not.empty();
-            expect(cpuUsageChart?.series.map(({ title }) => title)).to.eql([
-              'System max',
-              'System average',
-              'Process max',
-              'Process average',
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "System max",
+                "System average",
+                "Process max",
+                "Process average",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(cpuUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-              0.203,
-              0.17877777777777779,
-              0.01,
-              0.009000000000000001,
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                0.203,
+                0.17877777777777779,
+                0.01,
+                0.009000000000000001,
+              ]
+            `);
           });
 
           it('has the correct rate', async () => {
             const yValues = cpuUsageChart?.series.map((serie) => first(serie.data)?.y);
-            expect(yValues).to.eql([0.193, 0.193, 0.009000000000000001, 0.009000000000000001]);
+            expectSnapshot(yValues).toMatchInline(`
+              Array [
+                0.193,
+                0.193,
+                0.009000000000000001,
+                0.009000000000000001,
+              ]
+            `);
           });
         });
 
@@ -179,22 +206,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(systemMemoryUsageChart).to.not.empty();
-            expect(systemMemoryUsageChart?.series.map(({ title }) => title)).to.eql([
-              'Max',
-              'Average',
-            ]);
+            expectSnapshot(systemMemoryUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "Max",
+                "Average",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-              0.7076640478161058,
-              0.7051353250994505,
-            ]);
+            expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                0.7076640478161058,
+                0.7051353250994505,
+              ]
+            `);
           });
 
           it('has the correct rate', async () => {
             const yValues = systemMemoryUsageChart?.series.map((serie) => first(serie.data)?.y);
-            expect(yValues).to.eql([0.7076640478161058, 0.7076640478161058]);
+            expectSnapshot(yValues).toMatchInline(`
+              Array [
+                0.7076640478161058,
+                0.7076640478161058,
+              ]
+            `);
           });
         });
 
@@ -208,24 +245,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(cpuUsageChart).to.not.empty();
-            expect(cpuUsageChart?.series.map(({ title }) => title)).to.eql([
-              'Avg. used',
-              'Avg. committed',
-              'Avg. limit',
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "Avg. used",
+                "Avg. committed",
+                "Avg. limit",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(cpuUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-              222501617.7777778,
-              374341632,
-              1560281088,
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                222501617.7777778,
+                374341632,
+                1560281088,
+              ]
+            `);
           });
 
           it('has the correct rate', async () => {
             const yValues = cpuUsageChart?.series.map((serie) => first(serie.data)?.y);
-            expect(yValues).to.eql([211472896, 374341632, 1560281088]);
+            expectSnapshot(yValues).toMatchInline(`
+              Array [
+                211472896,
+                374341632,
+                1560281088,
+              ]
+            `);
           });
         });
 
@@ -239,22 +287,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(cpuUsageChart).to.not.empty();
-            expect(cpuUsageChart?.series.map(({ title }) => title)).to.eql([
-              'Avg. used',
-              'Avg. committed',
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "Avg. used",
+                "Avg. committed",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(cpuUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-              138573397.33333334,
-              147677639.1111111,
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                138573397.33333334,
+                147677639.1111111,
+              ]
+            `);
           });
 
           it('has the correct rate', async () => {
             const yValues = cpuUsageChart?.series.map((serie) => first(serie.data)?.y);
-            expect(yValues).to.eql([138162752, 147386368]);
+            expectSnapshot(yValues).toMatchInline(`
+              Array [
+                138162752,
+                147386368,
+              ]
+            `);
           });
         });
 
@@ -268,22 +326,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(cpuUsageChart).to.not.empty();
-            expect(cpuUsageChart?.series.map(({ title }) => title)).to.eql([
-              'Avg. count',
-              'Max count',
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "Avg. count",
+                "Max count",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(cpuUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-              44.44444444444444,
-              45,
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                44.44444444444444,
+                45,
+              ]
+            `);
           });
 
           it('has the correct rate', async () => {
             const yValues = cpuUsageChart?.series.map((serie) => first(serie.data)?.y);
-            expect(yValues).to.eql([44, 44]);
+            expectSnapshot(yValues).toMatchInline(`
+              Array [
+                44,
+                44,
+              ]
+            `);
           });
         });
 
@@ -297,14 +365,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(cpuUsageChart).to.not.empty();
-            expect(cpuUsageChart?.series.map(({ title }) => title)).to.eql([
-              'G1 Old Generation',
-              'G1 Young Generation',
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "G1 Old Generation",
+                "G1 Young Generation",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(cpuUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([0, 15]);
+            expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                0,
+                15,
+              ]
+            `);
           });
         });
 
@@ -318,17 +394,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('has correct series', () => {
             expect(cpuUsageChart).to.not.empty();
-            expect(cpuUsageChart?.series.map(({ title }) => title)).to.eql([
-              'G1 Old Generation',
-              'G1 Young Generation',
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+              Array [
+                "G1 Old Generation",
+                "G1 Young Generation",
+              ]
+            `);
           });
 
           it('has correct series overall values', () => {
-            expect(cpuUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-              0,
-              187.5,
-            ]);
+            expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+              .toMatchInline(`
+              Array [
+                0,
+                187.5,
+              ]
+            `);
           });
         });
       });
@@ -347,14 +428,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(systemMemoryUsageChart).to.not.empty();
-        expect(systemMemoryUsageChart?.series.map(({ title }) => title)).to.eql(['Max', 'Average']);
-        expect(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue)).to.eql([
-          0.11448253949914791,
-          0.11396101916306417,
-        ]);
+        expectSnapshot(systemMemoryUsageChart?.series.map(({ title }) => title)).toMatchInline(`
+          Array [
+            "Max",
+            "Average",
+          ]
+        `);
+        expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
+          .toMatchInline(`
+          Array [
+            0.11448253949914791,
+            0.11396101916306417,
+          ]
+        `);
 
         const yValues = systemMemoryUsageChart?.series.map((serie) => first(serie.data)?.y);
-        expect(yValues).to.eql([0.11379588321328883, 0.11379588321328883]);
+        expectSnapshot(yValues).toMatchInline(`
+          Array [
+            0.11379588321328883,
+            0.11379588321328883,
+          ]
+        `);
       });
     });
   });
