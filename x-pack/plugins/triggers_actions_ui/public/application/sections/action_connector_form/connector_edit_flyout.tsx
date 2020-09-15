@@ -79,6 +79,8 @@ export const ConnectorEditFlyout = ({
   const closeFlyout = useCallback(() => {
     setEditFlyoutVisibility(false);
     setConnector('connector', { ...initialConnector, secrets: {} });
+    hasChanges(false);
+    setTestExecutionResult(none);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setEditFlyoutVisibility]);
 
@@ -259,6 +261,9 @@ export const ConnectorEditFlyout = ({
               actionTypeName={connector.actionType}
               dispatch={(changes) => {
                 setHasChanges(true);
+                // if the user changes the connector, "forget" the last execution
+                // so the user comes back to a clean form ready to run a fresh test
+                setTestExecutionResult(none);
                 dispatch(changes);
               }}
               actionTypeRegistry={actionTypeRegistry}
