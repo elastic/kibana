@@ -8,10 +8,11 @@
   $sideBarWidth: $euiSize * 15;
   $sideBarMobileHeight: $euiSize * 4.75;
   $consoleHeaderHeight: 98px; // NOTE: Keep an eye on this for changes
+  $pageHeight: calc(100vh - #{$consoleHeaderHeight});
 
   display: block;
   background-color: $euiColorEmptyShade;
-  height: calc(100vh - #{$consoleHeaderHeight});
+  height: $pageHeight;
   position: relative;
   left: $sideBarWidth;
   width: calc(100% - #{$sideBarWidth});
@@ -47,7 +48,7 @@
     overflow-y: auto;
     overflow-x: hidden;
 
-    height: calc(100vh - #{$consoleHeaderHeight});
+    height: $pageHeight;
     width: $sideBarWidth;
 
     background-color: $euiColorLightestShade;
