@@ -387,7 +387,7 @@ export class DynamicStyleProperty<T>
   }
 }
 
-export function getNumericalMbFeatureStateValue(value: string | number | null | undefined) {
+export function getNumericalMbFeatureStateValue(value: RawValue) {
   if (typeof value !== 'string') {
     return value;
   }
