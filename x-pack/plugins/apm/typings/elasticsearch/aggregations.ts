@@ -23,13 +23,13 @@ type BucketsPath = string | Record<string, string>;
 
 type SourceOptions = string | string[];
 
-type MetricsAggregationOptions =
+type AggregationSourceOptions =
   | {
       field: string;
-      missing?: number;
+      missing?: unknown;
     }
   | {
-      script?: Script;
+      script: Script;
     };
 
 interface MetricsAggregationResponsePart {
@@ -51,48 +51,49 @@ type GetCompositeKeys<
 
 type CompositeOptionsSource = Record<
   string,
-  { terms: { field: string; missing_bucket?: boolean } } | undefined
+  | {
+      terms: ({ field: string } | { script: Script }) & {
+        missing_bucket?: boolean;
+      };
+    }
+  | undefined
 >;
 
 export interface AggregationOptionsByType {
   terms: {
-    field: string;
     size?: number;
-    missing?: string;
     order?: SortOptions;
     execution_hint?: 'map' | 'global_ordinals';
-  };
+  } & AggregationSourceOptions;
   date_histogram: {
-    field: string;
     format?: string;
     min_doc_count?: number;
     extended_bounds?: {
       min: number;
       max: number;
     };
-  } & ({ calendar_interval: string } | { fixed_interval: string });
+  } & ({ calendar_interval: string } | { fixed_interval: string }) &
+    AggregationSourceOptions;
   histogram: {
-    field: string;
     interval: number;
     min_doc_count?: number;
     extended_bounds?: {
       min?: number | string;
       max?: number | string;
     };
-  };
-  avg: MetricsAggregationOptions;
-  max: MetricsAggregationOptions;
-  min: MetricsAggregationOptions;
-  sum: MetricsAggregationOptions;
-  value_count: MetricsAggregationOptions;
-  cardinality: MetricsAggregationOptions & {
+  } & AggregationSourceOptions;
+  avg: AggregationSourceOptions;
+  max: AggregationSourceOptions;
+  min: AggregationSourceOptions;
+  sum: AggregationSourceOptions;
+  value_count: AggregationSourceOptions;
+  cardinality: AggregationSourceOptions & {
     precision_threshold?: number;
   };
   percentiles: {
-    field: string;
     percents?: number[];
     hdr?: { number_of_significant_value_digits: number };
-  };
+  } & AggregationSourceOptions;
   extended_stats: {
     field: string;
   };
@@ -133,7 +134,6 @@ export interface AggregationOptionsByType {
     reduce_script: Script;
   };
   date_range: {
-    field: string;
     format?: string;
     ranges: Array<
       | { from: string | number }
@@ -141,17 +141,15 @@ export interface AggregationOptionsByType {
       | { from: string | number; to: string | number }
     >;
     keyed?: boolean;
-  };
+  } & AggregationSourceOptions;
   auto_date_histogram: {
-    field: string;
     buckets: number;
-  };
+  } & AggregationSourceOptions;
   percentile_ranks: {
-    field: string;
-    values: string[];
+    values: Array<string | number>;
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
-  };
+  } & AggregationSourceOptions;
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -223,7 +221,7 @@ interface AggregationResponsePart<
     value: number;
   };
   percentiles: {
-    values: Record<string, number>;
+    values: Record<string, number | null>;
   };
   extended_stats: {
     count: number;
@@ -288,10 +286,9 @@ interface AggregationResponsePart<
       }
     | undefined;
   composite: {
-    after_key: Record<
-      GetCompositeKeys<TAggregationOptionsMap>,
-      string | number
-    >;
+    after_key: {
+      [key in GetCompositeKeys<TAggregationOptionsMap>]: TAggregationOptionsMap;
+    };
     buckets: Array<
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;
@@ -348,6 +345,12 @@ interface AggregationResponsePart<
 export type ValidAggregationKeysOf<
   T extends Record<string, any>
 > = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
+
+export type AggregationResultOf<
+  TAggregationOptionsMap extends AggregationOptionsMap,
+  TDocument
+> = AggregationResponsePart<TAggregationOptionsMap, TDocument>[AggregationType &
+  ValidAggregationKeysOf<TAggregationOptionsMap>];
 
 export type AggregationResponseMap<
   TAggregationInputMap extends AggregationInputMap | undefined,

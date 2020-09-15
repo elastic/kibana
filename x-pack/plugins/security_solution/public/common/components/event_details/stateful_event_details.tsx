@@ -7,7 +7,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { BrowserFields } from '../../containers/source';
-import { DetailItem } from '../../../graphql/types';
+import { DetailItem } from '../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 

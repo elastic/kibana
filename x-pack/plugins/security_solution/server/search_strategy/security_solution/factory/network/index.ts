@@ -4,12 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
-import { NetworkQueries } from '../../../../../common/search_strategy/security_solution/network';
+import {
+  FactoryQueryTypes,
+  NetworkQueries,
+} from '../../../../../common/search_strategy/security_solution';
 
 import { SecuritySolutionFactory } from '../types';
+import { networkDetails } from './details';
+import { networkDns } from './dns';
+import { networkHttp } from './http';
+import { networkOverview } from './overview';
 import { networkTls } from './tls';
+import { networkTopCountries } from './top_countries';
+import { networkTopNFlow } from './top_n_flow';
+import { networkUsers } from './users';
 
 export const networkFactory: Record<NetworkQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
+  [NetworkQueries.details]: networkDetails,
+  [NetworkQueries.dns]: networkDns,
+  [NetworkQueries.http]: networkHttp,
+  [NetworkQueries.overview]: networkOverview,
   [NetworkQueries.tls]: networkTls,
+  [NetworkQueries.topCountries]: networkTopCountries,
+  [NetworkQueries.topNFlow]: networkTopNFlow,
+  [NetworkQueries.users]: networkUsers,
 };

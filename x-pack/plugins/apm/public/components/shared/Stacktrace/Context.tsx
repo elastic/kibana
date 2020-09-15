@@ -8,17 +8,17 @@ import { size } from 'lodash';
 import { tint } from 'polished';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter
-// @ts-ignore
+// @ts-expect-error
 import javascript from 'react-syntax-highlighter/dist/languages/javascript';
-// @ts-ignore
+// @ts-expect-error
 import python from 'react-syntax-highlighter/dist/languages/python';
-// @ts-ignore
+// @ts-expect-error
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
-// @ts-ignore
+// @ts-expect-error
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
+// @ts-expect-error
 import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
+// @ts-expect-error
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
 import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';

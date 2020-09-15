@@ -7,11 +7,11 @@
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { HostItem, HostsFields } from '../common';
-import { CursorType, Inspect, Maybe, PageInfoPaginated, RequestOptionsPaginated } from '../..';
+import { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
+import { RequestOptionsPaginated } from '../..';
 
 export interface HostsEdges {
   node: HostItem;
-
   cursor: CursorType;
 }
 

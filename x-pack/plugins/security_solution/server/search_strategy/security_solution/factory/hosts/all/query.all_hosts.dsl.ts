@@ -11,7 +11,7 @@ import {
   HostsRequestOptions,
   SortField,
   HostsFields,
-} from '../../../../../../common/search_strategy/security_solution';
+} from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 

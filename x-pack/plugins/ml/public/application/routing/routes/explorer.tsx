@@ -22,7 +22,8 @@ import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
-import { ExplorerAppState, explorerService } from '../../explorer/explorer_dashboard_service';
+import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
+import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useShowCharts } from '../../components/controls/checkbox_showcharts';
@@ -72,7 +73,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
-
+  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
@@ -98,6 +99,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   // `timefilter.getBounds()` to update `bounds` in this component's state.
   useEffect(() => {
     if (globalState?.time !== undefined) {
+      if (globalState.time.mode === 'invalid') {
+        setInValidTimeRangeError(true);
+      }
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
@@ -214,10 +218,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       loadExplorerData({
         ...loadExplorerDataConfig,
         swimlaneLimit:
-          explorerState?.viewBySwimlaneData &&
-          isViewBySwimLaneData(explorerState?.viewBySwimlaneData)
-            ? explorerState?.viewBySwimlaneData.cardinality
-            : undefined,
+          isViewBySwimLaneData(explorerState?.viewBySwimlaneData) &&
+          explorerState?.viewBySwimlaneData.cardinality,
       });
     }
   }, [JSON.stringify(loadExplorerDataConfig)]);
@@ -235,6 +237,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           showCharts,
           severity: tableSeverity.val,
           stoppedPartitions,
+          invalidTimeRangeError,
         }}
       />
     </div>

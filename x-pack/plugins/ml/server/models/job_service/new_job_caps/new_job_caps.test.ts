@@ -21,28 +21,23 @@ describe('job_service - job_caps', () => {
   let savedObjectsClientMock: any;
 
   beforeEach(() => {
-    const callAsNonRollupMock = jest.fn((action: string) => {
-      switch (action) {
-        case 'fieldCaps':
-          return farequoteFieldCaps;
-      }
-    });
-    mlClusterClientNonRollupMock = {
-      callAsCurrentUser: callAsNonRollupMock,
-      callAsInternalUser: callAsNonRollupMock,
+    const asNonRollupMock = {
+      fieldCaps: jest.fn(() => ({ body: farequoteFieldCaps })),
     };
 
-    const callAsRollupMock = jest.fn((action: string) => {
-      switch (action) {
-        case 'fieldCaps':
-          return cloudwatchFieldCaps;
-        case 'ml.rollupIndexCapabilities':
-          return Promise.resolve(rollupCaps);
-      }
-    });
+    mlClusterClientNonRollupMock = {
+      asCurrentUser: asNonRollupMock,
+      asInternalUser: asNonRollupMock,
+    };
+
+    const callAsRollupMock = {
+      fieldCaps: jest.fn(() => ({ body: cloudwatchFieldCaps })),
+      rollup: { getRollupIndexCaps: jest.fn(() => Promise.resolve({ body: rollupCaps })) },
+    };
+
     mlClusterClientRollupMock = {
-      callAsCurrentUser: callAsRollupMock,
-      callAsInternalUser: callAsRollupMock,
+      asCurrentUser: callAsRollupMock,
+      asInternalUser: callAsRollupMock,
     };
 
     savedObjectsClientMock = {

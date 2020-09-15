@@ -8,16 +8,16 @@ import { getOr } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
-  TlsBuckets,
-  TlsEdges,
+  NetworkTlsBuckets,
+  NetworkTlsEdges,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
-export const getTlsEdges = (response: IEsSearchResponse<unknown>): TlsEdges[] =>
-  formatTlsEdges(getOr([], 'aggregations.sha1.buckets', response.rawResponse));
+export const getNetworkTlsEdges = (response: IEsSearchResponse<unknown>): NetworkTlsEdges[] =>
+  formatNetworkTlsEdges(getOr([], 'aggregations.sha1.buckets', response.rawResponse));
 
-export const formatTlsEdges = (buckets: TlsBuckets[]): TlsEdges[] =>
-  buckets.map((bucket: TlsBuckets) => {
-    const edge: TlsEdges = {
+export const formatNetworkTlsEdges = (buckets: NetworkTlsBuckets[]): NetworkTlsEdges[] =>
+  buckets.map((bucket: NetworkTlsBuckets) => {
+    const edge: NetworkTlsEdges = {
       node: {
         _id: bucket.key,
         subjects: bucket.subjects.buckets.map(({ key }) => key),

@@ -18,7 +18,8 @@ const fieldsConfig: Record<string, FieldConfig> = {
       defaultMessage: 'Path',
     }),
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.dotExpanderForm.pathHelpText', {
-      defaultMessage: 'Only required if the field to expand is part another object field.',
+      defaultMessage:
+        'Output field. Only required if the field to expand is part another object field.',
     }),
   },
 };
@@ -29,7 +30,7 @@ export const DotExpander: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.dotExpanderForm.fieldNameHelpText',
-          { defaultMessage: 'The field to expand into an object field.' }
+          { defaultMessage: 'Field containing dot notation.' }
         )}
         additionalValidations={[
           {

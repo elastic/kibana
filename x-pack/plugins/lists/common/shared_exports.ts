@@ -25,7 +25,6 @@ export {
   NamespaceType,
   Operator,
   OperatorEnum,
-  OperatorType,
   OperatorTypeEnum,
   ExceptionListTypeEnum,
   comment,

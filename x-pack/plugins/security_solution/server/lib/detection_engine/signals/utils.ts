@@ -14,7 +14,8 @@ import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
 import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
 import { BuildRuleMessage } from './rule_messages';
-import { hasLargeValueList, parseScheduleDates } from '../../../../common/detection_engine/utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
+import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 
 interface SortExceptionsReturn {

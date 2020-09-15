@@ -64,7 +64,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
   public setup(
     { http, uiSettings, getStartServices }: CoreSetup,
-    { licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
+    { features, licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
   ) {
     this.license.setup(
       {
@@ -79,6 +79,20 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: 'rollup_jobs',
+      management: {
+        data: ['rollup_jobs'],
+      },
+      catalogue: ['rollup_jobs'],
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage_rollup'],
+          ui: [],
+        },
+      ],
+    });
 
     http.registerRouteHandlerContext('rollup', async (context, request) => {
       this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));

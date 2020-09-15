@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler, RequestHandlerContext } from 'kibana/server';
 import {
   GetTrustedAppsListRequest,
   GetTrustedListAppsResponse,
@@ -13,6 +13,45 @@ import {
 import { EndpointAppContext } from '../../types';
 import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import { DeleteTrustedAppsRequestParams } from './types';
+import { ExceptionListClient } from '../../../../../lists/server';
+
+const exceptionListClientFromContext = (context: RequestHandlerContext): ExceptionListClient => {
+  const exceptionLists = context.lists?.getExceptionListClient();
+
+  if (!exceptionLists) {
+    throw new Error('Exception List client not found');
+  }
+
+  return exceptionLists;
+};
+
+export const getTrustedAppsDeleteRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<DeleteTrustedAppsRequestParams, undefined, undefined> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    try {
+      const exceptionsListService = exceptionListClientFromContext(context);
+      const { id } = req.params;
+      const response = await exceptionsListService.deleteExceptionListItem({
+        id,
+        itemId: undefined,
+        namespaceType: 'agnostic',
+      });
+
+      if (response === null) {
+        return res.notFound({ body: `trusted app id [${id}] not found` });
+      }
+
+      return res.ok();
+    } catch (error) {
+      logger.error(error);
+      return res.internalError({ body: error });
+    }
+  };
+};
 
 export const getTrustedAppsListRouteHandler = (
   endpointAppContext: EndpointAppContext
@@ -20,10 +59,10 @@ export const getTrustedAppsListRouteHandler = (
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
-    const exceptionsListService = endpointAppContext.service.getExceptionsList();
     const { page, per_page: perPage } = req.query;
 
     try {
+      const exceptionsListService = exceptionListClientFromContext(context);
       // Ensure list is created if it does not exist
       await exceptionsListService.createTrustedAppsList();
       const results = await exceptionsListService.findExceptionListItem({
@@ -54,11 +93,11 @@ export const getTrustedAppsCreateRouteHandler = (
 ): RequestHandler<undefined, undefined, PostTrustedAppCreateRequest> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
-  return async (constext, req, res) => {
-    const exceptionsListService = endpointAppContext.service.getExceptionsList();
+  return async (context, req, res) => {
     const newTrustedApp = req.body;
 
     try {
+      const exceptionsListService = exceptionListClientFromContext(context);
       // Ensure list is created if it does not exist
       await exceptionsListService.createTrustedAppsList();
 

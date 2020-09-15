@@ -11,8 +11,7 @@ import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockReportingCore } from '../test_helpers';
-import { createMockLevelLogger } from '../test_helpers/create_mock_levellogger';
+import { createMockReportingCore, createMockLevelLogger } from '../test_helpers';
 import { registerJobGenerationRoutes } from './generation';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
@@ -75,7 +74,7 @@ describe('POST /api/reporting/generate', () => {
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-      scheduleTaskFnFactory: () => () => ({ scheduleParamsTest: { test1: 'yes' } }),
+      createJobFnFactory: () => () => ({ jobParamsTest: { test1: 'yes' } }),
       runTaskFnFactory: () => () => ({ runParamsTest: { test2: 'yes' } }),
     });
     core.getExportTypesRegistry = () => mockExportTypesRegistry;

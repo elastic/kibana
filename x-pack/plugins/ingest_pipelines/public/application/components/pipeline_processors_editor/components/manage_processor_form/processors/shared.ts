@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { FunctionComponent } from 'react';
 import * as rt from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
 
@@ -31,7 +31,8 @@ export function isArrayOfStrings(v: unknown): v is string[] {
  */
 export const to = {
   booleanOrUndef: (v: unknown): boolean | undefined => (typeof v === 'boolean' ? v : undefined),
-  arrayOfStrings: (v: unknown): string[] => (isArrayOfStrings(v) ? v : []),
+  arrayOfStrings: (v: unknown): string[] =>
+    isArrayOfStrings(v) ? v : typeof v === 'string' && v.length ? [v] : [],
   jsonString: (v: unknown) => (v ? JSON.stringify(v, null, 2) : '{}'),
 };
 
@@ -62,7 +63,17 @@ export const from = {
       }
     }
   },
-  defaultBoolToUndef: (defaultBool: boolean) => (v: boolean) => (v === defaultBool ? undefined : v),
+  optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
+  undefinedIfValue: (value: any) => (v: boolean) => (v === value ? undefined : v),
+};
+
+export const EDITOR_PX_HEIGHT = {
+  extraSmall: 75,
+  small: 100,
+  medium: 200,
+  large: 300,
 };
 
 export type FieldsConfig = Record<string, FieldConfig>;
+
+export type FormFieldsComponent = FunctionComponent<{ initialFieldValues?: Record<string, any> }>;
