@@ -10,30 +10,32 @@ exports[`Node Listing Metric Cell should format N/A as the metric for an offline
 
 exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
-  intl="[object Object]"
+  class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
 >
+  <div
+    class="euiFlexItem"
+  >
+    <div
+      class="euiText euiText--medium"
+    >
+      206.3 GB
+    </div>
+  </div>
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <span
-      class="euiTitle euiTitle--small"
-      style="overflow-x:hidden;white-space:nowrap"
-    >
-      206.3 GB 
-      <span
-        class="fa fa-long-arrow-down"
-      />
-    </span>
     <div
-      class="euiText euiText--extraSmall"
+      class="euiPopover euiPopover--anchorDownCenter"
     >
-      206.5 GB  max
-    </div>
-    <div
-      class="euiText euiText--extraSmall"
-    >
-      206.3 GB  min
+      <div
+        class="euiPopover__anchor"
+      >
+        <div
+          data-euiicon-type="arrowDown"
+          tabindex="0"
+          title="More information about this metric"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -41,30 +43,32 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
 
 exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
-  intl="[object Object]"
+  class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
 >
+  <div
+    class="euiFlexItem"
+  >
+    <div
+      class="euiText euiText--medium"
+    >
+      0%
+    </div>
+  </div>
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <span
-      class="euiTitle euiTitle--small"
-      style="overflow-x:hidden;white-space:nowrap"
-    >
-      0% 
-      <span
-        class="fa fa-long-arrow-down"
-      />
-    </span>
     <div
-      class="euiText euiText--extraSmall"
+      class="euiPopover euiPopover--anchorDownCenter"
     >
-      2% max
-    </div>
-    <div
-      class="euiText euiText--extraSmall"
-    >
-      0% min
+      <div
+        class="euiPopover__anchor"
+      >
+        <div
+          data-euiicon-type="arrowDown"
+          tabindex="0"
+          title="More information about this metric"
+        />
+      </div>
     </div>
   </div>
 </div>

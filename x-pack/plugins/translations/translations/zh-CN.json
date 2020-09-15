@@ -12754,8 +12754,6 @@
     "xpack.monitoring.elasticsearch.nodeDetailStatus.transportAddress": "传输地址",
     "xpack.monitoring.elasticsearch.nodeDetailStatus.typeLabel": "类型",
     "xpack.monitoring.elasticsearch.nodes.alertsColumnTitle": "告警",
-    "xpack.monitoring.elasticsearch.nodes.cells.maxText": "{metric} 最大值",
-    "xpack.monitoring.elasticsearch.nodes.cells.minText": "{metric} 最小值",
     "xpack.monitoring.elasticsearch.nodes.cpuThrottlingColumnTitle": "CPU 限制",
     "xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle": "CPU 使用",
     "xpack.monitoring.elasticsearch.nodes.diskFreeSpaceColumnTitle": "磁盘可用空间",

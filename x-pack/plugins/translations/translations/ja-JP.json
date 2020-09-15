@@ -12745,8 +12745,6 @@
     "xpack.monitoring.elasticsearch.nodeDetailStatus.transportAddress": "トランスポートアドレス",
     "xpack.monitoring.elasticsearch.nodeDetailStatus.typeLabel": "タイプ",
     "xpack.monitoring.elasticsearch.nodes.alertsColumnTitle": "アラート",
-    "xpack.monitoring.elasticsearch.nodes.cells.maxText": "最高 {metric}",
-    "xpack.monitoring.elasticsearch.nodes.cells.minText": "最低 {metric}",
     "xpack.monitoring.elasticsearch.nodes.cpuThrottlingColumnTitle": "CPU スロットル",
     "xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle": "CPU 使用状況",
     "xpack.monitoring.elasticsearch.nodes.diskFreeSpaceColumnTitle": "ディスクの空き容量",
