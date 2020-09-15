@@ -11,11 +11,9 @@ import { BasicParametersSection } from '../edit_field';
 
 export const RuntimeType = () => {
   return (
-    <>
-      <BasicParametersSection>
-        <RuntimeTypeParameter />
-        <PainlessScriptParameter />
-      </BasicParametersSection>
-    </>
+    <BasicParametersSection>
+      <RuntimeTypeParameter />
+      <PainlessScriptParameter />
+    </BasicParametersSection>
   );
 };

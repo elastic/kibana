@@ -6,34 +6,43 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { UseField } from '../../../shared_imports';
-import { DataType, ComboBoxOption } from '../../../types';
+import { DataType } from '../../../types';
 import { getFieldConfig } from '../../../lib';
 import { RUNTIME_FIELD_OPTIONS, TYPE_DEFINITION } from '../../../constants';
-import { FieldDescriptionSection } from '../fields/edit_field';
+import { EditFieldFormRow, FieldDescriptionSection } from '../fields/edit_field';
 
 export const RuntimeTypeParameter = () => {
   return (
     <UseField path="runtime_type" config={getFieldConfig('runtime_type')}>
       {(runtimeTypeField) => {
         const { label, value, setValue } = runtimeTypeField;
-        const typeDefinition = TYPE_DEFINITION[(value as ComboBoxOption[])[0]!.value as DataType];
+        const typeDefinition =
+          TYPE_DEFINITION[(value as EuiComboBoxOptionOption[])[0]!.value as DataType];
 
         return (
-          <>
+          <EditFieldFormRow
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeType.title', {
+              defaultMessage: 'Emitted type',
+            })}
+            description={i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeType.description', {
+              defaultMessage: 'Select the type of value emitted by the runtime field.',
+            })}
+            withToggle={false}
+          >
             <EuiFormRow label={label} fullWidth>
               <EuiComboBox
                 placeholder={i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.runtimeTyeField.placeholderLabel',
+                  'xpack.idxMgmt.mappingsEditor.runtimeType.placeholderLabel',
                   {
                     defaultMessage: 'Select a type',
                   }
                 )}
                 singleSelection={{ asPlainText: true }}
                 options={RUNTIME_FIELD_OPTIONS}
-                selectedOptions={value as ComboBoxOption[]}
+                selectedOptions={value as EuiComboBoxOptionOption[]}
                 onChange={setValue}
                 isClearable={false}
                 fullWidth
@@ -42,15 +51,11 @@ export const RuntimeTypeParameter = () => {
 
             {/* Field description */}
             {typeDefinition && (
-              <>
-                <FieldDescriptionSection isMultiField={false}>
-                  {typeDefinition.description?.() as JSX.Element}
-                </FieldDescriptionSection>
-
-                <EuiSpacer size="l" />
-              </>
+              <FieldDescriptionSection isMultiField={false}>
+                {typeDefinition.description?.() as JSX.Element}
+              </FieldDescriptionSection>
             )}
-          </>
+          </EditFieldFormRow>
         );
       }}
     </UseField>

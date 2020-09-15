@@ -22,7 +22,7 @@ import { useDispatch } from '../../../../mappings_state_context';
 import { fieldSerializer } from '../../../../lib';
 import { Field, NormalizedFields } from '../../../../types';
 import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
-import { getParametersFormForType } from './required_parameters_forms';
+import { getRequiredParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -195,18 +195,18 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
             <FormDataProvider pathsToWatch={['type', 'subType']}>
               {({ type, subType }) => {
-                const ParametersForm = getParametersFormForType(
+                const RequiredParametersForm = getRequiredParametersFormForType(
                   type?.[0].value,
                   subType?.[0].value
                 );
 
-                if (!ParametersForm) {
+                if (!RequiredParametersForm) {
                   return null;
                 }
 
                 return (
                   <div className="mappingsEditor__createFieldRequiredProps">
-                    <ParametersForm key={subType ?? type} allFields={allFields} />
+                    <RequiredParametersForm key={subType ?? type} allFields={allFields} />
                   </div>
                 );
               }}

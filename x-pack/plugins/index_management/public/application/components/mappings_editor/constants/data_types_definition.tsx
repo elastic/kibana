@@ -18,9 +18,10 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldDescription', {
       defaultMessage: 'Runtime',
     }),
-    documentation: {
-      main: '/runtime_field.html',
-    },
+    // TODO: Add this once the page exists.
+    // documentation: {
+    //   main: '/runtime_field.html',
+    // },
     description: () => (
       <p>
         <FormattedMessage

@@ -191,7 +191,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     fieldConfig: {
       type: FIELD_TYPES.COMBO_BOX,
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.runtimeTypeLabel', {
-        defaultMessage: 'Emitted type',
+        defaultMessage: 'Type',
       }),
       defaultValue: 'keyword',
       deserializer: (fieldType: RuntimeType | undefined) => {

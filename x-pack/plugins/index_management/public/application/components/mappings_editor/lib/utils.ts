@@ -78,12 +78,11 @@ const getTypeLabel = (type?: DataType): string => {
 };
 
 export const getTypeLabelFromField = (field: Field) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { type, runtime_type } = field;
+  const { type, runtime_type: runtimeType } = field;
   const typeLabel = getTypeLabel(type);
 
   if (type === 'runtime') {
-    const runtimeTypeLabel = getTypeLabel(runtime_type);
+    const runtimeTypeLabel = getTypeLabel(runtimeType);
     return `${typeLabel} ${runtimeTypeLabel}`;
   }
 

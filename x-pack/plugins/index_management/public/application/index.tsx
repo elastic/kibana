@@ -32,6 +32,7 @@ export const renderApp = (
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs, uiSettings } = dependencies;
 
+  // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
   });
