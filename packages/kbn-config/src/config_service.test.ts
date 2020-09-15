@@ -26,12 +26,20 @@ import { rawConfigServiceMock } from './raw/raw_config_service.mock';
 import { schema } from '@kbn/config-schema';
 import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
 
-import { ConfigService, Env } from '.';
+import { ConfigService, Env, RawPackageInfo } from '.';
 
 import { getEnvOptions } from './__mocks__/env';
 
+const packageInfos: RawPackageInfo = {
+  branch: 'master',
+  version: '8.0.0',
+  build: {
+    number: 42,
+    sha: 'one',
+  },
+};
 const emptyArgv = getEnvOptions();
-const defaultEnv = new Env('/kibana', {}, emptyArgv);
+const defaultEnv = new Env('/kibana', packageInfos, emptyArgv);
 
 let logger: MockedLogger;
 

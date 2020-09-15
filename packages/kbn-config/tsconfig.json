@@ -7,6 +7,6 @@
     "declarationMap": true,
     "types": ["jest", "node"]
   },
-  "include": ["./src/**/*.ts", "../../typings/index.d.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["target"]
 }

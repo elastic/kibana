@@ -9,11 +9,6 @@
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
-  "dependencies": {
-    "rxjs": "^6.5.5",
-    "@kbn/config-schema": "1.0.0",
-    "moment-timezone": "^0.5.27"
-  },
   "devDependencies": {
     "typescript": "4.0.2"
   }

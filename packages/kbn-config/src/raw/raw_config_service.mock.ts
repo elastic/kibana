@@ -19,6 +19,7 @@
 
 import { RawConfigService } from './raw_config_service';
 import { Observable, of } from 'rxjs';
+import type { PublicMethodsOf } from '../types';
 
 const createRawConfigServiceMock = ({
   rawConfig = {},

@@ -47,13 +47,24 @@ export interface CliArgs {
   dist: boolean;
 }
 
+/** @internal */
+export interface RawPackageInfo {
+  branch: string;
+  version: string;
+  build: {
+    distributable?: boolean;
+    number: number;
+    sha: string;
+  };
+}
+
 export class Env {
   /**
    * @internal
    */
-  public static createDefault(repoRoot: string, options: EnvOptions, pkg?: any): Env {
+  public static createDefault(repoRoot: string, options: EnvOptions, pkg?: RawPackageInfo): Env {
     if (!pkg) {
-      pkg = loadJsonFile.sync(join(repoRoot, 'package.json'));
+      pkg = loadJsonFile.sync(join(repoRoot, 'package.json')) as RawPackageInfo;
     }
     return new Env(repoRoot, pkg, options);
   }
@@ -98,7 +109,7 @@ export class Env {
   /**
    * @internal
    */
-  constructor(public readonly homeDir: string, pkg: any, options: EnvOptions) {
+  constructor(public readonly homeDir: string, pkg: RawPackageInfo, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');

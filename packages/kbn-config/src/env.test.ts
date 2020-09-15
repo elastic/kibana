@@ -19,10 +19,19 @@
 
 import { mockPackage } from './env.test.mocks';
 
-import { Env } from '.';
+import { Env, RawPackageInfo } from './env';
 import { getEnvOptions } from './__mocks__/env';
 
 const REPO_ROOT = '/test/kibanaRoot';
+
+const packageInfos: RawPackageInfo = {
+  branch: 'master',
+  version: '8.0.0',
+  build: {
+    number: 42,
+    sha: 'one',
+  },
+};
 
 beforeEach(() => {
   mockPackage.raw = {};
@@ -144,7 +153,7 @@ test('correctly creates environment with constructor.', () => {
 test('pluginSearchPaths contains x-pack plugins path if --oss flag is false', () => {
   const env = new Env(
     '/some/home/dir',
-    {},
+    packageInfos,
     getEnvOptions({
       cliArgs: { oss: false },
     })
@@ -156,7 +165,7 @@ test('pluginSearchPaths contains x-pack plugins path if --oss flag is false', ()
 test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is true', () => {
   const env = new Env(
     '/some/home/dir',
-    {},
+    packageInfos,
     getEnvOptions({
       cliArgs: { oss: true },
     })
@@ -168,7 +177,7 @@ test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is t
 test('pluginSearchPaths contains examples plugins path if --run-examples flag is true', () => {
   const env = new Env(
     '/some/home/dir',
-    {},
+    packageInfos,
     getEnvOptions({
       cliArgs: { runExamples: true },
     })
@@ -180,7 +189,7 @@ test('pluginSearchPaths contains examples plugins path if --run-examples flag is
 test('pluginSearchPaths contains x-pack/examples plugins path if --run-examples flag is true', () => {
   const env = new Env(
     '/some/home/dir',
-    {},
+    packageInfos,
     getEnvOptions({
       cliArgs: { runExamples: true },
     })
@@ -192,7 +201,7 @@ test('pluginSearchPaths contains x-pack/examples plugins path if --run-examples 
 test('pluginSearchPaths does not contains examples plugins path if --run-examples flag is false', () => {
   const env = new Env(
     '/some/home/dir',
-    {},
+    packageInfos,
     getEnvOptions({
       cliArgs: { runExamples: false },
     })
@@ -204,7 +213,7 @@ test('pluginSearchPaths does not contains examples plugins path if --run-example
 test('pluginSearchPaths does not contains x-pack/examples plugins path if --run-examples flag is false', () => {
   const env = new Env(
     '/some/home/dir',
-    {},
+    packageInfos,
     getEnvOptions({
       cliArgs: { runExamples: false },
     })

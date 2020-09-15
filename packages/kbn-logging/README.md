@@ -3,7 +3,7 @@
 Base types for the kibana platform logging system.
 
 Note that this package currently only contains logging types. The only concrete implementation
-is still in `core`.
+is still in `core` for now.
 
 - [Loggers, Appenders and Layouts](#loggers-appenders-and-layouts)
 - [Logger hierarchy](#logger-hierarchy)
@@ -57,5 +57,5 @@ log record or disable logging entirely for the specific context.
 
 Every appender should know exactly how to format log messages before they are written to the console or file on the disk.
 This behaviour is controlled by the layouts and configured through `appender.layout` configuration property for every 
-custom appender (see examples in [Configuration](#configuration)). Currently we don't define any default layout for the
-custom appenders, so one should always make the choice explicitly.
+custom appender. Currently we don't define any default layout for the custom appenders, so one should always make the choice 
+explicitly.

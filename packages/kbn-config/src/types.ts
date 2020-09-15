@@ -36,3 +36,10 @@ export interface EnvironmentMode {
   dev: boolean;
   prod: boolean;
 }
+
+// TODO: remove once https://github.com/elastic/kibana/pull/76785 is merged
+type MethodKeysOf<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+}[keyof T];
+
+export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;

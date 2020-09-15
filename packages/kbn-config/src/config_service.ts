@@ -25,6 +25,7 @@ import { Logger, LoggerFactory } from '@kbn/logging';
 
 import { Config, ConfigPath, Env } from '.';
 
+import type { PublicMethodsOf } from './types';
 import { hasConfigPathIntersection } from './config';
 import { RawConfigurationProvider } from './raw/raw_config_service';
 import {
