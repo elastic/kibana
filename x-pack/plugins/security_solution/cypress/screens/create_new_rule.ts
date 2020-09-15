@@ -42,6 +42,10 @@ export const DEFINE_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
 export const DEFINE_INDEX_INPUT =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="input"]';
 
+export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
+
+export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
+
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
 

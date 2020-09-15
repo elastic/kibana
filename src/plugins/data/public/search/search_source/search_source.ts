@@ -72,19 +72,12 @@
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
-import { HttpStart } from 'src/core/public';
-import { BehaviorSubject } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern, ISearchGeneric } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import {
-  RequestFailure,
-  handleResponse,
-  getSearchParamsFromRequest,
-  SearchRequest,
-} from '../fetch';
+import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from '../fetch';
 
 import {
   getEsQueryConfig,
@@ -94,7 +87,6 @@ import {
   ISearchOptions,
 } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { GetConfigFn } from '../../../common/types';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
 
@@ -114,11 +106,8 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.SORT_OPTIONS,
 ];
 
-export interface SearchSourceDependencies {
-  getConfig: GetConfigFn;
+export interface SearchSourceDependencies extends FetchHandlers {
   search: ISearchGeneric;
-  http: HttpStart;
-  loadingCount$: BehaviorSubject<number>;
 }
 
 /** @public **/
@@ -321,14 +310,14 @@ export class SearchSource {
    * @return {Observable<SearchResponse<unknown>>}
    */
   private fetch$(searchRequest: SearchRequest, options: ISearchOptions) {
-    const { search, getConfig } = this.dependencies;
+    const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
       getConfig,
     });
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
-      map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
+      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
     );
   }
 
@@ -337,7 +326,7 @@ export class SearchSource {
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async legacyFetch(searchRequest: SearchRequest, options: ISearchOptions) {
-    const { http, getConfig, loadingCount$ } = this.dependencies;
+    const { getConfig, legacy, onResponse } = this.dependencies;
 
     return await fetchSoon(
       searchRequest,
@@ -346,9 +335,9 @@ export class SearchSource {
         ...options,
       },
       {
-        http,
-        config: { get: getConfig },
-        loadingCount$,
+        getConfig,
+        onResponse,
+        legacy,
       }
     );
   }

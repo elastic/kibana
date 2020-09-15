@@ -52,6 +52,8 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
+  EQL_TYPE,
+  EQL_QUERY_INPUT,
 } from '../screens/create_new_rule';
 import { TIMELINE } from '../screens/timeline';
 
@@ -206,6 +208,14 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
+export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  cy.get(EQL_QUERY_INPUT).type(rule.customQuery);
+  cy.get(EQL_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+
+  cy.get(EQL_QUERY_INPUT).should('not.exist');
+};
+
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
   cy.get(MACHINE_LEARNING_DROPDOWN).click({ force: true });
   cy.contains(MACHINE_LEARNING_LIST, rule.machineLearningJob).click();
@@ -239,4 +249,8 @@ export const selectMachineLearningRuleType = () => {
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
+};
+
+export const selectEqlRuleType = () => {
+  cy.get(EQL_TYPE).click({ force: true });
 };
