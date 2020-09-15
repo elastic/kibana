@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AuditTrailSetup, AuditTrailStart, Auditor } from './types';
 import { AuditTrailService } from './audit_trail_service';
 
