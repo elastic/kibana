@@ -61,9 +61,11 @@ describe('XY Config panels', () => {
       expect(options!.map(({ id }) => id)).toEqual([
         'bar',
         'bar_stacked',
-        'line',
+        'bar_percentage_stacked',
         'area',
         'area_stacked',
+        'area_percentage_stacked',
+        'line',
       ]);
 
       expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
@@ -85,7 +87,11 @@ describe('XY Config panels', () => {
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
-      expect(options!.map(({ id }) => id)).toEqual(['bar_horizontal', 'bar_horizontal_stacked']);
+      expect(options!.map(({ id }) => id)).toEqual([
+        'bar_horizontal',
+        'bar_horizontal_stacked',
+        'bar_horizontal_percentage_stacked',
+      ]);
       expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
     });
   });

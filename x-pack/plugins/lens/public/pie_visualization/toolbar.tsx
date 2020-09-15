@@ -169,7 +169,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         <EuiHorizontalRule margin="s" />
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
-            defaultMessage: 'Decimal places for percent',
+            defaultMessage: 'Maximum decimal places for percent',
           })}
           fullWidth
           display="rowCompressed"

@@ -70,13 +70,14 @@ export class ReportingPlugin
     });
 
     const { elasticsearch, http } = core;
-    const { licensing, security } = plugins;
+    const { features, licensing, security } = plugins;
     const { initializerContext: initContext, reportingCore } = this;
 
     const router = http.createRouter();
     const basePath = http.basePath.get;
 
     reportingCore.pluginSetup({
+      features,
       elasticsearch,
       licensing,
       basePath,
@@ -91,6 +92,8 @@ export class ReportingPlugin
     (async () => {
       const config = await buildConfig(initContext, core, this.logger);
       reportingCore.setConfig(config);
+      // Feature registration relies on config, so it cannot be setup before here.
+      reportingCore.registerFeature();
       this.logger.debug('Setup complete');
     })().catch((e) => {
       this.logger.error(`Error in Reporting setup, reporting may not function properly`);

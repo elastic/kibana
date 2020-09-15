@@ -49,9 +49,16 @@ export function getAxesConfiguration(
       const mode =
         layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
         'auto';
-      const formatter: SerializedFieldFormat = table?.columns.find(
-        (column) => column.id === accessor
-      )?.formatHint || { id: 'number' };
+      let formatter: SerializedFieldFormat = table?.columns.find((column) => column.id === accessor)
+        ?.formatHint || { id: 'number' };
+      if (layer.seriesType.includes('percentage') && formatter.id !== 'percent') {
+        formatter = {
+          id: 'percent',
+          params: {
+            pattern: '0.[00]%',
+          },
+        };
+      }
       series[mode].push({
         layer: layer.layerId,
         accessor,

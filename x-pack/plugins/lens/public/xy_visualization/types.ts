@@ -7,13 +7,16 @@
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { ArgumentType, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import chartAreaSVG from '../assets/chart_area.svg';
-import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
-import chartBarSVG from '../assets/chart_bar.svg';
-import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
-import chartBarHorizontalSVG from '../assets/chart_bar_horizontal.svg';
-import chartBarHorizontalStackedSVG from '../assets/chart_bar_horizontal_stacked.svg';
-import chartLineSVG from '../assets/chart_line.svg';
+import { LensIconChartArea } from '../assets/chart_area';
+import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
+import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
+import { LensIconChartBar } from '../assets/chart_bar';
+import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
+import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
+import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
+import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
+import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
+import { LensIconChartLine } from '../assets/chart_line';
 
 import { VisualizationType } from '../index';
 import { FittingFunction } from './fitting_functions';
@@ -286,7 +289,15 @@ export const layerConfig: ExpressionFunctionDefinition<
     },
     seriesType: {
       types: ['string'],
-      options: ['bar', 'line', 'area', 'bar_stacked', 'area_stacked'],
+      options: [
+        'bar',
+        'line',
+        'area',
+        'bar_stacked',
+        'area_stacked',
+        'bar_percentage_stacked',
+        'area_percentage_stacked',
+      ],
       help: 'The type of chart to display.',
     },
     xScaleType: {
@@ -339,8 +350,11 @@ export type SeriesType =
   | 'line'
   | 'area'
   | 'bar_stacked'
+  | 'bar_percentage_stacked'
   | 'bar_horizontal_stacked'
-  | 'area_stacked';
+  | 'bar_horizontal_percentage_stacked'
+  | 'area_stacked'
+  | 'area_percentage_stacked';
 
 export type YAxisMode = 'auto' | 'left' | 'right';
 
@@ -401,58 +415,72 @@ export type State = XYState;
 export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
-    icon: 'visBarVertical',
-    largeIcon: chartBarSVG,
+    icon: LensIconChartBar,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar',
     }),
   },
   {
     id: 'bar_horizontal',
-    icon: 'visBarHorizontal',
-    largeIcon: chartBarHorizontalSVG,
+    icon: LensIconChartBarHorizontal,
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
       defaultMessage: 'Horizontal bar',
     }),
   },
   {
     id: 'bar_stacked',
-    icon: 'visBarVerticalStacked',
-    largeIcon: chartBarStackedSVG,
+    icon: LensIconChartBarStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Stacked bar',
     }),
   },
   {
+    id: 'bar_percentage_stacked',
+    icon: LensIconChartBarPercentage,
+    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
+      defaultMessage: 'Bar percentage',
+    }),
+  },
+  {
     id: 'bar_horizontal_stacked',
-    icon: 'visBarHorizontalStacked',
-    largeIcon: chartBarHorizontalStackedSVG,
+    icon: LensIconChartBarHorizontalStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
       defaultMessage: 'Stacked horizontal bar',
     }),
   },
   {
-    id: 'line',
-    icon: 'visLine',
-    largeIcon: chartLineSVG,
-    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
-      defaultMessage: 'Line',
+    id: 'bar_horizontal_percentage_stacked',
+    icon: LensIconChartBarHorizontalPercentage,
+    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
+      defaultMessage: 'Horizontal bar percentage',
     }),
   },
   {
     id: 'area',
-    icon: 'visArea',
-    largeIcon: chartAreaSVG,
+    icon: LensIconChartArea,
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
   },
   {
     id: 'area_stacked',
-    icon: 'visAreaStacked',
-    largeIcon: chartAreaStackedSVG,
+    icon: LensIconChartAreaStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Stacked area',
+    }),
+  },
+  {
+    id: 'area_percentage_stacked',
+    icon: LensIconChartAreaPercentage,
+    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
+      defaultMessage: 'Area percentage',
+    }),
+  },
+  {
+    id: 'line',
+    icon: LensIconChartLine,
+    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
+      defaultMessage: 'Line',
     }),
   },
 ];

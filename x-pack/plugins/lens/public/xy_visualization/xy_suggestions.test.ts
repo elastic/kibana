@@ -119,6 +119,51 @@ describe('xy_suggestions', () => {
     );
   });
 
+  test('suggests all xy charts without changes to the state when switching among xy charts with malformed table', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: false,
+        columns: [numCol('bytes')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      state: {
+        legend: { isVisible: true, position: 'bottom' },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'bar',
+            accessors: ['bytes'],
+            splitAccessor: undefined,
+          },
+          {
+            layerId: 'second',
+            seriesType: 'bar',
+            accessors: ['bytes'],
+            splitAccessor: undefined,
+          },
+        ],
+      },
+    });
+
+    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
+      'bar',
+      'bar_horizontal',
+      'bar_stacked',
+      'bar_percentage_stacked',
+      'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
+      'area',
+      'area_stacked',
+      'area_percentage_stacked',
+      'line',
+    ]);
+  });
+
   test('suggests all basic x y charts when switching from another vis', () => {
     (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({
@@ -134,10 +179,13 @@ describe('xy_suggestions', () => {
     expect(suggestions).toHaveLength(visualizationTypes.length);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
+      'line',
+      'area_percentage_stacked',
       'area_stacked',
       'area',
-      'line',
+      'bar_horizontal_percentage_stacked',
       'bar_horizontal_stacked',
+      'bar_percentage_stacked',
       'bar_horizontal',
       'bar',
     ]);
@@ -157,13 +205,27 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestions).toHaveLength(visualizationTypes.length);
-    expect(suggestions.map(({ state }) => state.layers.length)).toEqual([1, 1, 1, 1, 1, 1, 1]);
+    expect(suggestions.map(({ state }) => state.layers.length)).toEqual([
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+    ]);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
+      'line',
+      'area_percentage_stacked',
       'area_stacked',
       'area',
-      'line',
+      'bar_horizontal_percentage_stacked',
       'bar_horizontal_stacked',
+      'bar_percentage_stacked',
       'bar_horizontal',
       'bar',
     ]);
@@ -200,9 +262,12 @@ describe('xy_suggestions', () => {
       'bar',
       'bar_horizontal',
       'bar_stacked',
+      'bar_percentage_stacked',
       'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
       'area',
       'area_stacked',
+      'area_percentage_stacked',
     ]);
   });
 
@@ -244,11 +309,17 @@ describe('xy_suggestions', () => {
       'bar',
       'bar_horizontal',
       'bar_stacked',
+      'bar_percentage_stacked',
       'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
       'area',
       'area_stacked',
+      'area_percentage_stacked',
     ]);
     expect(suggestions.map(({ state }) => state.layers.map((l) => l.layerId))).toEqual([
+      ['first', 'second'],
+      ['first', 'second'],
+      ['first', 'second'],
       ['first', 'second'],
       ['first', 'second'],
       ['first', 'second'],
