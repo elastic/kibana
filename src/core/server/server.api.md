@@ -105,7 +105,6 @@ import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { ParsedQuery } from 'query-string';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
@@ -156,9 +155,6 @@ import { Url } from 'url';
 //
 // @public (undocumented)
 export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
-
-// @public
-export function assertNever(x: never): never;
 
 // @public @deprecated (undocumented)
 export interface AssistanceAPIResponse {
@@ -501,9 +497,6 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
-// @public
-export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>;
-
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Readonly<{
     kibana: {
@@ -713,11 +706,6 @@ export interface FakeRequest {
     headers: Headers;
 }
 
-// @public (undocumented)
-export type Freezable = {
-    [k: string]: any;
-} | any[];
-
 // @public
 export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
 
@@ -725,11 +713,6 @@ export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHea
 export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
     status: AuthStatus;
     state: T;
-};
-
-// @public
-export function getFlattenedObject(rootValue: Record<string, any>): {
-    [key: string]: any;
 };
 
 // @public (undocumented)
@@ -962,9 +945,6 @@ export interface IScopedClusterClient {
     readonly asCurrentUser: ElasticsearchClient;
     readonly asInternalUser: ElasticsearchClient;
 }
-
-// @public
-export function isRelativeUrl(candidatePath: string): boolean;
 
 // @public
 export interface IUiSettingsClient {
@@ -1539,9 +1519,6 @@ export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 
 // @public @deprecated (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
-
-// @public
-export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
 
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
@@ -2844,26 +2821,6 @@ export interface UiSettingsServiceStart {
 
 // @public
 export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
-
-// @public
-export interface URLMeaningfulParts {
-    // (undocumented)
-    auth?: string | null;
-    // (undocumented)
-    hash?: string | null;
-    // (undocumented)
-    hostname?: string | null;
-    // (undocumented)
-    pathname?: string | null;
-    // (undocumented)
-    port?: string | null;
-    // (undocumented)
-    protocol?: string | null;
-    // (undocumented)
-    query: ParsedQuery;
-    // (undocumented)
-    slashes?: boolean | null;
-}
 
 // @public
 export interface UserProvidedValues<T = any> {
