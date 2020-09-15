@@ -28,7 +28,6 @@ import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { History } from 'history';
 import { Href } from 'history';
-import { HttpStart } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
@@ -49,6 +48,7 @@ import { Path } from 'history';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import { PopoverAnchorPosition } from '@elastic/eui';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import * as React_2 from 'react';
@@ -65,7 +65,6 @@ import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { Subscription } from 'rxjs';
-import { Toast } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
 import { ToastsSetup } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
@@ -1705,7 +1704,7 @@ export interface QueryStateChange extends QueryStateChangePartial {
 // Warning: (ae-missing-release-tag) "QueryStringInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const QueryStringInput: React.FC<Pick<Props_3, "query" | "prepend" | "size" | "className" | "placeholder" | "onChange" | "onBlur" | "onSubmit" | "isInvalid" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
+export const QueryStringInput: React.FC<Pick<Props_3, "prepend" | "query" | "size" | "className" | "placeholder" | "onChange" | "onBlur" | "onSubmit" | "isInvalid" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "onChangeQueryInputFocus">>;
 
 // @public (undocumented)
 export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;
@@ -1958,11 +1957,6 @@ export class SearchInterceptor {
     protected application: CoreStart['application'];
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
-    getPendingCount$(): Observable<number>;
-    // @internal (undocumented)
-    protected hideToast: () => void;
-    // @internal
-    protected longRunningToast?: Toast;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
@@ -1976,8 +1970,8 @@ export class SearchInterceptor {
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };
-    // @internal (undocumented)
-    protected showToast: () => void;
+    // (undocumented)
+    protected showTimeoutError: ((e: Error) => void) & import("lodash").Cancelable;
     // @internal
     protected timeoutSubscriptions: Subscription;
 }
@@ -2042,7 +2036,7 @@ export class SearchSource {
     onRequestStart(handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>): void;
     serialize(): {
         searchSourceJSON: string;
-        references: import("../../../../../core/public").SavedObjectReference[];
+        references: import("../../../../../core/types").SavedObjectReference[];
     };
     setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]): this;
     setFields(newFields: SearchSourceFields): this;

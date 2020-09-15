@@ -38,7 +38,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
     alerts.registerType(alwaysFiringAlert);
     alerts.registerType(peopleInSpaceAlert);
 
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: ALERTING_EXAMPLE_APP_ID,
       name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
         defaultMessage: 'Alerts Example',

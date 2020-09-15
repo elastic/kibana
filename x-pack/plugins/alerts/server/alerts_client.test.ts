@@ -7,6 +7,8 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, CreateOptions, ConstructorOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
+import { nodeTypes } from '../../../../src/plugins/data/common';
+import { esKuery } from '../../../../src/plugins/data/server';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
@@ -2722,6 +2724,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
+          "filter": undefined,
           "type": "alert",
         },
       ]
@@ -2730,9 +2733,11 @@ describe('find()', () => {
 
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
+      const filter = esKuery.fromKueryExpression(
+        '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
+      );
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        filter:
-          '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))',
+        filter,
         ensureAlertTypeIsAuthorized() {},
         logSuccessfulAuthorization() {},
       });
@@ -2741,8 +2746,8 @@ describe('find()', () => {
       await alertsClient.find({ options: { filter: 'someTerm' } });
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
-      expect(options.filter).toMatchInlineSnapshot(
-        `"someTerm and ((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))"`
+      expect(options.filter).toEqual(
+        nodeTypes.function.buildNode('and', [esKuery.fromKueryExpression('someTerm'), filter])
       );
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });
@@ -2759,7 +2764,6 @@ describe('find()', () => {
       const ensureAlertTypeIsAuthorized = jest.fn();
       const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        filter: '',
         ensureAlertTypeIsAuthorized,
         logSuccessfulAuthorization,
       });
