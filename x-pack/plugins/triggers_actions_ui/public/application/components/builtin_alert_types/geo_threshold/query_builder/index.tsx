@@ -129,12 +129,14 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         setAlertProperty={setAlertProperty}
         setIndexPattern={setIndexPattern}
         indexPattern={indexPattern}
+        isInvalid={!indexId || !dateField || !geoField}
       />
       <EntityByExpression
         errors={errors}
         entity={entity}
         setAlertParamsEntity={(entityName) => setAlertParams('entity', entityName)}
         indexFields={indexPattern.fields}
+        isInvalid={indexId && dateField && geoField ? !entity : false}
       />
 
       <EuiSpacer size="l" />
@@ -148,23 +150,20 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       </EuiTitle>
       <EuiSpacer size="s" />
       <ExpressionWithPopover
-        defaultValue={
-          indexId && geoField && dateField && entity
-            ? conditionOptions[0].text
-            : 'Select crossing option'
-        }
+        isInvalid={entity ? !trackingEvent : false}
+        defaultValue={'Select crossing option'}
         value={trackingEvent}
         popoverContent={
-          <EuiFormRow
-            id="someSelect"
-            fullWidth
-            isInvalid={false /* TODO: Determine error conditions */}
-            error={errors.index}
-          >
+          <EuiFormRow id="someSelect" fullWidth error={errors.index}>
             <div>
               <EuiSelect
                 data-test-subj="whenExpressionSelect"
-                value={trackingEvent}
+                value={
+                  (trackingEvent && trackingEvent) ||
+                  (entity &&
+                    setAlertParams('trackingEvent', conditionOptions[0].text) &&
+                    conditionOptions[0].text)
+                }
                 fullWidth
                 onChange={(e) => setAlertParams('trackingEvent', e.target.value)}
                 options={conditionOptions}

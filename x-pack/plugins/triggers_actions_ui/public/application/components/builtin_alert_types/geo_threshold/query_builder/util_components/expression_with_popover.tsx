@@ -24,17 +24,14 @@ export const ExpressionWithPopover: ({
   expressionDescription,
   defaultValue,
   value,
+  isInvalid,
 }: {
   popoverContent: any;
   expressionDescription: any;
   defaultValue?: any;
   value?: any;
-}) => JSX.Element = ({
-  popoverContent,
-  expressionDescription,
-  defaultValue = '',
-  value = defaultValue,
-}) => {
+  isInvalid?: boolean;
+}) => JSX.Element = ({ popoverContent, expressionDescription, defaultValue, value, isInvalid }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   return (
@@ -45,10 +42,10 @@ export const ExpressionWithPopover: ({
           display="columns"
           data-test-subj="selectIndexExpression"
           description={expressionDescription}
-          value={value}
+          value={value || defaultValue}
           isActive={popoverOpen}
           onClick={() => setPopoverOpen(true)}
-          isInvalid={false /* TODO: set valid criteria */}
+          isInvalid={isInvalid}
         />
       }
       isOpen={popoverOpen}

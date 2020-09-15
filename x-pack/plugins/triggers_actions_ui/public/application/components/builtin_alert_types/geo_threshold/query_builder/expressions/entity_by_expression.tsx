@@ -16,7 +16,7 @@ import { ExpressionWithPopover } from '../util_components/expression_with_popove
 export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
   GeoThresholdAlertParams,
   AlertsContextValue
->> = ({ errors, entity, setAlertParamsEntity, indexFields }) => {
+>> = ({ errors, entity, setAlertParamsEntity, indexFields, isInvalid }) => {
   const indexPopover = (
     <EuiFormRow
       id="someSelect"
@@ -42,6 +42,7 @@ export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressi
 
   return (
     <ExpressionWithPopover
+      isInvalid={isInvalid}
       value={entity}
       defaultValue={'Select entity field'}
       popoverContent={indexPopover}

@@ -38,6 +38,7 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
   alertsContext,
   setIndexPattern,
   indexPattern,
+  isInvalid,
 }) => {
   const {
     trackingEvent,
@@ -141,6 +142,7 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
 
   return (
     <ExpressionWithPopover
+      isInvalid={isInvalid}
       value={indexPattern.title}
       defaultValue={'Select an index pattern and geo shape/point field'}
       popoverContent={indexPopover}
