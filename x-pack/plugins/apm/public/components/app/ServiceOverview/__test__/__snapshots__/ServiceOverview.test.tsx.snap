@@ -7,7 +7,7 @@ NodeList [
   >
     <td
       class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-      colspan="6"
+      colspan="5"
     >
       <div
         class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -45,7 +45,7 @@ NodeList [
   >
     <td
       class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-      colspan="6"
+      colspan="5"
     >
       <div
         class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -141,110 +141,33 @@ NodeList [
   >
     <td
       class="euiTableRowCell"
-      style="width: 40%;"
+      style="width: 96px;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
       >
-        Name
+        Health
       </div>
       <div
         class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
         <span
-          class="euiToolTipAnchor"
+          class="euiBadge euiBadge--iconLeft"
+          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+          title="Unknown"
         >
-          <a
-            class="euiLink euiLink--primary c0"
-            href="/basepath/app/apm/services/My Go Service/transactions"
-            rel="noreferrer"
+          <span
+            class="euiBadge__content"
           >
-            My Go Service
-          </a>
+            <span
+              class="euiBadge__text"
+            >
+              Unknown
+            </span>
+          </span>
         </span>
       </div>
     </td>
-    <td
-      class="euiTableRowCell"
-      style="width: 20%;"
-    >
-      <div
-        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-      >
-        Environment
-      </div>
-      <div
-        class="euiTableCellContent euiTableCellContent--overflowingContent"
-      />
-    </td>
-    <td
-      class="euiTableRowCell"
-    >
-      <div
-        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-      >
-        Agent
-      </div>
-      <div
-        class="euiTableCellContent euiTableCellContent--overflowingContent"
-      >
-        go
-      </div>
-    </td>
-    <td
-      class="euiTableRowCell"
-    >
-      <div
-        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-      >
-        Avg. response time
-      </div>
-      <div
-        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
-      >
-        0.6 ms
-      </div>
-    </td>
-    <td
-      class="euiTableRowCell"
-    >
-      <div
-        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-      >
-        Trans. per minute
-      </div>
-      <div
-        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
-      >
-        400.0 tpm
-      </div>
-    </td>
-    <td
-      class="euiTableRowCell"
-    >
-      <div
-        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-      >
-        Errors per minute
-      </div>
-      <div
-        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
-      >
-        500.0 err.
-      </div>
-    </td>
-  </tr>,
-  .c0 {
-  font-size: 16px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-<tr
-    class="euiTableRow"
-  >
     <td
       class="euiTableRowCell"
       style="width: 40%;"
@@ -260,19 +183,36 @@ NodeList [
         <span
           class="euiToolTipAnchor"
         >
-          <a
-            class="euiLink euiLink--primary c0"
-            href="/basepath/app/apm/services/My Python Service/transactions"
-            rel="noreferrer"
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
-            My Python Service
-          </a>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <img
+                alt="python"
+                height="24px"
+                src="test-file-stub"
+              />
+            </div>
+            <div
+              class="euiFlexItem"
+            >
+              <a
+                class="euiLink euiLink--primary c0"
+                href="/basepath/app/apm/services/My Python Service/transactions"
+                rel="noreferrer"
+              >
+                My Python Service
+              </a>
+            </div>
+          </div>
         </span>
       </div>
     </td>
     <td
       class="euiTableRowCell"
-      style="width: 20%;"
+      style="width: 160px;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -314,20 +254,7 @@ NodeList [
     </td>
     <td
       class="euiTableRowCell"
-    >
-      <div
-        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-      >
-        Agent
-      </div>
-      <div
-        class="euiTableCellContent euiTableCellContent--overflowingContent"
-      >
-        python
-      </div>
-    </td>
-    <td
-      class="euiTableRowCell"
+      style="width: 160px;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -335,13 +262,52 @@ NodeList [
         Avg. response time
       </div>
       <div
-        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
-        0.3 ms
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+            style="white-space: nowrap;"
+          >
+            0 ms
+          </div>
+        </div>
       </div>
     </td>
     <td
       class="euiTableRowCell"
+      style="width: 160px;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -349,23 +315,351 @@ NodeList [
         Trans. per minute
       </div>
       <div
-        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
-        100.0 tpm
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+            style="white-space: nowrap;"
+          >
+            0 tpm
+          </div>
+        </div>
       </div>
     </td>
     <td
       class="euiTableRowCell"
+      style="width: 160px;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
       >
-        Errors per minute
+        Error rate %
       </div>
       <div
-        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
       >
-        200.0 err.
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+            style="white-space: nowrap;"
+          />
+        </div>
+      </div>
+    </td>
+  </tr>,
+  .c0 {
+  font-size: 16px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+<tr
+    class="euiTableRow"
+  >
+    <td
+      class="euiTableRowCell"
+      style="width: 96px;"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Health
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        <span
+          class="euiBadge euiBadge--iconLeft"
+          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+          title="Unknown"
+        >
+          <span
+            class="euiBadge__content"
+          >
+            <span
+              class="euiBadge__text"
+            >
+              Unknown
+            </span>
+          </span>
+        </span>
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+      style="width: 40%;"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Name
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        <span
+          class="euiToolTipAnchor"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <img
+                alt="go"
+                height="24px"
+                src="test-file-stub"
+              />
+            </div>
+            <div
+              class="euiFlexItem"
+            >
+              <a
+                class="euiLink euiLink--primary c0"
+                href="/basepath/app/apm/services/My Go Service/transactions"
+                rel="noreferrer"
+              >
+                My Go Service
+              </a>
+            </div>
+          </div>
+        </span>
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+      style="width: 160px;"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Environment
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      />
+    </td>
+    <td
+      class="euiTableRowCell"
+      style="width: 160px;"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Avg. response time
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+            style="white-space: nowrap;"
+          >
+            0 ms
+          </div>
+        </div>
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+      style="width: 160px;"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Trans. per minute
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+            style="white-space: nowrap;"
+          >
+            0 tpm
+          </div>
+        </div>
+      </div>
+    </td>
+    <td
+      class="euiTableRowCell"
+      style="width: 160px;"
+    >
+      <div
+        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+      >
+        Error rate %
+      </div>
+      <div
+        class="euiTableCellContent euiTableCellContent--overflowingContent"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  color="subdued"
+                  data-euiicon-type="visLine"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiText euiText--small"
+                >
+                  <div
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    N/A
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+            style="white-space: nowrap;"
+          />
+        </div>
       </div>
     </td>
   </tr>,

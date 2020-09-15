@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -22,7 +23,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
         );
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ serviceCount: 0, transactionCoordinates: [] });
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "serviceCount": 0,
+            "transactionCoordinates": Array [],
+          }
+        `);
       });
     });
     describe('when data is loaded', () => {
@@ -34,13 +40,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `/api/apm/observability_overview?start=${start}&end=${end}&bucketSize=${bucketSize}`
         );
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({
-          serviceCount: 3,
-          transactionCoordinates: [
-            { x: 1593413220000, y: 0.016666666666666666 },
-            { x: 1593413280000, y: 1.0458333333333334 },
-          ],
-        });
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "serviceCount": 3,
+            "transactionCoordinates": Array [
+              Object {
+                "x": 1593413220000,
+                "y": 0.016666666666666666,
+              },
+              Object {
+                "x": 1593413280000,
+                "y": 1.0458333333333334,
+              },
+            ],
+          }
+        `);
       });
     });
   });
