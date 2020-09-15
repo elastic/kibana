@@ -21,11 +21,21 @@ import moment from 'moment';
 import rison from 'rison-node';
 // import { EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonToggle } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButton,
+  EuiButtonToggle,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+} from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
+import { DiscoverSidebarMobile } from './sidebar';
+import { DiscoverMobileFlyout } from './sidebar';
 import { getServices } from '../../kibana_services';
 
 // @ts-ignore
@@ -118,6 +128,32 @@ export function Discover({
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch, filterManager } = opts;
   const size = useWindowSize();
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  let flyout;
+
+  if (isFlyoutVisible) {
+    flyout = (
+      <EuiFlyout onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
+        <EuiFlyoutHeader hasBorder>
+          <h2 id="flyoutTitle">Field list</h2>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <DiscoverMobileFlyout
+            columns={state.columns}
+            fieldCounts={fieldCounts}
+            hits={rows}
+            indexPatternList={indexPatternList}
+            onAddField={addColumn}
+            onAddFilter={onAddFilter}
+            onRemoveField={onRemoveColumn}
+            selectedIndexPattern={searchSource && searchSource.getField('index')}
+            setIndexPattern={setIndexPattern}
+          />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    );
+  }
 
   const getContextAppHref = (anchorId: string) => {
     const path = `#/context/${encodeURIComponent(indexPattern.id)}/${encodeURIComponent(anchorId)}`;
@@ -160,20 +196,32 @@ export function Discover({
         />
         <main className="dscApp__frame">
           <>
-            <div>
-              {size.width}px / {size.height}px
-            </div>
-            <DiscoverSidebar
-              columns={state.columns}
-              fieldCounts={fieldCounts}
-              hits={rows}
-              indexPatternList={indexPatternList}
-              onAddField={addColumn}
-              onAddFilter={onAddFilter}
-              onRemoveField={onRemoveColumn}
-              selectedIndexPattern={searchSource && searchSource.getField('index')}
-              setIndexPattern={setIndexPattern}
-            />
+            {flyout}
+            {size && size.width > 575 ? (
+              <DiscoverSidebar
+                columns={state.columns}
+                fieldCounts={fieldCounts}
+                hits={rows}
+                indexPatternList={indexPatternList}
+                onAddField={addColumn}
+                onAddFilter={onAddFilter}
+                onRemoveField={onRemoveColumn}
+                selectedIndexPattern={searchSource && searchSource.getField('index')}
+                setIndexPattern={setIndexPattern}
+              />
+            ) : (
+              <DiscoverSidebarMobile
+                columns={state.columns}
+                fieldCounts={fieldCounts}
+                hits={rows}
+                indexPatternList={indexPatternList}
+                onAddField={addColumn}
+                onAddFilter={onAddFilter}
+                onRemoveField={onRemoveColumn}
+                selectedIndexPattern={searchSource && searchSource.getField('index')}
+                setIndexPattern={setIndexPattern}
+              />
+            )}
 
             <>
               {resultState === 'none' && (
@@ -197,6 +245,8 @@ export function Discover({
 
               {resultState === 'ready' && (
                 <div className="dscWrapper__content">
+                  {size.width}px / {size.height}px
+                  <EuiButton onClick={() => setIsFlyoutVisible(true)}>Fields</EuiButton>
                   <div className="dscResultCount">
                     <EuiFlexGroup justifyContent="spaceBetween">
                       <EuiFlexItem
@@ -234,7 +284,6 @@ export function Discover({
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </div>
-
                   <div className="dscResults">
                     {opts.timefield && toggleOn && (
                       <section

@@ -31,6 +31,11 @@ discover-app {
   flex-grow: 1;
   display: flex;
   overflow: hidden;
+  @include euiBreakpoint('xs', 's') {
+    flex-wrap: wrap;
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 .dscApp__sidebar {
