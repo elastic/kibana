@@ -126,7 +126,7 @@ describe('Sourcerer Hooks', () => {
   describe('Initialization', () => {
     it('initializes loading default index patterns', async () => {
       await act(async () => {
-        const { waitForNextUpdate } = renderHook<string>(() => useInitSourcerer(), {
+        const { waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
         await waitForNextUpdate();
