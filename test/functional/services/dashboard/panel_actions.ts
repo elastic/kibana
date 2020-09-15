@@ -63,9 +63,13 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await this.expectContextMenuToBeOpen();
     }
 
+    async clickContextMenuMoreItem() {
+      await testSubjects.click('embeddablePanelMore-mainMenu');
+    }
+
     async openContextMenuMorePanel(parent?: WebElementWrapper) {
       await this.openContextMenu(parent);
-      await testSubjects.click('embeddablePanelMore-mainMenu');
+      await this.clickContextMenuMoreItem();
     }
 
     async clickEdit() {
