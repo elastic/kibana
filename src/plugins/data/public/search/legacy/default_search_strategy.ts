@@ -29,12 +29,14 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 };
 
-function msearch({ searchRequests, config, http, loadingCount$ }: SearchStrategySearchParams) {
+function msearch({ searchRequests, getConfig, legacy }: SearchStrategySearchParams) {
+  const { callMsearch, loadingCount$ } = legacy;
+
   const requests = searchRequests.map(({ index, body }) => {
     return {
       header: {
         index: index.title || index,
-        preference: getPreference(config.get),
+        preference: getPreference(getConfig),
       },
       body,
     };
@@ -55,12 +57,11 @@ function msearch({ searchRequests, config, http, loadingCount$ }: SearchStrategy
     }
   };
 
-  const searching = http
-    .post('/internal/_msearch', {
-      body: JSON.stringify({ searches: requests }),
-      signal: abortController.signal,
-    })
-    .then(({ body }) => body?.responses)
+  const searching = callMsearch({
+    body: { searches: requests },
+    signal: abortController.signal,
+  })
+    .then((res: any) => res?.body?.responses)
     .finally(() => cleanup());
 
   return {
