@@ -22,9 +22,9 @@ import Boom from 'boom';
 import { IndexMapping } from '../../../mappings';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KueryNode } from '../../../../../../plugins/data/server';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+
+type KueryNode = any;
 
 interface GetSearchDslOptions {
   type: string | string[];
