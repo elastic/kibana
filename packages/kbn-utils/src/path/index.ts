@@ -20,7 +20,7 @@
 import { join } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
-import { fromRoot } from '../utils';
+import { REPO_ROOT } from '../repo_root';
 
 const isString = (v: any): v is string => typeof v === 'string';
 
@@ -28,19 +28,19 @@ const CONFIG_PATHS = [
   process.env.KBN_PATH_CONF && join(process.env.KBN_PATH_CONF, 'kibana.yml'),
   process.env.KIBANA_PATH_CONF && join(process.env.KIBANA_PATH_CONF, 'kibana.yml'),
   process.env.CONFIG_PATH, // deprecated
-  fromRoot('config/kibana.yml'),
+  join(REPO_ROOT, 'config/kibana.yml'),
 ].filter(isString);
 
 const CONFIG_DIRECTORIES = [
   process.env.KBN_PATH_CONF,
   process.env.KIBANA_PATH_CONF,
-  fromRoot('config'),
+  join(REPO_ROOT, 'config'),
   '/etc/kibana',
 ].filter(isString);
 
 const DATA_PATHS = [
   process.env.DATA_PATH, // deprecated
-  fromRoot('data'),
+  join(REPO_ROOT, 'data'),
   '/var/lib/kibana',
 ].filter(isString);
 
