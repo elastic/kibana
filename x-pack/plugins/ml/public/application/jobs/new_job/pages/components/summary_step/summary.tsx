@@ -28,6 +28,7 @@ import { DatafeedDetails } from './components/datafeed_details';
 import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
+import { StartDatafeedSwitch } from './components/start_datafeed_switch';
 import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,
@@ -50,6 +51,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
+  const [startDatafeed, setStartDatafeed] = useState(true);
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);
   const jsonEditorMode = isAdvanced ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
@@ -60,13 +62,15 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   async function start() {
     if (isAdvanced) {
-      await startAdvanced();
+      await createAdvancedJob();
+    } else if (startDatafeed === true) {
+      await createAndStartJob();
     } else {
-      await startInline();
+      await createAdvancedJob(false);
     }
   }
 
-  async function startInline() {
+  async function createAndStartJob() {
     setCreatingJob(true);
     try {
       const jr = await jobCreator.createAndStartJob();
@@ -76,12 +80,12 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     }
   }
 
-  async function startAdvanced() {
+  async function createAdvancedJob(showStartModal: boolean = true) {
     setCreatingJob(true);
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
-      advancedStartDatafeed(jobCreator, navigateToPath);
+      advancedStartDatafeed(showStartModal ? jobCreator : null, navigateToPath);
     } catch (error) {
       handleJobCreationError(error);
     }
@@ -130,6 +134,13 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           <JobProgress progress={progress} />
           <EuiSpacer size="m" />
           <JobDetails />
+
+          {isAdvanced === false && (
+            <StartDatafeedSwitch
+              startDatafeed={startDatafeed}
+              setStartDatafeed={setStartDatafeed}
+            />
+          )}
 
           {isAdvanced && (
             <Fragment>
