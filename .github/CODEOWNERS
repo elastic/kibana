@@ -295,6 +295,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/plugins/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/ingest_manager/**/*.scss @elastic/observability-design
 /x-pack/plugins/observability/**/*.scss @elastic/observability-design
+/x-pack/plugins/monitoring/**/*.scss @elastic/observability-design 
 
 # Ent. Search design
 /x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
