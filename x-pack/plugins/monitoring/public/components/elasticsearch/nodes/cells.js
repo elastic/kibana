@@ -36,6 +36,13 @@ const getDirection = (slope) => {
   return null;
 };
 
+const getIcon = (slope) => {
+  if (slope || slope === 0) {
+    return slope > 0 ? 'arrowUp' : 'arrowDown';
+  }
+  return null;
+};
+
 const metricVal = (metric, format, isPercent, units) => {
   if (isPercent) {
     return formatMetric(metric, format, '%', { prependSpace: false });
@@ -79,7 +86,7 @@ function MetricCell({ isOnline, metric = {}, isPercent }) {
       <EuiIcon
         onClick={onButtonClick}
         tabIndex="0"
-        type="arrowDown"
+        type={getIcon(slope)}
         title={i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel', {
           defaultMessage: 'More information about this metric',
         })}
