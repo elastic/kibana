@@ -20,12 +20,12 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { PathConfigType } from '@kbn/utils';
 
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { PathConfigType } from '../path';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
