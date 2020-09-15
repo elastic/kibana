@@ -48,26 +48,24 @@ export const CategoryQualityWarnings: React.FC<{
                 defaultMessage="Details"
               />
             }
-            paddingSize="s"
           >
-            <ul>
-              {qualityWarningsForJob.flatMap((qualityWarning) =>
-                qualityWarning.reasons.map((reason) => (
-                  <li key={`title-${reason.type}-${qualityWarning.dataset}`}>
-                    <WarningReasonListTitle
-                      data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
-                    >
-                      {getFriendlyNameForPartitionId(qualityWarning.dataset)}
-                    </WarningReasonListTitle>
-                    <WarningReasonListDescription
+            {qualityWarningsForJob.flatMap((qualityWarning) => (
+              <>
+                <WarningReasonListTitle data-test-subj={`title-${qualityWarning.dataset}`}>
+                  {getFriendlyNameForPartitionId(qualityWarning.dataset)}
+                </WarningReasonListTitle>
+                <ul>
+                  {qualityWarning.reasons.map((reason) => (
+                    <li
+                      key={`description-${reason.type}-${qualityWarning.dataset}`}
                       data-test-subj={`description-${reason.type}-${qualityWarning.dataset}`}
                     >
                       <CategoryQualityWarningReasonDescription reason={reason} />
-                    </WarningReasonListDescription>
-                  </li>
-                ))
-              )}
-            </ul>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ))}
           </EuiAccordion>
           <EuiSpacer size="l" />
         </RecreateJobCallout>
@@ -76,14 +74,8 @@ export const CategoryQualityWarnings: React.FC<{
   );
 };
 
-const WarningReasonListTitle = euiStyled.div`
-  display: inline-block;
-  font-weight: bold;
-  padding-right: ${(props) => props.theme.eui.paddingSizes.m}
-`;
-
-const WarningReasonListDescription = euiStyled.div`
-  display: inline-block;
+const WarningReasonListTitle = euiStyled.h4`
+  margin-top: ${(props) => props.theme.eui.paddingSizes.m};
 `;
 
 const categoryQualityWarningCalloutTitle = i18n.translate(
