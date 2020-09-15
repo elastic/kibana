@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   TRANSACTION_PAGE_LOAD,
@@ -36,6 +37,11 @@ import {
 import { MLHeader } from './ml_header';
 import { TransactionLineChart } from './TransactionLineChart';
 import { useFormatter } from './use_formatter';
+import { ClientSideMonitoringLink } from '../../Links/ClientSideMonitoringLink';
+
+const CSMLinkSection = styled.section`
+  text-align: center;
+`;
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
@@ -130,6 +136,15 @@ export function TransactionCharts({
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <CSMLinkSection>
+            <ClientSideMonitoringLink external target="_blank">
+              {i18n.translate(
+                'xpack.apm.metrics.transactionChart.clientSideMonitoringLink',
+                { defaultMessage: 'See more in Client Side Monitoring' }
+              )}
+            </ClientSideMonitoringLink>
+          </CSMLinkSection>
         </>
       )}
     </>
