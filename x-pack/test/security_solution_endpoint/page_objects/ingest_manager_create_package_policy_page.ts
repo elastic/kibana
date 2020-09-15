@@ -52,13 +52,11 @@ export function IngestManagerCreatePackagePolicy({
     async selectAgentPolicy(name?: string) {
       // if we have a name, then find the button with that `title` set.
       if (name) {
-        await (
-          await find.byCssSelector(`[data-test-subj="agentPolicyItem"][title="${name}"]`)
-        ).click();
+        await find.clickByCssSelector(`[data-test-subj="agentPolicyItem"][title="${name}"]`);
       }
       // Else, just select the first agent policy that is present
       else {
-        await (await testSubjects.find('agentPolicyItem')).click();
+        await testSubjects.click('agentPolicyItem');
       }
     },
 

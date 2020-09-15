@@ -40,7 +40,10 @@ export const epmRouteService = {
   },
 
   getInstallPath: (pkgkey: string) => {
-    return EPM_API_ROUTES.INSTALL_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
+    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgkey}', pkgkey).replace(
+      /\/$/,
+      ''
+    ); // trim trailing slash
   },
 
   getRemovePath: (pkgkey: string) => {
