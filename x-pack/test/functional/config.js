@@ -258,17 +258,6 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
-        global_dashboard_all: {
-          kibana: [
-            {
-              feature: {
-                dashboard: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        },
-
         global_discover_read: {
           kibana: [
             {
