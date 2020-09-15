@@ -21,6 +21,29 @@ import {
 import { BooleanFilter } from './types';
 
 describe('build_threat_mapping_filter', () => {
+  describe('buildThreatMappingFilter', () => {
+    test('it should create the right entries when using the default mocks', () => {
+      const threatMapping = getThreatMappingMock();
+      const threatList = getThreatListSearchResponseMock();
+      const filter = buildThreatMappingFilter({ threatMapping, threatList });
+      expect(filter).toEqual(getThreatMappingFilterMock());
+    });
+
+    test('it should not mutate the original threatMapping', () => {
+      const threatMapping = getThreatMappingMock();
+      const threatList = getThreatListSearchResponseMock();
+      buildThreatMappingFilter({ threatMapping, threatList });
+      expect(threatMapping).toEqual(getThreatMappingMock());
+    });
+
+    test('it should not mutate the original threatListItem', () => {
+      const threatMapping = getThreatMappingMock();
+      const threatList = getThreatListSearchResponseMock();
+      buildThreatMappingFilter({ threatMapping, threatList });
+      expect(threatList).toEqual(getThreatListSearchResponseMock());
+    });
+  });
+
   describe('filterEntriesNotInThreatListItem', () => {
     test('it should remove one entry when using the default mocks', () => {
       const threatMapping = getThreatMappingMock();
@@ -51,29 +74,6 @@ describe('build_threat_mapping_filter', () => {
         threatListItem,
       });
       expect(threatListItem).toEqual(getThreatListItemMock());
-    });
-  });
-
-  describe('buildEntriesMappingFilter', () => {
-    test('it should create the right entries when using the default mocks', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
-      const filter = buildThreatMappingFilter({ threatMapping, threatList });
-      expect(filter).toEqual(getThreatMappingFilterMock());
-    });
-
-    test('it should not mutate the original threatMapping', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
-      buildThreatMappingFilter({ threatMapping, threatList });
-      expect(threatMapping).toEqual(getThreatMappingMock());
-    });
-
-    test('it should not mutate the original threatListItem', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock();
-      buildThreatMappingFilter({ threatMapping, threatList });
-      expect(threatList).toEqual(getThreatListSearchResponseMock());
     });
   });
 
