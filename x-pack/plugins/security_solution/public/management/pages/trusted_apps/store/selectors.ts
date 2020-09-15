@@ -12,6 +12,7 @@ import {
   getCurrentResourceError,
   getLastLoadedResourceState,
   isFailedResourceState,
+  isLoadedResourceState,
   isLoadingResourceState,
   isOutdatedResourceState,
   LoadedResourceState,
@@ -86,6 +87,10 @@ export const isDeletionDialogOpen = (state: Immutable<TrustedAppsListPageState>)
 
 export const isDeletionInProgress = (state: Immutable<TrustedAppsListPageState>): boolean => {
   return isLoadingResourceState(state.deletionDialog.submissionResourceState);
+};
+
+export const isDeletionSuccessful = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return isLoadedResourceState(state.deletionDialog.submissionResourceState);
 };
 
 export const getDeletionError = (
