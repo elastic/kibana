@@ -37,7 +37,6 @@ const Wrapper = styled.header`
     width: 100%;
     z-index: ${theme.eui.euiZNavigation};
     position: fixed;
-    top: ${GLOBAL_HEADER_HEIGHT}px;
   `}
 `;
 Wrapper.displayName = 'Wrapper';
