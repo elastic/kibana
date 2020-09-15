@@ -231,7 +231,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
       anchorPosition="rightUp"
-      panelClassName="lnsFieldItem__fieldPopoverPanel"
+      panelClassName="lnsFieldItem__fieldPanel"
     >
       <FieldItemPopoverContents {...state} {...props} />
     </EuiPopover>
@@ -316,7 +316,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
       <EuiButtonGroup
-        className="lnsFieldItem__popoverButtonGroup"
+        className="lnsFieldItem__buttonGroup"
         buttonSize="compressed"
         isFullWidth
         legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {

@@ -14,6 +14,7 @@ import {
   SavedObject,
   PluginInitializerContext,
 } from 'src/core/server';
+import { esKuery } from '../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../actions/server';
 import {
   Alert,
@@ -38,11 +39,7 @@ import { TaskManagerStartContract } from '../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 import { RegistryAlertType } from './alert_type_registry';
-import {
-  AlertsAuthorization,
-  WriteOperations,
-  ReadOperations,
-} from './authorization/alerts_authorization';
+import { AlertsAuthorization, WriteOperations, ReadOperations, and } from './authorization';
 import { IEventLogClient } from '../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from './lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from './lib/alert_instance_summary_from_event_log';
@@ -348,11 +345,6 @@ export class AlertsClient {
       logSuccessfulAuthorization,
     } = await this.authorization.getFindAuthorizationFilter();
 
-    if (authorizationFilter) {
-      options.filter = options.filter
-        ? `${options.filter} and ${authorizationFilter}`
-        : authorizationFilter;
-    }
     const {
       page,
       per_page: perPage,
@@ -360,6 +352,10 @@ export class AlertsClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
+      filter:
+        (authorizationFilter && options.filter
+          ? and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
+          : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
