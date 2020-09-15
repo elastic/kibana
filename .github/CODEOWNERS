@@ -85,6 +85,7 @@
 # Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
 /src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-core-ui
 /src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
+/x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
 
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
@@ -169,6 +170,7 @@
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
+/x-pack/test/ui_capabilities/ @elastic/kibana-security
 /x-pack/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
 /x-pack/test/functional/apps/security/ @elastic/kibana-security
 /x-pack/test/kerberos_api_integration/ @elastic/kibana-security
