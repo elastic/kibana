@@ -66,7 +66,7 @@ function VisualizationSummary(props: Props) {
   return (
     <>
       {description.icon && (
-        <EuiIcon size="xl" className="lnsChartSwitch__summaryIcon" type={description.icon} />
+        <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
       {description.label}
     </>
@@ -181,7 +181,7 @@ export function ChartSwitch(props: Props) {
           v.visualizationTypes.map((t) => ({
             visualizationId: v.id,
             ...t,
-            icon: t.largeIcon || t.icon,
+            icon: t.icon,
           }))
         )
       ).map((visualizationType) => ({

@@ -21,7 +21,6 @@ import { CatSnapshotsParams } from 'elasticsearch';
 import { CatTasksParams } from 'elasticsearch';
 import { CatThreadPoolParams } from 'elasticsearch';
 import { ClearScrollParams } from 'elasticsearch';
-import { CliArgs } from '@kbn/config';
 import { Client } from 'elasticsearch';
 import { ClientOptions } from '@elastic/elasticsearch';
 import { ClusterAllocationExplainParams } from 'elasticsearch';
@@ -32,13 +31,7 @@ import { ClusterPutSettingsParams } from 'elasticsearch';
 import { ClusterRerouteParams } from 'elasticsearch';
 import { ClusterStateParams } from 'elasticsearch';
 import { ClusterStatsParams } from 'elasticsearch';
-import { ConfigDeprecation } from '@kbn/config';
-import { ConfigDeprecationFactory } from '@kbn/config';
-import { ConfigDeprecationLogger } from '@kbn/config';
-import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigOptions } from 'elasticsearch';
-import { ConfigPath } from '@kbn/config';
-import { ConfigService } from '@kbn/config';
 import { CountParams } from 'elasticsearch';
 import { CreateDocumentParams } from 'elasticsearch';
 import { DeleteDocumentByQueryParams } from 'elasticsearch';
@@ -47,8 +40,6 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
-import { EnvironmentMode } from '@kbn/config';
-import { ErrorToastOptions } from 'src/core/public/notifications';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -103,11 +94,6 @@ import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import { Logger } from '@kbn/logging';
-import { LoggerFactory } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
-import { LogMeta } from '@kbn/logging';
-import { LogRecord } from '@kbn/logging';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import { MSearchParams } from 'elasticsearch';
@@ -119,7 +105,6 @@ import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { PackageInfo } from '@kbn/config';
 import { ParsedQuery } from 'query-string';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
@@ -133,7 +118,6 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
@@ -157,7 +141,6 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
-import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -383,17 +366,45 @@ export const config: {
     };
 };
 
-export { ConfigDeprecation }
+// @public
+export type ConfigDeprecation = (config: Record<string, any>, fromPath: string, logger: ConfigDeprecationLogger) => Record<string, any>;
 
-export { ConfigDeprecationFactory }
+// @public
+export interface ConfigDeprecationFactory {
+    rename(oldKey: string, newKey: string): ConfigDeprecation;
+    renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
+    unused(unusedKey: string): ConfigDeprecation;
+    unusedFromRoot(unusedKey: string): ConfigDeprecation;
+}
 
-export { ConfigDeprecationLogger }
+// @public
+export type ConfigDeprecationLogger = (message: string) => void;
 
-export { ConfigDeprecationProvider }
+// @public
+export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => ConfigDeprecation[];
 
-export { ConfigPath }
+// @public (undocumented)
+export type ConfigPath = string | string[];
 
-export { ConfigService }
+// @internal (undocumented)
+export class ConfigService {
+    // Warning: (ae-forgotten-export) The symbol "RawConfigurationProvider" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
+    constructor(rawConfigProvider: RawConfigurationProvider, env: Env, logger: LoggerFactory);
+    addDeprecationProvider(path: ConfigPath, provider: ConfigDeprecationProvider): void;
+    atPath<TSchema>(path: ConfigPath): Observable<TSchema>;
+    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
+    getConfig$(): Observable<Config>;
+    // (undocumented)
+    getUnusedPaths(): Promise<string[]>;
+    // (undocumented)
+    getUsedPaths(): Promise<string[]>;
+    // (undocumented)
+    isEnabledAtPath(path: ConfigPath): Promise<boolean>;
+    optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
+    setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
+    validate(): Promise<void>;
+    }
 
 // @public
 export interface ContextSetup {
@@ -668,7 +679,15 @@ export interface ElasticsearchStatusMeta {
     warningNodes: NodesVersionCompatibility['warningNodes'];
 }
 
-export { EnvironmentMode }
+// @public (undocumented)
+export interface EnvironmentMode {
+    // (undocumented)
+    dev: boolean;
+    // (undocumented)
+    name: 'development' | 'production';
+    // (undocumented)
+    prod: boolean;
+}
 
 // @public
 export interface ErrorHttpResponseOptions {
@@ -1419,7 +1438,18 @@ export interface LegacyUiExports {
 // @public
 export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
 
-export { Logger }
+// @public
+export interface Logger {
+    debug(message: string, meta?: LogMeta): void;
+    error(errorOrMessage: string | Error, meta?: LogMeta): void;
+    fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
+    get(...childContextPaths: string[]): Logger;
+    info(message: string, meta?: LogMeta): void;
+    // @internal (undocumented)
+    log(record: LogRecord): void;
+    trace(message: string, meta?: LogMeta): void;
+    warn(errorOrMessage: string | Error, meta?: LogMeta): void;
+}
 
 // Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
 //
@@ -1434,18 +1464,69 @@ export interface LoggerContextConfigInput {
     loggers?: LoggerConfigType[];
 }
 
-export { LoggerFactory }
+// @public
+export interface LoggerFactory {
+    get(...contextParts: string[]): Logger;
+}
 
 // @public
 export interface LoggingServiceSetup {
     configure(config$: Observable<LoggerContextConfigInput>): void;
 }
 
-export { LogLevel }
+// @internal
+export class LogLevel {
+    // (undocumented)
+    static readonly All: LogLevel;
+    // (undocumented)
+    static readonly Debug: LogLevel;
+    // (undocumented)
+    static readonly Error: LogLevel;
+    // (undocumented)
+    static readonly Fatal: LogLevel;
+    static fromId(level: LogLevelId): LogLevel;
+    // Warning: (ae-forgotten-export) The symbol "LogLevelId" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly id: LogLevelId;
+    // (undocumented)
+    static readonly Info: LogLevel;
+    // (undocumented)
+    static readonly Off: LogLevel;
+    supports(level: LogLevel): boolean;
+    // (undocumented)
+    static readonly Trace: LogLevel;
+    // (undocumented)
+    readonly value: number;
+    // (undocumented)
+    static readonly Warn: LogLevel;
+}
 
-export { LogMeta }
+// @public
+export interface LogMeta {
+    // (undocumented)
+    [key: string]: any;
+}
 
-export { LogRecord }
+// @internal
+export interface LogRecord {
+    // (undocumented)
+    context: string;
+    // (undocumented)
+    error?: Error;
+    // (undocumented)
+    level: LogLevel;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    meta?: {
+        [name: string]: any;
+    };
+    // (undocumented)
+    pid: number;
+    // (undocumented)
+    timestamp: Date;
+}
 
 // @public
 export interface MetricsServiceSetup {
@@ -1607,7 +1688,19 @@ export interface OpsServerMetrics {
     };
 }
 
-export { PackageInfo }
+// @public (undocumented)
+export interface PackageInfo {
+    // (undocumented)
+    branch: string;
+    // (undocumented)
+    buildNum: number;
+    // (undocumented)
+    buildSha: string;
+    // (undocumented)
+    dist: boolean;
+    // (undocumented)
+    version: string;
+}
 
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
@@ -1621,7 +1714,6 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 
 // @public
 export interface PluginConfigDescriptor<T = any> {
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     deprecations?: ConfigDeprecationProvider;
     exposeToBrowser?: {
         [P in keyof T]?: boolean;
@@ -1659,7 +1751,6 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
 
 // @public
 export interface PluginManifest {
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     readonly configPath: ConfigPath;
     // @deprecated
     readonly extraPublicDirs?: string[];
