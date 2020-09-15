@@ -13,20 +13,20 @@ object Checks : BuildType({
   paused = true
   description = "Executes Various Checks"
 
-  kibanaAgent(2)
+  kibanaAgent(4)
 
   val checkScripts = mapOf(
     "Check Telemetry Schema" to ".ci/teamcity/checks/telemetry.sh",
     "Check TypeScript Projects" to ".ci/teamcity/checks/ts_projects.sh",
-    "Check Doc API Changes" to ".ci/teamcity/checks/doc_api_changes.sh",
-    "Check Types" to ".ci/teamcity/checks/type_check.sh",
-    "Check i18n" to ".ci/teamcity/checks/i18n.sh",
     "Check File Casing" to ".ci/teamcity/checks/file_casing.sh",
     "Check Lockfile Symlinks" to ".ci/teamcity/checks/lock_file_symlinks.sh",
     "Check Licenses" to ".ci/teamcity/checks/licenses.sh",
     "Verify Dependency Versions" to ".ci/teamcity/checks/verify_dependency_versions.sh",
     "Verify NOTICE" to ".ci/teamcity/checks/verify_notice.sh",
-    "Test Hardening" to ".ci/teamcity/checks/test_hardening.sh"
+    "Test Hardening" to ".ci/teamcity/checks/test_hardening.sh",
+    "Check Types" to ".ci/teamcity/checks/type_check.sh",
+    "Check Doc API Changes" to ".ci/teamcity/checks/doc_api_changes.sh",
+    "Check i18n" to ".ci/teamcity/checks/i18n.sh"
   )
 
   steps {
