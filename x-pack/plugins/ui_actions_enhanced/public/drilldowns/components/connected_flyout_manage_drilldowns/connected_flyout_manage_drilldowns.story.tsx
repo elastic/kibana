@@ -8,17 +8,13 @@ import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
-import { dashboardFactory, urlFactory } from '../../../components/action_wizard/test_data';
+import { mockActionFactories } from '../../../components/action_wizard/test_data';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
 import { mockDynamicActionManager } from './test_data';
-import { ActionFactory } from '../../../dynamic_actions';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
-  actionFactories: [
-    (dashboardFactory as unknown) as ActionFactory,
-    (urlFactory as unknown) as ActionFactory,
-  ],
+  actionFactories: mockActionFactories,
   storage: new Storage(new StubBrowserStorage()),
   toastService: {
     addError: (...args: any[]) => {

@@ -6,16 +6,14 @@
 
 import {
   ActionFactoryDefinition,
+  BaseActionConfig,
   BaseActionFactoryContext,
   SerializedEvent,
 } from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import {
-  PersistableStateDefinition,
-  SerializableState,
-} from '../../../../../src/plugins/kibana_utils/common';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -32,7 +30,7 @@ import {
  */
 
 export interface DrilldownDefinition<
-  Config extends SerializableState = SerializableState,
+  Config extends BaseActionConfig = BaseActionConfig,
   SupportedTriggers extends TriggerId = TriggerId,
   FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
     triggers: SupportedTriggers[];

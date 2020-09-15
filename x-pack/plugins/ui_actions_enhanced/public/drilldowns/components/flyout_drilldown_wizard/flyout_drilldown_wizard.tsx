@@ -16,12 +16,15 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryPlaceContext } from '../types';
-import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common';
 
-export interface DrilldownWizardConfig<ActionConfig extends SerializableState = SerializableState> {
+export interface DrilldownWizardConfig<ActionConfig extends BaseActionConfig = BaseActionConfig> {
   name: string;
   actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
@@ -29,7 +32,7 @@ export interface DrilldownWizardConfig<ActionConfig extends SerializableState = 
 }
 
 export interface FlyoutDrilldownWizardProps<
-  CurrentActionConfig extends SerializableState = SerializableState,
+  CurrentActionConfig extends BaseActionConfig = BaseActionConfig,
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   drilldownActionFactories: ActionFactory[];
@@ -64,7 +67,7 @@ function useWizardConfigState(
   DrilldownWizardConfig,
   {
     setName: (name: string) => void;
-    setActionConfig: (actionConfig: SerializableState) => void;
+    setActionConfig: (actionConfig: BaseActionConfig) => void;
     setActionFactory: (actionFactory?: ActionFactory) => void;
     setSelectedTriggers: (triggers?: TriggerId[]) => void;
   }
@@ -93,7 +96,7 @@ function useWizardConfigState(
           name,
         });
       },
-      setActionConfig: (actionConfig: SerializableState) => {
+      setActionConfig: (actionConfig: BaseActionConfig) => {
         setWizardConfig({
           ...wizardConfig,
           actionConfig,
@@ -102,7 +105,7 @@ function useWizardConfigState(
       setActionFactory: (actionFactory?: ActionFactory) => {
         if (actionFactory) {
           const actionConfig = (actionConfigCache[actionFactory.id] ??
-            actionFactory.createConfig(actionFactoryContext)) as SerializableState;
+            actionFactory.createConfig(actionFactoryContext)) as BaseActionConfig;
           setWizardConfig({
             ...wizardConfig,
             actionFactory,
@@ -135,7 +138,7 @@ function useWizardConfigState(
 }
 
 export function FlyoutDrilldownWizard<
-  CurrentActionConfig extends SerializableState = SerializableState
+  CurrentActionConfig extends BaseActionConfig = BaseActionConfig
 >({
   onClose,
   onBack,

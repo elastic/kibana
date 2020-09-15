@@ -8,10 +8,13 @@ import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
-import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
-import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common';
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
@@ -27,8 +30,8 @@ export interface FormDrilldownWizardProps<
   onActionFactoryChange?: (actionFactory?: ActionFactory) => void;
   actionFactoryContext: ActionFactoryContext;
 
-  actionConfig?: SerializableState;
-  onActionConfigChange?: (config: SerializableState) => void;
+  actionConfig?: BaseActionConfig;
+  onActionConfigChange?: (config: BaseActionConfig) => void;
 
   actionFactories?: ActionFactory[];
 

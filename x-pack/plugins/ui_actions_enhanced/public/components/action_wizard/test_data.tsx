@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionWizard } from './action_wizard';
-import { ActionFactory, ActionFactoryDefinition } from '../../dynamic_actions';
+import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
 import { licensingMock } from '../../../../licensing/public/mocks';
 import {
@@ -18,9 +18,6 @@ import {
   TriggerId,
   VALUE_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
-import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
-
-type ActionBaseConfig = SerializableState;
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
@@ -186,6 +183,10 @@ export const urlFactory = new ActionFactory(urlDrilldownActionFactory, {
   getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
 });
 
+export const mockActionFactories: ActionFactory[] = ([dashboardFactory, urlFactory] as Array<
+  ActionFactory<any>
+>) as ActionFactory[];
+
 export const mockSupportedTriggers: TriggerId[] = [
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
@@ -214,7 +215,7 @@ export const mockGetTriggerInfo = (triggerId: TriggerId): Trigger => {
 export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
   const [state, setState] = useState<{
     currentActionFactory?: ActionFactory;
-    config?: ActionBaseConfig;
+    config?: BaseActionConfig;
     selectedTriggers?: TriggerId[];
   }>({});
 

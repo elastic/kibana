@@ -28,9 +28,8 @@ import {
   txtTriggerPickerHelpTooltip,
 } from './i18n';
 import './action_wizard.scss';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
-import { SerializableState } from '../../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionWizardProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
@@ -55,12 +54,12 @@ export interface ActionWizardProps<
   /**
    * current config for currently selected action factory
    */
-  config?: SerializableState;
+  config?: BaseActionConfig;
 
   /**
    * config changed
    */
-  onConfigChange: (config: SerializableState) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
 
   /**
    * Context will be passed into ActionFactory's methods
@@ -217,9 +216,9 @@ interface SelectedActionFactoryProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   actionFactory: ActionFactory;
-  config: SerializableState;
+  config: BaseActionConfig;
   context: ActionFactoryContext;
-  onConfigChange: (config: SerializableState) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
   showDeselect: boolean;
   onDeselect: () => void;
   allTriggers: TriggerId[];

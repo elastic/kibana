@@ -5,7 +5,12 @@
  */
 
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { BaseActionFactoryContext, SerializedAction, SerializedEvent } from './types';
+import {
+  BaseActionConfig,
+  BaseActionFactoryContext,
+  SerializedAction,
+  SerializedEvent,
+} from './types';
 import { LicenseType } from '../../../licensing/public';
 import {
   TriggerContextMapping,
@@ -13,16 +18,13 @@ import {
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
-import {
-  PersistableStateDefinition,
-  SerializableState,
-} from '../../../../../src/plugins/kibana_utils/common';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface for registering new action factories.
  */
 export interface ActionFactoryDefinition<
-  Config extends SerializableState = SerializableState,
+  Config extends BaseActionConfig = BaseActionConfig,
   SupportedTriggers extends TriggerId = TriggerId,
   FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
     triggers: SupportedTriggers[];

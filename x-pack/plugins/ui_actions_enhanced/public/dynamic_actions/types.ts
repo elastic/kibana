@@ -7,8 +7,10 @@
 import { TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
 
+export type BaseActionConfig = SerializableState;
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SerializedAction<Config extends SerializableState = SerializableState> = {
+export type SerializedAction<Config extends BaseActionConfig = BaseActionConfig> = {
   readonly factoryId: string;
   readonly name: string;
   readonly config: Config;
