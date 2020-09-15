@@ -19,8 +19,9 @@
 
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { deepFreeze } from '@kbn/std';
+
 import { ServiceStatusLevels, ServiceStatus, CoreStatus } from './types';
-import { deepFreeze } from '../../utils';
 import { PluginName } from '../plugins';
 
 interface Deps {
@@ -31,16 +32,31 @@ interface Deps {
 }
 
 export interface LegacyStatusInfo {
-  overall: {
-    state: LegacyStatusState;
-    title: string;
-    nickname: string;
-    uiColor: LegacyStatusUiColor;
-    /** ISO-8601 date string w/o timezone */
-    since: string;
-    icon?: string;
-  };
+  overall: LegacyStatusOverall;
   statuses: StatusComponentHttp[];
+}
+
+interface LegacyStatusOverall {
+  state: LegacyStatusState;
+  title: string;
+  nickname: string;
+  uiColor: LegacyStatusUiColor;
+  /** ISO-8601 date string w/o timezone */
+  since: string;
+  icon?: string;
+}
+
+type LegacyStatusState = 'green' | 'yellow' | 'red';
+type LegacyStatusIcon = 'danger' | 'warning' | 'success';
+type LegacyStatusUiColor = 'secondary' | 'warning' | 'danger';
+
+interface LegacyStateAttr {
+  id: LegacyStatusState;
+  state: LegacyStatusState;
+  title: string;
+  icon: LegacyStatusIcon;
+  uiColor: LegacyStatusUiColor;
+  nickname: string;
 }
 
 export const calculateLegacyStatus = ({
@@ -50,7 +66,7 @@ export const calculateLegacyStatus = ({
   versionWithoutSnapshot,
 }: Deps): LegacyStatusInfo => {
   const since = new Date().toISOString();
-  const overallLegacy: LegacyStatusInfo['overall'] = {
+  const overallLegacy: LegacyStatusOverall = {
     since,
     ...pick(STATUS_LEVEL_LEGACY_ATTRS[overall.level.toString()], [
       'state',
@@ -92,21 +108,11 @@ const serviceStatusToHttpComponent = (
   id: serviceName,
   message: status.summary,
   since,
-  ...pick(STATUS_LEVEL_LEGACY_ATTRS[status.level.toString()], ['state', 'icon', 'uiColor']), // TODO: only pick needed fields
+  ...serviceStatusAttrs(status),
 });
 
-type LegacyStatusState = 'green' | 'yellow' | 'red';
-type LegacyStatusIcon = 'danger' | 'warning' | 'success';
-type LegacyStatusUiColor = 'secondary' | 'warning' | 'danger';
-
-interface LegacyStateAttr {
-  id: LegacyStatusState;
-  state: LegacyStatusState;
-  title: string;
-  icon: LegacyStatusIcon;
-  uiColor: LegacyStatusUiColor;
-  nickname: string;
-}
+const serviceStatusAttrs = (status: ServiceStatus) =>
+  pick(STATUS_LEVEL_LEGACY_ATTRS[status.level.toString()], ['state', 'icon', 'uiColor']);
 
 const STATUS_LEVEL_LEGACY_ATTRS = deepFreeze<Record<string, LegacyStateAttr>>({
   [ServiceStatusLevels.critical.toString()]: {

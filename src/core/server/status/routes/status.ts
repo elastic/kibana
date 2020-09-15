@@ -104,10 +104,12 @@ interface StatusHttpBody {
 }
 
 export const registerStatusRoute = ({ router, config, metrics, status }: Deps) => {
-  // Since this observable is not subscribed to elsewhere, we need to subscribe
-  // here to eagerly load the plugins status when Kibana starts up.
-  const plugins$ = new ReplaySubject<Record<PluginName, ServiceStatus>>();
-  status.plugins$.subscribe(plugins$);
+  // Since the status.plugins$ observable is not subscribed to elsewhere, we need to subscribe it here to eagerly load
+  // the plugins status when Kibana starts up so this endpoint responds quickly on first boot.
+  const combinedStatus$ = new ReplaySubject<
+    [ServiceStatus<unknown>, CoreStatus, Record<string, ServiceStatus<unknown>>]
+  >();
+  combineLatest([status.overall$, status.core$, status.plugins$]).subscribe(combinedStatus$);
 
   router.get(
     {
@@ -125,13 +127,7 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
     async (context, req, res) => {
       const { version, buildSha, buildNum } = config.packageInfo;
       const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
-      const [overall, core, plugins] = await combineLatest([
-        status.overall$,
-        status.core$,
-        plugins$,
-      ])
-        .pipe(first())
-        .toPromise();
+      const [overall, core, plugins] = await combinedStatus$.pipe(first()).toPromise();
 
       let statusInfo: StatusInfo | LegacyStatusInfo;
       if (req.query?.v8format) {
