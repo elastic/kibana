@@ -36,7 +36,6 @@ export interface FormHook<T extends FormData = FormData> {
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   getFields: () => FieldsMap;
   getFormData: (options?: { unflatten?: boolean }) => T;
-  getFieldDefaultValue: (fieldName: string) => unknown;
   /* Returns a list of all errors in the form */
   getErrors: () => string[];
   reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
@@ -50,6 +49,7 @@ export interface FormHook<T extends FormData = FormData> {
   __updateFormDataAt: (field: string, value: unknown) => T;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
+  __getFieldDefaultValue: (fieldName: string) => unknown;
 }
 
 export interface FormSchema<T extends FormData = FormData> {
