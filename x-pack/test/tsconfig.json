@@ -14,5 +14,8 @@
   ],
   "exclude": [
     "../typings/jest.d.ts"
+  ],
+  "references": [
+    { "path": "../../src/core/tsconfig.json" }
   ]
 }

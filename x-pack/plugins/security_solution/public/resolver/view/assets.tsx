@@ -477,7 +477,7 @@ export const useResolverTheme = (): {
       ),
       isLabelFilled: false,
       labelButtonFill: 'primary',
-      strokeColor: `${theme.euiColorPrimary}33`, // 33 = 20% opacity
+      strokeColor: theme.euiColorPrimary,
     },
     terminatedTriggerCube: {
       backingFill: colorMap.triggerBackingFill,
@@ -491,7 +491,7 @@ export const useResolverTheme = (): {
       ),
       isLabelFilled: false,
       labelButtonFill: 'danger',
-      strokeColor: `${theme.euiColorDanger}33`,
+      strokeColor: theme.euiColorDanger,
     },
   };
 
