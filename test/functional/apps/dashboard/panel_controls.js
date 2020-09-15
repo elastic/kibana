@@ -176,10 +176,11 @@ export default function ({ getService, getPageObjects }) {
         const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
         expect(isContextMenuIconVisible).to.equal(true);
         await dashboardPanelActions.openContextMenu();
-
         await dashboardPanelActions.expectExistsEditPanelAction();
-        await dashboardPanelActions.expectExistsReplacePanelAction();
         await dashboardPanelActions.expectExistsDuplicatePanelAction();
+
+        await dashboardPanelActions.clickContextMenuMoreItem();
+        await dashboardPanelActions.expectExistsReplacePanelAction();
         await dashboardPanelActions.expectExistsRemovePanelAction();
       });
 
@@ -193,8 +194,10 @@ export default function ({ getService, getPageObjects }) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.expectExistsEditPanelAction();
-        await dashboardPanelActions.expectExistsReplacePanelAction();
         await dashboardPanelActions.expectExistsDuplicatePanelAction();
+
+        await dashboardPanelActions.clickContextMenuMoreItem();
+        await dashboardPanelActions.expectExistsReplacePanelAction();
         await dashboardPanelActions.expectExistsRemovePanelAction();
 
         // Get rid of the timestamp in the url.
@@ -209,8 +212,10 @@ export default function ({ getService, getPageObjects }) {
           await dashboardPanelActions.clickExpandPanelToggle();
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectMissingEditPanelAction();
-          await dashboardPanelActions.expectMissingReplacePanelAction();
           await dashboardPanelActions.expectMissingDuplicatePanelAction();
+
+          await dashboardPanelActions.clickContextMenuMoreItem();
+          await dashboardPanelActions.expectMissingReplacePanelAction();
           await dashboardPanelActions.expectMissingRemovePanelAction();
         });
 
@@ -218,8 +223,10 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.switchToEditMode();
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.expectExistsEditPanelAction();
-          await dashboardPanelActions.expectExistsReplacePanelAction();
           await dashboardPanelActions.expectExistsDuplicatePanelAction();
+
+          await dashboardPanelActions.clickContextMenuMoreItem();
+          await dashboardPanelActions.expectExistsReplacePanelAction();
           await dashboardPanelActions.expectMissingRemovePanelAction();
           await dashboardPanelActions.clickExpandPanelToggle();
         });
