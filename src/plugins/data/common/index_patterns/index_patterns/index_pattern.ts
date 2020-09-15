@@ -58,8 +58,6 @@ export class IndexPattern implements IIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
-
-  // todo rename
   public version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   public sourceFilters?: SourceFilter[];

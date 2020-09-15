@@ -632,8 +632,8 @@ Object {
   "sourceFilters": undefined,
   "timeFieldName": "timestamp",
   "title": "title",
-  "type": undefined,
+  "type": "index-pattern",
   "typeMeta": undefined,
-  "version": 2,
+  "version": "2",
 }
 `;

@@ -338,22 +338,6 @@ export class IndexPatternsService {
     return indexPattern;
   };
 
-  async specToIndexPattern(spec: IndexPatternSpec) {
-    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-
-    const indexPattern = new IndexPattern({
-      spec,
-      savedObjectsClient: this.savedObjectsClient,
-      fieldFormats: this.fieldFormats,
-      shortDotsEnable,
-      metaFields,
-    });
-
-    indexPattern.initFromSpec(spec);
-    return indexPattern;
-  }
-
   async newIndexPattern(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
