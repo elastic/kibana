@@ -35,6 +35,7 @@ import {
   IndexPatternSpec,
   IndexPatternAttributes,
   FieldSpec,
+  FieldFormatMap,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
@@ -213,39 +214,49 @@ export class IndexPatternsService {
     indexPattern.fields.replaceAll([...fields, ...scripted]);
   };
 
-  private refreshFieldSpecArray = async (
-    fields: FieldSpec[],
-    id: string,
-    title: string,
-    options: GetFieldsOptions
+  private refreshIndexPatternSpecFields = async (
+    spec: IndexPatternSpec,
+    fieldFormatMap: FieldFormatMap
   ) => {
-    const scriptdFields = fields.filter((field) => field.scripted);
+    const scriptdFields = (spec.fields || []).filter((field) => field.scripted);
     try {
-      const newFields = await this.getFieldsForWildcard(options);
-      return [...newFields, ...scriptdFields];
+      const newFields = await this.getFieldsForWildcard({
+        pattern: spec.title,
+        metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+        type: spec.type,
+        params: spec.typeMeta && spec.typeMeta.params,
+      });
+      const mergedFields = [...newFields, ...scriptdFields];
+      this.mergeFieldsAndFormats(mergedFields, fieldFormatMap);
+      spec.fields = mergedFields;
+      return spec;
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-        return [];
+      } else {
+        this.onError(err, {
+          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+            values: { id: spec.id, title: spec.title },
+          }),
+        });
       }
-
-      this.onError(err, {
-        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-          values: { id, title },
-        }),
-      });
     }
-    return fields;
+    return spec;
   };
 
-  get = async (id: string): Promise<IndexPattern> => {
-    const cache = indexPatternCache.get(id);
-    if (cache) {
-      return cache;
-    }
+  private mergeFieldsAndFormats = (fieldSpecs: FieldSpec[], fieldFormatMap: FieldFormatMap) => {
+    Object.entries(fieldFormatMap).forEach(([fieldName, value]) => {
+      const field = fieldSpecs.find((fld: FieldSpec) => fld.name === fieldName);
+      if (field) {
+        field.format = value;
+      }
+    });
+  };
 
+  savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
     const {
+      id,
       version,
       attributes: {
         title,
@@ -257,65 +268,74 @@ export class IndexPatternsService {
         typeMeta,
         type,
       },
-    } = await this.savedObjectsClient.get<IndexPatternAttributes>(savedObjectType, id);
-
-    if (!version) {
-      throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
-    }
+    } = savedObject;
 
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
-    let parsedFields = fields ? JSON.parse(fields) : [];
+    const parsedFields = fields ? JSON.parse(fields) : [];
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
+    const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
 
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(parsedFields);
-    let isSaveRequired = isFieldRefreshRequired;
-    try {
-      parsedFields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecArray(parsedFields, id, title, {
-            pattern: title,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            params: parsedTypeMeta && parsedTypeMeta.params,
-          })
-        : parsedFields;
-    } catch (err) {
-      isSaveRequired = false;
-      if (err instanceof IndexPatternMissingIndices) {
-        this.onNotification({
-          title: (err as any).message,
-          color: 'danger',
-          iconType: 'alert',
-        });
-      } else {
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-            values: { id, title },
-          }),
-        });
-      }
-    }
+    this.mergeFieldsAndFormats(parsedFields, parsedFieldFormatMap);
 
-    Object.entries(parsedFieldFormatMap).forEach(([fieldName, value]) => {
-      const field = parsedFields.find((fld: FieldSpec) => fld.name === fieldName);
-      if (field) {
-        field.format = value;
-      }
-    });
-
-    const spec: IndexPatternSpec = {
+    return {
       id,
       version,
       title,
-      timeFieldName,
       intervalName,
+      timeFieldName,
+      sourceFilters: parsedSourceFilters,
       fields: parsedFields,
-      sourceFilters: sourceFilters ? JSON.parse(sourceFilters) : undefined,
       typeMeta: parsedTypeMeta,
       type,
     };
+  };
 
-    const indexPattern = await this.specToIndexPattern(spec);
+  get = async (id: string): Promise<IndexPattern> => {
+    const cache = indexPatternCache.get(id);
+    if (cache) {
+      return cache;
+    }
+
+    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
+      savedObjectType,
+      id
+    );
+
+    if (!savedObject.version) {
+      throw new SavedObjectNotFound(savedObjectType, id, 'management/kibana/indexPatterns');
+    }
+
+    const spec = this.savedObjectToSpec(savedObject);
+    const parsedFieldFormats = savedObject.attributes.fieldFormatMap
+      ? JSON.parse(savedObject.attributes.fieldFormatMap)
+      : {};
+
+    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
+    let isSaveRequired = isFieldRefreshRequired;
+
+    if (isFieldRefreshRequired) {
+      try {
+        await this.refreshIndexPatternSpecFields(spec, parsedFieldFormats);
+      } catch (err) {
+        isSaveRequired = false;
+        if (err instanceof IndexPatternMissingIndices) {
+          this.onNotification({
+            title: (err as any).message,
+            color: 'danger',
+            iconType: 'alert',
+          });
+        } else {
+          this.onError(err, {
+            title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+              values: { id, title: spec.title },
+            }),
+          });
+        }
+      }
+    }
+
+    const indexPattern = await this.newIndexPattern(spec);
     indexPatternCache.set(id, indexPattern);
     if (isSaveRequired) {
       try {
