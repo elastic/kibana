@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   deleteMetadataCurrentStream,
   deleteMetadataStream,
+  deleteAllDocsFromMetadataCurrentIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -21,12 +22,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     [
       'Hostname',
       'Agent Status',
-      'Integration',
-      'Configuration Status',
+      'Integration Policy',
+      'Policy Status',
       'Operating System',
       'IP Address',
       'Version',
       'Last Active',
+      'Actions',
     ],
     [
       'rezzani-7.example.com',
@@ -37,6 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
       '6.8.0',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
     [
       'cadmann-4.example.com',
@@ -47,6 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.192.213.130, 10.70.28.129',
       '6.6.1',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
     [
       'thurlow-9.example.com',
@@ -57,6 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       '10.46.229.234',
       '6.0.0',
       'Jan 24, 2020 @ 16:06:09.541',
+      '',
     ],
   ];
 
@@ -68,11 +73,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);
+        await deleteAllDocsFromMetadataCurrentIndex(getService);
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);
+        await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
 
       it('finds no data in list and prompts onboarding to add policy', async () => {
@@ -80,8 +87,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('finds data after load and polling', async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 120000);
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 1100);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });
@@ -89,13 +96,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await sleep(120000);
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
         await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);
+        await deleteAllDocsFromMetadataCurrentIndex(getService);
       });
 
       it('finds page title', async () => {
@@ -181,8 +188,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'OS',
             'Last Seen',
             'Alerts',
-            'Integration',
-            'Configuration Status',
+            'Integration Policy',
+            'Policy Status',
             'IP Address',
             'Hostname',
             'Sensor Version',
@@ -209,6 +216,95 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             '6.8.0',
           ]);
         });
+      });
+    });
+
+    describe('displays the correct table data for the kql queries', () => {
+      before(async () => {
+        await esArchiver.load('endpoint/metadata/destination_index', { useCreate: true });
+        await pageObjects.endpoint.navigateToEndpointList();
+      });
+      after(async () => {
+        await deleteMetadataStream(getService);
+        await deleteMetadataCurrentStream(getService);
+        await deleteAllDocsFromMetadataCurrentIndex(getService);
+      });
+      it('for the kql query: na, table shows an empty list', async () => {
+        await testSubjects.setValue('adminSearchBar', 'na');
+        await (await testSubjects.find('querySubmitButton')).click();
+        const expectedDataFromQuery = [
+          [
+            'Hostname',
+            'Agent Status',
+            'Integration Policy',
+            'Policy Status',
+            'Operating System',
+            'IP Address',
+            'Version',
+            'Last Active',
+            'Actions',
+          ],
+          ['No items found'],
+        ];
+
+        await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable');
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+        expect(tableData).to.eql(expectedDataFromQuery);
+      });
+
+      it('for the kql query: HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A", table shows 2 items', async () => {
+        await testSubjects.setValue('adminSearchBar', ' ');
+        await (await testSubjects.find('querySubmitButton')).click();
+
+        const endpointListTableTotal = await testSubjects.getVisibleText('endpointListTableTotal');
+
+        await testSubjects.setValue(
+          'adminSearchBar',
+          'HostDetails.Endpoint.policy.applied.id : "C2A9093E-E289-4C0A-AA44-8C32A414FA7A" '
+        );
+        await (await testSubjects.find('querySubmitButton')).click();
+        const expectedDataFromQuery = [
+          [
+            'Hostname',
+            'Agent Status',
+            'Integration Policy',
+            'Policy Status',
+            'Operating System',
+            'IP Address',
+            'Version',
+            'Last Active',
+            'Actions',
+          ],
+          [
+            'cadmann-4.example.com',
+            'Error',
+            'Default',
+            'Failure',
+            'windows 10.0',
+            '10.192.213.130, 10.70.28.129',
+            '6.6.1',
+            'Jan 24, 2020 @ 16:06:09.541',
+            '',
+          ],
+          [
+            'thurlow-9.example.com',
+            'Error',
+            'Default',
+            'Success',
+            'windows 10.0',
+            '10.46.229.234',
+            '6.0.0',
+            'Jan 24, 2020 @ 16:06:09.541',
+            '',
+          ],
+        ];
+
+        await pageObjects.endpoint.waitForVisibleTextToChange(
+          'endpointListTableTotal',
+          endpointListTableTotal
+        );
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+        expect(tableData).to.eql(expectedDataFromQuery);
       });
     });
 

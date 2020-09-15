@@ -8,7 +8,11 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { isThresholdRule } from '../../../../../common/detection_engine/utils';
+import {
+  isThresholdRule,
+  isEqlRule,
+  isQueryRule,
+} from '../../../../../common/detection_engine/utils';
 import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -37,6 +41,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
     },
     [field]
   );
+  const setEql = useCallback(() => setType('eql'), [setType]);
   const setMl = useCallback(() => setType('machine_learning'), [setType]);
   const setQuery = useCallback(() => setType('query'), [setType]);
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
@@ -45,11 +50,20 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
     path: '#/management/stack/license_management',
   });
 
+  const eqlSelectableConfig = useMemo(
+    () => ({
+      isDisabled: isReadOnly,
+      onClick: setEql,
+      isSelected: isEqlRule(ruleType),
+    }),
+    [isReadOnly, ruleType, setEql]
+  );
+
   const querySelectableConfig = useMemo(
     () => ({
       isDisabled: isReadOnly,
       onClick: setQuery,
-      isSelected: !isMlRule(ruleType) && !isThresholdRule(ruleType),
+      isSelected: isQueryRule(ruleType),
     }),
     [isReadOnly, ruleType, setQuery]
   );
@@ -112,6 +126,16 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               thresholdSelectableConfig.isDisabled && !thresholdSelectableConfig.isSelected
             }
             selectable={thresholdSelectableConfig}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            data-test-subj="eqlRuleType"
+            title={i18n.EQL_TYPE_TITLE}
+            description={i18n.EQL_TYPE_DESCRIPTION}
+            icon={<EuiIcon size="l" type="bullseye" />}
+            isDisabled={eqlSelectableConfig.isDisabled && !eqlSelectableConfig.isSelected}
+            selectable={eqlSelectableConfig}
           />
         </EuiFlexItem>
       </EuiFlexGrid>

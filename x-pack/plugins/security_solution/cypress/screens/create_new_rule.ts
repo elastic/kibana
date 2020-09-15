@@ -30,6 +30,10 @@ export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';
 
+export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
+
+export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
+
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
 

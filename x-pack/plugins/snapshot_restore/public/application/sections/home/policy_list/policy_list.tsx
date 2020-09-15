@@ -45,7 +45,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     data: { policies } = {
       policies: undefined,
     },
-    sendRequest: reload,
+    resendRequest: reload,
   } = useLoadPolicies();
 
   const { uiMetricService } = useServices();
@@ -55,7 +55,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     isLoading: isLoadingRetentionSettings,
     error: retentionSettingsError,
     data: retentionSettings,
-    sendRequest: reloadRetentionSettings,
+    resendRequest: reloadRetentionSettings,
   } = useLoadRetentionSettings();
 
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {

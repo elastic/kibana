@@ -20,7 +20,7 @@ export async function getApmTimeseriesData(options: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end } = options.setup;
-  const { bucketSize } = getBucketSize(start, end, 'auto');
+  const { bucketSize } = getBucketSize(start, end);
   const durationAsMinutes = (end - start) / 1000 / 60;
 
   const timeseriesResponse = await timeseriesFetcher(options);
