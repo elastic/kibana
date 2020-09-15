@@ -20,7 +20,6 @@ import {
   EuiText,
   EuiLink,
   EuiTabs,
-  EuiSpacer,
   EuiTab,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +33,7 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { PLUGIN } from '../../constants/plugin';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import './connector_edit_flyout.scss';
 
 export interface ConnectorEditProps {
   initialConnector: ActionConnectorTableItem;
@@ -230,16 +230,14 @@ export const ConnectorEditFlyout = ({
           ) : null}
           <EuiFlexItem>{flyoutTitle}</EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiTabs>
+        <EuiTabs className="connectorEditFlyoutTabs">
           <EuiTab
             onClick={() => setTab('config')}
             data-test-subj="configureConnectorTab"
             isSelected={'config' === selectedTab}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.tabText', {
-              defaultMessage: 'configuration',
+              defaultMessage: 'Configuration',
             })}
           </EuiTab>
           <EuiTab
@@ -248,11 +246,12 @@ export const ConnectorEditFlyout = ({
             isSelected={'test' === selectedTab}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
-              defaultMessage: 'test',
+              defaultMessage: 'Test',
             })}
           </EuiTab>
         </EuiTabs>
-        <EuiSpacer size="l" />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         {selectedTab === 'config' ? (
           !connector.isPreconfigured ? (
             <ActionConnectorForm
@@ -325,7 +324,6 @@ export const ConnectorEditFlyout = ({
                     <EuiButton
                       color="secondary"
                       data-test-subj="saveEditedActionButton"
-                      iconType="check"
                       isDisabled={hasErrorsInConnectorConfig || !hasChanges}
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {
@@ -344,7 +342,6 @@ export const ConnectorEditFlyout = ({
                       color="secondary"
                       data-test-subj="saveAndCloseEditedActionButton"
                       type="submit"
-                      iconType="check"
                       isDisabled={hasErrorsInConnectorConfig || !hasChanges}
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Suspense } from 'react';
+import React, { Fragment, Suspense } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiDescriptionList,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -85,26 +86,10 @@ export const TestConnectorForm = ({
     {
       title: 'Execute the example action',
       children: (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <EuiButton
-                iconType={'play'}
-                isLoading={isExecutingAction}
-                isDisabled={!executeEnabled || hasErrors || isExecutingAction}
-                data-test-subj="executeActionButton"
-                onClick={onExecutAction}
-              >
-                <FormattedMessage
-                  defaultMessage="Execute"
-                  id="xpack.triggersActionsUI.sections.testConnectorForm.executeTestButton"
-                />
-              </EuiButton>
-            </EuiText>
-          </EuiFlexItem>
+        <Fragment>
           {executeEnabled ? null : (
-            <EuiFlexItem>
-              <EuiCallOut iconType="alert" size="s" color="warning">
+            <Fragment>
+              <EuiCallOut iconType="alert" color="warning">
                 <p>
                   <FormattedMessage
                     defaultMessage="Unsaved changes must be saved before the connector can be tested"
@@ -112,9 +97,24 @@ export const TestConnectorForm = ({
                   />
                 </p>
               </EuiCallOut>
-            </EuiFlexItem>
+              <EuiSpacer size="s" />
+            </Fragment>
           )}
-        </EuiFlexGroup>
+          <EuiText>
+            <EuiButton
+              iconType={'play'}
+              isLoading={isExecutingAction}
+              isDisabled={!executeEnabled || hasErrors || isExecutingAction}
+              data-test-subj="executeActionButton"
+              onClick={onExecutAction}
+            >
+              <FormattedMessage
+                defaultMessage="Execute"
+                id="xpack.triggersActionsUI.sections.testConnectorForm.executeTestButton"
+              />
+            </EuiButton>
+          </EuiText>
+        </Fragment>
       ),
     },
     {
@@ -146,7 +146,7 @@ const AwaitingExecution = () => (
       }
     )}
     data-test-subj="executionAwaiting"
-    iconType="search"
+    iconType="iInCircle"
   >
     <p>
       <FormattedMessage
@@ -168,7 +168,7 @@ const SuccessfulExecution = () => (
     )}
     color="success"
     data-test-subj="executionSuccessfulResult"
-    iconType="play"
+    iconType="check"
   >
     <p>
       <FormattedMessage
