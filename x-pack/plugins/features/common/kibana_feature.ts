@@ -6,7 +6,7 @@
 
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { SubFeatureConfig, SubFeature } from './sub_feature';
+import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
 
 /**
@@ -14,7 +14,7 @@ import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
  * Feature registration allows plugins to hide their applications with spaces,
  * and secure access when configured for security.
  */
-export interface FeatureConfig {
+export interface KibanaFeatureConfig {
   /**
    * Unique identifier for this feature.
    * This identifier is also used when generating UI Capabilities.
@@ -137,12 +137,12 @@ export interface FeatureConfig {
   };
 }
 
-export class Feature {
-  public readonly subFeatures: SubFeature[];
+export class KibanaFeature {
+  public readonly subFeatures: KibanaSubFeature[];
 
-  constructor(protected readonly config: RecursiveReadonly<FeatureConfig>) {
+  constructor(protected readonly config: RecursiveReadonly<KibanaFeatureConfig>) {
     this.subFeatures = (config.subFeatures ?? []).map(
-      (subFeatureConfig) => new SubFeature(subFeatureConfig)
+      (subFeatureConfig) => new KibanaSubFeature(subFeatureConfig)
     );
   }
 
@@ -199,6 +199,6 @@ export class Feature {
   }
 
   public toRaw() {
-    return { ...this.config } as FeatureConfig;
+    return { ...this.config } as KibanaFeatureConfig;
   }
 }

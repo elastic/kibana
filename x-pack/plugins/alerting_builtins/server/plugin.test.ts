@@ -43,7 +43,7 @@ describe('AlertingBuiltins Plugin', () => {
           "name": "Index threshold",
         }
       `);
-      expect(featuresSetup.registerFeature).toHaveBeenCalledWith(BUILT_IN_ALERTS_FEATURE);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith(BUILT_IN_ALERTS_FEATURE);
     });
 
     it('should return a service in the expected shape', async () => {

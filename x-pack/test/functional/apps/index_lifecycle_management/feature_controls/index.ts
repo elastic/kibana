@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('management', function () {
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('feature controls', function () {
     this.tags(['ciGroup2']);
 
-    loadTestFile(require.resolve('./create_index_pattern_wizard'));
+    loadTestFile(require.resolve('./ilm_security'));
   });
 }
