@@ -92,6 +92,7 @@ describe('utils', () => {
         getTypeLabelFromField({
           name: 'testField',
           type: 'runtime',
+          // @ts-ignore
           runtime_type: 'hyperdrive',
         })
       ).toBe('Runtime Other: hyperdrive');
