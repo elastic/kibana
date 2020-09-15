@@ -40,7 +40,6 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
-import { ErrorToastOptions } from 'src/core/public/notifications';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -119,7 +118,6 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
@@ -143,7 +141,6 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
-import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -1411,19 +1408,30 @@ export interface LegacyServiceStartDeps {
     plugins: Record<string, unknown>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectsLegacyUiExports" needs to be exported by the entry point index.d.ts
-//
 // @internal @deprecated (undocumented)
-export type LegacyUiExports = SavedObjectsLegacyUiExports & {
+export interface LegacyUiExports {
+    // Warning: (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
     defaultInjectedVarProviders?: VarsProvider[];
+    // Warning: (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
     injectedVarsReplacers?: VarsReplacer[];
+    // Warning: (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
     navLinkSpecs?: LegacyNavLinkSpec[] | null;
+    // Warning: (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
     uiAppSpecs?: Array<LegacyAppSpec | undefined>;
+    // (undocumented)
     unknown?: [{
         pluginSpec: LegacyPluginSpec;
         type: unknown;
     }];
-};
+}
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
 //
@@ -1520,10 +1528,10 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// Warning: (ae-missing-release-tag) "MetricsServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export interface MetricsServiceSetup {
+    readonly collectionInterval: number;
+    getOpsMetrics$: () => Observable<OpsMetrics>;
 }
 
 // @public @deprecated (undocumented)
@@ -1610,6 +1618,7 @@ export interface OnPreRoutingToolkit {
 
 // @public
 export interface OpsMetrics {
+    collected_at: Date;
     concurrent_connections: OpsServerMetrics['concurrent_connections'];
     os: OpsOsMetrics;
     process: OpsProcessMetrics;
@@ -1619,6 +1628,20 @@ export interface OpsMetrics {
 
 // @public
 export interface OpsOsMetrics {
+    cpu?: {
+        control_group: string;
+        cfs_period_micros: number;
+        cfs_quota_micros: number;
+        stat: {
+            number_of_elapsed_periods: number;
+            number_of_times_throttled: number;
+            time_throttled_nanos: number;
+        };
+    };
+    cpuacct?: {
+        control_group: string;
+        usage_nanos: number;
+    };
     distro?: string;
     distroRelease?: string;
     load: {
@@ -2021,6 +2044,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
     attributes: Partial<T>;
     id: string;
+    namespace?: string;
     type: string;
 }
 
@@ -2437,33 +2461,6 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
     refresh?: MutatingOperationRefreshSetting;
 }
 
-// @internal @deprecated (undocumented)
-export interface SavedObjectsLegacyService {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider['addClientWrapperFactory'];
-    // (undocumented)
-    getSavedObjectsRepository(...rest: any[]): any;
-    // (undocumented)
-    getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
-    // (undocumented)
-    importExport: {
-        objectLimit: number;
-        importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
-        resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
-        getSortedObjectsForExport(options: SavedObjectsExportOptions): Promise<Readable>;
-    };
-    // (undocumented)
-    SavedObjectsClient: typeof SavedObjectsClient;
-    // (undocumented)
-    schema: SavedObjectsSchema;
-    // (undocumented)
-    setScopedSavedObjectsClientFactory: SavedObjectsClientProvider['setClientFactory'];
-    // (undocumented)
-    types: string[];
-}
-
 // @public
 export interface SavedObjectsMappingProperties {
     // (undocumented)
@@ -2517,10 +2514,10 @@ export class SavedObjectsRepository {
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: IKibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
@@ -2546,24 +2543,6 @@ export interface SavedObjectsResolveImportErrorsOptions {
     retries: SavedObjectsImportRetry[];
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
-}
-
-// @internal @deprecated (undocumented)
-export class SavedObjectsSchema {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
-    constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
-    // (undocumented)
-    getConvertToAliasScript(type: string): string | undefined;
-    // (undocumented)
-    getIndexForType(config: LegacyConfig, type: string): string | undefined;
-    // (undocumented)
-    isHiddenType(type: string): boolean;
-    // (undocumented)
-    isMultiNamespace(type: string): boolean;
-    // (undocumented)
-    isNamespaceAgnostic(type: string): boolean;
-    // (undocumented)
-    isSingleNamespace(type: string): boolean;
 }
 
 // @public
@@ -2647,6 +2626,12 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
     attributes: Partial<T>;
     // (undocumented)
     references: SavedObjectReference[] | undefined;
+}
+
+// @public (undocumented)
+export class SavedObjectsUtils {
+    static namespaceIdToString: (namespace?: string | undefined) => string;
+    static namespaceStringToId: (namespace: string) => string | undefined;
 }
 
 // @public
@@ -2797,10 +2782,17 @@ export type SharedGlobalConfig = RecursiveReadonly<{
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
+//
 // @public
 export interface StatusServiceSetup {
     core$: Observable<CoreStatus>;
+    dependencies$: Observable<Record<string, ServiceStatus>>;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "StatusSetup"
+    derivedStatus$: Observable<ServiceStatus>;
     overall$: Observable<ServiceStatus>;
+    set(status$: Observable<ServiceStatus>): void;
 }
 
 // @public
@@ -2888,13 +2880,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:132:3 - (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:133:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:134:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:135:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:136:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:268:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:135:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

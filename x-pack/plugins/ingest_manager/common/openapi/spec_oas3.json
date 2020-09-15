@@ -1425,11 +1425,13 @@
                         },
                         "icons": [
                           {
-                            "src": "/package/coredns-1.0.1/img/icon.png",
+                            "path": "/package/coredns-1.0.1/img/icon.png",
+                            "src": "/img/icon.png",
                             "size": "1800x1800"
                           },
                           {
-                            "src": "/package/coredns-1.0.1/img/icon.svg",
+                            "path": "/package/coredns-1.0.1/img/icon.svg",
+                            "src": "/img/icon.svg",
                             "size": "255x144",
                             "type": "image/svg+xml"
                           }
@@ -1704,7 +1706,8 @@
                         },
                         "icons": [
                           {
-                            "src": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
+                            "path": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
+                            "src": "/img/logo-endpoint-64-color.svg",
                             "size": "16x16",
                             "type": "image/svg+xml"
                           }
@@ -2001,7 +2004,8 @@
                           "download": "/epr/aws/aws-0.0.3.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/aws/0.0.3/img/logo_aws.svg",
+                              "path": "/package/aws/0.0.3/img/logo_aws.svg",
+                              "src": "/img/logo_aws.svg",
                               "title": "logo aws",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2019,7 +2023,8 @@
                           "download": "/epr/endpoint/endpoint-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/endpoint/0.1.0/img/logo-endpoint-64-color.svg",
+                              "path": "/package/endpoint/0.1.0/img/logo-endpoint-64-color.svg",
+                              "src": "/img/logo-endpoint-64-color.svg",
                               "size": "16x16",
                               "type": "image/svg+xml"
                             }
@@ -2087,7 +2092,8 @@
                           "download": "/epr/log/log-0.9.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/log/0.9.0/img/icon.svg",
+                              "path": "/package/log/0.9.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2103,7 +2109,8 @@
                           "download": "/epr/longdocs/longdocs-1.0.4.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/longdocs/1.0.4/img/icon.svg",
+                              "path": "/package/longdocs/1.0.4/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2119,7 +2126,8 @@
                           "download": "/epr/metricsonly/metricsonly-2.0.1.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/metricsonly/2.0.1/img/icon.svg",
+                              "path": "/package/metricsonly/2.0.1/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2135,7 +2143,8 @@
                           "download": "/epr/multiversion/multiversion-1.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/multiversion/1.1.0/img/icon.svg",
+                              "path": "/package/multiversion/1.1.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2151,7 +2160,8 @@
                           "download": "/epr/mysql/mysql-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/mysql/0.1.0/img/logo_mysql.svg",
+                              "path": "/package/mysql/0.1.0/img/logo_mysql.svg",
+                              "src": "/img/logo_mysql.svg",
                               "title": "logo mysql",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2169,7 +2179,8 @@
                           "download": "/epr/nginx/nginx-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/nginx/0.1.0/img/logo_nginx.svg",
+                              "path": "/package/nginx/0.1.0/img/logo_nginx.svg",
+                              "src": "/img/logo_nginx.svg",
                               "title": "logo nginx",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2187,7 +2198,8 @@
                           "download": "/epr/redis/redis-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/redis/0.1.0/img/logo_redis.svg",
+                              "path": "/package/redis/0.1.0/img/logo_redis.svg",
+                              "src": "/img/logo_redis.svg",
                               "title": "logo redis",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2205,7 +2217,8 @@
                           "download": "/epr/reference/reference-1.0.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/reference/1.0.0/img/icon.svg",
+                              "path": "/package/reference/1.0.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "size": "32x32",
                               "type": "image/svg+xml"
                             }
@@ -2222,7 +2235,8 @@
                           "download": "/epr/system/system-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/system/0.1.0/img/system.svg",
+                              "path": "/package/system/0.1.0/img/system.svg",
+                              "src": "/img/system.svg",
                               "title": "system",
                               "size": "1000x1000",
                               "type": "image/svg+xml"
@@ -3913,11 +3927,20 @@
                 "src": {
                   "type": "string"
                 },
+                "path": {
+                  "type": "string"
+                },
                 "title": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "string"
+                },
+                "type": {
                   "type": "string"
                 }
               },
-              "required": ["src"]
+              "required": ["src", "path"]
             }
           },
           "icons": {

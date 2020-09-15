@@ -234,7 +234,13 @@ export const EditIndexPattern = withRouter(
             </>
           )}
           <EuiSpacer />
-          <Tabs indexPattern={indexPattern} fields={fields} history={history} location={location} />
+          <Tabs
+            indexPattern={indexPattern}
+            saveIndexPattern={data.indexPatterns.save.bind(data.indexPatterns)}
+            fields={fields}
+            history={history}
+            location={location}
+          />
         </div>
       </EuiPanel>
     );

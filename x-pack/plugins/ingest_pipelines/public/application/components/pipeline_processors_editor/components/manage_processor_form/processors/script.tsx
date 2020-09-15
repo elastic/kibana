@@ -32,7 +32,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.scriptForm.storedScriptIDFieldHelpText',
       {
-        defaultMessage: 'Stored script reference.',
+        defaultMessage: 'ID of the stored script to run.',
       }
     ),
     validations: [
@@ -55,7 +55,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.scriptForm.sourceFieldHelpText',
       {
-        defaultMessage: 'Script to be executed.',
+        defaultMessage: 'Inline script to run.',
       }
     ),
     validations: [
@@ -98,7 +98,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.scriptForm.paramsFieldHelpText',
       {
-        defaultMessage: 'Script parameters.',
+        defaultMessage: 'Named parameters passed to the script as variables.',
       }
     ),
     validations: [
@@ -128,7 +128,7 @@ export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
         <EuiSwitch
           label={i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.scriptForm.useScriptIdToggleLabel',
-            { defaultMessage: 'Use stored script' }
+            { defaultMessage: 'Run a stored script' }
           )}
           checked={showId}
           onChange={() => setShowId((v) => !v)}
