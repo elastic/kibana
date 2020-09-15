@@ -26,7 +26,6 @@ import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { ApmPluginContext } from '../context/ApmPluginContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { ApmPluginSetupDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
@@ -98,15 +97,13 @@ export function ApmAppRoot({
           <KibanaContextProvider services={{ ...core, ...plugins }}>
             <i18nCore.Context>
               <Router history={history}>
-                <LocationProvider>
-                  <UrlParamsProvider>
-                    <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <App />
-                      </LicenseProvider>
-                    </LoadingIndicatorProvider>
-                  </UrlParamsProvider>
-                </LocationProvider>
+                <UrlParamsProvider>
+                  <LoadingIndicatorProvider>
+                    <LicenseProvider>
+                      <App />
+                    </LicenseProvider>
+                  </LoadingIndicatorProvider>
+                </UrlParamsProvider>
               </Router>
             </i18nCore.Context>
           </KibanaContextProvider>
