@@ -33,11 +33,7 @@ export {
   onUnsupportedTimePattern,
 } from './index_patterns';
 
-export {
-  getIndexPatternFieldListCreator,
-  Field,
-  IIndexPatternFieldList,
-} from '../../common/index_patterns';
+export { IndexPatternField, IIndexPatternFieldList } from '../../common/index_patterns';
 
 export {
   IndexPatternsService,

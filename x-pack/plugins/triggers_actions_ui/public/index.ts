@@ -19,7 +19,9 @@ export {
   ActionType,
   ActionTypeRegistryContract,
   AlertTypeParamsExpressionProps,
+  ValidationResult,
   ActionVariable,
+  ActionConnector,
 } from './types';
 export {
   ConnectorAddFlyout,

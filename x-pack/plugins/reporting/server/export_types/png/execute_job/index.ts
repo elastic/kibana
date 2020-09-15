@@ -8,17 +8,17 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
-import { ESQueueWorkerExecuteFn, RunTaskFnFactory, TaskRunResult } from '../../..//types';
+import { RunTaskFn, RunTaskFnFactory, TaskRunResult } from '../../..//types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
   getFullUrls,
-  omitBlacklistedHeaders,
+  omitBlockedHeaders,
 } from '../../common';
 import { generatePngObservableFactory } from '../lib/generate_png';
-import { ScheduledTaskParamsPNG } from '../types';
+import { TaskPayloadPNG } from '../types';
 
-type QueuedPngExecutorFactory = RunTaskFnFactory<ESQueueWorkerExecuteFn<ScheduledTaskParamsPNG>>;
+type QueuedPngExecutorFactory = RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>>;
 
 export const runTaskFnFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
   reporting,
@@ -37,7 +37,7 @@ export const runTaskFnFactory: QueuedPngExecutorFactory = function executeJobFac
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
-      map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map((decryptedHeaders) => omitBlockedHeaders({ job, decryptedHeaders })),
       map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
       mergeMap((conditionalHeaders) => {
         const urls = getFullUrls({ config, job });

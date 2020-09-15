@@ -6,36 +6,37 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  Plugin,
-  CoreStart,
-  CoreSetup,
   AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ManagementSetup } from 'src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart, UrlGeneratorState } from 'src/plugins/share/public';
+import { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
 import { EmbeddableSetup } from 'src/plugins/embeddable/public';
-import { AppStatus, AppUpdater } from '../../../../src/core/public';
+import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { registerManagementSection } from './application/management';
 import { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import { setDependencyCache } from './application/util/dependency_cache';
-import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
+import { PLUGIN_ICON, PLUGIN_ID } from '../common/constants/app';
 import { registerFeature } from './register_feature';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { registerEmbeddables } from './embeddables';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { registerUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
-import { isMlEnabled, isFullLicense } from '../common/license';
+import { registerUrlGenerator } from './ml_url_generator';
+import { isFullLicense, isMlEnabled } from '../common/license';
+import { registerEmbeddables } from './embeddables';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -49,17 +50,12 @@ export interface MlSetupDependencies {
   management?: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   kibanaVersion: string;
   share: SharePluginSetup;
-}
-
-declare module '../../../../src/plugins/share/public' {
-  export interface UrlGeneratorStateMapping {
-    [ML_APP_URL_GENERATOR]: UrlGeneratorState<MlUrlGeneratorState>;
-  }
+  indexPatternManagement: IndexPatternManagementSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -100,34 +96,51 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
           },
-          {
-            element: params.element,
-            appBasePath: params.appBasePath,
-            onAppLeave: params.onAppLeave,
-            history: params.history,
-          }
+          params
         );
       },
     });
 
+    const managementApp = registerManagementSection(pluginsSetup.management, core);
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-    licensing.subscribe((license) => {
+    licensing.subscribe(async (license) => {
+      const [coreStart] = await core.getStartServices();
       if (isMlEnabled(license)) {
         // add ML to home page
-        registerFeature(pluginsSetup.home);
+        if (pluginsSetup.home) {
+          registerFeature(pluginsSetup.home);
+        }
+
+        const { capabilities } = coreStart.application;
+
+        // register ML for the index pattern management no data screen.
+        pluginsSetup.indexPatternManagement.environment.update({
+          ml: () =>
+            capabilities.ml.canFindFileStructure ? MlCardState.ENABLED : MlCardState.HIDDEN,
+        });
+
+        const canManageMLJobs = capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
 
         // register various ML plugin features which require a full license
         if (isFullLicense(license)) {
-          registerManagementSection(pluginsSetup.management, core);
+          if (canManageMLJobs && managementApp) {
+            managementApp.enable();
+          }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
           registerUrlGenerator(pluginsSetup.share, core);
+        } else if (managementApp) {
+          managementApp.disable();
         }
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater.next(() => ({
           status: AppStatus.inaccessible,
         }));
+        if (managementApp) {
+          managementApp.disable();
+        }
       }
     });
 

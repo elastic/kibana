@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiTitle } from '@elastic/eui';
-import { TransactionLineChart } from './TransactionLineChart';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useAvgDurationByBrowser } from '../../../../hooks/useAvgDurationByBrowser';
+import { getDurationFormatter } from '../../../../utils/formatters';
 import {
-  getMaxY,
   getResponseTimeTickFormatter,
   getResponseTimeTooltipFormatter,
-} from '.';
-import { getDurationFormatter } from '../../../../utils/formatters';
-import { useAvgDurationByBrowser } from '../../../../hooks/useAvgDurationByBrowser';
+  getMaxY,
+} from './helper';
+import { TransactionLineChart } from './TransactionLineChart';
 
 export function BrowserLineChart() {
   const { data } = useAvgDurationByBrowser();

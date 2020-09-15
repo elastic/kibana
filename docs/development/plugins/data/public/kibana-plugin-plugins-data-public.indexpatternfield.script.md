@@ -7,5 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-script?: string;
+get script(): string | undefined;
+
+set script(script: string | undefined);
 ```

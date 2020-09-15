@@ -5,19 +5,27 @@
  */
 
 /**
- * NOTE: This variable name MUST start with 'mock*' in order for
+ * NOTE: These variable names MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
 export const mockHistory = {
-  createHref: jest.fn(({ pathname }) => `/enterprise_search${pathname}`),
+  createHref: jest.fn(({ pathname }) => `/app/enterprise_search${pathname}`),
   push: jest.fn(),
   location: {
     pathname: '/current-path',
   },
 };
+export const mockLocation = {
+  key: 'someKey',
+  pathname: '/current-path',
+  search: '?query=something',
+  hash: '#hash',
+  state: {},
+};
 
 jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(() => mockHistory),
+  useLocation: jest.fn(() => mockLocation),
 }));
 
 /**

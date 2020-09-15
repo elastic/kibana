@@ -15,6 +15,7 @@ import {
   PostAgentEnrollResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
+  PostAgentEnrollRequest,
 } from '../../../common/types';
 import {
   GetAgentsRequestSchema,
@@ -22,8 +23,7 @@ import {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
-  PostAgentCheckinRequestSchema,
-  PostAgentEnrollRequestSchema,
+  PostAgentCheckinRequest,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
 } from '../../types';
@@ -43,7 +43,6 @@ export const getAgentHandler: RequestHandler<TypeOf<
         ...agent,
         status: AgentService.getAgentStatus(agent),
       },
-      success: true,
     };
 
     return response.ok({ body });
@@ -77,7 +76,6 @@ export const getAgentEventsHandler: RequestHandler<
     const body: GetOneAgentEventsResponse = {
       list: items,
       total,
-      success: true,
       page,
       perPage,
     };
@@ -107,7 +105,6 @@ export const deleteAgentHandler: RequestHandler<TypeOf<
     await AgentService.deleteAgent(soClient, request.params.agentId);
 
     const body = {
-      success: true,
       action: 'deleted',
     };
 
@@ -144,7 +141,6 @@ export const updateAgentHandler: RequestHandler<
         ...agent,
         status: AgentService.getAgentStatus(agent),
       },
-      success: true,
     };
 
     return response.ok({ body });
@@ -163,9 +159,9 @@ export const updateAgentHandler: RequestHandler<
 };
 
 export const postAgentCheckinHandler: RequestHandler<
-  TypeOf<typeof PostAgentCheckinRequestSchema.params>,
+  PostAgentCheckinRequest['params'],
   undefined,
-  TypeOf<typeof PostAgentCheckinRequestSchema.body>
+  PostAgentCheckinRequest['body']
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
@@ -187,7 +183,6 @@ export const postAgentCheckinHandler: RequestHandler<
     );
     const body: PostAgentCheckinResponse = {
       action: 'checkin',
-      success: true,
       actions: actions.map((a) => ({
         agent_id: agent.id,
         type: a.type,
@@ -223,7 +218,7 @@ export const postAgentCheckinHandler: RequestHandler<
 export const postAgentEnrollHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof PostAgentEnrollRequestSchema.body>
+  PostAgentEnrollRequest['body']
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
@@ -239,7 +234,7 @@ export const postAgentEnrollHandler: RequestHandler<
     const agent = await AgentService.enroll(
       soClient,
       request.body.type,
-      enrollmentAPIKey.config_id as string,
+      enrollmentAPIKey.policy_id as string,
       {
         userProvided: request.body.metadata.user_provided,
         local: request.body.metadata.local,
@@ -248,7 +243,6 @@ export const postAgentEnrollHandler: RequestHandler<
     );
     const body: PostAgentEnrollResponse = {
       action: 'created',
-      success: true,
       item: {
         ...agent,
         status: AgentService.getAgentStatus(agent),
@@ -289,7 +283,6 @@ export const getAgentsHandler: RequestHandler<
         ...agent,
         status: AgentService.getAgentStatus(agent),
       })),
-      success: true,
       total,
       page,
       perPage,
@@ -310,11 +303,9 @@ export const putAgentsReassignHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.config_id);
+    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.policy_id);
 
-    const body: PutAgentReassignResponse = {
-      success: true,
-    };
+    const body: PutAgentReassignResponse = {};
     return response.ok({ body });
   } catch (e) {
     return response.customError({
@@ -324,16 +315,19 @@ export const putAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const getAgentStatusForConfigHandler: RequestHandler<
+export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     // TODO change path
-    const results = await AgentService.getAgentStatusForConfig(soClient, request.query.configId);
+    const results = await AgentService.getAgentStatusForAgentPolicy(
+      soClient,
+      request.query.policyId
+    );
 
-    const body: GetAgentStatusResponse = { results, success: true };
+    const body: GetAgentStatusResponse = { results };
 
     return response.ok({ body });
   } catch (e) {

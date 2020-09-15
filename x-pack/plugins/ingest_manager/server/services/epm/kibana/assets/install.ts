@@ -11,16 +11,12 @@ import {
 } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import * as Registry from '../../registry';
-import {
-  AssetType,
-  KibanaAssetType,
-  AssetReference,
-  KibanaAssetReference,
-} from '../../../../types';
-import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
-import { getInstallationObject, savedObjectTypes } from '../../packages';
+import { AssetType, KibanaAssetType, AssetReference } from '../../../../types';
+import { savedObjectTypes } from '../../packages';
 
-type SavedObjectToBe = Required<SavedObjectsBulkCreateObject> & { type: AssetType };
+type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
+  type: AssetType;
+};
 export type ArchiveAsset = Pick<
   SavedObject,
   'id' | 'attributes' | 'migrationVersion' | 'references'
@@ -28,7 +24,7 @@ export type ArchiveAsset = Pick<
   type: AssetType;
 };
 
-export async function getKibanaAsset(key: string) {
+export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {
   const buffer = Registry.getAsset(key);
 
   // cache values are buffers. convert to string / JSON
@@ -51,31 +47,17 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  paths: string[];
-  isUpdate: boolean;
-}): Promise<KibanaAssetReference[]> {
-  const { savedObjectsClient, paths, pkgName, isUpdate } = options;
+  kibanaAssets: ArchiveAsset[];
+}): Promise<SavedObject[]> {
+  const { savedObjectsClient, kibanaAssets } = options;
 
-  if (isUpdate) {
-    // delete currently installed kibana saved objects and installation references
-    const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-    const installedKibanaRefs = installedPkg?.attributes.installed_kibana;
-
-    if (installedKibanaRefs?.length) {
-      await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedKibanaRefs);
-      await deleteKibanaInstalledRefs(savedObjectsClient, pkgName, installedKibanaRefs);
-    }
-  }
-
-  // install the new assets and save installation references
+  // install the assets
   const kibanaAssetTypes = Object.values(KibanaAssetType);
   const installedAssets = await Promise.all(
     kibanaAssetTypes.map((assetType) =>
-      installKibanaSavedObjects({ savedObjectsClient, assetType, paths })
+      installKibanaSavedObjects({ savedObjectsClient, assetType, kibanaAssets })
     )
   );
-  // installKibanaSavedObjects returns AssetReference[], so .map creates AssetReference[][]
-  // call .flat to flatten into one dimensional array
   return installedAssets.flat();
 }
 export const deleteKibanaInstalledRefs = async (
@@ -92,21 +74,25 @@ export const deleteKibanaInstalledRefs = async (
     installed_kibana: installedAssetsToSave,
   });
 };
-
+export async function getKibanaAssets(paths: string[]) {
+  const isKibanaAssetType = (path: string) => Registry.pathParts(path).type in KibanaAssetType;
+  const filteredPaths = paths.filter(isKibanaAssetType);
+  const kibanaAssets = await Promise.all(filteredPaths.map((path) => getKibanaAsset(path)));
+  return kibanaAssets;
+}
 async function installKibanaSavedObjects({
   savedObjectsClient,
   assetType,
-  paths,
+  kibanaAssets,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   assetType: KibanaAssetType;
-  paths: string[];
+  kibanaAssets: ArchiveAsset[];
 }) {
-  const isSameType = (path: string) => assetType === Registry.pathParts(path).type;
-  const pathsOfType = paths.filter((path) => isSameType(path));
-  const kibanaAssets = await Promise.all(pathsOfType.map((path) => getKibanaAsset(path)));
+  const isSameType = (asset: ArchiveAsset) => assetType === asset.type;
+  const filteredKibanaAssets = kibanaAssets.filter((asset) => isSameType(asset));
   const toBeSavedObjects = await Promise.all(
-    kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
+    filteredKibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
   if (toBeSavedObjects.length === 0) {
@@ -115,13 +101,11 @@ async function installKibanaSavedObjects({
     const createResults = await savedObjectsClient.bulkCreate(toBeSavedObjects, {
       overwrite: true,
     });
-    const createdObjects = createResults.saved_objects;
-    const installed = createdObjects.map(toAssetReference);
-    return installed;
+    return createResults.saved_objects;
   }
 }
 
-function toAssetReference({ id, type }: SavedObject) {
+export function toAssetReference({ id, type }: SavedObject) {
   const reference: AssetReference = { id, type: type as KibanaAssetType };
 
   return reference;

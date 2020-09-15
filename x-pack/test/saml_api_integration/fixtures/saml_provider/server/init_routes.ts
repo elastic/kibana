@@ -43,4 +43,15 @@ export function initRoutes(core: CoreSetup) {
       return response.renderJs({ body: 'document.getElementById("loginForm").submit();' });
     }
   );
+
+  core.http.resources.register(
+    {
+      path: '/saml_provider/logout',
+      validate: false,
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      return response.redirected({ headers: { location: '/logout?SAMLResponse=something' } });
+    }
+  );
 }

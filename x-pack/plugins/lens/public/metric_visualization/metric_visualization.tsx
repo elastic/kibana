@@ -7,20 +7,20 @@
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
-import { Visualization, FramePublicAPI, OperationMetadata } from '../types';
-import { State, PersistableState } from './types';
-import chartMetricSVG from '../assets/chart_metric.svg';
+import { LensIconChartMetric } from '../assets/chart_metric';
+import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
+import { State } from './types';
 
 const toExpression = (
   state: State,
-  frame: FramePublicAPI,
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
   mode: 'reduced' | 'full' = 'full'
 ): Ast | null => {
   if (!state.accessor) {
     return null;
   }
 
-  const [datasource] = Object.values(frame.datasourceLayers);
+  const [datasource] = Object.values(datasourceLayers);
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
   return {
@@ -39,14 +39,13 @@ const toExpression = (
   };
 };
 
-export const metricVisualization: Visualization<State, PersistableState> = {
+export const metricVisualization: Visualization<State> = {
   id: 'lnsMetric',
 
   visualizationTypes: [
     {
       id: 'lnsMetric',
-      icon: 'visMetric',
-      largeIcon: chartMetricSVG,
+      icon: LensIconChartMetric,
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),
@@ -70,7 +69,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
 
   getDescription() {
     return {
-      icon: chartMetricSVG,
+      icon: LensIconChartMetric,
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),
@@ -88,8 +87,6 @@ export const metricVisualization: Visualization<State, PersistableState> = {
     );
   },
 
-  getPersistableState: (state) => state,
-
   getConfiguration(props) {
     return {
       groups: [
@@ -106,8 +103,8 @@ export const metricVisualization: Visualization<State, PersistableState> = {
   },
 
   toExpression,
-  toPreviewExpression: (state: State, frame: FramePublicAPI) =>
-    toExpression(state, frame, 'reduced'),
+  toPreviewExpression: (state, datasourceLayers) =>
+    toExpression(state, datasourceLayers, 'reduced'),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };

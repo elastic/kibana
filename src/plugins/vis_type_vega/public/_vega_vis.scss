@@ -107,6 +107,7 @@
 
 .vgaVis__tooltip {
   max-width: 100%;
+  position: fixed;
 
   h2 {
     margin-bottom: $euiSizeS;

@@ -13,7 +13,6 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
       '@elastic/eui/lib/(.*)?': `${kibanaDirectory}/node_modules/@elastic/eui/test-env/$1`,
-      '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
       '^fixtures/(.*)': `${kibanaDirectory}/src/fixtures/$1`,
       'uiExports/(.*)': fileMockPath,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,

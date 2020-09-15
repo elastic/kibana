@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable complexity */
-
 import ApolloClient from 'apollo-client';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
@@ -24,7 +22,12 @@ import {
   DataProviderResult,
 } from '../../../graphql/types';
 
-import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import {
+  DataProviderType,
+  TimelineId,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/types/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -238,7 +241,6 @@ export const getTimelineStatus = (
   return duplicate ? TimelineStatus.active : timeline.status;
 };
 
-// eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
@@ -318,7 +320,7 @@ export const queryTimelineById = <TCache>({
   updateIsLoading,
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
-  updateIsLoading({ id: 'timeline-1', isLoading: true });
+  updateIsLoading({ id: TimelineId.active, isLoading: true });
   if (apolloClient) {
     apolloClient
       .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
@@ -326,7 +328,6 @@ export const queryTimelineById = <TCache>({
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
-      // eslint-disable-next-line
       .then((result) => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
@@ -347,7 +348,7 @@ export const queryTimelineById = <TCache>({
           updateTimeline({
             duplicate,
             from,
-            id: 'timeline-1',
+            id: TimelineId.active,
             notes,
             timeline: {
               ...timeline,
@@ -359,7 +360,7 @@ export const queryTimelineById = <TCache>({
         }
       })
       .finally(() => {
-        updateIsLoading({ id: 'timeline-1', isLoading: false });
+        updateIsLoading({ id: TimelineId.active, isLoading: false });
       });
   }
 };
@@ -367,6 +368,7 @@ export const queryTimelineById = <TCache>({
 export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
   duplicate,
   id,
+  forceNotes = false,
   from,
   notes,
   timeline,
@@ -374,7 +376,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
-  dispatch(dispatchAddTimeline({ id, timeline }));
+  dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
   if (
     timeline.kqlQuery != null &&
     timeline.kqlQuery.filterQuery != null &&
@@ -411,7 +413,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }
 
-  if (!duplicate) {
+  if (!duplicate || forceNotes) {
     dispatch(
       dispatchAddNotes({
         notes:

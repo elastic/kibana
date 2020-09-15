@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
@@ -31,23 +31,23 @@ import { EditExceptionModal } from '../edit_exception_modal';
 import { AddExceptionModal } from '../add_exception_modal';
 
 const initialState: State = {
-  filterOptions: { filter: '', showEndpointList: false, showDetectionsList: false, tags: [] },
+  filterOptions: { filter: '', tags: [] },
   pagination: {
     pageIndex: 0,
     pageSize: 20,
     totalItemCount: 0,
     pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
   },
-  endpointList: null,
-  detectionsList: null,
-  allExceptions: [],
   exceptions: [],
   exceptionToEdit: null,
-  loadingLists: [],
   loadingItemIds: [],
   isInitLoading: true,
   currentModal: null,
   exceptionListTypeToEdit: null,
+  totalEndpointItems: 0,
+  totalDetectionsItems: 0,
+  showEndpointListsOnly: false,
+  showDetectionsListsOnly: false,
 };
 
 interface ExceptionsViewerProps {
@@ -87,46 +87,47 @@ const ExceptionsViewerComponent = ({
   );
   const [
     {
-      endpointList,
-      detectionsList,
       exceptions,
       filterOptions,
       pagination,
-      loadingLists,
       loadingItemIds,
       isInitLoading,
       currentModal,
       exceptionToEdit,
       exceptionListTypeToEdit,
+      totalEndpointItems,
+      totalDetectionsItems,
+      showDetectionsListsOnly,
+      showEndpointListsOnly,
     },
     dispatch,
-  ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
-  const { deleteExceptionItem } = useApi(services.http);
+  ] = useReducer(allExceptionItemsReducer(), { ...initialState });
+  const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
 
   const setExceptions = useCallback(
-    ({
-      lists: newLists,
-      exceptions: newExceptions,
-      pagination: newPagination,
-    }: UseExceptionListSuccess): void => {
+    ({ exceptions: newExceptions, pagination: newPagination }: UseExceptionListSuccess): void => {
       dispatch({
         type: 'setExceptions',
-        lists: newLists,
+        lists: exceptionListsMeta,
         exceptions: newExceptions,
         pagination: newPagination,
       });
     },
-    [dispatch]
+    [dispatch, exceptionListsMeta]
   );
-  const [loadingList, , , , fetchList] = useExceptionList({
+  const [loadingList, , , fetchListItems] = useExceptionList({
     http: services.http,
-    lists: loadingLists,
-    filterOptions,
+    lists: exceptionListsMeta,
+    filterOptions:
+      filterOptions.filter !== '' || filterOptions.tags.length > 0 ? [filterOptions] : [],
     pagination: {
       page: pagination.pageIndex + 1,
       perPage: pagination.pageSize,
       total: pagination.totalItemCount,
     },
+    showDetectionsListsOnly,
+    showEndpointListsOnly,
+    matchFilters: true,
     onSuccess: setExceptions,
     onError: onDispatchToaster({
       color: 'danger',
@@ -145,22 +146,81 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const handleFetchList = useCallback((): void => {
-    if (fetchList != null) {
-      fetchList();
-    }
-  }, [fetchList]);
-
-  const handleFilterChange = useCallback(
-    ({ filter, pagination: pag }: Filter): void => {
+  const setExceptionItemTotals = useCallback(
+    (endpointItemTotals: number | null, detectionItemTotals: number | null): void => {
       dispatch({
-        type: 'updateFilterOptions',
-        filterOptions: filter,
-        pagination: pag,
-        allLists: exceptionListsMeta,
+        type: 'setExceptionItemTotals',
+        totalEndpointItems: endpointItemTotals,
+        totalDetectionsItems: detectionItemTotals,
       });
     },
-    [dispatch, exceptionListsMeta]
+    [dispatch]
+  );
+
+  const handleGetTotals = useCallback(async (): Promise<void> => {
+    await getExceptionListsItems({
+      lists: exceptionListsMeta,
+      filterOptions: [],
+      pagination: {
+        page: 0,
+        perPage: 1,
+        total: 0,
+      },
+      showDetectionsListsOnly: true,
+      showEndpointListsOnly: false,
+      onSuccess: ({ pagination: detectionPagination }) => {
+        setExceptionItemTotals(null, detectionPagination.total ?? 0);
+      },
+      onError: () => {
+        const dispatchToasterError = onDispatchToaster({
+          color: 'danger',
+          title: i18n.TOTAL_ITEMS_FETCH_ERROR,
+          iconType: 'alert',
+        });
+
+        dispatchToasterError();
+      },
+    });
+    await getExceptionListsItems({
+      lists: exceptionListsMeta,
+      filterOptions: [],
+      pagination: {
+        page: 0,
+        perPage: 1,
+        total: 0,
+      },
+      showDetectionsListsOnly: false,
+      showEndpointListsOnly: true,
+      onSuccess: ({ pagination: endpointPagination }) => {
+        setExceptionItemTotals(endpointPagination.total ?? 0, null);
+      },
+      onError: () => {
+        const dispatchToasterError = onDispatchToaster({
+          color: 'danger',
+          title: i18n.TOTAL_ITEMS_FETCH_ERROR,
+          iconType: 'alert',
+        });
+
+        dispatchToasterError();
+      },
+    });
+  }, [setExceptionItemTotals, exceptionListsMeta, getExceptionListsItems, onDispatchToaster]);
+
+  const handleFetchList = useCallback((): void => {
+    if (fetchListItems != null) {
+      fetchListItems();
+      handleGetTotals();
+    }
+  }, [fetchListItems, handleGetTotals]);
+
+  const handleFilterChange = useCallback(
+    (filters: Partial<Filter>): void => {
+      dispatch({
+        type: 'updateFilterOptions',
+        filters,
+      });
+    },
+    [dispatch]
   );
 
   const handleAddException = useCallback(
@@ -178,12 +238,13 @@ const ExceptionsViewerComponent = ({
     (exception: ExceptionListItemSchema): void => {
       dispatch({
         type: 'updateExceptionToEdit',
+        lists: exceptionListsMeta,
         exception,
       });
 
       setCurrentModal('editModal');
     },
-    [setCurrentModal]
+    [setCurrentModal, exceptionListsMeta]
   );
 
   const handleOnCancelExceptionModal = useCallback((): void => {
@@ -235,23 +296,24 @@ const ExceptionsViewerComponent = ({
   // Logic for initial render
   useEffect((): void => {
     if (isInitLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
+      handleGetTotals();
       dispatch({
         type: 'updateIsInitLoading',
         loading: false,
       });
     }
-  }, [isInitLoading, exceptions, loadingList, dispatch]);
+  }, [handleGetTotals, isInitLoading, exceptions, loadingList, dispatch]);
 
   // Used in utility bar info text
-  const ruleSettingsUrl = useMemo((): string => {
-    return services.application.getUrlForApp(
-      `security/detections/rules/id/${encodeURI(ruleId)}/edit`
-    );
-  }, [ruleId, services.application]);
+  const ruleSettingsUrl = services.application.getUrlForApp(
+    `security/detections/rules/id/${encodeURI(ruleId)}/edit`
+  );
 
-  const showEmpty = useMemo((): boolean => {
-    return !isInitLoading && !loadingList && exceptions.length === 0;
-  }, [isInitLoading, exceptions.length, loadingList]);
+  const showEmpty: boolean =
+    !isInitLoading && !loadingList && totalEndpointItems === 0 && totalDetectionsItems === 0;
+
+  const showNoResults: boolean =
+    exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
 
   return (
     <>
@@ -260,11 +322,13 @@ const ExceptionsViewerComponent = ({
         exceptionListTypeToEdit != null && (
           <EditExceptionModal
             ruleName={ruleName}
+            ruleId={ruleId}
             ruleIndices={ruleIndices}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
             onConfirm={handleOnConfirmExceptionModal}
+            onRuleChange={onRuleChange}
           />
         )}
 
@@ -288,8 +352,8 @@ const ExceptionsViewerComponent = ({
         <ExceptionsViewerHeader
           isInitLoading={isInitLoading}
           supportedListTypes={availableListTypes}
-          detectionsListItems={detectionsList != null ? detectionsList.totalItems : 0}
-          endpointListItems={endpointList != null ? endpointList.totalItems : 0}
+          detectionsListItems={totalDetectionsItems}
+          endpointListItems={totalEndpointItems}
           onFilterChange={handleFilterChange}
           onAddExceptionClick={handleAddException}
         />
@@ -298,13 +362,15 @@ const ExceptionsViewerComponent = ({
 
         <ExceptionsViewerUtility
           pagination={pagination}
-          filterOptions={filterOptions}
+          showEndpointListsOnly={showEndpointListsOnly}
+          showDetectionsListsOnly={showDetectionsListsOnly}
           onRefreshClick={handleFetchList}
           ruleSettingsUrl={ruleSettingsUrl}
         />
 
         <ExceptionsViewerItems
           showEmpty={showEmpty}
+          showNoResults={showNoResults}
           isInitLoading={isInitLoading}
           exceptions={exceptions}
           loadingItemIds={loadingItemIds}

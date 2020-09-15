@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { assertUnreachable } from '../../../../common/utility_types';
 import { JobStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { assertUnreachable } from '../../../utils/build_query';
 import { IRuleStatusAttributes } from '../rules/types';
 import { getOrCreateRuleStatuses } from './get_or_create_rule_statuses';
 import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';

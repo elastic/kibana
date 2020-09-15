@@ -40,7 +40,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
-  '**/{webpackShims,__mocks__}/**/*',
+  '**/__mocks__/**/*',
   'x-pack/docs/**/*',
   'src/core/server/core_app/assets/fonts/**/*',
   'packages/kbn-utility-types/test-d/**/*',
@@ -70,6 +70,8 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
+  // packages for the ingest manager's api integration tests could be valid semver which has dashes
+  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
 ];
 
 /**
@@ -96,7 +98,6 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
  */
 export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
-  '**/webpackShims',
   'src/babel-*',
   'packages/*',
   'packages/kbn-ui-framework/generator-kui',
@@ -104,7 +105,16 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
+  'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
 ];
+
+/**
+ * These patterns identify files which should have the extension stripped
+ * to reveal the actual name that should be checked.
+ *
+ * @type {Array}
+ */
+export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!
@@ -139,35 +149,10 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core/server/core_app/assets/favicons/mstile-310x150.png',
   'src/core/server/core_app/assets/favicons/mstile-310x310.png',
   'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
-  'src/legacy/ui/public/styles/bootstrap/component-animations.less',
-  'src/legacy/ui/public/styles/bootstrap/input-groups.less',
-  'src/legacy/ui/public/styles/bootstrap/list-group.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/background-variant.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/border-radius.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/center-block.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/grid-framework.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/hide-text.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/list-group.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/nav-divider.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/nav-vertical-align.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/progress-bar.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/reset-filter.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/reset-text.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/responsive-visibility.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/tab-focus.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/table-row.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/text-emphasis.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/text-overflow.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/vendor-prefixes.less',
-  'src/legacy/ui/public/styles/bootstrap/progress-bars.less',
-  'src/legacy/ui/public/styles/bootstrap/responsive-utilities.less',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
   'packages/kbn-ui-framework/doc_site/src/images/elastic-logo.svg',
   'packages/kbn-ui-framework/doc_site/src/images/hint-arrow.svg',
   'packages/kbn-ui-framework/doc_site/src/images/react-logo.svg',
-  'webpackShims/elasticsearch-browser.js',
-  'webpackShims/moment-timezone.js',
-  'webpackShims/ui-bootstrap.js',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
@@ -175,12 +160,12 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

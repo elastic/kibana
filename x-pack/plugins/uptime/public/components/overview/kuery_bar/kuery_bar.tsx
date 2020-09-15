@@ -5,8 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { uniqueId, startsWith } from 'lodash';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, htmlIdGenerator } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
@@ -16,6 +15,7 @@ import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
+  DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from './use_index_pattern';
 
@@ -56,7 +56,7 @@ export function KueryBar({
     services: {
       data: { autocomplete },
     },
-  } = useKibana();
+  } = useKibana<{ data: DataPublicPluginStart }>();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -94,7 +94,7 @@ export function KueryBar({
     setState({ ...state, suggestions: [] });
     setSuggestionLimit(15);
 
-    const currentRequest = uniqueId();
+    const currentRequest = htmlIdGenerator()();
     currentRequestCheck = currentRequest;
 
     try {
@@ -103,8 +103,8 @@ export function KueryBar({
           language: 'kuery',
           indexPatterns: [indexPattern],
           query: inputValue,
-          selectionStart,
-          selectionEnd: selectionStart,
+          selectionStart: selectionStart || 0,
+          selectionEnd: selectionStart || 0,
           boolFilter: [
             {
               range: {
@@ -116,7 +116,7 @@ export function KueryBar({
             },
           ],
         })) || []
-      ).filter((suggestion: QuerySuggestion) => !startsWith(suggestion.text, 'span.'));
+      ).filter((suggestion: QuerySuggestion) => !suggestion.text.startsWith('span.'));
       if (currentRequest !== currentRequestCheck) {
         return;
       }

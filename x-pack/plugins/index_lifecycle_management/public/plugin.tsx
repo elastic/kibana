@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
-
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initDocumentation } from './application/services/documentation';
@@ -30,7 +31,7 @@ export class IndexLifecycleManagementPlugin {
         getStartServices,
       } = coreSetup;
 
-      const { usageCollection, management, indexManagement } = plugins;
+      const { usageCollection, management, indexManagement, home } = plugins;
 
       // Initialize services even if the app isn't mounted, because they're used by index management extensions.
       initHttp(http);
@@ -47,7 +48,7 @@ export class IndexLifecycleManagementPlugin {
             chrome: { docTitle },
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-            application: { navigateToApp },
+            application: { navigateToApp, getUrlForApp },
           } = coreStart;
 
           docTitle.change(PLUGIN.TITLE);
@@ -58,7 +59,14 @@ export class IndexLifecycleManagementPlugin {
           );
 
           const { renderApp } = await import('./application');
-          const unmountAppCallback = renderApp(element, I18nContext, history, navigateToApp);
+
+          const unmountAppCallback = renderApp(
+            element,
+            I18nContext,
+            history,
+            navigateToApp,
+            getUrlForApp
+          );
 
           return () => {
             docTitle.reset();
@@ -66,6 +74,24 @@ export class IndexLifecycleManagementPlugin {
           };
         },
       });
+
+      if (home) {
+        home.featureCatalogue.register({
+          id: PLUGIN.ID,
+          title: i18n.translate('xpack.indexLifecycleMgmt.featureCatalogueTitle', {
+            defaultMessage: 'Manage index lifecycles',
+          }),
+          description: i18n.translate('xpack.indexLifecycleMgmt.featureCatalogueDescription', {
+            defaultMessage:
+              'Define lifecycle policies to automatically perform operations as an index ages.',
+          }),
+          icon: 'indexSettings',
+          path: '/app/management/data/index_lifecycle_management',
+          showOnHomePage: true,
+          category: FeatureCatalogueCategory.ADMIN,
+          order: 640,
+        });
+      }
 
       if (indexManagement) {
         addAllExtensions(indexManagement.extensionsService);

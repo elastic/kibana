@@ -8,6 +8,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import uuid from 'uuid';
 import { filter } from 'rxjs/operators';
+import { Option, some, none } from 'fp-ts/lib/Option';
 
 import {
   TaskDictionary,
@@ -626,13 +627,13 @@ if (doc['task.runAt'].size()!=0) {
       });
     });
 
-    test('it returns task objects', async () => {
+    test('it filters out running tasks', async () => {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'aaa',
+          _id: 'task:aaa',
           _source: {
             type: 'task',
             task: {
@@ -640,7 +641,7 @@ if (doc['task.runAt'].size()!=0) {
               taskType: 'foo',
               schedule: undefined,
               attempts: 0,
-              status: 'idle',
+              status: 'claiming',
               params: '{ "hello": "world" }',
               state: '{ "baby": "Henhen" }',
               user: 'jimbo',
@@ -653,7 +654,104 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
+          // this is invalid as it doesn't have the `type` prefix
           _id: 'bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const {
+        result: { docs },
+        args: {
+          search: {
+            body: { query },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          taskManagerId,
+        },
+        claimingOpts: {
+          claimOwnershipUntil,
+          size: 10,
+        },
+        hits: tasks,
+      });
+
+      expect(query.bool.must).toContainEqual({
+        bool: {
+          must: [
+            {
+              term: {
+                'task.ownerId': taskManagerId,
+              },
+            },
+            { term: { 'task.status': 'claiming' } },
+          ],
+        },
+      });
+
+      expect(docs).toMatchObject([
+        {
+          attempts: 0,
+          id: 'aaa',
+          schedule: undefined,
+          params: { hello: 'world' },
+          runAt,
+          scope: ['reporting'],
+          state: { baby: 'Henhen' },
+          status: 'claiming',
+          taskType: 'foo',
+          user: 'jimbo',
+          ownerId: taskManagerId,
+        },
+      ]);
+    });
+
+    test('it filters out invalid tasks that arent SavedObjects', async () => {
+      const taskManagerId = uuid.v1();
+      const claimOwnershipUntil = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'task:aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              schedule: undefined,
+              attempts: 0,
+              status: 'claiming',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'task:bbb',
           _source: {
             type: 'task',
             task: {
@@ -714,7 +812,103 @@ if (doc['task.runAt'].size()!=0) {
           runAt,
           scope: ['reporting'],
           state: { baby: 'Henhen' },
-          status: 'idle',
+          status: 'claiming',
+          taskType: 'foo',
+          user: 'jimbo',
+          ownerId: taskManagerId,
+        },
+      ]);
+    });
+
+    test('it returns task objects', async () => {
+      const taskManagerId = uuid.v1();
+      const claimOwnershipUntil = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'task:aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              schedule: undefined,
+              attempts: 0,
+              status: 'claiming',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'task:bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const {
+        result: { docs },
+        args: {
+          search: {
+            body: { query },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          taskManagerId,
+        },
+        claimingOpts: {
+          claimOwnershipUntil,
+          size: 10,
+        },
+        hits: tasks,
+      });
+
+      expect(query.bool.must).toContainEqual({
+        bool: {
+          must: [
+            {
+              term: {
+                'task.ownerId': taskManagerId,
+              },
+            },
+            { term: { 'task.status': 'claiming' } },
+          ],
+        },
+      });
+
+      expect(docs).toMatchObject([
+        {
+          attempts: 0,
+          id: 'aaa',
+          schedule: undefined,
+          params: { hello: 'world' },
+          runAt,
+          scope: ['reporting'],
+          state: { baby: 'Henhen' },
+          status: 'claiming',
           taskType: 'foo',
           user: 'jimbo',
           ownerId: taskManagerId,
@@ -727,7 +921,7 @@ if (doc['task.runAt'].size()!=0) {
           runAt,
           scope: ['reporting', 'ceo'],
           state: { henry: 'The 8th' },
-          status: 'running',
+          status: 'claiming',
           taskType: 'bar',
           user: 'dabo',
           ownerId: taskManagerId,
@@ -972,7 +1166,7 @@ if (doc['task.runAt'].size()!=0) {
       const runAt = new Date();
       const tasks = [
         {
-          _id: 'aaa',
+          _id: 'task:claimed-by-id',
           _source: {
             type: 'task',
             task: {
@@ -980,7 +1174,7 @@ if (doc['task.runAt'].size()!=0) {
               taskType: 'foo',
               schedule: undefined,
               attempts: 0,
-              status: 'idle',
+              status: 'claiming',
               params: '{ "hello": "world" }',
               state: '{ "baby": "Henhen" }',
               user: 'jimbo',
@@ -996,7 +1190,31 @@ if (doc['task.runAt'].size()!=0) {
           sort: ['a', 1],
         },
         {
-          _id: 'bbb',
+          _id: 'task:claimed-by-schedule',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+              startedAt: null,
+              retryAt: null,
+              scheduledAt: new Date(),
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+        {
+          _id: 'task:already-running',
           _source: {
             type: 'task',
             task: {
@@ -1045,19 +1263,24 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<ConcreteTaskInstance, Error>) => event.id === 'aaa'))
+        .pipe(
+          filter(
+            (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
+              event.id === 'claimed-by-id'
+          )
+        )
         .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Error>) => {
+          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
             expect(event).toMatchObject(
               asTaskClaimEvent(
-                'aaa',
+                'claimed-by-id',
                 asOk({
-                  id: 'aaa',
+                  id: 'claimed-by-id',
                   runAt,
                   taskType: 'foo',
                   schedule: undefined,
                   attempts: 0,
-                  status: 'idle' as TaskStatus,
+                  status: 'claiming' as TaskStatus,
                   params: { hello: 'world' },
                   state: { baby: 'Henhen' },
                   user: 'jimbo',
@@ -1075,7 +1298,7 @@ if (doc['task.runAt'].size()!=0) {
         });
 
       await store.claimAvailableTasks({
-        claimTasksById: ['aaa'],
+        claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
@@ -1102,19 +1325,24 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<ConcreteTaskInstance, Error>) => event.id === 'bbb'))
+        .pipe(
+          filter(
+            (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
+              event.id === 'claimed-by-schedule'
+          )
+        )
         .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Error>) => {
+          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
             expect(event).toMatchObject(
               asTaskClaimEvent(
-                'bbb',
+                'claimed-by-schedule',
                 asOk({
-                  id: 'bbb',
+                  id: 'claimed-by-schedule',
                   runAt,
                   taskType: 'bar',
                   schedule: { interval: '5m' },
                   attempts: 2,
-                  status: 'running' as TaskStatus,
+                  status: 'claiming' as TaskStatus,
                   params: { shazm: 1 },
                   state: { henry: 'The 8th' },
                   user: 'dabo',
@@ -1132,13 +1360,77 @@ if (doc['task.runAt'].size()!=0) {
         });
 
       await store.claimAvailableTasks({
-        claimTasksById: ['aaa'],
+        claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
     });
 
     test('emits an event when the store fails to claim a required task by id', async (done) => {
+      const { taskManagerId, runAt, tasks } = generateTasks();
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
+        name === 'updateByQuery'
+          ? {
+              total: tasks.length,
+              updated: tasks.length,
+            }
+          : { hits: { hits: tasks } }
+      );
+      const store = new TaskStore({
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        serializer,
+        savedObjectsRepository: savedObjectsClient,
+        taskManagerId,
+        index: '',
+      });
+
+      const sub = store.events
+        .pipe(
+          filter(
+            (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
+              event.id === 'already-running'
+          )
+        )
+        .subscribe({
+          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
+            expect(event).toMatchObject(
+              asTaskClaimEvent(
+                'already-running',
+                asErr(
+                  some({
+                    id: 'already-running',
+                    runAt,
+                    taskType: 'bar',
+                    schedule: { interval: '5m' },
+                    attempts: 2,
+                    status: 'running' as TaskStatus,
+                    params: { shazm: 1 },
+                    state: { henry: 'The 8th' },
+                    user: 'dabo',
+                    scope: ['reporting', 'ceo'],
+                    ownerId: taskManagerId,
+                    startedAt: null,
+                    retryAt: null,
+                    scheduledAt: new Date(),
+                  })
+                )
+              )
+            );
+            sub.unsubscribe();
+            done();
+          },
+        });
+
+      await store.claimAvailableTasks({
+        claimTasksById: ['already-running'],
+        claimOwnershipUntil: new Date(),
+        size: 10,
+      });
+    });
+
+    test('emits an event when the store fails to find a task which was required by id', async (done) => {
       const { taskManagerId, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1159,19 +1451,22 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<ConcreteTaskInstance, Error>) => event.id === 'ccc'))
+        .pipe(
+          filter(
+            (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) =>
+              event.id === 'unknown-task'
+          )
+        )
         .subscribe({
-          next: (event: TaskEvent<ConcreteTaskInstance, Error>) => {
-            expect(event).toMatchObject(
-              asTaskClaimEvent('ccc', asErr(new Error(`failed to claim task 'ccc'`)))
-            );
+          next: (event: TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>) => {
+            expect(event).toMatchObject(asTaskClaimEvent('unknown-task', asErr(none)));
             sub.unsubscribe();
             done();
           },
         });
 
       await store.claimAvailableTasks({
-        claimTasksById: ['ccc'],
+        claimTasksById: ['unknown-task'],
         claimOwnershipUntil: new Date(),
         size: 10,
       });
@@ -1180,8 +1475,8 @@ if (doc['task.runAt'].size()!=0) {
 });
 
 function generateFakeTasks(count: number = 1) {
-  return _.times(count, () => ({
-    _id: 'aaa',
+  return _.times(count, (index) => ({
+    _id: `task:id-${index}`,
     _source: {
       type: 'task',
       task: {},

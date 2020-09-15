@@ -33,13 +33,20 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { SecurityPluginSetup } from '../../security/server';
 
 import { ActionsConfig } from './config';
-import { Services, ActionType, PreConfiguredAction } from './types';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
+import {
+  Services,
+  ActionType,
+  PreConfiguredAction,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+} from './types';
 
 import { getActionsConfigurationUtilities } from './actions_config';
 
@@ -70,7 +77,13 @@ export const EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
-  registerType: (actionType: ActionType) => void;
+  registerType<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Params extends ActionTypeParams = ActionTypeParams
+  >(
+    actionType: ActionType<Config, Secrets, Params>
+  ): void;
 }
 
 export interface PluginStartContract {
@@ -103,6 +116,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private readonly config: Promise<ActionsConfig>;
 
   private readonly logger: Logger;
+  private actionsConfig?: ActionsConfig;
   private serverBasePath?: string;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
@@ -110,6 +124,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private licenseState: ILicenseState | null = null;
   private spaces?: SpacesServiceSetup;
   private security?: SecurityPluginSetup;
+  private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private readonly telemetryLogger: Logger;
@@ -144,9 +159,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       );
     }
 
-    plugins.features.registerFeature(ACTIONS_FEATURE);
+    plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
     setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
+    this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
@@ -158,12 +174,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
-    const actionsConfig = (await this.config) as ActionsConfig;
-    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
+    this.actionsConfig = (await this.config) as ActionsConfig;
+    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
-    for (const preconfiguredId of Object.keys(actionsConfig.preconfigured)) {
+    for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
       this.preconfiguredActions.push({
-        ...actionsConfig.preconfigured[preconfiguredId],
+        ...this.actionsConfig.preconfigured[preconfiguredId],
         id: preconfiguredId,
         isPreconfigured: true,
       });
@@ -219,7 +235,13 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     executeActionRoute(router, this.licenseState);
 
     return {
-      registerType: (actionType: ActionType) => {
+      registerType: <
+        Config extends ActionTypeConfig = ActionTypeConfig,
+        Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+        Params extends ActionTypeParams = ActionTypeParams
+      >(
+        actionType: ActionType<Config, Secrets, Params>
+      ) => {
         if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
         }
@@ -276,6 +298,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       });
     };
 
+    this.eventLogService!.registerSavedObjectProvider('action', (request) => {
+      const client = getActionsClientWithRequest(request);
+      return async (type: string, id: string) => (await client).get({ id });
+    });
+
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request);
 
@@ -291,6 +318,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
+      proxySettings:
+        this.actionsConfig && this.actionsConfig.proxyUrl
+          ? {
+              proxyUrl: this.actionsConfig.proxyUrl,
+              proxyHeaders: this.actionsConfig.proxyHeaders,
+              proxyRejectUnauthorizedCertificates: this.actionsConfig
+                .proxyRejectUnauthorizedCertificates,
+            }
+          : undefined,
     });
 
     taskRunnerFactory!.initialize({

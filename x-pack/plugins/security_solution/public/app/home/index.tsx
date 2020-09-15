@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useThrottledResizeObserver } from '../../common/components/utils';
+import { TimelineId } from '../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
 import { HeaderGlobal } from '../../common/components/header_global';
@@ -18,44 +18,30 @@ import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useUserInfo } from '../../detections/components/user_info';
 
-const WrappedByAutoSizer = styled.div`
+const SecuritySolutionAppWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  width: 100%;
 `;
-WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
 const Main = styled.main`
-  height: 100%;
+  overflow: auto;
+  flex: 1;
 `;
+
 Main.displayName = 'Main';
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
-
-/** the global Kibana navigation at the top of every page */
-export const globalHeaderHeightPx = 48;
-
-const calculateFlyoutHeight = ({
-  globalHeaderSize,
-  windowHeight,
-}: {
-  globalHeaderSize: number;
-  windowHeight: number;
-}): number => Math.max(0, windowHeight - globalHeaderSize);
 
 interface HomePageProps {
   children: React.ReactNode;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ children }) => {
-  const { ref: measureRef, height: windowHeight = 0 } = useThrottledResizeObserver();
-  const flyoutHeight = useMemo(
-    () =>
-      calculateFlyoutHeight({
-        globalHeaderSize: globalHeaderHeightPx,
-        windowHeight,
-      }),
-    [windowHeight]
-  );
+const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { signalIndexExists, signalIndexName } = useSignalIndex();
 
   const indexToAdd = useMemo<string[] | null>(() => {
@@ -68,8 +54,11 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
   const [showTimeline] = useShowTimeline();
   const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
 
+  // side effect: this will attempt to create the signals index if it doesn't exist
+  useUserInfo();
+
   return (
-    <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
+    <SecuritySolutionAppWrapper>
       <HeaderGlobal />
 
       <Main data-test-subj="pageContainer">
@@ -78,11 +67,7 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout
-                flyoutHeight={flyoutHeight}
-                timelineId="timeline-1"
-                usersViewing={usersViewing}
-              />
+              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
             </>
           )}
 
@@ -91,8 +76,10 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
       </Main>
 
       <HelpMenu />
-    </WrappedByAutoSizer>
+    </SecuritySolutionAppWrapper>
   );
 };
 
-HomePage.displayName = 'HomePage';
+HomePageComponent.displayName = 'HomePage';
+
+export const HomePage = React.memo(HomePageComponent);

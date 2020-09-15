@@ -57,7 +57,6 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
 
     const invalidCharacters = [' ', ':', '*', '*', '/'];
@@ -89,7 +88,6 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
 
     expect(() => registry.register(alertType)).toThrowError(
@@ -111,7 +109,6 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -319,22 +316,13 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     producer: 'alerts',
   };
 
-  if (!context && !state) {
-    return baseAlert;
-  }
+  if (!context && !state) return baseAlert;
 
-  const actionVariables = {
-    context: [{ name: context, description: `${id} context` }],
-    state: [{ name: state, description: `${id} state` }],
+  return {
+    ...baseAlert,
+    actionVariables: {
+      ...(context ? { context: [{ name: context, description: `${id} context` }] } : {}),
+      ...(state ? { state: [{ name: state, description: `${id} state` }] } : {}),
+    },
   };
-
-  if (!context) {
-    delete actionVariables.context;
-  }
-
-  if (!state) {
-    delete actionVariables.state;
-  }
-
-  return { ...baseAlert, actionVariables };
 }

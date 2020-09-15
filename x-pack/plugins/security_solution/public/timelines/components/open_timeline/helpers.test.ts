@@ -36,7 +36,7 @@ import { KueryFilterQueryKind } from '../../../common/store/model';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -942,7 +942,7 @@ describe('helpers', () => {
     test('it invokes date range picker dispatch', () => {
       timelineDispatch({
         duplicate: true,
-        id: 'timeline-1',
+        id: TimelineId.active,
         from: '2020-03-26T14:35:56.356Z',
         to: '2020-03-26T14:41:56.356Z',
         notes: [],
@@ -958,7 +958,7 @@ describe('helpers', () => {
     test('it invokes add timeline dispatch', () => {
       timelineDispatch({
         duplicate: true,
-        id: 'timeline-1',
+        id: TimelineId.active,
         from: '2020-03-26T14:35:56.356Z',
         to: '2020-03-26T14:41:56.356Z',
         notes: [],
@@ -966,7 +966,8 @@ describe('helpers', () => {
       })();
 
       expect(dispatchAddTimeline).toHaveBeenCalledWith({
-        id: 'timeline-1',
+        id: TimelineId.active,
+        savedTimeline: true,
         timeline: mockTimelineModel,
       });
     });
@@ -974,7 +975,7 @@ describe('helpers', () => {
     test('it does not invoke kql filter query dispatches if timeline.kqlQuery.filterQuery is null', () => {
       timelineDispatch({
         duplicate: true,
-        id: 'timeline-1',
+        id: TimelineId.active,
         from: '2020-03-26T14:35:56.356Z',
         to: '2020-03-26T14:41:56.356Z',
         notes: [],
@@ -988,7 +989,7 @@ describe('helpers', () => {
     test('it does not invoke notes dispatch if duplicate is true', () => {
       timelineDispatch({
         duplicate: true,
-        id: 'timeline-1',
+        id: TimelineId.active,
         from: '2020-03-26T14:35:56.356Z',
         to: '2020-03-26T14:41:56.356Z',
         notes: [],
@@ -1011,7 +1012,7 @@ describe('helpers', () => {
       };
       timelineDispatch({
         duplicate: true,
-        id: 'timeline-1',
+        id: TimelineId.active,
         from: '2020-03-26T14:35:56.356Z',
         to: '2020-03-26T14:41:56.356Z',
         notes: [],
@@ -1035,7 +1036,7 @@ describe('helpers', () => {
       };
       timelineDispatch({
         duplicate: true,
-        id: 'timeline-1',
+        id: TimelineId.active,
         from: '2020-03-26T14:35:56.356Z',
         to: '2020-03-26T14:41:56.356Z',
         notes: [],
@@ -1043,14 +1044,14 @@ describe('helpers', () => {
       })();
 
       expect(dispatchSetKqlFilterQueryDraft).toHaveBeenCalledWith({
-        id: 'timeline-1',
+        id: TimelineId.active,
         filterQueryDraft: {
           kind: 'kuery',
           expression: 'expression',
         },
       });
       expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
-        id: 'timeline-1',
+        id: TimelineId.active,
         filterQuery: {
           kuery: {
             kind: 'kuery',
@@ -1064,7 +1065,7 @@ describe('helpers', () => {
     test('it invokes dispatchAddNotes if duplicate is false', () => {
       timelineDispatch({
         duplicate: false,
-        id: 'timeline-1',
+        id: TimelineId.active,
         from: '2020-03-26T14:35:56.356Z',
         to: '2020-03-26T14:41:56.356Z',
         notes: [
@@ -1098,7 +1099,7 @@ describe('helpers', () => {
     test('it invokes dispatch to create a timeline note if duplicate is true and ruleNote exists', () => {
       timelineDispatch({
         duplicate: true,
-        id: 'timeline-1',
+        id: TimelineId.active,
         from: '2020-03-26T14:35:56.356Z',
         to: '2020-03-26T14:41:56.356Z',
         notes: [],
@@ -1118,7 +1119,7 @@ describe('helpers', () => {
       expect(dispatchAddNotes).not.toHaveBeenCalled();
       expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
       expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
-        id: 'timeline-1',
+        id: TimelineId.active,
         noteId: 'uuid.v4()',
       });
     });

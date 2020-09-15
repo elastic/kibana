@@ -66,12 +66,6 @@ describe('metric_visualization', () => {
     });
   });
 
-  describe('#getPersistableState', () => {
-    it('persists the state as given', () => {
-      expect(metricVisualization.getPersistableState(exampleState())).toEqual(exampleState());
-    });
-  });
-
   describe('#getConfiguration', () => {
     it('can add a metric when there is no accessor', () => {
       expect(
@@ -168,7 +162,8 @@ describe('metric_visualization', () => {
         datasourceLayers: { l1: datasource },
       };
 
-      expect(metricVisualization.toExpression(exampleState(), frame)).toMatchInlineSnapshot(`
+      expect(metricVisualization.toExpression(exampleState(), frame.datasourceLayers))
+        .toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {

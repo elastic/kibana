@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
-import { NonEmptyString } from '../../siem_common_deps';
+import { NonEmptyString } from '../../shared_imports';
 import { created_at, created_by, id, updated_at, updated_by } from '../common/schemas';
 
 export const comment = t.intersection([

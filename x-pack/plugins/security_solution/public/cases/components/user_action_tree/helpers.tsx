@@ -53,7 +53,7 @@ const getTagsLabelTitle = (action: CaseUserActions) => (
     <EuiBadgeGroup>
       {action.newValue != null &&
         action.newValue.split(',').map((tag) => (
-          <EuiBadge data-test-subj={`ua-tag`} color="default">
+          <EuiBadge data-test-subj={`ua-tag`} color="default" key={tag}>
             {tag}
           </EuiBadge>
         ))}

@@ -5,8 +5,7 @@
  */
 
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
-import { Visualization, Datasource, FramePublicAPI } from '../../types';
-import { Filter, TimeRange, Query } from '../../../../../../src/plugins/data/public';
+import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
@@ -60,38 +59,10 @@ export function prependDatasourceExpression(
 
   return {
     type: 'expression',
-    chain: [datafetchExpression, ...parsedVisualizationExpression.chain],
-  };
-}
-
-export function prependKibanaContext(
-  expression: Ast | string,
-  {
-    timeRange,
-    query,
-    filters,
-  }: {
-    timeRange?: TimeRange;
-    query?: Query;
-    filters?: Filter[];
-  }
-): Ast {
-  const parsedExpression = typeof expression === 'string' ? fromExpression(expression) : expression;
-
-  return {
-    type: 'expression',
     chain: [
       { type: 'function', function: 'kibana', arguments: {} },
-      {
-        type: 'function',
-        function: 'kibana_context',
-        arguments: {
-          timeRange: timeRange ? [JSON.stringify(timeRange)] : [],
-          query: query ? [JSON.stringify(query)] : [],
-          filters: [JSON.stringify(filters || [])],
-        },
-      },
-      ...parsedExpression.chain,
+      datafetchExpression,
+      ...parsedVisualizationExpression.chain,
     ],
   };
 }
@@ -101,8 +72,7 @@ export function buildExpression({
   visualizationState,
   datasourceMap,
   datasourceStates,
-  framePublicAPI,
-  removeDateRange,
+  datasourceLayers,
 }: {
   visualization: Visualization | null;
   visualizationState: unknown;
@@ -114,24 +84,12 @@ export function buildExpression({
       state: unknown;
     }
   >;
-  framePublicAPI: FramePublicAPI;
-  removeDateRange?: boolean;
+  datasourceLayers: Record<string, DatasourcePublicAPI>;
 }): Ast | null {
   if (visualization === null) {
     return null;
   }
-  const visualizationExpression = visualization.toExpression(visualizationState, framePublicAPI);
-
-  const expressionContext = removeDateRange
-    ? { query: framePublicAPI.query, filters: framePublicAPI.filters }
-    : {
-        query: framePublicAPI.query,
-        timeRange: {
-          from: framePublicAPI.dateRange.fromDate,
-          to: framePublicAPI.dateRange.toDate,
-        },
-        filters: framePublicAPI.filters,
-      };
+  const visualizationExpression = visualization.toExpression(visualizationState, datasourceLayers);
 
   const completeExpression = prependDatasourceExpression(
     visualizationExpression,
@@ -139,9 +97,5 @@ export function buildExpression({
     datasourceStates
   );
 
-  if (completeExpression) {
-    return prependKibanaContext(completeExpression, expressionContext);
-  } else {
-    return null;
-  }
+  return completeExpression;
 }

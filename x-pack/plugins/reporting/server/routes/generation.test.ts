@@ -11,16 +11,15 @@ import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockReportingCore } from '../test_helpers';
-import { createMockLevelLogger } from '../test_helpers/create_mock_levellogger';
+import { createMockReportingCore, createMockLevelLogger } from '../test_helpers';
 import { registerJobGenerationRoutes } from './generation';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('POST /api/reporting/generate', () => {
   const reportingSymbol = Symbol('reporting');
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let mockExportTypesRegistry: ExportTypesRegistry;
   let callClusterStub: any;
   let core: ReportingCore;
@@ -75,7 +74,7 @@ describe('POST /api/reporting/generate', () => {
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-      scheduleTaskFnFactory: () => () => ({ scheduleParamsTest: { test1: 'yes' } }),
+      createJobFnFactory: () => () => ({ jobParamsTest: { test1: 'yes' } }),
       runTaskFnFactory: () => () => ({ runParamsTest: { test2: 'yes' } }),
     });
     core.getExportTypesRegistry = () => mockExportTypesRegistry;
@@ -138,8 +137,7 @@ describe('POST /api/reporting/generate', () => {
   });
 
   it('returns 500 if job handler throws an error', async () => {
-    // throw an error from enqueueJob
-    core.getEnqueueJob = jest.fn().mockRejectedValue('Sorry, this tests says no');
+    callClusterStub.withArgs('index').rejects('silly');
 
     registerJobGenerationRoutes(core, mockLogger);
 

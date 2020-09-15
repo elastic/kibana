@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import { times } from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -358,11 +359,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should delete all selection', async () => {
-      const createdAlert = await createAlert();
-      await pageObjects.common.navigateToApp('triggersActions');
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      const namePrefix = generateUniqueKey();
+      let count = 0;
+      const createdAlertsFirstPage = await Promise.all(
+        times(10, () => createAlert({ name: `${namePrefix}-0${count++}` }))
+      );
 
-      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
+      const createdAlertsSecondPage = await Promise.all(
+        times(2, () => createAlert({ name: `${namePrefix}-1${count++}` }))
+      );
+
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
+
+      for (const createdAlert of createdAlertsFirstPage) {
+        await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
+      }
 
       await testSubjects.click('bulkAction');
 
@@ -373,7 +385,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.common.closeToast();
 
-      expect(await pageObjects.triggersActionsUI.isAnEmptyAlertsListDisplayed()).to.be(true);
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterDelete).to.have.length(2);
+      expect(searchResultsAfterDelete[0].name).to.eql(createdAlertsSecondPage[0].name);
+      expect(searchResultsAfterDelete[1].name).to.eql(createdAlertsSecondPage[1].name);
     });
   });
 };

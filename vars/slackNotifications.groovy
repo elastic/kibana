@@ -105,16 +105,26 @@ def getDefaultDisplayName() {
   return "${env.JOB_NAME} ${env.BUILD_DISPLAY_NAME}"
 }
 
-def getDefaultContext() {
-  def duration = currentBuild.durationString.replace(' and counting', '')
+def getDefaultContext(config = [:]) {
+  def progressMessage = ""
+  if (config && !config.isFinal) {
+    progressMessage = "In-progress"
+  } else {
+    def duration = currentBuild.durationString.replace(' and counting', '')
+    progressMessage = "${buildUtils.getBuildStatus().toLowerCase().capitalize()} after ${duration}"
+  }
 
   return contextBlock([
-    "${buildUtils.getBuildStatus().toLowerCase().capitalize()} after ${duration}",
+    progressMessage,
     "<https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}|ci.kibana.dev>",
   ].join(' · '))
 }
 
-def getStatusIcon() {
+def getStatusIcon(config = [:]) {
+  if (config && !config.isFinal) {
+    return ':hourglass_flowing_sand:'
+  }
+
   def status = buildUtils.getBuildStatus()
   if (status == 'UNSTABLE') {
     return ':yellow_heart:'
@@ -124,7 +134,7 @@ def getStatusIcon() {
 }
 
 def getBackupMessage(config) {
-  return "${getStatusIcon()} ${config.title}\n\nFirst attempt at sending this notification failed. Please check the build."
+  return "${getStatusIcon(config)} ${config.title}\n\nFirst attempt at sending this notification failed. Please check the build."
 }
 
 def sendFailedBuild(Map params = [:]) {
@@ -135,19 +145,32 @@ def sendFailedBuild(Map params = [:]) {
     color: 'danger',
     icon: ':jenkins:',
     username: 'Kibana Operations',
-    context: getDefaultContext(),
+    isFinal: false,
   ] + params
 
-  def title = "${getStatusIcon()} ${config.title}"
-  def message = "${getStatusIcon()} ${config.message}"
+  config.context = config.context ?: getDefaultContext(config)
+
+  def title = "${getStatusIcon(config)} ${config.title}"
+  def message = "${getStatusIcon(config)} ${config.message}"
 
   def blocks = [markdownBlock(title)]
   getFailedBuildBlocks().each { blocks << it }
   blocks << dividerBlock()
   blocks << config.context
 
+  def channel = config.channel
+  def timestamp = null
+
+  def previousResp = buildState.get('SLACK_NOTIFICATION_RESPONSE')
+  if (previousResp) {
+    // When using `timestamp` to update a previous message, you have to use the channel ID from the previous response
+    channel = previousResp.channelId
+    timestamp = previousResp.ts
+  }
+
   def resp = slackSend(
-    channel: config.channel,
+    channel: channel,
+    timestamp: timestamp,
     username: config.username,
     iconEmoji: config.icon,
     color: config.color,
@@ -156,7 +179,7 @@ def sendFailedBuild(Map params = [:]) {
   )
 
   if (!resp) {
-    slackSend(
+    resp = slackSend(
       channel: config.channel,
       username: config.username,
       iconEmoji: config.icon,
@@ -165,6 +188,10 @@ def sendFailedBuild(Map params = [:]) {
       blocks: [markdownBlock(getBackupMessage(config))]
     )
   }
+
+  if (resp) {
+    buildState.set('SLACK_NOTIFICATION_RESPONSE', resp)
+  }
 }
 
 def onFailure(Map options = [:]) {
@@ -172,6 +199,7 @@ def onFailure(Map options = [:]) {
     def status = buildUtils.getBuildStatus()
     if (status != "SUCCESS") {
       catchErrors {
+        options.isFinal = true
         sendFailedBuild(options)
       }
     }
@@ -179,6 +207,16 @@ def onFailure(Map options = [:]) {
 }
 
 def onFailure(Map options = [:], Closure closure) {
+  if (options.disabled) {
+    catchError {
+      closure()
+    }
+
+    return
+  }
+
+  buildState.set('SLACK_NOTIFICATION_CONFIG', options)
+
   // try/finally will NOT work here, because the build status will not have been changed to ERROR when the finally{} block executes
   catchError {
     closure()

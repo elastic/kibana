@@ -13,7 +13,7 @@ To get started copy and paste this example to `test/functional/config.js`:
 ["source","js"]
 -----------
 import { resolve } from 'path';
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { MyServiceProvider } from './services/my_service';
 import { MyAppPageProvider } from './services/my_app_page';
@@ -24,7 +24,7 @@ export default async function ({ readConfigFile }) {
 
   // read the {kib} config file so that we can utilize some of
   // its services and PageObjects
-  const kibanaConfig = await readConfigFile(resolveKibanaPath('test/functional/config.js'));
+  const kibanaConfig = await readConfigFile(resolve(REPO_ROOT, 'test/functional/config.js'));
 
   return {
     // list paths to the files that contain your plugins tests

@@ -123,6 +123,7 @@ export class ElasticsearchService
       client: this.client!,
       createClient,
       legacy: {
+        config$: this.config$,
         client: this.legacyClient,
         createClient: this.createLegacyCustomClient,
       },

@@ -33,7 +33,7 @@ import { navigationPluginMock } from '../../../../../src/plugins/navigation/publ
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
 
-jest.mock('../persistence');
+jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
 jest.mock('../../../../../src/plugins/saved_objects/public', () => {
   // eslint-disable-next-line no-shadow
@@ -136,6 +136,7 @@ describe('Lens App', () => {
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
     history: History;
+    getAppNameFromId?: (appId: string) => string | undefined;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -187,6 +188,7 @@ describe('Lens App', () => {
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
       history: History;
+      getAppNameFromId?: (appId: string) => string | undefined;
     }>;
   }
 
@@ -196,7 +198,7 @@ describe('Lens App', () => {
 
     core.uiSettings.get.mockImplementation(
       jest.fn((type) => {
-        if (type === 'timepicker:timeDefaults') {
+        if (type === UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS) {
           return { from: 'now-7d', to: 'now' };
         } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
@@ -249,6 +251,27 @@ describe('Lens App', () => {
     expect(defaultArgs.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
   });
 
+  it('passes global filters to frame', async () => {
+    const args = makeDefaultArgs();
+    args.editorFrame = frame;
+    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+    const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
+    args.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+      return [pinnedFilter];
+    });
+    const component = mount(<App {...args} />);
+    component.update();
+    expect(frame.mount).toHaveBeenCalledWith(
+      expect.any(Element),
+      expect.objectContaining({
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        query: { query: '', language: 'kuery' },
+        filters: [pinnedFilter],
+      })
+    );
+  });
+
   it('sets breadcrumbs when the document title changes', async () => {
     const defaultArgs = makeDefaultArgs();
     instance = mount(<App {...defaultArgs} />);
@@ -261,17 +284,72 @@ describe('Lens App', () => {
     (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
       id: '1234',
       title: 'Daaaaaaadaumching!',
-      expression: 'valid expression',
       state: {
         query: 'fake query',
-        datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+        filters: [],
       },
+      references: [],
     });
     await act(async () => {
       instance.setProps({ docId: '1234' });
     });
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+      { text: 'Daaaaaaadaumching!' },
+    ]);
+  });
+
+  it('adds to the recently viewed list on load', async () => {
+    const defaultArgs = makeDefaultArgs();
+    instance = mount(<App {...defaultArgs} />);
+
+    (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
+      id: '1234',
+      title: 'Daaaaaaadaumching!',
+      state: {
+        query: 'fake query',
+        filters: [],
+      },
+      references: [],
+    });
+    await act(async () => {
+      instance.setProps({ docId: '1234' });
+    });
+    expect(defaultArgs.core.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
+      '/app/lens#/edit/1234',
+      'Daaaaaaadaumching!',
+      '1234'
+    );
+  });
+
+  it('sets originatingApp breadcrumb when the document title changes', async () => {
+    const defaultArgs = makeDefaultArgs();
+    defaultArgs.originatingApp = 'ultraCoolDashboard';
+    defaultArgs.getAppNameFromId = () => 'The Coolest Container Ever Made';
+    instance = mount(<App {...defaultArgs} />);
+
+    expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
+      { text: 'Create' },
+    ]);
+
+    (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
+      id: '1234',
+      title: 'Daaaaaaadaumching!',
+      state: {
+        query: 'fake query',
+        filters: [],
+      },
+      references: [],
+    });
+    await act(async () => {
+      instance.setProps({ docId: '1234' });
+    });
+
+    expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
       { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Daaaaaaadaumching!' },
     ]);
@@ -291,12 +369,11 @@ describe('Lens App', () => {
       args.editorFrame = frame;
       (args.docStorage.load as jest.Mock).mockResolvedValue({
         id: '1234',
-        expression: 'valid expression',
         state: {
           query: 'fake query',
           filters: [{ query: { match_phrase: { src: 'test' } } }],
-          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
         },
+        references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       });
 
       instance = mount(<App {...args} />);
@@ -320,15 +397,13 @@ describe('Lens App', () => {
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          doc: {
+          doc: expect.objectContaining({
             id: '1234',
-            expression: 'valid expression',
-            state: {
+            state: expect.objectContaining({
               query: 'fake query',
               filters: [{ query: { match_phrase: { src: 'test' } } }],
-              datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
-            },
-          },
+            }),
+          }),
         })
       );
     });
@@ -389,7 +464,6 @@ describe('Lens App', () => {
           expression: 'valid expression',
           state: {
             query: 'kuery',
-            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
           },
         } as jest.ResolvedValue<Document>);
       });
@@ -412,7 +486,12 @@ describe('Lens App', () => {
       }
 
       async function save({
-        lastKnownDoc = { expression: 'kibana 3' },
+        lastKnownDoc = {
+          references: [],
+          state: {
+            filters: [],
+          },
+        },
         initialDocId,
         ...saveProps
       }: SaveProps & {
@@ -426,16 +505,14 @@ describe('Lens App', () => {
         args.editorFrame = frame;
         (args.docStorage.load as jest.Mock).mockResolvedValue({
           id: '1234',
-          expression: 'kibana',
+          references: [],
           state: {
             query: 'fake query',
-            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
             filters: [],
           },
         });
         (args.docStorage.save as jest.Mock).mockImplementation(async ({ id }) => ({
           id: id || 'aaa',
-          expression: 'kibana 2',
         }));
 
         await act(async () => {
@@ -453,6 +530,7 @@ describe('Lens App', () => {
           onChange({
             filterableIndexPatterns: [],
             doc: { id: initialDocId, ...lastKnownDoc } as Document,
+            isSaveable: true,
           })
         );
 
@@ -486,7 +564,8 @@ describe('Lens App', () => {
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: 'will save this', expression: 'valid expression' } as unknown) as Document,
+            doc: ({ id: 'will save this' } as unknown) as Document,
+            isSaveable: true,
           })
         );
         instance.update();
@@ -505,7 +584,8 @@ describe('Lens App', () => {
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: 'will save this', expression: 'valid expression' } as unknown) as Document,
+            doc: ({ id: 'will save this' } as unknown) as Document,
+            isSaveable: true,
           })
         );
         instance.update();
@@ -520,17 +600,31 @@ describe('Lens App', () => {
           newTitle: 'hello there',
         });
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: undefined,
-          title: 'hello there',
-          expression: 'kibana 3',
-        });
+        expect(args.docStorage.save).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: undefined,
+            title: 'hello there',
+          })
+        );
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
         expect(args.docStorage.load).not.toHaveBeenCalled();
+      });
+
+      it('adds to the recently viewed list on save', async () => {
+        const { args } = await save({
+          initialDocId: undefined,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+        expect(args.core.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
+          '/app/lens#/edit/aaa',
+          'hello there',
+          'aaa'
+        );
       });
 
       it('saves the latest doc as a copy', async () => {
@@ -540,11 +634,12 @@ describe('Lens App', () => {
           newTitle: 'hello there',
         });
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: undefined,
-          title: 'hello there',
-          expression: 'kibana 3',
-        });
+        expect(args.docStorage.save).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: undefined,
+            title: 'hello there',
+          })
+        );
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
@@ -560,11 +655,12 @@ describe('Lens App', () => {
           newTitle: 'hello there',
         });
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: '1234',
-          title: 'hello there',
-          expression: 'kibana 3',
-        });
+        expect(args.docStorage.save).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: '1234',
+            title: 'hello there',
+          })
+        );
 
         expect(args.redirectTo).not.toHaveBeenCalled();
 
@@ -584,7 +680,8 @@ describe('Lens App', () => {
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: undefined, expression: 'new expression' } as unknown) as Document,
+            doc: ({ id: undefined } as unknown) as Document,
+            isSaveable: true,
           })
         );
 
@@ -608,11 +705,12 @@ describe('Lens App', () => {
           newTitle: 'hello there',
         });
 
-        expect(args.docStorage.save).toHaveBeenCalledWith({
-          expression: 'kibana 3',
-          id: undefined,
-          title: 'hello there',
-        });
+        expect(args.docStorage.save).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: undefined,
+            title: 'hello there',
+          })
+        );
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, true);
       });
@@ -662,7 +760,8 @@ describe('Lens App', () => {
         await act(async () =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: '123', expression: 'valid expression' } as unknown) as Document,
+            doc: ({ id: '123' } as unknown) as Document,
+            isSaveable: true,
           })
         );
         instance.update();
@@ -701,7 +800,8 @@ describe('Lens App', () => {
         await act(async () =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ expression: 'valid expression' } as unknown) as Document,
+            doc: ({} as unknown) as Document,
+            isSaveable: true,
           })
         );
         instance.update();
@@ -724,7 +824,6 @@ describe('Lens App', () => {
         expression: 'valid expression',
         state: {
           query: 'kuery',
-          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
         },
       } as jest.ResolvedValue<Document>);
     });
@@ -769,8 +868,9 @@ describe('Lens App', () => {
 
       await act(async () => {
         onChange({
-          filterableIndexPatterns: [{ id: '1', title: 'newIndex' }],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          filterableIndexPatterns: ['1'],
+          doc: ({ id: undefined } as unknown) as Document,
+          isSaveable: true,
         });
       });
 
@@ -787,8 +887,9 @@ describe('Lens App', () => {
 
       await act(async () => {
         onChange({
-          filterableIndexPatterns: [{ id: '2', title: 'second index' }],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          filterableIndexPatterns: ['2'],
+          doc: ({ id: undefined } as unknown) as Document,
+          isSaveable: true,
         });
       });
 
@@ -1023,11 +1124,11 @@ describe('Lens App', () => {
       (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
         id: '1234',
         title: 'My cool doc',
-        expression: 'valid expression',
         state: {
           query: 'kuery',
-          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+          filters: [],
         },
+        references: [],
       } as jest.ResolvedValue<Document>);
     });
 
@@ -1059,7 +1160,12 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          doc: ({
+            id: undefined,
+
+            references: [],
+          } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();
@@ -1080,7 +1186,8 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          doc: ({ id: undefined, state: {} } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();
@@ -1104,7 +1211,12 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: '1234', expression: 'different expression' } as unknown) as Document,
+          doc: ({
+            id: '1234',
+
+            references: [],
+          } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();
@@ -1128,7 +1240,16 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: '1234', expression: 'valid expression' } as unknown) as Document,
+          doc: ({
+            id: '1234',
+            title: 'My cool doc',
+            references: [],
+            state: {
+              query: 'kuery',
+              filters: [],
+            },
+          } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();
@@ -1152,7 +1273,8 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: '1234', expression: null } as unknown) as Document,
+          doc: ({ id: '1234', references: [] } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();

@@ -15,9 +15,9 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
     defaultMessage:
       'Adds a column calculated as the result of other columns. ' +
       'Changes are made only when you provide arguments.' +
-      'See also {mapColumnFn} and {staticColumnFn}.',
+      'See also {alterColumnFn} and {staticColumnFn}.',
     values: {
-      mapColumnFn: '`mapColumn`',
+      alterColumnFn: '`alterColumn`',
       staticColumnFn: '`staticColumn`',
     },
   }),

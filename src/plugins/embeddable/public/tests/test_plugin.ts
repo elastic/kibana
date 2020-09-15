@@ -19,9 +19,7 @@
 
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { UiActionsStart } from '../../../ui_actions/public';
-// eslint-disable-next-line
 import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
-// eslint-disable-next-line
 import { inspectorPluginMock } from '../../../inspector/public/mocks';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { coreMock } from '../../../../core/public/mocks';

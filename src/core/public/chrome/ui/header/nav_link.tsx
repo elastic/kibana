@@ -29,7 +29,6 @@ export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement,
 
 interface Props {
   link: ChromeNavLink;
-  legacyMode: boolean;
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
@@ -44,7 +43,6 @@ interface Props {
 // But FlyoutMenuItem isn't exported from EUI
 export function createEuiListItem({
   link,
-  legacyMode,
   appId,
   basePath,
   onClick = () => {},
@@ -52,7 +50,7 @@ export function createEuiListItem({
   dataTestSubj,
   externalLink = false,
 }: Props) {
-  const { legacy, active, id, title, disabled, euiIconType, icon, tooltip, href } = link;
+  const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
 
   return {
     label: tooltip ?? title,
@@ -65,8 +63,6 @@ export function createEuiListItem({
 
       if (
         !externalLink && // ignore external links
-        !legacyMode && // ignore when in legacy mode
-        !legacy && // ignore links to legacy apps
         event.button === 0 && // ignore everything but left clicks
         !isModifiedOrPrevented(event)
       ) {
@@ -74,8 +70,7 @@ export function createEuiListItem({
         navigateToApp(id);
       }
     },
-    // Legacy apps use `active` property, NP apps should match the current app
-    isActive: active || appId === id,
+    isActive: appId === id,
     isDisabled: disabled,
     'data-test-subj': dataTestSubj,
     ...(basePath && {
@@ -111,7 +106,7 @@ export function createRecentNavLink(
 ) {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
-  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl ?? nl.subUrlBase));
+  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
   let titleAndAriaLabel = label;
 
   if (navLink) {

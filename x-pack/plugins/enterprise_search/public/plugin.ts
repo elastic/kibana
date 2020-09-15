@@ -12,7 +12,6 @@ import {
   AppMountParameters,
   HttpSetup,
 } from 'src/core/public';
-
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -20,94 +19,144 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
-import { getPublicUrl } from './applications/shared/enterprise_search_url';
-import AppSearchLogo from './applications/app_search/assets/logo.svg';
-import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
+import { IInitialAppData } from '../common/types';
+import {
+  ENTERPRISE_SEARCH_PLUGIN,
+  APP_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
+} from '../common/constants';
+import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
 
 export interface ClientConfigType {
   host?: string;
 }
+export interface ClientData extends IInitialAppData {
+  externalUrl: IExternalUrl;
+  errorConnecting?: boolean;
+}
+
 export interface PluginsSetup {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
-  private hasCheckedPublicUrl: boolean = false;
+  private hasInitialized: boolean = false;
+  private data: ClientData = {} as ClientData;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+    this.data.externalUrl = new ExternalUrl(this.config.host || '');
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = { host: this.config.host };
-
     core.application.register({
-      id: 'appSearch',
-      title: 'App Search',
-      appRoute: '/app/enterprise_search/app_search',
+      id: ENTERPRISE_SEARCH_PLUGIN.ID,
+      title: ENTERPRISE_SEARCH_PLUGIN.NAV_TITLE,
+      appRoute: ENTERPRISE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
+        const { chrome } = coreStart;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
 
-        await this.setPublicUrl(config, coreStart.http);
+        await this.getInitialData(coreStart.http);
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearch } = await import('./applications/enterprise_search');
+
+        return renderApp(EnterpriseSearch, params, coreStart, plugins, this.config, this.data);
+      },
+    });
+
+    core.application.register({
+      id: APP_SEARCH_PLUGIN.ID,
+      title: APP_SEARCH_PLUGIN.NAME,
+      appRoute: APP_SEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const { chrome } = coreStart;
+        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+
+        await this.getInitialData(coreStart.http);
 
         const { renderApp } = await import('./applications');
         const { AppSearch } = await import('./applications/app_search');
 
-        return renderApp(AppSearch, coreStart, params, config, plugins);
+        return renderApp(AppSearch, params, coreStart, plugins, this.config, this.data);
       },
     });
 
     core.application.register({
-      id: 'workplaceSearch',
-      title: 'Workplace Search',
-      appRoute: '/app/enterprise_search/workplace_search',
+      id: WORKPLACE_SEARCH_PLUGIN.ID,
+      title: WORKPLACE_SEARCH_PLUGIN.NAME,
+      appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
+        const { chrome } = coreStart;
+        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
+
+        await this.getInitialData(coreStart.http);
 
         const { renderApp } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
 
-        return renderApp(WorkplaceSearch, coreStart, params, config, plugins);
+        return renderApp(WorkplaceSearch, params, coreStart, plugins, this.config, this.data);
       },
     });
 
-    plugins.home.featureCatalogue.register({
-      id: 'appSearch',
-      title: 'App Search',
-      icon: AppSearchLogo,
-      description:
-        'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
-      path: '/app/enterprise_search/app_search',
-      category: FeatureCatalogueCategory.DATA,
-      showOnHomePage: true,
-    });
+    if (plugins.home) {
+      plugins.home.featureCatalogue.registerSolution({
+        id: ENTERPRISE_SEARCH_PLUGIN.ID,
+        title: ENTERPRISE_SEARCH_PLUGIN.NAME,
+        subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
+        icon: 'logoEnterpriseSearch',
+        descriptions: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTIONS,
+        path: ENTERPRISE_SEARCH_PLUGIN.URL,
+      });
 
-    plugins.home.featureCatalogue.register({
-      id: 'workplaceSearch',
-      title: 'Workplace Search',
-      icon: WorkplaceSearchLogo,
-      description:
-        'Search all documents, files, and sources available across your virtual workplace.',
-      path: '/app/enterprise_search/workplace_search',
-      category: FeatureCatalogueCategory.DATA,
-      showOnHomePage: true,
-    });
+      plugins.home.featureCatalogue.register({
+        id: APP_SEARCH_PLUGIN.ID,
+        title: APP_SEARCH_PLUGIN.NAME,
+        icon: 'appSearchApp',
+        description: APP_SEARCH_PLUGIN.DESCRIPTION,
+        path: APP_SEARCH_PLUGIN.URL,
+        category: FeatureCatalogueCategory.DATA,
+        showOnHomePage: false,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: WORKPLACE_SEARCH_PLUGIN.ID,
+        title: WORKPLACE_SEARCH_PLUGIN.NAME,
+        icon: 'workplaceSearchApp',
+        description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
+        path: WORKPLACE_SEARCH_PLUGIN.URL,
+        category: FeatureCatalogueCategory.DATA,
+        showOnHomePage: false,
+      });
+    }
   }
 
   public start(core: CoreStart) {}
 
   public stop() {}
 
-  private async setPublicUrl(config: ClientConfigType, http: HttpSetup) {
-    if (!config.host) return; // No API to check
-    if (this.hasCheckedPublicUrl) return; // We've already performed the check
+  private async getInitialData(http: HttpSetup) {
+    if (!this.config.host) return; // No API to call
+    if (this.hasInitialized) return; // We've already made an initial call
 
-    const publicUrl = await getPublicUrl(http);
-    if (publicUrl) config.host = publicUrl;
-    this.hasCheckedPublicUrl = true;
+    try {
+      const { publicUrl, ...initialData } = await http.get('/api/enterprise_search/config_data');
+      this.data = { ...this.data, ...initialData };
+      if (publicUrl) this.data.externalUrl = new ExternalUrl(publicUrl);
+
+      this.hasInitialized = true;
+    } catch {
+      this.data.errorConnecting = true;
+      // The plugin will attempt to re-fetch config data on page change
+    }
   }
 }

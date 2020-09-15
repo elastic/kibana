@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -17,8 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
 import { NativeRenderer } from '../../../native_renderer';
-import { StateSetter } from '../../../types';
+import { StateSetter, isDraggedOperation } from '../../../types';
 import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -26,9 +27,17 @@ import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps, DimensionPopoverState } from './types';
 import { DimensionPopover } from './dimension_popover';
 
+const initialPopoverState = {
+  isOpen: false,
+  openId: null,
+  addingToGroupId: null,
+  tabId: null,
+};
+
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
     layerId: string;
+    dataTestSubj: string;
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
@@ -41,15 +50,15 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [popoverState, setPopoverState] = useState<DimensionPopoverState>({
-    isOpen: false,
-    openId: null,
-    addingToGroupId: null,
-    tabId: null,
-  });
+  const [popoverState, setPopoverState] = useState<DimensionPopoverState>(initialPopoverState);
 
-  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer } = props;
+  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
+
+  useEffect(() => {
+    setPopoverState(initialPopoverState);
+  }, [props.activeVisualizationId]);
+
   if (
     !datasourcePublicAPI ||
     !props.activeVisualizationId ||
@@ -89,9 +98,9 @@ export function LayerPanel(
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiPanel className="lnsLayerPanel" paddingSize="s">
+      <EuiPanel data-test-subj={dataTestSubj} className="lnsLayerPanel" paddingSize="s">
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
             <LayerSettings
               layerId={layerId}
               layerConfigProps={{
@@ -116,7 +125,6 @@ export function LayerPanel(
                     const nextPublicAPI = layerDatasource.getPublicAPI({
                       state: newState,
                       layerId,
-                      dateRange: props.framePublicAPI.dateRange,
                     });
                     const nextTable = new Set(
                       nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
@@ -147,6 +155,7 @@ export function LayerPanel(
         {groups.map((group, index) => {
           const newId = generateId();
           const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+
           return (
             <EuiFormRow
               className="lnsLayerPanel__row"
@@ -208,10 +217,32 @@ export function LayerPanel(
                   return (
                     <DragDrop
                       key={accessor}
-                      className="lnsLayerPanel__dimension"
+                      className={classNames('lnsLayerPanel__dimension', {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        'lnsLayerPanel__dimension-isHidden':
+                          isDraggedOperation(dragDropContext.dragging) &&
+                          accessor === dragDropContext.dragging.columnId,
+                      })}
+                      getAdditionalClassesOnEnter={() => {
+                        // If we are dragging another column, add an indication that the behavior will be a replacement'
+                        if (
+                          isDraggedOperation(dragDropContext.dragging) &&
+                          group.groupId !== dragDropContext.dragging.groupId
+                        ) {
+                          return 'lnsLayerPanel__dimension-isReplacing';
+                        }
+                        return '';
+                      }}
                       data-test-subj={group.dataTestSubj}
+                      draggable={true}
+                      value={{ columnId: accessor, groupId: group.groupId, layerId }}
+                      label={group.groupLabel}
                       droppable={
-                        dragDropContext.dragging &&
+                        Boolean(dragDropContext.dragging) &&
+                        // Verify that the dragged item is not coming from the same group
+                        // since this would be a reorder
+                        (!isDraggedOperation(dragDropContext.dragging) ||
+                          dragDropContext.dragging.groupId !== group.groupId) &&
                         layerDatasource.canHandleDrop({
                           ...layerDatasourceDropProps,
                           columnId: accessor,
@@ -219,12 +250,22 @@ export function LayerPanel(
                         })
                       }
                       onDrop={(droppedItem) => {
-                        layerDatasource.onDrop({
+                        const dropResult = layerDatasource.onDrop({
                           ...layerDatasourceDropProps,
                           droppedItem,
                           columnId: accessor,
                           filterOperations: group.filterOperations,
                         });
+                        if (typeof dropResult === 'object') {
+                          // When a column is moved, we delete the reference to the old
+                          props.updateVisualization(
+                            activeVisualization.removeDimension({
+                              layerId,
+                              columnId: dropResult.deleted,
+                              prevState: props.visualizationState,
+                            })
+                          );
+                        }
                       }}
                     >
                       <DimensionPopover
@@ -243,12 +284,7 @@ export function LayerPanel(
                               suggestedPriority: group.suggestedPriority,
                               togglePopover: () => {
                                 if (popoverState.isOpen) {
-                                  setPopoverState({
-                                    isOpen: false,
-                                    openId: null,
-                                    addingToGroupId: null,
-                                    tabId: null,
-                                  });
+                                  setPopoverState(initialPopoverState);
                                 } else {
                                   setPopoverState({
                                     isOpen: true,
@@ -264,7 +300,7 @@ export function LayerPanel(
                         panel={
                           <EuiTabbedContent
                             tabs={tabs}
-                            initialSelectedTab={tabs.find((t) => t.id === popoverState.tabId)}
+                            selectedTab={tabs.find((t) => t.id === popoverState.tabId) || tabs[0]}
                             size="s"
                             onTabClick={(tab) => {
                               setPopoverState({
@@ -313,7 +349,11 @@ export function LayerPanel(
                     className="lnsLayerPanel__dimension"
                     data-test-subj={group.dataTestSubj}
                     droppable={
-                      dragDropContext.dragging &&
+                      Boolean(dragDropContext.dragging) &&
+                      // Verify that the dragged item is not coming from the same group
+                      // since this would be a reorder
+                      (!isDraggedOperation(dragDropContext.dragging) ||
+                        dragDropContext.dragging.groupId !== group.groupId) &&
                       layerDatasource.canHandleDrop({
                         ...layerDatasourceDropProps,
                         columnId: newId,
@@ -321,13 +361,13 @@ export function LayerPanel(
                       })
                     }
                     onDrop={(droppedItem) => {
-                      const dropSuccess = layerDatasource.onDrop({
+                      const dropResult = layerDatasource.onDrop({
                         ...layerDatasourceDropProps,
                         droppedItem,
                         columnId: newId,
                         filterOperations: group.filterOperations,
                       });
-                      if (dropSuccess) {
+                      if (dropResult) {
                         props.updateVisualization(
                           activeVisualization.setDimension({
                             layerId,
@@ -336,6 +376,17 @@ export function LayerPanel(
                             prevState: props.visualizationState,
                           })
                         );
+
+                        if (typeof dropResult === 'object') {
+                          // When a column is moved, we delete the reference to the old
+                          props.updateVisualization(
+                            activeVisualization.removeDimension({
+                              layerId,
+                              columnId: dropResult.deleted,
+                              prevState: props.visualizationState,
+                            })
+                          );
+                        }
                       }
                     }}
                   >
@@ -358,12 +409,7 @@ export function LayerPanel(
                             })}
                             onClick={() => {
                               if (popoverState.isOpen) {
-                                setPopoverState({
-                                  isOpen: false,
-                                  openId: null,
-                                  addingToGroupId: null,
-                                  tabId: null,
-                                });
+                                setPopoverState(initialPopoverState);
                               } else {
                                 setPopoverState({
                                   isOpen: true,

@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ExceptionListItemComponent } from './builder_exception_item';
+import { BuilderExceptionListItemComponent } from './exception_item';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,
@@ -20,7 +20,7 @@ import {
   entriesNested,
 } from '../../../../../public/lists_plugin_deps';
 import { AndOrBadge } from '../../and_or_badge';
-import { BuilderButtonOptions } from './builder_button_options';
+import { BuilderLogicButtons } from './logic_buttons';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { State, exceptionsBuilderReducer } from './reducer';
@@ -29,8 +29,6 @@ import {
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
 } from './helpers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import exceptionableFields from '../exceptionable_fields.json';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -74,7 +72,7 @@ interface ExceptionBuilderProps {
   onChange: (arg: OnChangeProps) => void;
 }
 
-export const ExceptionBuilder = ({
+export const ExceptionBuilderComponent = ({
   exceptionListItems,
   listType,
   listId,
@@ -244,17 +242,6 @@ export const ExceptionBuilder = ({
     setUpdateExceptions([...exceptions, { ...newException }]);
   }, [setUpdateExceptions, exceptions, listType, listId, listNamespaceType, ruleName]);
 
-  // Filters index pattern fields by exceptionable fields if list type is endpoint
-  const filterIndexPatterns = useMemo((): IIndexPattern => {
-    if (listType === 'endpoint') {
-      return {
-        ...indexPatterns,
-        fields: indexPatterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
-      };
-    }
-    return indexPatterns;
-  }, [indexPatterns, listType]);
-
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
   // on the index, as a result, created a temporary id when new exception items are first
@@ -323,6 +310,8 @@ export const ExceptionBuilder = ({
     onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
   }, [onChange, exceptionsToDelete, exceptions]);
 
+  // Defaults builder to never be sans entry, instead
+  // always falls back to an empty entry if user deletes all
   useEffect(() => {
     if (
       exceptions.length === 0 ||
@@ -364,13 +353,12 @@ export const ExceptionBuilder = ({
                 </EuiFlexItem>
               ))}
             <EuiFlexItem grow={false}>
-              <ExceptionListItemComponent
+              <BuilderExceptionListItemComponent
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
-                indexPattern={filterIndexPatterns}
+                indexPattern={indexPatterns}
                 listType={listType}
-                addNested={addNested}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
                 isOnlyItem={exceptions.length === 1}
@@ -391,7 +379,7 @@ export const ExceptionBuilder = ({
             </MyInvisibleAndBadge>
           )}
           <EuiFlexItem grow={1}>
-            <BuilderButtonOptions
+            <BuilderLogicButtons
               isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
               isAndDisabled={disableAnd}
               isNestedDisabled={disableNested}
@@ -409,4 +397,4 @@ export const ExceptionBuilder = ({
   );
 };
 
-ExceptionBuilder.displayName = 'ExceptionBuilder';
+ExceptionBuilderComponent.displayName = 'ExceptionBuilder';

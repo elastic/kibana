@@ -14,7 +14,7 @@ import * as i18n from '../case_view/translations';
 import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
-import { AddComment } from '../add_comment';
+import { AddComment, AddCommentRefObject } from '../add_comment';
 import { getLabelTitle } from './helpers';
 import { UserActionItem } from './user_action_item';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -56,14 +56,14 @@ export const UserActionTree = React.memo(
     updateCase,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const { commentId } = useParams();
+    const { commentId } = useParams<{ commentId?: string }>();
     const handlerTimeoutId = useRef(0);
+    const addCommentRef = useRef<AddCommentRefObject>(null);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
-    const [insertQuote, setInsertQuote] = useState<string | null>(null);
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
         if (!manageMarkdownEditIds.includes(id)) {
@@ -111,14 +111,17 @@ export const UserActionTree = React.memo(
           window.clearTimeout(handlerTimeoutId.current);
         }, 2400);
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [handlerTimeoutId.current]
+      [handlerTimeoutId]
     );
 
     const handleManageQuote = useCallback(
       (quote: string) => {
         const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
-        setInsertQuote(`> ${addCarrots} \n`);
+
+        if (addCommentRef && addCommentRef.current) {
+          addCommentRef.current.addQuote(`> ${addCarrots} \n`);
+        }
+
         handleOutlineComment('add-comment');
       },
       [handleOutlineComment]
@@ -152,14 +155,13 @@ export const UserActionTree = React.memo(
         <AddComment
           caseId={caseData.id}
           disabled={!userCanCrud}
-          insertQuote={insertQuote}
+          ref={addCommentRef}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
         />
       ),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [caseData.id, handleUpdate, insertQuote, userCanCrud]
+      [caseData.id, handleUpdate, userCanCrud, handleManageMarkdownEditId]
     );
 
     useEffect(() => {
@@ -169,8 +171,7 @@ export const UserActionTree = React.memo(
           handleOutlineComment(commentId);
         }
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [commentId, initLoading, isLoadingUserActions, isLoadingIds]);
+    }, [commentId, initLoading, isLoadingUserActions, isLoadingIds, handleOutlineComment]);
     return (
       <>
         <UserActionItem

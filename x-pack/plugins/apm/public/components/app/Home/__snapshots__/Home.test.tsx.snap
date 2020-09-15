@@ -11,8 +11,21 @@ exports[`Home component should render services 1`] = `
         },
       },
       "core": Object {
+        "application": Object {
+          "capabilities": Object {
+            "apm": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+          },
+        },
         "chrome": Object {
+          "docTitle": Object {
+            "change": [Function],
+          },
+          "setBadge": [Function],
           "setBreadcrumbs": [Function],
+          "setHelpExtension": [Function],
         },
         "docLinks": Object {
           "DOC_LINK_VERSION": "0",
@@ -23,6 +36,9 @@ exports[`Home component should render services 1`] = `
             "prepend": [Function],
           },
         },
+        "i18n": Object {
+          "Context": [Function],
+        },
         "notifications": Object {
           "toasts": Object {
             "addDanger": [Function],
@@ -31,6 +47,7 @@ exports[`Home component should render services 1`] = `
         },
         "uiSettings": Object {
           "get": [Function],
+          "get$": [Function],
         },
       },
       "plugins": Object {},
@@ -54,8 +71,21 @@ exports[`Home component should render traces 1`] = `
         },
       },
       "core": Object {
+        "application": Object {
+          "capabilities": Object {
+            "apm": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+          },
+        },
         "chrome": Object {
+          "docTitle": Object {
+            "change": [Function],
+          },
+          "setBadge": [Function],
           "setBreadcrumbs": [Function],
+          "setHelpExtension": [Function],
         },
         "docLinks": Object {
           "DOC_LINK_VERSION": "0",
@@ -66,6 +96,9 @@ exports[`Home component should render traces 1`] = `
             "prepend": [Function],
           },
         },
+        "i18n": Object {
+          "Context": [Function],
+        },
         "notifications": Object {
           "toasts": Object {
             "addDanger": [Function],
@@ -74,6 +107,7 @@ exports[`Home component should render traces 1`] = `
         },
         "uiSettings": Object {
           "get": [Function],
+          "get$": [Function],
         },
       },
       "plugins": Object {},

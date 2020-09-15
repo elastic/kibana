@@ -19,6 +19,7 @@ import {
 import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
+import { getChromiumDisconnectedError } from '../';
 import { BROWSER_TYPE } from '../../../../common/constants';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
@@ -58,28 +59,6 @@ export class HeadlessChromiumDriverFactory {
 
   type = BROWSER_TYPE;
 
-  test(logger: LevelLogger) {
-    const chromiumArgs = args({
-      userDataDir: this.userDataDir,
-      viewport: { width: 800, height: 600 },
-      disableSandbox: this.browserConfig.disableSandbox,
-      proxy: this.browserConfig.proxy,
-    });
-
-    return puppeteerLaunch({
-      userDataDir: this.userDataDir,
-      executablePath: this.binaryPath,
-      ignoreHTTPSErrors: true,
-      args: chromiumArgs,
-    } as LaunchOptions).catch((error: Error) => {
-      logger.error(
-        `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
-      );
-      logger.error(error);
-      return null;
-    });
-  }
-
   /*
    * Return an observable to objects which will drive screenshot capture for a page
    */
@@ -115,13 +94,19 @@ export class HeadlessChromiumDriverFactory {
 
         logger.debug(`Browser page driver created`);
       } catch (err) {
-        observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
+        observer.error(new Error(`Error spawning Chromium browser!`));
+        observer.error(err);
         throw err;
       }
 
       const childProcess = {
         async kill() {
-          await browser.close();
+          try {
+            await browser.close();
+          } catch (err) {
+            // do not throw
+            logger.error(err);
+          }
         },
       };
       const { terminate$ } = safeChildProcess(logger, childProcess);
@@ -167,7 +152,8 @@ export class HeadlessChromiumDriverFactory {
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
         del(userDataDir, { force: true }).catch((error) => {
-          logger.error(`error deleting user data directory at [${userDataDir}]: [${error}]`);
+          logger.error(`error deleting user data directory at [${userDataDir}]!`);
+          logger.error(error);
         });
       });
     });
@@ -219,7 +205,7 @@ export class HeadlessChromiumDriverFactory {
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.errorDetected', {
-            defaultMessage: 'Reporting detected an error: {err}',
+            defaultMessage: 'Reporting encountered an error: {err}',
             values: { err: err.toString() },
           })
         );
@@ -230,7 +216,7 @@ export class HeadlessChromiumDriverFactory {
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
-            defaultMessage: `Reporting detected an error on the page: {err}`,
+            defaultMessage: `Reporting encountered an error on the page: {err}`,
             values: { err: err.toString() },
           })
         );
@@ -238,15 +224,7 @@ export class HeadlessChromiumDriverFactory {
     );
 
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
-      mergeMap(() =>
-        Rx.throwError(
-          new Error(
-            i18n.translate('xpack.reporting.browsers.chromium.chromiumClosed', {
-              defaultMessage: `Reporting detected that Chromium has closed.`,
-            })
-          )
-        )
-      )
+      mergeMap(() => Rx.throwError(getChromiumDisconnectedError()))
     );
 
     return Rx.merge(pageError$, uncaughtExceptionPageError$, browserDisconnect$);

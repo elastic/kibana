@@ -33,7 +33,6 @@ export interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
-  legacyMode: boolean;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   navigateToApp: CoreStart['application']['navigateToApp'];
@@ -41,7 +40,7 @@ export interface Props {
 }
 
 function NavDrawerRenderer(
-  { isLocked, onIsLockedUpdate, basePath, legacyMode, navigateToApp, ...observables }: Props,
+  { isLocked, onIsLockedUpdate, basePath, navigateToApp, ...observables }: Props,
   ref: React.Ref<EuiNavDrawer>
 ) {
   const appId = useObservable(observables.appId$, '');
@@ -67,7 +66,6 @@ function NavDrawerRenderer(
         listItems={navLinks.map((link) =>
           createEuiListItem({
             link,
-            legacyMode,
             appId,
             basePath,
             navigateToApp,

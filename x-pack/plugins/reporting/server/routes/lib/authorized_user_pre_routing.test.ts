@@ -46,7 +46,7 @@ describe('authorized_user_pre_routing', function () {
     mockCore = await createMockReportingCore(mockReportingConfig);
   });
 
-  it('should return from handler with a "null" user when security plugin is not found', async function () {
+  it('should return from handler with a "false" user when security plugin is not found', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
@@ -58,7 +58,7 @@ describe('authorized_user_pre_routing', function () {
 
     let handlerCalled = false;
     authorizedUserPreRouting((user: unknown) => {
-      expect(user).toBe(null); // verify the user is a null value
+      expect(user).toBe(false); // verify the user is a false value
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);
@@ -66,7 +66,7 @@ describe('authorized_user_pre_routing', function () {
     expect(handlerCalled).toBe(true);
   });
 
-  it('should return from handler with a "null" user when security is disabled', async function () {
+  it('should return from handler with a "false" user when security is disabled', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
@@ -82,7 +82,7 @@ describe('authorized_user_pre_routing', function () {
 
     let handlerCalled = false;
     authorizedUserPreRouting((user: unknown) => {
-      expect(user).toBe(null); // verify the user is a null value
+      expect(user).toBe(false); // verify the user is a false value
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);

@@ -7,7 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
+import { StyledBreadcrumbs } from './panel_content_utilities';
+import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 
 /**
  * Display an error in the panel when something goes wrong and give the user a way to "retreat" back to a default state.
@@ -17,11 +18,10 @@ import { CrumbInfo, StyledBreadcrumbs } from './panel_content_utilities';
  */
 export const PanelContentError = memo(function ({
   translatedErrorMessage,
-  pushToQueryParams,
 }: {
   translatedErrorMessage: string;
-  pushToQueryParams: (arg0: CrumbInfo) => unknown;
 }) {
+  const pushToQueryParams = useReplaceBreadcrumbParameters();
   const crumbs = useMemo(() => {
     return [
       {

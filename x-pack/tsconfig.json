@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.base.json",
   "include": [
     "mocks.ts",
     "typings/**/*",
@@ -14,17 +14,13 @@
     "test/**/*",
     "plugins/security_solution/cypress/**/*",
     "plugins/apm/e2e/cypress/**/*",
-    "plugins/apm/scripts/**/*",
-    "**/typespec_tests.ts"
+    "plugins/apm/scripts/**/*"
   ],
   "compilerOptions": {
     "outDir": ".",
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "ui/*": [
-        "src/legacy/ui/public/*"
-      ],
       "plugins/xpack_main/*": [
         "x-pack/legacy/plugins/xpack_main/public/*"
       ],
@@ -37,12 +33,7 @@
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
       "fixtures/*": ["src/fixtures/*"],
     },
-    "types": [
-      "node",
-      "jest",
-      "flot",
-      "jest-styled-components",
-      "@testing-library/jest-dom"
-    ]
+    // overhead is too significant
+    "incremental": false,
   }
 }

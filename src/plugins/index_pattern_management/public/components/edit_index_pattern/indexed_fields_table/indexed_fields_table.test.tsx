@@ -42,20 +42,27 @@ const helpers = {
   getFieldInfo: () => [],
 };
 
+const indexPattern = ({
+  getNonScriptedFields: () => fields,
+} as unknown) as IIndexPattern;
+
+const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
+  return new IndexPatternField(
+    (spec as unknown) as IndexPatternField['spec'],
+    spec.displayName as string
+  );
+};
+
 const fields = [
   {
     name: 'Elastic',
     displayName: 'Elastic',
     searchable: true,
-    type: 'name',
+    type: 'string',
   },
   { name: 'timestamp', displayName: 'timestamp', type: 'date' },
   { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
-] as IndexPatternField[];
-
-const indexPattern = ({
-  getNonScriptedFields: () => fields,
-} as unknown) as IIndexPattern;
+].map(mockFieldToIndexPatternField);
 
 describe('IndexedFieldsTable', () => {
   test('should render normally', async () => {

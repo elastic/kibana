@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSuperSelect } from '@elastic/eui';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import { EuiSuperSelect } from '@elastic/eui';
 import { fonts, FontValue } from '../../../common/lib/fonts';
 
 interface DisplayedFont {
-  value: string;
   label: string;
+  value: string;
 }
 
 interface Props {
@@ -19,9 +19,7 @@ interface Props {
   value?: FontValue;
 }
 
-export const FontPicker: FunctionComponent<Props> = (props) => {
-  const { value, onSelect } = props;
-
+export const FontPicker: FC<Props> = ({ value, onSelect }) => {
   // While fonts are strongly-typed, we also support custom fonts someone might type in.
   // So let's cast the fonts and allow for additions.
   const displayedFonts: DisplayedFont[] = fonts;
@@ -46,10 +44,10 @@ export const FontPicker: FunctionComponent<Props> = (props) => {
 };
 
 FontPicker.propTypes = {
-  /** Initial value of the Font Picker. */
-  value: PropTypes.string,
   /** Function to execute when a Font is selected. */
   onSelect: PropTypes.func,
+  /** Initial value of the Font Picker. */
+  value: PropTypes.string,
 };
 
 FontPicker.displayName = 'FontPicker';

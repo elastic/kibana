@@ -102,8 +102,8 @@ export const TagList = React.memo(
           <EuiBadgeGroup>
             {tags.length > 0 &&
               !isEditTags &&
-              tags.map((tag, key) => (
-                <EuiBadge data-test-subj={`case-tag-${tag}`} color="hollow">
+              tags.map((tag) => (
+                <EuiBadge data-test-subj={`case-tag-${tag}`} color="hollow" key={tag}>
                   {tag}
                 </EuiBadge>
               ))}

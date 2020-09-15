@@ -74,6 +74,7 @@ Array [
     const location = getLocation();
     const routes = getTestRoutes();
 
+    // @ts-expect-error
     delete routes[2].breadcrumb;
 
     const breadcrumbs = getBreadcrumbs({ location, routes });

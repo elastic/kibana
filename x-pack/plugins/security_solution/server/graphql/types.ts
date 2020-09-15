@@ -104,9 +104,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex?: Maybe<number>;
+  pageIndex: number;
 
-  pageSize?: Maybe<number>;
+  pageSize: number;
 }
 
 export interface SortTimeline {
@@ -397,11 +397,6 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
-}
-
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
 }
 
 export enum NetworkDirectionEcs {
@@ -1027,6 +1022,8 @@ export interface SignalField {
   rule?: Maybe<RuleField>;
 
   original_time?: Maybe<string[] | string>;
+
+  status?: Maybe<string[] | string>;
 }
 
 export interface RuleField {
@@ -2326,7 +2323,7 @@ export interface GetOneTimelineQueryArgs {
   id: string;
 }
 export interface GetAllTimelineQueryArgs {
-  pageInfo?: Maybe<PageInfoTimeline>;
+  pageInfo: PageInfoTimeline;
 
   search?: Maybe<string>;
 
@@ -2335,8 +2332,6 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
-
-  templateTimelineType?: Maybe<TemplateTimelineType>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -2804,7 +2799,7 @@ export namespace QueryResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext, GetAllTimelineArgs>;
   export interface GetAllTimelineArgs {
-    pageInfo?: Maybe<PageInfoTimeline>;
+    pageInfo: PageInfoTimeline;
 
     search?: Maybe<string>;
 
@@ -2813,8 +2808,6 @@ export namespace QueryResolvers {
     onlyUserFavorite?: Maybe<boolean>;
 
     timelineType?: Maybe<TimelineType>;
-
-    templateTimelineType?: Maybe<TemplateTimelineType>;
 
     status?: Maybe<TimelineStatus>;
   }
@@ -4939,6 +4932,8 @@ export namespace SignalFieldResolvers {
     rule?: RuleResolver<Maybe<RuleField>, TypeParent, TContext>;
 
     original_time?: OriginalTimeResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    status?: StatusResolver<Maybe<string[] | string>, TypeParent, TContext>;
   }
 
   export type RuleResolver<
@@ -4947,6 +4942,11 @@ export namespace SignalFieldResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type OriginalTimeResolver<
+    R = Maybe<string[] | string>,
+    Parent = SignalField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type StatusResolver<
     R = Maybe<string[] | string>,
     Parent = SignalField,
     TContext = SiemContext

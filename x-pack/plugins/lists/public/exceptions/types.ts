@@ -44,7 +44,6 @@ export interface ExceptionList extends ExceptionListSchema {
 }
 
 export interface UseExceptionListSuccess {
-  lists: ExceptionList[];
   exceptions: ExceptionListItemSchema[];
   pagination: Pagination;
 }
@@ -53,8 +52,11 @@ export interface UseExceptionListProps {
   http: HttpStart;
   lists: ExceptionIdentifiers[];
   onError?: (arg: string[]) => void;
-  filterOptions?: FilterExceptionsOptions;
+  filterOptions: FilterExceptionsOptions[];
   pagination?: Pagination;
+  showDetectionsListsOnly: boolean;
+  showEndpointListsOnly: boolean;
+  matchFilters: boolean;
   onSuccess?: (arg: UseExceptionListSuccess) => void;
 }
 
@@ -67,9 +69,9 @@ export interface ExceptionIdentifiers {
 
 export interface ApiCallByListIdProps {
   http: HttpStart;
-  listId: string;
-  namespaceType: NamespaceType;
-  filterOptions?: FilterExceptionsOptions;
+  listIds: string[];
+  namespaceTypes: NamespaceType[];
+  filterOptions: FilterExceptionsOptions[];
   pagination: Partial<Pagination>;
   signal: AbortSignal;
 }
@@ -86,6 +88,16 @@ export interface ApiCallMemoProps {
   namespaceType: NamespaceType;
   onError: (arg: string[]) => void;
   onSuccess: () => void;
+}
+
+export interface ApiCallFindListsItemsMemoProps {
+  lists: ExceptionIdentifiers[];
+  filterOptions: FilterExceptionsOptions[];
+  pagination: Partial<Pagination>;
+  showDetectionsListsOnly: boolean;
+  showEndpointListsOnly: boolean;
+  onError: (arg: string[]) => void;
+  onSuccess: (arg: UseExceptionListSuccess) => void;
 }
 
 export interface AddExceptionListProps {

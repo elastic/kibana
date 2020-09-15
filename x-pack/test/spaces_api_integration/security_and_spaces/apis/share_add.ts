@@ -25,7 +25,7 @@ const createTestCases = (spaceId: string) => {
   const namespaces = [spaceId];
   return [
     // Test cases to check adding the target namespace to different saved objects
-    { ...CASES.DEFAULT_SPACE_ONLY, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+    { ...CASES.DEFAULT_ONLY, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
     { ...CASES.SPACE_1_ONLY, namespaces, ...fail404(spaceId !== SPACE_1_ID) },
     { ...CASES.SPACE_2_ONLY, namespaces, ...fail404(spaceId !== SPACE_2_ID) },
     { ...CASES.DEFAULT_AND_SPACE_1, namespaces, ...fail404(spaceId === SPACE_2_ID) },
@@ -37,7 +37,7 @@ const createTestCases = (spaceId: string) => {
     // These are non-exhaustive, they only check cases for adding two additional namespaces to a saved object
     // More permutations are covered in the corresponding spaces_only test suite
     {
-      ...CASES.DEFAULT_SPACE_ONLY,
+      ...CASES.DEFAULT_ONLY,
       namespaces: [SPACE_1_ID, SPACE_2_ID],
       ...fail404(spaceId !== DEFAULT_SPACE_ID),
     },

@@ -69,7 +69,11 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     });
     const monitoringCluster = null;
     const config = {
-      ui: { ccs: { enabled: true }, container: { elasticsearch: { enabled: false } } },
+      ui: {
+        ccs: { enabled: true },
+        container: { elasticsearch: { enabled: false } },
+        metricbeat: { index: 'metricbeat-*' },
+      },
     };
     const kibanaUrl = 'http://localhost:5601';
 
@@ -115,7 +119,8 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -166,7 +171,8 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -214,7 +220,8 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({

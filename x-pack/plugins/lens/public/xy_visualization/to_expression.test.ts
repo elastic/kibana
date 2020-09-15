@@ -41,6 +41,8 @@ describe('#toExpression', () => {
           legend: { position: Position.Bottom, isVisible: true },
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
+          tickLabelsVisibilitySettings: { x: false, y: true },
+          gridlinesVisibilitySettings: { x: false, y: true },
           layers: [
             {
               layerId: 'first',
@@ -51,7 +53,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       )
     ).toMatchSnapshot();
   });
@@ -72,30 +74,52 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       ) as Ast).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
   });
 
-  it('should not generate an expression when missing x', () => {
-    expect(
-      xyVisualization.toExpression(
-        {
-          legend: { position: Position.Bottom, isVisible: true },
-          preferredSeriesType: 'bar',
-          layers: [
-            {
-              layerId: 'first',
-              seriesType: 'area',
-              splitAccessor: undefined,
-              xAccessor: undefined,
-              accessors: ['a'],
-            },
-          ],
-        },
-        frame
-      )
-    ).toBeNull();
+  it('should default the showXAxisTitle and showYAxisTitle to true', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect(expression.chain[0].arguments.showXAxisTitle[0]).toBe(true);
+    expect(expression.chain[0].arguments.showYAxisTitle[0]).toBe(true);
+  });
+
+  it('should generate an expression without x accessor', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: undefined,
+            xAccessor: undefined,
+            accessors: ['a'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.xAccessor).toEqual(
+      []
+    );
   });
 
   it('should not generate an expression when missing y', () => {
@@ -114,7 +138,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       )
     ).toBeNull();
   });
@@ -134,14 +158,14 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame
+      frame.datasourceLayers
     )! as Ast;
 
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('d');
-    expect(expression.chain[0].arguments.xTitle).toEqual(['col_a']);
-    expect(expression.chain[0].arguments.yTitle).toEqual(['col_b']);
+    expect(expression.chain[0].arguments.xTitle).toEqual(['']);
+    expect(expression.chain[0].arguments.yTitle).toEqual(['']);
     expect(
       (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.columnToLabel
     ).toEqual([
@@ -151,5 +175,55 @@ describe('#toExpression', () => {
         d: 'col_d',
       }),
     ]);
+  });
+
+  it('should default the tick labels visibility settings to true', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect(
+      (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments
+    ).toEqual({
+      x: [true],
+      y: [true],
+    });
+  });
+
+  it('should default the gridlines visibility settings to true', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect(
+      (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments
+    ).toEqual({
+      x: [true],
+      y: [true],
+    });
   });
 });

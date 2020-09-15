@@ -1,8 +1,8 @@
 [role="xpack"]
 [[canvas-tutorial]]
-== Canvas tutorial
+== Tutorial: Create a workpad for monitoring sales
 
-To get up and running with Canvas, use the following tutorial where you'll create a display for monitoring sales at an eCommerce store.
+To get up and running with Canvas, use the following tutorial where you'll create a workpad for monitoring sales at an eCommerce store.
 
 [float]
 === Before you begin
@@ -124,7 +124,7 @@ Here are some things to try:
 
 * Play with the {kibana-ref}/add-sample-data.html[sample Canvas workpads].
 
-* Build presentations of your own live data with <<create-canvas-workpad,workpads>>.
+* Build presentations of your own live data with <<create-workpads,workpads>>.
 
 * Learn more about <<add-canvas-elements,elements>> &mdash; the building blocks of your workpad.
 

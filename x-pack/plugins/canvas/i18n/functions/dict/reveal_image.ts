@@ -13,7 +13,7 @@ import { BASE64, URL } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof revealImage>> = {
   help: i18n.translate('xpack.canvas.functions.revealImageHelpText', {
-    defaultMessage: 'Configure an image reveal element.',
+    defaultMessage: 'Configures an image reveal element.',
   }),
   args: {
     image: i18n.translate('xpack.canvas.functions.revealImage.args.imageHelpText', {

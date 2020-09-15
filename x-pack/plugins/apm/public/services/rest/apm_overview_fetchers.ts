@@ -11,6 +11,8 @@ import {
 } from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
 
+export { createCallApmApi } from './createCallApmApi';
+
 export const fetchOverviewPageData = async ({
   absoluteTime,
   relativeTime,
@@ -30,7 +32,7 @@ export const fetchOverviewPageData = async ({
   const { serviceCount, transactionCoordinates } = data;
 
   return {
-    appLink: `/app/apm#/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
+    appLink: `/app/apm/services?rangeFrom=${relativeTime.start}&rangeTo=${relativeTime.end}`,
     stats: {
       services: {
         type: 'number',

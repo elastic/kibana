@@ -18,7 +18,6 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
 const filters: Record<string, any> = {};
 
 filters.and = {

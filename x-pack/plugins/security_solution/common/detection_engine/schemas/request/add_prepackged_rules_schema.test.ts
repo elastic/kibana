@@ -618,6 +618,7 @@ describe('add prepackaged rules schema', () => {
 
   test('rule_id is required', () => {
     const payload: AddPrepackagedRulesSchema = getAddPrepackagedRulesSchemaMock();
+    // @ts-expect-error
     delete payload.rule_id;
 
     const decoded = addPrepackagedRulesSchema.decode(payload);
@@ -678,6 +679,7 @@ describe('add prepackaged rules schema', () => {
   });
 
   test('defaults max signals to 100', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getAddPrepackagedRulesSchemaMock();
     const payload: AddPrepackagedRulesSchema = {
       ...noMaxSignals,

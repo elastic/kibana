@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EditButton } from './edit_button';
-export { EditButtonFlyout } from './edit_button_flyout';
+export { EditActionFlyout } from './edit_action_flyout';
 export { isEditActionFlyoutVisible, useEditAction } from './use_edit_action';

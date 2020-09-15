@@ -681,6 +681,7 @@ describe('import rules schema', () => {
   });
 
   test('defaults max signals to 100', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getImportRulesSchemaMock();
     const payload: ImportRulesSchema = {
       ...noMaxSignals,
@@ -1177,6 +1178,7 @@ describe('import rules schema', () => {
       ...getImportRulesSchemaMock(),
       id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
     };
+    // @ts-expect-error
     delete payload.rule_id;
 
     const decoded = importRulesSchema.decode(payload);

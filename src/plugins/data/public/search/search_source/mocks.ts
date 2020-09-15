@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import {
-  injectedMetadataServiceMock,
-  uiSettingsServiceMock,
-} from '../../../../../core/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { httpServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { ISearchSource, SearchSource } from './search_source';
 import { SearchSourceFields } from './types';
@@ -54,13 +52,8 @@ export const searchSourceMock = {
 
 export const createSearchSourceMock = (fields?: SearchSourceFields) =>
   new SearchSource(fields, {
+    getConfig: uiSettingsServiceMock.createStartContract().get,
     search: jest.fn(),
-    legacySearch: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
-    },
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract(),
+    loadingCount$: new BehaviorSubject(0),
   });

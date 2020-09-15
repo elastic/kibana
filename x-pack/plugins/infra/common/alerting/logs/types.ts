@@ -96,40 +96,64 @@ const DocumentCountRT = rt.type({
 
 export type DocumentCount = rt.TypeOf<typeof DocumentCountRT>;
 
-const CriterionRT = rt.type({
+export const CriterionRT = rt.type({
   field: rt.string,
   comparator: ComparatorRT,
   value: rt.union([rt.string, rt.number]),
 });
 
 export type Criterion = rt.TypeOf<typeof CriterionRT>;
+export const criteriaRT = rt.array(CriterionRT);
 
-const TimeUnitRT = rt.union([rt.literal('s'), rt.literal('m'), rt.literal('h'), rt.literal('d')]);
+export const TimeUnitRT = rt.union([
+  rt.literal('s'),
+  rt.literal('m'),
+  rt.literal('h'),
+  rt.literal('d'),
+]);
 export type TimeUnit = rt.TypeOf<typeof TimeUnitRT>;
+
+export const timeSizeRT = rt.number;
+export const groupByRT = rt.array(rt.string);
 
 export const LogDocumentCountAlertParamsRT = rt.intersection([
   rt.type({
     count: DocumentCountRT,
-    criteria: rt.array(CriterionRT),
+    criteria: criteriaRT,
     timeUnit: TimeUnitRT,
-    timeSize: rt.number,
+    timeSize: timeSizeRT,
   }),
   rt.partial({
-    groupBy: rt.array(rt.string),
+    groupBy: groupByRT,
   }),
 ]);
 
 export type LogDocumentCountAlertParams = rt.TypeOf<typeof LogDocumentCountAlertParamsRT>;
 
+const chartPreviewHistogramBucket = rt.type({
+  key: rt.number,
+  doc_count: rt.number,
+});
+
 export const UngroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
-  rt.type({
-    hits: rt.type({
-      total: rt.type({
-        value: rt.number,
+  rt.intersection([
+    rt.type({
+      hits: rt.type({
+        total: rt.type({
+          value: rt.number,
+        }),
       }),
     }),
-  }),
+    // Chart preview buckets
+    rt.partial({
+      aggregations: rt.type({
+        histogramBuckets: rt.type({
+          buckets: rt.array(chartPreviewHistogramBucket),
+        }),
+      }),
+    }),
+  ]),
 ]);
 
 export type UngroupedSearchQueryResponse = rt.TypeOf<typeof UngroupedSearchQueryResponseRT>;
@@ -144,9 +168,17 @@ export const GroupedSearchQueryResponseRT = rt.intersection([
             rt.type({
               key: rt.record(rt.string, rt.string),
               doc_count: rt.number,
-              filtered_results: rt.type({
-                doc_count: rt.number,
-              }),
+              filtered_results: rt.intersection([
+                rt.type({
+                  doc_count: rt.number,
+                }),
+                // Chart preview buckets
+                rt.partial({
+                  histogramBuckets: rt.type({
+                    buckets: rt.array(chartPreviewHistogramBucket),
+                  }),
+                }),
+              ]),
             })
           ),
         }),

@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
 import {
-  EuiTitle,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiSelect,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 interface Props {
@@ -22,6 +22,7 @@ interface Props {
 }
 
 function ServiceNameFilter({ loading, serviceNames }: Props) {
+  const history = useHistory();
   const {
     urlParams: { serviceName },
   } = useUrlParams();
@@ -31,22 +32,25 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
     value: type,
   }));
 
-  const updateServiceName = (serviceN: string) => {
-    const newLocation = {
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        serviceName: serviceN,
-      }),
-    };
-    history.push(newLocation);
-  };
+  const updateServiceName = useCallback(
+    (serviceN: string) => {
+      const newLocation = {
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          serviceName: serviceN,
+        }),
+      };
+      history.push(newLocation);
+    },
+    [history]
+  );
 
   useEffect(() => {
     if (!serviceName && serviceNames.length > 0) {
       updateServiceName(serviceNames[0]);
     }
-  }, [serviceNames, serviceName]);
+  }, [serviceNames, serviceName, updateServiceName]);
 
   return (
     <>

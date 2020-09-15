@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { setup, SetupResult } from './pipeline_processors_editor.helpers';
 import { Pipeline } from '../../../../../common/types';
 
@@ -43,9 +44,6 @@ describe('Pipeline Editor', () => {
       },
       onFlyoutOpen: jest.fn(),
       onUpdate,
-      links: {
-        esDocsBasePath: 'test',
-      },
     });
   });
 
@@ -181,10 +179,19 @@ describe('Pipeline Editor', () => {
 
     it('prevents moving a processor while in edit mode', () => {
       const { find, exists } = testBed;
-      find('processors>0.editItemButton').simulate('click');
+      find('processors>0.manageItemButton').simulate('click');
       expect(exists('processorSettingsForm')).toBe(true);
       expect(find('processors>0.moveItemButton').props().disabled).toBe(true);
       expect(find('processors>1.moveItemButton').props().disabled).toBe(true);
+    });
+
+    it('can move a processor into an empty tree', () => {
+      const { actions } = testBed;
+      actions.moveProcessor('processors>0', 'onFailure.dropButtonEmptyTree');
+      const [onUpdateResult2] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+      const data = onUpdateResult2.getData();
+      expect(data.processors).toEqual([testProcessors.processors[1]]);
+      expect(data.on_failure).toEqual([testProcessors.processors[0]]);
     });
   });
 });

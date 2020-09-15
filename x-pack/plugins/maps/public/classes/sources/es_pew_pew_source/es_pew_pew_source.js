@@ -6,7 +6,8 @@
 
 import React from 'react';
 import uuid from 'uuid/v4';
-import turf from 'turf';
+import turfBbox from '@turf/bbox';
+import { multiPoint } from '@turf/helpers';
 
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { registerSource } from '../source_registry';
-import { turfBboxToBounds } from '../../../elasticsearch_geo_utils';
+import { turfBboxToBounds } from '../../../../common/elasticsearch_geo_utils';
 import { DataRequestAbortError } from '../../util/data_request';
 
 const MAX_GEOTILE_LEVEL = 29;
@@ -216,15 +217,11 @@ export class ESPewPewSource extends AbstractESAggSource {
       return null;
     }
 
-    return turfBboxToBounds(turf.bbox(turf.multiPoint(corners)));
+    return turfBboxToBounds(turfBbox(multiPoint(corners)));
   }
 
   canFormatFeatureProperties() {
     return true;
-  }
-
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }
 

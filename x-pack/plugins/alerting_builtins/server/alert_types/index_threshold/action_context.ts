@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Params } from './alert_type_params';
-import { AlertExecutorOptions } from '../../../../alerts/server';
+import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerts/server';
 
 // alert type context provided to actions
 
@@ -19,7 +19,7 @@ export interface ActionContext extends BaseActionContext {
   message: string;
 }
 
-export interface BaseActionContext {
+export interface BaseActionContext extends AlertInstanceContext {
   // the aggType used in the alert
   // the value of the aggField, if used, otherwise 'all documents'
   group: string;

@@ -3,15 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Logger } from 'kibana/server';
+import Boom from 'boom';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseReturnType } from '../../../typings/common';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { ServiceAnomalyStats } from '../../../common/anomaly_detection';
-import { APM_ML_JOB_GROUP } from '../anomaly_detection/constants';
+import {
+  ServiceAnomalyStats,
+  ML_ERRORS,
+} from '../../../common/anomaly_detection';
+import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { MlPluginSetup } from '../../../../ml/server';
 
 export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: {} };
 
@@ -21,37 +26,30 @@ export type ServiceAnomaliesResponse = PromiseReturnType<
 
 export async function getServiceAnomalies({
   setup,
-  logger,
   environment,
 }: {
   setup: Setup & SetupTimeRange;
-  logger: Logger;
   environment?: string;
 }) {
   const { ml, start, end } = setup;
 
   if (!ml) {
-    logger.warn('Anomaly detection plugin is not available.');
-    return DEFAULT_ANOMALIES;
-  }
-  const mlCapabilities = await ml.mlSystem.mlCapabilities();
-  if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    logger.warn('Anomaly detection feature is not enabled for the space.');
-    return DEFAULT_ANOMALIES;
-  }
-  if (!mlCapabilities.isPlatinumOrTrialLicense) {
-    logger.warn(
-      'Unable to create anomaly detection jobs due to insufficient license.'
-    );
-    return DEFAULT_ANOMALIES;
+    throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  let mlJobIds: string[] = [];
-  try {
-    mlJobIds = await getMLJobIds(ml, environment);
-  } catch (error) {
-    logger.error(error);
-    return DEFAULT_ANOMALIES;
+  const mlCapabilities = await ml.mlSystem.mlCapabilities();
+
+  if (!mlCapabilities.mlFeatureEnabledInSpace) {
+    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
+  }
+
+  const mlJobIds = await getMLJobIds(ml.anomalyDetectors, environment);
+
+  if (!mlJobIds.length) {
+    return {
+      mlJobIds: [],
+      serviceAnomalies: {},
+    };
   }
 
   const params = {
@@ -92,7 +90,9 @@ export async function getServiceAnomalies({
       },
     },
   };
+
   const response = await ml.mlSystem.mlAnomalySearch(params);
+
   return {
     mlJobIds,
     serviceAnomalies: transformResponseToServiceAnomalies(
@@ -126,7 +126,9 @@ interface ServiceAnomaliesAggResponse {
 function transformResponseToServiceAnomalies(
   response: ServiceAnomaliesAggResponse
 ): Record<string, ServiceAnomalyStats> {
-  const serviceAnomaliesMap = response.aggregations.services.buckets.reduce(
+  const serviceAnomaliesMap = (
+    response.aggregations?.services.buckets ?? []
+  ).reduce(
     (statsByServiceName, { key: serviceName, top_score: topScoreAgg }) => {
       return {
         ...statsByServiceName,
@@ -144,21 +146,22 @@ function transformResponseToServiceAnomalies(
 }
 
 export async function getMLJobIds(
-  ml: Required<Setup>['ml'],
+  anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
   environment?: string
 ) {
-  const response = await ml.anomalyDetectors.jobs(APM_ML_JOB_GROUP);
+  const response = await getMlJobsWithAPMGroup(anomalyDetectors);
+
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.
   const mlJobs = response.jobs.filter(
     (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
   );
-  if (environment) {
+  if (environment && environment !== ENVIRONMENT_ALL.value) {
     const matchingMLJob = mlJobs.find(
       (job) => job.custom_settings?.job_tags?.environment === environment
     );
     if (!matchingMLJob) {
-      throw new Error(`ML job Not Found for environment "${environment}".`);
+      return [];
     }
     return [matchingMLJob.job_id];
   }

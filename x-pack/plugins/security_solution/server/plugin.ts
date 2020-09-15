@@ -17,6 +17,8 @@ import {
   PluginInitializerContext,
   SavedObjectsClient,
 } from '../../../../src/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
@@ -42,7 +44,6 @@ import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
-  APP_ICON,
   SERVER_APP_ID,
   SecurityPageName,
   SIGNALS_ID,
@@ -58,9 +59,13 @@ import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 import { AppRequestContext } from './types';
+import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
+import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
+import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
+  data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   licensing: LicensingPluginSetup;
@@ -73,6 +78,7 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
+  data: DataPluginStart;
   ingestManager?: IngestManagerStartContract;
   taskManager?: TaskManagerStartContract;
 }
@@ -162,15 +168,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
+    registerTrustedAppsRoutes(router, endpointContext);
     registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
 
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
       name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: APP_ICON,
+      icon: 'logoSecurity',
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
@@ -263,6 +270,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const libs = compose(core, plugins, this.context.env.mode.prod, endpointContext);
     initServer(libs);
 
+    core.getStartServices().then(([_, depsStart]) => {
+      const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
+      const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
+        depsStart.data
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionSearchStrategy',
+        securitySolutionSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionTimelineSearchStrategy',
+        securitySolutionTimelineSearchStrategy
+      );
+    });
+
     return {};
   }
 
@@ -285,7 +307,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
-        packageConfigService: plugins.ingestManager!.packageConfigService,
+        packagePolicyService: plugins.ingestManager!.packagePolicyService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });

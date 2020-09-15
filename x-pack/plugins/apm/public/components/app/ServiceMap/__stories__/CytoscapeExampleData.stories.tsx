@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable no-console */
 
 import {
   EuiButton,
@@ -36,6 +35,8 @@ function setSessionJson(json: string) {
   window.sessionStorage.setItem(SESSION_STORAGE_KEY, json);
 }
 
+const getCytoscapeHeight = () => window.innerHeight - 300;
+
 storiesOf(STORYBOOK_PATH, module)
   .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
   .add(
@@ -44,16 +45,17 @@ storiesOf(STORYBOOK_PATH, module)
       const [size, setSize] = useState<number>(10);
       const [json, setJson] = useState<string>('');
       const [elements, setElements] = useState<any[]>(
-        generateServiceMapElements(size)
+        generateServiceMapElements({ size, hasAnomalies: true })
       );
-
       return (
         <div>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButton
                 onClick={() => {
-                  setElements(generateServiceMapElements(size));
+                  setElements(
+                    generateServiceMapElements({ size, hasAnomalies: true })
+                  );
                   setJson('');
                 }}
               >
@@ -80,7 +82,7 @@ storiesOf(STORYBOOK_PATH, module)
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <Cytoscape elements={elements} height={600} width={1340} />
+          <Cytoscape elements={elements} height={getCytoscapeHeight()} />
 
           {json && (
             <EuiCodeEditor
@@ -122,7 +124,7 @@ storiesOf(STORYBOOK_PATH, module)
 
       return (
         <div>
-          <Cytoscape elements={elements} height={600} width={1340} />
+          <Cytoscape elements={elements} height={getCytoscapeHeight()} />
           <EuiForm isInvalid={error !== undefined} error={error}>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -205,8 +207,7 @@ storiesOf(STORYBOOK_PATH, module)
         <div>
           <Cytoscape
             elements={exampleResponseTodo.elements}
-            height={600}
-            width={1340}
+            height={getCytoscapeHeight()}
           />
         </div>
       );
@@ -225,8 +226,7 @@ storiesOf(STORYBOOK_PATH, module)
         <div>
           <Cytoscape
             elements={exampleResponseOpbeansBeats.elements}
-            height={600}
-            width={1340}
+            height={getCytoscapeHeight()}
           />
         </div>
       );
@@ -245,8 +245,7 @@ storiesOf(STORYBOOK_PATH, module)
         <div>
           <Cytoscape
             elements={exampleResponseHipsterStore.elements}
-            height={600}
-            width={1340}
+            height={getCytoscapeHeight()}
           />
         </div>
       );
@@ -265,8 +264,7 @@ storiesOf(STORYBOOK_PATH, module)
         <div>
           <Cytoscape
             elements={exampleResponseOneDomainManyIPs.elements}
-            height={600}
-            width={1340}
+            height={getCytoscapeHeight()}
           />
         </div>
       );

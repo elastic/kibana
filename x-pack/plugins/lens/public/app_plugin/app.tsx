@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/public';
 import { History } from 'history';
+import { EuiBreadcrumb } from '@elastic/eui';
 import {
   Query,
   DataPublicPluginStart,
@@ -19,6 +20,7 @@ import {
 import {
   createKbnUrlStateStorage,
   IStorageWrapper,
+  withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -26,7 +28,7 @@ import {
   OnSaveProps,
   checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
-import { Document, SavedObjectStore } from '../persistence';
+import { Document, SavedObjectStore, injectFilterReferences } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -37,6 +39,7 @@ import {
   IndexPatternsContract,
   SavedQuery,
 } from '../../../../../src/plugins/data/public';
+import { getFullPath } from '../../common';
 
 interface State {
   indicateNoData: boolean;
@@ -55,6 +58,7 @@ interface State {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  isSaveable: boolean;
 }
 
 export function App({
@@ -69,6 +73,7 @@ export function App({
   navigation,
   onAppLeave,
   history,
+  getAppNameFromId,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -81,6 +86,7 @@ export function App({
   originatingApp?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
+  getAppNameFromId?: (appId: string) => string | undefined;
 }) {
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
@@ -94,8 +100,9 @@ export function App({
         toDate: currentRange.to,
       },
       originatingApp,
-      filters: [],
+      filters: data.query.filterManager.getFilters(),
       indicateNoData: false,
+      isSaveable: false,
     };
   });
 
@@ -118,11 +125,7 @@ export function App({
 
   const { lastKnownDoc } = state;
 
-  const isSaveable =
-    lastKnownDoc &&
-    lastKnownDoc.expression &&
-    lastKnownDoc.expression.length > 0 &&
-    core.application.capabilities.visualize.save;
+  const savingPermitted = state.isSaveable && core.application.capabilities.visualize.save;
 
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
@@ -152,6 +155,7 @@ export function App({
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
       useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(core.notifications.toasts),
     });
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       data.query,
@@ -163,7 +167,34 @@ export function App({
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
-  }, [data.query.filterManager, data.query.timefilter.timefilter]);
+  }, [
+    data.query.filterManager,
+    data.query.timefilter.timefilter,
+    core.notifications.toasts,
+    core.uiSettings,
+    data.query,
+    history,
+  ]);
+
+  const getLastKnownDocWithoutPinnedFilters = useCallback(
+    function () {
+      if (!lastKnownDoc) return undefined;
+      const [pinnedFilters, appFilters] = _.partition(
+        injectFilterReferences(lastKnownDoc.state?.filters || [], lastKnownDoc.references),
+        esFilters.isFilterPinned
+      );
+      return pinnedFilters?.length
+        ? {
+            ...lastKnownDoc,
+            state: {
+              ...lastKnownDoc.state,
+              filters: appFilters,
+            },
+          }
+        : lastKnownDoc;
+    },
+    [lastKnownDoc]
+  );
 
   useEffect(() => {
     onAppLeave((actions) => {
@@ -171,9 +202,8 @@ export function App({
       // or when the user has configured something without saving
       if (
         core.application.capabilities.visualize.save &&
-        (state.persistedDoc?.expression
-          ? !_.isEqual(lastKnownDoc?.expression, state.persistedDoc.expression)
-          : lastKnownDoc?.expression)
+        !_.isEqual(state.persistedDoc?.state, getLastKnownDocWithoutPinnedFilters()?.state) &&
+        (state.isSaveable || state.persistedDoc)
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
@@ -187,11 +217,28 @@ export function App({
         return actions.default();
       }
     });
-  }, [lastKnownDoc, onAppLeave, state.persistedDoc, core.application.capabilities.visualize.save]);
+  }, [
+    lastKnownDoc,
+    onAppLeave,
+    state.persistedDoc,
+    state.isSaveable,
+    core.application.capabilities.visualize.save,
+    getLastKnownDocWithoutPinnedFilters,
+  ]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     core.chrome.setBreadcrumbs([
+      ...(originatingApp && getAppNameFromId
+        ? [
+            {
+              onClick: (e) => {
+                core.application.navigateToApp(originatingApp);
+              },
+              text: getAppNameFromId(originatingApp),
+            } as EuiBreadcrumb,
+          ]
+        : []),
       {
         href: core.http.basePath.prepend(`/app/visualize#/`),
         onClick: (e) => {
@@ -208,59 +255,76 @@ export function App({
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
       },
     ]);
-  }, [core.application, core.chrome, core.http.basePath, state.persistedDoc]);
-
-  useEffect(() => {
-    if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
-      setState((s) => ({ ...s, isLoading: true }));
-      docStorage
-        .load(docId)
-        .then((doc) => {
-          getAllIndexPatterns(
-            doc.state.datasourceMetaData.filterableIndexPatterns,
-            data.indexPatterns,
-            core.notifications
-          )
-            .then((indexPatterns) => {
-              // Don't overwrite any pinned filters
-              data.query.filterManager.setAppFilters(doc.state.filters);
-              setState((s) => ({
-                ...s,
-                isLoading: false,
-                persistedDoc: doc,
-                lastKnownDoc: doc,
-                query: doc.state.query,
-                indexPatternsForTopNav: indexPatterns,
-              }));
-            })
-            .catch(() => {
-              setState((s) => ({ ...s, isLoading: false }));
-
-              redirectTo();
-            });
-        })
-        .catch(() => {
-          setState((s) => ({ ...s, isLoading: false }));
-
-          core.notifications.toasts.addDanger(
-            i18n.translate('xpack.lens.app.docLoadingError', {
-              defaultMessage: 'Error loading saved document',
-            })
-          );
-
-          redirectTo();
-        });
-    }
   }, [
-    core.notifications,
-    data.indexPatterns,
-    data.query.filterManager,
-    docId,
-    // TODO: These dependencies are changing too often
-    // docStorage,
-    // redirectTo,
-    // state.persistedDoc,
+    core.application,
+    core.chrome,
+    core.http.basePath,
+    state.persistedDoc,
+    originatingApp,
+    redirectTo,
+    getAppNameFromId,
   ]);
+
+  useEffect(
+    () => {
+      if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
+        setState((s) => ({ ...s, isLoading: true }));
+        docStorage
+          .load(docId)
+          .then((doc) => {
+            core.chrome.recentlyAccessed.add(getFullPath(docId), doc.title, docId);
+            getAllIndexPatterns(
+              _.uniq(
+                doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+              ),
+              data.indexPatterns,
+              core.notifications
+            )
+              .then((indexPatterns) => {
+                // Don't overwrite any pinned filters
+                data.query.filterManager.setAppFilters(
+                  injectFilterReferences(doc.state.filters, doc.references)
+                );
+                setState((s) => ({
+                  ...s,
+                  isLoading: false,
+                  persistedDoc: doc,
+                  lastKnownDoc: doc,
+                  query: doc.state.query,
+                  indexPatternsForTopNav: indexPatterns,
+                }));
+              })
+              .catch((e) => {
+                setState((s) => ({ ...s, isLoading: false }));
+
+                redirectTo();
+              });
+          })
+          .catch((e) => {
+            setState((s) => ({ ...s, isLoading: false }));
+
+            core.notifications.toasts.addDanger(
+              i18n.translate('xpack.lens.app.docLoadingError', {
+                defaultMessage: 'Error loading saved document',
+              })
+            );
+
+            redirectTo();
+          });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      core.notifications,
+      data.indexPatterns,
+      data.query.filterManager,
+      docId,
+      // TODO: These dependencies are changing too often
+      // docStorage,
+      // redirectTo,
+      // state.persistedDoc,
+    ]
+  );
 
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -272,22 +336,9 @@ export function App({
     if (!lastKnownDoc) {
       return;
     }
-    const [pinnedFilters, appFilters] = _.partition(
-      lastKnownDoc.state?.filters,
-      esFilters.isFilterPinned
-    );
-    const lastDocWithoutPinned = pinnedFilters?.length
-      ? {
-          ...lastKnownDoc,
-          state: {
-            ...lastKnownDoc.state,
-            filters: appFilters,
-          },
-        }
-      : lastKnownDoc;
 
     const doc = {
-      ...lastDocWithoutPinned,
+      ...getLastKnownDocWithoutPinnedFilters()!,
       description: saveProps.newDescription,
       id: saveProps.newCopyOnSave ? undefined : lastKnownDoc.id,
       title: saveProps.newTitle,
@@ -316,6 +367,7 @@ export function App({
     docStorage
       .save(doc)
       .then(({ id }) => {
+        core.chrome.recentlyAccessed.add(getFullPath(id), doc.title, id);
         // Prevents unnecessary network request and disables save button
         const newDoc = { ...doc, id };
         const currentOriginatingApp = state.originatingApp;
@@ -323,9 +375,7 @@ export function App({
           ...s,
           isSaveModalVisible: false,
           originatingApp:
-            saveProps.newCopyOnSave && !saveProps.returnToOrigin
-              ? undefined
-              : currentOriginatingApp,
+            newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));
@@ -379,7 +429,7 @@ export function App({
                         emphasize: true,
                         iconType: 'check',
                         run: () => {
-                          if (isSaveable && lastKnownDoc) {
+                          if (savingPermitted) {
                             runSave({
                               newTitle: lastKnownDoc.title,
                               newCopyOnSave: false,
@@ -389,7 +439,7 @@ export function App({
                           }
                         },
                         testId: 'lnsApp_saveAndReturnButton',
-                        disableButton: !isSaveable,
+                        disableButton: !savingPermitted,
                       },
                     ]
                   : []),
@@ -404,12 +454,12 @@ export function App({
                         }),
                   emphasize: !state.originatingApp || !lastKnownDoc?.id,
                   run: () => {
-                    if (isSaveable && lastKnownDoc) {
+                    if (savingPermitted) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
                     }
                   },
                   testId: 'lnsApp_saveButton',
-                  disableButton: !isSaveable,
+                  disableButton: !savingPermitted,
                 },
               ]}
               data-test-subj="lnsApp_topNav"
@@ -490,7 +540,10 @@ export function App({
                 doc: state.persistedDoc,
                 onError,
                 showNoDataPopover,
-                onChange: ({ filterableIndexPatterns, doc }) => {
+                onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
+                  if (isSaveable !== state.isSaveable) {
+                    setState((s) => ({ ...s, isSaveable }));
+                  }
                   if (!_.isEqual(state.persistedDoc, doc)) {
                     setState((s) => ({ ...s, lastKnownDoc: doc }));
                   }
@@ -498,8 +551,8 @@ export function App({
                   // Update the cached index patterns if the user made a change to any of them
                   if (
                     state.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-                    filterableIndexPatterns.find(
-                      ({ id }) =>
+                    filterableIndexPatterns.some(
+                      (id) =>
                         !state.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
                     )
                   ) {
@@ -523,6 +576,7 @@ export function App({
             originatingApp={state.originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
+            getAppNameFromId={getAppNameFromId}
             documentInfo={{
               id: lastKnownDoc.id,
               title: lastKnownDoc.title || '',
@@ -540,12 +594,12 @@ export function App({
 }
 
 export async function getAllIndexPatterns(
-  ids: Array<{ id: string }>,
+  ids: string[],
   indexPatternsService: IndexPatternsContract,
   notifications: NotificationsStart
 ): Promise<IndexPatternInstance[]> {
   try {
-    return await Promise.all(ids.map(({ id }) => indexPatternsService.get(id)));
+    return await Promise.all(ids.map((id) => indexPatternsService.get(id)));
   } catch (e) {
     notifications.toasts.addDanger(
       i18n.translate('xpack.lens.app.indexPatternLoadingError', {

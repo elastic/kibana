@@ -18,7 +18,6 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
 export const search = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('search', {
     priority: 10, // collides with get doc by id

@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-// eslint-disable-next-line @typescript-eslint/camelcase
 import { severity_mapping, SeverityMapping } from '../common/schemas';
 
 /**

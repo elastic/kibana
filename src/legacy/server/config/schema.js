@@ -20,9 +20,6 @@
 import Joi from 'joi';
 import os from 'os';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { fromRoot } from '../../../core/server/utils';
-
 const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
   'This key is handled in the new platform ONLY'
 );
@@ -51,22 +48,6 @@ export default () =>
     }).default(),
 
     csp: HANDLED_IN_NEW_PLATFORM,
-
-    cpu: Joi.object({
-      cgroup: Joi.object({
-        path: Joi.object({
-          override: Joi.string().default(),
-        }),
-      }),
-    }),
-
-    cpuacct: Joi.object({
-      cgroup: Joi.object({
-        path: Joi.object({
-          override: Joi.string().default(),
-        }),
-      }),
-    }),
 
     server: Joi.object({
       name: Joi.string().default(os.hostname()),
@@ -148,6 +129,10 @@ export default () =>
 
     ops: Joi.object({
       interval: Joi.number().default(5000),
+      cGroupOverrides: Joi.object().keys({
+        cpuPath: Joi.string().default(),
+        cpuAcctPath: Joi.string().default(),
+      }),
     }).default(),
 
     plugins: Joi.object({
@@ -162,28 +147,6 @@ export default () =>
       maximumWaitTimeForAllCollectorsInS: Joi.number().default(60),
     }).default(),
 
-    optimize: Joi.object({
-      enabled: Joi.boolean().default(true),
-      bundleFilter: Joi.string().default('!tests'),
-      bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
-      viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-      watch: Joi.boolean().default(false),
-      watchPort: Joi.number().default(5602),
-      watchHost: Joi.string().hostname().default('localhost'),
-      watchPrebuild: Joi.boolean().default(false),
-      watchProxyTimeout: Joi.number().default(5 * 60000),
-      useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-      sourceMaps: Joi.when('$prod', {
-        is: true,
-        then: Joi.boolean().valid(false),
-        otherwise: Joi.alternatives()
-          .try(Joi.string().required(), Joi.boolean())
-          .default('#cheap-source-map'),
-      }),
-      workers: Joi.number().min(1),
-      profile: Joi.boolean().default(false),
-      validateSyntaxOfNodeModules: Joi.boolean().default(true),
-    }).default(),
     status: Joi.object({
       allowAnonymous: Joi.boolean().default(false),
     }).default(),
@@ -255,6 +218,15 @@ export default () =>
 
     i18n: Joi.object({
       locale: Joi.string().default('en'),
+    }).default(),
+
+    // temporarily moved here from the (now deleted) kibana legacy plugin
+    kibana: Joi.object({
+      enabled: Joi.boolean().default(true),
+      index: Joi.string().default('.kibana'),
+      autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
+      // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
+      autocompleteTimeout: Joi.number().integer().min(1).default(1000),
     }).default(),
 
     savedObjects: Joi.object({

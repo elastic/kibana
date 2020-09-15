@@ -133,6 +133,7 @@ export class ClusterClientAdapter {
     namespace: string | undefined,
     type: string,
     id: string,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
   ): Promise<QueryEventsBySavedObjectResult> {
     const defaultNamespaceQuery = {

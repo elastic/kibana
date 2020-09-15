@@ -12,7 +12,7 @@ import { hasHistoricalAgentData } from './get_services/has_historical_agent_data
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 
 describe('services queries', () => {
   let mock: SearchParamsMock;
@@ -38,7 +38,7 @@ describe('services queries', () => {
   });
 
   it('fetches the service items', async () => {
-    mock = await inspectSearchParams((setup) => getServicesItems(setup));
+    mock = await inspectSearchParams((setup) => getServicesItems({ setup }));
 
     const allParams = mock.spy.mock.calls.map((call) => call[0]);
 

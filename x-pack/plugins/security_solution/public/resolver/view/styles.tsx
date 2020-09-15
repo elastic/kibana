@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import styled from 'styled-components';
-import { Panel } from './panel';
+import { Panel } from './panels';
 
 /**
  * The top level DOM element for Resolver

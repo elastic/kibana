@@ -20,7 +20,7 @@ export const EDIT_EXCEPTION_SAVE_BUTTON = i18n.translate(
 export const EDIT_EXCEPTION_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.editException.editExceptionTitle',
   {
-    defaultMessage: 'Edit Exception',
+    defaultMessage: 'Edit Rule Exception',
   }
 );
 
@@ -65,7 +65,7 @@ export const ENDPOINT_QUARANTINE_TEXT = i18n.translate(
   'xpack.securitySolution.exceptions.editException.endpointQuarantineText',
   {
     defaultMessage:
-      'Any file in quarantine on any endpoint that matches the attribute(s) selected will automatically be restored to its original location. This exception will apply to any rule that is linked to the Global Endpoint Exception List.',
+      'On all Endpoint hosts, quarantined files that match the exception are automatically restored to their original locations. This exception applies to all rules using Endpoint exceptions.',
   }
 );
 

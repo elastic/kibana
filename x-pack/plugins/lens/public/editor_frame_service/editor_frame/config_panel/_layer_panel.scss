@@ -6,6 +6,14 @@
   max-width: calc(100% - #{$euiSize * 3.625});
 }
 
+.lnsLayerPanel__settingsFlexItem:empty + .lnsLayerPanel__sourceFlexItem {
+  max-width: calc(100% - #{$euiSizeS});
+}
+
+.lnsLayerPanel__settingsFlexItem:empty {
+  margin: 0;
+}
+
 .lnsLayerPanel__row {
   background: $euiColorLightestShade;
   padding: $euiSizeS;
@@ -27,12 +35,28 @@
   overflow: hidden;
 }
 
+.lnsLayerPanel__dimension-isHidden {
+  opacity: 0;
+}
+
+.lnsLayerPanel__dimension-isReplacing {
+  text-decoration: line-through;
+}
+
 .lnsLayerPanel__triggerLink {
   padding: $euiSizeS;
   width: 100%;
   display: flex;
   align-items: center;
   min-height: $euiSizeXXL;
+}
+
+.lnsLayerPanel__anchor {
+  width: 100%;
+}
+
+.lnsLayerPanel__dndGrab {
+  padding: $euiSizeS;
 }
 
 .lnsLayerPanel__styleEditor {

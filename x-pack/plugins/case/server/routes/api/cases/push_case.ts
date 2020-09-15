@@ -49,6 +49,7 @@ export function initPushCaseUserActionApi({
           throw Boom.notFound('Action client have not been found');
         }
 
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
 
         const pushedDate = new Date().toISOString();

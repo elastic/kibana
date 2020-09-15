@@ -11,9 +11,8 @@ export const security = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'security',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana'],
+    require: ['elasticsearch'],
     configPrefix: 'xpack.security',
-    uiExports: { hacks: ['plugins/security/hacks/legacy'] },
     config: (Joi: Root) =>
       Joi.object({ enabled: Joi.boolean().default(true) })
         .unknown()

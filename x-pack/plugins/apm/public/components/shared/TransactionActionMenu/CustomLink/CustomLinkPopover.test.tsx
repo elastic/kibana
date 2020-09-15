@@ -3,12 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { render, act, fireEvent } from '@testing-library/react';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { CustomLinkPopover } from './CustomLinkPopover';
-import { expectTextsInDocument } from '../../../../utils/testHelpers';
+import { act, fireEvent, render } from '@testing-library/react';
+import React, { ReactNode } from 'react';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { expectTextsInDocument } from '../../../../utils/testHelpers';
+import { CustomLinkPopover } from './CustomLinkPopover';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
+}
 
 describe('CustomLinkPopover', () => {
   const customLinks = [
@@ -29,7 +34,8 @@ describe('CustomLinkPopover', () => {
         transaction={transaction}
         onCreateCustomLinkClick={jest.fn()}
         onClose={jest.fn()}
-      />
+      />,
+      { wrapper: Wrapper }
     );
     expectTextsInDocument(component, ['CUSTOM LINKS', 'Create', 'foo', 'bar']);
   });
@@ -42,7 +48,8 @@ describe('CustomLinkPopover', () => {
         transaction={transaction}
         onCreateCustomLinkClick={jest.fn()}
         onClose={handleCloseMock}
-      />
+      />,
+      { wrapper: Wrapper }
     );
     expect(handleCloseMock).not.toHaveBeenCalled();
     act(() => {
@@ -59,7 +66,8 @@ describe('CustomLinkPopover', () => {
         transaction={transaction}
         onCreateCustomLinkClick={handleCreateCustomLinkClickMock}
         onClose={jest.fn()}
-      />
+      />,
+      { wrapper: Wrapper }
     );
     expect(handleCreateCustomLinkClickMock).not.toHaveBeenCalled();
     act(() => {

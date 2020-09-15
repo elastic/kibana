@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { render, act, fireEvent } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
+import React, { ReactNode } from 'react';
 import { CustomLink } from '.';
+import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
-import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
+}
 
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
@@ -24,7 +29,8 @@ describe('Custom links', () => {
         onCreateCustomLinkClick={jest.fn()}
         onSeeMoreClick={jest.fn()}
         status={FETCH_STATUS.SUCCESS}
-      />
+      />,
+      { wrapper: Wrapper }
     );
 
     expectTextsInDocument(component, [
@@ -41,7 +47,8 @@ describe('Custom links', () => {
         onCreateCustomLinkClick={jest.fn()}
         onSeeMoreClick={jest.fn()}
         status={FETCH_STATUS.LOADING}
-      />
+      />,
+      { wrapper: Wrapper }
     );
     expect(getByTestId('loading-spinner')).toBeInTheDocument();
   });
@@ -60,7 +67,8 @@ describe('Custom links', () => {
         onCreateCustomLinkClick={jest.fn()}
         onSeeMoreClick={jest.fn()}
         status={FETCH_STATUS.SUCCESS}
-      />
+      />,
+      { wrapper: Wrapper }
     );
     expectTextsInDocument(component, ['foo', 'bar', 'baz']);
     expectTextsNotInDocument(component, ['qux']);
@@ -81,7 +89,8 @@ describe('Custom links', () => {
         onCreateCustomLinkClick={jest.fn()}
         onSeeMoreClick={onSeeMoreClickMock}
         status={FETCH_STATUS.SUCCESS}
-      />
+      />,
+      { wrapper: Wrapper }
     );
     expect(onSeeMoreClickMock).not.toHaveBeenCalled();
     act(() => {
@@ -99,7 +108,8 @@ describe('Custom links', () => {
           onCreateCustomLinkClick={jest.fn()}
           onSeeMoreClick={jest.fn()}
           status={FETCH_STATUS.SUCCESS}
-        />
+        />,
+        { wrapper: Wrapper }
       );
 
       expectTextsInDocument(component, ['Create custom link']);
@@ -119,7 +129,8 @@ describe('Custom links', () => {
           onCreateCustomLinkClick={jest.fn()}
           onSeeMoreClick={jest.fn()}
           status={FETCH_STATUS.SUCCESS}
-        />
+        />,
+        { wrapper: Wrapper }
       );
       expectTextsInDocument(component, ['Create']);
       expectTextsNotInDocument(component, ['Create custom link']);

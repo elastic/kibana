@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { registerMochaHooksForSnapshots } from '../../common/match_snapshot';
 
 export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('APM specs (basic)', function () {
+    registerMochaHooksForSnapshots();
+
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./feature_controls'));
@@ -25,6 +28,12 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     describe('Settings', function () {
       loadTestFile(require.resolve('./settings/custom_link'));
       loadTestFile(require.resolve('./settings/agent_configuration'));
+
+      describe('Anomaly detection', function () {
+        loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/read_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/write_user'));
+      });
     });
 
     describe('Traces', function () {

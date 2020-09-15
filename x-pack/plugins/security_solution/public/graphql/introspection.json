@@ -229,7 +229,11 @@
               {
                 "name": "pageInfo",
                 "description": "",
-                "type": { "kind": "INPUT_OBJECT", "name": "PageInfoTimeline", "ofType": null },
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "PageInfoTimeline", "ofType": null }
+                },
                 "defaultValue": null
               },
               {
@@ -254,12 +258,6 @@
                 "name": "timelineType",
                 "description": "",
                 "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
-                "defaultValue": null
-              },
-              {
-                "name": "templateTimelineType",
-                "description": "",
-                "type": { "kind": "ENUM", "name": "TemplateTimelineType", "ofType": null },
                 "defaultValue": null
               },
               {
@@ -4716,6 +4714,14 @@
           },
           {
             "name": "original_time",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "status",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
@@ -10911,13 +10917,21 @@
           {
             "name": "pageIndex",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           },
           {
             "name": "pageSize",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           }
         ],
@@ -10978,24 +10992,6 @@
             "deprecationReason": null
           },
           { "name": "created", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "TemplateTimelineType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "elastic",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

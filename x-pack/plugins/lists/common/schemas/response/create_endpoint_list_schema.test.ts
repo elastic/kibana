@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getExceptionListSchemaMock } from './exception_list_schema.mock';
 import { CreateEndpointListSchema, createEndpointListSchema } from './create_endpoint_list_schema';
@@ -35,6 +35,7 @@ describe('create_endpoint_list_schema', () => {
 
   test('it should NOT accept an undefined for "list_id"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.list_id;
     const decoded = createEndpointListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -48,6 +49,7 @@ describe('create_endpoint_list_schema', () => {
 
   test('it should NOT allow missing fields', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.list_id;
     const decoded = createEndpointListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

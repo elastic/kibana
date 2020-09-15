@@ -47,7 +47,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
             type="button"
           >
             <span
-              class="euiButton__content"
+              class="euiButtonContent euiButton__content"
             >
               <span
                 class="euiButton__text"
@@ -67,7 +67,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         type="button"
       >
         <span
-          class="euiButtonEmpty__content"
+          class="euiButtonContent euiButtonEmpty__content"
         >
           <span
             class="euiButtonEmpty__text"
@@ -132,7 +132,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
             type="button"
           >
             <span
-              class="euiButton__content"
+              class="euiButtonContent euiButton__content"
             >
               <span
                 class="euiButton__text"
@@ -152,7 +152,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         type="button"
       >
         <span
-          class="euiButtonEmpty__content"
+          class="euiButtonContent euiButtonEmpty__content"
         >
           <span
             class="euiButtonEmpty__text"

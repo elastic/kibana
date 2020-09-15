@@ -5,15 +5,9 @@
  */
 
 import { resolve } from 'path';
-import dedent from 'dedent';
-import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../server/lib/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
 import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
-import { i18n } from '@kbn/i18n';
-
-export { callClusterFactory } from './server/lib/call_cluster_factory';
 
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
@@ -33,63 +27,7 @@ export const xpackMain = (kibana) => {
       }).default();
     },
 
-    uiCapabilities(server) {
-      const featuresPlugin = server.newPlatform.setup.plugins.features;
-      if (!featuresPlugin) {
-        throw new Error('New Platform XPack Features plugin is not available.');
-      }
-      return featuresPlugin.getFeaturesUICapabilities();
-    },
-
-    uiExports: {
-      uiSettingDefaults: {
-        [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
-          name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
-            defaultMessage: 'Admin email',
-          }),
-          // TODO: change the description when email address is used for more things?
-          description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
-            defaultMessage:
-              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.',
-          }),
-          deprecation: {
-            message: i18n.translate('xpack.main.uiSettings.adminEmailDeprecation', {
-              defaultMessage:
-                'This setting is deprecated and will not be supported in Kibana 8.0. Please configure `monitoring.cluster_alerts.email_notifications.email_address` in your kibana.yml settings.',
-            }),
-            docLinksKey: 'kibanaGeneralSettings',
-          },
-          type: 'string', // TODO: Any way of ensuring this is a valid email address?
-          value: null,
-        },
-      },
-      hacks: ['plugins/xpack_main/hacks/check_xpack_info_change'],
-      replaceInjectedVars,
-      injectDefaultVars(server) {
-        const config = server.config();
-
-        return {
-          activeSpace: null,
-          spacesEnabled: config.get('xpack.spaces.enabled'),
-        };
-      },
-      __webpackPluginProvider__(webpack) {
-        return new webpack.BannerPlugin({
-          banner: dedent`
-            /*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
-             * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
-          `,
-          raw: true,
-        });
-      },
-    },
-
     init(server) {
-      const featuresPlugin = server.newPlatform.setup.plugins.features;
-      if (!featuresPlugin) {
-        throw new Error('New Platform XPack Features plugin is not available.');
-      }
-
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
       setupXPackMain(server);

@@ -20,7 +20,6 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { HitsCounter, HitsCounterProps } from './hits_counter';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('hits counter', function () {

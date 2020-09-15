@@ -7,13 +7,12 @@ import { take, sortBy } from 'lodash';
 import { Unionize } from 'utility-types';
 import moment from 'moment';
 import { joinByKey } from '../../../common/utils/join_by_key';
-import { ESSearchRequest } from '../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -45,7 +44,9 @@ export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 
-export type TransactionGroupRequestBase = ESSearchRequest & {
+export type TransactionGroupRequestBase = ReturnType<
+  typeof getTransactionGroupsProjection
+> & {
   body: {
     aggs: {
       transaction_groups: Unionize<
@@ -64,7 +65,7 @@ function getItemsWithRelativeImpact(
     key: string | Record<string, any>;
     avg?: number | null;
     count?: number | null;
-    p95?: number;
+    p95?: number | null;
     sample?: Transaction;
   }>
 ) {
@@ -109,6 +110,7 @@ export async function transactionGroupsFetcher(
 
   const isTopTraces = options.type === 'top_traces';
 
+  // @ts-expect-error
   delete projection.body.aggs;
 
   // traces overview is hardcoded to 10000
@@ -183,10 +185,12 @@ export async function transactionGroupsFetcher(
 }
 
 export interface TransactionGroup {
-  key: Record<string, any> | string;
+  name?: string;
+  key?: Record<string, any> | string;
   averageResponseTime: number | null | undefined;
   transactionsPerMinute: number;
-  p95: number | undefined;
+  p95: number | null | undefined;
   impact: number;
+  impactRelative?: number;
   sample: Transaction;
 }

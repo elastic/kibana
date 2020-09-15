@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertPreview } from '../../common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
   Comparator,
   Aggregators,
@@ -185,7 +184,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const preFillAlertCriteria = useCallback(() => {
     const md = alertsContext.metadata;
-    if (md && md.currentOptions?.metrics) {
+    if (md?.currentOptions?.metrics?.length) {
       setAlertParams(
         'criteria',
         md.currentOptions.metrics.map((metric) => ({
@@ -249,12 +248,17 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
-  }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [alertsContext.metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
     [onFilterChange]
   );
+
+  const groupByPreviewDisplayName = useMemo(() => {
+    if (Array.isArray(alertParams.groupBy)) return alertParams.groupBy.join(', ');
+    return alertParams.groupBy;
+  }, [alertParams.groupBy]);
 
   return (
     <>
@@ -396,11 +400,11 @@ export const Expressions: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertType={METRIC_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams as any, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
+        alertParams={pick(alertParams, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
         showNoDataResults={alertParams.alertOnNoData}
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}
-        groupByDisplayName={alertParams.groupBy}
+        groupByDisplayName={groupByPreviewDisplayName}
       />
       <EuiSpacer size={'m'} />
     </>

@@ -188,6 +188,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     const fields: EuiComboBoxOptionOption[] = [];
 
     this.props.indexPattern.fields
+      .getAll()
       .filter((field) => {
         const isMultiField = field.subType && field.subType.multi;
         return !field.name.startsWith('_') && !isMultiField && !field.scripted;

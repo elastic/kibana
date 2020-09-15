@@ -23,9 +23,7 @@ import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import {
   EmbeddableFactoryDefinition,
-  EmbeddableStart,
   IContainer,
-  AttributeService,
   EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import {
@@ -33,14 +31,13 @@ import {
   BOOK_EMBEDDABLE,
   BookEmbeddableInput,
   BookEmbeddableOutput,
-  BookByValueInput,
-  BookByReferenceInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
 import { OverlayStart } from '../../../../src/core/public';
+import { DashboardStart, AttributeService } from '../../../../src/plugins/dashboard/public';
 
 interface StartServices {
-  getAttributeService: EmbeddableStart['getAttributeService'];
+  getAttributeService: DashboardStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
 }
 
@@ -67,11 +64,7 @@ export class BookEmbeddableFactoryDefinition
     getIconForSavedObject: () => 'pencil',
   };
 
-  private attributeService?: AttributeService<
-    BookSavedObjectAttributes,
-    BookByValueInput,
-    BookByReferenceInput
-  >;
+  private attributeService?: AttributeService<BookSavedObjectAttributes>;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
@@ -83,6 +76,16 @@ export class BookEmbeddableFactoryDefinition
     return new BookEmbeddable(input, await this.getAttributeService(), {
       parent,
     });
+  }
+
+  // This is currently required due to the distinction in container.ts and the
+  // default error implementation in default_embeddable_factory_provider.ts
+  public async createFromSavedObject(
+    savedObjectId: string,
+    input: BookEmbeddableInput,
+    parent?: IContainer
+  ) {
+    return this.create(input, parent);
   }
 
   public getDisplayName() {
@@ -117,11 +120,9 @@ export class BookEmbeddableFactoryDefinition
   private async getAttributeService() {
     if (!this.attributeService) {
       this.attributeService = await (await this.getStartServices()).getAttributeService<
-        BookSavedObjectAttributes,
-        BookByValueInput,
-        BookByReferenceInput
+        BookSavedObjectAttributes
       >(this.type);
     }
-    return this.attributeService;
+    return this.attributeService!;
   }
 }

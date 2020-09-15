@@ -30,8 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
 
-  // FLAKY/FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/58815
-  describe.skip('context view for date_nanos', () => {
+  describe('context view for date_nanos', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('date_nanos');

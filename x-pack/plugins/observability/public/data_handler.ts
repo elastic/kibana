@@ -40,7 +40,6 @@ export async function fetchHasData(): Promise<Record<ObservabilityApp, boolean>>
       return result.value;
     }
 
-    // eslint-disable-next-line no-console
     console.error('Error while fetching has data', result.reason);
     return false;
   });

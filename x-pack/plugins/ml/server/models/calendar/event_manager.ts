@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 
 export interface CalendarEvent {
@@ -16,39 +16,42 @@ export interface CalendarEvent {
 }
 
 export class EventManager {
-  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
-  constructor({ callAsInternalUser }: ILegacyScopedClusterClient) {
-    this._callAsInternalUser = callAsInternalUser;
+  private _asInternalUser: IScopedClusterClient['asInternalUser'];
+  constructor({ asInternalUser }: IScopedClusterClient) {
+    this._asInternalUser = asInternalUser;
   }
 
   async getCalendarEvents(calendarId: string) {
-    const resp = await this._callAsInternalUser('ml.events', { calendarId });
+    const { body } = await this._asInternalUser.ml.getCalendarEvents({ calendar_id: calendarId });
 
-    return resp.events;
+    return body.events;
   }
 
   // jobId is optional
   async getAllEvents(jobId?: string) {
     const calendarId = GLOBAL_CALENDAR;
-    const resp = await this._callAsInternalUser('ml.events', {
-      calendarId,
-      jobId,
+    const { body } = await this._asInternalUser.ml.getCalendarEvents({
+      calendar_id: calendarId,
+      job_id: jobId,
     });
 
-    return resp.events;
+    return body.events;
   }
 
   async addEvents(calendarId: string, events: CalendarEvent[]) {
     const body = { events };
 
-    return await this._callAsInternalUser('ml.addEvent', {
-      calendarId,
+    return await this._asInternalUser.ml.postCalendarEvents({
+      calendar_id: calendarId,
       body,
     });
   }
 
   async deleteEvent(calendarId: string, eventId: string) {
-    return this._callAsInternalUser('ml.deleteEvent', { calendarId, eventId });
+    return this._asInternalUser.ml.deleteCalendarEvent({
+      calendar_id: calendarId,
+      event_id: eventId,
+    });
   }
 
   isEqual(ev1: CalendarEvent, ev2: CalendarEvent) {

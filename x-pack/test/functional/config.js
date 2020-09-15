@@ -128,6 +128,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/dev_tools',
         hash: '/searchprofiler',
       },
+      painlessLab: {
+        pathname: '/app/dev_tools',
+        hash: '/painless_lab',
+      },
       spaceSelector: {
         pathname: '/',
       },
@@ -221,6 +225,17 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        global_canvas_all: {
+          kibana: [
+            {
+              feature: {
+                canvas: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         global_discover_read: {
           kibana: [
             {
@@ -251,6 +266,16 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        global_dashboard_all: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         global_maps_all: {
           kibana: [
             {
@@ -267,6 +292,17 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        geoconnections_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['connections*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],
@@ -312,6 +348,20 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        global_upgrade_assistant_role: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
@@ -325,6 +375,65 @@ export default async function ({ readConfigFile }) {
               spaces: ['default'],
             },
           ],
+        },
+
+        manage_security: {
+          elasticsearch: {
+            cluster: ['manage_security'],
+          },
+        },
+
+        ccr_user: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+        },
+
+        manage_ilm: {
+          elasticsearch: {
+            cluster: ['manage_ilm'],
+          },
+        },
+
+        index_management_user: {
+          elasticsearch: {
+            cluster: ['monitor', 'manage_index_templates'],
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        ingest_pipelines_user: {
+          elasticsearch: {
+            cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+          },
+        },
+
+        license_management_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+        },
+
+        logstash_read_user: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['.logstash*'],
+                privileges: ['read'],
+              },
+            ],
+          },
+        },
+
+        remote_clusters_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
         },
       },
       defaultRoles: ['superuser'],

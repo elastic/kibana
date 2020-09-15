@@ -107,7 +107,7 @@ export interface GetFieldsOptions {
   type?: string;
   params?: any;
   lookBack?: boolean;
-  metaFields?: string;
+  metaFields?: string[];
 }
 
 export interface IIndexPatternsApiClient {
@@ -160,8 +160,21 @@ export interface FieldSpecExportFmt {
 }
 
 export interface FieldSpec {
-  [key: string]: any;
+  count?: number;
+  script?: string;
+  lang?: string;
+  conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormat;
+
+  name: string;
+  type: string;
+  esTypes?: string[];
+  scripted?: boolean;
+  searchable: boolean;
+  aggregatable: boolean;
+  readFromDocValues?: boolean;
+  subType?: IFieldSubType;
+  indexed?: boolean;
 }
 
 export interface IndexPatternSpec {

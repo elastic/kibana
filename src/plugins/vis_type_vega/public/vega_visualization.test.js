@@ -82,7 +82,6 @@ describe('VegaVisualizations', () => {
     setInjectedVars({
       emsTileLayerId: {},
       enableExternalUrls: true,
-      esShardTimeout: 10000,
     });
     setData(dataPluginStart);
     setSavedObjects(coreStart.savedObjects);
@@ -105,6 +104,11 @@ describe('VegaVisualizations', () => {
 
       vis = {
         type: vegaVisType,
+        API: {
+          events: {
+            applyFilter: jest.fn(),
+          },
+        },
       };
     });
 

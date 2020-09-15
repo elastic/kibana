@@ -133,7 +133,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
           label={i18n.translate(
             'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameMessage',
             {
-              defaultMessage: 'Tile layer',
+              defaultMessage: 'Source layer',
             }
           )}
         >

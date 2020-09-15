@@ -36,12 +36,14 @@ export const readKibanaConfig = () => {
   };
 
   return {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.transactionIndices': 'apm-*',
     'apm_oss.metricsIndices': 'apm-*',
     'apm_oss.errorIndices': 'apm-*',
     'apm_oss.spanIndices': 'apm-*',
     'apm_oss.onboardingIndices': 'apm-*',
     'apm_oss.sourcemapIndices': 'apm-*',
+    /* eslint-enable @typescript-eslint/naming-convention */
     'elasticsearch.hosts': 'http://localhost:9200',
     ...loadedKibanaConfig,
     ...cliEsCredentials,

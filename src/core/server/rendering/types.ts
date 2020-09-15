@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Env } from '../config';
+import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
 import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
@@ -41,8 +41,10 @@ export interface RenderingMetadata {
     branch: string;
     basePath: string;
     serverBasePath: string;
-    env: Env;
-    legacyMode: boolean;
+    env: {
+      mode: EnvironmentMode;
+      packageInfo: PackageInfo;
+    };
     anonymousStatusPage: boolean;
     i18n: {
       translationsUrl: string;

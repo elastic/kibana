@@ -21,6 +21,7 @@ import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { DEFAULT_NAMESPACE_STRING } from '../utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -39,17 +40,27 @@ function getTypes(mappings: IndexMapping, type?: string | string[]) {
 }
 
 /**
- *  Get the field params based on the types and searchFields
+ *  Get the field params based on the types, searchFields, and rootSearchFields
  */
-function getFieldsForTypes(types: string[], searchFields?: string[]) {
-  if (!searchFields || !searchFields.length) {
+function getFieldsForTypes(
+  types: string[],
+  searchFields: string[] = [],
+  rootSearchFields: string[] = []
+) {
+  if (!searchFields.length && !rootSearchFields.length) {
     return {
       lenient: true,
       fields: ['*'],
     };
   }
 
-  let fields: string[] = [];
+  let fields = [...rootSearchFields];
+  fields.forEach((field) => {
+    if (field.indexOf('.') !== -1) {
+      throw new Error(`rootSearchFields entry "${field}" is invalid: cannot contain "." character`);
+    }
+  });
+
   for (const field of searchFields) {
     fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
   }
@@ -63,7 +74,7 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  */
 function getClauseForType(
   registry: ISavedObjectTypeRegistry,
-  namespaces: string[] = ['default'],
+  namespaces: string[] = [DEFAULT_NAMESPACE_STRING],
   type: string
 ) {
   if (namespaces.length === 0) {
@@ -78,11 +89,11 @@ function getClauseForType(
     };
   } else if (registry.isSingleNamespace(type)) {
     const should: Array<Record<string, any>> = [];
-    const eligibleNamespaces = namespaces.filter((namespace) => namespace !== 'default');
+    const eligibleNamespaces = namespaces.filter((x) => x !== DEFAULT_NAMESPACE_STRING);
     if (eligibleNamespaces.length > 0) {
       should.push({ terms: { namespace: eligibleNamespaces } });
     }
-    if (namespaces.includes('default')) {
+    if (namespaces.includes(DEFAULT_NAMESPACE_STRING)) {
       should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
     }
     if (should.length === 0) {
@@ -119,6 +130,7 @@ interface QueryParams {
   type?: string | string[];
   search?: string;
   searchFields?: string[];
+  rootSearchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
@@ -134,6 +146,7 @@ export function getQueryParams({
   type,
   search,
   searchFields,
+  rootSearchFields,
   defaultSearchOperator,
   hasReference,
   kueryNode,
@@ -150,9 +163,7 @@ export function getQueryParams({
   // would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
   // We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
   const normalizedNamespaces = namespaces
-    ? Array.from(
-        new Set(namespaces.map((namespace) => (namespace === '*' ? 'default' : namespace)))
-      )
+    ? Array.from(new Set(namespaces.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x))))
     : undefined;
 
   const bool: any = {
@@ -199,7 +210,7 @@ export function getQueryParams({
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(types, searchFields),
+          ...getFieldsForTypes(types, searchFields, rootSearchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },

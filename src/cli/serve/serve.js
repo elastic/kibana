@@ -77,7 +77,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     set('env', 'development');
-    set('optimize.watch', true);
 
     if (!has('elasticsearch.username')) {
       set('elasticsearch.username', 'kibana_system');
@@ -137,11 +136,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
-  if (opts.optimize) {
-    set('server.autoListen', false);
-    set('plugins.initialize', false);
-  }
-
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set(
     'plugins.paths',
@@ -155,7 +149,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   );
 
   merge(extraCliOptions);
-  merge(readKeystore(get('path.data')));
+  merge(readKeystore());
 
   return rawConfig;
 }
@@ -194,7 +188,7 @@ export default function (program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--optimize', 'Run the legacy plugin optimizer and then stop the server');
+    .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
@@ -220,6 +214,7 @@ export default function (program) {
         "Don't put a proxy in front of the dev server, which adds a random basePath"
       )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
@@ -255,6 +250,7 @@ export default function (program) {
         // elastic.co links.
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
+        disableOptimizer: !opts.optimizer,
         oss: !!opts.oss,
         cache: !!opts.cache,
         dist: !!opts.dist,

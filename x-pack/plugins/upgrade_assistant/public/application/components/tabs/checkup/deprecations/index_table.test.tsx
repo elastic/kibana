@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/kfetch');
-
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 

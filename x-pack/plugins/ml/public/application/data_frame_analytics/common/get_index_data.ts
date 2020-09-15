@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getErrorMessage } from '../../../../common/util/errors';
+import type { SearchResponse7 } from '../../../../common/types/es_client';
+import { extractErrorMessage } from '../../../../common/util/errors';
 
-import { EsSorting, SearchResponse7, UseDataGridReturnType } from '../../components/data_grid';
+import { EsSorting, UseDataGridReturnType } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
 
 import { isKeywordAndTextType } from '../common/fields';
 import { SavedSearchQuery } from '../../contexts/ml';
 
-import { DataFrameAnalyticsConfig, INDEX_STATUS } from './analytics';
+import { INDEX_STATUS } from './analytics';
+import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,
@@ -61,7 +63,7 @@ export const getIndexData = async (
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+      setErrorMessage(extractErrorMessage(e));
       setStatus(INDEX_STATUS.ERROR);
     }
   }

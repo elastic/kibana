@@ -6,6 +6,7 @@
 
 import { Given, Then } from 'cypress-cucumber-preprocessor/steps';
 import { loginAndWaitForPage } from '../../../integration/helpers';
+import { verifyClientMetrics } from './client_metrics_helper';
 
 /** The default time in ms to wait for a Cypress command to complete */
 export const DEFAULT_TIMEOUT = 60 * 1000;
@@ -14,26 +15,16 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
   // open service overview page
   const RANGE_FROM = 'now-24h';
   const RANGE_TO = 'now';
-  loginAndWaitForPage(`/app/apm#/rum-preview`, {
+  loginAndWaitForPage(`/app/apm/rum-preview`, {
     from: RANGE_FROM,
     to: RANGE_TO,
   });
 });
 
 Then(`should have correct client metrics`, () => {
-  const clientMetrics = '[data-cy=client-metrics] .euiStat__title';
+  const metrics = ['0.01 sec', '0.08 sec', '55 '];
 
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
-  cy.get('.euiStat__title', { timeout: DEFAULT_TIMEOUT }).should('be.visible');
-  cy.get('.euiSelect-isLoading').should('not.be.visible');
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
-
-  cy.get(clientMetrics).eq(2).should('have.text', '55 ');
-
-  cy.get(clientMetrics).eq(1).should('have.text', '0.08 sec');
-
-  cy.get(clientMetrics).eq(0).should('have.text', '0.01 sec');
+  verifyClientMetrics(metrics, true);
 });
 
 Then(`should display percentile for page load chart`, () => {

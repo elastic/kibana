@@ -32,11 +32,12 @@ import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_proper
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
   {
-    defaultMessage: '.pbf vector tiles',
+    defaultMessage: 'Vector tiles',
   }
 );
 
-export class MVTSingleLayerVectorSource extends AbstractSource
+export class MVTSingleLayerVectorSource
+  extends AbstractSource
   implements ITiledSingleLayerVectorSource {
   static createDescriptor({
     urlTemplate,
@@ -191,7 +192,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return false;
   }
 
-  async filterAndFormatPropertiesToHtml(
+  async getTooltipProperties(
     properties: GeoJsonProperties,
     featureId?: string | number
   ): Promise<ITooltipProperty[]> {

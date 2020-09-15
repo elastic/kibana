@@ -34,7 +34,7 @@ export const Pin = React.memo<Props>(
         iconSize={iconSize}
         iconType={getPinIcon(pinned)}
         onClick={onClick}
-        isDisabled={isTemplate}
+        isDisabled={isTemplate || !allowUnpinning}
       />
     );
   }

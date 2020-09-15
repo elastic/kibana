@@ -102,9 +102,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex?: Maybe<number>;
+  pageIndex: number;
 
-  pageSize?: Maybe<number>;
+  pageSize: number;
 }
 
 export interface SortTimeline {
@@ -395,11 +395,6 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
-}
-
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
 }
 
 export enum NetworkDirectionEcs {
@@ -1025,6 +1020,8 @@ export interface SignalField {
   rule?: Maybe<RuleField>;
 
   original_time?: Maybe<string[]>;
+
+  status?: Maybe<string[]>;
 }
 
 export interface RuleField {
@@ -2324,7 +2321,7 @@ export interface GetOneTimelineQueryArgs {
   id: string;
 }
 export interface GetAllTimelineQueryArgs {
-  pageInfo?: Maybe<PageInfoTimeline>;
+  pageInfo: PageInfoTimeline;
 
   search?: Maybe<string>;
 
@@ -2333,8 +2330,6 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
-
-  templateTimelineType?: Maybe<TemplateTimelineType>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -4435,7 +4430,6 @@ export namespace GetAllTimeline {
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
     timelineType?: Maybe<TimelineType>;
-    templateTimelineType?: Maybe<TemplateTimelineType>;
     status?: Maybe<TimelineStatus>;
   };
 
@@ -5105,6 +5099,8 @@ export namespace GetTimelineQuery {
 
   export type Signal = {
     __typename?: 'SignalField';
+
+    status: Maybe<string[]>;
 
     original_time: Maybe<string[]>;
 
