@@ -6,7 +6,7 @@
 
 import { composeValidators, patternValidator } from '../../../../ml/public';
 
-export type AggName = string;
+import { AggName } from '../../../common/types/aggregations';
 
 export function isAggName(arg: any): arg is AggName {
   // allow all characters except `[]>` and must not start or end with a space.

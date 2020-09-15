@@ -71,6 +71,10 @@ export interface InstallPackageResponse {
   response: AssetReference[];
 }
 
+export interface MessageResponse {
+  response: string;
+}
+
 export interface DeletePackageRequest {
   params: {
     pkgkey: string;

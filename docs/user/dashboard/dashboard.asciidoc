@@ -495,6 +495,8 @@ include::edit-dashboards.asciidoc[]
 
 include::explore-dashboard-data.asciidoc[]
 
+include::drilldowns.asciidoc[]
+
 include::share-dashboards.asciidoc[]
 
 include::tutorials.asciidoc[]
