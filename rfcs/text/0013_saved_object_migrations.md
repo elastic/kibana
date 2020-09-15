@@ -225,7 +225,7 @@ Note:
       1. That belong to a known saved object type.
       2. Which don't have outdated migrationVersion numbers since these will be transformed anyway.
       3. That belong to a type whose mappings were changed by comparing the `migrationMappingPropertyHashes`. (Metadata, unlike the mappings isn't commutative, so there is a small chance that the metadata hashes do not accurately reflect the latest mappings, however, this will just result in an less efficient query).
-7. Transform documents by reading batches from the source index then transforming and updating them with optimistic concurrency control.
+7. Transform documents by reading batches of outdated documents from the target index then transforming and updating them with optimistic concurrency control. 
    1. Ignore any version conflict errors.
    2. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents. If any failures occured, log the complete list of documents that failed to transform. Fail the migration.
 8. Mark the migration as complete by doing a single atomic operation (requires https://github.com/elastic/elasticsearch/pull/58100) that:
@@ -295,7 +295,10 @@ There are several approaches we could take to dealing with these orphan document
    Disadvantages:
     - It might be less obvious that a plugin is in a degraded state unless you read the logs (not possible on Cloud) or view the `/status` endpoint.
     - If a user doesn't care that the plugin is degraded, orphan documents are carried forward indefinitely.
-    - Since Kibana has started receiving traffic, users can no longer downgrade without losing data. They have to re-migrate, but if that fails they're stuck.
+    - Since Kibana has started receiving traffic, users can no longer
+      downgrade without losing data. They have to re-migrate, but if that
+      fails they're stuck.
+    - Introduces a breaking change in the upgrade behaviour
 
     To perform a re-migration:
       - Remove the `.kibana_7.10.0` alias
@@ -309,6 +312,7 @@ There are several approaches we could take to dealing with these orphan document
 
     Disadvantages:
     - Cannot temporarily disable a plugin to aid in debugging or to reduce the load a Kibana plugin places on an ES cluster.
+    - Introduces a breaking change
 
 3. Refuse to start a migration until the plugin is enabled or it's data deleted
 
@@ -320,8 +324,40 @@ There are several approaches we could take to dealing with these orphan document
     - Since users have to take down outdated nodes before they can start the upgrade, they have to enter the downtime window before they know about this problem. This prolongs the downtime window and in many cases might cause an operations team to have to reschedule their downtime window to give them time to investigate the documents that need to be deleted. Logging an error on every startup could warn users ahead of time to mitigate this.
     - We don’t expose Kibana logs on Cloud so this will have to be escalated to support and could take 48hrs to resolve (users can safely rollback, but without visibility into the logs they might not know this). Exposing Kibana logs is on the cloud team’s roadmap.
     - It might not be obvious just from the saved object type, which plugin created these objects.
+    - Introduces a breaking change in the upgrade behaviour
 
-We prefer option (3) since it provides flexibility for disabling plugins in the same version while also protecting users' data in all cases during an upgrade migration.
+4. Use a hash of enabled plugins as part of the target index name
+    Using a migration target index name like
+    `.kibana_7.10.0_${hash(enabled_plugins)}_001` we can migrate all documents
+    every time a plugin is enabled / disabled. 
+
+    Advantages:
+    - Outdated documents belonging to disabled plugins will be upgraded as soon
+     as the plugin is enabled again.
+
+    Disadvantages:
+    - Disabling / enabling a plugin will cause downtime (breaking change).
+    - When a plugin is enabled, disabled and enabled again our target index
+      will be an existing outdated index which needs to be deleted and
+      re-cloned. Without a way to check if the index is outdated, we cannot
+      deterministically perform the delete and re-clone operation without
+      coordination.
+
+5. Transform outdated documents (step 7) on every startup
+    Advantages:
+    - Outdated documents belonging to disabled plugins will be upgraded as soon
+     as the plugin is enabled again.
+
+    Disadvantages:
+    - Orphan documents are retained indefinitely so there's still a potential
+      for future problems.
+    - Slightly slower startup time since we have to query for outdated
+      documents every time.
+
+We prefer option (3) since it provides flexibility for disabling plugins in
+the same version while also protecting users' data in all cases during an
+upgrade migration. However, because this is a breaking change we will
+implement (5) during 7.x and only implement (3) during 8.x.
 
 # 5. Alternatives
 ## 5.1 Rolling upgrades
