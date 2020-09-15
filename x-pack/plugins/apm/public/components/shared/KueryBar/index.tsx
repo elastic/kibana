@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   esKuery,
@@ -16,7 +16,6 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
-import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';

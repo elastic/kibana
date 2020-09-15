@@ -25,6 +25,7 @@ const account = {
   canCreatePersonalSources: true,
   groups: [],
   isCurated: false,
+  canCreateInvitations: true,
 };
 
 describe('OnboardingSteps', () => {
@@ -60,9 +61,8 @@ describe('OnboardingSteps', () => {
   describe('Users & Invitations', () => {
     it('renders 0 users when not on federated auth', () => {
       setMockValues({
-        canCreateInvitations: true,
         isFederatedAuth: false,
-        fpAccount: account,
+        account,
         accountsCount: 0,
         hasUsers: false,
       });
@@ -78,7 +78,7 @@ describe('OnboardingSteps', () => {
     it('renders completed users state', () => {
       setMockValues({
         isFederatedAuth: false,
-        fpAccount: account,
+        account,
         accountsCount: 1,
         hasUsers: true,
       });
@@ -90,7 +90,13 @@ describe('OnboardingSteps', () => {
     });
 
     it('disables link when the user cannot create invitations', () => {
-      setMockValues({ isFederatedAuth: false, canCreateInvitations: false });
+      setMockValues({
+        isFederatedAuth: false,
+        account: {
+          ...account,
+          canCreateInvitations: false,
+        },
+      });
       const wrapper = shallow(<OnboardingSteps />);
       expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(undefined);
     });
@@ -98,6 +104,12 @@ describe('OnboardingSteps', () => {
 
   describe('Org Name', () => {
     it('renders button to change name', () => {
+      setMockValues({
+        organization: {
+          name: 'foo',
+          defaultOrgName: 'foo',
+        },
+      });
       const wrapper = shallow(<OnboardingSteps />);
 
       const button = wrapper

@@ -34,5 +34,9 @@ export { SetProcessor } from './set';
 export { SetSecurityUser } from './set_security_user';
 export { Split } from './split';
 export { Sort } from './sort';
+export { Trim } from './trim';
+export { Uppercase } from './uppercase';
+export { UrlDecode } from './url_decode';
+export { UserAgent } from './user_agent';
 
 export { FormFieldsComponent } from './shared';

@@ -40,7 +40,7 @@ import {
 } from 'src/core/public';
 import { ScopedHistory } from 'kibana/public';
 import { FeaturesPluginStart } from '../../../../../features/public';
-import { Feature } from '../../../../../features/common';
+import { KibanaFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { Space } from '../../../../../spaces/public';
 import {
@@ -247,7 +247,7 @@ function useFeatures(
   getFeatures: FeaturesPluginStart['getFeatures'],
   fatalErrors: FatalErrorsSetup
 ) {
-  const [features, setFeatures] = useState<Feature[] | null>(null);
+  const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
   useEffect(() => {
     getFeatures()
       .catch((err: IHttpFetchError) => {
@@ -260,7 +260,7 @@ function useFeatures(
         // 404 here, and respond in a way that still allows the UI to render itself.
         const unauthorizedForFeatures = err.response?.status === 404;
         if (unauthorizedForFeatures) {
-          return [] as Feature[];
+          return [] as KibanaFeature[];
         }
 
         fatalErrors.add(err);

@@ -8,9 +8,9 @@ jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
 jest.mock('../lib/create_queue');
-jest.mock('../lib/validate');
 
 import * as Rx from 'rxjs';
+import { featuresPluginMock } from '../../../features/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import {
   chromium,
@@ -33,6 +33,7 @@ const createMockPluginSetup = (
   setupMock?: any
 ): ReportingInternalSetup => {
   return {
+    features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
     basePath: setupMock.basePath || '/all-about-that-basepath',
     router: setupMock.router,

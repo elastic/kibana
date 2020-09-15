@@ -6,11 +6,21 @@
 
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { termsOperation } from './terms';
-import { cardinalityOperation } from './cardinality';
-import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
-import { dateHistogramOperation } from './date_histogram';
-import { countOperation } from './count';
+import { termsOperation, TermsIndexPatternColumn } from './terms';
+import { filtersOperation, FiltersIndexPatternColumn } from './filters';
+import { cardinalityOperation, CardinalityIndexPatternColumn } from './cardinality';
+import {
+  minOperation,
+  MinIndexPatternColumn,
+  averageOperation,
+  AvgIndexPatternColumn,
+  sumOperation,
+  SumIndexPatternColumn,
+  maxOperation,
+  MaxIndexPatternColumn,
+} from './metrics';
+import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
+import { countOperation, CountIndexPatternColumn } from './count';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
@@ -18,9 +28,10 @@ import { DateRange } from '../../../../common';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 
 // List of all operation definitions registered to this data source.
-// If you want to implement a new operation, add it to this array and
-// its type will get propagated to everything else
+// If you want to implement a new operation, add the definition to this array and
+// the column type to the `IndexPatternColumn` union type below.
 const internalOperationDefinitions = [
+  filtersOperation,
   termsOperation,
   dateHistogramOperation,
   minOperation,
@@ -31,7 +42,24 @@ const internalOperationDefinitions = [
   countOperation,
 ];
 
+/**
+ * A union type of all available column types. If a column is of an unknown type somewhere
+ * withing the indexpattern data source it should be typed as `IndexPatternColumn` to make
+ * typeguards possible that consider all available column types.
+ */
+export type IndexPatternColumn =
+  | FiltersIndexPatternColumn
+  | TermsIndexPatternColumn
+  | DateHistogramIndexPatternColumn
+  | MinIndexPatternColumn
+  | MaxIndexPatternColumn
+  | AvgIndexPatternColumn
+  | CardinalityIndexPatternColumn
+  | SumIndexPatternColumn
+  | CountIndexPatternColumn;
+
 export { termsOperation } from './terms';
+export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { countOperation } from './count';
@@ -106,7 +134,12 @@ interface BaseBuildColumnArgs {
   indexPattern: IndexPattern;
 }
 
-interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn>
+/**
+ * Shape of an operation definition. If the type parameter of the definition
+ * indicates a field based column, `getPossibleOperationForField` has to be
+ * specified, otherwise `getPossibleOperationForDocument` has to be defined.
+ */
+export interface OperationDefinition<C extends BaseIndexPatternColumn>
   extends BaseOperationDefinitionProps<C> {
   /**
    * Returns the meta data of the operation if applied to the given field. Undefined
@@ -119,7 +152,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn>
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
-      previousColumn?: C;
+      previousColumn?: IndexPatternColumn;
     }
   ) => C;
   /**
@@ -142,29 +175,6 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn>
 }
 
 /**
- * Shape of an operation definition. If the type parameter of the definition
- * indicates a field based column, `getPossibleOperationForField` has to be
- * specified, otherwise `getPossibleOperationForDocument` has to be defined.
- */
-export type OperationDefinition<C extends BaseIndexPatternColumn> = FieldBasedOperationDefinition<
-  C
->;
-
-// Helper to to infer the column type out of the operation definition.
-// This is done to avoid it to have to list out the column types along with
-// the operation definition types
-type ColumnFromOperationDefinition<D> = D extends OperationDefinition<infer C> ? C : never;
-
-/**
- * A union type of all available column types. If a column is of an unknown type somewhere
- * withing the indexpattern data source it should be typed as `IndexPatternColumn` to make
- * typeguards possible that consider all available column types.
- */
-export type IndexPatternColumn = ColumnFromOperationDefinition<
-  typeof internalOperationDefinitions[number]
->;
-
-/**
  * A union type of all available operation types. The operation type is a unique id of an operation.
  * Each column is assigned to exactly one operation type.
  */
@@ -174,7 +184,7 @@ export type OperationType = typeof internalOperationDefinitions[number]['type'];
  * This is an operation definition of an unspecified column out of all possible
  * column types.
  */
-export type GenericOperationDefinition = FieldBasedOperationDefinition<IndexPatternColumn>;
+export type GenericOperationDefinition = OperationDefinition<IndexPatternColumn>;
 
 /**
  * List of all available operation definitions
