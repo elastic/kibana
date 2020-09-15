@@ -12,6 +12,19 @@ import { KpiNetworkBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
+export const fieldsMapping: Readonly<StatItems[]> = [
+  {
+    key: 'dnsQueries',
+    fields: [
+      {
+        key: 'dnsQueries',
+        value: null,
+      },
+    ],
+    description: i18n.DNS_QUERIES,
+  },
+];
+
 const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
@@ -20,18 +33,6 @@ const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const fieldsMapping: Readonly<StatItems[]> = [
-    {
-      key: 'dnsQueries',
-      fields: [
-        {
-          key: 'dnsQueries',
-          value: null,
-        },
-      ],
-      description: i18n.DNS_QUERIES,
-    },
-  ];
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiDns({
     filterQuery,
     endDate: to,

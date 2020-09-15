@@ -25,8 +25,8 @@ export enum NetworkKpiQueries {
 }
 
 export type NetworkKpiStrategyResponse =
-  | NetworkKpiDnsStrategyResponse
-  | NetworkKpiNetworkEventsStrategyResponse
-  | NetworkKpiTlsHandshakesStrategyResponse
-  | NetworkKpiUniqueFlowsStrategyResponse
-  | NetworkKpiUniquePrivateIpsStrategyResponse;
+  | Omit<NetworkKpiDnsStrategyResponse, 'rawResponse'>
+  | Omit<NetworkKpiNetworkEventsStrategyResponse, 'rawResponse'>
+  | Omit<NetworkKpiTlsHandshakesStrategyResponse, 'rawResponse'>
+  | Omit<NetworkKpiUniqueFlowsStrategyResponse, 'rawResponse'>
+  | Omit<NetworkKpiUniquePrivateIpsStrategyResponse, 'rawResponse'>;

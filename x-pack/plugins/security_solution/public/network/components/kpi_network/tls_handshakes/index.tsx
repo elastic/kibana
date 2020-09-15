@@ -12,6 +12,19 @@ import { KpiNetworkBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
+export const fieldsMapping: Readonly<StatItems[]> = [
+  {
+    key: 'tlsHandshakes',
+    fields: [
+      {
+        key: 'tlsHandshakes',
+        value: null,
+      },
+    ],
+    description: i18n.TLS_HANDSHAKES,
+  },
+];
+
 const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
@@ -20,18 +33,6 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const fieldsMapping: Readonly<StatItems[]> = [
-    {
-      key: 'tlsHandshakes',
-      fields: [
-        {
-          key: 'tlsHandshakes',
-          value: null,
-        },
-      ],
-      description: i18n.TLS_HANDSHAKES,
-    },
-  ];
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiTlsHandshakes({
     filterQuery,
     endDate: to,

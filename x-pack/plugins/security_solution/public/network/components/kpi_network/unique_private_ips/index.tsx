@@ -17,6 +17,33 @@ const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
 const euiColorVis3 = euiVisColorPalette[3];
 
+export const fieldsMapping: Readonly<StatItems[]> = [
+  {
+    key: 'UniqueIps',
+    fields: [
+      {
+        key: 'uniqueSourcePrivateIps',
+        value: null,
+        name: i18n.SOURCE_CHART_LABEL,
+        description: i18n.SOURCE_UNIT_LABEL,
+        color: euiColorVis2,
+        icon: 'visMapCoordinate',
+      },
+      {
+        key: 'uniqueDestinationPrivateIps',
+        value: null,
+        name: i18n.DESTINATION_CHART_LABEL,
+        description: i18n.DESTINATION_UNIT_LABEL,
+        color: euiColorVis3,
+        icon: 'visMapCoordinate',
+      },
+    ],
+    description: i18n.UNIQUE_PRIVATE_IPS,
+    enableAreaChart: true,
+    enableBarChart: true,
+  },
+];
+
 const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
@@ -25,33 +52,6 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const fieldsMapping: Readonly<StatItems[]> = [
-    {
-      key: 'UniqueIps',
-      fields: [
-        {
-          key: 'uniqueSourcePrivateIps',
-          value: null,
-          name: i18n.SOURCE_CHART_LABEL,
-          description: i18n.SOURCE_UNIT_LABEL,
-          color: euiColorVis2,
-          icon: 'visMapCoordinate',
-        },
-        {
-          key: 'uniqueDestinationPrivateIps',
-          value: null,
-          name: i18n.DESTINATION_CHART_LABEL,
-          description: i18n.DESTINATION_UNIT_LABEL,
-          color: euiColorVis3,
-          icon: 'visMapCoordinate',
-        },
-      ],
-      description: i18n.UNIQUE_PRIVATE_IPS,
-      enableAreaChart: true,
-      enableBarChart: true,
-    },
-  ];
-
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
     filterQuery,
     endDate: to,

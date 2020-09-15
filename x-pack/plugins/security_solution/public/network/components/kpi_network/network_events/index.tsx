@@ -16,6 +16,20 @@ import * as i18n from './translations';
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];
 
+export const fieldsMapping: Readonly<StatItems[]> = [
+  {
+    key: 'networkEvents',
+    fields: [
+      {
+        key: 'networkEvents',
+        value: null,
+        color: euiColorVis1,
+      },
+    ],
+    description: i18n.NETWORK_EVENTS,
+  },
+];
+
 const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
@@ -24,19 +38,6 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const fieldsMapping: Readonly<StatItems[]> = [
-    {
-      key: 'networkEvents',
-      fields: [
-        {
-          key: 'networkEvents',
-          value: null,
-          color: euiColorVis1,
-        },
-      ],
-      description: i18n.NETWORK_EVENTS,
-    },
-  ];
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiNetworkEvents({
     filterQuery,
     endDate: to,

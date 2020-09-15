@@ -12,6 +12,19 @@ import { KpiNetworkBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
+export const fieldsMapping: Readonly<StatItems[]> = [
+  {
+    key: 'uniqueFlowId',
+    fields: [
+      {
+        key: 'uniqueFlowId',
+        value: null,
+      },
+    ],
+    description: i18n.UNIQUE_FLOW_IDS,
+  },
+];
+
 const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
@@ -20,18 +33,6 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const fieldsMapping: Readonly<StatItems[]> = [
-    {
-      key: 'uniqueFlowId',
-      fields: [
-        {
-          key: 'uniqueFlowId',
-          value: null,
-        },
-      ],
-      description: i18n.UNIQUE_FLOW_IDS,
-    },
-  ];
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniqueFlows({
     filterQuery,
     endDate: to,
