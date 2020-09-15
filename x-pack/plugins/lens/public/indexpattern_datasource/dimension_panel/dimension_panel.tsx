@@ -20,7 +20,7 @@ import {
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
-import { PopoverEditor } from './popover_editor';
+import { DimensionEditor } from './dimension_editor';
 import { changeColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -239,9 +239,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     <EuiLink
       id={columnId}
       className="lnsLayerPanel__triggerLink"
-      onClick={() => {
-        props.togglePopover();
-      }}
+      onClick={props.onClick}
       data-test-subj="lns-dimensionTrigger"
       aria-label={i18n.translate('xpack.lens.configure.editConfig', {
         defaultMessage: 'Edit configuration',
@@ -267,7 +265,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
     props.state.layers[layerId].columns[props.columnId] || null;
 
   return (
-    <PopoverEditor
+    <DimensionEditor
       {...props}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}
