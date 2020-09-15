@@ -56,6 +56,11 @@ export class EnvironmentService {
       this.configService.atPath<PidConfigType>(pidConfigDef.path).pipe(take(1)).toPromise(),
     ]);
 
+    // was present in the legacy `pid` file. Should be removed once we upgrade to node 16.
+    process.on('unhandledRejection', (reason) => {
+      this.log.warn(`Detected an unhandled Promise rejection.\n${reason}`);
+    });
+
     await createDataFolder({ pathConfig, logger: this.log });
     await writePidFile({ pidConfig, logger: this.log });
 
