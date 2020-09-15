@@ -25,7 +25,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
   }
 
   class GisPage {
-    basePath;
+    basePath: string;
 
     constructor() {
       this.basePath = '';
