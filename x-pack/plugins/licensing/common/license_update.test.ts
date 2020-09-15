@@ -13,7 +13,6 @@ import { licenseMock } from './licensing.mock';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const stop$ = new Subject();
-
 describe('licensing update', () => {
   it('loads updates when triggered', async () => {
     const trigger$ = new Subject();
