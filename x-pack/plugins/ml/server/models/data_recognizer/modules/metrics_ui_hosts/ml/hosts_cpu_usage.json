@@ -4,7 +4,7 @@
       "hosts",
       "metrics"
     ],
-    "description": "",
+    "description": "Metrics: Hosts - Identify unusual spikes in cpu utilization across hosts.",
     "analysis_config": {
       "bucket_span": "15m",
       "summary_count_field_name": "doc_count",

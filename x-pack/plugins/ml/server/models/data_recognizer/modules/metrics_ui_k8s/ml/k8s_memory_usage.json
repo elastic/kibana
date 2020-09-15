@@ -4,7 +4,7 @@
       "k8s",
       "metrics"
     ],
-    "description": "",
+    "description": "Metrics: Kubernetes - Identify unusual spikes in memory usage across kubernetes pods.",
     "analysis_config": {
       "bucket_span": "15m",
       "detectors": [

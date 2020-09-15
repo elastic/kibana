@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "",
+  "description": "Metrics: Kubernetes - Identify unusual spikes in outbound traffic across kubernetes pods.",
   "groups": [
     "k8s",
     "metrics"

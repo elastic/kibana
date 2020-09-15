@@ -4,7 +4,7 @@
       "hosts",
       "metrics"
     ],
-    "description": "",
+    "description": "Metrics: Hosts - Identify unusual spikes in memory usage across hosts.",
     "analysis_config": {
       "bucket_span": "15m",
       "detectors": [
