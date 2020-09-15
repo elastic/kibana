@@ -19,9 +19,6 @@
         ],
       "summary_count_field_name": "doc_count"
     },
-    "model_plot_config": {
-      "enabled": "true"
-    },
     "data_description": {
       "time_field": "@timestamp"
     },
