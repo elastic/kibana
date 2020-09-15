@@ -7,7 +7,7 @@
 import { Map as MbMap } from 'mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
-import { RawValue } from './style_property';
+import { RawValue } from '../../../../../common/constants';
 
 export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOptions> {
   syncTextFieldWithMb(mbLayerId: string, mbMap: MbMap) {

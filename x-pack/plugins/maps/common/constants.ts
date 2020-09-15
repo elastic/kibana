@@ -262,3 +262,7 @@ export enum MB_LOOKUP_FUNCTION {
   GET = 'get',
   FEATURE_STATE = 'feature-state',
 }
+
+export type RawValue = string | number | boolean | undefined | null;
+
+export type FieldFormatter = (value: RawValue) => string | number;

@@ -9,8 +9,7 @@ import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
 import { FieldMetaOptions } from '../../../../../common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../common/constants';
-export type RawValue = string | number | undefined | null;
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 
 export type LegendProps = {
   isPointsOnly: boolean;
@@ -55,7 +54,13 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
   }
 
   formatField(value: RawValue): string | number {
-    return typeof value === 'undefined' || value === null ? '' : value;
+    if (typeof value === 'undefined' || value === null) {
+      return '';
+    } else if (typeof value === 'boolean') {
+      return value.toString();
+    } else {
+      return value;
+    }
   }
 
   getStyleName(): VECTOR_STYLES {

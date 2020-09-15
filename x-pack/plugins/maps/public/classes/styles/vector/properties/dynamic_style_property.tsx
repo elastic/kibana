@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Feature } from 'geojson';
-import { AbstractStyleProperty, IStyleProperty, RawValue } from './style_property';
+import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
   FIELD_ORIGIN,
@@ -15,6 +15,8 @@ import {
   SOURCE_META_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
+  RawValue,
+  FieldFormatter,
 } from '../../../../../common/constants';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
@@ -57,8 +59,6 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getMbPropertyName(): string;
   getMbPropertyValue(value: RawValue): RawValue;
 }
-
-export type FieldFormatter = (value: string | number | undefined) => string | number;
 
 export class DynamicStyleProperty<T>
   extends AbstractStyleProperty<T>
@@ -327,7 +327,7 @@ export class DynamicStyleProperty<T>
     if (this.getField()) {
       const fieldName = this.getFieldName();
       const fieldFormatter = this._getFieldFormatter(fieldName);
-      return fieldFormatter && value !== null ? fieldFormatter(value) : super.formatField(value);
+      return fieldFormatter ? fieldFormatter(value) : super.formatField(value);
     } else {
       return super.formatField(value);
     }
