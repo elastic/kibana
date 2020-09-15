@@ -18,3 +18,4 @@
  */
 
 export * from './preview_scripted_field';
+export * from './resolve_index';
