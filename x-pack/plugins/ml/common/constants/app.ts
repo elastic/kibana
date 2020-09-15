@@ -6,3 +6,4 @@
 
 export const PLUGIN_ID = 'ml';
 export const PLUGIN_ICON = 'machineLearningApp';
+export const PLUGIN_ICON_SOLUTION = 'logoKibana';

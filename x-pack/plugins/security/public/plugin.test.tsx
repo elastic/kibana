@@ -114,7 +114,8 @@ describe('Security Plugin', () => {
         }
       );
 
-      plugin.start(coreMock.createStart({ basePath: '/some-base-path' }), {
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      plugin.start(coreStart, {
         data: {} as DataPublicPluginStart,
         features: {} as FeaturesPluginStart,
         management: managementStartMock,
