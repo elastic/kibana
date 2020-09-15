@@ -17,7 +17,7 @@ export function createOnPreResponseHandler(
     // Elasticsearch in case the error is due to a change in license information
     // in Elasticsearch.
     // https://github.com/elastic/x-pack-kibana/pull/2876
-    if (res.statusCode >= 400) {
+    if (res.statusCode >= 400 && res.statusCode !== 429) {
       await refresh();
     }
     const license = await license$.pipe(take(1)).toPromise();
