@@ -22,7 +22,6 @@ import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
-import { ParsedQuery } from 'query-string';
 import { Path } from 'history';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
@@ -186,9 +185,6 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
-
-// @public
-export function assertNever(x: never): never;
 
 // @public
 export interface Capabilities {
@@ -444,9 +440,6 @@ export class CoreSystem {
     stop(): void;
     }
 
-// @public
-export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>;
-
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Readonly<{
     kibana: {
@@ -615,16 +608,6 @@ export interface FatalErrorsSetup {
 
 // @public
 export type FatalErrorsStart = FatalErrorsSetup;
-
-// @public (undocumented)
-export type Freezable = {
-    [k: string]: any;
-} | any[];
-
-// @public
-export function getFlattenedObject(rootValue: Record<string, any>): {
-    [key: string]: any;
-};
 
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
@@ -838,9 +821,6 @@ export interface ImageValidation {
 }
 
 // @public
-export function isRelativeUrl(candidatePath: string): boolean;
-
-// @public
 export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
 // @public
@@ -867,9 +847,6 @@ export interface IUiSettingsClient {
     remove: (key: string) => Promise<boolean>;
     set: (key: string, value: any) => Promise<boolean>;
 }
-
-// @public
-export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
 
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
@@ -1446,26 +1423,6 @@ export type UnmountCallback = () => void;
 
 // @public
 export const URL_MAX_LENGTH: number;
-
-// @public
-export interface URLMeaningfulParts {
-    // (undocumented)
-    auth?: string | null;
-    // (undocumented)
-    hash?: string | null;
-    // (undocumented)
-    hostname?: string | null;
-    // (undocumented)
-    pathname?: string | null;
-    // (undocumented)
-    port?: string | null;
-    // (undocumented)
-    protocol?: string | null;
-    // (undocumented)
-    query: ParsedQuery;
-    // (undocumented)
-    slashes?: boolean | null;
-}
 
 // @public
 export interface UserProvidedValues<T = any> {

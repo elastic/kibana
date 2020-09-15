@@ -98,3 +98,9 @@ export type PublicKeys<T> = keyof T;
  * Returns an object with public keys only.
  */
 export type PublicContract<T> = Pick<T, PublicKeys<T>>;
+
+type MethodKeysOf<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+}[keyof T];
+
+export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
