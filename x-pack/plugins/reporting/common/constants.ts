@@ -23,7 +23,7 @@ export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 export const CSV_BOM_CHARS = '\ufeff';
 export const CSV_FORMULA_CHARS = ['=', '+', '-', '@'];
 
-export const WHITELISTED_JOB_CONTENT_TYPES = [
+export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
   CONTENT_TYPE_CSV,
@@ -34,7 +34,7 @@ export const WHITELISTED_JOB_CONTENT_TYPES = [
 // See:
 // https://github.com/chromium/chromium/blob/3611052c055897e5ebbc5b73ea295092e0c20141/services/network/public/cpp/header_util_unittest.cc#L50
 // For a list of headers that chromium doesn't like
-export const KBN_SCREENSHOT_HEADER_BLACKLIST = [
+export const KBN_SCREENSHOT_HEADER_BLOCK_LIST = [
   'accept-encoding',
   'connection',
   'content-length',
@@ -51,7 +51,7 @@ export const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'keep-alive',
 ];
 
-export const KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN = ['proxy-'];
+export const KBN_SCREENSHOT_HEADER_BLOCK_LIST_STARTS_WITH_PATTERN = ['proxy-'];
 
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 

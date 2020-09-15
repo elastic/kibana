@@ -135,6 +135,7 @@ describe('Lens App', () => {
     redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     history: History;
     getAppNameFromId?: (appId: string) => string | undefined;
   }> {
@@ -175,6 +176,7 @@ describe('Lens App', () => {
       },
       redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
       onAppLeave: jest.fn(),
+      setHeaderActionMenu: jest.fn(),
       history: createMemoryHistory(),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
@@ -187,6 +189,7 @@ describe('Lens App', () => {
       redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
+      setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
       history: History;
       getAppNameFromId?: (appId: string) => string | undefined;
     }>;
@@ -298,6 +301,29 @@ describe('Lens App', () => {
       { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Daaaaaaadaumching!' },
     ]);
+  });
+
+  it('adds to the recently viewed list on load', async () => {
+    const defaultArgs = makeDefaultArgs();
+    instance = mount(<App {...defaultArgs} />);
+
+    (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
+      id: '1234',
+      title: 'Daaaaaaadaumching!',
+      state: {
+        query: 'fake query',
+        filters: [],
+      },
+      references: [],
+    });
+    await act(async () => {
+      instance.setProps({ docId: '1234' });
+    });
+    expect(defaultArgs.core.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
+      '/app/lens#/edit/1234',
+      'Daaaaaaadaumching!',
+      '1234'
+    );
   });
 
   it('sets originatingApp breadcrumb when the document title changes', async () => {
@@ -589,6 +615,19 @@ describe('Lens App', () => {
         inst.setProps({ docId: 'aaa' });
 
         expect(args.docStorage.load).not.toHaveBeenCalled();
+      });
+
+      it('adds to the recently viewed list on save', async () => {
+        const { args } = await save({
+          initialDocId: undefined,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+        expect(args.core.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
+          '/app/lens#/edit/aaa',
+          'hello there',
+          'aaa'
+        );
       });
 
       it('saves the latest doc as a copy', async () => {
