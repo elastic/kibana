@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.9.2>>
 * <<release-notes-7.9.1>>
 * <<release-notes-7.9.0>>
 * <<release-notes-7.8.1>>
@@ -41,6 +42,51 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.9.2]]
+== {kib} 7.9.2
+
+See also <<breaking-changes-7.9,breaking changes in 7.9>>.
+
+[float]
+[[enhancement-v7.9.2]]
+=== Enhancement
+Machine Learning::
+* Improves performance of job exists check {kibana-pull}77156[#77156]
+
+[float]
+[[bug-v7.9.2]]
+=== Bug fixes
+Alerting::
+* Fixes alerts unable to create or update when the name has trailing whitepace {kibana-pull}76079[#76079]
+Machine Learning::
+* Swim lane pagination for viewing by job ID {kibana-pull}76847[#76847]
+* Fixes custom URLs processing for security app {kibana-pull}76957[#76957]
+Management::
+* Fixes an issue in Snapshot and Restore UI where creating a policy, repository, or snapshot with a special character, 
+like a colon, in the name would result in a 404 when viewing details or editing any of the aforementioned {kibana-pull}76278[#76278]
+* Indices that contain the characters % { [ @ no longer cause a 405 error in Index Management {kibana-pull}76584[#76584]
+* Fixes an issue in the snapshot and restore policy creation form that allowed a policy to be created without an index specified {kibana-pull}76855[#76855]
+* The snapshot and restore wizard now notifies users when a policy configured with a non-existing repository is being updated and requires that the user 
+select a new repository {kibana-pull}76861[#76861]
+Maps::
+* Fixes drawing shapes in maps app broken in 7.9.1 {kibana-pull}76329[#76329]
+Monitoring::
+* Prevents edit/create for Stack Monitoring alerts in Alerts Management {kibana-pull}77097[#77097]
+* Fixes improper lodash syntax {kibana-pull}77105[#77105]
+* Fixes UI error when alerting is not available {kibana-pull}77179[#77179]
+Platform::
+* Fixes bug causing multiple overrides to only show the last confirm modal {kibana-pull}76482[#76482]
+* Fixes remoteAddress being duplicated in userAgent field {kibana-pull}76751[#76751]
+* Fixes an issue that caused savedObject migration errors to not being displayed in the logs {kibana-pull}77018[#77018]
+* Fixes an issue where defaultAppId redirect could fire outside home app {kibana-pull}76415[#76415]
+Reporting::
+* Adds back in custom images for reporting + tests {kibana-pull}76810[#76810]
+Security::
+* Adds Lens as a readable saved object for read-only dashboard users {kibana-pull}77067[#77067]
+Uptime::
+* Fixes alerting false positives {kibana-pull}75577[#75577]
+
 [[release-notes-7.9.1]]
 == {kib} 7.9.1
 
