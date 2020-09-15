@@ -6,7 +6,7 @@
 
 import { lazy } from 'react';
 
-import { CaseSetting } from '../../../types';
+import { CaseSetting } from '../types';
 
 export const getCaseSetting = (): CaseSetting => {
   return {

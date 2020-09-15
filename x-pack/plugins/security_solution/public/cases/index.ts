@@ -5,28 +5,14 @@
  */
 
 import { SecuritySubPlugin } from '../app/types';
-import { createCaseRoutes } from './routes';
-import { createCaseSettingsRegistry } from './settings_registry';
-import { registerCaseSettings } from './components/settings';
-import { CaseSettingsRegistry } from './types';
+import { CasesRoutes } from './routes';
 
 export class Cases {
-  private caseSettingsRegistry: CaseSettingsRegistry;
-
-  constructor() {
-    this.caseSettingsRegistry = createCaseSettingsRegistry();
-  }
-
-  public setup() {
-    registerCaseSettings({ caseSettingsRegistry: this.caseSettingsRegistry });
-    return {
-      caseSettingsRegistry: this.caseSettingsRegistry,
-    };
-  }
+  public setup() {}
 
   public start(): SecuritySubPlugin {
     return {
-      SubPluginRoutes: createCaseRoutes({ caseSettingsRegistry: this.caseSettingsRegistry }),
+      SubPluginRoutes: CasesRoutes,
     };
   }
 }
