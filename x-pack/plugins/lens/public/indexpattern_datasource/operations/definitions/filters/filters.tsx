@@ -8,23 +8,14 @@ import './filters.scss';
 import React, { MouseEventHandler, useState } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
-  euiDragDropReorder,
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiLink,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import { updateColumnParam } from '../../../state_helpers';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
 import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
-import { CustomBucketContainer } from '../shared_components';
+import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
 
@@ -33,10 +24,11 @@ export interface Filter {
   input: Query;
   label: string;
 }
+
 export interface FilterValue {
+  id: string;
   input: Query;
   label: string;
-  id: string;
 }
 
 const customQueryLabel = i18n.translate('xpack.lens.indexPattern.customQuery', {
@@ -68,11 +60,6 @@ export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
     return false;
   }
 };
-
-interface DraggableLocation {
-  droppableId: string;
-  index: number;
-}
 
 export interface FiltersIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'filters';
@@ -215,92 +202,67 @@ export const FilterList = ({
       )
     );
 
-  const onDragEnd = ({
-    source,
-    destination,
-  }: {
-    source?: DraggableLocation;
-    destination?: DraggableLocation;
-  }) => {
-    if (source && destination) {
-      const items = euiDragDropReorder(localFilters, source.index, destination.index);
-      updateFilters(items);
-    }
-  };
-
   return (
     <>
-      <EuiDragDropContext onDragEnd={onDragEnd} onDragStart={() => setIsOpenByCreation(false)}>
-        <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
-          {localFilters?.map((filter: FilterValue, idx: number) => {
-            const { input, label, id } = filter;
-            const isInvalid = !isQueryValid(input, indexPattern);
+      <DragDropBuckets
+        onDragEnd={updateFilters}
+        onDragStart={() => setIsOpenByCreation(false)}
+        droppableId="FILTERS_DROPPABLE_AREA"
+        items={localFilters}
+      >
+        {localFilters?.map((filter: FilterValue, idx: number) => {
+          const isInvalid = !isQueryValid(filter.input, indexPattern);
 
-            return (
-              <EuiDraggable
-                spacing="m"
-                key={id}
-                index={idx}
-                draggableId={id}
-                disableInteractiveElementBlocking
-              >
-                {(provided) => (
-                  <CustomBucketContainer
-                    isInvalid={isInvalid}
-                    invalidMessage={i18n.translate('xpack.lens.indexPattern.filters.isInvalid', {
-                      defaultMessage: 'This query is invalid',
+          return (
+            <DraggableBucketContainer
+              id={filter.id}
+              key={filter.id}
+              idx={idx}
+              isInvalid={isInvalid}
+              invalidMessage={i18n.translate('xpack.lens.indexPattern.filters.isInvalid', {
+                defaultMessage: 'This query is invalid',
+              })}
+              onRemoveClick={() => onRemoveFilter(filter.id)}
+              removeTitle={i18n.translate('xpack.lens.indexPattern.filters.removeCustomQuery', {
+                defaultMessage: 'Remove custom query',
+              })}
+            >
+              <FilterPopover
+                data-test-subj="indexPattern-filters-existingFilterContainer"
+                isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
+                setIsOpenByCreation={setIsOpenByCreation}
+                indexPattern={indexPattern}
+                filter={filter}
+                setFilter={(f: FilterValue) => {
+                  onChangeValue(f.id, f.input, f.label);
+                }}
+                Button={({ onClick }: { onClick: MouseEventHandler }) => (
+                  <EuiLink
+                    className="lnsFiltersOperation__popoverButton"
+                    data-test-subj="indexPattern-filters-existingFilterTrigger"
+                    onClick={onClick}
+                    color={isInvalid ? 'danger' : 'text'}
+                    title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
+                      defaultMessage: 'Click to edit',
                     })}
-                    onRemoveClick={() => onRemoveFilter(filter.id)}
-                    removeTitle={i18n.translate(
-                      'xpack.lens.indexPattern.filters.removeCustomQuery',
-                      {
-                        defaultMessage: 'Remove custom query',
-                      }
-                    )}
                   >
-                    <FilterPopover
-                      data-test-subj="indexPattern-filters-existingFilterContainer"
-                      isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
-                      setIsOpenByCreation={setIsOpenByCreation}
-                      indexPattern={indexPattern}
-                      filter={filter}
-                      setFilter={(f: FilterValue) => {
-                        onChangeValue(f.id, f.input, f.label);
-                      }}
-                      Button={({ onClick }: { onClick: MouseEventHandler }) => (
-                        <EuiLink
-                          className="lnsFiltersOperation__popoverButton"
-                          data-test-subj="indexPattern-filters-existingFilterTrigger"
-                          onClick={onClick}
-                          color={isInvalid ? 'danger' : 'text'}
-                          title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
-                            defaultMessage: 'Click to edit',
-                          })}
-                        >
-                          {label || input.query || defaultLabel}
-                        </EuiLink>
-                      )}
-                    />
-                  </CustomBucketContainer>
+                    {filter.label || filter.input.query || defaultLabel}
+                  </EuiLink>
                 )}
-              </EuiDraggable>
-            );
-          })}
-        </EuiDroppable>
-      </EuiDragDropContext>
-
-      <EuiButtonEmpty
-        size="xs"
-        iconType="plusInCircle"
+              />
+            </DraggableBucketContainer>
+          );
+        })}
+      </DragDropBuckets>
+      <NewBucketButton
         onClick={() => {
           onAddFilter();
           setIsOpenByCreation(true);
         }}
-      >
-        {i18n.translate('xpack.lens.indexPattern.filters.addCustomQuery', {
+        label={i18n.translate('xpack.lens.indexPattern.filters.addCustomQuery', {
           defaultMessage: 'Add a custom query',
         })}
-      </EuiButtonEmpty>
+      />
     </>
   );
 };
