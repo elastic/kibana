@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
 import { useCapabilities } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
-import { AgentUnenrollProvider, AgentReassignAgentPolicyFlyout } from '../../components';
+import { AgentUnenrollAgentModal, AgentReassignAgentPolicyFlyout } from '../../components';
 import { useAgentRefresh } from '../hooks';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
@@ -20,6 +20,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const hasWriteCapabilites = useCapabilities().write;
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
+  const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
 
   const onClose = useMemo(() => {
@@ -35,6 +36,19 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       {isReassignFlyoutOpen && (
         <EuiPortal>
           <AgentReassignAgentPolicyFlyout agents={[agent]} onClose={onClose} />
+        </EuiPortal>
+      )}
+      {isUnenrollModalOpen && (
+        <EuiPortal>
+          <AgentUnenrollAgentModal
+            agents={[agent]}
+            agentCount={1}
+            onClose={() => {
+              setIsUnenrollModalOpen(false);
+              refreshAgent();
+            }}
+            useForceUnenroll={isUnenrolling}
+          />
         </EuiPortal>
       )}
       <ContextMenuActions
@@ -61,29 +75,25 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               defaultMessage="Assign new agent policy"
             />
           </EuiContextMenuItem>,
-          <AgentUnenrollProvider key="unenrollAgent" forceUnenroll={isUnenrolling}>
-            {(unenrollAgentsPrompt) => (
-              <EuiContextMenuItem
-                icon="cross"
-                disabled={!hasWriteCapabilites || !agent.active}
-                onClick={() => {
-                  unenrollAgentsPrompt([agent.id], 1, refreshAgent);
-                }}
-              >
-                {isUnenrolling ? (
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentList.forceUnenrollOneButton"
-                    defaultMessage="Force unenroll"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentList.unenrollOneButton"
-                    defaultMessage="Unenroll"
-                  />
-                )}
-              </EuiContextMenuItem>
+          <EuiContextMenuItem
+            icon="cross"
+            disabled={!hasWriteCapabilites || !agent.active}
+            onClick={() => {
+              setIsUnenrollModalOpen(true);
+            }}
+          >
+            {isUnenrolling ? (
+              <FormattedMessage
+                id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+                defaultMessage="Force unenroll"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ingestManager.agentList.unenrollOneButton"
+                defaultMessage="Unenroll"
+              />
             )}
-          </AgentUnenrollProvider>,
+          </EuiContextMenuItem>,
         ]}
       />
     </>

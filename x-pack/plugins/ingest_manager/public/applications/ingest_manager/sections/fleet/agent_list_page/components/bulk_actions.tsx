@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
-import { AgentReassignAgentPolicyFlyout } from '../../components';
+import { AgentReassignAgentPolicyFlyout, AgentUnenrollAgentModal } from '../../components';
 
 const Divider = styled.div`
   width: 0;
@@ -65,6 +65,7 @@ export const AgentBulkActions: React.FunctionComponent<{
 
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
+  const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -101,21 +102,9 @@ export const AgentBulkActions: React.FunctionComponent<{
           disabled: !atLeastOneActiveAgentSelected,
           onClick: () => {
             closeMenu();
+            setIsUnenrollModalOpen(true);
           },
         },
-        // {
-        //   name: (
-        //     <FormattedMessage
-        //       id="xpack.ingestManager.agentBulkActions.upgradeAgents"
-        //       defaultMessage="Upgrade agent binary"
-        //     />
-        //   ),
-        //   icon: <EuiIcon type="refresh" size="m" />,
-        //   disabled: !atLeastOneActiveAgentSelected,
-        //   onClick: () => {
-        //     closeMenu();
-        //   },
-        // },
         {
           name: (
             <FormattedMessage
@@ -142,6 +131,20 @@ export const AgentBulkActions: React.FunctionComponent<{
             agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
             onClose={() => {
               setIsReassignFlyoutOpen(false);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isUnenrollModalOpen && (
+        <EuiPortal>
+          <AgentUnenrollAgentModal
+            agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
+            agentCount={
+              selectionMode === 'manual' ? selectedAgents.length : totalAgents - totalInactiveAgents
+            }
+            onClose={() => {
+              setIsUnenrollModalOpen(false);
               refreshAgents();
             }}
           />

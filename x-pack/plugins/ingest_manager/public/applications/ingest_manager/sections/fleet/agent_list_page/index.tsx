@@ -39,7 +39,11 @@ import {
 import { SearchBar, ContextMenuActions } from '../../../components';
 import { AgentStatusKueryHelper } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AgentReassignAgentPolicyFlyout, AgentHealth, AgentUnenrollProvider } from '../components';
+import {
+  AgentReassignAgentPolicyFlyout,
+  AgentHealth,
+  AgentUnenrollAgentModal,
+} from '../components';
 import { AgentBulkActions, SelectionMode } from './components/bulk_actions';
 
 const REFRESH_INTERVAL_MS = 5000;
@@ -66,72 +70,68 @@ const statusFilters = [
   },
 ] as Array<{ label: string; status: string }>;
 
-const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refresh: () => void }>(
-  ({ agent, refresh, onReassignClick }) => {
-    const { getHref } = useLink();
-    const hasWriteCapabilites = useCapabilities().write;
+const RowActions = React.memo<{
+  agent: Agent;
+  refresh: () => void;
+  onReassignClick: () => void;
+  onUnenrollClick: () => void;
+}>(({ agent, refresh, onReassignClick, onUnenrollClick }) => {
+  const { getHref } = useLink();
+  const hasWriteCapabilites = useCapabilities().write;
 
-    const isUnenrolling = agent.status === 'unenrolling';
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    return (
-      <ContextMenuActions
-        isOpen={isMenuOpen}
-        onChange={(isOpen) => setIsMenuOpen(isOpen)}
-        items={[
-          <EuiContextMenuItem
-            icon="inspect"
-            href={getHref('fleet_agent_details', { agentId: agent.id })}
-            key="viewAgent"
-          >
+  const isUnenrolling = agent.status === 'unenrolling';
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  return (
+    <ContextMenuActions
+      isOpen={isMenuOpen}
+      onChange={(isOpen) => setIsMenuOpen(isOpen)}
+      items={[
+        <EuiContextMenuItem
+          icon="inspect"
+          href={getHref('fleet_agent_details', { agentId: agent.id })}
+          key="viewAgent"
+        >
+          <FormattedMessage
+            id="xpack.ingestManager.agentList.viewActionText"
+            defaultMessage="View agent"
+          />
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          icon="pencil"
+          onClick={() => {
+            onReassignClick();
+          }}
+          disabled={!agent.active}
+          key="reassignPolicy"
+        >
+          <FormattedMessage
+            id="xpack.ingestManager.agentList.reassignActionText"
+            defaultMessage="Assign new agent policy"
+          />
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          disabled={!hasWriteCapabilites || !agent.active}
+          icon="cross"
+          onClick={() => {
+            onUnenrollClick();
+          }}
+        >
+          {isUnenrolling ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.viewActionText"
-              defaultMessage="View agent"
+              id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+              defaultMessage="Force unenroll"
             />
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            icon="pencil"
-            onClick={() => {
-              onReassignClick();
-            }}
-            disabled={!agent.active}
-            key="reassignPolicy"
-          >
+          ) : (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.reassignActionText"
-              defaultMessage="Assign new agent policy"
+              id="xpack.ingestManager.agentList.unenrollOneButton"
+              defaultMessage="Unenroll"
             />
-          </EuiContextMenuItem>,
-          <AgentUnenrollProvider forceUnenroll={isUnenrolling}>
-            {(unenrollAgentsPrompt) => (
-              <EuiContextMenuItem
-                disabled={!hasWriteCapabilites || !agent.active}
-                icon="cross"
-                onClick={() => {
-                  unenrollAgentsPrompt([agent.id], 1, () => {
-                    refresh();
-                    setIsMenuOpen(false);
-                  });
-                }}
-              >
-                {isUnenrolling ? (
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentList.forceUnenrollOneButton"
-                    defaultMessage="Force unenroll"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentList.unenrollOneButton"
-                    defaultMessage="Unenroll"
-                  />
-                )}
-              </EuiContextMenuItem>
-            )}
-          </AgentUnenrollProvider>,
-        ]}
-      />
-    );
-  }
-);
+          )}
+        </EuiContextMenuItem>,
+      ]}
+    />
+  );
+});
 
 function safeMetadata(val: any) {
   if (typeof val !== 'string') {
@@ -188,8 +188,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 
-  // Agent reassignment flyout state
-  const [agentToReassignId, setAgentToReassignId] = useState<string | undefined>(undefined);
+  // Agent actions states
+  const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
+  const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
 
   let kuery = search.trim();
   if (selectedAgentPolicies.length) {
@@ -355,7 +356,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               <RowActions
                 agent={agent}
                 refresh={() => agentsRequest.resendRequest()}
-                onReassignClick={() => setAgentToReassignId(agent.id)}
+                onReassignClick={() => setAgentToReassign(agent)}
+                onUnenrollClick={() => setAgentToUnenroll(agent)}
               />
             );
           },
@@ -388,8 +390,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     />
   );
 
-  const agentToReassign = agentToReassignId && agents.find((a) => a.id === agentToReassignId);
-
   return (
     <>
       {isEnrollmentFlyoutOpen ? (
@@ -403,9 +403,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentReassignAgentPolicyFlyout
             agents={[agentToReassign]}
             onClose={() => {
-              setAgentToReassignId(undefined);
+              setAgentToReassign(undefined);
               agentsRequest.resendRequest();
             }}
+          />
+        </EuiPortal>
+      )}
+      {agentToUnenroll && (
+        <EuiPortal>
+          <AgentUnenrollAgentModal
+            agents={[agentToUnenroll]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToUnenroll(undefined);
+              agentsRequest.resendRequest();
+            }}
+            useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
           />
         </EuiPortal>
       )}
