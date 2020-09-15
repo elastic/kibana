@@ -329,7 +329,7 @@ export async function fetchHighLevelStats<
         // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
         field: `${product}_stats.${product}.uuid`,
       },
-      sort: [{ timestamp: 'desc' }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
   };
 
