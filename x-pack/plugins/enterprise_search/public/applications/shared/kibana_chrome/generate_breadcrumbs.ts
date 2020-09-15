@@ -26,6 +26,9 @@ import { letBrowserHandleEvent } from '../react_router_helpers';
 interface IBreadcrumb {
   text: string;
   path?: string;
+  // Used to navigate outside of the React Router basename,
+  // i.e. if we need to go from App Search to Enterprise Search
+  shouldNotCreateHref?: boolean;
 }
 export type TBreadcrumbs = IBreadcrumb[];
 
@@ -33,11 +36,11 @@ export const useBreadcrumbs = (breadcrumbs: TBreadcrumbs) => {
   const history = useHistory();
   const { navigateToUrl } = useContext(KibanaContext) as IKibanaContext;
 
-  return breadcrumbs.map(({ text, path }) => {
+  return breadcrumbs.map(({ text, path, shouldNotCreateHref }) => {
     const breadcrumb = { text } as EuiBreadcrumb;
 
     if (path) {
-      const href = history.createHref({ pathname: path }) as string;
+      const href = shouldNotCreateHref ? path : (history.createHref({ pathname: path }) as string);
 
       breadcrumb.href = href;
       breadcrumb.onClick = (event) => {
@@ -56,7 +59,14 @@ export const useBreadcrumbs = (breadcrumbs: TBreadcrumbs) => {
  */
 
 export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
-  useBreadcrumbs([{ text: ENTERPRISE_SEARCH_PLUGIN.NAME }, ...breadcrumbs]);
+  useBreadcrumbs([
+    {
+      text: ENTERPRISE_SEARCH_PLUGIN.NAME,
+      path: ENTERPRISE_SEARCH_PLUGIN.URL,
+      shouldNotCreateHref: true,
+    },
+    ...breadcrumbs,
+  ]);
 
 export const useAppSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([{ text: APP_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);

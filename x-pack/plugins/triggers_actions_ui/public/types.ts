@@ -54,6 +54,7 @@ export interface ActionParamsProps<TParams> {
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   docLinks: DocLinksStart;
+  actionConnector?: ActionConnector;
 }
 
 export interface Pagination {

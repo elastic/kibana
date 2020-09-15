@@ -9,6 +9,7 @@ import { appContextService } from '../../services';
 import {
   GetInfoResponse,
   InstallPackageResponse,
+  MessageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
@@ -19,7 +20,8 @@ import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  InstallPackageRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
 import {
@@ -129,10 +131,10 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const installPackageHandler: RequestHandler<
-  TypeOf<typeof InstallPackageRequestSchema.params>,
+export const installPackageFromRegistryHandler: RequestHandler<
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
   undefined,
-  TypeOf<typeof InstallPackageRequestSchema.body>
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const logger = appContextService.getLogger();
   const savedObjectsClient = context.core.savedObjects.client;
@@ -167,7 +169,7 @@ export const installPackageHandler: RequestHandler<
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
       }
       if (installType === 'update') {
-        // @ts-ignore installType conditions already check for existence of installedPkg
+        // @ts-ignore getInstallType ensures we have installedPkg
         const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
         logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
         await installPackage({
@@ -181,6 +183,17 @@ export const installPackageHandler: RequestHandler<
     }
     return defaultResult;
   }
+};
+
+export const installPackageByUploadHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.body>
+> = async (context, request, response) => {
+  const body: MessageResponse = {
+    response: 'package upload was received ok, but not installed (not implemented yet)',
+  };
+  return response.ok({ body });
 };
 
 export const deletePackageHandler: RequestHandler<TypeOf<

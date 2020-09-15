@@ -20,9 +20,10 @@
 import Path from 'path';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { pick } from '@kbn/std';
+
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
@@ -31,7 +32,6 @@ import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
-import { pick } from '../../utils';
 import { InternalEnvironmentServiceSetup } from '../environment';
 
 /** @internal */
