@@ -18,7 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { deepFreeze } from '../../utils';
+import { deepFreeze } from '@kbn/std';
 import { PluginName } from '../plugins';
 
 /**
