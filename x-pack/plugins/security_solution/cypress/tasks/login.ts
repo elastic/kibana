@@ -149,6 +149,6 @@ export const loginAndWaitForTimeline = (timelineId: string) => {
   login();
   cy.viewport('macbook-15');
   cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
-  cy.get('#headerGlobalNav');
+  cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
