@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Connector } from '../../../../../case/common/api';
+
 export interface CaseSetting {
   id: string;
 }
@@ -12,16 +14,11 @@ export interface CaseSettingsRegistry {
   has: (id: string) => boolean;
   register: (setting: CaseSetting) => void;
   get: (id: string) => CaseSetting;
-}
-
-export interface CaseSettingConnector {
-  id: string;
-  actionTypeId: string;
-  name: string;
+  list: () => CaseSetting[];
 }
 
 export interface SettingFieldsProps<TFields> {
   fields: TFields;
-  connector: CaseSettingConnector;
+  connector: Connector;
   onChange: (property: string, value: unknown) => void;
 }
