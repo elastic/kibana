@@ -52,6 +52,23 @@ describe('7.10.0', () => {
     });
   });
 
+  test('migrates the consumer for siem', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      consumer: 'securitySolution',
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        consumer: 'siem',
+        meta: {
+          versionApiKeyLastmodified: 'pre-7.10.0',
+        },
+      },
+    });
+  });
+
   test('migrates the consumer for alerting', () => {
     const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const alert = getMockData({
