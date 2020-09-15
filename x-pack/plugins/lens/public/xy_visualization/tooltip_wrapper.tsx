@@ -19,12 +19,13 @@ export const TooltipWrapper: React.FunctionComponent<TooltipWrapperProps> = ({
 }) => {
   return (
     <>
-      {condition && (
+      {condition ? (
         <EuiToolTip content={tooltipContent} delay="long">
           <>{children}</>
         </EuiToolTip>
+      ) : (
+        children
       )}
-      {!condition && children}
     </>
   );
 };
