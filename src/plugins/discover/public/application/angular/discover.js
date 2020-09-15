@@ -40,6 +40,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
+  getHeaderActionMenuMounter,
   getUrlTracker,
   unhashUrl,
   subscribeWithScope,
@@ -600,6 +601,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     indexPatternList: $route.current.locals.savedObjects.ip.list,
     config: config,
     fixedScroll: createFixedScroll($scope, $timeout),
+    setHeaderActionMenu: getHeaderActionMenuMounter(),
   };
 
   const shouldSearchOnPageLoad = () => {

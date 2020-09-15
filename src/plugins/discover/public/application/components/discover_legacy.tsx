@@ -21,7 +21,7 @@ import classNames from 'classnames';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, MountPoint } from 'kibana/public';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
@@ -74,6 +74,7 @@ export interface DiscoverLegacyProps {
     timefield: string;
     sampleSize: number;
     fixedScroll: (el: HTMLElement) => void;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
   };
   resetQuery: () => void;
   resultState: string;
@@ -168,6 +169,7 @@ export function DiscoverLegacy({
           onQuerySubmit={updateQuery}
           onSavedQueryIdChange={updateSavedQueryId}
           query={state.query}
+          setMenuMountPoint={opts.setHeaderActionMenu}
           savedQueryId={state.savedQuery}
           screenTitle={savedSearch.title}
           showDatePicker={indexPattern.isTimeBased()}
