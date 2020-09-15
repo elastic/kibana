@@ -13,6 +13,7 @@ import { State } from '../common/store';
 import { StartServices } from '../types';
 import { SecurityApp } from './app';
 import { AppFrontendLibs } from '../common/lib/lib';
+import { UpgradeEndpointPackage } from './upgrade';
 
 interface RenderAppProps extends AppFrontendLibs, AppMountParameters {
   services: StartServices;
@@ -30,6 +31,7 @@ export const renderApp = ({
 }: RenderAppProps) => {
   render(
     <SecurityApp apolloClient={apolloClient} history={history} services={services} store={store}>
+      <UpgradeEndpointPackage />
       <SubPluginRoutes />
     </SecurityApp>,
     element

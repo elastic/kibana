@@ -30,7 +30,6 @@ import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
-import { UpgradeEndpointPackage } from '../../common/hooks/endpoint/endpoint_package';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -69,7 +68,6 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
   return (
     <>
-      <UpgradeEndpointPackage hasPermissions={isIngestEnabled} />
       {indicesExist ? (
         <>
           <FiltersGlobal>

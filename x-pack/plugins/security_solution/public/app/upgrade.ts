@@ -6,16 +6,17 @@
 import semver from 'semver';
 import { useEffect } from 'react';
 import { HttpFetchOptions, HttpStart } from 'src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   GetInfoResponse,
   epmRouteService,
   PackageInfo,
   InstallPackageRequest,
   InstallationStatus,
-} from '../../../../../ingest_manager/common';
-import { sendGetEndpointSecurityPackage } from '../../../management/pages/policy/store/policy_list/services/ingest';
-import { StartServices } from '../../../types';
+} from '../../../ingest_manager/common';
+import { sendGetEndpointSecurityPackage } from '../management/pages/policy/store/policy_list/services/ingest';
+import { StartServices } from '../types';
+import { useIngestEnabledCheck } from '../common/hooks/endpoint/ingest_enabled';
 
 /**
  * Retrieves the info for a package from the ingest manager
@@ -57,34 +58,77 @@ const createPackageKey = (name: string, version: string) => {
   return `${name}-${version}`;
 };
 
-export const UpgradeEndpointPackage = ({ hasPermissions }: { hasPermissions: boolean }) => {
+export const UpgradeEndpointPackage = () => {
   const context = useKibana<StartServices>();
+  const { allEnabled: hasPermissions } = useIngestEnabledCheck();
 
   useEffect(() => {
+    const abortController = new AbortController();
+
+    // cancel any ongoing requests
+    const cleanup = () => {
+      abortController.abort();
+    };
+
     if (hasPermissions) {
+      const signal = abortController.signal;
+
       (async () => {
         try {
-          const endpointPackage = await sendGetEndpointSecurityPackage(context.services.http);
-          const currentPackageKey = createPackageKey(endpointPackage.name, endpointPackage.version);
+          const endpointPackage = await sendGetEndpointSecurityPackage(context.services.http, {
+            signal,
+          });
           if (endpointPackage.status === InstallationStatus.notInstalled) {
-            console.log('no current installed package');
-            await sendInstallPackage(context.services.http, currentPackageKey);
-            return;
-          }
-
-          const endpointPackageInfo = await sendGetPackageInfo(
-            context.services.http,
-            createPackageKey(endpointPackage.name, endpointPackage.version)
-          );
-          console.log('checking version');
-          console.log(
-            `latest: ${endpointPackageInfo.latestVersion} current: ${endpointPackageInfo.version}`
-          );
-          if (semver.gt(endpointPackageInfo.latestVersion, endpointPackageInfo.version)) {
-            console.log('latest version was greater');
             await sendInstallPackage(
               context.services.http,
-              createPackageKey(endpointPackageInfo.name, endpointPackageInfo.latestVersion)
+              createPackageKey(endpointPackage.name, endpointPackage.version),
+              { signal }
+            );
+            return cleanup;
+          }
+
+          /**
+           * If a package is installed the `endpointPackage` variable will look like this:
+           * {
+           *  "name": "endpoint",
+           *  "version": "0.16.0-dev.1",
+           *  ...
+           *  "status": "installed",
+           *  "savedObject": {
+           *    ...
+           *    "attributes": {
+           *      ...
+           *      "name": "endpoint",
+           *      "version": "0.13.1",
+           *      "internal": false,
+           *      "removable": false,
+           *      "install_version": "0.13.1",
+           *      "install_status": "installed",
+           *      "install_started_at": "2020-09-15T19:52:25.153Z"
+           *    },
+           *    ...
+           *  }
+           *}
+           * So to get the actual installed version of the package we need to look in the `savedObject` section
+           */
+          const installedPackageKey = createPackageKey(
+            endpointPackage.savedObject.attributes.name,
+            endpointPackage.savedObject.attributes.version
+          );
+
+          // Just to be sure, lets get the full package info, which will include a `latestVersion` field for the endpoint package
+          const endpointPackageInfo = await sendGetPackageInfo(
+            context.services.http,
+            installedPackageKey,
+            { signal }
+          );
+
+          // check and see if a newer version exists
+          if (semver.gt(endpointPackageInfo.latestVersion, endpointPackageInfo.version)) {
+            await sendInstallPackage(
+              context.services.http,
+              createPackageKey(endpointPackageInfo.name, endpointPackageInfo.latestVersion),
+              { signal }
             );
           }
         } catch (error) {
@@ -92,9 +136,10 @@ export const UpgradeEndpointPackage = ({ hasPermissions }: { hasPermissions: boo
           // eslint-disable-next-line no-console
           console.error(error);
         }
+
+        return cleanup;
       })();
     }
-    // todo I think we want to run the code regardless of whether these change
   }, [hasPermissions, context.services.http]);
 
   return null;
