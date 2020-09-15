@@ -114,13 +114,15 @@ export function getAlertType(
     producer: BUILT_IN_ALERTS_FEATURE_ID,
     validate: {
       params: schema.object({
-        index: schema.string({ minLength: 1 }),
+        indexTitle: schema.string({ minLength: 1 }),
+        indexId: schema.string({ minLength: 1 }),
         geoField: schema.string({ minLength: 1 }),
         entity: schema.string({ minLength: 1 }),
         dateField: schema.string({ minLength: 1 }),
         trackingEvent: schema.string({ minLength: 1 }),
         boundaryType: schema.string({ minLength: 1 }),
-        boundaryIndex: schema.string({ minLength: 1 }),
+        boundaryIndexTitle: schema.string({ minLength: 1 }),
+        boundaryIndexId: schema.string({ minLength: 1 }),
         boundaryGeoField: schema.string({ minLength: 1 }),
       }),
     },

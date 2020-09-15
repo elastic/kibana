@@ -9,6 +9,7 @@ import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPatternsService } from '../../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
 const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
@@ -16,7 +17,7 @@ interface Props {
   onChange: (indexPattern: IndexPattern) => void;
   value: string | null;
   IndexPatternSelectComponent: unknown;
-  indexPatternService: unknown;
+  indexPatternsService: IndexPatternsService;
   http: unknown;
   geoTypes: unknown;
 }

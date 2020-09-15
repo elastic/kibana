@@ -55,7 +55,8 @@ export async function executeEsQueryFactory(
     boundaryType,
   }: {
     entity: string;
-    index: string;
+    indexTitle: string;
+    indexId: string;
     dateField: string;
     boundaryGeoField: string;
     geoField: string;

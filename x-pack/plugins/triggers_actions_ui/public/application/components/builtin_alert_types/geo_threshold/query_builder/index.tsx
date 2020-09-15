@@ -19,11 +19,13 @@ import { BoundaryIndexExpression } from './expressions/boundary_index_expression
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
   ENTITY: '',
-  INDEX: '',
+  INDEX_TITLE: '',
+  INDEX_ID: '',
   DATE_FIELD: '',
   BOUNDARY_TYPE: 'entireIndex', // Only one supported currently. Will eventually be more
   GEO_FIELD: '',
-  BOUNDARY_INDEX: '',
+  BOUNDARY_INDEX_TITLE: '',
+  BOUNDARY_INDEX_ID: '',
   BOUNDARY_GEO_FIELD: '',
 };
 
@@ -37,27 +39,29 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
   AlertsContextValue
 >> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
   const {
-    index,
+    indexTitle,
+    indexId,
     geoField,
     entity,
     dateField,
     trackingEvent,
     boundaryType,
-    boundaryIndex,
+    boundaryIndexTitle,
+    boundaryIndexId,
     boundaryGeoField,
   } = alertParams;
 
   const [indexPattern, _setIndexPattern] = useState({ id: '', fields: [] });
-  const [indexFields, _setIndexFields] = useState([]);
   const setIndexPattern = (_indexPattern) => {
     _setIndexPattern(_indexPattern);
-    _setIndexFields(_indexPattern.fields);
-    setAlertParams('index', _indexPattern.title);
+    setAlertParams('indexTitle', _indexPattern.title);
+    setAlertParams('indexId', _indexPattern.id);
   };
   const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState({ id: '', fields: [] });
   const setBoundaryIndexPattern = (_indexPattern) => {
     _setBoundaryIndexPattern(_indexPattern);
-    setAlertParams('boundaryIndex', _indexPattern.title);
+    setAlertParams('boundaryIndexTitle', _indexPattern.title);
+    setAlertParams('boundaryIndexId', _indexPattern.id);
   };
 
   const hasExpressionErrors = false;
@@ -72,15 +76,25 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     const initToDefaultParams = async () => {
       setAlertProperty('params', {
         ...alertParams,
-        index: index ?? DEFAULT_VALUES.INDEX,
+        indexTitle: indexTitle ?? DEFAULT_VALUES.INDEX_TITLE,
+        indexId: indexId ?? DEFAULT_VALUES.INDEX_ID,
         entity: entity ?? DEFAULT_VALUES.ENTITY,
         dateField: dateField ?? DEFAULT_VALUES.DATE_FIELD,
         trackingEvent: trackingEvent ?? DEFAULT_VALUES.TRACKING_EVENT,
         boundaryType: boundaryType ?? DEFAULT_VALUES.BOUNDARY_TYPE,
         geoField: geoField ?? DEFAULT_VALUES.GEO_FIELD,
-        boundaryIndex: index ?? DEFAULT_VALUES.BOUNDARY_INDEX,
-        boundaryGeoField: index ?? DEFAULT_VALUES.BOUNDARY_GEO_FIELD,
+        boundaryIndexTitle: boundaryIndexTitle ?? DEFAULT_VALUES.BOUNDARY_INDEX_TITLE,
+        boundaryIndexId: boundaryIndexId ?? DEFAULT_VALUES.BOUNDARY_INDEX_ID,
+        boundaryGeoField: boundaryGeoField ?? DEFAULT_VALUES.BOUNDARY_GEO_FIELD,
       });
+      if (indexId) {
+        const _indexPattern = await alertsContext.dataIndexPatterns.get(indexId);
+        setIndexPattern(_indexPattern);
+      }
+      if (boundaryIndexId) {
+        const _boundaryIndexPattern = await alertsContext.dataIndexPatterns.get(boundaryIndexId);
+        setBoundaryIndexPattern(_boundaryIndexPattern);
+      }
     };
     initToDefaultParams();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,7 +149,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiSpacer size="s" />
       <ExpressionWithPopover
         defaultValue={
-          index && geoField && dateField && entity
+          indexId && geoField && dateField && entity
             ? conditionOptions[0].text
             : 'Select crossing option'
         }
