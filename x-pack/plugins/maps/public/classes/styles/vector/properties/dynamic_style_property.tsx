@@ -382,6 +382,9 @@ export class DynamicStyleProperty<T>
   }
 
   getMbPropertyValue(rawValue: RawValue): RawValue {
+    // Maps only uses feature-state for numerical values.
+    // `supportsMbFeatureState` will only return true when the mb-style rule does a feature-state lookup on a numerical value
+    // Calling `isOrdinal` would be equivalent.
     return this.supportsMbFeatureState() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
   }
 }
