@@ -79,7 +79,7 @@ interface Props {
   basePath: HttpStart['basePath'];
   id: string;
   isLocked: boolean;
-  isOpen: boolean;
+  isNavOpen: boolean;
   homeHref: string;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
@@ -94,7 +94,7 @@ export function CollapsibleNav({
   basePath,
   id,
   isLocked,
-  isOpen,
+  isNavOpen,
   homeHref,
   storage = window.localStorage,
   onIsLockedUpdate,
@@ -129,7 +129,7 @@ export function CollapsibleNav({
       aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
         defaultMessage: 'Primary',
       })}
-      isOpen={isOpen}
+      isOpen={isNavOpen}
       isDocked={isLocked}
       onClose={closeNav}
     >

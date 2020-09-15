@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
-import { LocationContext } from '../context/LocationContext';
+import { MonitoringConfig } from '../../config';
 
-export function useLocation() {
-  return useContext(LocationContext);
+export function appendMetricbeatIndex(config: MonitoringConfig, indexPattern: string) {
+  return `${indexPattern},${config.ui.metricbeat.index}`;
 }
