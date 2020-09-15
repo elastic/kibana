@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker', 'hosts', 'settings']);
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const queryBar = getService('queryBar');
 
   describe('Endpoint Event Resolver', function () {
     before(async () => {
@@ -19,6 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
       const toTime = 'now';
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await queryBar.setQuery('event.dataset : endpoint.events.*');
+      await queryBar.submitQuery();
       await (await testSubjects.find('draggable-content-host.name')).click();
       await testSubjects.existOrFail('header-page-title');
       await (await testSubjects.find('navigation-events')).click();
@@ -28,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await pageObjects.hosts.deleteDataStreams();
+      // await pageObjects.hosts.deleteDataStreams();
     });
     it('check that Resolver and Data table is loaded', async () => {
       await testSubjects.existOrFail('resolver:graph');
