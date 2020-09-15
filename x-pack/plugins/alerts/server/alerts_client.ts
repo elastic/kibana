@@ -375,7 +375,7 @@ export class AlertsClient {
   }
 
   public async delete({ id }: { id: string }) {
-    let taskIdToRemove: string | undefined;
+    let taskIdToRemove: string | undefined | null;
     let apiKeyToInvalidate: string | null | undefined = null;
     let attributes: RawAlert;
 

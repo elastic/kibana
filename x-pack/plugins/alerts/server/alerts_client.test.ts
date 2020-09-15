@@ -370,7 +370,7 @@ describe('create()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
@@ -439,55 +439,13 @@ describe('create()', () => {
                                                                           },
                                                                         ]
                                                 `);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[1]).toHaveLength(3);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[1][0]).toEqual('alert');
-    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
-        "actions": Array [
-          Object {
-            "actionRef": "action_0",
-            "actionTypeId": "test",
-            "group": "default",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeId": "123",
-        "apiKey": null,
-        "apiKeyOwner": null,
-        "consumer": "bar",
-        "createdAt": "2019-02-12T21:01:22.479Z",
-        "createdBy": "elastic",
-        "enabled": true,
-        "muteAll": false,
-        "mutedInstanceIds": Array [],
-        "name": "abc",
-        "params": Object {
-          "bar": true,
-        },
-        "schedule": Object {
-          "interval": "10s",
-        },
         "scheduledTaskId": "task-123",
-        "tags": Array [
-          "foo",
-        ],
-        "throttle": null,
-        "updatedBy": "elastic",
-      }
-    `);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[1][2]).toMatchInlineSnapshot(`
-      Object {
-        "id": "1",
-        "overwrite": true,
-        "references": Array [
-          Object {
-            "id": "1",
-            "name": "action_0",
-            "type": "action",
-          },
-        ],
       }
     `);
   });
@@ -3757,7 +3715,7 @@ describe('update()', () => {
         },
       ],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
