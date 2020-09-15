@@ -4,17 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { render, act, fireEvent } from '@testing-library/react';
-import { ManageCustomLink } from './ManageCustomLink';
+import { MemoryRouter } from 'react-router-dom';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { ManageCustomLink } from './ManageCustomLink';
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
 }
 
 describe('ManageCustomLink', () => {
