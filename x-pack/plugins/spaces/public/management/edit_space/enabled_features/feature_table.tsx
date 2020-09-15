@@ -48,7 +48,7 @@ export class FeatureTable extends Component<Props, {}> {
   public render() {
     const { space } = this.props;
 
-    const accordians: Array<{ order: number; element: ReactElement }> = [];
+    const accordions: Array<{ order: number; element: ReactElement }> = [];
     this.featureCategories.forEach((featuresInCategory) => {
       const { category } = featuresInCategory[0];
 
@@ -113,7 +113,7 @@ export class FeatureTable extends Component<Props, {}> {
       //   </EuiText>
       // );
 
-      const accordian = (
+      const accordion = (
         <EuiAccordion
           id={`featureCategory_${category.id}`}
           key={category.id}
