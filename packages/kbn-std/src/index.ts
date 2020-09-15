@@ -16,34 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { deepFreeze } from '@kbn/std';
 
-import { Capabilities } from '../../../types/capabilities';
-import { HttpStart } from '../../http';
-
-interface StartDeps {
-  appIds: string[];
-  http: HttpStart;
-}
-
-/** @internal */
-export interface CapabilitiesStart {
-  capabilities: RecursiveReadonly<Capabilities>;
-}
-
-/**
- * Service that is responsible for UI Capabilities.
- * @internal
- */
-export class CapabilitiesService {
-  public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
-    const capabilities = await http.post<Capabilities>('/api/core/capabilities', {
-      body: JSON.stringify({ applications: appIds }),
-    });
-
-    return {
-      capabilities: deepFreeze(capabilities),
-    };
-  }
-}
+export { assertNever } from './assert_never';
+export { deepFreeze, Freezable } from './deep_freeze';
+export { get } from './get';
+export { mapToObject } from './map_to_object';
+export { merge } from './merge';
+export { pick } from './pick';
+export { withTimeout } from './promise';
+export { isRelativeUrl, modifyUrl, URLMeaningfulParts } from './url';
+export { unset } from './unset';
+export { getFlattenedObject } from './get_flattened_object';
