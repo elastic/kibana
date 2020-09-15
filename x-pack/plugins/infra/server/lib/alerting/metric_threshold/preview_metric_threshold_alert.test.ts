@@ -16,6 +16,8 @@ describe('Previewing the metric threshold alert type', () => {
         ...baseParams,
         lookback: 'h',
         alertInterval: '1m',
+        alertThrottle: '1m',
+        alertOnNoData: true,
       });
       const [firedResults, noDataResults, errorResults] = ungroupedResult;
       expect(firedResults).toBe(30);
@@ -28,6 +30,8 @@ describe('Previewing the metric threshold alert type', () => {
         ...baseParams,
         lookback: 'h',
         alertInterval: '3m',
+        alertThrottle: '3m',
+        alertOnNoData: true,
       });
       const [firedResults, noDataResults, errorResults] = ungroupedResult;
       expect(firedResults).toBe(10);
@@ -39,6 +43,8 @@ describe('Previewing the metric threshold alert type', () => {
         ...baseParams,
         lookback: 'h',
         alertInterval: '30s',
+        alertThrottle: '30s',
+        alertOnNoData: true,
       });
       const [firedResults, noDataResults, errorResults] = ungroupedResult;
       expect(firedResults).toBe(60);
@@ -56,6 +62,8 @@ describe('Previewing the metric threshold alert type', () => {
         },
         lookback: 'h',
         alertInterval: '1m',
+        alertThrottle: '1m',
+        alertOnNoData: true,
       });
       const [firedResultsA, noDataResultsA, errorResultsA] = resultA;
       expect(firedResultsA).toBe(30);
@@ -82,6 +90,8 @@ describe('Previewing the metric threshold alert type', () => {
         },
         lookback: 'h',
         alertInterval: '1m',
+        alertThrottle: '1m',
+        alertOnNoData: true,
       });
       const [firedResults, noDataResults, errorResults] = ungroupedResult;
       expect(firedResults).toBe(25);
