@@ -46,6 +46,7 @@ interface ActionWithContext<Context extends BaseContext = BaseContext> {
 
 type ItemDescriptor = EuiContextMenuPanelItemDescriptor & {
   _order: number;
+  _title?: string;
 };
 
 type PanelDescriptor = EuiContextMenuPanelDescriptor & {
@@ -104,7 +105,7 @@ const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, 
 const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemDescriptor[] => {
   const euiItems: EuiContextMenuPanelItemDescriptor[] = [];
   for (const item of items) {
-    const { _order: omit, ...rest } = item;
+    const { _order: omit, _title: omit2, ...rest } = item;
     euiItems.push(rest);
   }
   return euiItems;
@@ -122,7 +123,7 @@ const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDe
 export interface BuildContextMenuParams {
   actions: ActionWithContext[];
   title?: string;
-  closeMenu: () => void;
+  closeMenu?: () => void;
 }
 
 /**
@@ -131,7 +132,7 @@ export interface BuildContextMenuParams {
 export async function buildContextMenuForActions({
   actions,
   title = defaultTitle,
-  closeMenu,
+  closeMenu = () => {},
 }: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
     mainMenu: {
@@ -166,6 +167,7 @@ export async function buildContextMenuForActions({
               panel: currentPanel,
               icon: group.getIconType ? group.getIconType(context) : 'empty',
               _order: group.order || 0,
+              _title: group.getDisplayName ? group.getDisplayName(context) : '',
             });
           }
         }
@@ -182,13 +184,18 @@ export async function buildContextMenuForActions({
       onClick: onClick(action, context, closeMenu),
       href: action.getHref ? await action.getHref(context) : undefined,
       _order: action.order || 0,
+      _title: action.getDisplayName(context),
     });
   });
   await Promise.all(promises);
 
   for (const panel of Object.values(panels)) {
     const items = panel.items.filter(Boolean) as ItemDescriptor[];
-    panel.items = items.sort((a, b) => (a._order < b._order ? 1 : -1));
+    panel.items = _.sortBy(
+      items,
+      (a) => -1 * (a._order ?? 0),
+      (a) => a._title
+    );
   }
 
   wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
