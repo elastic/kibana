@@ -99,6 +99,9 @@ const fieldsWithData = [
 
 const metricBeatData = [
   '@timestamp',
+  '_id',
+  '_index',
+  '_source',
   'agent.ephemeral_id',
   'agent.hostname',
   'agent.id',
@@ -188,6 +191,9 @@ export default ({ getService }: FtrProviderContext) => {
           '@tags',
           '@tags.raw',
           '@timestamp',
+          '_id',
+          '_index',
+          '_source',
           'agent',
           'agent.raw',
           'bytes',
