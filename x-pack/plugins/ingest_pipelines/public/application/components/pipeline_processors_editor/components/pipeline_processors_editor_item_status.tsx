@@ -18,7 +18,7 @@ interface ProcessorStatusIcon {
 
 const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
   success: {
-    icon: 'check',
+    icon: 'checkInCircleFilled',
     iconColor: 'success',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.successStatusAriaLabel', {
       defaultMessage: 'Success',
@@ -54,7 +54,7 @@ const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
   },
   inactive: {
     icon: 'dot',
-    iconColor: 'subdued',
+    iconColor: '#D3DAE6', // $euiColorLightShade
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.inactiveStatusAriaLabel', {
       defaultMessage: 'Not run',
     }),
@@ -65,7 +65,7 @@ const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
 // This is not expected and likely means we need to modify the code to support a new status
 const unknownStatus = {
   icon: 'dot',
-  iconColor: 'subdued',
+  iconColor: '#D3DAE6', // $euiColorLightShade
   label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.unknownStatusAriaLabel', {
     defaultMessage: 'Unknown',
   }),

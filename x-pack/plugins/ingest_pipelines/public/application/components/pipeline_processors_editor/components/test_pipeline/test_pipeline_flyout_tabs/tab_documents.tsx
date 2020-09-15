@@ -82,6 +82,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         size="s"
         isLoading={isRunningTest}
         disabled={isSubmitButtonDisabled}
+        iconType="play"
       >
         {isRunningTest ? (
           <FormattedMessage

@@ -18,7 +18,7 @@ const i18nTexts = {
   testPipelineActionsLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.testPipelineActionsLabel',
     {
-      defaultMessage: 'Test:',
+      defaultMessage: 'Test pipeline:',
     }
   ),
 };

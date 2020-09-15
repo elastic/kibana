@@ -12,7 +12,7 @@ const i18nTexts = {
   buttonLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.testPipeline.outputButtonLabel',
     {
-      defaultMessage: 'Output',
+      defaultMessage: 'View output',
     }
   ),
 };
