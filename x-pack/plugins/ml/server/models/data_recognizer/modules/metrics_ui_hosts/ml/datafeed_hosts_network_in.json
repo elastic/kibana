@@ -18,7 +18,7 @@
         "time_span": "1000s"
     },
     "aggregations": {
-        "host.name": {"terms": {"field": "host.name"},
+        "host.name": {"terms": {"field": "host.name", "size": 1000},
             "aggregations": {
                 "buckets": {
                     "date_histogram": {"field": "@timestamp","fixed_interval": "5m"},

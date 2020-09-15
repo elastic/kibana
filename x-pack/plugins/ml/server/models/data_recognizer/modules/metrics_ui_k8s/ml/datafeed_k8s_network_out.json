@@ -18,9 +18,9 @@
         "time_span": "1000s"
     },
     "aggregations": {
-        "kubernetes.namespace": {"terms": {"field": "kubernetes.namespace"},
+        "kubernetes.namespace": {"terms": {"field": "kubernetes.namespace", "size": 1000},
             "aggregations": {
-                "kubernetes.pod.uid": {"terms": {"field": "kubernetes.pod.uid"},
+                "kubernetes.pod.uid": {"terms": {"field": "kubernetes.pod.uid", "size": 1000},
                     "aggregations": {
                         "buckets": {
                             "date_histogram": {"field": "@timestamp","fixed_interval": "5m"},
