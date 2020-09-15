@@ -74,7 +74,10 @@ const mergeTimelineFieldsWithHit = <T>(
                 ...get('node.ecs', flattenedFields),
                 ...fieldName
                   .split('.')
-                  .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
+                  .reduceRight(
+                    (obj, next) => ({ [next]: obj }),
+                    toArray(get(esField, hit._source))
+                  ),
               }
             : get('node.ecs', flattenedFields),
         },
