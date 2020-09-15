@@ -10,6 +10,7 @@ import { ReactElement } from 'react';
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
 import { FieldMetaOptions } from '../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../common/constants';
+export type RawValue = string | number | undefined | null;
 
 export type LegendProps = {
   isPointsOnly: boolean;

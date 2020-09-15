@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { Feature } from 'geojson';
-import { AbstractStyleProperty, IStyleProperty } from './style_property';
+import { AbstractStyleProperty, IStyleProperty, RawValue } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
   FIELD_ORIGIN,
@@ -29,8 +29,6 @@ import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IJoin } from '../../../joins/join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
-
-export type RawValue = string | number | undefined | null;
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
