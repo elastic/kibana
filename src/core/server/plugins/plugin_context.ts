@@ -20,6 +20,7 @@
 import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import { PathConfigType, config as pathConfig } from '@kbn/utils';
+import { pick, deepFreeze } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -34,7 +35,6 @@ import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '../elasticsearch/elasticsearch_config';
-import { pick, deepFreeze } from '../../utils';
 import { CoreSetup, CoreStart } from '..';
 
 export interface InstanceInfo {
