@@ -17,12 +17,24 @@
  * under the License.
  */
 
+import { REPO_ROOT } from '@kbn/utils';
+import { resolve } from 'path';
+
+const loadJsonFile = jest.requireActual('load-json-file');
+const kibanaPackagePath = resolve(REPO_ROOT, 'package.json');
+
 export const mockPackage = {
-  raw: { __dirname: '/tmp' } as any,
+  raw: { __dirname: '/tmp', name: 'kibana' } as any,
 };
 
 jest.doMock('load-json-file', () => ({
-  sync: () => mockPackage.raw,
+  ...loadJsonFile,
+  sync: (path: string) => {
+    if (path === kibanaPackagePath) {
+      return mockPackage.raw;
+    }
+    return loadJsonFile.sync(path);
+  },
 }));
 
 export const mockDiscover = jest.fn();

@@ -17,13 +17,12 @@
  * under the License.
  */
 
-// must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
+import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
