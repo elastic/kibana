@@ -13,6 +13,7 @@ import { licenseMock } from './licensing.mock';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const stop$ = new Subject();
+
 describe('licensing update', () => {
   it('loads updates when triggered', async () => {
     const trigger$ = new Subject();
@@ -66,7 +67,8 @@ describe('licensing update', () => {
     expect(first.type).toBe('basic');
 
     trigger$.next();
-    await jest.runAllTicks();
+    // waiting on a promise gives the exhaustMap time to complete and not de-dupe these calls
+    await new Promise((resolve) => resolve());
     trigger$.next();
 
     const [, second] = await license$.pipe(take(2), toArray()).toPromise();
@@ -142,7 +144,7 @@ describe('licensing update', () => {
     expect(fetcher).toHaveBeenCalledTimes(0);
   });
 
-  it('refreshManually guarantees license fetching', async () => {
+  it(`refreshManually multiple times gets new license`, async () => {
     const trigger$ = new Subject();
     const firstLicense = licenseMock.createLicense({ license: { uid: 'first', type: 'basic' } });
     const secondLicense = licenseMock.createLicense({ license: { uid: 'second', type: 'gold' } });
