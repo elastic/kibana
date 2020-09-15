@@ -72,6 +72,7 @@ export function WorkspacePanelWrapper({
           gutterSize="m"
           direction="row"
           responsive={false}
+          wrap={true}
           className="lnsWorkspacePanelWrapper__toolbar"
         >
           <EuiFlexItem grow={false}>
