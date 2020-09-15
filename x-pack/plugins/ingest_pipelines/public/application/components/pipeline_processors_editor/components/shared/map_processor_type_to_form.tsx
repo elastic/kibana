@@ -413,7 +413,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.trim', {
       defaultMessage: 'Trim',
     }),
-    description: i18n.translate('xpack.ingestPipelines.processors.description.split', {
+    description: i18n.translate('xpack.ingestPipelines.processors.description.trim', {
       defaultMessage: 'Removes leading and trailing whitespace from a string.',
     }),
   },
@@ -423,7 +423,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.uppercase', {
       defaultMessage: 'Uppercase',
     }),
-    description: i18n.translate('xpack.ingestPipelines.processors.description.split', {
+    description: i18n.translate('xpack.ingestPipelines.processors.description.uppercase', {
       defaultMessage: 'Converts a string to uppercase.',
     }),
   },
@@ -433,7 +433,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.urldecode', {
       defaultMessage: 'URL decode',
     }),
-    description: i18n.translate('xpack.ingestPipelines.processors.description.split', {
+    description: i18n.translate('xpack.ingestPipelines.processors.description.urldecode', {
       defaultMessage: 'Decodes a URL-encoded string.',
     }),
   },
@@ -443,8 +443,8 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
       defaultMessage: 'User agent',
     }),
-    description: i18n.translate('xpack.ingestPipelines.processors.description.split', {
-      defaultMessage: "Extracts field values from a browser's user agent string.",
+    description: i18n.translate('xpack.ingestPipelines.processors.description.userAgent', {
+      defaultMessage: "Extracts values from a browser's user agent string.",
     }),
   },
 };
