@@ -123,14 +123,14 @@ export const useNetworkKpiUniquePrivateIps = ({
                   setLoading(false);
                 }
                 // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_DNS);
+                notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_UNIQUE_PRIVATE_IPS);
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
               if (!(msg instanceof AbortError)) {
                 notifications.toasts.addDanger({
-                  title: i18n.FAIL_NETWORK_KPI_DNS,
+                  title: i18n.FAIL_NETWORK_KPI_UNIQUE_PRIVATE_IPS,
                   text: msg.message,
                 });
               }
