@@ -25,9 +25,14 @@ export async function loadNodeDetails(selectedNodeAttrs: string) {
   return await sendGet(`nodes/${selectedNodeAttrs}/details`);
 }
 
-export async function loadIndexTemplates() {
-  return await sendGet(`templates`);
-}
+export const useLoadIndexTemplates = (legacy: boolean = false) => {
+  return useRequest({
+    path: 'templates',
+    query: { legacy },
+    method: 'get',
+    initialData: [],
+  });
+};
 
 export async function loadPolicies(withIndices: boolean) {
   return await sendGet('policies', { withIndices });
@@ -65,8 +70,15 @@ export const addLifecyclePolicyToIndex = async (body: any) => {
   return response;
 };
 
-export const addLifecyclePolicyToTemplate = async (body: any) => {
-  const response = await sendPost(`template`, body);
+export const addLifecyclePolicyToTemplate = async (
+  body: {
+    policyName: string;
+    templateName: string;
+    aliasName?: string;
+  },
+  legacy: boolean = false
+) => {
+  const response = await sendPost(`template`, body, { legacy });
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX_TEMPLATE);
   return response;

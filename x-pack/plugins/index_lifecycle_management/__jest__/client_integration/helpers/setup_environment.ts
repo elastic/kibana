@@ -29,6 +29,7 @@ export const setupEnvironment = () => {
   );
 
   mockHttpClient.interceptors.response.use(({ data }) => data);
+  // @ts-ignore
   initHttp(mockHttpClient);
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
-import { get, find } from 'lodash';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCallOut,
-  EuiSelect,
+  EuiComboBox,
   EuiForm,
   EuiFormRow,
   EuiOverlayMask,
@@ -18,71 +17,32 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiText,
+  EuiSwitch,
+  EuiButton,
 } from '@elastic/eui';
 
+import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../../services/api';
 import { toasts } from '../../../../services/notification';
-import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../../services/api';
 import { showApiError } from '../../../../services/api_errors';
-import { LearnMoreLink } from '../../../components/learn_more_link';
+import { LearnMoreLink } from '../../../components';
 
-export class AddPolicyToTemplateConfirmModal extends Component {
-  state = {
-    templates: [],
-  };
-  async componentDidMount() {
-    const templates = await loadIndexTemplates();
-    this.setState({ templates });
-  }
-  addPolicyToTemplate = async () => {
-    const { policy, callback, onCancel } = this.props;
-    const { templateName, aliasName } = this.state;
-    const policyName = policy.name;
-    if (!templateName) {
-      this.setState({
-        templateError: i18n.translate(
-          'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.noTemplateSelectedErrorMessage',
-          { defaultMessage: 'You must select an index template.' }
-        ),
-      });
-      return;
-    }
-    try {
-      await addLifecyclePolicyToTemplate({
-        policyName,
-        templateName,
-        aliasName,
-      });
-      const message = i18n.translate(
-        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.successMessage',
-        {
-          defaultMessage: 'Added policy {policyName} to index template {templateName}',
-          values: { policyName, templateName },
-        }
-      );
-      toasts.addSuccess(message);
-      onCancel();
-    } catch (e) {
-      const title = i18n.translate(
-        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.errorMessage',
-        {
-          defaultMessage: 'Error adding policy "{policyName}" to index template {templateName}',
-          values: { policyName, templateName },
-        }
-      );
-      showApiError(e, title);
-    }
-    if (callback) {
-      callback();
-    }
-  };
-  renderTemplateHasPolicyWarning() {
-    const selectedTemplate = this.getSelectedTemplate();
-    const existingPolicyName = get(selectedTemplate, 'settings.index.lifecycle.name');
+export const AddPolicyToTemplateConfirmModal = ({ policy, onCancel }) => {
+  const [isLegacy, setIsLegacy] = useState(false);
+  const [templateName, setTemplateName] = useState();
+  const [aliasName, setAliasName] = useState();
+  const [templateError, setTemplateError] = useState();
+
+  const { error, isLoading, data: templates, sendRequest } = useLoadIndexTemplates(isLegacy);
+
+  const renderTemplateHasPolicyWarning = () => {
+    const selectedTemplate = templates.find((template) => template.name === templateName);
+    const existingPolicyName = selectedTemplate?.settings?.index?.lifecycle?.name;
     if (!existingPolicyName) {
       return;
     }
     return (
       <Fragment>
+        <EuiSpacer size="s" />
         <EuiCallOut
           style={{ maxWidth: 400 }}
           title={
@@ -105,57 +65,41 @@ export class AddPolicyToTemplateConfirmModal extends Component {
         <EuiSpacer size="s" />
       </Fragment>
     );
-  }
-  getSelectedTemplate() {
-    const { templates, templateName } = this.state;
-    return find(templates, (template) => template.name === templateName);
-  }
-  renderForm() {
-    const { templates, templateName, templateError } = this.state;
-    const options = templates.map(({ name }) => {
-      return {
-        value: name,
-        text: name,
-      };
-    });
-    options.unshift({
-      value: '',
-      text: i18n.translate(
-        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateMessage',
-        {
-          defaultMessage: 'Select an index template',
-        }
-      ),
-    });
+  };
+
+  const renderUnableToLoadTemplatesCallout = () => {
+    const { statusCode = '', message = '' } = error;
     return (
-      <EuiForm>
-        {this.renderTemplateHasPolicyWarning()}
-        <EuiFormRow
-          isInvalid={!!templateError}
-          error={templateError}
-          label={
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiCallOut
+          style={{ maxWidth: 400 }}
+          title={
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateLabel"
-              defaultMessage="Index template"
+              id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.errorLoadingTemplatesTitle"
+              defaultMessage="Unable to load index templates"
             />
           }
+          color="danger"
         >
-          <EuiSelect
-            options={options}
-            value={templateName}
-            onChange={(e) => {
-              this.setState({ templateError: null, templateName: e.target.value });
-            }}
-          />
-        </EuiFormRow>
-        {this.renderAliasFormElement()}
-      </EuiForm>
+          <p>
+            {message} ({statusCode})
+          </p>
+          <EuiButton isLoading={isLoading} color="danger" onClick={sendRequest}>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.errorLoadingTemplatesButton"
+              defaultMessage="Try again"
+            />
+          </EuiButton>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </Fragment>
     );
-  }
-  renderAliasFormElement = () => {
-    const { aliasName } = this.state;
-    const { policy } = this.props;
-    const showAliasTextInput = policy && get(policy, 'policy.phases.hot.actions.rollover');
+  };
+
+  const renderAliasFormElement = () => {
+    console.log(policy);
+    const showAliasTextInput = policy?.policy?.phases.hot?.actions.rollover;
     if (!showAliasTextInput) {
       return null;
     }
@@ -171,63 +115,182 @@ export class AddPolicyToTemplateConfirmModal extends Component {
         <EuiFieldText
           value={aliasName}
           onChange={(e) => {
-            this.setState({ aliasName: e.target.value });
+            setAliasName(e.target.value);
           }}
         />
       </EuiFormRow>
     );
   };
-  render() {
-    const { policy, onCancel } = this.props;
-    const title = i18n.translate(
-      'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.title',
-      {
-        defaultMessage: 'Add policy "{name}" to index template',
-        values: { name: policy.name },
+
+  const renderForm = () => {
+    let options = [];
+    if (templates) {
+      options = templates.map(({ name }) => {
+        return {
+          label: name,
+        };
+      });
+    }
+    const onComboChange = (comboOptions) => {
+      let value = '';
+      if (comboOptions.length > 0) {
+        value = comboOptions[0].label;
       }
-    );
+      setTemplateError(undefined);
+      setTemplateName(value);
+    };
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={onCancel}
-          onConfirm={this.addPolicyToTemplate}
-          cancelButtonText={i18n.translate(
-            'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.cancelButton',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.confirmButton',
-            {
-              defaultMessage: 'Add policy',
-            }
-          )}
-          onClose={onCancel}
-        >
-          <EuiText>
-            <p>
+      <EuiForm>
+        <EuiFormRow>
+          <EuiSwitch
+            label={
               <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.explanationText"
-                defaultMessage="This will apply the lifecycle policy to
-                  all indices which match the index template."
-              />{' '}
-              <LearnMoreLink
-                docPath="indices-templates.html"
-                text={
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexTemplatesLink"
-                    defaultMessage="Learn about index templates"
-                  />
-                }
+                id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.showLegacyTemplates"
+                defaultMessage="Show legacy index templates"
               />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          {this.renderForm()}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+            }
+            checked={isLegacy}
+            onChange={(e) => {
+              setTemplateName('');
+              setIsLegacy(e.target.checked);
+            }}
+          />
+        </EuiFormRow>
+        {!error ? (
+          <>
+            {renderTemplateHasPolicyWarning()}
+            <EuiFormRow
+              isInvalid={!!templateError}
+              error={templateError}
+              label={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateLabel"
+                  defaultMessage="Index template"
+                />
+              }
+            >
+              <EuiComboBox
+                isLoading={isLoading}
+                placeholder={i18n.translate(
+                  'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateMessage',
+                  {
+                    defaultMessage: 'Select an index template',
+                  }
+                )}
+                options={options}
+                selectedOptions={
+                  templateName
+                    ? [
+                        {
+                          label: templateName,
+                        },
+                      ]
+                    : []
+                }
+                onChange={onComboChange}
+                singleSelection={{ asPlainText: true }}
+                isClearable={true}
+              />
+            </EuiFormRow>
+          </>
+        ) : (
+          renderUnableToLoadTemplatesCallout()
+        )}
+        {renderAliasFormElement()}
+      </EuiForm>
     );
-  }
-}
+  };
+
+  const addPolicyToTemplate = async () => {
+    const policyName = policy.name;
+    if (!templateName) {
+      setTemplateError(
+        i18n.translate(
+          'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.noTemplateSelectedErrorMessage',
+          { defaultMessage: 'You must select an index template.' }
+        )
+      );
+      return;
+    }
+    try {
+      await addLifecyclePolicyToTemplate(
+        {
+          policyName,
+          templateName,
+          aliasName,
+        },
+        isLegacy
+      );
+      const message = i18n.translate(
+        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.successMessage',
+        {
+          defaultMessage: 'Added policy {policyName} to index template {templateName}',
+          values: { policyName, templateName },
+        }
+      );
+      toasts.addSuccess(message);
+      onCancel();
+    } catch (e) {
+      const title = i18n.translate(
+        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.errorMessage',
+        {
+          defaultMessage: 'Error adding policy "{policyName}" to index template {templateName}',
+          values: { policyName, templateName },
+        }
+      );
+      showApiError(e, title);
+    }
+  };
+
+  const title = i18n.translate(
+    'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.title',
+    {
+      defaultMessage: 'Add policy "{name}" to index template',
+      values: { name: policy.name },
+    }
+  );
+
+  return (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title={title}
+        onCancel={onCancel}
+        onConfirm={addPolicyToTemplate}
+        cancelButtonText={i18n.translate(
+          'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.cancelButton',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.confirmButton',
+          {
+            defaultMessage: 'Add policy',
+          }
+        )}
+        confirmButtonDisabled={isLoading || !!error || !templates}
+      >
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.explanationText"
+              defaultMessage="This will apply the lifecycle policy to
+                  all indices which match the index template."
+            />{' '}
+            <LearnMoreLink
+              docPath="indices-templates.html"
+              text={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexTemplatesLink"
+                  defaultMessage="Learn about index templates"
+                />
+              }
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        {renderForm()}
+      </EuiConfirmModal>
+    </EuiOverlayMask>
+  );
+};
