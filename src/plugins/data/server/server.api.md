@@ -117,6 +117,7 @@ import { NodesHotThreadsParams } from 'elasticsearch';
 import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { PathConfigType } from '@kbn/utils';
 import { PingParams } from 'elasticsearch';
 import { Plugin as Plugin_2 } from 'src/core/server';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/server';

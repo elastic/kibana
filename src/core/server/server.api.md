@@ -106,6 +106,7 @@ import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
@@ -2843,6 +2844,5 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:135:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```
