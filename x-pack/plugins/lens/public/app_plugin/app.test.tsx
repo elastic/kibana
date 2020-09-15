@@ -676,12 +676,10 @@ describe('Lens App', () => {
         );
         expect(props.redirectTo).toHaveBeenCalledWith('aaa');
 
-        // TODO: Figure out why this section was supposed to be called 0 times. Seems to me that the savedObjectId has been updated
-        // from undefined, to 'aaa', so it only makes sense for the doc to be loaded...
         await act(async () => {
           component.setProps({ initialInput: { savedObjectId: 'aaa' } });
         });
-        expect(services.attributeService.unwrapAttributes).toHaveBeenCalledTimes(1);
+        expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
       });
 
       it('adds to the recently viewed list on save', async () => {
