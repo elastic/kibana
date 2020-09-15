@@ -5,9 +5,10 @@
  */
 
 import { map as mapAsync } from 'bluebird';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function WatcherPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+export function WatcherPageProvider({ getPageObjects, getService }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['header']);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
@@ -22,7 +23,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
       }
     }
 
-    async createWatch(watchName, name) {
+    async createWatch(watchName: string, name: string) {
       await testSubjects.click('createWatchButton');
       await testSubjects.click('jsonWatchCreateLink');
       await find.setValue('#id', watchName);
@@ -31,7 +32,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async getWatch(watchID) {
+    async getWatch(watchID: string) {
       const watchIdColumn = await testSubjects.find(`watchIdColumn-${watchID}`);
       const watchNameColumn = await testSubjects.find(`watchNameColumn-${watchID}`);
       const id = await watchIdColumn.getVisibleText();
@@ -47,7 +48,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
       await testSubjects.click('btnDeleteWatches');
     }
 
-    //get all the watches in the list
+    // get all the watches in the list
     async getWatches() {
       const watches = await find.allByCssSelector('.euiTableRow');
       return mapAsync(watches, async (watch) => {

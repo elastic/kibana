@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function VegaChartPageProvider({
@@ -48,10 +47,10 @@ export function VegaChartPageProvider({
       await textarea.click();
       let repeats = 20;
       while (--repeats > 0) {
-        await browser.pressKeys(Key.ARROW_UP);
+        await browser.pressKeys(browser.keys.ARROW_UP);
         await common.sleep(50);
       }
-      await browser.pressKeys(Key.ARROW_RIGHT);
+      await browser.pressKeys(browser.keys.ARROW_RIGHT);
       await browser.pressKeys(text);
     }
 
