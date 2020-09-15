@@ -201,7 +201,7 @@ export function DiscoverLegacy({
                 onClick={() => setIsSidebarClosed(!isSidebarClosed)}
                 data-test-subj="collapseSideBarButton"
                 aria-controls="discover-sidebar"
-                aria-expanded="true"
+                aria-expanded={isSidebarClosed ? 'false' : 'true'}
                 aria-label="Toggle sidebar"
                 className="kuiCollapseButton kbnCollapsibleSidebar__collapseButton"
               >
