@@ -95,5 +95,20 @@ export default function ({ getService }: FtrProviderContext) {
         .auth(users.kibana_basic_user.username, users.kibana_basic_user.password)
         .expect(404);
     });
+    it('should return a 400 when given a bad "kuery" value', async () => {
+      await supertest
+        .get(`/api/ingest_manager/fleet/agents?kuery=m`)
+        .auth(users.fleet_user.username, users.fleet_user.password)
+        .expect(400);
+    });
+    it('work', async () => {
+      const filter = encodeURIComponent('fleet-agents.access_api_key_id : "api-key-2"');
+      const { body: apiResponse } = await supertest
+        .get(`/api/ingest_manager/fleet/agents?kuery=${filter}`)
+        .auth(users.fleet_user.username, users.fleet_user.password)
+        .expect(200);
+
+      expect(apiResponse.total).to.eql(2);
+    });
   });
 }
