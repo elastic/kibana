@@ -33,7 +33,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ hasHistoricalData: false, hasLegacyData: false, items: [] });
+        expect(response.body.hasHistoricalData).to.be(false);
+        expect(response.body.hasLegacyData).to.be(false);
+        expect(response.body.items.length).to.be(0);
       });
     });
 
