@@ -29,7 +29,7 @@ export function initAPIAuthorization(
 
     const apiActions = actionTags.map((tag) => actions.api.get(tag.substring(tagPrefix.length)));
     const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-    const checkPrivilegesResponse = await checkPrivileges(apiActions);
+    const checkPrivilegesResponse = await checkPrivileges({ kibana: apiActions });
 
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {

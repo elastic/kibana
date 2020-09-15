@@ -37,6 +37,7 @@ import {
 import { AlertType } from '../common/alert_types';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
+import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -57,6 +58,7 @@ export interface ApmPluginStartDeps {
   home: void;
   licensing: void;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  embeddable: EmbeddableStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -103,7 +105,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       id: 'apm',
       title: 'APM',
       order: 8300,
-      euiIconType: 'apmApp',
+      euiIconType: 'logoObservability',
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -123,16 +125,23 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       id: 'csm',
       title: 'Client Side Monitoring',
       order: 8500,
+      euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application/csmApp'),
           core.getStartServices(),
         ]);
 
-        return renderApp(coreStart, pluginSetupDeps, params, config);
+        return renderApp(
+          coreStart,
+          pluginSetupDeps,
+          params,
+          config,
+          corePlugins as ApmPluginStartDeps
+        );
       },
     });
   }

@@ -132,6 +132,7 @@ export class AdvancedUiActionsPublicPlugin
         storage: new Storage(window?.localStorage),
         toastService: core.notifications.toasts,
         docsLink: core.docLinks.links.dashboard.drilldowns,
+        triggerPickerDocsLink: core.docLinks.links.dashboard.drilldownsTriggerPicker,
       }),
     };
   }
