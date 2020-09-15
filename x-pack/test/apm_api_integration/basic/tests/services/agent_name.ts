@@ -6,13 +6,14 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import archives from '../../archives_metadata';
+import archives from '../../../common/archives_metadata';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const range = archives['apm_8.0.0'];
+  const archiveName = 'apm_8.0.0';
+  const range = archives[archiveName];
   const start = encodeURIComponent(range.start);
   const end = encodeURIComponent(range.end);
 
@@ -29,8 +30,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('apm_8.0.0'));
-      after(() => esArchiver.unload('apm_8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('returns the agent name', async () => {
         const response = await supertest.get(
@@ -38,6 +39,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
+
         expect(response.body).to.eql({ agentName: 'nodejs' });
       });
     });

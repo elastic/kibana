@@ -5,16 +5,15 @@
  */
 
 import http, { IncomingMessage } from 'http';
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { parse } from 'url';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ReportingPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-
-  const PageObjects = getPageObjects(['common', 'security' as any, 'share', 'timePicker']); // FIXME: Security PageObject is not Typescript
+  const PageObjects = getPageObjects(['security', 'share', 'timePicker']);
 
   class ReportingPage {
     async forceSharedItemsContainerSize({ width }: { width: number }) {

@@ -40,7 +40,6 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
-import { ErrorToastOptions } from 'src/core/public/notifications';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -106,7 +105,6 @@ import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { ParsedQuery } from 'query-string';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
@@ -119,7 +117,6 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
@@ -143,7 +140,6 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
-import { ToastInputFields } from 'src/core/public/notifications';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -159,9 +155,6 @@ import { Url } from 'url';
 //
 // @public (undocumented)
 export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
-
-// @public
-export function assertNever(x: never): never;
 
 // @public @deprecated (undocumented)
 export interface AssistanceAPIResponse {
@@ -504,9 +497,6 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
-// @public
-export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>;
-
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Readonly<{
     kibana: {
@@ -716,11 +706,6 @@ export interface FakeRequest {
     headers: Headers;
 }
 
-// @public (undocumented)
-export type Freezable = {
-    [k: string]: any;
-} | any[];
-
 // @public
 export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
 
@@ -728,11 +713,6 @@ export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHea
 export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
     status: AuthStatus;
     state: T;
-};
-
-// @public
-export function getFlattenedObject(rootValue: Record<string, any>): {
-    [key: string]: any;
 };
 
 // @public (undocumented)
@@ -965,9 +945,6 @@ export interface IScopedClusterClient {
     readonly asCurrentUser: ElasticsearchClient;
     readonly asInternalUser: ElasticsearchClient;
 }
-
-// @public
-export function isRelativeUrl(candidatePath: string): boolean;
 
 // @public
 export interface IUiSettingsClient {
@@ -1531,10 +1508,10 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// Warning: (ae-missing-release-tag) "MetricsServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export interface MetricsServiceSetup {
+    readonly collectionInterval: number;
+    getOpsMetrics$: () => Observable<OpsMetrics>;
 }
 
 // @public @deprecated (undocumented)
@@ -1542,9 +1519,6 @@ export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 
 // @public @deprecated (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
-
-// @public
-export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
 
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
@@ -1621,6 +1595,7 @@ export interface OnPreRoutingToolkit {
 
 // @public
 export interface OpsMetrics {
+    collected_at: Date;
     concurrent_connections: OpsServerMetrics['concurrent_connections'];
     os: OpsOsMetrics;
     process: OpsProcessMetrics;
@@ -1630,6 +1605,20 @@ export interface OpsMetrics {
 
 // @public
 export interface OpsOsMetrics {
+    cpu?: {
+        control_group: string;
+        cfs_period_micros: number;
+        cfs_quota_micros: number;
+        stat: {
+            number_of_elapsed_periods: number;
+            number_of_times_throttled: number;
+            time_throttled_nanos: number;
+        };
+    };
+    cpuacct?: {
+        control_group: string;
+        usage_nanos: number;
+    };
     distro?: string;
     distroRelease?: string;
     load: {
@@ -2032,6 +2021,7 @@ export interface SavedObjectsBulkResponse<T = unknown> {
 export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
     attributes: Partial<T>;
     id: string;
+    namespace?: string;
     type: string;
 }
 
@@ -2615,6 +2605,12 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
     references: SavedObjectReference[] | undefined;
 }
 
+// @public (undocumented)
+export class SavedObjectsUtils {
+    static namespaceIdToString: (namespace?: string | undefined) => string;
+    static namespaceStringToId: (namespace: string) => string | undefined;
+}
+
 // @public
 export class SavedObjectTypeRegistry {
     getAllTypes(): SavedObjectsType[];
@@ -2763,10 +2759,17 @@ export type SharedGlobalConfig = RecursiveReadonly<{
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ServiceStatusSetup"
+//
 // @public
 export interface StatusServiceSetup {
     core$: Observable<CoreStatus>;
+    dependencies$: Observable<Record<string, ServiceStatus>>;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "StatusSetup"
+    derivedStatus$: Observable<ServiceStatus>;
     overall$: Observable<ServiceStatus>;
+    set(status$: Observable<ServiceStatus>): void;
 }
 
 // @public
@@ -2820,26 +2823,6 @@ export interface UiSettingsServiceStart {
 export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
 
 // @public
-export interface URLMeaningfulParts {
-    // (undocumented)
-    auth?: string | null;
-    // (undocumented)
-    hash?: string | null;
-    // (undocumented)
-    hostname?: string | null;
-    // (undocumented)
-    pathname?: string | null;
-    // (undocumented)
-    port?: string | null;
-    // (undocumented)
-    protocol?: string | null;
-    // (undocumented)
-    query: ParsedQuery;
-    // (undocumented)
-    slashes?: boolean | null;
-}
-
-// @public
 export interface UserProvidedValues<T = any> {
     // (undocumented)
     isOverridden?: boolean;
@@ -2855,8 +2838,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:135:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:268:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

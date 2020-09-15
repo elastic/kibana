@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { httpServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { ISearchSource, SearchSource } from './search_source';
 import { SearchSourceFields } from './types';
@@ -54,6 +54,9 @@ export const createSearchSourceMock = (fields?: SearchSourceFields) =>
   new SearchSource(fields, {
     getConfig: uiSettingsServiceMock.createStartContract().get,
     search: jest.fn(),
-    http: httpServiceMock.createStartContract(),
-    loadingCount$: new BehaviorSubject(0),
+    onResponse: jest.fn().mockImplementation((req, res) => res),
+    legacy: {
+      callMsearch: jest.fn(),
+      loadingCount$: new BehaviorSubject(0),
+    },
   });

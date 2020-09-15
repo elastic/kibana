@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import url from 'url';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { useFetcher } from '../../../hooks/useFetcher';
+import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -18,8 +18,11 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { MLCallout } from './ServiceList/MLCallout';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
 
-const initalData = {
+const initialData = {
   items: [],
   hasHistoricalData: true,
   hasLegacyData: false,
@@ -33,7 +36,7 @@ export function ServiceOverview() {
     urlParams: { start, end },
     uiFilters,
   } = useUrlParams();
-  const { data = initalData, status } = useFetcher(
+  const { data = initialData, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
@@ -93,6 +96,26 @@ export function ServiceOverview() {
     []
   );
 
+  const {
+    data: anomalyDetectionJobsData,
+    status: anomalyDetectionJobsStatus,
+  } = useAnomalyDetectionJobs();
+
+  const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
+    'apm.userHasDismissedServiceInventoryMlCallout',
+    false
+  );
+
+  const canCreateJob = !!core.application.capabilities.ml?.canCreateJob;
+
+  const displayMlCallout =
+    anomalyDetectionJobsStatus === FETCH_STATUS.SUCCESS &&
+    !anomalyDetectionJobsData?.jobs.length &&
+    canCreateJob &&
+    !userHasDismissedCallout;
+
+  const displayHealthStatus = data.items.some((item) => 'severity' in item);
+
   return (
     <>
       <EuiSpacer />
@@ -101,17 +124,27 @@ export function ServiceOverview() {
           <LocalUIFilters {...localFiltersConfig} />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiPanel>
-            <ServiceList
-              items={data.items}
-              noItemsMessage={
-                <NoServicesMessage
-                  historicalDataFound={data.hasHistoricalData}
-                  status={status}
+          <EuiFlexGroup direction="column">
+            {displayMlCallout ? (
+              <EuiFlexItem>
+                <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem>
+              <EuiPanel>
+                <ServiceList
+                  items={data.items}
+                  displayHealthStatus={displayHealthStatus}
+                  noItemsMessage={
+                    <NoServicesMessage
+                      historicalDataFound={data.hasHistoricalData}
+                      status={status}
+                    />
+                  }
                 />
-              }
-            />
-          </EuiPanel>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
