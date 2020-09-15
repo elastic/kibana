@@ -29,6 +29,7 @@ export const ENTERPRISE_SEARCH_PLUGIN = {
     }),
   ],
   URL: '/app/enterprise_search/overview',
+  LOGO: 'logoEnterpriseSearch',
 };
 
 export const APP_SEARCH_PLUGIN = {

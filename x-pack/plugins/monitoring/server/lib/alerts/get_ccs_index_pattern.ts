@@ -7,10 +7,11 @@ export function getCcsIndexPattern(indexPattern: string, remotes: string[]): str
   if (remotes.length === 0) {
     return indexPattern;
   }
-  return `${indexPattern},${indexPattern
-    .split(',')
-    .map((pattern) => {
-      return remotes.map((remoteName) => `${remoteName}:${pattern}`).join(',');
-    })
-    .join(',')}`;
+  const patternsToAdd = [];
+  for (const index of indexPattern.split(',')) {
+    for (const remote of remotes) {
+      patternsToAdd.push(`${remote}:${index}`);
+    }
+  }
+  return [...indexPattern.split(','), ...patternsToAdd].join(',');
 }

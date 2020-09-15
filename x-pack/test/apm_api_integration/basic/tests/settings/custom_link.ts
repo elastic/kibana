@@ -14,6 +14,8 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
 
+  const archiveName = 'apm_8.0.0';
+
   function searchCustomLinks(filters?: any) {
     const path = URL.format({
       pathname: `/api/apm/settings/custom_links`,
@@ -142,8 +144,8 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
     });
 
     describe('transaction', () => {
-      before(() => esArchiver.load('8.0.0'));
-      after(() => esArchiver.unload('8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('fetches a transaction sample', async () => {
         const response = await supertestRead.get(
