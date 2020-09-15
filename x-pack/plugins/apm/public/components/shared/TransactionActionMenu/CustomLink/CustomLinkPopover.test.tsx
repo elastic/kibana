@@ -5,6 +5,7 @@
  */
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
@@ -12,7 +13,11 @@ import { expectTextsInDocument } from '../../../../utils/testHelpers';
 import { CustomLinkPopover } from './CustomLinkPopover';
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  return <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>;
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
 }
 
 describe('CustomLinkPopover', () => {

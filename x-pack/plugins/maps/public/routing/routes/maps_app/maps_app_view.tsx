@@ -88,6 +88,7 @@ interface Props {
   setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => void;
   setOpenTOCDetails: (openTOCDetails: string[]) => void;
   query: MapQuery | undefined;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 interface State {
@@ -395,6 +396,7 @@ export class MapsAppView extends React.Component<Props, State> {
     const { TopNavMenu } = getNavigation().ui;
     return (
       <TopNavMenu
+        setMenuMountPoint={this.props.setHeaderActionMenu}
         appName="maps"
         config={topNavConfig}
         indexPatterns={this.state.indexPatterns}
