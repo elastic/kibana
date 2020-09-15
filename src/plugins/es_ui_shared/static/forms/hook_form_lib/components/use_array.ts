@@ -109,7 +109,7 @@ export const UseArray = ({
   // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.
   const fieldConfigBase: FieldConfig<any, ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,
-    errorDisplayDelay: 0,
+    valueChangeDebounceTime: 0,
     isIncludedInOutput: false,
   };
 
