@@ -5,7 +5,6 @@ import builds.*
 import builds.default.*
 import builds.oss.*
 import builds.test.*
-import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnection
 import kibanaAgent
@@ -69,6 +68,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
     }
 
     buildType(Lint)
+    buildType(Checks)
 
     subProject {
       id("Test")
@@ -138,7 +138,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
       }
     }
 
-    buildType(EssentialCi)
+    buildType(FullCi)
     buildType(BaselineCi)
   }
 }

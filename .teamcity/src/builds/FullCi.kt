@@ -7,9 +7,10 @@ import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.schedule
 
-object EssentialCi : BuildType({
-  id("Essential_CI")
-  name = "Essential CI"
+object FullCi : BuildType({
+  id("Full_CI")
+  name = "Full CI"
+  description = "Runs everything in CI, hourly"
   type = Type.COMPOSITE
   paused = false
 
@@ -26,6 +27,7 @@ object EssentialCi : BuildType({
 
   dependsOn(
     Lint,
+    Checks,
     AllTests,
     OssBuild,
     OssVisualRegression,
