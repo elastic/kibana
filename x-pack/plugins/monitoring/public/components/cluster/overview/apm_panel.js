@@ -55,7 +55,7 @@ export function ApmPanel(props) {
       {...props}
       url="apm"
       title={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmTitle', {
-        defaultMessage: 'APM',
+        defaultMessage: 'APM server',
       })}
     >
       <EuiFlexGrid columns={4}>
