@@ -37,7 +37,7 @@ export function createTileMapTypeDefinition(dependencies) {
       console.log(vis);
       return i18n.translate('tileMap.vis.deprecationMessage', {
         defaultMessage:
-          'In 8.0, Coordinate maps will be migrating to Maps. With Maps, you can add multiple layers and indices, plot individual documents, symbolize features from data values, and more.',
+          'Coordinate maps will migrate to Maps in 8.0. With Maps, you can add multiple layers and indices, plot individual documents, symbolize features from data values, and more.',
       });
     },
     title: i18n.translate('tileMap.vis.mapTitle', {
