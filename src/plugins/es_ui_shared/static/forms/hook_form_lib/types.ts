@@ -52,7 +52,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
    * If you are only interested in the raw form data, pass `unflatten: false` to the handler
    */
   getFormData: (options?: { unflatten?: boolean }) => T;
-  /* Returns an array with of all errors in the form. */
+  /* Returns a list of all errors in the form */
   getErrors: () => string[];
   /** Resets the form to its initial state. */
   reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
