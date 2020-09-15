@@ -14,11 +14,11 @@ object BaselineCi : BuildType({
   name = "Baseline CI"
   description = "Runs builds and visual regression tests for every commit"
   type = Type.COMPOSITE
-  paused = false
+  paused = true
 
   triggers {
     vcs {
-      perCheckinTriggering = true
+//      perCheckinTriggering = true // TODO re-enable this later, it wreaks havoc when I merge upstream
     }
   }
 
