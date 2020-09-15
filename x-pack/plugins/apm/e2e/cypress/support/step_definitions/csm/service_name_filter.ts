@@ -8,16 +8,16 @@ import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { DEFAULT_TIMEOUT } from '../apm';
 import { verifyClientMetrics } from './client_metrics_helper';
 
-When('a user changes the selected service name', (filterName) => {
+When('the user changes the selected service name', (filterName) => {
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
   cy.get(`[data-cy=serviceNameFilter]`, { timeout: DEFAULT_TIMEOUT }).select(
-    'opbean-client-rum'
+    'client'
   );
 });
 
 Then(`it displays relevant client metrics`, () => {
-  const metrics = ['0.01 sec', '0.07 sec', '7 '];
+  const metrics = ['4 ms', '0.06 s', '55 '];
 
   verifyClientMetrics(metrics, false);
 });
