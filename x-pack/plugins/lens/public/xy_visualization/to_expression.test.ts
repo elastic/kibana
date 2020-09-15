@@ -100,25 +100,26 @@ describe('#toExpression', () => {
     expect(expression.chain[0].arguments.showYAxisTitle[0]).toBe(true);
   });
 
-  it('should not generate an expression when missing x', () => {
-    expect(
-      xyVisualization.toExpression(
-        {
-          legend: { position: Position.Bottom, isVisible: true },
-          preferredSeriesType: 'bar',
-          layers: [
-            {
-              layerId: 'first',
-              seriesType: 'area',
-              splitAccessor: undefined,
-              xAccessor: undefined,
-              accessors: ['a'],
-            },
-          ],
-        },
-        frame.datasourceLayers
-      )
-    ).toBeNull();
+  it('should generate an expression without x accessor', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: undefined,
+            xAccessor: undefined,
+            accessors: ['a'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.xAccessor).toEqual(
+      []
+    );
   });
 
   it('should not generate an expression when missing y', () => {
