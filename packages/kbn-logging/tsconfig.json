@@ -5,12 +5,7 @@
     "stripInternal": false,
     "declaration": true,
     "declarationMap": true,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["./src/**/*.ts"]
 }
