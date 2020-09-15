@@ -22,7 +22,7 @@ import { cloneDeep } from 'lodash';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
 import url from 'url';
-import { pick } from '../../../utils';
+import { pick } from '@kbn/std';
 import { Logger } from '../../logging';
 import { ElasticsearchConfig } from '../elasticsearch_config';
 

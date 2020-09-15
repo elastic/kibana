@@ -325,19 +325,20 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           success: false,
         };
 
-        // Check if analyticsId is valid and get destination index
-        if (deleteDestIndex || deleteDestIndexPattern) {
-          try {
-            const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
-              id: analyticsId,
-            });
-            if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
-              destinationIndex = body.data_frame_analytics[0].dest.index;
-            }
-          } catch (e) {
-            return response.customError(wrapError(e));
+        try {
+          // Check if analyticsId is valid and get destination index
+          const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
+            id: analyticsId,
+          });
+          if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
+            destinationIndex = body.data_frame_analytics[0].dest.index;
           }
+        } catch (e) {
+          // exist early if the job doesn't exist
+          return response.customError(wrapError(e));
+        }
 
+        if (deleteDestIndex || deleteDestIndexPattern) {
           // If user checks box to delete the destinationIndex associated with the job
           if (destinationIndex && deleteDestIndex) {
             // Verify if user has privilege to delete the destination index
@@ -349,8 +350,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
                   index: destinationIndex,
                 });
                 destIndexDeleted.success = true;
-              } catch (deleteIndexError) {
-                destIndexDeleted.error = wrapError(deleteIndexError);
+              } catch ({ body }) {
+                destIndexDeleted.error = body;
               }
             } else {
               return response.forbidden();
@@ -366,7 +367,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
               }
               destIndexPatternDeleted.success = true;
             } catch (deleteDestIndexPatternError) {
-              destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
+              destIndexPatternDeleted.error = deleteDestIndexPatternError;
             }
           }
         }
@@ -378,11 +379,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
             id: analyticsId,
           });
           analyticsJobDeleted.success = true;
-        } catch (deleteDFAError) {
-          analyticsJobDeleted.error = wrapError(deleteDFAError);
-          if (analyticsJobDeleted.error.statusCode === 404) {
-            return response.notFound();
-          }
+        } catch ({ body }) {
+          analyticsJobDeleted.error = body;
         }
         const results = {
           analyticsJobDeleted,
