@@ -8,11 +8,16 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import uuid from 'uuid/v4';
 import { CombinedField } from './types';
+import {
+  FindFileStructureResponse,
+  IngestPipeline,
+  Mappings,
+} from '../../../../../../common/types/file_datavisualizer';
 
 const COMMON_LAT_NAMES = ['latitude', 'lat'];
 const COMMON_LON_NAMES = ['longitude', 'long', 'lon'];
 
-export function getDefaultCombinedFields(results: unknown) {
+export function getDefaultCombinedFields(results: FindFileStructureResponse) {
   const combinedFields: CombinedField[] = [];
   const geoPointField = getGeoPointField(results);
   if (geoPointField) {
@@ -21,7 +26,7 @@ export function getDefaultCombinedFields(results: unknown) {
   return combinedFields;
 }
 
-export function addCombinedFieldsToMappings(mappings: unknown, combinedFields: CombinedField[]) {
+export function addCombinedFieldsToMappings(mappings: Mappings, combinedFields: CombinedField[]) {
   const updatedMappings = { ...mappings };
   combinedFields.forEach((combinedField) => {
     updatedMappings.properties[combinedField.combinedFieldName] = {
@@ -32,7 +37,7 @@ export function addCombinedFieldsToMappings(mappings: unknown, combinedFields: C
 }
 
 export function removeCombinedFieldsFromMappings(
-  mappings: unknown,
+  mappings: Mappings,
   combinedFields: CombinedField[]
 ) {
   const updatedMappings = { ...mappings };
@@ -42,7 +47,10 @@ export function removeCombinedFieldsFromMappings(
   return updatedMappings;
 }
 
-export function addCombinedFieldsToPipeline(pipeline: unknown, combinedFields: CombinedField[]) {
+export function addCombinedFieldsToPipeline(
+  pipeline: IngestPipeline,
+  combinedFields: CombinedField[]
+) {
   const updatedPipeline = _.cloneDeep(pipeline);
   combinedFields.forEach((combinedField) => {
     updatedPipeline.processors.push({
@@ -65,7 +73,7 @@ export function removeCombinedFieldsFromPipeline(
 ) {
   return {
     ...pipeline,
-    processors: pipeline.processors.filter((processor: unknown) => {
+    processors: pipeline.processors.filter((processor: IngestPipeline) => {
       return processor.hasOwnProperty('set')
         ? !combinedFields.some((combinedField) => {
             return processor.set.field === combinedField.combinedFieldName;
@@ -85,7 +93,10 @@ export function isWithinLatRange(fieldName: string, fieldStats: unknown) {
   );
 }
 
-export function isWithinLonRange(fieldName: string, fieldStats: unknown) {
+export function isWithinLonRange(
+  fieldName: string,
+  fieldStats: FindFileStructureResponse['field_stats']
+) {
   return (
     fieldStats.hasOwnProperty(fieldName) &&
     fieldStats[fieldName].hasOwnProperty('max_value') &&
@@ -115,7 +126,7 @@ export function getNameCollisionMsg(name: string) {
   });
 }
 
-function getGeoPointField(results: unknown) {
+function getGeoPointField(results: FindFileStructureResponse) {
   const latField = results.column_names.find((columnName) => {
     return (
       COMMON_LAT_NAMES.includes(columnName.toLowerCase()) &&
@@ -145,5 +156,5 @@ function getGeoPointField(results: unknown) {
     return !results.column_names.includes(name);
   });
 
-  return createGeoPointCombinedField(latField, lonField, geoPointField);
+  return geoPointField ? createGeoPointCombinedField(latField, lonField, geoPointField) : null;
 }

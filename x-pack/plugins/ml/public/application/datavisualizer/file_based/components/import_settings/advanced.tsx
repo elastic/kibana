@@ -19,6 +19,7 @@ import {
 
 import { CombinedField, CombinedFieldsForm } from '../combined_fields';
 import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 const EDITOR_HEIGHT = '300px';
 
 interface Props {
@@ -39,7 +40,7 @@ interface Props {
   indexPatternNameError: string;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
-  results: unknown;
+  results: FindFileStructureResponse;
 }
 
 export const AdvancedSettings: FC<Props> = ({

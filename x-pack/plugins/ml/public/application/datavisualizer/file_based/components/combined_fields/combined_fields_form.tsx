@@ -28,6 +28,7 @@ import {
   removeCombinedFieldsFromMappings,
   removeCombinedFieldsFromPipeline,
 } from './utils';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 
 interface Props {
   mappingsString: string;
@@ -36,7 +37,7 @@ interface Props {
   onPipelineStringChange(): void;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
-  results: unknown;
+  results: FindFileStructureResponse;
 }
 
 interface State {
@@ -60,7 +61,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
     });
   };
 
-  addCombinedField = (combinedField) => {
+  addCombinedField = (combinedField: CombinedField) => {
     if (this.hasNameCollision(combinedField.combinedFieldName)) {
       throw new Error(getNameCollisionMsg(combinedField.combinedFieldName));
     }

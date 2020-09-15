@@ -10,11 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 
 import {
-  EuiText,
   EuiFormRow,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButtonEmpty,
   EuiFieldText,
   EuiTextAlign,
   EuiSpacer,
@@ -31,11 +27,12 @@ import {
   isWithinLonRange,
   getNameCollisionMsg,
 } from './utils';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 
 interface Props {
   addCombinedField: (combinedField: CombinedField) => void;
   hasNameCollision: (name: string) => boolean;
-  results: unknown;
+  results: FindFileStructureResponse;
 }
 
 interface State {
@@ -180,7 +177,7 @@ export class GeoPointForm extends Component<Props, State> {
             onClick={this.onSubmit}
           >
             <FormattedMessage
-              id="xpack.maps.xpack.ml.fileDatavisualizer.geoPointForm.submitButtonLabel"
+              id="xpack.ml.fileDatavisualizer.geoPointForm.submitButtonLabel"
               defaultMessage="Submit"
             />
           </EuiButton>

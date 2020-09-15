@@ -12,6 +12,7 @@ import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
 import { CombinedField } from '../combined_fields';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 
 interface Props {
   index: string;
@@ -31,7 +32,7 @@ interface Props {
   indexPatternNameError: string;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
-  results: unknown;
+  results: FindFileStructureResponse;
 }
 
 export const ImportSettings: FC<Props> = ({
