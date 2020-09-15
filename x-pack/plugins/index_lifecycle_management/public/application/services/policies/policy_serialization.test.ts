@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import cloneDeep from 'lodash/cloneDeep';
 import { serializePolicy } from './policy_serialization';
 import {
   defaultNewColdPhase,
@@ -12,6 +12,7 @@ import {
   defaultNewHotPhase,
   defaultNewWarmPhase,
 } from '../../constants';
+import { DataTierAllocationType } from '../../../../common/types';
 
 describe('Policy serialization', () => {
   test('serialize a policy using "default" data allocation', () => {
@@ -406,5 +407,58 @@ describe('Policy serialization', () => {
         },
       },
     });
+  });
+
+  test('serialization does not alter the original policy', () => {
+    const originalPolicy = {
+      name: 'test',
+      phases: {
+        hot: { actions: {} },
+        warm: {
+          actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
+        },
+        cold: {
+          actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
+        },
+        frozen: {
+          actions: { allocate: { include: {}, exclude: {}, require: { something: 'here' } } },
+        },
+      },
+    };
+
+    const originalClone = cloneDeep(originalPolicy);
+
+    const deserializedPolicy = {
+      name: 'test',
+      phases: {
+        hot: { ...defaultNewHotPhase },
+        warm: {
+          ...defaultNewWarmPhase,
+          dataTierAllocationType: 'none' as DataTierAllocationType,
+          selectedNodeAttrs: 'ignore:this',
+          phaseEnabled: true,
+        },
+        cold: {
+          ...defaultNewColdPhase,
+          dataTierAllocationType: 'none' as DataTierAllocationType,
+          selectedNodeAttrs: 'ignore:this',
+          phaseEnabled: true,
+        },
+        frozen: {
+          ...defaultNewFrozenPhase,
+          dataTierAllocationType: 'none' as DataTierAllocationType,
+          selectedNodeAttrs: 'ignore:this',
+          phaseEnabled: true,
+        },
+        delete: { ...defaultNewDeletePhase },
+      },
+    };
+
+    serializePolicy(deserializedPolicy, originalPolicy);
+    deserializedPolicy.phases.warm.dataTierAllocationType = 'custom';
+    serializePolicy(deserializedPolicy, originalPolicy);
+    deserializedPolicy.phases.warm.dataTierAllocationType = 'default';
+    serializePolicy(deserializedPolicy, originalPolicy);
+    expect(originalPolicy).toEqual(originalClone);
   });
 });

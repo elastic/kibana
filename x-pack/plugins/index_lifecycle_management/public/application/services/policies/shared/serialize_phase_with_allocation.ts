@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import cloneDeep from 'lodash/cloneDeep';
+
 import {
   AllocateAction,
   PhaseWithAllocationAction,
@@ -14,7 +16,7 @@ export const serializePhaseWithAllocation = (
   phase: PhaseWithAllocationAction,
   originalPhaseActions: SerializedPhase['actions'] = {}
 ): SerializedPhase['actions'] => {
-  const esPhaseActions: SerializedPhase['actions'] = { ...originalPhaseActions };
+  const esPhaseActions: SerializedPhase['actions'] = cloneDeep(originalPhaseActions);
 
   if (phase.dataTierAllocationType === 'custom' && phase.selectedNodeAttrs) {
     const [name, value] = phase.selectedNodeAttrs.split(':');
