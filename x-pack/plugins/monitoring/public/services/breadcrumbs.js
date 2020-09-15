@@ -44,7 +44,9 @@ function getElasticsearchBreadcrumbs(mainInstance) {
       breadcrumbs.push(
         createCrumb(
           '#/elasticsearch/ml_jobs',
-          i18n.translate('xpack.monitoring.breadcrumbs.es.jobsLabel', { defaultMessage: 'Jobs' })
+          i18n.translate('xpack.monitoring.breadcrumbs.es.jobsLabel', {
+            defaultMessage: 'Machine learning jobs',
+          })
         )
       );
     } else if (mainInstance.name === 'ccr_shard') {

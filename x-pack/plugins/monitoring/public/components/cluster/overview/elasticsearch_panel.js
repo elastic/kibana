@@ -198,7 +198,7 @@ export function ElasticsearchPanel(props) {
             >
               <FormattedMessage
                 id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
-                defaultMessage="Jobs"
+                defaultMessage="Machine learning jobs"
               />
             </DisabledIfNoDataAndInSetupModeLink>
           </EuiDescriptionListTitle>
