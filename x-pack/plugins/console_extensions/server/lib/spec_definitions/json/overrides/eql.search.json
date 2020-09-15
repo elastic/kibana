@@ -1,12 +1,16 @@
 {
   "eql.search": {
-    "data_autocomplete_rules": {
-      "allow_no_indices": { "__one_of": ["true", "false"] },
+    "url_params": {
+      "allow_no_indices": { "__one_of": [true, false] },
       "expand_wildcards": { "__one_of": ["all", "open", "closed", "hidden", "none"] },
-      "ignore_unavailable": { "__one_of": ["true", "false"] },
+      "ignore_unavailable": { "__one_of": [true, false] } ,
       "keep_alive": "5d",
-      "keep_on_completion": { "__one_of": ["true", "false"] },
+      "keep_on_completion": { "__one_of": [true, false] }  ,
       "wait_for_completion_timeout": 0
+    },
+    "data_autocomplete_rules": {
+      "case_sensitive": { "__one_of": [true, false] },
+      "fetch_size": 1000
     },
     "patterns": [
       "{target}/_eql/search"
