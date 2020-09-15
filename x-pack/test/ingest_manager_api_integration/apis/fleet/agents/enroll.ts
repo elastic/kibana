@@ -115,7 +115,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(400);
-      expect(apiResponse.message).to.match(/Agent version is not compatible with kibana/);
+      expect(apiResponse.message).to.match(/is not compatible/);
     });
 
     it('should allow to enroll an agent with a valid enrollment token', async () => {

@@ -5,19 +5,16 @@
  */
 
 /* eslint-disable max-classes-per-file */
+export { defaultIngestErrorHandler } from './handlers';
+
 export class IngestManagerError extends Error {
   constructor(message?: string) {
     super(message);
     this.name = this.constructor.name; // for stack traces
   }
 }
-
-export const getHTTPResponseCode = (error: IngestManagerError): number => {
-  if (error instanceof RegistryError) {
-    return 502; // Bad Gateway
-  } else {
-    return 400; // Bad Request
-  }
-};
-
 export class RegistryError extends IngestManagerError {}
+export class RegistryConnectionError extends RegistryError {}
+export class RegistryResponseError extends RegistryError {}
+export class PackageNotFoundError extends IngestManagerError {}
+export class PackageOutdatedError extends IngestManagerError {}
