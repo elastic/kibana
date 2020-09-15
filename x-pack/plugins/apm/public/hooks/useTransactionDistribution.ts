@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IUrlParams } from '../context/UrlParamsContext/types';
-import { useFetcher } from './useFetcher';
-import { useUiFilters } from '../context/UrlParamsContext';
+import { useParams } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
+import { useUiFilters } from '../context/UrlParamsContext';
+import { IUrlParams } from '../context/UrlParamsContext/types';
+import { useFetcher } from './useFetcher';
 
 const INITIAL_DATA = {
   buckets: [] as TransactionDistributionAPIResponse['buckets'],
@@ -17,8 +18,8 @@ const INITIAL_DATA = {
 };
 
 export function useTransactionDistribution(urlParams: IUrlParams) {
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
-    serviceName,
     start,
     end,
     transactionType,
