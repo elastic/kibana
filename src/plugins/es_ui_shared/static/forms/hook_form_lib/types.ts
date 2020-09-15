@@ -83,7 +83,7 @@ export interface OnFormUpdateArg<T extends FormData> {
 export type OnUpdateHandler<T extends FormData = FormData> = (arg: OnFormUpdateArg<T>) => void;
 
 export interface FormOptions {
-  errorDisplayDelay?: number;
+  valueChangeDebounceTime?: number;
   /**
    * Remove empty string field ("") from form data
    */
@@ -135,7 +135,7 @@ export interface FieldConfig<T extends FormData = any, ValueType = unknown> {
   readonly deserializer?: SerializerFunc;
   readonly serializer?: SerializerFunc;
   readonly fieldsToValidateOnChange?: string[];
-  readonly errorDisplayDelay?: number;
+  readonly valueChangeDebounceTime?: number;
 }
 
 export interface FieldsMap {

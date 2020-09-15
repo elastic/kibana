@@ -44,7 +44,7 @@ export const useField = <T>(
     validations,
     formatters,
     fieldsToValidateOnChange,
-    errorDisplayDelay = form.__options.errorDisplayDelay,
+    valueChangeDebounceTime = form.__options.valueChangeDebounceTime,
     serializer,
     deserializer,
   } = config;
@@ -129,16 +129,8 @@ export const useField = <T>(
     const changeIteration = ++changeCounter.current;
     const startTime = Date.now();
 
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-      debounceTimeout.current = null;
-    }
-
     setPristine(false);
-
-    if (errorDisplayDelay > 0) {
-      setIsChangingValue(true);
-    }
+    setIsChangingValue(true);
 
     // Notify listener
     if (valueChangeListener) {
@@ -161,22 +153,24 @@ export const useField = <T>(
      * and then, we verify how long we've already waited for as form.__validateFields() is asynchronous
      * and might already have taken more than the specified delay)
      */
-    if (errorDisplayDelay > 0 && changeIteration === changeCounter.current) {
-      const delta = Date.now() - startTime;
-      if (delta < errorDisplayDelay) {
-        debounceTimeout.current = setTimeout(() => {
-          debounceTimeout.current = null;
-          setIsChangingValue(false);
-        }, errorDisplayDelay - delta);
-      } else {
-        setIsChangingValue(false);
+    if (changeIteration === changeCounter.current) {
+      if (valueChangeDebounceTime > 0) {
+        const delta = Date.now() - startTime;
+        if (delta < valueChangeDebounceTime) {
+          debounceTimeout.current = setTimeout(() => {
+            debounceTimeout.current = null;
+            setIsChangingValue(false);
+          }, valueChangeDebounceTime - delta);
+          return;
+        }
       }
+      setIsChangingValue(false);
     }
   }, [
     path,
     value,
     valueChangeListener,
-    errorDisplayDelay,
+    valueChangeDebounceTime,
     fieldsToValidateOnChange,
     __updateFormDataAt,
     __validateFields,
@@ -565,6 +559,7 @@ export const useField = <T>(
     return () => {
       if (debounceTimeout.current) {
         clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = null;
       }
     };
   }, [onValueChange]);
