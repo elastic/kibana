@@ -1,5 +1,10 @@
 Feature: CSM Dashboard
 
+  Scenario: Service name filter
+    Given a user browses the APM UI application for RUM Data
+    When the user changes the selected service name
+    Then it displays relevant client metrics
+
   Scenario: Client metrics
     When a user browses the APM UI application for RUM Data
     Then should have correct client metrics
@@ -22,7 +27,3 @@ Feature: CSM Dashboard
     Given a user clicks the page load breakdown filter
     When the user selected the breakdown
     Then breakdown series should appear in chart
-
-  Scenario: Service name filter
-    When a user changes the selected service name
-    Then it displays relevant client metrics

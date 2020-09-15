@@ -5,9 +5,9 @@
  */
 
 import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
+import { DEFAULT_TIMEOUT } from './csm_dashboard';
 
 /** The default time in ms to wait for a Cypress command to complete */
-export const DEFAULT_TIMEOUT = { timeout: 60 * 1000 };
 
 Given(`a user clicks the page load breakdown filter`, () => {
   // wait for all loading to finish

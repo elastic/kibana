@@ -21,9 +21,7 @@ export function verifyClientMetrics(
   cy.get('kbnLoadingIndicator').should('not.be.visible');
 
   if (checkTitleStatus) {
-    cy.get('.euiStat__title', { timeout: DEFAULT_TIMEOUT }).should(
-      'be.visible'
-    );
+    cy.get('.euiStat__title', DEFAULT_TIMEOUT).should('be.visible');
     cy.get('.euiSelect-isLoading').should('not.be.visible');
   }
 

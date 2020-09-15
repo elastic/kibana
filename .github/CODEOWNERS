@@ -64,11 +64,12 @@
 /src/apm.js @watson @vigneshshanmugam
 
 # Client Side Monitoring (lives in APM directories but owned by Uptime)
-/x-pack/plugins/apm/e2e/cypress/support/step_definitions/rum @elastic/uptime
+/x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm @elastic/uptime
 /x-pack/plugins/apm/public/application/csmApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
+/x-pack/plugins/apm/server/projections/rum_overview.ts @elastic/uptime
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats

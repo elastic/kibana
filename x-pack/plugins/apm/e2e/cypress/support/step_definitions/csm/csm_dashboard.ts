@@ -9,7 +9,7 @@ import { loginAndWaitForPage } from '../../../integration/helpers';
 import { verifyClientMetrics } from './client_metrics_helper';
 
 /** The default time in ms to wait for a Cypress command to complete */
-export const DEFAULT_TIMEOUT = 60 * 1000;
+export const DEFAULT_TIMEOUT = { timeout: 60 * 1000 };
 
 Given(`a user browses the APM UI application for RUM Data`, () => {
   // open service overview page
@@ -30,7 +30,7 @@ Then(`should have correct client metrics`, () => {
 Then(`should display percentile for page load chart`, () => {
   const pMarkers = '[data-cy=percentile-markers] span';
 
-  cy.get('.euiLoadingChart', { timeout: DEFAULT_TIMEOUT }).should('be.visible');
+  cy.get('.euiLoadingChart', DEFAULT_TIMEOUT).should('be.visible');
 
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
@@ -52,9 +52,7 @@ Then(`should display chart legend`, () => {
   cy.get('kbnLoadingIndicator').should('not.be.visible');
   cy.get('.euiLoadingChart').should('not.be.visible');
 
-  cy.get(chartLegend, { timeout: DEFAULT_TIMEOUT })
-    .eq(0)
-    .should('have.text', 'Overall');
+  cy.get(chartLegend, DEFAULT_TIMEOUT).eq(0).should('have.text', 'Overall');
 });
 
 Then(`should display tooltip on hover`, () => {
@@ -66,7 +64,7 @@ Then(`should display tooltip on hover`, () => {
   cy.get('kbnLoadingIndicator').should('not.be.visible');
   cy.get('.euiLoadingChart').should('not.be.visible');
 
-  const marker = cy.get(pMarkers, { timeout: DEFAULT_TIMEOUT }).eq(0);
+  const marker = cy.get(pMarkers, DEFAULT_TIMEOUT).eq(0);
   marker.invoke('show');
   marker.trigger('mouseover', { force: true });
   cy.get('span[data-cy=percentileTooltipTitle]').should('be.visible');

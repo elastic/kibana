@@ -15,15 +15,11 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
   cy.get(`#local-filter-${filterName}`).click();
 
   if (filterName === 'os') {
-    cy.get('span.euiSelectableListItem__text', {
-      timeout: DEFAULT_TIMEOUT,
-    })
+    cy.get('span.euiSelectableListItem__text', DEFAULT_TIMEOUT)
       .contains('Mac OS X')
       .click();
   } else {
-    cy.get('span.euiSelectableListItem__text', {
-      timeout: DEFAULT_TIMEOUT,
-    })
+    cy.get('span.euiSelectableListItem__text', DEFAULT_TIMEOUT)
       .contains('DE')
       .click();
   }
@@ -40,5 +36,5 @@ Then(/^it filters the client metrics "([^"]*)"$/, (filterName) => {
 
   verifyClientMetrics(data, true);
 
-  cy.get('[data-cy=clearFilters]').click();
+  cy.get('[data-cy=clearFilters]', DEFAULT_TIMEOUT).click();
 });
