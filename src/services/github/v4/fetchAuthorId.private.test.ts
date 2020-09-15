@@ -1,4 +1,4 @@
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
 import { fetchAuthorId } from './fetchAuthorId';
 
@@ -15,7 +15,7 @@ describe('fetchAuthorId', () => {
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
         all: true,
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       expect(await fetchAuthorId(options)).toEqual(null);
     });
@@ -28,7 +28,7 @@ describe('fetchAuthorId', () => {
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
         all: false,
         author: 'sqren',
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       expect(await fetchAuthorId(options)).toEqual('MDQ6VXNlcjIwOTk2Ng==');
     });

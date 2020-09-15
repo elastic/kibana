@@ -34,6 +34,7 @@ export const pullRequestFragment = /* GraphQL */ `
                 title
                 state
                 baseRefName
+                number
                 commits(first: 20) {
                   edges {
                     node {
@@ -71,17 +72,18 @@ export interface PullRequestNode {
     name: string;
   };
   timelineItems: {
-    edges: (TimelineItemEdge | null)[];
+    edges: TimelineItemEdge[];
   };
 }
 
-interface PullRequestTimelineItem {
+interface TimeLinePullRequestItem {
   node: {
     source: {
       __typename: 'PullRequest';
       title: string;
       state: 'OPEN' | 'CLOSED' | 'MERGED';
       baseRefName: string;
+      number: number;
       commits: {
         edges: CommitEdge[];
       };
@@ -97,7 +99,7 @@ interface IssueTimelineItem {
   };
 }
 
-type TimelineItemEdge = PullRequestTimelineItem | IssueTimelineItem;
+type TimelineItemEdge = TimeLinePullRequestItem | IssueTimelineItem;
 
 interface CommitEdge {
   node: {
@@ -115,14 +117,16 @@ export type ExistingTargetPullRequests = ReturnType<
   typeof getExistingTargetPullRequests
 >;
 export function getExistingTargetPullRequests(
-  commitMessage: string,
   sourcePullRequest?: PullRequestNode
 ) {
-  if (!sourcePullRequest) {
+  if (!sourcePullRequest || !sourcePullRequest.mergeCommit) {
     return [];
   }
 
-  const firstMessageLine = getFirstCommitMessageLine(commitMessage);
+  const sourcePRMergeCommitMessage = getFirstCommitMessageLine(
+    sourcePullRequest.mergeCommit.message
+  );
+
   return sourcePullRequest.timelineItems.edges
     .filter(filterNil)
     .filter(filterPullRequests)
@@ -133,14 +137,15 @@ export function getExistingTargetPullRequests(
         return false;
       }
 
+      // at least one of the commits in the target pull request should match the merge commit from the source pull request
       const commitMatch = source.commits.edges.some((commit) => {
-        return (
-          getFirstCommitMessageLine(commit.node.commit.message) ===
-          firstMessageLine
+        const targetPRCommitMessage = getFirstCommitMessageLine(
+          commit.node.commit.message
         );
+        return targetPRCommitMessage === sourcePRMergeCommitMessage;
       });
 
-      const prTitleMatch = source.title.includes(firstMessageLine);
+      const prTitleMatch = source.title.includes(sourcePRMergeCommitMessage);
       const prNumberMatch = source.title.includes(
         sourcePullRequest.number.toString()
       );
@@ -150,6 +155,7 @@ export function getExistingTargetPullRequests(
     .map((item) => {
       const { source } = item.node;
       return {
+        number: source.number,
         branch: source.baseRefName,
         state: source.state,
       };
@@ -158,7 +164,7 @@ export function getExistingTargetPullRequests(
 
 function filterPullRequests(
   item: TimelineItemEdge
-): item is PullRequestTimelineItem {
+): item is TimeLinePullRequestItem {
   const { source } = item.node;
   // filter out non-prs
   if (source.__typename !== 'PullRequest') {

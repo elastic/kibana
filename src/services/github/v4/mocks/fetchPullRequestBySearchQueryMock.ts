@@ -38,6 +38,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
                   __typename: 'PullRequest',
                   title: '[7.x] [APM] @ts-error -> @ts-expect-error (#76492)',
                   state: 'MERGED',
+                  number: 99,
                   baseRefName: '7.x',
                   commits: {
                     edges: [
@@ -93,6 +94,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
                   title:
                     '[7.x] [APM] Avoid negative offset for error marker on timeline (#76638)',
                   state: 'MERGED',
+                  number: 99,
                   baseRefName: '7.x',
                   commits: {
                     edges: [
@@ -152,6 +154,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
                     '[7.x] [APM] Add anomaly detection API tests + fixes (#73120)',
                   state: 'MERGED',
                   baseRefName: '7.x',
+                  number: 99,
                   commits: {
                     edges: [
                       {
@@ -178,6 +181,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title:
                     '[7.9] [APM] Add anomaly detection API tests + fixes (#73120)',
                   state: 'MERGED',
@@ -276,6 +280,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.x] Update jobs_list.tsx (#72797)',
                   state: 'MERGED',
                   baseRefName: '7.x',
@@ -297,6 +302,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.9] Update jobs_list.tsx (#72797)',
                   state: 'MERGED',
                   baseRefName: '7.9',
@@ -355,6 +361,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title:
                     '[7.x] [APM] Fix confusing request/minute viz (#69143)',
                   state: 'MERGED',
@@ -415,6 +422,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.x] [APM] Remove watcher integration (#71655)',
                   state: 'MERGED',
                   baseRefName: '7.x',
@@ -471,6 +479,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.x] [APM] Disable flaky rum e2e’s (#72614)',
                   state: 'MERGED',
                   baseRefName: '7.x',
@@ -492,6 +501,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.9] [APM] Disable flaky rum e2e’s (#72614)',
                   state: 'MERGED',
                   baseRefName: '7.9',
@@ -558,6 +568,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title:
                     '[APM] Increase `xpack.apm.ui.transactionGroupBucketSize`',
                   state: 'CLOSED',
@@ -596,6 +607,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title:
                     '[7.x] [APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
                   state: 'CLOSED',
@@ -619,6 +631,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title:
                     '[7.x] [APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
                   state: 'MERGED',
@@ -642,6 +655,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title:
                     '[7.9] [APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
                   state: 'MERGED',
@@ -700,6 +714,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.9] [APM] Handle ML errors (#72316)',
                   state: 'MERGED',
                   baseRefName: '7.9',
@@ -722,6 +737,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.x] [APM] Handle ML errors (#72316)',
                   state: 'MERGED',
                   baseRefName: '7.x',
@@ -744,6 +760,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.x] [APM] Handle ML errors (#72316)',
                   state: 'CLOSED',
                   baseRefName: '7.x',
@@ -766,6 +783,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.9] [APM] Handle ML errors (#72316)',
                   state: 'CLOSED',
                   baseRefName: '7.9',
@@ -788,6 +806,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title: '[7.x] [APM] Handle ML errors (#72316)',
                   state: 'CLOSED',
                   baseRefName: '7.x',
@@ -810,6 +829,7 @@ export const fetchPullRequestBySearchQueryMock: DataResponse = {
               node: {
                 source: {
                   __typename: 'PullRequest',
+                  number: 99,
                   title:
                     '[APM] Fixes error when loading APM without ML read permissions',
                   state: 'CLOSED',

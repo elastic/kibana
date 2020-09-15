@@ -1,13 +1,17 @@
 import { PullRequestNode } from '../getExistingTargetPullRequests';
 
 export function getPullRequestNodeMock({
-  pullRequestNumber,
-  timelinePullRequest,
+  sourcePullRequest,
+  targetPullRequest,
 }: {
-  pullRequestNumber: number;
-  timelinePullRequest: {
+  sourcePullRequest: {
+    commitMessage: string;
+    number: number;
+  };
+  targetPullRequest: {
     title: string;
-    commits: string[];
+    commitMessages: string[];
+    number: number;
   };
 }): PullRequestNode {
   return {
@@ -16,7 +20,7 @@ export function getPullRequestNodeMock({
     },
     mergeCommit: {
       oid: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
-      message: 'my commit message...1',
+      message: sourcePullRequest.commitMessage,
     },
     repository: {
       name: 'kibana',
@@ -25,17 +29,18 @@ export function getPullRequestNodeMock({
       },
     },
     baseRefName: 'master',
-    number: pullRequestNumber,
+    number: sourcePullRequest.number,
     timelineItems: {
       edges: [
         {
           node: {
             source: {
               __typename: 'PullRequest',
-              title: timelinePullRequest.title,
+              number: targetPullRequest.number,
+              title: targetPullRequest.title,
               state: 'MERGED' as const,
               commits: {
-                edges: timelinePullRequest.commits.map((message) => ({
+                edges: targetPullRequest.commitMessages.map((message) => ({
                   node: { commit: { message } },
                 })),
               },

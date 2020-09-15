@@ -1,12 +1,15 @@
 import intersection from 'lodash.intersection';
 import isEmpty from 'lodash.isempty';
-import { BackportOptions } from '../options/options';
+import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { promptForTargetBranches } from '../services/prompts';
 import { Commit } from '../types/Commit';
 import { filterNil } from '../utils/filterEmpty';
 
-export function getTargetBranches(options: BackportOptions, commits: Commit[]) {
+export function getTargetBranches(
+  options: ValidConfigOptions,
+  commits: Commit[]
+) {
   // target branches already specified (in contrast to letting the user choose from a list)
   if (!isEmpty(options.targetBranches)) {
     return options.targetBranches;
@@ -44,7 +47,7 @@ export function getTargetBranches(options: BackportOptions, commits: Commit[]) {
 }
 
 export function getTargetBranchChoices(
-  options: BackportOptions,
+  options: ValidConfigOptions,
   targetBranchesFromLabels: string[],
   sourceBranch: string
 ) {

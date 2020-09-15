@@ -1,3 +1,5 @@
+import { ExistingTargetPullRequests } from '../services/github/v4/getExistingTargetPullRequests';
+
 export interface Commit {
   sourceBranch: string;
   targetBranchesFromLabels: string[];
@@ -5,8 +7,5 @@ export interface Commit {
   formattedMessage: string;
   originalMessage: string;
   pullNumber?: number;
-  existingTargetPullRequests: {
-    branch: string;
-    state: 'OPEN' | 'CLOSED' | 'MERGED';
-  }[];
+  existingTargetPullRequests: ExistingTargetPullRequests;
 }

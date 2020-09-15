@@ -1,4 +1,4 @@
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
 import { fetchDefaultRepoBranchAndPerformStartupChecks } from './fetchDefaultRepoBranchAndPerformStartupChecks';
 
@@ -16,7 +16,7 @@ describe('fetchDefaultRepoBranchAndPerformStartupChecks', () => {
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       await expect(
         fetchDefaultRepoBranchAndPerformStartupChecks(options)
@@ -33,7 +33,7 @@ describe('fetchDefaultRepoBranchAndPerformStartupChecks', () => {
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       expect(
         await fetchDefaultRepoBranchAndPerformStartupChecks(options)

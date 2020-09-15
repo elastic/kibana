@@ -1,12 +1,12 @@
 import { fetchDefaultRepoBranchAndPerformStartupChecks } from '../services/github/v4/fetchDefaultRepoBranchAndPerformStartupChecks';
 import { PromiseReturnType } from '../types/PromiseReturnType';
-import { setLogLevel, setRedactedAccessToken } from './../services/logger';
+import { updateLogger } from './../services/logger';
 import { ConfigOptions } from './ConfigOptions';
 import { getOptionsFromCliArgs } from './cliArgs';
 import { getOptionsFromConfigFiles } from './config/config';
 import { getValidatedOptions } from './getValidatedOptions';
 
-export type BackportOptions = Readonly<PromiseReturnType<typeof getOptions>>;
+export type ValidConfigOptions = Readonly<PromiseReturnType<typeof getOptions>>;
 export async function getOptions(
   argv: string[],
   optionsFromModule?: ConfigOptions
@@ -18,10 +18,9 @@ export async function getOptions(
     { ...optionsFromConfig, ...optionsFromModule },
     argv
   );
-  setRedactedAccessToken(optionsFromCli.accessToken);
 
-  // set log level when all config options have been taken into account
-  setLogLevel({ verbose: optionsFromCli.verbose });
+  // update logger
+  updateLogger(optionsFromCli);
 
   // TODO: move `getValidatedOptions` to `getOptionsFromCliArgs`
   const validatedOptions = getValidatedOptions(optionsFromCli);

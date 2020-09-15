@@ -96,10 +96,10 @@ describe('getOptions', () => {
     expect(options.autoFixConflicts).toBe(myFn);
   });
 
-  it('should call setLogLevel', async () => {
+  it('should call updateLogger', async () => {
     mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
     await getOptions(defaultArgs);
-    expect(logger.setLogLevel).toHaveBeenCalledWith({ verbose: false });
+    expect(logger.updateLogger).toHaveBeenCalledTimes(1);
   });
 
   it('should return options', async () => {

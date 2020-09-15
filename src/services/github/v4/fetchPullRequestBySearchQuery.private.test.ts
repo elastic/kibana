@@ -1,4 +1,4 @@
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
 import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
 
@@ -21,7 +21,7 @@ describe('fetchPullRequestBySearchQuery', () => {
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
         sourceBranch: 'master',
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       await expect(fetchPullRequestBySearchQuery(options)).rejects.toThrowError(
         'There are no commits by "sqren" matching the filter "label:non-existing". Try with `--all` for commits by all users or `--author=<username>` for commits from a specific user'
@@ -41,11 +41,13 @@ describe('fetchPullRequestBySearchQuery', () => {
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
         sourceBranch: 'master',
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       expect(await fetchPullRequestBySearchQuery(options)).toEqual([
         {
-          existingTargetPullRequests: [{ branch: '7.8', state: 'OPEN' }],
+          existingTargetPullRequests: [
+            { branch: '7.8', state: 'OPEN', number: 10 },
+          ],
           formattedMessage: 'Add sheep emoji (#9)',
           originalMessage: 'Add sheep emoji (#9)',
           pullNumber: 9,
@@ -55,8 +57,8 @@ describe('fetchPullRequestBySearchQuery', () => {
         },
         {
           existingTargetPullRequests: [
-            { branch: '7.x', state: 'MERGED' },
-            { branch: '7.8', state: 'MERGED' },
+            { branch: '7.x', state: 'MERGED', number: 6 },
+            { branch: '7.8', state: 'MERGED', number: 7 },
           ],
           formattedMessage: 'Add 🍏 emoji (#5)',
           originalMessage: 'Add 🍏 emoji (#5)',

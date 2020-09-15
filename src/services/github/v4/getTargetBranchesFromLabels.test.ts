@@ -3,9 +3,10 @@ import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 
 describe('getTargetBranchesFromLabels', () => {
   it(`should support Kibana's label format`, () => {
+    const sourceBranch = 'master';
     const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
-      'v8.0.0': '', // current major (master) should be ignored
+      'v8.0.0': 'master', // current major (master)
       '^v7.8.0$': '7.x', // current minor (7.x)
       '^v(\\d+).(\\d+).\\d+$': '$1.$2', // all other branches
     };
@@ -35,6 +36,7 @@ describe('getTargetBranchesFromLabels', () => {
       'v8.0.0', // master
     ];
     const targetBranches = getTargetBranchesFromLabels({
+      sourceBranch,
       existingTargetPullRequests,
       branchLabelMapping,
       labels,
@@ -65,6 +67,7 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should only get first match', () => {
+    const sourceBranch = 'master';
     const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'label-2': 'branch-b',
@@ -72,6 +75,7 @@ describe('getTargetBranchesFromLabels', () => {
     };
     const labels = ['label-2'];
     const targetBranches = getTargetBranchesFromLabels({
+      sourceBranch,
       existingTargetPullRequests,
       labels,
       branchLabelMapping,
@@ -80,6 +84,7 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should remove PRs that are already open', () => {
+    const sourceBranch = 'master';
     const existingTargetPullRequests = [
       { branch: 'branch-3', state: 'OPEN' },
     ] as ExistingTargetPullRequests;
@@ -88,6 +93,7 @@ describe('getTargetBranchesFromLabels', () => {
     };
     const labels = ['label-1', 'label-2', 'label-3', 'label-4'];
     const targetBranches = getTargetBranchesFromLabels({
+      sourceBranch,
       existingTargetPullRequests,
       labels,
       branchLabelMapping,
@@ -96,6 +102,7 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should remove PRs that are already merged', () => {
+    const sourceBranch = 'master';
     const existingTargetPullRequests = [
       { branch: 'branch-2', state: 'MERGED' },
     ] as ExistingTargetPullRequests;
@@ -104,6 +111,7 @@ describe('getTargetBranchesFromLabels', () => {
     };
     const labels = ['label-1', 'label-2', 'label-3', 'label-4'];
     const targetBranches = getTargetBranchesFromLabels({
+      sourceBranch,
       existingTargetPullRequests,
       labels,
       branchLabelMapping,
@@ -112,12 +120,14 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should remove duplicates', () => {
+    const sourceBranch = 'master';
     const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'label-(\\d+)': 'branch-$1',
     };
     const labels = ['label-1', 'label-2', 'label-2'];
     const targetBranches = getTargetBranchesFromLabels({
+      sourceBranch,
       existingTargetPullRequests,
       labels,
       branchLabelMapping,
@@ -126,12 +136,14 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should ignore non-matching labels', () => {
+    const sourceBranch = 'master';
     const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'label-(\\d+)': 'branch-$1',
     };
     const labels = ['label-1', 'label-2', 'foo', 'bar'];
     const targetBranches = getTargetBranchesFromLabels({
+      sourceBranch,
       existingTargetPullRequests,
       labels,
       branchLabelMapping,
@@ -140,6 +152,7 @@ describe('getTargetBranchesFromLabels', () => {
   });
 
   it('should omit empty labels', () => {
+    const sourceBranch = 'master';
     const existingTargetPullRequests = [] as ExistingTargetPullRequests;
     const branchLabelMapping = {
       'label-2': '',
@@ -147,6 +160,7 @@ describe('getTargetBranchesFromLabels', () => {
     };
     const labels = ['label-1', 'label-2'];
     const targetBranches = getTargetBranchesFromLabels({
+      sourceBranch,
       existingTargetPullRequests,
       labels,
       branchLabelMapping,

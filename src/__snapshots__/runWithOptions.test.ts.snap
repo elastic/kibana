@@ -15,7 +15,7 @@ Array [
     },
   ],
   Array [
-    "git remote add sqren https://myAccessToken@github.com/sqren/kibana.git",
+    "git remote add sqren https://x-access-token:myAccessToken@github.com/sqren/kibana.git",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -27,7 +27,7 @@ Array [
     },
   ],
   Array [
-    "git remote add elastic https://myAccessToken@github.com/elastic/kibana.git",
+    "git remote add elastic https://x-access-token:myAccessToken@github.com/elastic/kibana.git",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -68,7 +68,7 @@ Array [
 exports[`runWithOptions git clone should be called with correct args 1`] = `
 Array [
   Array [
-    "git clone https://myAccessToken@github.com/elastic/kibana.git --progress",
+    "git clone https://x-access-token:myAccessToken@github.com/elastic/kibana.git --progress",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic",
       "maxBuffer": 104857600,
@@ -117,6 +117,7 @@ Array [
               "existingTargetPullRequests": Array [
                 Object {
                   "branch": "6.3",
+                  "number": 99,
                   "state": "MERGED",
                 },
               ],

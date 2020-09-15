@@ -23,8 +23,13 @@ export function getValidatedOptions({
     );
   }
 
-  // ensure targetBranches or targetBranchChoices are given
-  if (isEmpty(options.targetBranches) && isEmpty(options.targetBranchChoices)) {
+  // ensure `targetBranches` or `targetBranchChoices` are given
+  if (
+    isEmpty(options.targetBranches) &&
+    isEmpty(options.targetBranchChoices) &&
+    // this is primarily necessary on CI where `targetBranches` and `targetBranchChoices` and not given
+    isEmpty(options.branchLabelMapping)
+  ) {
     throw new HandledError(
       `You must specify a target branch\n\nYou can specify it via either:\n - Config file (recommended): ".backportrc.json". Read more: ${PROJECT_CONFIG_DOCS_LINK}\n - CLI: "--branch 6.1"`
     );

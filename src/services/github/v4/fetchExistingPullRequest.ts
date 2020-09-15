@@ -1,4 +1,4 @@
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { PullRequestPayload } from '../v3/createPullRequest';
 import { apiRequestV4 } from './apiRequestV4';
 
@@ -6,7 +6,7 @@ export async function fetchExistingPullRequest({
   options,
   prPayload,
 }: {
-  options: BackportOptions;
+  options: ValidConfigOptions;
   prPayload: PullRequestPayload;
 }) {
   const { githubApiBaseUrlV4, accessToken } = options;

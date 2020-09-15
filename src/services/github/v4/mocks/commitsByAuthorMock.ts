@@ -80,6 +80,7 @@ export const commitsWithPullRequestsMock: DataResponse = {
                                   __typename: 'PullRequest',
                                   title: 'some title',
                                   state: 'MERGED',
+                                  number: 99,
                                   baseRefName: '6.3',
                                   commits: {
                                     edges: [

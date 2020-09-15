@@ -2,6 +2,7 @@ import dedent from 'dedent';
 import isString from 'lodash.isstring';
 import safeJsonStringify from 'safe-json-stringify';
 import winston, { format } from 'winston';
+import { OptionsFromCliArgs } from '../options/cliArgs';
 import { getLogfilePath } from './env';
 
 const { combine } = format;
@@ -13,10 +14,6 @@ export function consoleLog(message: string) {
   // eslint-disable-next-line no-console
   console.log(redact(message));
   //process.stdout.write(message);
-}
-
-export function setLogLevel({ verbose }: { verbose: boolean }) {
-  winstonInstance.level = verbose ? 'debug' : 'info';
 }
 
 export type Logger = typeof logger;
@@ -41,8 +38,18 @@ export const logger = {
 
 let redactedAccessToken: string | undefined;
 
-export function setRedactedAccessToken(accessToken?: string) {
-  redactedAccessToken = accessToken;
+export function updateLogger(options: OptionsFromCliArgs) {
+  redactedAccessToken = options.accessToken;
+
+  // set log level
+  if (options.verbose) {
+    winstonInstance.level = 'debug';
+  }
+
+  // output logs to console in ci env
+  if (options.ci) {
+    winstonInstance.add(new winston.transports.Console());
+  }
 }
 
 export function redact(str: string) {

@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { mockGqlRequest } from '../../../test/nockHelpers';
 import { PromiseReturnType } from '../../../types/PromiseReturnType';
 import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
@@ -26,7 +26,7 @@ describe('fetchPullRequestBySearchQuery', () => {
       repoOwner: 'elastic',
       sourceBranch: 'master',
       prFilter: 'label:Team:apm',
-    } as BackportOptions);
+    } as ValidConfigOptions);
   });
 
   afterEach(() => {
@@ -49,6 +49,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
           ],
@@ -65,6 +66,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
           ],
@@ -81,10 +83,12 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
             Object {
               "branch": "7.9",
+              "number": 99,
               "state": "MERGED",
             },
           ],
@@ -116,10 +120,12 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
             Object {
               "branch": "7.9",
+              "number": 99,
               "state": "MERGED",
             },
           ],
@@ -134,6 +140,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
           ],
@@ -148,6 +155,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
           ],
@@ -162,10 +170,12 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
             Object {
               "branch": "7.9",
+              "number": 99,
               "state": "MERGED",
             },
           ],
@@ -180,10 +190,12 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
             Object {
               "branch": "7.9",
+              "number": 99,
               "state": "MERGED",
             },
           ],
@@ -198,10 +210,12 @@ describe('fetchPullRequestBySearchQuery', () => {
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.9",
+              "number": 99,
               "state": "MERGED",
             },
             Object {
               "branch": "7.x",
+              "number": 99,
               "state": "MERGED",
             },
           ],

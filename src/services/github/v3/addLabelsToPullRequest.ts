@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import ora from 'ora';
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { logger } from '../../logger';
 
 export async function addLabelsToPullRequest(
@@ -10,7 +10,7 @@ export async function addLabelsToPullRequest(
     repoOwner,
     accessToken,
     dryRun,
-  }: BackportOptions,
+  }: ValidConfigOptions,
   pullNumber: number,
   labels: string[]
 ): Promise<void> {

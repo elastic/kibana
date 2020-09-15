@@ -54,11 +54,11 @@ function mockExec() {
   jest.spyOn(childProcess, 'exec').mockImplementation((cmd, options, cb) => {
     const nextCmd = cmd
       .replace(
-        'https://myAccessToken@github.com/backport-org/backport-demo.git',
+        'https://x-access-token:myAccessToken@github.com/backport-org/backport-demo.git',
         REMOTE_ORIGIN_REPO_PATH
       )
       .replace(
-        'https://myAccessToken@github.com/sqren/backport-demo.git',
+        'https://x-access-token:myAccessToken@github.com/sqren/backport-demo.git',
         REMOTE_FORK_REPO_PATH
       );
 

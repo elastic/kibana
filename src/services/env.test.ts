@@ -1,4 +1,4 @@
-import { BackportOptions } from '../options/options';
+import { ValidConfigOptions } from '../options/options';
 import {
   getGlobalConfigPath,
   getRepoOwnerPath,
@@ -16,9 +16,9 @@ describe('env', () => {
   });
 
   test('getRepoOwnerPath', () => {
-    expect(getRepoOwnerPath({ repoOwner: 'elastic' } as BackportOptions)).toBe(
-      '/myHomeDir/.backport/repositories/elastic'
-    );
+    expect(
+      getRepoOwnerPath({ repoOwner: 'elastic' } as ValidConfigOptions)
+    ).toBe('/myHomeDir/.backport/repositories/elastic');
   });
 
   test('getRepoPath', () => {
@@ -26,7 +26,7 @@ describe('env', () => {
       getRepoPath({
         repoOwner: 'elastic',
         repoName: 'kibana',
-      } as BackportOptions)
+      } as ValidConfigOptions)
     ).toBe('/myHomeDir/.backport/repositories/elastic/kibana');
   });
 });

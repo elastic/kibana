@@ -90,8 +90,7 @@ jest.mock('../../services/logger', () => {
   const spy = jest.fn();
   return {
     consoleLog: jest.fn(),
-    setLogLevel: jest.fn(),
-    setRedactedAccessToken: jest.fn(),
+    updateLogger: jest.fn(),
     redact: () => {},
     logger: {
       spy: spy,

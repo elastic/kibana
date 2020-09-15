@@ -119,6 +119,7 @@ Array [
                 title
                 state
                 baseRefName
+                number
                 commits(first: 20) {
                   edges {
                     node {
@@ -268,6 +269,7 @@ Array [
                 title
                 state
                 baseRefName
+                number
                 commits(first: 20) {
                   edges {
                     node {

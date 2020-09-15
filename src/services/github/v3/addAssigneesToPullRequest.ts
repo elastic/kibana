@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import ora from 'ora';
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { logger } from '../../logger';
 
 export async function addAssigneesToPullRequest(
@@ -11,7 +11,7 @@ export async function addAssigneesToPullRequest(
     accessToken,
     username,
     dryRun,
-  }: BackportOptions,
+  }: ValidConfigOptions,
   pullNumber: number,
   assignees: string[]
 ) {

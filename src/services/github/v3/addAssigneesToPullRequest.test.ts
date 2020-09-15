@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { addAssigneesToPullRequest } from './addAssigneesToPullRequest';
 
 describe('addAssigneesToPullRequest', () => {
@@ -21,7 +21,7 @@ describe('addAssigneesToPullRequest', () => {
         accessToken: 'my-token',
         username: 'sqren',
         dryRun: false,
-      } as BackportOptions,
+      } as ValidConfigOptions,
       pullNumber,
       assignees
     );

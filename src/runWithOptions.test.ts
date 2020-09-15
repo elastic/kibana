@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import nock from 'nock';
-import { BackportOptions } from './options/options';
+import { ValidConfigOptions } from './options/options';
 import { runWithOptions } from './runWithOptions';
 import * as childProcess from './services/child-process-promisified';
 import * as fs from './services/fs-promisified';
@@ -24,7 +24,7 @@ describe('runWithOptions', () => {
   });
 
   beforeEach(async () => {
-    const options: BackportOptions = {
+    const options: ValidConfigOptions = {
       accessToken: 'myAccessToken',
       all: false,
       assignees: [],

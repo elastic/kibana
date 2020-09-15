@@ -1,4 +1,4 @@
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
 import { PromiseReturnType } from '../../../types/PromiseReturnType';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
@@ -22,21 +22,21 @@ describe('fetchCommitsByAuthor', () => {
         author: 'sqren',
         maxNumber: 10,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
-      } as BackportOptions);
+      } as ValidConfigOptions);
     });
 
     it('returns related OPEN PRs', async () => {
       const commitWithOpenPR = res.find((commit) => commit.pullNumber === 9);
       expect(commitWithOpenPR?.existingTargetPullRequests).toEqual([
-        { branch: '7.8', state: 'OPEN' },
+        { branch: '7.8', state: 'OPEN', number: 10 },
       ]);
     });
 
     it('returns related MERGED PRs', async () => {
       const commitWithMergedPRs = res.find((commit) => commit.pullNumber === 5);
       expect(commitWithMergedPRs?.existingTargetPullRequests).toEqual([
-        { branch: '7.x', state: 'MERGED' },
-        { branch: '7.8', state: 'MERGED' },
+        { branch: '7.x', state: 'MERGED', number: 6 },
+        { branch: '7.8', state: 'MERGED', number: 7 },
       ]);
     });
 

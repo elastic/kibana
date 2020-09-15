@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import ora from 'ora';
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
 import { getFormattedCommitMessage } from '../commitFormatters';
@@ -15,7 +15,7 @@ import {
 import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 
 export async function fetchCommitByPullNumber(
-  options: BackportOptions & { pullNumber: number }
+  options: ValidConfigOptions & { pullNumber: number }
 ): Promise<Commit> {
   const {
     accessToken,
@@ -86,11 +86,11 @@ export async function fetchCommitByPullNumber(
   });
 
   const existingTargetPullRequests = getExistingTargetPullRequests(
-    commitMessage,
     pullRequestNode
   );
 
   const targetBranchesFromLabels = getTargetBranchesFromLabels({
+    sourceBranch: pullRequestNode.baseRefName,
     existingTargetPullRequests,
     branchLabelMapping: options.branchLabelMapping,
     labels: getPullRequestLabels(pullRequestNode),

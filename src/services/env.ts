@@ -1,6 +1,6 @@
 import { homedir } from 'os';
 import path from 'path';
-import { BackportOptions } from '../options/options';
+import { ValidConfigOptions } from '../options/options';
 
 export function getLogfilePath() {
   return path.join(homedir(), '.backport', 'backport.log');
@@ -14,10 +14,10 @@ export function getReposPath() {
   return path.join(homedir(), '.backport', 'repositories');
 }
 
-export function getRepoOwnerPath({ repoOwner }: BackportOptions) {
+export function getRepoOwnerPath({ repoOwner }: ValidConfigOptions) {
   return path.join(homedir(), '.backport', 'repositories', repoOwner);
 }
 
-export function getRepoPath({ repoOwner, repoName }: BackportOptions) {
+export function getRepoPath({ repoOwner, repoName }: ValidConfigOptions) {
   return path.join(homedir(), '.backport', 'repositories', repoOwner, repoName);
 }

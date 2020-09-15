@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { mockGqlRequest } from '../../../test/nockHelpers';
 import { Commit } from '../../../types/Commit';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
@@ -18,7 +18,7 @@ const defaultOptions = {
   maxNumber: 10,
   githubApiBaseUrlV3: 'https://api.github.com',
   githubApiBaseUrlV4: 'http://localhost/graphql',
-} as BackportOptions;
+} as ValidConfigOptions;
 
 const authorIdMockData = { user: { id: 'myUserId' } } as const;
 
@@ -77,7 +77,9 @@ describe('fetchCommitsByAuthor', () => {
           originalMessage:
             'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
           pullNumber: 80,
-          existingTargetPullRequests: [{ branch: '6.3', state: 'MERGED' }],
+          existingTargetPullRequests: [
+            { branch: '6.3', state: 'MERGED', number: 99 },
+          ],
           targetBranchesFromLabels: [],
           sourceBranch: 'master',
         },
@@ -115,7 +117,9 @@ describe('fetchCommitsByAuthor', () => {
       const res = await getExistingBackportsByRepoName('kibana', 'kibana');
       const expectedCommits: Commit[] = [
         {
-          existingTargetPullRequests: [{ branch: '6.3', state: 'MERGED' }],
+          existingTargetPullRequests: [
+            { branch: '6.3', state: 'MERGED', number: 99 },
+          ],
           formattedMessage: 'Add SF mention (#80)',
           originalMessage:
             'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
@@ -179,83 +183,89 @@ describe('getExistingTargetPullRequests', () => {
   });
 
   it('should return a result when commit messages match', () => {
-    const commitMessage = 'my message (#1234)';
     const pullRequestNode = getPullRequestNodeMock({
-      pullRequestNumber: 1234,
-      timelinePullRequest: {
+      sourcePullRequest: {
+        number: 1234,
+        commitMessage: 'my message (#1234)',
+      },
+      targetPullRequest: {
+        number: 10,
         title: 'a pr title',
-        commits: ['my message (#1234)'],
+        commitMessages: ['my message (#1234)'],
       },
     });
-    const existingPRs = getExistingTargetPullRequests(
-      commitMessage,
-      pullRequestNode
-    );
-    expect(existingPRs).toEqual([{ branch: '7.x', state: 'MERGED' }]);
+    const existingPRs = getExistingTargetPullRequests(pullRequestNode);
+    expect(existingPRs).toEqual([
+      { branch: '7.x', state: 'MERGED', number: 10 },
+    ]);
   });
 
   it('should not return a result when commit messages do not match', () => {
-    const commitMessage = 'my message1 (#1234)';
     const pullRequestNode = getPullRequestNodeMock({
-      pullRequestNumber: 1234,
-      timelinePullRequest: {
-        title: 'a pr title',
-        commits: ['my message2 (#1234)'],
+      sourcePullRequest: {
+        number: 1234,
+        commitMessage: 'the initial message',
+      },
+      targetPullRequest: {
+        number: 1337,
+        title: 'my changed message',
+        commitMessages: ['my changed message (#1234)'],
       },
     });
-    const existingPRs = getExistingTargetPullRequests(
-      commitMessage,
-      pullRequestNode
-    );
+    const existingPRs = getExistingTargetPullRequests(pullRequestNode);
     expect(existingPRs).toEqual([]);
   });
 
   it('should return a result when commit message matches pull request title and number', () => {
-    const commitMessage = 'my message (#1234)';
     const pullRequestNode = getPullRequestNodeMock({
-      pullRequestNumber: 1234,
-      timelinePullRequest: {
-        title: 'my message (#1234)',
-        commits: ['the actual message'],
+      sourcePullRequest: {
+        number: 1234,
+        commitMessage: 'the initial message',
+      },
+      targetPullRequest: {
+        number: 40,
+        title: 'the initial message (#1234)',
+        commitMessages: ['the actual message'],
       },
     });
-    const existingPRs = getExistingTargetPullRequests(
-      commitMessage,
-      pullRequestNode
-    );
-    expect(existingPRs).toEqual([{ branch: '7.x', state: 'MERGED' }]);
+    const existingPRs = getExistingTargetPullRequests(pullRequestNode);
+    expect(existingPRs).toEqual([
+      { branch: '7.x', state: 'MERGED', number: 40 },
+    ]);
   });
 
-  it('should not return a result when only pull request title (and not pull number) matches', () => {
-    const commitMessage = 'my message (#1234)';
+  it('should not return a result when only pull request title (but not pull number) matches', () => {
     const pullRequestNode = getPullRequestNodeMock({
-      pullRequestNumber: 1234,
-      timelinePullRequest: {
+      sourcePullRequest: {
+        number: 1234,
+        commitMessage: 'my message',
+      },
+      targetPullRequest: {
+        number: 30,
         title: 'my message (#1235)',
-        commits: ['the actual message'],
+        commitMessages: ['the actual message'],
       },
     });
-    const existingPRs = getExistingTargetPullRequests(
-      commitMessage,
-      pullRequestNode
-    );
+    const existingPRs = getExistingTargetPullRequests(pullRequestNode);
     expect(existingPRs).toEqual([]);
   });
 
   it('should return a result when first line of a multiline commit message matches', () => {
-    const commitMessage = 'my message (#1234)';
     const pullRequestNode = getPullRequestNodeMock({
-      pullRequestNumber: 1234,
-      timelinePullRequest: {
+      sourcePullRequest: {
+        number: 1234,
+        commitMessage: 'my message (#1234)',
+      },
+      targetPullRequest: {
+        number: 20,
         title: 'a pr title',
-        commits: ['my message (#1234)\n\nsomething else'],
+        commitMessages: ['my message (#1234)\n\nsomething else'],
       },
     });
-    const existingPRs = getExistingTargetPullRequests(
-      commitMessage,
-      pullRequestNode
-    );
-    expect(existingPRs).toEqual([{ branch: '7.x', state: 'MERGED' }]);
+    const existingPRs = getExistingTargetPullRequests(pullRequestNode);
+    expect(existingPRs).toEqual([
+      { branch: '7.x', state: 'MERGED', number: 20 },
+    ]);
   });
 });
 

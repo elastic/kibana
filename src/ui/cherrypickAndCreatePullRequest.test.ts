@@ -1,6 +1,6 @@
 import nock from 'nock';
 import ora from 'ora';
-import { BackportOptions } from '../options/options';
+import { ValidConfigOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
 import * as logger from '../services/logger';
 import * as prompts from '../services/prompts';
@@ -54,7 +54,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
         sourcePRLabels: [] as string[],
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       const commits: Commit[] = [
         {
@@ -145,7 +145,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         repoOwner: 'elastic',
         username: 'sqren',
         sourcePRLabels: [] as string[],
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       const scope = nock('https://api.github.com')
         .post('/repos/elastic/kibana/pulls', {
@@ -199,7 +199,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
         sourcePRLabels: [] as string[],
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       const scope = nock('https://api.github.com')
         .post('/repos/elastic/kibana/pulls', {

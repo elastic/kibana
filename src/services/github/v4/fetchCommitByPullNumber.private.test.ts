@@ -1,4 +1,4 @@
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
 import { fetchCommitByPullNumber } from './fetchCommitByPullNumber';
 
@@ -17,7 +17,7 @@ describe('fetchCommitByPullNumber', () => {
         pullNumber: 5,
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
-      } as BackportOptions & { pullNumber: number };
+      } as ValidConfigOptions & { pullNumber: number };
 
       expect(await fetchCommitByPullNumber(options)).toEqual({
         formattedMessage: 'Add 🍏 emoji (#5)',
@@ -27,8 +27,8 @@ describe('fetchCommitByPullNumber', () => {
         sourceBranch: 'master',
         targetBranchesFromLabels: [],
         existingTargetPullRequests: [
-          { branch: '7.x', state: 'MERGED' },
-          { branch: '7.8', state: 'MERGED' },
+          { branch: '7.x', state: 'MERGED', number: 6 },
+          { branch: '7.8', state: 'MERGED', number: 7 },
         ],
       });
     });
@@ -42,7 +42,7 @@ describe('fetchCommitByPullNumber', () => {
         pullNumber: 11,
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
-      } as BackportOptions & { pullNumber: number };
+      } as ValidConfigOptions & { pullNumber: number };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(
         `The PR #11 is not merged`
@@ -58,7 +58,7 @@ describe('fetchCommitByPullNumber', () => {
         pullNumber: 9999999999999,
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
-      } as BackportOptions & { pullNumber: number };
+      } as ValidConfigOptions & { pullNumber: number };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(
         `Could not resolve to a PullRequest with the number of 9999999999999. (Github v4)`

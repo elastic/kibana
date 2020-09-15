@@ -1,7 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import chalk from 'chalk';
 import ora from 'ora';
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
 import { logger, consoleLog } from '../../logger';
@@ -22,7 +22,7 @@ export async function createPullRequest({
   options,
   prPayload,
 }: {
-  options: BackportOptions;
+  options: ValidConfigOptions;
   prPayload: PullRequestPayload;
 }) {
   logger.info(
@@ -88,7 +88,7 @@ export function getBody({
   commits,
   targetBranch,
 }: {
-  options: BackportOptions;
+  options: ValidConfigOptions;
   commits: Commit[];
   targetBranch: string;
 }) {
@@ -106,7 +106,7 @@ export function getTitle({
   commits,
   targetBranch,
 }: {
-  options: BackportOptions;
+  options: ValidConfigOptions;
   commits: Commit[];
   targetBranch: string;
 }) {

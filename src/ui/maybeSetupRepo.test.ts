@@ -1,6 +1,6 @@
 import del from 'del';
 import makeDir = require('make-dir');
-import { BackportOptions } from '../options/options';
+import { ValidConfigOptions } from '../options/options';
 import { maybeSetupRepo } from './maybeSetupRepo';
 
 describe('maybeSetupRepo', () => {
@@ -17,7 +17,7 @@ describe('maybeSetupRepo', () => {
         username: 'sqren',
         accessToken: 'myAccessToken',
         gitHostname: 'github.com',
-      } as BackportOptions)
+      } as ValidConfigOptions)
     ).rejects.toThrowError('makeDir failed');
 
     expect(del).toHaveBeenCalledWith(

@@ -1,4 +1,4 @@
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
 import { fetchExistingPullRequest } from './fetchExistingPullRequest';
 
@@ -14,7 +14,7 @@ describe('fetchExistingPullRequest', () => {
       const options = {
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       const prPayload = {
         owner: 'backport-org',
@@ -36,7 +36,7 @@ describe('fetchExistingPullRequest', () => {
       const options = {
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
-      } as BackportOptions;
+      } as ValidConfigOptions;
 
       const prPayload = {
         owner: 'backport-org',

@@ -1,10 +1,8 @@
-import { Octokit } from '@octokit/rest';
 import chalk from 'chalk';
-import { backportPullRequest } from 'github-backport';
 import difference from 'lodash.difference';
 import isEmpty from 'lodash.isempty';
 import ora = require('ora');
-import { BackportOptions } from '../options/options';
+import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { exec } from '../services/child-process-promisified';
 import { getRepoPath } from '../services/env';
@@ -28,10 +26,6 @@ import {
   getBody,
   PullRequestPayload,
 } from '../services/github/v3/createPullRequest';
-import {
-  splitHead,
-  fetchExistingPullRequest,
-} from '../services/github/v4/fetchExistingPullRequest';
 import { consoleLog, logger } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
@@ -42,7 +36,7 @@ export async function cherrypickAndCreateTargetPullRequest({
   commits,
   targetBranch,
 }: {
-  options: BackportOptions;
+  options: ValidConfigOptions;
   commits: Commit[];
   targetBranch: string;
 }) {
@@ -59,35 +53,13 @@ export async function cherrypickAndCreateTargetPullRequest({
     base: targetBranch, // eg. 7.x
   };
 
-  const sourcePullNumber =
-    commits.length === 1 ? commits[0].pullNumber : undefined;
-
-  // backport using Github API
-  const targetPullRequest =
-    // fork mode not supported via API
-    (options.username === options.repoName || !options.fork) &&
-    // only enable for ci mode until fork-mode is supported
-    options.ci &&
-    // has exactly 1 PR to backport
-    sourcePullNumber != undefined &&
-    // `autoFixConflicts` is not supported via API
-    !options.autoFixConflicts &&
-    // `mainline` (merge commits) is not supported via API
-    !options.mainline &&
-    // `resetAuthor` is not supported via API
-    !options.resetAuthor
-      ? await backportViaGithubApi({
-          options,
-          prPayload,
-          pullNumber: sourcePullNumber,
-        })
-      : await backportViaFilesystem({
-          options,
-          prPayload,
-          targetBranch,
-          backportBranch,
-          commits,
-        });
+  const targetPullRequest = await backportViaFilesystem({
+    options,
+    prPayload,
+    targetBranch,
+    backportBranch,
+    commits,
+  });
 
   // add assignees to target pull request
   if (options.assignees.length > 0) {
@@ -126,61 +98,6 @@ export async function cherrypickAndCreateTargetPullRequest({
   return targetPullRequest;
 }
 
-async function backportViaGithubApi({
-  options,
-  prPayload,
-  pullNumber,
-}: {
-  options: BackportOptions;
-  prPayload: PullRequestPayload;
-  pullNumber: number;
-}) {
-  logger.info('Backporting via api');
-
-  const spinner = ora(`Performing backport via Github API...`).start();
-
-  const octokit = new Octokit({
-    auth: options.accessToken,
-    baseUrl: options.githubApiBaseUrlV3,
-    log: logger,
-  });
-
-  let number;
-  try {
-    const { head } = splitHead(prPayload);
-    number = await backportPullRequest({
-      octokit,
-      pullRequestNumber: pullNumber,
-      ...prPayload,
-      head,
-    });
-    spinner.succeed();
-  } catch (e) {
-    spinner.fail();
-
-    // PR already exists
-    if (
-      e.name === 'HttpError' &&
-      e.message.includes('Reference already exists')
-    ) {
-      const res = await fetchExistingPullRequest({ options, prPayload });
-      throw new HandledError(`Pull request already exists: ${res?.url}`);
-    }
-
-    // merge conflict
-    if (e.message.includes('could not be cherry-picked on top of')) {
-      throw new HandledError(
-        'Commit could not be cherrypicked due to conflicts'
-      );
-    }
-
-    throw e;
-  }
-
-  const url = `https://github.com/${options.repoOwner}/${options.repoName}/pull/${number}`;
-  return { number, url };
-}
-
 async function backportViaFilesystem({
   options,
   prPayload,
@@ -188,7 +105,7 @@ async function backportViaFilesystem({
   targetBranch,
   backportBranch,
 }: {
-  options: BackportOptions;
+  options: ValidConfigOptions;
   prPayload: PullRequestPayload;
   commits: Commit[];
   targetBranch: string;
@@ -232,7 +149,7 @@ export function getBackportBranchName(targetBranch: string, commits: Commit[]) {
 }
 
 async function waitForCherrypick(
-  options: BackportOptions,
+  options: ValidConfigOptions,
   commit: Commit,
   targetBranch: string
 ) {
@@ -313,7 +230,7 @@ async function waitForCherrypick(
   }
 }
 
-async function listConflictingAndUnstagedFiles(options: BackportOptions) {
+async function listConflictingAndUnstagedFiles(options: ValidConfigOptions) {
   const checkForProblems = async (retries = 0): Promise<void> => {
     const [conflictingFiles, _unstagedFiles] = await Promise.all([
       getConflictingFiles(options),

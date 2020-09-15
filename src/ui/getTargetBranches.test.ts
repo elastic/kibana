@@ -1,5 +1,5 @@
 import { BranchChoice } from '../options/ConfigOptions';
-import { BackportOptions } from '../options/options';
+import { ValidConfigOptions } from '../options/options';
 import * as prompts from '../services/prompts';
 import { Commit } from '../types/Commit';
 import { SpyHelper } from '../types/SpyHelper';
@@ -31,7 +31,7 @@ describe('getTargetBranches', () => {
         ] as BranchChoice[],
         branchLabelMapping: {},
         sourceBranch: 'master',
-      } as unknown) as BackportOptions;
+      } as unknown) as ValidConfigOptions;
 
       const commits = [
         {
@@ -85,7 +85,7 @@ describe('getTargetBranches', () => {
           { name: '7.5' },
         ] as BranchChoice[],
         sourceBranch: 'master',
-      } as unknown) as BackportOptions;
+      } as unknown) as ValidConfigOptions;
 
       const commits = [
         {
@@ -121,7 +121,7 @@ describe('getTargetBranches', () => {
         targetBranches: [],
         targetBranchChoices: [{ name: 'branchA' }, { name: 'branchB' }],
         multipleBranches: false,
-      } as unknown) as BackportOptions;
+      } as unknown) as ValidConfigOptions;
 
       const commits: Commit[] = [
         {
@@ -159,7 +159,7 @@ describe('getTargetBranches', () => {
           targetBranches: ['branchA', 'branchB'],
           targetBranchChoices: [],
           multipleBranches: false,
-        } as unknown) as BackportOptions,
+        } as unknown) as ValidConfigOptions,
         []
       );
     });
@@ -184,7 +184,7 @@ describe('getTargetBranchChoices', () => {
       { name: '7.7', checked: false },
     ],
     branchLabelMapping: {},
-  } as unknown) as BackportOptions;
+  } as unknown) as ValidConfigOptions;
 
   const sourceBranch = 'master';
 

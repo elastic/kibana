@@ -37,6 +37,7 @@ export const getCommitsByAuthorMock = (repoName: string): DataResponse => ({
                               node: {
                                 source: {
                                   __typename: 'PullRequest',
+                                  number: 99,
                                   title: 'some title',
                                   state: 'MERGED',
                                   baseRefName: '6.3',

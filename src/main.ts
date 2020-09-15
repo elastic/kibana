@@ -6,17 +6,12 @@ import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
 import { initLogger, consoleLog, redact } from './services/logger';
 
-export type BackportResponse =
-  | {
-      success: boolean;
-      results: Result[];
-    }
-  | {
-      success: false;
-      results: Result[];
-      errorMessage: string;
-      error: Error;
-    };
+export type BackportResponse = {
+  success: boolean;
+  results: Result[];
+  errorMessage?: string;
+  error?: Error;
+};
 
 export async function main(
   argv: string[],
@@ -53,12 +48,14 @@ export async function main(
       logger.info('Unknown error:', e);
     }
 
+    const errorMessage = redact(e.message);
+
     return {
       success: false,
       results: [],
       errorMessage: isHandledError
-        ? redact(e.message)
-        : 'An unhandled error occurred. Please see the logs for additional details',
+        ? errorMessage
+        : `An unhandled error occurred: ${errorMessage}`,
       error: e,
     };
   }

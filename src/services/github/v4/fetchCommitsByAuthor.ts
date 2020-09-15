@@ -1,6 +1,6 @@
 import isEmpty from 'lodash.isempty';
 import ora from 'ora';
-import { BackportOptions } from '../../../options/options';
+import { ValidConfigOptions } from '../../../options/options';
 import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
 import {
@@ -19,7 +19,7 @@ import {
 import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 
 export async function fetchCommitsByAuthor(
-  options: BackportOptions
+  options: ValidConfigOptions
 ): Promise<Commit[]> {
   const {
     accessToken,
@@ -141,11 +141,11 @@ export async function fetchCommitsByAuthor(
     });
 
     const existingTargetPullRequests = getExistingTargetPullRequests(
-      commitMessage,
       pullRequestNode
     );
 
     const targetBranchesFromLabels = getTargetBranchesFromLabels({
+      sourceBranch: pullRequestNode.baseRefName,
       existingTargetPullRequests,
       branchLabelMapping: options.branchLabelMapping,
       labels: getPullRequestLabels(pullRequestNode),
@@ -184,7 +184,7 @@ function isSourcePullRequest({
   sha,
 }: {
   pullRequestNode: PullRequestNode | undefined;
-  options: BackportOptions;
+  options: ValidConfigOptions;
   sha: string;
 }) {
   return (
@@ -211,11 +211,9 @@ interface HistoryEdge {
     oid: string;
     message: string;
     associatedPullRequests: {
-      edges: PullRequestEdge[];
+      edges: {
+        node: PullRequestNode;
+      }[];
     };
   };
-}
-
-export interface PullRequestEdge {
-  node: PullRequestNode;
 }
