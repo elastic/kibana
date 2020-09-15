@@ -70,7 +70,7 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
     if (!loadingSignalIndex && signalIndexName != null) {
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
-  }, [allIndexPatterns, dispatch, loadingSignalIndex, kibanaIndexPatterns, scopeId, setIndexPatternsList]);
+  }, [dispatch, loadingSignalIndex, signalIndexName]);
 
   // Related to the detection page
   useEffect(() => {
@@ -87,7 +87,15 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
       );
       setIndexPatternsList(kibanaIndexPatterns, allIndexPatterns);
     }
-  }, [allIndexPatterns, dispatch, kibanaIndexPatterns, isSignalIndexExists, scopeId, signalIndexName]);
+  }, [
+    allIndexPatterns,
+    dispatch,
+    kibanaIndexPatterns,
+    isSignalIndexExists,
+    scopeId,
+    setIndexPatternsList,
+    signalIndexName,
+  ]);
 
   useEffect(() => {
     if (scopeId !== SourcererScopeName.detections) {

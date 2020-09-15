@@ -19,7 +19,7 @@ import type { RowRendererId } from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-export type EventType = 'all' | 'raw' | 'alert' | 'signal';
+export type EventType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -66,6 +66,7 @@ export interface TimelineModel {
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
+  indexesName: string[];
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
   /** Events to be rendered as loading **/

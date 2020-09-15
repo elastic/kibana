@@ -66,7 +66,7 @@ interface Props {
   savedQueryId: string | null;
   to: string;
   toStr: string;
-  updateEventType: (eventType: EventType) => void;
+  updateEventTypeAndIndexesName: (eventType: EventType, indexesName: string[]) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
@@ -114,7 +114,7 @@ export const SearchOrFilter = React.memo<Props>(
     setSavedQueryId,
     to,
     toStr,
-    updateEventType,
+    updateEventTypeAndIndexesName,
     updateKqlMode,
     updateReduxTime,
   }) => {
@@ -167,7 +167,10 @@ export const SearchOrFilter = React.memo<Props>(
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <PickEventType eventType={eventType} onChangeEventType={updateEventType} />
+              <PickEventType
+                eventType={eventType}
+                onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </SearchOrFilterContainer>

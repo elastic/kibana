@@ -6,11 +6,13 @@
 
 import {
   EuiButton,
+  EuiButtonGroup,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiHealth,
   EuiIcon,
   EuiPopover,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
@@ -72,20 +74,31 @@ export const eventTypeOptions: EuiComboBoxOptionOption = {
   ],
 };
 
+const toggleEventType = [
+  {
+    id: 'all',
+    label: i18n.ALL_EVENT,
+  },
+  {
+    id: 'raw',
+    label: i18n.RAW_EVENT,
+  },
+  {
+    id: 'alert',
+    label: i18n.DETECTION_ALERTS_EVENT,
+  },
+];
+
 interface PickEventTypeProps {
   eventType: EventType;
-  onChangeEventType: (value: EventType) => void;
+  onChangeEventTypeAndIndexesName: (value: EventType, indexesName: string[]) => void;
 }
 
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
-  eventType,
-  onChangeEventType,
+  eventType = 'all',
+  onChangeEventTypeAndIndexesName,
 }) => {
-  const comboboxRef = useRef<EuiComboBox<string>>();
   const [isPopoverOpen, setPopover] = useState(false);
-  const [allOptions, setAllOptions] = useState<EuiComboBoxOptionOption[]>([eventTypeOptions]);
-  const [filter, setFilter] = useState<'all' | 'raw' | 'signal' | 'alert' | 'none'>(eventType);
-  const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>([]);
 
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { allExistingIndexPatterns, signalIndexName, sourcererScope } = useSelector<
@@ -95,20 +108,24 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   const indexesPatternOptions = useMemo(
     () =>
-      [...allExistingIndexPatterns, signalIndexName].reduce<EuiComboBoxOptionOption<string>>(
+      [...allExistingIndexPatterns, signalIndexName].reduce<Array<EuiComboBoxOptionOption<string>>>(
         (acc, index) => {
           if (index != null) {
-            return {
-              ...acc,
-              options: [...(acc.options ?? []), { label: index, value: index }],
-            };
+            return [...acc, { label: index, value: index }];
           }
           return acc;
         },
-        { label: 'indexes', options: [] }
+        []
       ),
     [allExistingIndexPatterns, signalIndexName]
   );
+
+  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+    return sourcererScope.selectedPatterns.map((indexSelected) => ({
+      label: indexSelected,
+      value: indexSelected,
+    }));
+  }, [sourcererScope.selectedPatterns]);
 
   const renderOption = useCallback(
     (option) => {
@@ -116,7 +133,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       if (value === 'all') {
         return (
           <>
-            {filter === 'all' && <EuiIcon type="check" />}{' '}
+            {eventType === 'all' && <EuiIcon type="check" />}{' '}
             <AllEuiHealth color="subdued">
               <WarningEuiHealth color="warning">{i18n.ALL_EVENT}</WarningEuiHealth>
             </AllEuiHealth>
@@ -125,14 +142,14 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       } else if (value === 'raw') {
         return (
           <>
-            {filter === 'raw' && <EuiIcon type="check" />}{' '}
+            {eventType === 'raw' && <EuiIcon type="check" />}{' '}
             <EuiHealth color="subdued"> {i18n.RAW_EVENT}</EuiHealth>
           </>
         );
       } else if (value === 'alert' || value === 'signal') {
         return (
           <>
-            {filter === 'alert' && <EuiIcon type="check" />}{' '}
+            {eventType === 'alert' && <EuiIcon type="check" />}{' '}
             <EuiHealth color="warning"> {i18n.DETECTION_ALERTS_EVENT}</EuiHealth>
           </>
         );
@@ -140,48 +157,37 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         return <>{value}</>;
       }
     },
-    [filter]
+    [eventType]
   );
 
-  const onChange = useCallback(
+  const onChangeCombo = useCallback(
     (newSelectedOptions) => {
-      setSelectedOptions((prevSelectedOptions) => {
-        let filterValues: string[] = [];
-        if (newSelectedOptions.some((so: { value: string }) => so.value === 'all')) {
-          filterValues = [...allExistingIndexPatterns, signalIndexName ?? ''];
-          setFilter('all');
-        } else if (newSelectedOptions.some((so: { value: string }) => so.value === 'raw')) {
-          filterValues = allExistingIndexPatterns;
-          setFilter('raw');
-        } else if (newSelectedOptions.some((so: { value: string }) => so.value === 'alert')) {
-          filterValues = [signalIndexName ?? ''];
-          setFilter('alert');
-        }
-        if (filterValues.length > 0) {
-          return filterValues
-            .filter((fv) => fv !== '')
-            .reduce<Array<EuiComboBoxOptionOption<string>>>(
-              (acc, index) => [...acc, { label: index, value: index }],
-              []
-            );
-        }
-        setFilter('none');
-        return newSelectedOptions;
-      });
+      onChangeEventTypeAndIndexesName(
+        'custom',
+        newSelectedOptions.map((so: { value: string }) => so.value)
+      );
     },
-    [allExistingIndexPatterns, signalIndexName]
+    [onChangeEventTypeAndIndexesName]
+  );
+
+  const onChangeFilter = useCallback(
+    (filter) => {
+      if (filter === 'all') {
+        onChangeEventTypeAndIndexesName('all', [
+          ...allExistingIndexPatterns,
+          signalIndexName ?? '',
+        ]);
+      } else if (filter === 'raw') {
+        onChangeEventTypeAndIndexesName('raw', allExistingIndexPatterns);
+      } else if (filter === 'alert') {
+        onChangeEventTypeAndIndexesName('alert', [signalIndexName ?? '']);
+      }
+    },
+    [allExistingIndexPatterns, signalIndexName, onChangeEventTypeAndIndexesName]
   );
 
   const togglePopover = useCallback(
-    () =>
-      setPopover((prevIsPopoverOpen) => {
-        if (!prevIsPopoverOpen === true) {
-          setTimeout(() => {
-            comboboxRef.current?.openList();
-          }, 0);
-        }
-        return !prevIsPopoverOpen;
-      }),
+    () => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen),
     []
   );
 
@@ -191,19 +197,29 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     () => (
       <EuiComboBox
         placeholder="Pick events or index patterns"
-        options={allOptions}
+        options={indexesPatternOptions}
         selectedOptions={selectedOptions}
-        onChange={onChange}
+        onChange={onChangeCombo}
         renderOption={renderOption}
-        ref={(CRef) => {
-          comboboxRef.current = CRef as EuiComboBox<string>;
-        }}
       />
     ),
-    [allOptions, onChange, renderOption, selectedOptions]
+    [indexesPatternOptions, onChangeCombo, renderOption, selectedOptions]
   );
 
-  //TODO translation
+  const filter = useMemo(
+    () => (
+      <EuiButtonGroup
+        options={toggleEventType}
+        idSelected={eventType}
+        onChange={onChangeFilter}
+        buttonSize="compressed"
+        isFullWidth
+      />
+    ),
+    [eventType, onChangeFilter]
+  );
+
+  // TODO translation
   const button = useMemo(
     () => (
       <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
@@ -213,13 +229,9 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [togglePopover]
   );
 
+  // TODO find a better way to manage the old timeline
   useEffect(() => {
-    setAllOptions([eventTypeOptions, indexesPatternOptions]);
-  }, [indexesPatternOptions]);
-
-  //TODO find a better way to manage the old timeline
-  useEffect(() => {
-    onChange([{ label: eventType, value: eventType }]);
+    onChangeFilter(eventType);
   }, []);
 
   return (
@@ -238,7 +250,11 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           isOpen={isPopoverOpen}
           closePopover={closePopover}
         >
-          <div style={{ width: '300px' }}>{comboBox}</div>
+          <div style={{ width: '400px' }}>
+            {filter}
+            <EuiSpacer size="s" />
+            {comboBox}
+          </div>
         </EuiPopover>
       </EuiToolTip>
     </PickEventContainer>

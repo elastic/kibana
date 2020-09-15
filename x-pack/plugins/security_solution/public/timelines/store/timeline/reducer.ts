@@ -44,6 +44,7 @@ import {
   updateDescription,
   updateEventType,
   updateHighlightedDropAndProviderId,
+  updateIndexesName,
   updateIsFavorite,
   updateIsLive,
   updateIsLoading,
@@ -520,5 +521,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(setInsertTimeline, (state, insertTimeline) => ({
     ...state,
     insertTimeline,
+  }))
+  .case(updateIndexesName, (state, { id, indexesName }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        indexesName,
+      },
+    },
   }))
   .build();
