@@ -33,6 +33,7 @@ import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { LensIconChartDonut } from '../assets/chart_donut';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -186,7 +187,7 @@ export function PieComponent(
   const percentFormatter = props.formatFactory({
     id: 'percent',
     params: {
-      pattern: `0,0.${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}%`,
+      pattern: `0,0.[${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
     },
   });
 
@@ -210,7 +211,7 @@ export function PieComponent(
     );
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon="visPie" />;
+    return <EmptyPlaceholder icon={LensIconChartDonut} />;
   }
 
   if (hasNegative) {

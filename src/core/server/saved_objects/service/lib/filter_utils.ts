@@ -21,8 +21,9 @@ import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../es_query';
+type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 
