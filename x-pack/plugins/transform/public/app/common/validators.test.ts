@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { delayValidator } from './validators';
+import { continuousModeDelayValidator } from './validators';
 
 describe('delayValidator', () => {
   test('it should allow 0 input without unit', () => {
-    expect(delayValidator('0')).toBe(true);
+    expect(continuousModeDelayValidator('0')).toBe(true);
   });
 
   test('it should allow 0 input with unit provided', () => {
-    expect(delayValidator('0s')).toBe(true);
+    expect(continuousModeDelayValidator('0s')).toBe(true);
   });
 
   test('it should allow integer input with unit provided', () => {
-    expect(delayValidator('234nanos')).toBe(true);
+    expect(continuousModeDelayValidator('234nanos')).toBe(true);
   });
 
   test('it should not allow integer input without unit provided', () => {
-    expect(delayValidator('90000')).toBe(false);
+    expect(continuousModeDelayValidator('90000')).toBe(false);
   });
 
   test('it should not allow float input', () => {
-    expect(delayValidator('122.5d')).toBe(false);
+    expect(continuousModeDelayValidator('122.5d')).toBe(false);
   });
 });

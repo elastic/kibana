@@ -58,7 +58,7 @@ export function getDefaultStepCreateState(): StepDetailsExposedState {
   };
 }
 
-interface Props {
+export interface StepCreateFormProps {
   createIndexPattern: boolean;
   transformId: string;
   transformConfig: PutTransformsRequestSchema;
@@ -67,7 +67,7 @@ interface Props {
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: FC<Props> = React.memo(
+export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
   ({ createIndexPattern, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
