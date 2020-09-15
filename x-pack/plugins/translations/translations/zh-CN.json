@@ -9709,7 +9709,6 @@
     "xpack.lens.pieChart.legendDisplayLegend": "图例显示",
     "xpack.lens.pieChart.nestedLegendLabel": "嵌套图例",
     "xpack.lens.pieChart.numberLabels": "标签值",
-    "xpack.lens.pieChart.percentDecimalsLabel": "百分比的小数位数",
     "xpack.lens.pieChart.showCategoriesLabel": "内部或外部",
     "xpack.lens.pieChart.showFormatterValuesLabel": "显示值",
     "xpack.lens.pieChart.showPercentValuesLabel": "显示百分比",
