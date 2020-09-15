@@ -11,7 +11,7 @@ import styled, { ThemeProvider, DefaultTheme } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { CoreStart, AppMountParameters } from 'kibana/public';
-import { ApmPluginSetupDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
 import {
   KibanaContextProvider,
@@ -72,11 +72,13 @@ export function CsmAppRoot({
   deps,
   history,
   config,
+  corePlugins: { embeddable },
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   history: AppMountParameters['history'];
   config: ConfigSchema;
+  corePlugins: ApmPluginStartDeps;
 }) {
   const i18nCore = core.i18n;
   const plugins = deps;
@@ -88,7 +90,7 @@ export function CsmAppRoot({
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider services={{ ...core, ...plugins, embeddable }}>
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
@@ -112,12 +114,19 @@ export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
   { element, history }: AppMountParameters,
-  config: ConfigSchema
+  config: ConfigSchema,
+  corePlugins: ApmPluginStartDeps
 ) => {
   createCallApmApi(core.http);
 
   ReactDOM.render(
-    <CsmAppRoot core={core} deps={deps} history={history} config={config} />,
+    <CsmAppRoot
+      core={core}
+      deps={deps}
+      history={history}
+      config={config}
+      corePlugins={corePlugins}
+    />,
     element
   );
   return () => {
