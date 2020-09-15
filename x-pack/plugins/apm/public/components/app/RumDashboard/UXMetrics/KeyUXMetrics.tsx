@@ -17,13 +17,18 @@ import {
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
 
-function formatMicroSecValue(value: number | string): string {
-  const valueInMs = Number(value) / 1000;
+export function formatToSec(
+  value?: number | string,
+  fromUnit = 'MicroSec'
+): string {
+  const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
+
   if (valueInMs < 1000) {
     return valueInMs + ' ms';
   }
-  return valueInMs / 1000 + ' s';
+  return (valueInMs / 1000).toFixed(2) + ' s';
 }
+const STAT_STYLE = { width: '240px' };
 
 interface Props {
   data?: UXMetrics | null;
@@ -50,14 +55,13 @@ export function KeyUXMetrics({ data, loading }: Props) {
     [start, end, serviceName, uiFilters]
   );
 
-  const STAT_STYLE = { width: '240px' };
-
+  // Note: FCP value is in ms unit
   return (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatMicroSecValue(Number(data?.fcp ?? 0) * 1000)}
+          title={formatToSec(data?.fcp, 'ms')}
           description={FCP_LABEL}
           isLoading={loading}
         />
@@ -65,7 +69,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={(Number(data?.tbt ?? 0)?.toFixed(2) ?? '-') + ' s'}
+          title={formatToSec(data?.tbt)}
           description={TBT_LABEL}
           isLoading={loading}
         />
@@ -81,9 +85,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={
-            ((longTaskData?.longestLongTask ?? 0) / 100000).toFixed(1) + ' s'
-          }
+          title={formatToSec(longTaskData?.longestLongTask)}
           description={LONGEST_LONG_TASK}
           isLoading={status !== 'success'}
         />
@@ -91,9 +93,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={
-            ((longTaskData?.sumOfLongTasks ?? 0) / 100000).toFixed(1) + ' s'
-          }
+          title={formatToSec(longTaskData?.sumOfLongTasks)}
           description={SUM_LONG_TASKS}
           isLoading={status !== 'success'}
         />
