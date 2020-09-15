@@ -17,6 +17,8 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { MetricsService } from './metrics_service';
 import {
   InternalMetricsServiceSetup,

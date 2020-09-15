@@ -18,8 +18,7 @@
  */
 
 jest.mock('../../../legacy/server/kbn_server');
-jest.mock('../../../cli/cluster/cluster_manager');
-
+jest.mock('./cluster_manager');
 import {
   findLegacyPluginSpecsMock,
   logLegacyThirdPartyPluginDeprecationWarningMock,
@@ -27,7 +26,8 @@ import {
 
 import { BehaviorSubject, throwError } from 'rxjs';
 
-import { ClusterManager as MockClusterManager } from '../../../cli/cluster/cluster_manager';
+// @ts-expect-error js file to remove TS dependency on cli
+import { ClusterManager as MockClusterManager } from './cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
