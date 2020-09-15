@@ -127,10 +127,6 @@ export function App({
     [lastKnownDoc]
   );
 
-  // const setActiveDocument = (doc: Document) => {
-
-  // };
-
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
     // can be loaded without a full page refresh
@@ -268,6 +264,7 @@ export function App({
     ) {
       return;
     }
+
     setState((s) => ({ ...s, isLoading: true }));
     attributeService
       .unwrapAttributes(initialInput)
