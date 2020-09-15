@@ -4123,11 +4123,6 @@
     "@types/node" "*"
     "@types/webpack" "*"
 
-"@types/lodash@^3.10.1":
-  version "3.10.3"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.3.tgz#aaddec6a3c93bf03b402db3acf5d4c77bce8bdff"
-  integrity sha512-b9zScBKmB/RJqETbxu3YRya61vJOik89/lR+NdxjZAFMDcMSjwX6IhQoP4terJkhsa9TE1C+l6XwxCkhhsaZXg==
-
 "@types/lodash@^4.14.116", "@types/lodash@^4.14.159":
   version "4.14.159"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.159.tgz#61089719dc6fdd9c5cb46efc827f2571d1517065"
@@ -18970,11 +18965,6 @@ lodash@^3.10.1:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
-
-"lodash@npm:@elastic/lodash@3.10.1-kibana4":
-  version "3.10.1-kibana4"
-  resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana4.tgz#d491228fd659b4a1b0dfa08ba9c67a4979b9746d"
-  integrity sha512-geQqXd9ZedRCL+kq5cpeahYWYaYRV0BMXhCwzq4DpnGCVs430FTMS3Wcot3XChZZhCvkwHm15bpNjB312vPxaA==
 
 log-ok@^0.1.1:
   version "0.1.1"
