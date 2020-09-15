@@ -2,7 +2,10 @@
   "prefix": "xpack",
   "paths": {
     "xpack.actions": "plugins/actions",
-    "xpack.uiActionsEnhanced": ["plugins/ui_actions_enhanced", "examples/ui_actions_enhanced_examples"],
+    "xpack.uiActionsEnhanced": [
+      "plugins/ui_actions_enhanced",
+      "examples/ui_actions_enhanced_examples"
+    ],
     "xpack.alerts": "plugins/alerts",
     "xpack.eventLog": "plugins/event_log",
     "xpack.alertingBuiltins": "plugins/alerting_builtins",
@@ -21,6 +24,7 @@
     "xpack.features": "plugins/features",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": ["plugins/global_search"],
+    "xpack.globalSearchBar": ["plugins/global_search_bar"],
     "xpack.graph": ["plugins/graph"],
     "xpack.grokDebugger": "plugins/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
