@@ -71,7 +71,7 @@ export const UseArray = ({
   const uniqueId = useRef(0);
 
   const form = useFormContext();
-  const { getFieldDefaultValue } = form;
+  const { __getFieldDefaultValue } = form;
 
   const getNewItemAtIndex = useCallback(
     (index: number): ArrayItem => ({
@@ -84,7 +84,7 @@ export const UseArray = ({
 
   const fieldDefaultValue = useMemo<ArrayItem[]>(() => {
     const defaultValues = readDefaultValueOnForm
-      ? (getFieldDefaultValue(path) as any[])
+      ? (__getFieldDefaultValue(path) as any[])
       : undefined;
 
     const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
@@ -97,7 +97,13 @@ export const UseArray = ({
     return defaultValues
       ? getInitialItemsFromValues(defaultValues)
       : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
-  }, [path, initialNumberOfItems, readDefaultValueOnForm, getFieldDefaultValue, getNewItemAtIndex]);
+  }, [
+    path,
+    initialNumberOfItems,
+    readDefaultValueOnForm,
+    __getFieldDefaultValue,
+    getNewItemAtIndex,
+  ]);
 
   // Create a new hook field with the "hasValue" set to false so we don't use its value to build the final form data.
   // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.

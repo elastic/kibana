@@ -338,7 +338,7 @@ export function useForm<T extends FormData = FormData>(
 
   const getFields: FormHook<T>['getFields'] = useCallback(() => fieldsRefs.current, []);
 
-  const getFieldDefaultValue: FormHook['getFieldDefaultValue'] = useCallback(
+  const getFieldDefaultValue: FormHook['__getFieldDefaultValue'] = useCallback(
     (fieldName) => get(defaultValueDeserialized.current, fieldName),
     []
   );
@@ -445,13 +445,13 @@ export function useForm<T extends FormData = FormData>(
       getFields,
       getFormData,
       getErrors,
-      getFieldDefaultValue,
       reset,
       __options: formOptions,
       __getFormData$: getFormData$,
       __updateFormDataAt: updateFormDataAt,
       __updateDefaultValueAt: updateDefaultValueAt,
       __readFieldConfigFromSchema: readFieldConfigFromSchema,
+      __getFieldDefaultValue: getFieldDefaultValue,
       __addField: addField,
       __removeField: removeField,
       __validateFields: validateFields,

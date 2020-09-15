@@ -70,7 +70,8 @@ function UseFieldComp<T = unknown>(props: Props<T>) {
   } else {
     if (readDefaultValueOnForm) {
       // Read the field initial value from the "defaultValue" object passed to the form
-      fieldConfig.initialValue = (form.getFieldDefaultValue(path) as T) ?? fieldConfig.defaultValue;
+      fieldConfig.initialValue =
+        (form.__getFieldDefaultValue(path) as T) ?? fieldConfig.defaultValue;
     }
   }
 
