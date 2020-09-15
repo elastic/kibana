@@ -249,11 +249,6 @@ export function XYChart({
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
   const layersAlreadyFormatted: Record<string, boolean> = {};
-  // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
-  const safeXAccessorLabelRenderer = (value: unknown): string =>
-    xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]
-      ? (value as string)
-      : xAxisFormatter.convert(value);
 
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
@@ -267,6 +262,16 @@ export function XYChart({
     formatFactory,
     shouldRotate
   );
+
+  // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
+  const safeAccessorLabelRenderer = (value: unknown): string => {
+    // TODO: need to make it work also for splitAccessor propertly!
+    if (xAxisColumn && layersAlreadyFormatted[xAxisColumn.id]) {
+      return value as string;
+    }
+
+    return xAxisFormatter.convert(value);
+  };
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
   const showXAxisTitle = args.showXAxisTitle ?? true;
@@ -329,6 +334,14 @@ export function XYChart({
     );
   };
 
+  // as for now this is a special code made for ranges
+  function extractLabelsFromMeta(meta: KibanaDatatable['columns'][number]['meta'], index: number) {
+    const originalRanges = meta?.aggConfigParams?.ranges;
+    if (originalRanges && originalRanges.length >= index) {
+      return originalRanges[index]?.key;
+    }
+  }
+
   return (
     <Chart>
       <Settings
@@ -342,7 +355,7 @@ export function XYChart({
         theme={chartTheme}
         baseTheme={chartBaseTheme}
         tooltip={{
-          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
+          headerFormatter: (d) => safeAccessorLabelRenderer(d.value),
         }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
@@ -439,7 +452,7 @@ export function XYChart({
           strokeWidth: 2,
         }}
         hide={filteredLayers[0].hide}
-        tickFormat={(d) => safeXAccessorLabelRenderer(d)}
+        tickFormat={(d) => safeAccessorLabelRenderer(d)}
         style={{
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
@@ -500,12 +513,15 @@ export function XYChart({
           // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
           const tableConverted: KibanaDatatable = {
             ...table,
-            rows: table.rows.map((row) => {
+            rows: table.rows.map((row, index: number) => {
               const newRow = { ...row };
               for (const column of table.columns) {
                 const record = newRow[column.id];
                 if (record && !isPrimitive(record)) {
-                  newRow[column.id] = formatFactory(column.formatHint).convert(record);
+                  // check in meta.esAggsParams if there's a special key for that
+                  newRow[column.id] =
+                    extractLabelsFromMeta(column?.meta, index) ??
+                    formatFactory(column.formatHint).convert(record);
                 }
               }
               return newRow;

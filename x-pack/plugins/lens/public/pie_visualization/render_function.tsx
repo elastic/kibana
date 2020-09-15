@@ -99,6 +99,21 @@ export function PieComponent(
     fillLabel.valueFormatter = () => '';
   }
 
+  function sameRangeValue(rawRangeProp: number, aggsRangeProp: number | null) {
+    return rawRangeProp === aggsRangeProp || (!isFinite(rawRangeProp) && aggsRangeProp == null);
+  }
+
+  // TODO: remove this in favour of esAggs native mapping
+  function findRange(
+    d: { gte: number; lt: number },
+    ranges: Array<{ from: number; to: number; key?: string }>
+  ) {
+    if (!ranges) {
+      return;
+    }
+    return ranges.find(({ from, to }) => sameRangeValue(d.gte, from) && sameRangeValue(d.lt, to));
+  }
+
   const layers: PartitionLayer[] = columnGroups.map(({ col }, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
@@ -106,6 +121,16 @@ export function PieComponent(
       nodeLabel: (d: unknown) => {
         if (hideLabels || d === EMPTY_SLICE) {
           return '';
+        }
+        // Infer the custom label from the meta field
+        if (col.meta?.aggConfigParams?.ranges) {
+          const aggsRange = findRange(
+            d as { gte: number; lt: number },
+            col.meta?.aggConfigParams?.ranges
+          );
+          if (aggsRange && aggsRange.key) {
+            return aggsRange.key;
+          }
         }
         if (col.formatHint) {
           return formatters[col.id].convert(d) ?? '';

@@ -39,6 +39,7 @@ export interface RangeBucketAggDependencies {
 export interface RangeType {
   from: number;
   to: number;
+  key?: string;
 }
 
 export interface AggParamsRange extends BaseAggParams {
