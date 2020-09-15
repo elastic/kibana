@@ -6,6 +6,7 @@
 
 import './toolbar.scss';
 import React, { useState } from 'react';
+import { useDebounce } from 'react-use';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -187,24 +188,19 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           <EuiHorizontalRule margin="s" />
           <EuiFormRow
             label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
-              defaultMessage: 'Decimal places for percent',
+              defaultMessage: 'Maximum decimal places for percent',
             })}
             fullWidth
-            display="columnCompressed"
+            display="rowCompressed"
           >
-            <EuiRange
-              data-test-subj="indexPattern-dimension-formatDecimals"
+            <DecimalPlaceSlider
               value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-              min={0}
-              max={10}
-              showInput
-              compressed
-              onChange={(e) => {
+              setValue={(value) =>
                 setState({
                   ...state,
-                  layers: [{ ...layer, percentDecimals: Number(e.currentTarget.value) }],
-                });
-              }}
+                  layers: [{ ...layer, percentDecimals: value }],
+                })
+              }
             />
           </EuiFormRow>
           <EuiHorizontalRule margin="s" />
@@ -279,3 +275,28 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     </EuiFlexGroup>
   );
 }
+
+const DecimalPlaceSlider = ({
+  value,
+  setValue,
+}: {
+  value: number;
+  setValue: (value: number) => void;
+}) => {
+  const [localValue, setLocalValue] = useState(value);
+  useDebounce(() => setValue(localValue), 256, [localValue]);
+
+  return (
+    <EuiRange
+      data-test-subj="indexPattern-dimension-formatDecimals"
+      value={localValue}
+      min={0}
+      max={10}
+      showInput
+      compressed
+      onChange={(e) => {
+        setLocalValue(Number(e.currentTarget.value));
+      }}
+    />
+  );
+};

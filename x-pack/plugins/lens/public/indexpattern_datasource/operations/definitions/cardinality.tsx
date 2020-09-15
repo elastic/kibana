@@ -68,7 +68,11 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       params:
-        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
+        previousColumn?.dataType === 'number' &&
+        previousColumn.params &&
+        'format' in previousColumn.params
+          ? previousColumn.params
+          : undefined,
     };
   },
   toEsAggsConfig: (column, columnId) => ({

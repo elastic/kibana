@@ -16,7 +16,7 @@ import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
-import { Feature } from '../../../../features/public';
+import { KibanaFeature } from '../../../../features/public';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
@@ -34,7 +34,7 @@ const space = {
 
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
-  new Feature({
+  new KibanaFeature({
     id: 'feature-1',
     name: 'feature 1',
     icon: 'spacesApp',

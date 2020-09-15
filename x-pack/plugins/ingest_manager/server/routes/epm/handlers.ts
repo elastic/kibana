@@ -9,6 +9,7 @@ import { appContextService } from '../../services';
 import {
   GetInfoResponse,
   InstallPackageResponse,
+  MessageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
@@ -19,7 +20,8 @@ import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  InstallPackageRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
 import {
@@ -34,6 +36,7 @@ import {
 } from '../../services/epm/packages';
 import { IngestManagerError, defaultIngestErrorHandler } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
+import { getInstallType } from '../../services/epm/packages/install';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -128,16 +131,18 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const installPackageHandler: RequestHandler<
-  TypeOf<typeof InstallPackageRequestSchema.params>,
+export const installPackageFromRegistryHandler: RequestHandler<
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
   undefined,
-  TypeOf<typeof InstallPackageRequestSchema.body>
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const logger = appContextService.getLogger();
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const { pkgkey } = request.params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installType = getInstallType({ pkgVersion, installedPkg });
   try {
     const res = await installPackage({
       savedObjectsClient,
@@ -156,18 +161,39 @@ export const installPackageHandler: RequestHandler<
     if (e instanceof IngestManagerError) {
       return defaultResult;
     }
-    // if there is an unknown server error, uninstall any package assets
+
+    // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
     try {
-      const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-      const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
-      if (!isUpdate) {
+      if (installType === 'install' || installType === 'reinstall') {
+        logger.error(`uninstalling ${pkgkey} after error installing`);
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
       }
+      if (installType === 'update') {
+        // @ts-ignore getInstallType ensures we have installedPkg
+        const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
+        logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
+        await installPackage({
+          savedObjectsClient,
+          pkgkey: prevVersion,
+          callCluster,
+        });
+      }
     } catch (error) {
-      logger.error(`could not remove failed installation ${error}`);
+      logger.error(`failed to uninstall or rollback package after installation error ${error}`);
     }
     return defaultResult;
   }
+};
+
+export const installPackageByUploadHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.body>
+> = async (context, request, response) => {
+  const body: MessageResponse = {
+    response: 'package upload was received ok, but not installed (not implemented yet)',
+  };
+  return response.ok({ body });
 };
 
 export const deletePackageHandler: RequestHandler<TypeOf<

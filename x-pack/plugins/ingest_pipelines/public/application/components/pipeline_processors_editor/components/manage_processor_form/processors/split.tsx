@@ -33,7 +33,7 @@ const fieldsConfig: FieldsConfig = {
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.splitForm.separatorFieldHelpText',
       {
-        defaultMessage: 'Regex to match a separator',
+        defaultMessage: 'Regex pattern used to delimit the field value.',
       }
     ),
     validations: [
@@ -60,7 +60,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.splitForm.preserveTrailingFieldHelpText',
-      { defaultMessage: 'If enabled, preserve any trailing space.' }
+      { defaultMessage: 'Preserve any trailing whitespace in the split field values.' }
     ),
   },
 };
@@ -71,7 +71,7 @@ export const Split: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.splitForm.fieldNameHelpText',
-          { defaultMessage: 'Field to split' }
+          { defaultMessage: 'Field to split.' }
         )}
       />
 

@@ -25,6 +25,12 @@ export const I18LABELS = {
   pageLoadTimes: i18n.translate('xpack.apm.rum.dashboard.pageLoadTimes.label', {
     defaultMessage: 'Page load times',
   }),
+  pageLoadDuration: i18n.translate(
+    'xpack.apm.rum.dashboard.pageLoadDuration.label',
+    {
+      defaultMessage: 'Page load duration',
+    }
+  ),
   pageLoadDistribution: i18n.translate(
     'xpack.apm.rum.dashboard.pageLoadDistribution.label',
     {
@@ -46,6 +52,30 @@ export const I18LABELS = {
   seconds: i18n.translate('xpack.apm.rum.filterGroup.seconds', {
     defaultMessage: 'seconds',
   }),
+  coreWebVitals: i18n.translate('xpack.apm.rum.filterGroup.coreWebVitals', {
+    defaultMessage: 'Core web vitals',
+  }),
+  browser: i18n.translate('xpack.apm.rum.visitorBreakdown.browser', {
+    defaultMessage: 'Browser',
+  }),
+  operatingSystem: i18n.translate(
+    'xpack.apm.rum.visitorBreakdown.operatingSystem',
+    {
+      defaultMessage: 'Operating system',
+    }
+  ),
+  avgPageLoadDuration: i18n.translate(
+    'xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration',
+    {
+      defaultMessage: 'Average page load duration',
+    }
+  ),
+  pageLoadDurationByRegion: i18n.translate(
+    'xpack.apm.rum.visitorBreakdownMap.pageLoadDurationByRegion',
+    {
+      defaultMessage: 'Page load duration by region',
+    }
+  ),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(

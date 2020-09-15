@@ -182,13 +182,14 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     return (
       <EuiForm>
         {!intervalIsRestricted && (
-          <EuiFormRow>
+          <EuiFormRow display="rowCompressed" hasChildLabel={false}>
             <EuiSwitch
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
                 defaultMessage: 'Customize time interval',
               })}
               checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
+              compressed
             />
           </EuiFormRow>
         )}
@@ -197,6 +198,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
               defaultMessage: 'Minimum interval',
             })}
+            fullWidth
+            display="rowCompressed"
           >
             {intervalIsRestricted ? (
               <FormattedMessage
@@ -208,9 +211,10 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
               />
             ) : (
               <>
-                <EuiFlexGroup>
+                <EuiFlexGroup responsive={false} gutterSize="s">
                   <EuiFlexItem>
                     <EuiFieldNumber
+                      compressed
                       data-test-subj="lensDateHistogramValue"
                       value={
                         typeof interval.value === 'number' || interval.value === ''
@@ -229,6 +233,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiSelect
+                      compressed
                       data-test-subj="lensDateHistogramUnit"
                       value={interval.unit}
                       onChange={(e) => {

@@ -43,7 +43,6 @@ export const networkTopCountries: SecuritySolutionFactory<NetworkQueries.topCoun
     const edges = networkTopCountriesEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildTopCountriesQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 

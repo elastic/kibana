@@ -146,7 +146,7 @@ export interface AggregationOptionsByType {
     buckets: number;
   } & AggregationSourceOptions;
   percentile_ranks: {
-    values: string[];
+    values: Array<string | number>;
     keyed?: boolean;
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
@@ -345,6 +345,12 @@ interface AggregationResponsePart<
 export type ValidAggregationKeysOf<
   T extends Record<string, any>
 > = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
+
+export type AggregationResultOf<
+  TAggregationOptionsMap extends AggregationOptionsMap,
+  TDocument
+> = AggregationResponsePart<TAggregationOptionsMap, TDocument>[AggregationType &
+  ValidAggregationKeysOf<TAggregationOptionsMap>];
 
 export type AggregationResponseMap<
   TAggregationInputMap extends AggregationInputMap | undefined,

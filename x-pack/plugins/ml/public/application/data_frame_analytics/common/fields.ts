@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getNumTopClasses, getNumTopFeatureImportanceValues } from './analytics';
+import { Field } from '../../../../common/types/fields';
 import {
-  getNumTopClasses,
-  getNumTopFeatureImportanceValues,
   getPredictedFieldName,
   getDependentVar,
   getPredictionFieldName,
   isClassificationAnalysis,
   isOutlierAnalysis,
   isRegressionAnalysis,
-} from './analytics';
-import { Field } from '../../../../common/types/fields';
+} from '../../../../common/util/analytics_utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
