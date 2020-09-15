@@ -9,7 +9,7 @@
     "data",
     "navigation",
     "kibanaLegacy",
-    "triggers_actions_ui",
+    "triggersActionsUi",
     "alerts",
     "actions",
     "encryptedSavedObjects"
