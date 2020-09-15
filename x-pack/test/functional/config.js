@@ -287,42 +287,11 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
-        global_maps_read: {
-          kibana: [
-            {
-              feature: {
-                maps: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        },
-
         geoshape_data_reader: {
           elasticsearch: {
             indices: [
               {
                 names: ['geo_shapes*'],
-                privileges: ['read', 'view_index_metadata'],
-              },
-            ],
-          },
-        },
-        antimeridian_points_reader: {
-          elasticsearch: {
-            indices: [
-              {
-                names: ['antimeridian_points*'],
-                privileges: ['read', 'view_index_metadata'],
-              },
-            ],
-          },
-        },
-        antimeridian_shapes_reader: {
-          elasticsearch: {
-            indices: [
-              {
-                names: ['antimeridian_shapes*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],
