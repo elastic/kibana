@@ -40,7 +40,7 @@ describe('OverwriteModal', () => {
       const wrapper = shallowWithI18nProvider(<OverwriteModal {...props} />);
 
       expect(wrapper.find('p').text()).toMatchInlineSnapshot(
-        `"\\"baz\\" conflicts with an existing object, are you sure you want to overwrite it?"`
+        `"\\"baz\\" conflicts with an existing object. Overwrite it?"`
       );
       expect(wrapper.find('EuiSuperSelect')).toHaveLength(0);
     });
@@ -82,7 +82,7 @@ describe('OverwriteModal', () => {
       const wrapper = shallowWithI18nProvider(<OverwriteModal {...props} />);
 
       expect(wrapper.find('p').text()).toMatchInlineSnapshot(
-        `"\\"baz\\" conflicts with multiple existing objects, do you want to overwrite one of them?"`
+        `"\\"baz\\" conflicts with multiple existing objects. Overwrite one?"`
       );
       expect(wrapper.find('EuiSuperSelect')).toHaveLength(1);
     });
