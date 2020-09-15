@@ -22,33 +22,28 @@ export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
 
-export interface TimelineDetailsProps {
+export interface UseTimelineEventsDetailsProps {
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
   skip: boolean;
 }
 
-export const useTimelineDetails = ({
+export const useTimelineEventsDetails = ({
   docValueFields,
   indexName,
   eventId,
   skip,
-}: TimelineDetailsProps): [boolean, EventsArgs['detailsData']] => {
+}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [timelineDetailsRequest, setTimelineDetailsRequest] = useState<
-    TimelineEventsDetailsRequestOptions
-  >({
-    defaultIndex,
-    docValueFields,
-    indexName,
-    eventId,
-    factoryQueryType: TimelineEventsQueries.details,
-  });
+  const [
+    timelineDetailsRequest,
+    setTimelineDetailsRequest,
+  ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
     null
@@ -105,11 +100,12 @@ export const useTimelineDetails = ({
   useEffect(() => {
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex,
         docValueFields,
         indexName,
         eventId,
+        factoryQueryType: TimelineEventsQueries.details,
       };
       if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
@@ -119,7 +115,9 @@ export const useTimelineDetails = ({
   }, [defaultIndex, docValueFields, eventId, indexName, skip]);
 
   useEffect(() => {
-    timelineDetailsSearch(timelineDetailsRequest);
+    if (timelineDetailsRequest) {
+      timelineDetailsSearch(timelineDetailsRequest);
+    }
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];

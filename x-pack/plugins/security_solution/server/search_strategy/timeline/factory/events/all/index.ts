@@ -44,7 +44,7 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
     ]);
     const { activePage, querySize } = options.pagination;
 
-    const totalCount = getOr(0, 'hits.total', response.rawResponse);
+    const totalCount = getOr(0, 'hits.total.value', response.rawResponse);
     const hits = response.rawResponse.hits.hits;
     const edges: TimelineEdges[] = hits.map((hit) =>
       // @ts-expect-error
@@ -60,7 +60,7 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
       edges,
       totalCount,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         totalPages: Math.ceil(totalCount / querySize),
       },
     };

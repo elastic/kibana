@@ -68,13 +68,13 @@ interface UseTimelineEventsProps {
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
-const ID = 'timelineQuery';
+const ID = 'timelineEventsQuery';
 
 export const useTimelineEvents = ({
   docValueFields,
   endDate,
   eventType = 'raw',
-  id,
+  id = ID,
   indexPattern,
   indexToAdd = [],
   fields,
@@ -105,6 +105,7 @@ export const useTimelineEvents = ({
     fields,
     fieldRequested: fields,
     filterQuery: createFilter(filterQuery),
+    id,
     timerange: {
       interval: '12h',
       from: startDate,

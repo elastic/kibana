@@ -25,13 +25,13 @@ import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { useTimelineEvents } from '../../containers/index';
-import { useTimelineDetails } from '../../containers/details/index';
+import { useTimelineEventsDetails } from '../../containers/details/index';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../containers/details', () => ({
-  useTimelineDetails: jest.fn(),
+jest.mock('../../containers/details/index', () => ({
+  useTimelineEventsDetails: jest.fn(),
 }));
 jest.mock('./body/events/index', () => ({
   // eslint-disable-next-line react/display-name
@@ -89,7 +89,7 @@ describe('Timeline', () => {
         },
       },
     ]);
-    (useTimelineDetails as jest.Mock).mockReturnValue([false, {}]);
+    (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
     props = {
       browserFields: mockBrowserFields,

@@ -16127,7 +16127,6 @@
     "xpack.securitySolution.footer.live": "ライブ",
     "xpack.securitySolution.footer.loadingLabel": "読み込み中",
     "xpack.securitySolution.footer.loadingTimelineData": "タイムラインデータを読み込み中",
-    "xpack.securitySolution.footer.loadMoreLabel": "さらに読み込む",
     "xpack.securitySolution.footer.of": "/",
     "xpack.securitySolution.footer.rows": "行",
     "xpack.securitySolution.footer.totalCountOfEvents": "イベントが検索条件に一致します",

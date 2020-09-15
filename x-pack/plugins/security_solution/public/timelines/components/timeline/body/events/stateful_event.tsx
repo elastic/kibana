@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
-import { useTimelineDetails } from '../../../../containers/details';
+import { useTimelineEventsDetails } from '../../../../containers/details';
 import {
   TimelineEventsDetailsItem,
   TimelineItem,
@@ -140,7 +140,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     (state) => state.timeline.timelineById[timelineId]
   );
   const divElement = useRef<HTMLDivElement | null>(null);
-  const [loading, detailsData] = useTimelineDetails({
+  const [loading, detailsData] = useTimelineEventsDetails({
     docValueFields,
     indexName: event._index!,
     eventId: event._id,
