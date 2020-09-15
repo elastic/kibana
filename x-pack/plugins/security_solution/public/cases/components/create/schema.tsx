@@ -37,4 +37,9 @@ export const schema: FormSchema<CasePostRequest> = {
     ],
   },
   tags: schemaTags,
+  connector: {
+    type: FIELD_TYPES.SUPER_SELECT,
+    label: i18n.CONNECTORS,
+    defaultValue: 'none',
+  },
 };

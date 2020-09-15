@@ -14,18 +14,10 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { useHistory } from 'react-router-dom';
-
 import { isEqual } from 'lodash/fp';
-import { CasePostRequest } from '../../../../../case/common/api';
-import {
-  Field,
-  Form,
-  getUseField,
-  useForm,
-  UseField,
-  FormDataProvider,
-  useFormData,
-} from '../../../shared_imports';
+
+import { CasePostRequest, Connector } from '../../../../../case/common/api';
+import { Field, Form, getUseField, useForm, UseField, useFormData } from '../../../shared_imports';
 import { usePostCase } from '../../containers/use_post_case';
 import { schema } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
@@ -35,6 +27,9 @@ import { MarkdownEditorForm } from '../../../common/components/markdown_editor/e
 import { useGetTags } from '../../containers/use_get_tags';
 import { getCaseDetailsUrl } from '../../../common/components/link_to';
 import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_click';
+import { SettingFieldsForm } from '../settings/fields_form';
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { ConnectorSelector } from '../connector_selector/form';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -65,22 +60,27 @@ const initialCaseValue: CasePostRequest = {
 export const Create = React.memo(() => {
   const history = useHistory();
   const { caseData, isLoading, postCase } = usePostCase();
+  const { loading: isLoadingConnectors, connectors } = useConnectors();
+
   const { form } = useForm<CasePostRequest>({
     defaultValue: initialCaseValue,
     options: { stripEmptyFields: false },
     schema,
   });
 
-  const fieldName = 'description';
   const { submit, setFieldValue } = form;
-  const [{ description }] = useFormData({ form, watch: [fieldName] });
-
+  const [{ connector, tags, description }] = useFormData({
+    form,
+    watch: ['connector', 'tags', 'description'],
+  });
   const { tags: tagOptions } = useGetTags();
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
       label,
     }))
   );
+
+  const [currentConnector, setCurrentConnector] = useState<Connector | null>(null);
 
   useEffect(
     () =>
@@ -92,7 +92,34 @@ export const Create = React.memo(() => {
     [tagOptions]
   );
 
-  const onDescriptionChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
+  useEffect(() => {
+    if (tags == null) {
+      return;
+    }
+
+    const current: string[] = options.map((opt) => opt.label);
+    const newOptions = tags.reduce((acc: string[], item: string) => {
+      if (!acc.includes(item)) {
+        return [...acc, item];
+      }
+      return acc;
+    }, current);
+
+    if (!isEqual(current, newOptions)) {
+      setOptions(
+        newOptions.map((label: string) => ({
+          label,
+        }))
+      );
+    }
+  }, [tags, options]);
+
+  useEffect(() => {
+    const selectedConnector = connectors.find((c) => c.id === connector) ?? null;
+    setCurrentConnector(selectedConnector);
+  }, [connector, connectors]);
+
+  const onDescriptionChange = useCallback((newValue) => setFieldValue('description', newValue), [
     setFieldValue,
   ]);
 
@@ -151,9 +178,26 @@ export const Create = React.memo(() => {
             }}
           />
         </Container>
+        <Container>
+          <UseField
+            path="connector"
+            component={ConnectorSelector}
+            componentProps={{
+              connectors,
+              dataTestSubj: 'caseConnectors',
+              idAria: 'caseConnectors',
+              isLoading,
+              disabled: isLoadingConnectors,
+              defaultValue: 'none',
+            }}
+          />
+        </Container>
+        <Container>
+          <SettingFieldsForm connector={currentConnector} />
+        </Container>
         <ContainerBig>
           <UseField
-            path={fieldName}
+            path={'description'}
             component={MarkdownEditorForm}
             componentProps={{
               dataTestSubj: 'caseDescription',
@@ -171,25 +215,6 @@ export const Create = React.memo(() => {
             }}
           />
         </ContainerBig>
-        <FormDataProvider pathsToWatch="tags">
-          {({ tags: anotherTags }) => {
-            const current: string[] = options.map((opt) => opt.label);
-            const newOptions = anotherTags.reduce((acc: string[], item: string) => {
-              if (!acc.includes(item)) {
-                return [...acc, item];
-              }
-              return acc;
-            }, current);
-            if (!isEqual(current, newOptions)) {
-              setOptions(
-                newOptions.map((label: string) => ({
-                  label,
-                }))
-              );
-            }
-            return null;
-          }}
-        </FormDataProvider>
       </Form>
       <Container>
         <EuiFlexGroup

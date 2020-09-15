@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { Connector } from '../../../../../case/common/api';
 
-export interface CaseSetting {
+export interface CaseSetting<UIProps = unknown> {
   id: string;
+  caseSettingFieldsComponent: React.LazyExoticComponent<React.ComponentType<UIProps>> | null;
 }
 
 export interface CaseSettingsRegistry {
