@@ -55,10 +55,14 @@ const jobStateRT = rt.keyof({
 });
 
 const jobAnalysisConfigRT = rt.partial({
-  per_partition_categorization: rt.type({
-    enabled: rt.boolean,
-    stop_on_warn: rt.boolean,
-  }),
+  per_partition_categorization: rt.intersection([
+    rt.type({
+      enabled: rt.boolean,
+    }),
+    rt.partial({
+      stop_on_warn: rt.boolean,
+    }),
+  ]),
 });
 
 const jobCategorizationStatusRT = rt.keyof({
