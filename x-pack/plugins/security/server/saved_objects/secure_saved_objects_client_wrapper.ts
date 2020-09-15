@@ -19,7 +19,7 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import { CheckPrivilegesResponse } from '../authorization/check_privileges';
+import { CheckPrivilegesResponse } from '../authorization/types';
 import { SpacesService } from '../plugin';
 
 interface SecureSavedObjectsClientWrapperOptions {
@@ -242,12 +242,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const { hasAllRequested, username, privileges } = result;
     const spaceIds = uniq(
-      privileges.map(({ resource }) => resource).filter((x) => x !== undefined)
+      privileges.kibana.map(({ resource }) => resource).filter((x) => x !== undefined)
     ).sort() as string[];
 
     const isAuthorized =
       (requiresAll && hasAllRequested) ||
-      (!requiresAll && privileges.some(({ authorized }) => authorized));
+      (!requiresAll && privileges.kibana.some(({ authorized }) => authorized));
     if (isAuthorized) {
       this.auditLogger.savedObjectsAuthorizationSuccess(
         username,
@@ -275,7 +275,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private getMissingPrivileges(privileges: CheckPrivilegesResponse['privileges']) {
-    return privileges
+    return privileges.kibana
       .filter(({ authorized }) => !authorized)
       .map(({ resource, privilege }) => ({ spaceId: resource, privilege }));
   }
@@ -288,7 +288,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const action = this.actions.login;
     const checkPrivilegesResult = await this.checkPrivileges(action, namespaces);
     // check if the user can log into each namespace
-    const map = checkPrivilegesResult.privileges.reduce(
+    const map = checkPrivilegesResult.privileges.kibana.reduce(
       (acc: Record<string, boolean>, { resource, authorized }) => {
         // there should never be a case where more than one privilege is returned for a given space
         // if there is, fail-safe (authorized + unauthorized = unauthorized)

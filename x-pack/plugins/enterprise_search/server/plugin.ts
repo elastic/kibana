@@ -78,7 +78,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register space/feature control
      */
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: ENTERPRISE_SEARCH_PLUGIN.ID,
       name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
