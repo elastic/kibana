@@ -13,7 +13,7 @@ import {
   DatasourceMock,
 } from '../../mocks';
 import { ChildDragDropProvider } from '../../../drag_drop';
-import { EuiFormRow, EuiPopover } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { mount } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Visualization } from '../../../types';
@@ -203,7 +203,7 @@ describe('LayerPanel', () => {
       expect(group).toHaveLength(1);
     });
 
-    it('should render the datasource and visualization panels inside the dimension popover', () => {
+    it('should render the datasource and visualization panels inside the dimension container', () => {
       mockVisualization.getConfiguration.mockReturnValueOnce({
         groups: [
           {
@@ -221,16 +221,16 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionPopover');
+      const group = component.find('DimensionContainer');
       const panel = mount(group.prop('panel'));
 
-      expect(panel.find('EuiTabbedContent').prop('tabs')).toHaveLength(2);
+      expect(panel.children()).toHaveLength(2);
     });
 
-    it('should keep the popover open when configuring a new dimension', () => {
+    it('should keep the DimensionContainer open when configuring a new dimension', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the popover
+       * this tests that the ID used in the first render is used to keep the container
        * open in future renders
        */
       (generateId as jest.Mock).mockReturnValueOnce(`newid`);
@@ -264,20 +264,20 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionPopover');
+      const group = component.find('DimensionContainer');
       const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
         triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
       });
       component.update();
 
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
     });
 
-    it('should close the popover when the active visualization changes', () => {
+    it('should close the DimensionContainer when the active visualization changes', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the popover
+       * this tests that the ID used in the first render is used to keep the container
        * open in future renders
        */
 
@@ -312,18 +312,18 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionPopover');
+      const group = component.find('DimensionContainer');
       const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
         triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
       });
       component.update();
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
       act(() => {
         component.setProps({ activeVisualizationId: 'vis2' });
       });
       component.update();
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(false);
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(false);
     });
   });
 

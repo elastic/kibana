@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
+
 import { PivotGroupByConfig } from '../common';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
-import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
+import { PivotAggsConfig } from './pivot_aggs';
 import {
   defaultQuery,
-  getPreviewRequestBody,
-  getCreateRequestBody,
+  getPreviewTransformRequestBody,
+  getCreateTransformRequestBody,
   getPivotQuery,
   isDefaultQuery,
   isMatchAllQuery,
@@ -55,7 +57,7 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getPreviewRequestBody()', () => {
+  test('getPreviewTransformRequestBody()', () => {
     const query = getPivotQuery('the-query');
     const groupBy: PivotGroupByConfig[] = [
       {
@@ -73,7 +75,7 @@ describe('Transform: Common', () => {
         dropDownName: 'the-agg-drop-down-name',
       },
     ];
-    const request = getPreviewRequestBody('the-index-pattern-title', query, groupBy, aggs);
+    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, groupBy, aggs);
 
     expect(request).toEqual({
       pivot: {
@@ -87,7 +89,7 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getPreviewRequestBody() with comma-separated index pattern', () => {
+  test('getPreviewTransformRequestBody() with comma-separated index pattern', () => {
     const query = getPivotQuery('the-query');
     const groupBy: PivotGroupByConfig[] = [
       {
@@ -105,7 +107,7 @@ describe('Transform: Common', () => {
         dropDownName: 'the-agg-drop-down-name',
       },
     ];
-    const request = getPreviewRequestBody(
+    const request = getPreviewTransformRequestBody(
       'the-index-pattern-title,the-other-title',
       query,
       groupBy,
@@ -124,7 +126,7 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getCreateRequestBody()', () => {
+  test('getCreateTransformRequestBody()', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
@@ -160,7 +162,7 @@ describe('Transform: Common', () => {
       valid: true,
     };
 
-    const request = getCreateRequestBody(
+    const request = getCreateTransformRequestBody(
       'the-index-pattern-title',
       pivotState,
       transformDetailsState
