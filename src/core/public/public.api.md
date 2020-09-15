@@ -269,9 +269,12 @@ export interface ChromeNavControl {
 // @public
 export interface ChromeNavControls {
     // @internal (undocumented)
+    getCenter$(): Observable<ChromeNavControl[]>;
+    // @internal (undocumented)
     getLeft$(): Observable<ChromeNavControl[]>;
     // @internal (undocumented)
     getRight$(): Observable<ChromeNavControl[]>;
+    registerCenter(navControl: ChromeNavControl): void;
     registerLeft(navControl: ChromeNavControl): void;
     registerRight(navControl: ChromeNavControl): void;
 }
@@ -341,7 +344,6 @@ export interface ChromeStart {
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
-    getNavType$(): Observable<NavType>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;

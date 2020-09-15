@@ -6,8 +6,9 @@
 
 import _ from 'lodash';
 import { APP_ID } from '../../../plugins/maps/common/constants';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function GisPageProvider({ getService, getPageObjects }) {
+export function GisPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
   const log = getService('log');
@@ -19,25 +20,27 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const comboBox = getService('comboBox');
   const renderable = getService('renderable');
 
-  function escapeLayerName(layerName) {
+  function escapeLayerName(layerName: string) {
     return layerName.split(' ').join('_');
   }
 
   class GisPage {
+    basePath;
+
     constructor() {
       this.basePath = '';
     }
 
-    setBasePath(basePath) {
+    setBasePath(basePath: string) {
       this.basePath = basePath;
     }
 
-    async setAbsoluteRange(start, end) {
+    async setAbsoluteRange(start: string, end: string) {
       await PageObjects.timePicker.setAbsoluteRange(start, end);
       await this.waitForLayersToLoad();
     }
 
-    async setAndSubmitQuery(query) {
+    async setAndSubmitQuery(query: string) {
       await queryBar.setQuery(query);
       await queryBar.submitQuery();
       await this.waitForLayersToLoad();
@@ -70,7 +73,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     // this method waits until the map view has stabilized, signaling that the panning/zooming is complete.
     // Pass origView parameter when the new map view determinition is async
     // so method knows when panning/zooming has started.
-    async waitForMapPanAndZoom(origView) {
+    async waitForMapPanAndZoom(origView?: { lon: number; lat: number; zoom: number }) {
       await retry.try(async () => {
         log.debug('Waiting for map pan and zoom to complete');
         const prevView = await this.getView();
@@ -94,7 +97,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async waitForLayerDeleted(layerName) {
+    async waitForLayerDeleted(layerName: string) {
       log.debug('Wait for layer deleted');
       await retry.waitFor('Layer to be deleted', async () => {
         const doesLayerExist = await this.doesLayerExist(layerName);
@@ -104,7 +107,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     // use the search filter box to narrow the results down to a single
     // entry, or at least to a single page of results
-    async loadSavedMap(name) {
+    async loadSavedMap(name: string) {
       log.debug(`Load Saved Map ${name}`);
 
       await retry.try(async () => {
@@ -121,7 +124,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
-    async deleteSavedMaps(search) {
+    async deleteSavedMaps(search: string) {
       await this.searchForMapWithName(search);
       await testSubjects.click('checkboxSelectAll');
       await testSubjects.click('deleteSelectedItems');
@@ -139,7 +142,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await renderable.waitForRender();
     }
 
-    async saveMap(name, uncheckReturnToOriginModeSwitch = false) {
+    async saveMap(name: string, uncheckReturnToOriginModeSwitch = false) {
       await testSubjects.click('mapSaveButton');
       await testSubjects.setValue('savedObjectTitle', name);
       if (uncheckReturnToOriginModeSwitch) {
@@ -180,7 +183,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return exists;
     }
 
-    async searchForMapWithName(name) {
+    async searchForMapWithName(name: string) {
       log.debug(`searchForMapWithName: ${name}`);
 
       await this.gotoMapListingPage();
@@ -196,7 +199,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async selectMap(name) {
+    async selectMap(name: string) {
       await testSubjects.click(`mapListingTitleLink-${name.split(' ').join('-')}`);
     }
 
@@ -221,7 +224,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async getMapCountWithName(name) {
+    async getMapCountWithName(name: string) {
       await this.gotoMapListingPage();
 
       log.debug(`getMapCountWithName: ${name}`);
@@ -260,7 +263,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async setView(lat, lon, zoom) {
+    async setView(lat: number, lon: number, zoom: number) {
       log.debug(
         `Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`
       );
@@ -286,7 +289,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       };
     }
 
-    async toggleLayerVisibility(layerName) {
+    async toggleLayerVisibility(layerName: string) {
       log.debug(`Toggle layer visibility, layer: ${layerName}`);
       await this.openLayerTocActionsPanel(layerName);
       await testSubjects.click('layerVisibilityToggleButton');
@@ -300,7 +303,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async clickFitToBounds(layerName) {
+    async clickFitToBounds(layerName: string) {
       log.debug(`Fit to bounds, layer: ${layerName}`);
       const origView = await this.getView();
       await this.openLayerTocActionsPanel(layerName);
@@ -308,7 +311,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForMapPanAndZoom(origView);
     }
 
-    async openLayerTocActionsPanel(layerName) {
+    async openLayerTocActionsPanel(layerName: string) {
       const escapedDisplayName = escapeLayerName(layerName);
       const isOpen = await testSubjects.exists(`layerTocActionsPanel${escapedDisplayName}`);
       if (!isOpen) {
@@ -316,7 +319,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async openLayerPanel(layerName) {
+    async openLayerPanel(layerName: string) {
       log.debug(`Open layer panel, layer: ${layerName}`);
       await this.openLayerTocActionsPanel(layerName);
       await testSubjects.click('editLayerButton');
@@ -327,7 +330,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
-    async getLayerTOCDetails(layerName) {
+    async getLayerTOCDetails(layerName: string) {
       return await testSubjects.getVisibleText(`mapLayerTOCDetails${escapeLayerName(layerName)}`);
     }
 
@@ -352,13 +355,13 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async doesLayerExist(layerName) {
+    async doesLayerExist(layerName: string) {
       return await testSubjects.exists(
         `layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`
       );
     }
 
-    async hasFilePickerLoadedFile(fileName) {
+    async hasFilePickerLoadedFile(fileName: string) {
       log.debug(`Has file picker loaded file ${fileName}`);
       const filePickerText = await find.byCssSelector('.euiFilePicker__promptText');
       const filePickerTextContent = await filePickerText.getVisibleText();
@@ -393,7 +396,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async cancelLayerAdd(layerName) {
+    async cancelLayerAdd(layerName: string) {
       log.debug(`Cancel layer add`);
       const cancelExists = await testSubjects.exists('layerAddCancelButton');
       if (cancelExists) {
@@ -405,7 +408,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async closeOrCancelLayer(layerName) {
+    async closeOrCancelLayer(layerName: string) {
       log.debug(`Close or cancel layer add`);
       const cancelExists = await testSubjects.exists('layerAddCancelButton');
       const closeExists = await testSubjects.exists('layerPanelCancelButton');
@@ -449,24 +452,24 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('importFileButton');
     }
 
-    async setIndexName(indexName) {
+    async setIndexName(indexName: string) {
       log.debug(`Set index name to: ${indexName}`);
       await testSubjects.setValue('fileUploadIndexNameInput', indexName);
     }
 
-    async setIndexType(indexType) {
+    async setIndexType(indexType: string) {
       log.debug(`Set index type to: ${indexType}`);
       await testSubjects.selectValue('fileImportIndexSelect', indexType);
     }
 
-    async indexTypeOptionExists(indexType) {
+    async indexTypeOptionExists(indexType: string) {
       log.debug(`Check index type "${indexType}" available`);
       return await find.existsByCssSelector(
         `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
       );
     }
 
-    async getCodeBlockParsedJson(dataTestSubjName) {
+    async getCodeBlockParsedJson(dataTestSubjName: string) {
       log.debug(`Get parsed code block for ${dataTestSubjName}`);
       const indexRespCodeBlock = await testSubjects.find(`${dataTestSubjName}`);
       const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
@@ -483,7 +486,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await this.getCodeBlockParsedJson('indexPatternRespCodeBlock');
     }
 
-    async setLayerQuery(layerName, query) {
+    async setLayerQuery(layerName: string, query: string) {
       await this.openLayerPanel(layerName);
       await testSubjects.click('mapLayerPanelOpenFilterEditorButton');
       const filterEditorContainer = await testSubjects.find('mapFilterEditor');
@@ -505,7 +508,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
-    async setJoinWhereQuery(layerName, query) {
+    async setJoinWhereQuery(layerName: string, query: string) {
       await this.openLayerPanel(layerName);
       await testSubjects.click('mapJoinWhereExpressionButton');
       const filterEditorContainer = await testSubjects.find('mapJoinWhereFilterEditor');
@@ -531,7 +534,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('uploadGeoJson');
     }
 
-    async uploadJsonFileForIndexing(path) {
+    async uploadJsonFileForIndexing(path: string) {
       await PageObjects.common.setFileInputPath(path);
       log.debug(`File selected`);
 
@@ -540,7 +543,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     // Returns first layer by default
-    async selectVectorLayer(vectorLayerName) {
+    async selectVectorLayer(vectorLayerName: string) {
       log.debug(`Select EMS vector layer ${vectorLayerName}`);
       if (!vectorLayerName) {
         throw new Error(`You did not provide the EMS layer to select`);
@@ -549,14 +552,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
-    async removeLayer(layerName) {
+    async removeLayer(layerName: string) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
       await testSubjects.click(`mapRemoveLayerButton`);
       await this.waitForLayerDeleted(layerName);
     }
 
-    async getLayerErrorText(layerName) {
+    async getLayerErrorText(layerName: string) {
       log.debug(`Remove layer ${layerName}`);
       await this.openLayerPanel(layerName);
       return await testSubjects.getVisibleText(`layerErrorMessage`);
@@ -589,7 +592,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     // Method should only be used when multiple requests are expected
     // RequestSelector will only display inspectorRequestChooser when there is more than one request
-    async openInspectorRequest(requestName) {
+    async openInspectorRequest(requestName: string) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       log.debug(`Open Inspector request ${requestName}`);
@@ -620,12 +623,12 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return mapboxStyle;
     }
 
-    getInspectorStatRowHit(stats, rowName) {
+    getInspectorStatRowHit(stats: string[][], rowName: string) {
       const STATS_ROW_NAME_INDEX = 0;
       const STATS_ROW_VALUE_INDEX = 1;
 
-      const statsRow = stats.find((statsRow) => {
-        return statsRow[STATS_ROW_NAME_INDEX] === rowName;
+      const statsRow = stats.find((row) => {
+        return row[STATS_ROW_NAME_INDEX] === rowName;
       });
       if (!statsRow) {
         throw new Error(`Unable to find value for row ${rowName} in ${stats}`);
@@ -634,7 +637,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return statsRow[STATS_ROW_VALUE_INDEX];
     }
 
-    async triggerSingleRefresh(refreshInterval) {
+    async triggerSingleRefresh(refreshInterval: number) {
       log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
       await PageObjects.timePicker.resumeAutoRefresh();
       log.debug('waiting to give time for refresh timer to fire');
@@ -643,7 +646,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.waitForLayersToLoad();
     }
 
-    async lockTooltipAtPosition(xOffset, yOffset) {
+    async lockTooltipAtPosition(xOffset: number, yOffset: number) {
       await retry.try(async () => {
         const mapContainerElement = await testSubjects.find('mapContainer');
         await mapContainerElement.moveMouseTo({ xOffset, yOffset });
@@ -656,12 +659,12 @@ export function GisPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async setStyleByValue(styleName, fieldName) {
+    async setStyleByValue(styleName: string, fieldName: string) {
       await testSubjects.selectValue(`staticDynamicSelect_${styleName}`, 'DYNAMIC');
       await comboBox.set(`styleFieldSelect_${styleName}`, fieldName);
     }
 
-    async selectCustomColorRamp(styleName) {
+    async selectCustomColorRamp(styleName: string) {
       // open super select menu
       await testSubjects.click(`colorMapSelect_${styleName}`);
       // Click option

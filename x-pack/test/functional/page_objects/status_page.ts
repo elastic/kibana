@@ -5,13 +5,14 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function StatusPagePageProvider({ getService, getPageObjects }) {
+export function StatusPagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'home', 'security']);
+  const { common } = getPageObjects(['common']);
 
   class StatusPage {
     async initTests() {
@@ -20,13 +21,13 @@ export function StatusPagePageProvider({ getService, getPageObjects }) {
 
     async navigateToPage() {
       return await retry.try(async () => {
-        const url = PageObjects.common.getHostPort() + '/status';
+        const url = common.getHostPort() + '/status';
         log.info(`StatusPage:navigateToPage(): ${url}`);
         await browser.get(url);
       });
     }
 
-    async expectStatusPage() {
+    async expectStatusPage(): Promise<void> {
       return await retry.try(async () => {
         log.debug(`expectStatusPage()`);
         await find.byCssSelector('[data-test-subj="statusPageRoot"]', 20000);
