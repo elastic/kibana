@@ -57,17 +57,17 @@ export async function getLongTaskMetrics({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  const { transIds } = response.aggregations!;
+  const { transIds } = response.aggregations ?? {};
 
   const validTransactions: string[] = await filterPageLoadTransactions(
     setup,
-    transIds.buckets.map((bucket) => bucket.key as string)
+    (transIds?.buckets ?? []).map((bucket) => bucket.key as string)
   );
   let noOfLongTasks = 0;
   let sumOfLongTasks = 0;
   let longestLongTask = 0;
 
-  transIds.buckets.forEach((bucket) => {
+  (transIds?.buckets ?? []).forEach((bucket) => {
     if (validTransactions.includes(bucket.key as string)) {
       noOfLongTasks += bucket.doc_count;
       sumOfLongTasks += bucket.sumLongTask.value ?? 0;
