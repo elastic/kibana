@@ -37,6 +37,7 @@ console.log(discoverUrl); // http://localhost:5601/bpr/s/space/app/discover
 ==== Specifying state
 
 **Consider a {kib} app URL a part of app's plugin contract:**
+
 . Avoid hardcoding other app's URL in your app's code.
 . Avoid generating other app's state and serializing it into URL query params.
 
@@ -131,7 +132,7 @@ const MyApp = () =>
 It is very common for {kib} apps to use React and React Router.
 Common rules to follow in this scenario:
 
-* Set up `BrowserRouter` and not `HashRouter`;
+* Set up `BrowserRouter` and not `HashRouter`.
 * *Initialize your router with `history` instance provided by the `core`.*
 
 This is required to make sure `core` is aware of navigations triggered inside your app, so it could act accordingly when needed.
