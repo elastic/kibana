@@ -34,6 +34,7 @@ describe('StatusService', () => {
     service = new StatusService(mockCoreContext.create());
   });
 
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const available: ServiceStatus<any> = {
     level: ServiceStatusLevels.available,
     summary: 'Available',
@@ -53,6 +54,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: of(degraded),
           },
+          pluginDependencies: new Map(),
         });
         expect(await setup.core$.pipe(first()).toPromise()).toEqual({
           elasticsearch: available,
@@ -68,6 +70,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: of(degraded),
           },
+          pluginDependencies: new Map(),
         });
         const subResult1 = await setup.core$.pipe(first()).toPromise();
         const subResult2 = await setup.core$.pipe(first()).toPromise();
@@ -96,6 +99,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: savedObjects$,
           },
+          pluginDependencies: new Map(),
         });
 
         const statusUpdates: CoreStatus[] = [];
@@ -158,6 +162,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: of(degraded),
           },
+          pluginDependencies: new Map(),
         });
         expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
@@ -173,6 +178,7 @@ describe('StatusService', () => {
           savedObjects: {
             status$: of(degraded),
           },
+          pluginDependencies: new Map(),
         });
         const subResult1 = await setup.overall$.pipe(first()).toPromise();
         const subResult2 = await setup.overall$.pipe(first()).toPromise();
@@ -201,26 +207,95 @@ describe('StatusService', () => {
           savedObjects: {
             status$: savedObjects$,
           },
+          pluginDependencies: new Map(),
         });
 
         const statusUpdates: ServiceStatus[] = [];
         const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
 
+        // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
+        await delay(500);
         elasticsearch$.next(available);
+        await delay(500);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
+        await delay(500);
         savedObjects$.next(degraded);
+        await delay(500);
         savedObjects$.next(available);
+        await delay(500);
         savedObjects$.next(available);
+        await delay(500);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
           Array [
             Object {
+              "detail": "See the status page for more information",
               "level": degraded,
+              "meta": Object {
+                "affectedServices": Object {
+                  "savedObjects": Object {
+                    "level": degraded,
+                    "summary": "This is degraded!",
+                  },
+                },
+              },
+              "summary": "[savedObjects]: This is degraded!",
+            },
+            Object {
+              "level": available,
+              "summary": "All services are available",
+            },
+          ]
+        `);
+      });
+
+      it('debounces events in quick succession', async () => {
+        const savedObjects$ = new BehaviorSubject(available);
+        const setup = await service.setup({
+          elasticsearch: {
+            status$: new BehaviorSubject(available),
+          },
+          savedObjects: {
+            status$: savedObjects$,
+          },
+          pluginDependencies: new Map(),
+        });
+
+        const statusUpdates: ServiceStatus[] = [];
+        const subscription = setup.overall$.subscribe((status) => statusUpdates.push(status));
+
+        // All of these should debounced into a single `available` status
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        // Waiting for the debounce timeout should cut a new update
+        await delay(500);
+        savedObjects$.next(available);
+        await delay(500);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "detail": "See the status page for more information",
+              "level": degraded,
+              "meta": Object {
+                "affectedServices": Object {
+                  "savedObjects": Object {
+                    "level": degraded,
+                    "summary": "This is degraded!",
+                  },
+                },
+              },
               "summary": "[savedObjects]: This is degraded!",
             },
             Object {

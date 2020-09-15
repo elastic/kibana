@@ -18,6 +18,7 @@ import {
 } from '../../../../src/core/server';
 
 import { CloudSetup } from '../../cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 
@@ -39,6 +40,7 @@ interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   apmOss: APMOSSPluginSetup;
+  features: FeaturesPluginSetup;
   cloud?: CloudSetup;
 }
 
@@ -68,13 +70,26 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, getStartServices, capabilities, savedObjects }: CoreSetup,
-    { usageCollection, cloud, licensing, apmOss: apmOSS }: PluginsSetup
+    { usageCollection, cloud, features, licensing, apmOss: apmOSS }: PluginsSetup
   ) {
     this.licensing = licensing;
     this.apmOSS = apmOSS;
 
     savedObjects.registerType(reindexOperationSavedObjectType);
     savedObjects.registerType(telemetrySavedObjectType);
+
+    features.registerElasticsearchFeature({
+      id: 'upgrade_assistant',
+      management: {
+        stack: ['upgrade_assistant'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage'],
+          ui: [],
+        },
+      ],
+    });
 
     const router = http.createRouter();
 
