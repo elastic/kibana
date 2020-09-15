@@ -5,14 +5,15 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function UpgradeAssistantProvider({ getService, getPageObjects }) {
+export function UpgradeAssistantPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const { common } = getPageObjects(['common']);
 
   class UpgradeAssistant {
     async initTests() {
@@ -21,7 +22,7 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
 
     async navigateToPage() {
       return await retry.try(async () => {
-        await PageObjects.common.navigateToApp('settings');
+        await common.navigateToApp('settings');
         await testSubjects.click('upgrade_assistant');
       });
     }
@@ -29,7 +30,7 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
     async expectUpgradeAssistant() {
       return await retry.try(async () => {
         log.debug(`expectUpgradeAssistant()`);
-        expect(testSubjects.exists('upgradeAssistantRoot')).to.be.true;
+        expect(await testSubjects.exists('upgradeAssistantRoot')).to.equal(true);
         const url = await browser.getCurrentUrl();
         expect(url).to.contain(`/upgrade_assistant`);
       });
@@ -42,7 +43,7 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
       });
     }
 
-    async expectDeprecationLoggingLabel(labelText) {
+    async expectDeprecationLoggingLabel(labelText: string) {
       return await retry.try(async () => {
         log.debug('expectDeprecationLoggingLabel()');
         const label = await find.byCssSelector(
@@ -53,19 +54,17 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
       });
     }
 
-    async clickTab(tabId) {
+    async clickTab(tabId: string) {
       return await retry.try(async () => {
         log.debug('clickTab()');
-        const tab = await find.byCssSelector(`.euiTabs .euiTab#${tabId}`);
-        await tab.click();
+        await find.clickByCssSelector(`.euiTabs .euiTab#${tabId}`);
       });
     }
 
-    async expectIssueSummary(summary) {
+    async expectIssueSummary(summary: string) {
       return await retry.try(async () => {
         log.debug('expectIssueSummary()');
-        const summaryEl = await testSubjects.find('upgradeAssistantIssueSummary');
-        const summaryElText = await summaryEl.getVisibleText();
+        const summaryElText = await testSubjects.getVisibleText('upgradeAssistantIssueSummary');
         expect(summaryElText).to.eql(summary);
       });
     }
