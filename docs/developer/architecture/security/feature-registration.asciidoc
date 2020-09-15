@@ -9,13 +9,12 @@ Registering features also gives your plugin access to “UI Capabilities”. The
 
 === Registering a feature
 
-Feature registration is controlled via the built-in `xpack_main` plugin. To register a feature, call `xpack_main`'s `registerFeature` function from your plugin's `init` function, and provide the appropriate details:
+Feature registration is controlled via the built-in `features` plugin. To register a feature, call `features`'s `registerKibanaFeature` function from your plugin's `setup` lifecycle function, and provide the appropriate details:
 
 ["source","javascript"]
 -----------
-init(server) {
-  const xpackMainPlugin = server.plugins.xpack_main;
-  xpackMainPlugin.registerFeature({
+setup(core, { features }) {
+  features.registerKibanaFeature({
     // feature details here.
   });
 }
@@ -45,12 +44,12 @@ Registering a feature consists of the following fields. For more information, co
 |An array of applications this feature enables. Typically, all of your plugin's apps (from `uiExports`) will be included here.
 
 |`privileges` (required)
-|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
+|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`KibanaFeatureConfig`].
 |See <<example-1-canvas,Example 1>> and <<example-2-dev-tools,Example 2>>
 |The set of privileges this feature requires to function.
 
 |`subFeatures` (optional)
-|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
+|{kib-repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`KibanaFeatureConfig`].
 |See <<example-3-discover,Example 3>>
 |The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.
 
@@ -73,15 +72,17 @@ For a full explanation of fields and options, consult the {kib-repo}blob/{branch
 === Using UI Capabilities
 
 UI Capabilities are available to your public (client) plugin code. These capabilities are read-only, and are used to inform the UI. This object is namespaced by feature id. For example, if your feature id is “foo”, then your UI Capabilities are stored at `uiCapabilities.foo`.
-To access capabilities, import them from `ui/capabilities`:
+Capabilities can be accessed from your plugin's `start` lifecycle from the `core.application` service:
 
 ["source","javascript"]
 -----------
-import { uiCapabilities } from 'ui/capabilities';
+public start(core) {
+  const { capabilities } = core.application;
 
-const canUserSave = uiCapabilities.foo.save;
-if (canUserSave) {
-  // show save button
+  const canUserSave = capabilities.foo.save;
+  if (canUserSave) {
+    // show save button
+  }
 }
 -----------
 
@@ -89,9 +90,8 @@ if (canUserSave) {
 === Example 1: Canvas Application
 ["source","javascript"]
 -----------
-init(server) {
-  const xpackMainPlugin = server.plugins.xpack_main;
-  xpackMainPlugin.registerFeature({
+public setup(core, { features }) {
+  features.registerKibanaFeature({
     id: 'canvas',
     name: 'Canvas',
     icon: 'canvasApp',
@@ -130,11 +130,13 @@ The `all` privilege defines a single “save” UI Capability. To access this in
 
 ["source","javascript"]
 -----------
-import { uiCapabilities } from 'ui/capabilities';
+public start(core) {
+  const { capabilities } = core.application;
 
-const canUserSave = uiCapabilities.canvas.save;
-if (canUserSave) {
-  // show save button
+  const canUserSave = capabilities.canvas.save;
+  if (canUserSave) {
+    // show save button
+  }
 }
 -----------
 
@@ -145,9 +147,8 @@ Because the `read` privilege does not define the `save` capability, users with r
 
 ["source","javascript"]
 -----------
-init(server) {
-  const xpackMainPlugin = server.plugins.xpack_main;
-  xpackMainPlugin.registerFeature({
+public setup(core, { features }) {
+  features.registerKibanaFeature({
     id: 'dev_tools',
     name: i18n.translate('xpack.features.devToolsFeatureName', {
       defaultMessage: 'Dev Tools',
@@ -206,9 +207,8 @@ a single "Create Short URLs" subfeature privilege is defined, which allows users
 
 ["source","javascript"]
 -----------
-init(server) {
-  const xpackMainPlugin = server.plugins.xpack_main;
-  xpackMainPlugin.registerFeature({
+public setup(core, { features }) {
+  features.registerKibanaFeature({
     {
       id: 'discover',
       name: i18n.translate('xpack.features.discoverFeatureName', {

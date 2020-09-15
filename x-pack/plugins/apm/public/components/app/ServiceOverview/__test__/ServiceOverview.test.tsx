@@ -6,14 +6,18 @@
 
 import { render, wait, waitForElement } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
+import { merge } from 'lodash';
 import React, { FunctionComponent, ReactChild } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { ServiceOverview } from '..';
+import { EuiThemeProvider } from '../../../../../../observability/public';
 import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import * as useAnomalyDetectionJobs from '../../../../hooks/useAnomalyDetectionJobs';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
@@ -23,30 +27,33 @@ const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },
 } as Partial<CoreStart>);
 
+const addWarning = jest.fn();
+const httpGet = jest.fn();
+
 function wrapper({ children }: { children: ReactChild }) {
+  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+    core: {
+      http: {
+        get: httpGet,
+      },
+      notifications: {
+        toasts: {
+          addWarning,
+        },
+      },
+    },
+  }) as unknown) as ApmPluginContextValue;
+
   return (
-    <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper
-        value={
-          ({
-            ...mockApmPluginContextValue,
-            core: {
-              ...mockApmPluginContextValue.core,
-              http: { ...mockApmPluginContextValue.core.http, get: httpGet },
-              notifications: {
-                ...mockApmPluginContextValue.core.notifications,
-                toasts: {
-                  ...mockApmPluginContextValue.core.notifications.toasts,
-                  addWarning,
-                },
-              },
-            },
-          } as unknown) as ApmPluginContextValue
-        }
-      >
-        {children}
-      </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    <MemoryRouter>
+      <EuiThemeProvider>
+        <KibanaReactContext.Provider>
+          <MockApmPluginContextWrapper value={mockPluginContext}>
+            {children}
+          </MockApmPluginContextWrapper>
+        </KibanaReactContext.Provider>
+      </EuiThemeProvider>
+    </MemoryRouter>
   );
 }
 
@@ -55,9 +62,6 @@ function renderServiceOverview() {
     wrapper: FunctionComponent<{}>;
   });
 }
-
-const addWarning = jest.fn();
-const httpGet = jest.fn();
 
 describe('Service Overview -> View', () => {
   beforeEach(() => {
@@ -80,6 +84,17 @@ describe('Service Overview -> View', () => {
       clearValues: () => null,
       status: FETCH_STATUS.SUCCESS,
     });
+
+    jest
+      .spyOn(useAnomalyDetectionJobs, 'useAnomalyDetectionJobs')
+      .mockReturnValue({
+        status: FETCH_STATUS.SUCCESS,
+        data: {
+          jobs: [],
+          hasLegacyJobs: false,
+        },
+        refetch: () => undefined,
+      });
   });
 
   afterEach(() => {
@@ -99,6 +114,7 @@ describe('Service Overview -> View', () => {
           errorsPerMinute: 200,
           avgResponseTime: 300,
           environments: ['test', 'dev'],
+          severity: 1,
         },
         {
           serviceName: 'My Go Service',
@@ -107,6 +123,7 @@ describe('Service Overview -> View', () => {
           errorsPerMinute: 500,
           avgResponseTime: 600,
           environments: [],
+          severity: 10,
         },
       ],
     });
@@ -193,6 +210,59 @@ describe('Service Overview -> View', () => {
       await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
       expect(addWarning).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when ML data is not found', () => {
+    it('does not render the health column', async () => {
+      httpGet.mockResolvedValueOnce({
+        hasLegacyData: false,
+        hasHistoricalData: true,
+        items: [
+          {
+            serviceName: 'My Python Service',
+            agentName: 'python',
+            transactionsPerMinute: 100,
+            errorsPerMinute: 200,
+            avgResponseTime: 300,
+            environments: ['test', 'dev'],
+          },
+        ],
+      });
+
+      const { queryByText } = renderServiceOverview();
+
+      // wait for requests to be made
+      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+
+      expect(queryByText('Health')).toBeNull();
+    });
+  });
+
+  describe('when ML data is found', () => {
+    it('renders the health column', async () => {
+      httpGet.mockResolvedValueOnce({
+        hasLegacyData: false,
+        hasHistoricalData: true,
+        items: [
+          {
+            serviceName: 'My Python Service',
+            agentName: 'python',
+            transactionsPerMinute: 100,
+            errorsPerMinute: 200,
+            avgResponseTime: 300,
+            environments: ['test', 'dev'],
+            severity: 1,
+          },
+        ],
+      });
+
+      const { queryAllByText } = renderServiceOverview();
+
+      // wait for requests to be made
+      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
+
+      expect(queryAllByText('Health').length).toBeGreaterThan(1);
     });
   });
 });
