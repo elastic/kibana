@@ -6,21 +6,22 @@
 
 import { render, wait, waitForElement } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
-import React, { FunctionComponent, ReactChild } from 'react';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { merge } from 'lodash';
+import React, { FunctionComponent, ReactChild } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { ServiceOverview } from '..';
+import { EuiThemeProvider } from '../../../../../../observability/public';
 import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import * as useAnomalyDetectionJobs from '../../../../hooks/useAnomalyDetectionJobs';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as useAnomalyDetectionJobs from '../../../../hooks/useAnomalyDetectionJobs';
 import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
-import { EuiThemeProvider } from '../../../../../../../legacy/common/eui_styled_components';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },
@@ -44,13 +45,15 @@ function wrapper({ children }: { children: ReactChild }) {
   }) as unknown) as ApmPluginContextValue;
 
   return (
-    <KibanaReactContext.Provider>
+    <MemoryRouter>
       <EuiThemeProvider>
-        <MockApmPluginContextWrapper value={mockPluginContext as any}>
-          {children}
-        </MockApmPluginContextWrapper>
+        <KibanaReactContext.Provider>
+          <MockApmPluginContextWrapper value={mockPluginContext}>
+            {children}
+          </MockApmPluginContextWrapper>
+        </KibanaReactContext.Provider>
       </EuiThemeProvider>
-    </KibanaReactContext.Provider>
+    </MemoryRouter>
   );
 }
 
