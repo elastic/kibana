@@ -42,7 +42,7 @@ export const indexBasedRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const { redirectToMlAccessDeniedPage } = deps;
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );

@@ -20,8 +20,6 @@ import { DatavisualizerSelector } from '../../../datavisualizer';
 import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 export const selectorRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -36,7 +34,7 @@ export const selectorRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const { redirectToMlAccessDeniedPage } = deps;
 
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkBasicLicense,

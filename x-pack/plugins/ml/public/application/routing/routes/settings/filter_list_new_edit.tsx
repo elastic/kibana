@@ -84,7 +84,7 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     filterId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
-  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const { redirectToMlAccessDeniedPage } = deps;
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );

@@ -82,7 +82,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
       application: { navigateToUrl },
     },
   } = useMlKibana();
-  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const { redirectToMlAccessDeniedPage } = deps;
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );

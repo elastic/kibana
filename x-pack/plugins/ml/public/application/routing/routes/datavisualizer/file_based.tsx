@@ -23,8 +23,6 @@ import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/c
 import { loadIndexPatterns } from '../../../util/index_utils';
 
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 export const fileBasedRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -45,7 +43,7 @@ export const fileBasedRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const { redirectToMlAccessDeniedPage } = deps;
 
   const { context } = useResolver('', undefined, deps.config, {
     checkBasicLicense,

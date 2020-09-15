@@ -25,8 +25,6 @@ import {
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { AnomalyDetectionSettingsContext, Settings } from '../../../settings';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 export const settingsRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -41,7 +39,7 @@ export const settingsRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const { redirectToMlAccessDeniedPage } = deps;
 
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,

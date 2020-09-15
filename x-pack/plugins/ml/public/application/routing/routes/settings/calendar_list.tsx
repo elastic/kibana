@@ -25,8 +25,6 @@ import {
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { CalendarsList } from '../../../settings/calendars';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 export const calendarListRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -42,7 +40,7 @@ export const calendarListRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const redirectToMlAccessDeniedPage = useCreateAndNavigateToMlLink(ML_PAGES.ACCESS_DENIED);
+  const { redirectToMlAccessDeniedPage } = deps;
 
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
