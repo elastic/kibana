@@ -10,9 +10,9 @@ set -e
 ./check_env_variables.sh
 
 
-# Adds port ip ranges to the threat mapping for testing.
+# Adds port mock data to a threat list for testing.
 # Example: ./create_threat_data.sh
-# Exampple: ./create_threat_data.sh 1000 2000
+# Example: ./create_threat_data.sh 1000 2000
 
 START=${1:-1}
 END=${2:-1000}
