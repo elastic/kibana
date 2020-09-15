@@ -24,6 +24,8 @@ import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES } from '..';
 
+export type FieldFormatMap = Record<string, SerializedFieldFormat>;
+
 export interface IIndexPattern {
   [key: string]: any;
   fields: IFieldType[];
@@ -32,13 +34,7 @@ export interface IIndexPattern {
   type?: string;
   timeFieldName?: string;
   getTimeField?(): IFieldType | undefined;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
+  fieldFormatMap?: FieldFormatMap;
 }
 
 /**
