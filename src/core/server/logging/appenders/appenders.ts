@@ -18,8 +18,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { assertNever } from '@kbn/std';
 
-import { assertNever } from '../../../utils';
 import {
   LegacyAppender,
   LegacyAppenderConfig,

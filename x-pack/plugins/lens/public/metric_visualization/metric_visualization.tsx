@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
+import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
 import { State } from './types';
-import chartMetricSVG from '../assets/chart_metric.svg';
 
 const toExpression = (
   state: State,
@@ -45,8 +45,7 @@ export const metricVisualization: Visualization<State> = {
   visualizationTypes: [
     {
       id: 'lnsMetric',
-      icon: 'visMetric',
-      largeIcon: chartMetricSVG,
+      icon: LensIconChartMetric,
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),
@@ -70,7 +69,7 @@ export const metricVisualization: Visualization<State> = {
 
   getDescription() {
     return {
-      icon: chartMetricSVG,
+      icon: LensIconChartMetric,
       label: i18n.translate('xpack.lens.metric.label', {
         defaultMessage: 'Metric',
       }),

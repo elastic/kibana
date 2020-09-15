@@ -73,6 +73,12 @@ const detailsPolicyAppliedResponse = (state: Immutable<EndpointState>) =>
   state.policyResponse && state.policyResponse.Endpoint.policy.applied;
 
 /**
+ * Returns the policy response timestamp from the endpoint after a user modifies a policy.
+ */
+export const policyResponseTimestamp = (state: Immutable<EndpointState>) =>
+  state.policyResponse && state.policyResponse['@timestamp'];
+
+/**
  * Returns the response configurations from the endpoint after a user modifies a policy.
  */
 export const policyResponseConfigurations: (
@@ -216,6 +222,13 @@ export const policyResponseStatus: (state: Immutable<EndpointState>) => string =
 export const nonExistingPolicies: (
   state: Immutable<EndpointState>
 ) => Immutable<EndpointState['nonExistingPolicies']> = (state) => state.nonExistingPolicies;
+
+/**
+ * returns the list of known existing agent policies
+ */
+export const agentPolicies: (
+  state: Immutable<EndpointState>
+) => Immutable<EndpointState['agentPolicies']> = (state) => state.agentPolicies;
 
 /**
  * Return boolean that indicates whether endpoints exist

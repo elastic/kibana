@@ -46,6 +46,8 @@ import {
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
+import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
+import { EqlQueryBar } from '../eql_query_bar';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -123,9 +125,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }) as unknown) as [Partial<DefineStepRule>];
   const index = formIndex || initialState.index;
   const ruleType = formRuleType || initialState.ruleType;
-  const [
-    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(index, RuleStep.defineRule);
+  const [{ browserFields, indexPatterns, isLoading: indexPatternsLoading }] = useFetchIndexPatterns(
+    index,
+    RuleStep.defineRule
+  );
 
   // reset form when rule type changes
   useEffect(() => {
@@ -186,7 +189,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={indexPatternQueryBar}
+        indexPatterns={indexPatterns}
         schema={filterRuleFieldsForType(schema as typeof schema & RuleFields, ruleType)}
         data={filterRuleFieldsForType(initialState, ruleType)}
       />
@@ -227,31 +230,46 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   },
                 }}
               />
-              <UseField
-                path="queryBar"
-                config={{
-                  ...schema.queryBar,
-                  labelAppend: (
-                    <MyLabelButton
-                      data-test-subj="importQueryFromSavedTimeline"
-                      onClick={handleOpenTimelineSearch}
-                    >
-                      {i18n.IMPORT_TIMELINE_QUERY}
-                    </MyLabelButton>
-                  ),
-                }}
-                component={QueryBarDefineRule}
-                componentProps={{
-                  browserFields,
-                  idAria: 'detectionEngineStepDefineRuleQueryBar',
-                  indexPattern: indexPatternQueryBar,
-                  isDisabled: isLoading,
-                  isLoading: indexPatternLoadingQueryBar,
-                  dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-                  openTimelineSearch,
-                  onCloseTimelineSearch: handleCloseTimelineSearch,
-                }}
-              />
+              {isEqlRule(ruleType) ? (
+                <UseField
+                  key="EqlQueryBar"
+                  path="queryBar"
+                  component={EqlQueryBar}
+                  componentProps={{
+                    idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
+                    isDisabled: isLoading,
+                    isLoading: indexPatternsLoading,
+                    dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                  }}
+                />
+              ) : (
+                <UseField
+                  key="QueryBarDefineRule"
+                  path="queryBar"
+                  config={{
+                    ...schema.queryBar,
+                    labelAppend: (
+                      <MyLabelButton
+                        data-test-subj="importQueryFromSavedTimeline"
+                        onClick={handleOpenTimelineSearch}
+                      >
+                        {i18n.IMPORT_TIMELINE_QUERY}
+                      </MyLabelButton>
+                    ),
+                  }}
+                  component={QueryBarDefineRule}
+                  componentProps={{
+                    browserFields,
+                    idAria: 'detectionEngineStepDefineRuleQueryBar',
+                    indexPattern: indexPatterns,
+                    isDisabled: isLoading,
+                    isLoading: indexPatternsLoading,
+                    dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+                    openTimelineSearch,
+                    onCloseTimelineSearch: handleCloseTimelineSearch,
+                  }}
+                />
+              )}
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
@@ -273,7 +291,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow
-            $isVisible={ruleType === 'threshold'}
+            $isVisible={isThresholdRule(ruleType)}
             data-test-subj="thresholdInput"
             fullWidth
           >

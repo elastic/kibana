@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { unset } from '@kbn/std';
 import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
-import { unset } from '../../../utils';
 
 const _rename = (
   config: Record<string, any>,
