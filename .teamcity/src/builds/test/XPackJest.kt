@@ -13,8 +13,7 @@ object XPackJest : BuildType({
   paused = true
   description = "Executes X-Pack Jest Unit Tests"
 
-  // TODO temporarily run on a larger machine
-  kibanaAgent(16)
+  kibanaAgent(8)
 
   steps {
     script {
@@ -23,7 +22,7 @@ object XPackJest : BuildType({
         """
                 #!/bin/bash
                 cd x-pack
-                node --max-old-space-size=6144 scripts/jest --ci --verbose
+                node --max-old-space-size=6144 scripts/jest --ci --verbose --maxWorkers=6
         """.trimIndent()
     }
 
