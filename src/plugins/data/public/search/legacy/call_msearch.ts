@@ -17,31 +17,21 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { SearchResponse } from 'elasticsearch';
-import { FetchHandlers } from '../fetch';
-import { SearchRequest } from '..';
+import { HttpStart } from 'src/core/public';
+import { LegacyFetchHandlers } from './types';
 
-// @internal
-export interface LegacyFetchHandlers {
-  callMsearch: (params: {
-    body: SearchRequest;
-    signal: AbortSignal;
-  }) => Promise<Array<SearchResponse<any>>>;
-  loadingCount$: BehaviorSubject<number>;
-}
-
-export interface SearchStrategySearchParams extends FetchHandlers {
-  searchRequests: SearchRequest[];
-}
-
-// @deprecated
-export interface SearchStrategyProvider {
-  id: string;
-  search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
-}
-
-export interface SearchStrategyResponse<T = any> {
-  searching: Promise<Array<SearchResponse<T>>>;
-  abort: () => void;
+/**
+ * Wrapper for calling the internal msearch endpoint from the client.
+ * This is needed to abstract away differences in the http service
+ * between client & server.
+ *
+ * @internal
+ */
+export function getCallMsearch({ http }: { http: HttpStart }): LegacyFetchHandlers['callMsearch'] {
+  return async ({ body, signal }) => {
+    return http.post('/internal/_msearch', {
+      body: JSON.stringify(body),
+      signal,
+    });
+  };
 }
