@@ -18,10 +18,10 @@
  */
 
 import { join } from 'path';
+import { PathConfigType } from '@kbn/utils';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
-import { PathConfigType } from '../path';
 import { HttpConfigType } from '../http';
 
 jest.mock('uuid', () => ({

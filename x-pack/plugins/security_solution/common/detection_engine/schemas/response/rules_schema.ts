@@ -8,9 +8,9 @@ import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
-import { isMlRule } from '../../../machine_learning/helpers';
 
+import { isMlRule } from '../../../machine_learning/helpers';
+import { isThresholdRule } from '../../utils';
 import {
   actions,
   anomaly_threshold,
@@ -73,6 +73,7 @@ import {
   DefaultRiskScoreMappingArray,
   DefaultSeverityMappingArray,
 } from '../types';
+import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -218,7 +219,9 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 };
 
 export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (['query', 'saved_query', 'threshold', 'threat_match'].includes(typeAndTimelineOnly.type)) {
+  if (
+    ['eql', 'query', 'saved_query', 'threshold', 'threat_match'].includes(typeAndTimelineOnly.type)
+  ) {
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
@@ -242,7 +245,7 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
 };
 
 export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'threshold') {
+  if (isThresholdRule(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
