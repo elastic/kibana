@@ -7,19 +7,23 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { TrustedAppsPage } from './trusted_apps_page';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { fireEvent } from '@testing-library/dom';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
 
 describe('TrustedAppsPage', () => {
+  let history: AppContextTestRender['history'];
   let render: () => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
+
+    history = mockedContext.history;
     render = () => mockedContext.render(<TrustedAppsPage />);
     reactTestingLibrary.act(() => {
-      mockedContext.history.push('/trusted_apps');
+      history.push('/trusted_apps');
     });
   });
 
@@ -27,18 +31,52 @@ describe('TrustedAppsPage', () => {
     expect(render()).toMatchSnapshot();
   });
 
-  it.todo('should display a Add Trusted App button');
+  it('should display a Add Trusted App button', async () => {
+    const { getByTestId } = render();
+    const addButton = await getByTestId('trustedAppsListAddButton');
+    expect(addButton.textContent).toBe('Add Trusted Application');
+  });
 
   describe('when the Add Trusted App button is clicked', () => {
-    it.todo('should display the create flyout');
+    const renderAndClickAddButton = async (): Promise<
+      ReturnType<AppContextTestRender['render']>
+    > => {
+      const renderResult = render();
+      const addButton = await renderResult.getByTestId('trustedAppsListAddButton');
+      reactTestingLibrary.act(() => {
+        fireEvent.click(addButton, { buttton: 1 });
+      });
+      return renderResult;
+    };
 
-    it.todo('should update the URL to indicate the flyout is opened');
+    it('should display the create flyout', async () => {
+      const { getByTestId } = await renderAndClickAddButton();
+      const flyout = getByTestId('addTrustedAppFlyout');
+      expect(flyout).not.toBeNull();
 
-    it.todo('should preserve other URL search params');
+      const flyoutTitle = getByTestId('addTrustedAppFlyout-headerTitle');
+      expect(flyoutTitle.textContent).toBe('Add trusted application');
+    });
 
-    it.todo('should display create form'); // TODO: candidate for snapshot test here
+    it('should update the URL to indicate the flyout is opened', async () => {
+      await renderAndClickAddButton();
+      expect(/show\=create/.test(history.location.search)).toBe(true);
+    });
 
-    it.todo('should initialy have the Add button disabled');
+    it('should preserve other URL search params', async () => {
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps?page_index=2&page_size=20');
+      });
+      await renderAndClickAddButton();
+      expect(history.location.search).toBe('?page_index=2&page_size=20&show=create');
+    });
+
+    it('should display create form', async () => {
+      const { getByTestId } = await renderAndClickAddButton();
+      expect(getByTestId('addTrustedAppFlyout-createForm')).toMatchSnapshot();
+    });
+
+    it.todo('should initially have the Add button disabled');
 
     it.todo('should close flyout if cancel button is clicked');
 

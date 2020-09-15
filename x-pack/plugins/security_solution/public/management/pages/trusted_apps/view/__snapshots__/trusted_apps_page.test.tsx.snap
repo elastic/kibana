@@ -110,6 +110,7 @@ Object {
             >
               <button
                 class="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="trustedAppsListAddButton"
                 type="button"
               >
                 <span
@@ -334,6 +335,7 @@ Object {
           >
             <button
               class="euiButton euiButton--primary euiButton--fill"
+              data-test-subj="trustedAppsListAddButton"
               type="button"
             >
               <span
@@ -566,4 +568,379 @@ Object {
   "rerender": [Function],
   "unmount": [Function],
 }
+`;
+
+exports[`TrustedAppsPage when the Add Trusted App button is clicked should display create form 1`] = `
+@media only screen and (min-width:575px) {
+
+}
+
+<div
+  class="euiForm"
+  data-test-subj="addTrustedAppFlyout-createForm"
+>
+  <div
+    class="euiFormRow euiFormRow--fullWidth"
+    id="mockId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label"
+        for="mockId"
+      >
+        Name your trusted app application
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            class="euiFieldText euiFieldText--fullWidth"
+            id="mockId"
+            name="name"
+            type="text"
+            value=""
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--fullWidth"
+    id="mockId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label"
+        for="mockId"
+      >
+        Select operating system
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect euiSuperSelect--fullWidth"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <input
+            id="mockId"
+            name="os"
+            type="hidden"
+            value="windows"
+          />
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <span
+                class="euiScreenReaderOnly"
+                id="mockId"
+              >
+                Select an option: Windows, is selected
+              </span>
+              <button
+                aria-haspopup="true"
+                aria-labelledby="mockId mockId"
+                aria-selected="true"
+                class="euiSuperSelectControl euiSuperSelectControl--fullWidth"
+                role="option"
+                type="button"
+              >
+                Windows
+              </button>
+              <div
+                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              >
+                <span
+                  class="euiFormControlLayoutCustomIcon"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--fullWidth"
+    id="mockId-row"
+  >
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div>
+        <div>
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrow1"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrow2"
+                >
+                  <div
+                    class="euiFormRow euiFormRow--fullWidth"
+                    id="mockId-row"
+                  >
+                    <div
+                      class="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        class="euiFormLabel euiFormRow__label"
+                        for="mockId"
+                      >
+                        Field
+                      </label>
+                    </div>
+                    <div
+                      class="euiFormRow__fieldWrapper"
+                    >
+                      <div
+                        class="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+                      >
+                        <div
+                          class="euiPopover__anchor"
+                        >
+                          <input
+                            id="mockId"
+                            type="hidden"
+                            value="process.hash.*"
+                          />
+                          <div
+                            class="euiFormControlLayout"
+                          >
+                            <div
+                              class="euiFormControlLayout__childrenWrapper"
+                            >
+                              <span
+                                class="euiScreenReaderOnly"
+                                id="mockId"
+                              >
+                                Select an option: Hash, is selected
+                              </span>
+                              <button
+                                aria-haspopup="true"
+                                aria-labelledby="mockId mockId"
+                                aria-selected="true"
+                                class="euiSuperSelectControl"
+                                role="option"
+                                type="button"
+                              >
+                                Hash
+                              </button>
+                              <div
+                                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                              >
+                                <span
+                                  class="euiFormControlLayoutCustomIcon"
+                                >
+                                  <div
+                                    aria-hidden="true"
+                                    class="euiFormControlLayoutCustomIcon__icon"
+                                    data-euiicon-type="arrowDown"
+                                  />
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiFormRow euiFormRow--fullWidth"
+                    id="mockId-row"
+                  >
+                    <div
+                      class="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        class="euiFormLabel euiFormRow__label"
+                        for="mockId"
+                      >
+                        Operator
+                      </label>
+                    </div>
+                    <div
+                      class="euiFormRow__fieldWrapper"
+                    >
+                      <div
+                        class="euiFormControlLayout euiFormControlLayout--readOnly"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper"
+                        >
+                          <input
+                            class="euiFieldText"
+                            id="mockId"
+                            name="operator"
+                            readonly=""
+                            type="text"
+                            value="is"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrow3"
+                >
+                  <div
+                    class="euiFormRow euiFormRow--fullWidth"
+                    id="mockId-row"
+                  >
+                    <div
+                      class="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        class="euiFormLabel euiFormRow__label"
+                        for="mockId"
+                      >
+                        Value
+                      </label>
+                    </div>
+                    <div
+                      class="euiFormRow__fieldWrapper"
+                    >
+                      <div
+                        class="euiFormControlLayout"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper"
+                        >
+                          <input
+                            class="euiFieldText"
+                            id="mockId"
+                            name="operator"
+                            type="text"
+                            value=""
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiFormRow euiFormRow--fullWidth"
+                    id="mockId-row"
+                  >
+                    <div
+                      class="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        class="euiFormLabel euiFormRow__label"
+                        for="mockId"
+                      >
+                         
+                      </label>
+                    </div>
+                    <div
+                      class="euiFormRow__fieldWrapper"
+                    >
+                      <button
+                        aria-label="Remove Entry"
+                        class="euiButtonIcon euiButtonIcon--danger"
+                        disabled=""
+                        id="mockId"
+                        type="button"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          data-euiicon-type="trash"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <button
+          class="euiButton euiButton--primary euiButton--small euiButton--fill"
+          data-test-subj="undefined"
+          style="min-width: 95px;"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButton__content"
+          >
+            <div
+              class="euiButtonContent__icon"
+              data-euiicon-type="plusInCircle"
+            />
+            <span
+              class="euiButton__text"
+            >
+              AND
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--fullWidth"
+    id="mockId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label"
+        for="mockId"
+      >
+        Description
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <textarea
+        class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+        id="mockId"
+        name="description"
+        rows="6"
+      />
+    </div>
+  </div>
+</div>
 `;

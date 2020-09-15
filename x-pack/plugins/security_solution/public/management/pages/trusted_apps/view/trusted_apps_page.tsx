@@ -37,6 +37,7 @@ export const TrustedAppsPage = memo(() => {
       iconType="plusInCircle"
       isDisabled={showAddFlout}
       onClick={handleAddButtonClick}
+      data-test-subj="trustedAppsListAddButton"
     >
       <FormattedMessage
         id="xpack.securitySolution.trustedapps.list.addButton"
@@ -62,7 +63,13 @@ export const TrustedAppsPage = memo(() => {
       }
       actions={addButton}
     >
-      {showAddFlout && <CreateTrustedAppFlyout onClose={handleAddFlyoutClose} size="s" />}
+      {showAddFlout && (
+        <CreateTrustedAppFlyout
+          onClose={handleAddFlyoutClose}
+          size="s"
+          data-test-subj="addTrustedAppFlyout"
+        />
+      )}
       <TrustedAppsList />
     </AdministrationListPage>
   );

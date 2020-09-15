@@ -86,7 +86,13 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       <EuiFlyout onClose={handleCancelClick} {...flyoutProps} hideCloseButton={pendingCreate}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2
+              data-test-subj={
+                flyoutProps['data-test-subj']
+                  ? `${flyoutProps['data-test-subj']}-headerTitle`
+                  : undefined
+              }
+            >
               <FormattedMessage
                 id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.title"
                 defaultMessage="Add trusted application"
@@ -101,13 +107,27 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             onChange={handleFormOnChange}
             isInvalid={!!apiErrors}
             error={apiErrors?.message}
+            data-test-subj={
+              flyoutProps['data-test-subj']
+                ? `${flyoutProps['data-test-subj']}-createForm`
+                : undefined
+            }
           />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={handleCancelClick} flush="left" isDisabled={pendingCreate}>
+              <EuiButtonEmpty
+                onClick={handleCancelClick}
+                flush="left"
+                isDisabled={pendingCreate}
+                data-test-subj={
+                  flyoutProps['data-test-subj']
+                    ? `${flyoutProps['data-test-subj']}-cancelButton`
+                    : undefined
+                }
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.cancelButton"
                   defaultMessage="Cancel"
@@ -120,6 +140,11 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
                 fill
                 isDisabled={!formState?.isValid || pendingCreate}
                 isLoading={pendingCreate}
+                data-test-subj={
+                  flyoutProps['data-test-subj']
+                    ? `${flyoutProps['data-test-subj']}-createButton`
+                    : undefined
+                }
               >
                 <FormattedMessage
                   id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.saveButton"
