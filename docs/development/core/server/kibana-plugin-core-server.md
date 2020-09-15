@@ -28,6 +28,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
+|  [SavedObjectsUtils](./kibana-plugin-core-server.savedobjectsutils.md) |  |
 |  [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) | Registry holding information about all the registered [saved object types](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->. |
 
 ## Enumerations
@@ -41,13 +42,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Function | Description |
 |  --- | --- |
-|  [assertNever(x)](./kibana-plugin-core-server.assertnever.md) | Can be used in switch statements to ensure we perform exhaustive checks, see https://www.typescriptlang.org/docs/handbook/advanced-types.html\#exhaustiveness-checking |
-|  [deepFreeze(object)](./kibana-plugin-core-server.deepfreeze.md) | Apply Object.freeze to a value recursively and convert the return type to Readonly variant recursively |
 |  [exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-core-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-core-server.savedobjectsexportoptions.md) for more detailed information. |
-|  [getFlattenedObject(rootValue)](./kibana-plugin-core-server.getflattenedobject.md) | Flattens a deeply nested object to a map of dot-separated paths pointing to all primitive values \*\*and arrays\*\* from <code>rootValue</code>.<!-- -->example: getFlattenedObject(<!-- -->{ a: { b: 1, c: \[2,3\] } }<!-- -->) // =<!-- -->&gt; { 'a.b': 1, 'a.c': \[2,3\] } |
 |  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, })](./kibana-plugin-core-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
-|  [isRelativeUrl(candidatePath)](./kibana-plugin-core-server.isrelativeurl.md) | Determine if a url is relative. Any url including a protocol, hostname, or port is not considered relative. This means that absolute \*paths\* are considered to be relative \*urls\* |
-|  [modifyUrl(url, urlModifier)](./kibana-plugin-core-server.modifyurl.md) | Takes a URL and a function that takes the meaningful parts of the URL as a key-value object, modifies some or all of the parts, and returns the modified parts formatted again as a url.<!-- -->Url Parts sent: - protocol - slashes (does the url have the //) - auth - hostname (just the name of the host, no port or auth information) - port - pathname (the path after the hostname, no query or hash, starts with a slash if there was a path) - query (always an object, even when no query on original url) - hash<!-- -->Why? - The default url library in node produces several conflicting properties on the "parsed" output. Modifying any of these might lead to the modifications being ignored (depending on which property was modified) - It's not always clear whether to use path/pathname, host/hostname, so this tries to add helpful constraints |
 |  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, })](./kibana-plugin-core-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
 
 ## Interfaces
@@ -123,7 +119,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LoggerFactory](./kibana-plugin-core-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) | Provides APIs to plugins for customizing the plugin's logger. |
 |  [LogMeta](./kibana-plugin-core-server.logmeta.md) | Contextual metadata |
-|  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) |  |
+|  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [NodesVersionCompatibility](./kibana-plugin-core-server.nodesversioncompatibility.md) |  |
 |  [OnPostAuthToolkit](./kibana-plugin-core-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
@@ -216,7 +212,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
-|  [URLMeaningfulParts](./kibana-plugin-core-server.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Variables
@@ -245,7 +240,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
 |  [ElasticsearchClient](./kibana-plugin-core-server.elasticsearchclient.md) | Client used to query the elasticsearch cluster. |
 |  [ElasticsearchClientConfig](./kibana-plugin-core-server.elasticsearchclientconfig.md) | Configuration options to be used to create a [cluster client](./kibana-plugin-core-server.iclusterclient.md) using the [createClient API](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md) |
-|  [Freezable](./kibana-plugin-core-server.freezable.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-core-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-core-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
 |  [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) to represent the type of the context. |

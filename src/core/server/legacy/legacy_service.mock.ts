@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { LegacyService } from './legacy_service';
 import { LegacyConfig, LegacyServiceDiscoverPlugins, LegacyServiceSetupDeps } from './types';
 
@@ -24,13 +24,7 @@ type LegacyServiceMock = jest.Mocked<PublicMethodsOf<LegacyService> & { legacyId
 
 const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
   pluginSpecs: [],
-  uiExports: {
-    savedObjectSchemas: {},
-    savedObjectMappings: [],
-    savedObjectMigrations: {},
-    savedObjectValidations: {},
-    savedObjectsManagement: {},
-  },
+  uiExports: {},
   navLinks: [],
   pluginExtendedConfig: {
     get: jest.fn(),

@@ -32,7 +32,8 @@ jest.mock('os', () => {
 });
 
 import Path from 'path';
-import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';
 import { parseThemeTags } from '../common';
