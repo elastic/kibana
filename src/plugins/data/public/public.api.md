@@ -49,6 +49,7 @@ import { Path } from 'history';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import { PopoverAnchorPosition } from '@elastic/eui';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import * as React_2 from 'react';

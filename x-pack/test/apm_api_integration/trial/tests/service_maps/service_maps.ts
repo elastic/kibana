@@ -7,6 +7,7 @@
 import querystring from 'querystring';
 import expect from '@kbn/expect';
 import { isEmpty } from 'lodash';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
@@ -22,7 +23,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           );
 
           expect(response.status).to.be(200);
-          expect(response.body).to.eql({ elements: [] });
+          expect(response.body.elements.length).to.be(0);
         });
       });
 
@@ -37,227 +38,229 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
           expect(response.status).to.be(200);
 
-          expect(response.body).to.eql({
-            elements: [
-              {
-                data: {
-                  source: 'client',
-                  target: 'opbeans-node',
-                  id: 'client~opbeans-node',
-                  sourceData: {
-                    id: 'client',
-                    'service.name': 'client',
-                    'agent.name': 'rum-js',
-                  },
-                  targetData: {
-                    id: 'opbeans-node',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-node',
-                    'agent.name': 'nodejs',
-                  },
-                },
-              },
-              {
-                data: {
-                  source: 'opbeans-java',
-                  target: '>opbeans-java:3000',
-                  id: 'opbeans-java~>opbeans-java:3000',
-                  sourceData: {
-                    id: 'opbeans-java',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-java',
-                    'agent.name': 'java',
-                  },
-                  targetData: {
-                    'span.subtype': 'http',
-                    'span.destination.service.resource': 'opbeans-java:3000',
-                    'span.type': 'external',
-                    id: '>opbeans-java:3000',
-                    label: 'opbeans-java:3000',
+          expectSnapshot(response.body).toMatchInline(`
+            Object {
+              "elements": Array [
+                Object {
+                  "data": Object {
+                    "id": "client~opbeans-node",
+                    "source": "client",
+                    "sourceData": Object {
+                      "agent.name": "rum-js",
+                      "id": "client",
+                      "service.name": "client",
+                    },
+                    "target": "opbeans-node",
+                    "targetData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "production",
+                      "service.name": "opbeans-node",
+                    },
                   },
                 },
-              },
-              {
-                data: {
-                  source: 'opbeans-java',
-                  target: '>postgresql',
-                  id: 'opbeans-java~>postgresql',
-                  sourceData: {
-                    id: 'opbeans-java',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-java',
-                    'agent.name': 'java',
-                  },
-                  targetData: {
-                    'span.subtype': 'postgresql',
-                    'span.destination.service.resource': 'postgresql',
-                    'span.type': 'db',
-                    id: '>postgresql',
-                    label: 'postgresql',
-                  },
-                },
-              },
-              {
-                data: {
-                  source: 'opbeans-java',
-                  target: 'opbeans-node',
-                  id: 'opbeans-java~opbeans-node',
-                  sourceData: {
-                    id: 'opbeans-java',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-java',
-                    'agent.name': 'java',
-                  },
-                  targetData: {
-                    id: 'opbeans-node',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-node',
-                    'agent.name': 'nodejs',
-                  },
-                  bidirectional: true,
-                },
-              },
-              {
-                data: {
-                  source: 'opbeans-node',
-                  target: '>93.184.216.34:80',
-                  id: 'opbeans-node~>93.184.216.34:80',
-                  sourceData: {
-                    id: 'opbeans-node',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-node',
-                    'agent.name': 'nodejs',
-                  },
-                  targetData: {
-                    'span.subtype': 'http',
-                    'span.destination.service.resource': '93.184.216.34:80',
-                    'span.type': 'external',
-                    id: '>93.184.216.34:80',
-                    label: '93.184.216.34:80',
+                Object {
+                  "data": Object {
+                    "id": "opbeans-java~>opbeans-java:3000",
+                    "source": "opbeans-java",
+                    "sourceData": Object {
+                      "agent.name": "java",
+                      "id": "opbeans-java",
+                      "service.environment": "production",
+                      "service.name": "opbeans-java",
+                    },
+                    "target": ">opbeans-java:3000",
+                    "targetData": Object {
+                      "id": ">opbeans-java:3000",
+                      "label": "opbeans-java:3000",
+                      "span.destination.service.resource": "opbeans-java:3000",
+                      "span.subtype": "http",
+                      "span.type": "external",
+                    },
                   },
                 },
-              },
-              {
-                data: {
-                  source: 'opbeans-node',
-                  target: '>postgresql',
-                  id: 'opbeans-node~>postgresql',
-                  sourceData: {
-                    id: 'opbeans-node',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-node',
-                    'agent.name': 'nodejs',
-                  },
-                  targetData: {
-                    'span.subtype': 'postgresql',
-                    'span.destination.service.resource': 'postgresql',
-                    'span.type': 'db',
-                    id: '>postgresql',
-                    label: 'postgresql',
-                  },
-                },
-              },
-              {
-                data: {
-                  source: 'opbeans-node',
-                  target: '>redis',
-                  id: 'opbeans-node~>redis',
-                  sourceData: {
-                    id: 'opbeans-node',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-node',
-                    'agent.name': 'nodejs',
-                  },
-                  targetData: {
-                    'span.subtype': 'redis',
-                    'span.destination.service.resource': 'redis',
-                    'span.type': 'cache',
-                    id: '>redis',
-                    label: 'redis',
+                Object {
+                  "data": Object {
+                    "id": "opbeans-java~>postgresql",
+                    "source": "opbeans-java",
+                    "sourceData": Object {
+                      "agent.name": "java",
+                      "id": "opbeans-java",
+                      "service.environment": "production",
+                      "service.name": "opbeans-java",
+                    },
+                    "target": ">postgresql",
+                    "targetData": Object {
+                      "id": ">postgresql",
+                      "label": "postgresql",
+                      "span.destination.service.resource": "postgresql",
+                      "span.subtype": "postgresql",
+                      "span.type": "db",
+                    },
                   },
                 },
-              },
-              {
-                data: {
-                  source: 'opbeans-node',
-                  target: 'opbeans-java',
-                  id: 'opbeans-node~opbeans-java',
-                  sourceData: {
-                    id: 'opbeans-node',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-node',
-                    'agent.name': 'nodejs',
+                Object {
+                  "data": Object {
+                    "bidirectional": true,
+                    "id": "opbeans-java~opbeans-node",
+                    "source": "opbeans-java",
+                    "sourceData": Object {
+                      "agent.name": "java",
+                      "id": "opbeans-java",
+                      "service.environment": "production",
+                      "service.name": "opbeans-java",
+                    },
+                    "target": "opbeans-node",
+                    "targetData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "production",
+                      "service.name": "opbeans-node",
+                    },
                   },
-                  targetData: {
-                    id: 'opbeans-java',
-                    'service.environment': 'production',
-                    'service.name': 'opbeans-java',
-                    'agent.name': 'java',
+                },
+                Object {
+                  "data": Object {
+                    "id": "opbeans-node~>93.184.216.34:80",
+                    "source": "opbeans-node",
+                    "sourceData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "production",
+                      "service.name": "opbeans-node",
+                    },
+                    "target": ">93.184.216.34:80",
+                    "targetData": Object {
+                      "id": ">93.184.216.34:80",
+                      "label": "93.184.216.34:80",
+                      "span.destination.service.resource": "93.184.216.34:80",
+                      "span.subtype": "http",
+                      "span.type": "external",
+                    },
                   },
-                  isInverseEdge: true,
                 },
-              },
-              {
-                data: {
-                  id: 'opbeans-java',
-                  'service.environment': 'production',
-                  'service.name': 'opbeans-java',
-                  'agent.name': 'java',
+                Object {
+                  "data": Object {
+                    "id": "opbeans-node~>postgresql",
+                    "source": "opbeans-node",
+                    "sourceData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "production",
+                      "service.name": "opbeans-node",
+                    },
+                    "target": ">postgresql",
+                    "targetData": Object {
+                      "id": ">postgresql",
+                      "label": "postgresql",
+                      "span.destination.service.resource": "postgresql",
+                      "span.subtype": "postgresql",
+                      "span.type": "db",
+                    },
+                  },
                 },
-              },
-              {
-                data: {
-                  id: 'opbeans-node',
-                  'service.environment': 'production',
-                  'service.name': 'opbeans-node',
-                  'agent.name': 'nodejs',
+                Object {
+                  "data": Object {
+                    "id": "opbeans-node~>redis",
+                    "source": "opbeans-node",
+                    "sourceData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "production",
+                      "service.name": "opbeans-node",
+                    },
+                    "target": ">redis",
+                    "targetData": Object {
+                      "id": ">redis",
+                      "label": "redis",
+                      "span.destination.service.resource": "redis",
+                      "span.subtype": "redis",
+                      "span.type": "cache",
+                    },
+                  },
                 },
-              },
-              {
-                data: {
-                  'span.subtype': 'http',
-                  'span.destination.service.resource': 'opbeans-java:3000',
-                  'span.type': 'external',
-                  id: '>opbeans-java:3000',
-                  label: 'opbeans-java:3000',
+                Object {
+                  "data": Object {
+                    "id": "opbeans-node~opbeans-java",
+                    "isInverseEdge": true,
+                    "source": "opbeans-node",
+                    "sourceData": Object {
+                      "agent.name": "nodejs",
+                      "id": "opbeans-node",
+                      "service.environment": "production",
+                      "service.name": "opbeans-node",
+                    },
+                    "target": "opbeans-java",
+                    "targetData": Object {
+                      "agent.name": "java",
+                      "id": "opbeans-java",
+                      "service.environment": "production",
+                      "service.name": "opbeans-java",
+                    },
+                  },
                 },
-              },
-              {
-                data: {
-                  id: 'client',
-                  'service.name': 'client',
-                  'agent.name': 'rum-js',
+                Object {
+                  "data": Object {
+                    "agent.name": "java",
+                    "id": "opbeans-java",
+                    "service.environment": "production",
+                    "service.name": "opbeans-java",
+                  },
                 },
-              },
-              {
-                data: {
-                  'span.subtype': 'redis',
-                  'span.destination.service.resource': 'redis',
-                  'span.type': 'cache',
-                  id: '>redis',
-                  label: 'redis',
+                Object {
+                  "data": Object {
+                    "agent.name": "nodejs",
+                    "id": "opbeans-node",
+                    "service.environment": "production",
+                    "service.name": "opbeans-node",
+                  },
                 },
-              },
-              {
-                data: {
-                  'span.subtype': 'postgresql',
-                  'span.destination.service.resource': 'postgresql',
-                  'span.type': 'db',
-                  id: '>postgresql',
-                  label: 'postgresql',
+                Object {
+                  "data": Object {
+                    "id": ">opbeans-java:3000",
+                    "label": "opbeans-java:3000",
+                    "span.destination.service.resource": "opbeans-java:3000",
+                    "span.subtype": "http",
+                    "span.type": "external",
+                  },
                 },
-              },
-              {
-                data: {
-                  'span.subtype': 'http',
-                  'span.destination.service.resource': '93.184.216.34:80',
-                  'span.type': 'external',
-                  id: '>93.184.216.34:80',
-                  label: '93.184.216.34:80',
+                Object {
+                  "data": Object {
+                    "agent.name": "rum-js",
+                    "id": "client",
+                    "service.name": "client",
+                  },
                 },
-              },
-            ],
-          });
+                Object {
+                  "data": Object {
+                    "id": ">redis",
+                    "label": "redis",
+                    "span.destination.service.resource": "redis",
+                    "span.subtype": "redis",
+                    "span.type": "cache",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "id": ">postgresql",
+                    "label": "postgresql",
+                    "span.destination.service.resource": "postgresql",
+                    "span.subtype": "postgresql",
+                    "span.type": "db",
+                  },
+                },
+                Object {
+                  "data": Object {
+                    "id": ">93.184.216.34:80",
+                    "label": "93.184.216.34:80",
+                    "span.destination.service.resource": "93.184.216.34:80",
+                    "span.subtype": "http",
+                    "span.type": "external",
+                  },
+                },
+              ],
+            }
+          `);
         });
       });
     });

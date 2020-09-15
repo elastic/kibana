@@ -22,7 +22,7 @@ import {
 
 import { SpacesService } from '../plugin';
 import { Actions } from './actions';
-import { CheckPrivilegesWithRequest, checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import {
   CheckPrivilegesDynamicallyWithRequest,
   checkPrivilegesDynamicallyWithRequestFactory,
@@ -41,7 +41,9 @@ import { validateReservedPrivileges } from './validate_reserved_privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { SecurityLicense } from '../../common/licensing';
+import { CheckPrivilegesWithRequest } from './types';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { AuthenticatedUser } from '..';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
@@ -57,6 +59,7 @@ interface AuthorizationServiceSetupParams {
   features: FeaturesPluginSetup;
   kibanaIndexName: string;
   getSpacesService(): SpacesService | undefined;
+  getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
 }
 
 interface AuthorizationServiceStartParams {
@@ -92,6 +95,7 @@ export class AuthorizationService {
     features,
     kibanaIndexName,
     getSpacesService,
+    getCurrentUser,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetup {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
@@ -132,9 +136,11 @@ export class AuthorizationService {
 
         const disableUICapabilities = disableUICapabilitiesFactory(
           request,
-          features.getFeatures(),
+          features.getKibanaFeatures(),
+          features.getElasticsearchFeatures(),
           this.logger,
-          authz
+          authz,
+          getCurrentUser(request)
         );
 
         if (!request.auth.isAuthenticated) {
@@ -152,7 +158,7 @@ export class AuthorizationService {
   }
 
   start({ clusterClient, features, online$ }: AuthorizationServiceStartParams) {
-    const allFeatures = features.getFeatures();
+    const allFeatures = features.getKibanaFeatures();
     validateFeaturePrivileges(allFeatures);
     validateReservedPrivileges(allFeatures);
 
