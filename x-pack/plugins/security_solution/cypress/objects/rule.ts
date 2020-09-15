@@ -27,6 +27,8 @@ export interface CustomRule {
   customQuery: string;
   name: string;
   description: string;
+  index?: string[];
+  interval?: string;
   severity: string;
   riskScore: string;
   tags: string[];
@@ -107,6 +109,29 @@ export const newRule: CustomRule = {
   mitre: [mitre1, mitre2],
   note: '# test markdown',
   timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+};
+
+export const existingRule: CustomRule = {
+  customQuery: 'host.name:*',
+  name: 'Rule 1',
+  description: 'Description for Rule 1',
+  index: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  interval: '4m',
+  severity: 'High',
+  riskScore: '19',
+  tags: ['rule1'],
+  referenceUrls: [],
+  falsePositivesExamples: [],
+  mitre: [],
+  note: 'This is my note',
+  timelineId: '',
 };
 
 export const newOverrideRule: OverrideRule = {
