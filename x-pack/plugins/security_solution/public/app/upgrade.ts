@@ -13,6 +13,9 @@ import {
   PackageInfo,
   InstallPackageRequest,
   InstallationStatus,
+  appRoutesService,
+  CheckPermissionsResponse,
+  InstallPackageResponse,
 } from '../../../ingest_manager/common';
 import { sendGetEndpointSecurityPackage } from '../management/pages/policy/store/policy_list/services/ingest';
 import { StartServices } from '../types';
@@ -48,8 +51,24 @@ const sendInstallPackage = async (
   http: HttpStart,
   packageKey: string,
   options: HttpFetchOptions = {}
-): Promise<unknown> => {
-  return http.post<InstallPackageRequest>(epmRouteService.getInstallPath(packageKey), {
+): Promise<InstallPackageResponse> => {
+  return http.post<InstallPackageResponse>(epmRouteService.getInstallPath(packageKey), {
+    ...options,
+  });
+};
+
+/**
+ * Checks with the ingest manager if the current user making these requests has the right permissions
+ * to install the endpoint package.
+ *
+ * @param http an http client for sending the request
+ * @param options an object containing options for the request
+ */
+const sendCheckPermissions = async (
+  http: HttpStart,
+  options: HttpFetchOptions = {}
+): Promise<CheckPermissionsResponse> => {
+  return http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath(), {
     ...options,
   });
 };
@@ -60,7 +79,7 @@ const createPackageKey = (name: string, version: string) => {
 
 export const UpgradeEndpointPackage = () => {
   const context = useKibana<StartServices>();
-  const { allEnabled: hasPermissions } = useIngestEnabledCheck();
+  const { allEnabled: ingestEnabled } = useIngestEnabledCheck();
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -70,11 +89,22 @@ export const UpgradeEndpointPackage = () => {
       abortController.abort();
     };
 
-    if (hasPermissions) {
+    if (ingestEnabled) {
       const signal = abortController.signal;
 
       (async () => {
         try {
+          // make sure we're a privileged user before trying to install the package
+          const { success: hasPermissions } = await sendCheckPermissions(context.services.http, {
+            signal,
+          });
+
+          // if we're not a privileged user then return and don't try to check the status of the endpoint package
+          if (!hasPermissions) {
+            return cleanup;
+          }
+
+          // get the endpoint package's basic information
           const endpointPackage = await sendGetEndpointSecurityPackage(context.services.http, {
             signal,
           });
@@ -123,7 +153,7 @@ export const UpgradeEndpointPackage = () => {
             { signal }
           );
 
-          // check and see if a newer version exists
+          // check and see if the latest version is newer than the one we have installed
           if (semver.gt(endpointPackageInfo.latestVersion, endpointPackageInfo.version)) {
             await sendInstallPackage(
               context.services.http,
@@ -140,7 +170,7 @@ export const UpgradeEndpointPackage = () => {
         return cleanup;
       })();
     }
-  }, [hasPermissions, context.services.http]);
+  }, [ingestEnabled, context.services.http]);
 
   return null;
 };
