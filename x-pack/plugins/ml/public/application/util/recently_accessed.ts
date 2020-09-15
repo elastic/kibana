@@ -37,7 +37,7 @@ export function addItemToRecentlyAccessed(page: string, itemId: string, url: str
       return;
   }
 
-  url = `${page}/${url}`;
+  url = `/app/ml/${page}/${url}`;
   const recentlyAccessed = getRecentlyAccessed();
   recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
 }
