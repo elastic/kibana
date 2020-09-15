@@ -4162,7 +4162,6 @@
     "visTypeVega.vegaParser.unrecognizedControlsLocationValueErrorMessage": "无法识别的 {controlsLocationParam} 值。应为 [{locToDirMap}] 之一",
     "visTypeVega.vegaParser.unrecognizedDirValueErrorMessage": "{dirParam} 值无法识别。应为 [{expectedValues}] 之一",
     "visTypeVega.vegaParser.VLCompilerShouldHaveGeneratedSingleProtectionObjectErrorMessage": "内部错误：Vega-Lite 编译器应已生成单个投影对象",
-    "visTypeVega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage": "使用 {autosizeParam} 时，将忽略 {widthParam} 和 {heightParam} 参数",
     "visTypeVega.visualization.indexNotFoundErrorMessage": "找不到索引 {index}",
     "visTypeVega.visualization.renderErrorTitle": "Vega 错误",
     "visTypeVega.visualization.unableToFindDefaultIndexErrorMessage": "找不到默认索引",

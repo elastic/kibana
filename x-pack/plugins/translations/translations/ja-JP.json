@@ -4161,7 +4161,6 @@
     "visTypeVega.vegaParser.unrecognizedControlsLocationValueErrorMessage": "認識されない {controlsLocationParam} 値[{locToDirMap}] のいずれかである必要があります",
     "visTypeVega.vegaParser.unrecognizedDirValueErrorMessage": "認識されない {dirParam} 値[{expectedValues}] のいずれかである必要があります",
     "visTypeVega.vegaParser.VLCompilerShouldHaveGeneratedSingleProtectionObjectErrorMessage": "内部エラー:Vega-Lite コンパイラーがシングルプロジェクションオブジェクトを生成したはずです",
-    "visTypeVega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage": "{widthParam} と {heightParam} パラメーターは {autosizeParam} で無視されます",
     "visTypeVega.visualization.indexNotFoundErrorMessage": "インデックス {index} が見つかりません",
     "visTypeVega.visualization.renderErrorTitle": "Vega エラー",
     "visTypeVega.visualization.unableToFindDefaultIndexErrorMessage": "デフォルトのインデックスが見つかりません",
