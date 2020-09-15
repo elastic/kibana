@@ -95,13 +95,24 @@ export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
 }
 
 // Returns whether the url_value of the supplied config is for
-// a Kibana Discover or Dashboard page running on the same server as this ML plugin.
+// a Kibana Discover, Dashboard or supported solution page running
+// on the same server as this ML plugin. This is necessary so we can have
+// backwards compatibility with custom URLs created before the move to
+// BrowserRouter and URLs without hashes. If we add another solution to
+// recognize modules or with custom UI in the custom URL builder we'd
+// need to add the solution here. Manually created custom URLs for other
+// solution pages need to be prefixed with `app/` in the custom URL builder.
 function isKibanaUrl(urlConfig: UrlConfig) {
   const urlValue = urlConfig.url_value;
   return (
+    // HashRouter based plugins
     urlValue.startsWith('discover#/') ||
     urlValue.startsWith('dashboards#/') ||
-    urlValue.startsWith('apm#/')
+    urlValue.startsWith('apm#/') ||
+    // BrowserRouter based plugins
+    urlValue.startsWith('security/') ||
+    // Legacy links
+    urlValue.startsWith('siem#/')
   );
 }
 
