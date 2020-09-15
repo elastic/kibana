@@ -11,24 +11,28 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
-
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { TransformId } from '../../../../../../common';
+
+import {
+  isEsIndices,
+  isPostTransformsPreviewResponseSchema,
+} from '../../../../../../common/api_schemas/type_guards';
+import { TransformId, TransformPivotConfig } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
+import { isHttpFetchError } from '../../../../common/request';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
 import { StepDetailsTimeField } from './step_details_time_field';
 import {
   getPivotQuery,
-  getPreviewRequestBody,
+  getPreviewTransformRequestBody,
   isTransformIdValid,
-  TransformPivotConfig,
 } from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
 import { delayValidator } from '../../../../common/validators';
@@ -48,10 +52,12 @@ export interface StepDetailsExposedState {
   indexPatternDateField?: string | undefined;
 }
 
+const defaultContinuousModeDelay = '60s';
+
 export function getDefaultStepDetailsState(): StepDetailsExposedState {
   return {
     continuousModeDateField: '',
-    continuousModeDelay: '60s',
+    continuousModeDelay: defaultContinuousModeDelay,
     createIndexPattern: true,
     isContinuousModeEnabled: false,
     transformId: '',
@@ -72,7 +78,7 @@ export function applyTransformConfigToDetailsState(
     const time = transformConfig.sync?.time;
     if (time !== undefined) {
       state.continuousModeDateField = time.field;
-      state.continuousModeDelay = time.delay;
+      state.continuousModeDelay = time?.delay ?? defaultContinuousModeDelay;
       state.isContinuousModeEnabled = true;
     }
   }
@@ -137,19 +143,20 @@ export const StepDetailsForm: FC<Props> = React.memo(
     useEffect(() => {
       // use an IIFE to avoid returning a Promise to useEffect.
       (async function () {
-        try {
-          const { searchQuery, groupByList, aggList } = stepDefineState;
-          const pivotAggsArr = dictionaryToArray(aggList);
-          const pivotGroupByArr = dictionaryToArray(groupByList);
-          const pivotQuery = getPivotQuery(searchQuery);
-          const previewRequest = getPreviewRequestBody(
-            searchItems.indexPattern.title,
-            pivotQuery,
-            pivotGroupByArr,
-            pivotAggsArr
-          );
+        const { searchQuery, groupByList, aggList } = stepDefineState;
+        const pivotAggsArr = dictionaryToArray(aggList);
+        const pivotGroupByArr = dictionaryToArray(groupByList);
+        const pivotQuery = getPivotQuery(searchQuery);
+        const previewRequest = getPreviewTransformRequestBody(
+          searchItems.indexPattern.title,
+          pivotQuery,
+          pivotGroupByArr,
+          pivotAggsArr
+        );
 
-          const transformPreview = await api.getTransformsPreview(previewRequest);
+        const transformPreview = await api.getTransformsPreview(previewRequest);
+
+        if (isPostTransformsPreviewResponseSchema(transformPreview)) {
           const properties = transformPreview.generated_dest_index.mappings.properties;
           const datetimeColumns: string[] = Object.keys(properties).filter(
             (col) => properties[col].type === 'date'
@@ -157,43 +164,46 @@ export const StepDetailsForm: FC<Props> = React.memo(
 
           setPreviewDateColumns(datetimeColumns);
           setIndexPatternDateField(datetimeColumns[0]);
-        } catch (e) {
+        } else {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
-              defaultMessage: 'An error occurred getting transform preview',
+              defaultMessage: 'An error occurred fetching the transform preview',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText
+                overlays={deps.overlays}
+                text={getErrorMessage(transformPreview)}
+              />
             ),
           });
         }
 
-        try {
-          setTransformIds(
-            (await api.getTransforms()).transforms.map(
-              (transform: TransformPivotConfig) => transform.id
-            )
-          );
-        } catch (e) {
+        const resp = await api.getTransforms();
+
+        if (isHttpFetchError(resp)) {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(resp)} />
             ),
           });
+        } else {
+          setTransformIds(resp.transforms.map((transform: TransformPivotConfig) => transform.id));
         }
 
-        try {
-          setIndexNames((await api.getIndices()).map((index) => index.name));
-        } catch (e) {
+        const indices = await api.getEsIndices();
+
+        if (isEsIndices(indices)) {
+          setIndexNames(indices.map((index) => index.name));
+        } else {
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(indices)} />
             ),
           });
         }
