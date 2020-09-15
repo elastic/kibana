@@ -7,12 +7,11 @@
 import { AbstractVectorSource } from '../vector_source';
 import {
   getAutocompleteService,
-  fetchSearchSourceAndRecordWithInspector,
   getIndexPatternService,
   getTimeFilter,
   getSearchService,
 } from '../../../kibana_services';
-import { createExtentFilter } from '../../../elasticsearch_geo_utils';
+import { createExtentFilter } from '../../../../common/elasticsearch_geo_utils';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
@@ -20,6 +19,7 @@ import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../../reducers/util';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../es_geo_grid_source/geo_tile_utils';
+import { search } from '../../../../../../../src/plugins/data/public';
 
 export class AbstractESSource extends AbstractVectorSource {
   constructor(descriptor, inspectorAdapters) {
@@ -84,16 +84,22 @@ export class AbstractESSource extends AbstractVectorSource {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
+    const inspectorRequest = this._inspectorAdapters.requests.start(requestName, {
+      id: requestId,
+      description: requestDescription,
+    });
+    let resp;
     try {
-      return await fetchSearchSourceAndRecordWithInspector({
-        inspectorAdapters: this._inspectorAdapters,
-        searchSource,
-        requestName,
-        requestId,
-        requestDesc: requestDescription,
-        abortSignal: abortController.signal,
+      inspectorRequest.stats(search.getRequestInspectorStats(searchSource));
+      searchSource.getSearchRequestBody().then((body) => {
+        inspectorRequest.json(body);
       });
+      resp = await searchSource.fetch({ abortSignal: abortController.signal });
+      inspectorRequest
+        .stats(search.getResponseInspectorStats(resp, searchSource))
+        .ok({ json: resp });
     } catch (error) {
+      inspectorRequest.error({ error });
       if (error.name === 'AbortError') {
         throw new DataRequestAbortError();
       }
@@ -105,6 +111,8 @@ export class AbstractESSource extends AbstractVectorSource {
         })
       );
     }
+
+    return resp;
   }
 
   async makeSearchSource(searchFilters, limit, initialSearchContext) {
@@ -176,7 +184,7 @@ export class AbstractESSource extends AbstractVectorSource {
     const minLon = esBounds.top_left.lon;
     const maxLon = esBounds.bottom_right.lon;
     return {
-      minLon: minLon > maxLon ? minLon - 360 : minLon,
+      minLon: minLon > maxLon ? minLon - 360 : minLon, //fixes an ES bbox to straddle dateline
       maxLon,
       minLat: esBounds.bottom_right.lat,
       maxLat: esBounds.top_left.lat,
@@ -273,7 +281,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    return fieldFromIndexPattern.format.getConverterFor('text');
+    return indexPattern.getFormatterForField(fieldFromIndexPattern).getConverterFor('text');
   }
 
   async loadStylePropsMeta(

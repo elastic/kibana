@@ -7,20 +7,28 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, CreateOptions, ConstructorOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
+import { nodeTypes } from '../../../../src/plugins/data/common';
+import { esKuery } from '../../../../src/plugins/data/server';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
 import { TaskStatus } from '../../task_manager/server';
-import { IntervalSchedule } from './types';
+import { IntervalSchedule, RawAlert } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { AlertsAuthorization } from './authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../actions/server';
+import { eventLogClientMock } from '../../event_log/server/mocks';
+import { QueryEventsBySavedObjectResult } from '../../event_log/server';
+import { SavedObject } from 'kibana/server';
+import { EventsFactory } from './lib/alert_instance_summary_from_event_log.test';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+const eventLogClient = eventLogClientMock.create();
+
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
@@ -39,6 +47,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
+  getEventLogClient: jest.fn(),
 };
 
 beforeEach(() => {
@@ -91,16 +100,32 @@ beforeEach(() => {
     async executor() {},
     producer: 'alerts',
   }));
+  alertsClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
 });
 
-const mockedDate = new Date('2019-02-12T21:01:22.479Z');
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockedDateString = '2019-02-12T21:01:22.479Z';
+const mockedDate = new Date(mockedDateString);
+const DateOriginal = Date;
+
+// A version of date that responds to `new Date(null|undefined)` and `Date.now()`
+// by returning a fixed date, otherwise should be same as Date.
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 (global as any).Date = class Date {
-  constructor() {
-    return mockedDate;
+  constructor(...args: unknown[]) {
+    // sometimes the ctor has no args, sometimes has a single `null` arg
+    if (args[0] == null) {
+      // @ts-ignore
+      return mockedDate;
+    } else {
+      // @ts-ignore
+      return new DateOriginal(...args);
+    }
   }
   static now() {
     return mockedDate.getTime();
+  }
+  static parse(string: string) {
+    return DateOriginal.parse(string);
   }
 };
 
@@ -627,6 +652,70 @@ describe('create()', () => {
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).toHaveBeenCalledTimes(0);
+  });
+
+  test('should trim alert name when creating API key', async () => {
+    const data = getMockData({ name: ' my alert name ' });
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actions: [],
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: false,
+        name: ' my alert name ',
+        alertTypeId: '123',
+        schedule: { interval: 10000 },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+
+    await alertsClient.create({ data });
+    expect(alertsClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my alert name');
   });
 
   test('should validate params', async () => {
@@ -2295,6 +2384,239 @@ describe('getAlertState()', () => {
   });
 });
 
+const AlertInstanceSummaryFindEventsResult: QueryEventsBySavedObjectResult = {
+  page: 1,
+  per_page: 10000,
+  total: 0,
+  data: [],
+};
+
+const AlertInstanceSummaryIntervalSeconds = 1;
+
+const BaseAlertInstanceSummarySavedObject: SavedObject<RawAlert> = {
+  id: '1',
+  type: 'alert',
+  attributes: {
+    enabled: true,
+    name: 'alert-name',
+    tags: ['tag-1', 'tag-2'],
+    alertTypeId: '123',
+    consumer: 'alert-consumer',
+    schedule: { interval: `${AlertInstanceSummaryIntervalSeconds}s` },
+    actions: [],
+    params: {},
+    createdBy: null,
+    updatedBy: null,
+    createdAt: mockedDateString,
+    apiKey: null,
+    apiKeyOwner: null,
+    throttle: null,
+    muteAll: false,
+    mutedInstanceIds: [],
+  },
+  references: [],
+};
+
+function getAlertInstanceSummarySavedObject(
+  attributes: Partial<RawAlert> = {}
+): SavedObject<RawAlert> {
+  return {
+    ...BaseAlertInstanceSummarySavedObject,
+    attributes: { ...BaseAlertInstanceSummarySavedObject.attributes, ...attributes },
+  };
+}
+
+describe('getAlertInstanceSummary()', () => {
+  let alertsClient: AlertsClient;
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+  });
+
+  test('runs as expected with some event log data', async () => {
+    const alertSO = getAlertInstanceSummarySavedObject({
+      mutedInstanceIds: ['instance-muted-no-activity'],
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(alertSO);
+
+    const eventsFactory = new EventsFactory(mockedDateString);
+    const events = eventsFactory
+      .addExecute()
+      .addNewInstance('instance-currently-active')
+      .addNewInstance('instance-previously-active')
+      .addActiveInstance('instance-currently-active')
+      .addActiveInstance('instance-previously-active')
+      .advanceTime(10000)
+      .addExecute()
+      .addResolvedInstance('instance-previously-active')
+      .addActiveInstance('instance-currently-active')
+      .getEvents();
+    const eventsResult = {
+      ...AlertInstanceSummaryFindEventsResult,
+      total: events.length,
+      data: events,
+    };
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(eventsResult);
+
+    const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
+
+    const result = await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "alertTypeId": "123",
+        "consumer": "alert-consumer",
+        "enabled": true,
+        "errorMessages": Array [],
+        "id": "1",
+        "instances": Object {
+          "instance-currently-active": Object {
+            "activeStartDate": "2019-02-12T21:01:22.479Z",
+            "muted": false,
+            "status": "Active",
+          },
+          "instance-muted-no-activity": Object {
+            "activeStartDate": undefined,
+            "muted": true,
+            "status": "OK",
+          },
+          "instance-previously-active": Object {
+            "activeStartDate": undefined,
+            "muted": false,
+            "status": "OK",
+          },
+        },
+        "lastRun": "2019-02-12T21:01:32.479Z",
+        "muteAll": false,
+        "name": "alert-name",
+        "status": "Active",
+        "statusEndDate": "2019-02-12T21:01:22.479Z",
+        "statusStartDate": "2019-02-12T21:00:22.479Z",
+        "tags": Array [
+          "tag-1",
+          "tag-2",
+        ],
+        "throttle": null,
+      }
+    `);
+  });
+
+  // Further tests don't check the result of `getAlertInstanceSummary()`, as the result
+  // is just the result from the `alertInstanceSummaryFromEventLog()`, which itself
+  // has a complete set of tests.  These tests just make sure the data gets
+  // sent into `getAlertInstanceSummary()` as appropriate.
+
+  test('calls saved objects and event log client with default params', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    await alertsClient.getAlertInstanceSummary({ id: '1' });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObject.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "alert",
+        "1",
+        Object {
+          "end": "2019-02-12T21:01:22.479Z",
+          "page": 1,
+          "per_page": 10000,
+          "sort_order": "desc",
+          "start": "2019-02-12T21:00:22.479Z",
+        },
+      ]
+    `);
+    // calculate the expected start/end date for one test
+    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+    expect(end).toBe(mockedDateString);
+
+    const startMillis = Date.parse(start!);
+    const endMillis = Date.parse(end!);
+    const expectedDuration = 60 * AlertInstanceSummaryIntervalSeconds * 1000;
+    expect(endMillis - startMillis).toBeGreaterThan(expectedDuration - 2);
+    expect(endMillis - startMillis).toBeLessThan(expectedDuration + 2);
+  });
+
+  test('calls event log client with start date', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    const dateStart = new Date(
+      Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
+    ).toISOString();
+    await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
+    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+
+    expect({ start, end }).toMatchInlineSnapshot(`
+      Object {
+        "end": "2019-02-12T21:01:22.479Z",
+        "start": "2019-02-12T21:00:22.479Z",
+      }
+    `);
+  });
+
+  test('calls event log client with relative start date', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    const dateStart = '2m';
+    await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObject).toHaveBeenCalledTimes(1);
+    const { start, end } = eventLogClient.findEventsBySavedObject.mock.calls[0][2]!;
+
+    expect({ start, end }).toMatchInlineSnapshot(`
+      Object {
+        "end": "2019-02-12T21:01:22.479Z",
+        "start": "2019-02-12T20:59:22.479Z",
+      }
+    `);
+  });
+
+  test('invalid start date throws an error', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    const dateStart = 'ain"t no way this will get parsed as a date';
+    expect(
+      alertsClient.getAlertInstanceSummary({ id: '1', dateStart })
+    ).rejects.toMatchInlineSnapshot(
+      `[Error: Invalid date for parameter dateStart: "ain"t no way this will get parsed as a date"]`
+    );
+  });
+
+  test('saved object get throws an error', async () => {
+    unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    expect(alertsClient.getAlertInstanceSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
+      `[Error: OMG!]`
+    );
+  });
+
+  test('findEvents throws an error', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    eventLogClient.findEventsBySavedObject.mockRejectedValueOnce(new Error('OMG 2!'));
+
+    // error eaten but logged
+    await alertsClient.getAlertInstanceSummary({ id: '1' });
+  });
+});
+
 describe('find()', () => {
   const listedTypes = new Set([
     {
@@ -2402,6 +2724,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
+          "filter": undefined,
           "type": "alert",
         },
       ]
@@ -2410,9 +2733,11 @@ describe('find()', () => {
 
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
+      const filter = esKuery.fromKueryExpression(
+        '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
+      );
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        filter:
-          '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))',
+        filter,
         ensureAlertTypeIsAuthorized() {},
         logSuccessfulAuthorization() {},
       });
@@ -2421,8 +2746,8 @@ describe('find()', () => {
       await alertsClient.find({ options: { filter: 'someTerm' } });
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
-      expect(options.filter).toMatchInlineSnapshot(
-        `"someTerm and ((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))"`
+      expect(options.filter).toEqual(
+        nodeTypes.function.buildNode('and', [esKuery.fromKueryExpression('someTerm'), filter])
       );
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });
@@ -2439,7 +2764,6 @@ describe('find()', () => {
       const ensureAlertTypeIsAuthorized = jest.fn();
       const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        filter: '',
         ensureAlertTypeIsAuthorized,
         logSuccessfulAuthorization,
       });
@@ -2660,9 +2984,13 @@ describe('update()', () => {
     type: 'alert',
     attributes: {
       enabled: true,
+      tags: ['foo'],
       alertTypeId: 'myType',
+      schedule: { interval: '10s' },
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
+      params: {},
+      throttle: null,
       actions: [
         {
           group: 'default',
@@ -2691,7 +3019,7 @@ describe('update()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
     alertTypeRegistry.get.mockReturnValue({
-      id: '123',
+      id: 'myType',
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
@@ -3251,6 +3579,64 @@ describe('update()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
+  });
+
+  it('should trim alert name in the API key name', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actions: [],
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: false,
+        name: ' my alert name ',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: 'task-123',
+        apiKey: null,
+      },
+      updated_at: new Date().toISOString(),
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    await alertsClient.update({
+      id: '1',
+      data: {
+        ...existingAlert.attributes,
+        name: ' my alert name ',
+      },
+    });
+
+    expect(alertsClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
   });
 
   it('swallows error when invalidate API key throws', async () => {

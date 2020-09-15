@@ -7,13 +7,20 @@
 import React, { useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiBreadcrumb } from '@elastic/eui';
+
 import { KibanaContext, IKibanaContext } from '../../index';
 import {
-  appSearchBreadcrumbs,
-  workplaceSearchBreadcrumbs,
+  useEnterpriseSearchBreadcrumbs,
+  useAppSearchBreadcrumbs,
+  useWorkplaceSearchBreadcrumbs,
   TBreadcrumbs,
 } from './generate_breadcrumbs';
-import { appSearchTitle, workplaceSearchTitle, TTitle } from './generate_title';
+import {
+  enterpriseSearchTitle,
+  appSearchTitle,
+  workplaceSearchTitle,
+  TTitle,
+} from './generate_title';
 
 /**
  * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount
@@ -32,16 +39,37 @@ interface IRootBreadcrumbsProps {
 }
 type TBreadcrumbsProps = IBreadcrumbsProps | IRootBreadcrumbsProps;
 
+export const SetEnterpriseSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
+  const history = useHistory();
+  const { setBreadcrumbs, setDocTitle } = useContext(KibanaContext) as IKibanaContext;
+
+  const title = isRoot ? [] : [text];
+  const docTitle = enterpriseSearchTitle(title as TTitle | []);
+
+  const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
+  const breadcrumbs = useEnterpriseSearchBreadcrumbs(crumb as TBreadcrumbs | []);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, []);
+
+  return null;
+};
+
 export const SetAppSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
   const history = useHistory();
   const { setBreadcrumbs, setDocTitle } = useContext(KibanaContext) as IKibanaContext;
 
-  const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
   const title = isRoot ? [] : [text];
+  const docTitle = appSearchTitle(title as TTitle | []);
+
+  const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
+  const breadcrumbs = useAppSearchBreadcrumbs(crumb as TBreadcrumbs | []);
 
   useEffect(() => {
-    setBreadcrumbs(appSearchBreadcrumbs(history)(crumb as TBreadcrumbs | []));
-    setDocTitle(appSearchTitle(title as TTitle | []));
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
   }, []);
 
   return null;
@@ -51,12 +79,15 @@ export const SetWorkplaceSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, is
   const history = useHistory();
   const { setBreadcrumbs, setDocTitle } = useContext(KibanaContext) as IKibanaContext;
 
-  const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
   const title = isRoot ? [] : [text];
+  const docTitle = workplaceSearchTitle(title as TTitle | []);
+
+  const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
+  const breadcrumbs = useWorkplaceSearchBreadcrumbs(crumb as TBreadcrumbs | []);
 
   useEffect(() => {
-    setBreadcrumbs(workplaceSearchBreadcrumbs(history)(crumb as TBreadcrumbs | []));
-    setDocTitle(workplaceSearchTitle(title as TTitle | []));
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
   }, []);
 
   return null;

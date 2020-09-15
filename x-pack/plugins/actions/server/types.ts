@@ -47,7 +47,7 @@ export interface ActionsPlugin {
 
 export interface ActionsConfigType {
   enabled: boolean;
-  whitelistedHosts: string[];
+  allowedHosts: string[];
   enabledActionTypes: string[];
 }
 
@@ -58,6 +58,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
+  proxySettings?: ProxySettings;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
@@ -99,8 +100,8 @@ interface ValidatorType<Type> {
 }
 
 export interface ActionValidationService {
-  isWhitelistedHostname(hostname: string): boolean;
-  isWhitelistedUri(uri: string): boolean;
+  isHostnameAllowed(hostname: string): boolean;
+  isUriAllowed(uri: string): boolean;
 }
 
 export interface ActionType<
@@ -139,4 +140,10 @@ export interface ActionTaskParams extends SavedObjectAttributes {
 export interface ActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
+}
+
+export interface ProxySettings {
+  proxyUrl: string;
+  proxyHeaders?: Record<string, string>;
+  proxyRejectUnauthorizedCertificates: boolean;
 }

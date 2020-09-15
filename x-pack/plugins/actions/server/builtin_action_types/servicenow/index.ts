@@ -24,11 +24,11 @@ import {
   ExecutorSubActionPushParams,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
+  PushToServiceResponse,
 } from './types';
 
 // TODO: to remove, need to support Case
 import { buildMap, mapParams } from '../case/utils';
-import { PushToServiceResponse } from './case_types';
 
 interface GetActionTypeParams {
   logger: Logger;
@@ -76,10 +76,14 @@ async function executor(
   const { subAction, subActionParams } = params;
   let data: PushToServiceResponse | null = null;
 
-  const externalService = createExternalService({
-    config,
-    secrets,
-  });
+  const externalService = createExternalService(
+    {
+      config,
+      secrets,
+    },
+    logger,
+    execOptions.proxySettings
+  );
 
   if (!api[subAction]) {
     const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;

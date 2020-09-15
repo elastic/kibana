@@ -27,16 +27,18 @@ storiesOf('app/ServiceMap/Popover', module)
         avgCpuUsage: 0.32809666568309237,
         avgErrorRate: 0.556068173242986,
         avgMemoryUsage: 0.5504868173242986,
-        avgRequestsPerMinute: 164.47222031860858,
-        avgTransactionDuration: 61634.38905590272,
+        transactionStats: {
+          avgRequestsPerMinute: 164.47222031860858,
+          avgTransactionDuration: 61634.38905590272,
+        },
       }),
     } as unknown) as HttpSetup;
 
     createCallApmApi(httpMock);
 
-    setImmediate(() => {
-      cy.$('example service').select();
-    });
+    setTimeout(() => {
+      cy.$id('example service').select();
+    }, 0);
 
     return (
       <EuiThemeProvider>
@@ -59,9 +61,10 @@ storiesOf('app/ServiceMap/Popover', module)
       info: {
         propTablesExclude: [
           CytoscapeContext.Provider,
+          EuiThemeProvider,
           MockApmPluginContextWrapper,
           MockUrlParamsContextProvider,
-          EuiThemeProvider,
+          Popover,
         ],
         source: false,
       },

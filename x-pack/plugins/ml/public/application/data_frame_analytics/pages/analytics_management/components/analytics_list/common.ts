@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query, Ast } from '@elastic/eui';
+import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
 
 import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
 export { DATA_FRAME_TASK_STATE };
@@ -26,6 +26,7 @@ export type Clause = Parameters<typeof Query['isMust']>[0];
 type ExtractClauseType<T> = T extends (x: any) => x is infer Type ? Type : never;
 export type TermClause = ExtractClauseType<typeof Ast['Term']['isInstance']>;
 export type FieldClause = ExtractClauseType<typeof Ast['Field']['isInstance']>;
+export type Value = Parameters<typeof Ast['Term']['must']>[0];
 
 interface ProgressSection {
   phase: string;
@@ -139,3 +140,11 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
 export function getResultsUrl(jobId: string, analysisType: ANALYSIS_CONFIG_TYPE | string) {
   return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }
+
+// The single Action type is not exported as is
+// from EUI so we use that code to get the single
+// Action type from the array of actions.
+type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType[number];
+export type DataFrameAnalyticsListAction = ArrayElement<
+  EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions']
+>;

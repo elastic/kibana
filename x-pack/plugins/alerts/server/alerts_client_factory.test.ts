@@ -22,6 +22,7 @@ import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mock
 import { featuresPluginMock } from '../../features/server/mocks';
 import { AuditLogger } from '../../security/server';
 import { ALERTS_FEATURE_ID } from '../common';
+import { eventLogMock } from '../../event_log/server/mocks';
 
 jest.mock('./alerts_client');
 jest.mock('./authorization/alerts_authorization');
@@ -42,8 +43,10 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
   actions: actionsMock.createStart(),
   features,
+  eventLog: eventLogMock.createStart(),
 };
 const fakeRequest = ({
+  app: {},
   headers: {},
   getBasePath: () => '',
   path: '/',
@@ -119,6 +122,7 @@ test('creates an alerts client with proper constructor arguments when security i
     namespace: 'default',
     getUserName: expect.any(Function),
     getActionsClient: expect.any(Function),
+    getEventLogClient: expect.any(Function),
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
@@ -164,6 +168,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
     getActionsClient: expect.any(Function),
+    getEventLogClient: expect.any(Function),
   });
 });
 

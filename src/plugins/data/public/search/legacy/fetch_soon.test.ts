@@ -19,21 +19,28 @@
 
 import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
-import { IUiSettingsClient } from 'kibana/public';
-import { FetchHandlers, FetchOptions } from '../fetch/types';
-import { SearchRequest, SearchResponse } from '../index';
-import { UI_SETTINGS } from '../../../common';
+import { FetchHandlers } from '../fetch/types';
+import { SearchRequest } from '../index';
+import { SearchResponse } from 'elasticsearch';
+import { GetConfigFn, UI_SETTINGS, ISearchOptions } from '../../../common';
 
-function getConfigStub(config: any = {}) {
-  return {
-    get: (key) => config[key],
-  } as IUiSettingsClient;
+function getConfigStub(config: any = {}): GetConfigFn {
+  return (key) => config[key];
 }
 
-const mockResponses: Record<string, SearchResponse> = {
-  foo: {},
-  bar: {},
-  baz: {},
+const mockResponses: Record<string, SearchResponse<any>> = {
+  foo: {
+    took: 1,
+    timed_out: false,
+  } as SearchResponse<any>,
+  bar: {
+    took: 2,
+    timed_out: false,
+  } as SearchResponse<any>,
+  baz: {
+    took: 3,
+    timed_out: false,
+  } as SearchResponse<any>,
 };
 
 jest.useFakeTimers();
@@ -60,25 +67,21 @@ describe('fetchSoon', () => {
   });
 
   test('should execute asap if config is set to not batch searches', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: false,
-    });
+    const getConfig = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: false });
     const request = {};
     const options = {};
 
-    fetchSoon(request, options, { config } as FetchHandlers);
+    fetchSoon(request, options, { getConfig } as FetchHandlers);
 
     expect(callClient).toBeCalled();
   });
 
   test('should delay by 50ms if config is set to batch searches', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-    });
+    const getConfig = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
     const request = {};
     const options = {};
 
-    fetchSoon(request, options, { config } as FetchHandlers);
+    fetchSoon(request, options, { getConfig } as FetchHandlers);
 
     expect(callClient).not.toBeCalled();
     jest.advanceTimersByTime(0);
@@ -88,14 +91,12 @@ describe('fetchSoon', () => {
   });
 
   test('should send a batch of requests to callClient', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-    });
+    const getConfig = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
     const requests = [{ foo: 1 }, { foo: 2 }];
     const options = [{ bar: 1 }, { bar: 2 }];
 
     requests.forEach((request, i) => {
-      fetchSoon(request, options[i] as FetchOptions, { config } as FetchHandlers);
+      fetchSoon(request, options[i] as ISearchOptions, { getConfig } as FetchHandlers);
     });
 
     jest.advanceTimersByTime(50);
@@ -105,13 +106,11 @@ describe('fetchSoon', () => {
   });
 
   test('should return the response to the corresponding call for multiple batched requests', async () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-    });
+    const getConfig = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
     const requests = [{ _mockResponseId: 'foo' }, { _mockResponseId: 'bar' }];
 
     const promises = requests.map((request) => {
-      return fetchSoon(request, {}, { config } as FetchHandlers);
+      return fetchSoon(request, {}, { getConfig } as FetchHandlers);
     });
     jest.advanceTimersByTime(50);
     const results = await Promise.all(promises);
@@ -120,18 +119,16 @@ describe('fetchSoon', () => {
   });
 
   test('should wait for the previous batch to start before starting a new batch', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true,
-    });
+    const getConfig = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
     const firstBatch = [{ foo: 1 }, { foo: 2 }];
     const secondBatch = [{ bar: 1 }, { bar: 2 }];
 
     firstBatch.forEach((request) => {
-      fetchSoon(request, {}, { config } as FetchHandlers);
+      fetchSoon(request, {}, { getConfig } as FetchHandlers);
     });
     jest.advanceTimersByTime(50);
     secondBatch.forEach((request) => {
-      fetchSoon(request, {}, { config } as FetchHandlers);
+      fetchSoon(request, {}, { getConfig } as FetchHandlers);
     });
 
     expect(callClient).toBeCalledTimes(1);

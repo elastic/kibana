@@ -175,10 +175,18 @@ export const reducer = (state: State, action: Action): State => {
         fields: action.value.fields,
         configuration: {
           ...state.configuration,
+          data: {
+            raw: action.value.configuration,
+            format: () => action.value.configuration,
+          },
           defaultValue: action.value.configuration,
         },
         templates: {
           ...state.templates,
+          data: {
+            raw: action.value.templates,
+            format: () => action.value.templates,
+          },
           defaultValue: action.value.templates,
         },
         documentFields: {
@@ -335,6 +343,11 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         fields: updatedFields,
+        documentFields: {
+          ...state.documentFields,
+          // If we removed the last field, show the "Create field" form
+          status: updatedFields.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
+        },
         // If we have a search in progress, we reexecute the search to update our result array
         search: Boolean(state.search.term)
           ? {

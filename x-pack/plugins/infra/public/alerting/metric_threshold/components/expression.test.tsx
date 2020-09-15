@@ -34,6 +34,7 @@ describe('Expression', () => {
       criteria: [],
       groupBy: undefined,
       filterQueryText: '',
+      sourceId: 'default',
     };
 
     const mocks = coreMock.createSetup();

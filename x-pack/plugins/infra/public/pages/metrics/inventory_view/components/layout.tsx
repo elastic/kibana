@@ -8,6 +8,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useInterval } from 'react-use';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AutoSizer } from '../../../../components/auto_sizer';
 import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
 import { NodesOverview } from './nodes_overview';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
@@ -110,37 +111,44 @@ export const Layout = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </TopActionContainer>
-          <NodesOverview
-            nodes={nodes}
-            options={options}
-            nodeType={nodeType}
-            loading={loading}
-            reload={reload}
-            onDrilldown={applyFilterQuery}
-            currentTime={currentTime}
-            view={view}
-            autoBounds={autoBounds}
-            boundsOverride={boundsOverride}
-            formatter={formatter}
-          />
-          <BottomActionContainer>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <SavedViewsToolbarControls viewState={viewState} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ position: 'relative', minWidth: 400 }}>
-                <Legend
+          <AutoSizer bounds>
+            {({ measureRef, bounds: { height = 0 } }) => (
+              <>
+                <NodesOverview
+                  nodes={nodes}
+                  options={options}
+                  nodeType={nodeType}
+                  loading={loading}
+                  reload={reload}
+                  onDrilldown={applyFilterQuery}
+                  currentTime={currentTime}
+                  view={view}
+                  autoBounds={autoBounds}
+                  boundsOverride={boundsOverride}
                   formatter={formatter}
-                  bounds={bounds}
-                  dataBounds={dataBounds}
-                  legend={options.legend}
+                  bottomMargin={height}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <IntervalLabel intervalAsString={intervalAsString} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </BottomActionContainer>
+                <BottomActionContainer ref={measureRef}>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <SavedViewsToolbarControls viewState={viewState} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} style={{ position: 'relative', minWidth: 400 }}>
+                      <Legend
+                        formatter={formatter}
+                        bounds={bounds}
+                        dataBounds={dataBounds}
+                        legend={options.legend}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <IntervalLabel intervalAsString={intervalAsString} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </BottomActionContainer>
+              </>
+            )}
+          </AutoSizer>
         </MainContainer>
       </PageContent>
     </>
@@ -159,9 +167,9 @@ const TopActionContainer = euiStyled.div`
 const BottomActionContainer = euiStyled.div`
   background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
   padding: ${(props) => props.theme.eui.paddingSizes.m} ${(props) =>
-  props.theme.eui.paddingSizes.m} ${(props) => props.theme.eui.paddingSizes.s};
-  position: absolute;
+  props.theme.eui.paddingSizes.m};
+  position: fixed;
   left: 0;
-  bottom: 4px;
+  bottom: 0;
   right: 0;
 `;

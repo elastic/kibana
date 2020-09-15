@@ -59,9 +59,11 @@ describe('XY Config panels', () => {
       expect(options!.map(({ id }) => id)).toEqual([
         'bar',
         'bar_stacked',
-        'line',
+        'bar_percentage_stacked',
         'area',
         'area_stacked',
+        'area_percentage_stacked',
+        'line',
       ]);
 
       expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
@@ -83,7 +85,11 @@ describe('XY Config panels', () => {
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
-      expect(options!.map(({ id }) => id)).toEqual(['bar_horizontal', 'bar_horizontal_stacked']);
+      expect(options!.map(({ id }) => id)).toEqual([
+        'bar_horizontal',
+        'bar_horizontal_stacked',
+        'bar_horizontal_percentage_stacked',
+      ]);
       expect(options!.filter(({ isDisabled }) => isDisabled).map(({ id }) => id)).toEqual([]);
     });
   });
@@ -107,7 +113,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('Carry');
     });
 
-    it('should disable the select if there is no unstacked area or line series', () => {
+    it('should disable the select if there is no area or line series', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -115,10 +121,7 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [
-              { ...state.layers[0], seriesType: 'bar' },
-              { ...state.layers[0], seriesType: 'area_stacked' },
-            ],
+            layers: [{ ...state.layers[0], seriesType: 'bar' }],
             fittingFunction: 'Carry',
           }}
         />

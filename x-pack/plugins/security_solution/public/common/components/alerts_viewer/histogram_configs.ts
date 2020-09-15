@@ -5,8 +5,8 @@
  */
 
 import * as i18n from './translations';
-import { MatrixHistogramOption, MatrixHisrogramConfigs } from '../matrix_histogram/types';
-import { HistogramType } from '../../../graphql/types';
+import { MatrixHistogramOption, MatrixHistogramConfigs } from '../matrix_histogram/types';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution/matrix_histogram';
 
 export const alertsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -21,11 +21,11 @@ export const alertsStackByOptions: MatrixHistogramOption[] = [
 
 const DEFAULT_STACK_BY = 'event.module';
 
-export const histogramConfigs: MatrixHisrogramConfigs = {
+export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     alertsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? alertsStackByOptions[1],
   errorMessage: i18n.ERROR_FETCHING_ALERTS_DATA,
-  histogramType: HistogramType.alerts,
+  histogramType: MatrixHistogramType.alerts,
   stackByOptions: alertsStackByOptions,
   subtitle: undefined,
   title: i18n.ALERTS_GRAPH_TITLE,

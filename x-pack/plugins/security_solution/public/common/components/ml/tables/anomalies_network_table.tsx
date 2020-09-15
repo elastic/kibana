@@ -14,7 +14,7 @@ import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
 import { Loader } from '../../loader';
 import { AnomaliesNetworkTableProps } from '../types';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
-import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 import { networkEquality } from './network_equality';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';

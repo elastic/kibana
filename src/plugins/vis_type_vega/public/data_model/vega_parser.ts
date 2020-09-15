@@ -21,7 +21,8 @@ import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { vega, vegaLite } from '../lib/vega';
@@ -47,7 +48,7 @@ import {
 } from './types';
 
 // Set default single color to match other Kibana visualizations
-const defaultColor: string = VISUALIZATION_COLORS[0];
+const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
@@ -242,13 +243,13 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         // and will be automatically updated on resize events.
         // We delete width & height if the autosize is set to "fit"
         // We also set useResize=true in case autosize=none, and width & height are not set
-        const autosize = this.spec.autosize.type || this.spec.autosize;
+        const autosize = this.spec.autosize?.type || this.spec.autosize;
         if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
           this.useResize = true;
         }
       }
 
-      if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
+      if (this.useResize && this.spec.padding && this.spec.autosize?.contains !== 'padding') {
         if (typeof this.spec.padding === 'object') {
           this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
           this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
@@ -659,6 +660,35 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
       }
     }
+
+    // provide right colors for light and dark themes
+    this._setDefaultValue(euiThemeVars.euiColorDarkestShade, 'config', 'title', 'color');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'guide-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-subtitle',
+      'fill'
+    );
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'tickColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'domainColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'gridColor');
+    this._setDefaultValue('transparent', 'config', 'background');
   }
 
   /**

@@ -69,7 +69,7 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
           uiPublicUrl: `${basePath}/ui`,
-          bootstrapScriptUrl: `${basePath}/bundles/app/${appId}/bootstrap.js`,
+          bootstrapScriptUrl: `${basePath}/bootstrap.js`,
           i18n: i18n.translate,
           locale: i18n.getLocale(),
           darkMode: settings.user?.['theme:darkMode']?.userValue
@@ -82,7 +82,6 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
             basePath,
             serverBasePath,
             env,
-            legacyMode: appId !== 'core',
             anonymousStatusPage: status.isStatusPageAnonymous(),
             i18n: {
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,

@@ -6,6 +6,8 @@
 
 import {
   EuiBasicTable,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -31,6 +33,7 @@ import {
   ReportErrorButton,
   ReportInfoButton,
 } from './buttons';
+import { ReportDiagnostic } from './report_diagnostic';
 
 export interface Job {
   id: string;
@@ -134,23 +137,38 @@ class ReportListingUi extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
-        <EuiTitle>
-          <h1>
-            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
-          </h1>
-        </EuiTitle>
-        <EuiText color="subdued" size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.reporting.listing.reports.subtitle"
-              defaultMessage="Find reports generated in Kibana applications here"
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        {this.renderTable()}
-      </EuiPageContent>
+      <div>
+        <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.reporting.listing.reportstitle"
+                    defaultMessage="Reports"
+                  />
+                </h1>
+              </EuiTitle>
+              <EuiText color="subdued" size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.reporting.listing.reports.subtitle"
+                    defaultMessage="Find reports generated in Kibana applications here"
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          {this.renderTable()}
+        </EuiPageContent>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
+          <EuiFlexItem grow={false}>
+            <ReportDiagnostic apiClient={this.props.apiClient} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
   }
 
@@ -513,7 +531,6 @@ class ReportListingUi extends Component<Props, State> {
           isSelectable={true}
           onChange={this.onTableChange}
           data-test-subj="reportJobListing"
-          data-test-page={this.state.page}
         />
         {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
       </Fragment>

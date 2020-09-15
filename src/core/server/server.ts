@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { mapToObject } from '@kbn/std';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
 import { AuditTrailService } from './audit_trail';
@@ -31,7 +32,7 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
-import { UuidService } from './uuid';
+import { EnvironmentService, config as pidConfig } from './environment';
 import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
@@ -44,7 +45,6 @@ import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
-import { mapToObject } from '../utils';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
@@ -64,7 +64,7 @@ export class Server {
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
-  private readonly uuid: UuidService;
+  private readonly environment: EnvironmentService;
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -95,7 +95,7 @@ export class Server {
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
-    this.uuid = new UuidService(core);
+    this.environment = new EnvironmentService(core);
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
@@ -107,8 +107,12 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
 
+    const environmentSetup = await this.environment.setup();
+
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, uiPlugins } = await this.plugins.discover();
+    const { pluginTree, uiPlugins } = await this.plugins.discover({
+      environment: environmentSetup,
+    });
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
@@ -117,14 +121,16 @@ export class Server {
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-      // 1) Can access context from any NP plugin
+      // 1) Can access context from any KP plugin
       // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
       //    New Platform plugins.
-      pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
+      pluginDependencies: new Map([
+        ...pluginTree.asOpaqueIds,
+        [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
+      ]),
     });
 
     const auditTrailSetup = this.auditTrail.setup();
-    const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -139,7 +145,6 @@ export class Server {
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
-      legacyPlugins,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
@@ -151,6 +156,7 @@ export class Server {
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
+      pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
     });
 
@@ -174,11 +180,11 @@ export class Server {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
+      environment: environmentSetup,
       http: httpSetup,
       savedObjects: savedObjectsSetup,
       status: statusSetup,
       uiSettings: uiSettingsSetup,
-      uuid: uuidSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,
@@ -304,6 +310,7 @@ export class Server {
       uiSettingsConfig,
       opsConfig,
       statusConfig,
+      pidConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

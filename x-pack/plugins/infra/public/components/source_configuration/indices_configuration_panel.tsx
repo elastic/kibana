@@ -16,6 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
+import { METRICS_INDEX_PATTERN } from '../../../common/constants';
 import { InputFieldProps } from './input_fields';
 
 interface IndicesConfigurationPanelProps {
@@ -63,7 +64,7 @@ export const IndicesConfigurationPanel = ({
             id="xpack.infra.sourceConfiguration.metricIndicesRecommendedValue"
             defaultMessage="The recommended value is {defaultValue}"
             values={{
-              defaultValue: <EuiCode>metrics-*,metricbeat-*</EuiCode>,
+              defaultValue: <EuiCode>{METRICS_INDEX_PATTERN}</EuiCode>,
             }}
           />
         }

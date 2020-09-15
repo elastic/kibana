@@ -6,8 +6,8 @@
 
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
-import { CoreStart } from 'kibana/public';
-import { AbortError } from '../../../../../src/plugins/data/common';
+import { CoreSetup, CoreStart } from 'kibana/public';
+import { AbortError, UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -19,13 +19,14 @@ const error = jest.fn();
 const complete = jest.fn();
 
 let searchInterceptor: EnhancedSearchInterceptor;
+let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
 
 jest.useFakeTimers();
 
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
-  mockCoreStart.http.fetch.mockImplementation(() => {
+  mockCoreSetup.http.fetch.mockImplementation(() => {
     const { time = 0, value = {}, isError = false } = responses[i++];
     return new Promise((resolve, reject) =>
       setTimeout(() => {
@@ -39,7 +40,17 @@ describe('EnhancedSearchInterceptor', () => {
   let mockUsageCollector: any;
 
   beforeEach(() => {
+    mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+
+    mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
+      switch (name) {
+        case UI_SETTINGS.SEARCH_TIMEOUT:
+          return 1000;
+        default:
+          return;
+      }
+    });
 
     next.mockClear();
     error.mockClear();
@@ -49,21 +60,23 @@ describe('EnhancedSearchInterceptor', () => {
     mockUsageCollector = {
       trackQueryTimedOut: jest.fn(),
       trackQueriesCancelled: jest.fn(),
-      trackLongQueryPopupShown: jest.fn(),
-      trackLongQueryDialogDismissed: jest.fn(),
-      trackLongQueryRunBeyondTimeout: jest.fn(),
     };
 
-    searchInterceptor = new EnhancedSearchInterceptor(
-      {
-        toasts: mockCoreStart.notifications.toasts,
-        application: mockCoreStart.application,
-        http: mockCoreStart.http,
-        uiSettings: mockCoreStart.uiSettings,
-        usageCollector: mockUsageCollector,
-      },
-      1000
-    );
+    const mockPromise = new Promise((resolve) => {
+      resolve([
+        {
+          application: mockCoreStart.application,
+        },
+      ]);
+    });
+
+    searchInterceptor = new EnhancedSearchInterceptor({
+      toasts: mockCoreSetup.notifications.toasts,
+      startServices: mockPromise as any,
+      http: mockCoreSetup.http,
+      uiSettings: mockCoreSetup.uiSettings,
+      usageCollector: mockUsageCollector,
+    });
   });
 
   describe('search', () => {
@@ -179,7 +192,7 @@ describe('EnhancedSearchInterceptor', () => {
       const abortController = new AbortController();
       abortController.abort();
 
-      const response = searchInterceptor.search({}, { signal: abortController.signal });
+      const response = searchInterceptor.search({}, { abortSignal: abortController.signal });
       response.subscribe({ next, error });
 
       await timeTravel(500);
@@ -215,7 +228,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       const response = searchInterceptor.search(
         {},
-        { signal: abortController.signal, pollInterval: 0 }
+        { abortSignal: abortController.signal, pollInterval: 0 }
       );
       response.subscribe({ next, error });
 
@@ -229,8 +242,8 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
 
-      expect(mockCoreStart.http.fetch).toHaveBeenCalledTimes(2);
-      expect(mockCoreStart.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });
 
     test('should not DELETE a running async search on async timeout prior to first response', async () => {
@@ -253,8 +266,8 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
-      expect(mockCoreStart.http.fetch).toHaveBeenCalled();
-      expect(mockCoreStart.http.delete).not.toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
     });
 
     test('should DELETE a running async search on async timeout after first response', async () => {
@@ -285,16 +298,16 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(next).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
-      expect(mockCoreStart.http.fetch).toHaveBeenCalled();
-      expect(mockCoreStart.http.delete).not.toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
 
       // Long enough to reach the timeout but not long enough to reach the next response
       await timeTravel(1000);
 
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
-      expect(mockCoreStart.http.fetch).toHaveBeenCalledTimes(2);
-      expect(mockCoreStart.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });
 
     test('should DELETE a running async search on async timeout on error from fetch', async () => {
@@ -327,16 +340,16 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(next).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
-      expect(mockCoreStart.http.fetch).toHaveBeenCalled();
-      expect(mockCoreStart.http.delete).not.toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalled();
+      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
 
       // Long enough to reach the timeout but not long enough to reach the next response
       await timeTravel(10);
 
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBe(responses[1].value);
-      expect(mockCoreStart.http.fetch).toHaveBeenCalledTimes(2);
-      expect(mockCoreStart.http.delete).toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });
   });
 
@@ -367,95 +380,11 @@ describe('EnhancedSearchInterceptor', () => {
 
       await timeTravel();
 
-      const areAllRequestsAborted = mockCoreStart.http.fetch.mock.calls.every(
+      const areAllRequestsAborted = mockCoreSetup.http.fetch.mock.calls.every(
         ([{ signal }]) => signal?.aborted
       );
       expect(areAllRequestsAborted).toBe(true);
       expect(mockUsageCollector.trackQueriesCancelled).toBeCalledTimes(1);
-    });
-  });
-
-  describe('runBeyondTimeout', () => {
-    const timedResponses = [
-      {
-        time: 250,
-        value: {
-          isPartial: true,
-          isRunning: true,
-          id: 1,
-          rawResponse: {
-            took: 1,
-          },
-        },
-      },
-      {
-        time: 2000,
-        value: {
-          isPartial: false,
-          isRunning: false,
-          id: 1,
-          rawResponse: {
-            took: 1,
-          },
-        },
-      },
-    ];
-
-    test('times out if runBeyondTimeout is not called', async () => {
-      mockFetchImplementation(timedResponses);
-
-      const response = searchInterceptor.search({});
-      response.subscribe({ next, error });
-
-      await timeTravel(250);
-
-      expect(next).toHaveBeenCalled();
-      expect(next.mock.calls[0][0]).toStrictEqual(timedResponses[0].value);
-
-      await timeTravel(750);
-
-      expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
-    });
-
-    test('times out if runBeyondTimeout is called too late', async () => {
-      mockFetchImplementation(timedResponses);
-
-      const response = searchInterceptor.search({});
-      response.subscribe({ next, error });
-      setTimeout(() => searchInterceptor.runBeyondTimeout(), 1100);
-
-      await timeTravel(250);
-
-      expect(next).toHaveBeenCalled();
-      expect(next.mock.calls[0][0]).toStrictEqual(timedResponses[0].value);
-
-      await timeTravel(750);
-
-      expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
-    });
-
-    test('should prevent the request from timing out', async () => {
-      mockFetchImplementation(timedResponses);
-
-      const response = searchInterceptor.search({}, { pollInterval: 0 });
-      response.subscribe({ next, error, complete });
-      setTimeout(() => searchInterceptor.runBeyondTimeout(), 500);
-
-      await timeTravel(250);
-
-      expect(next).toHaveBeenCalled();
-      expect(next.mock.calls[0][0]).toStrictEqual(timedResponses[0].value);
-
-      await timeTravel(250); // Run beyond timeout
-      await timeTravel(1750); // Final response
-
-      expect(next).toHaveBeenCalledTimes(2);
-      expect(next.mock.calls[0][0]).toStrictEqual(timedResponses[0].value);
-      expect(next.mock.calls[1][0]).toStrictEqual(timedResponses[1].value);
-      expect(error).not.toHaveBeenCalled();
-      expect(mockUsageCollector.trackLongQueryRunBeyondTimeout).toBeCalledTimes(1);
     });
   });
 });

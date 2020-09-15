@@ -10,9 +10,13 @@ import { generatePath } from 'react-router-dom';
 import querystring from 'querystring';
 
 import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
 import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
@@ -72,13 +76,74 @@ export const getEndpointDetailsPath = (
   })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 };
 
-export const getPoliciesPath = (search?: string) =>
-  `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
+export const getPoliciesPath = (search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
     tabName: AdministrationSubTab.policies,
   })}${appendSearch(search)}`;
+};
 
-export const getPolicyDetailPath = (policyId: string, search?: string) =>
-  `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+export const getPolicyDetailPath = (policyId: string, search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(search)}`;
+};
+
+interface ListPaginationParams {
+  page_index: number;
+  page_size: number;
+}
+
+const isDefaultOrMissing = (value: number | undefined, defaultValue: number) => {
+  return value === undefined || value === defaultValue;
+};
+
+const normalizeListPaginationParams = (
+  params?: Partial<ListPaginationParams>
+): Partial<ListPaginationParams> => {
+  if (params) {
+    return {
+      ...(!isDefaultOrMissing(params.page_index, MANAGEMENT_DEFAULT_PAGE)
+        ? { page_index: params.page_index }
+        : {}),
+      ...(!isDefaultOrMissing(params.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { page_size: params.page_size }
+        : {}),
+    };
+  } else {
+    return {};
+  }
+};
+
+const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+  const value = query[key];
+
+  return Array.isArray(value) ? value[value.length - 1] : value;
+};
+
+const extractPageIndex = (query: querystring.ParsedUrlQuery): number => {
+  const pageIndex = Number(extractFirstParamValue(query, 'page_index'));
+
+  return !Number.isFinite(pageIndex) || pageIndex < 0 ? MANAGEMENT_DEFAULT_PAGE : pageIndex;
+};
+
+const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
+  const pageSize = Number(extractFirstParamValue(query, 'page_size'));
+
+  return MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : MANAGEMENT_DEFAULT_PAGE_SIZE;
+};
+
+export const extractListPaginationParams = (
+  query: querystring.ParsedUrlQuery
+): ListPaginationParams => ({
+  page_index: extractPageIndex(query),
+  page_size: extractPageSize(query),
+});
+
+export const getTrustedAppsListPath = (params?: Partial<ListPaginationParams>): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
+    tabName: AdministrationSubTab.trustedApps,
+  });
+
+  return `${path}${appendSearch(querystring.stringify(normalizeListPaginationParams(params)))}`;
+};

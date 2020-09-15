@@ -13,7 +13,7 @@ import { Agent } from '../../../../ingest_manager/common';
 import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 
 const testAgentId = 'testAgentId';
-const testConfigId = 'testConfigId';
+const testAgentPolicyId = 'testAgentPolicyId';
 const testHostId = 'randoHostId';
 const testHostName = 'testDesktop';
 
@@ -45,7 +45,7 @@ export const mockFleetObjectsResponse = (
       attributes: {
         active: true,
         id: testAgentId,
-        config_id: 'randoConfigId',
+        policy_id: 'randoAgentPolicyId',
         type: 'PERMANENT',
         user_provided_metadata: {},
         enrolled_at: lastCheckIn,
@@ -82,7 +82,7 @@ export const mockFleetObjectsResponse = (
       attributes: {
         active: true,
         id: 'oldTestAgentId',
-        config_id: 'randoConfigId',
+        policy_id: 'randoAgentPolicyId',
         type: 'PERMANENT',
         user_provided_metadata: {},
         enrolled_at: lastCheckIn,
@@ -250,7 +250,7 @@ export const mockFleetEventsObjectsResponse = (
             running ? 'RUNNING' : 'FAILED'
           }: `,
           payload: running ? mockPolicyPayload(policyStatus, policyMode) : undefined,
-          config_id: testConfigId,
+          policy_id: testAgentPolicyId,
         },
         references: [],
         updated_at: updatedDate,
@@ -267,7 +267,7 @@ export const mockFleetEventsObjectsResponse = (
           subtype: 'STARTING',
           message:
             'Application: endpoint-security--8.0.0[d8f7f6e8-9375-483c-b456-b479f1d7a4f2]: State changed to STARTING: Starting',
-          config_id: testConfigId,
+          policy_id: testAgentPolicyId,
         },
         references: [],
         updated_at: updatedDate,

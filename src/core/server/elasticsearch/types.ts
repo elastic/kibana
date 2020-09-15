@@ -37,9 +37,14 @@ export interface ElasticsearchServiceSetup {
   /**
    * @deprecated
    * Use {@link ElasticsearchServiceStart.legacy} instead.
-   *
-   * */
+   */
   legacy: {
+    /**
+     * Provide direct access to the current elasticsearch configuration.
+     *
+     * @deprecated this will be removed in a later version.
+     */
+    readonly config$: Observable<ElasticsearchConfig>;
     /**
      * @deprecated
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.createClient} instead.
@@ -82,11 +87,7 @@ export interface ElasticsearchServiceSetup {
 }
 
 /** @internal */
-export interface InternalElasticsearchServiceSetup {
-  // Required for the BWC with the legacy Kibana only.
-  readonly legacy: ElasticsearchServiceSetup['legacy'] & {
-    readonly config$: Observable<ElasticsearchConfig>;
-  };
+export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceSetup {
   esNodesCompatibility$: Observable<NodesVersionCompatibility>;
   status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
 }
@@ -132,6 +133,12 @@ export interface ElasticsearchServiceStart {
    * Switch to the new elasticsearch client as soon as https://github.com/elastic/kibana/issues/35508 done.
    * */
   legacy: {
+    /**
+     * Provide direct access to the current elasticsearch configuration.
+     *
+     * @deprecated this will be removed in a later version.
+     */
+    readonly config$: Observable<ElasticsearchConfig>;
     /**
      * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
      *

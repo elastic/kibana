@@ -338,7 +338,16 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             {generalizationEval.error !== null && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="danger">
-                  {generalizationEval.error}
+                  {isTrainingFilter === true &&
+                  generalizationDocsCount === 0 &&
+                  generalizationEval.error.includes('No documents found')
+                    ? i18n.translate(
+                        'xpack.ml.dataframe.analytics.regressionExploration.evaluateNoTestingDocsError',
+                        {
+                          defaultMessage: 'No testing documents found',
+                        }
+                      )
+                    : generalizationEval.error}
                 </EuiText>
               </EuiFlexItem>
             )}
@@ -421,7 +430,16 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             {trainingEval.error !== null && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="danger">
-                  {trainingEval.error}
+                  {isTrainingFilter === false &&
+                  trainingDocsCount === 0 &&
+                  trainingEval.error.includes('No documents found')
+                    ? i18n.translate(
+                        'xpack.ml.dataframe.analytics.regressionExploration.evaluateNoTrainingDocsError',
+                        {
+                          defaultMessage: 'No training documents found',
+                        }
+                      )
+                    : trainingEval.error}
                 </EuiText>
               </EuiFlexItem>
             )}

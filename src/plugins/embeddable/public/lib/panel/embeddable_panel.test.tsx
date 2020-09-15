@@ -21,7 +21,6 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';

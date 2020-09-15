@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, map, uniq, pick, truncate } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -13,6 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
 } from 'src/core/server';
+import { esKuery } from '../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../actions/server';
 import {
   Alert,
@@ -24,6 +25,7 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
+  AlertInstanceSummary,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -36,11 +38,12 @@ import { TaskManagerStartContract } from '../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 import { RegistryAlertType } from './alert_type_registry';
-import {
-  AlertsAuthorization,
-  WriteOperations,
-  ReadOperations,
-} from './authorization/alerts_authorization';
+import { AlertsAuthorization, WriteOperations, ReadOperations, and } from './authorization';
+import { IEventLogClient } from '../../../plugins/event_log/server';
+import { parseIsoOrRelativeDate } from './lib/iso_or_relative_date';
+import { alertInstanceSummaryFromEventLog } from './lib/alert_instance_summary_from_event_log';
+import { IEvent } from '../../event_log/server';
+import { parseDuration } from '../common/parse_duration';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -67,6 +70,7 @@ export interface ConstructorOptions {
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
   getActionsClient: () => Promise<ActionsClient>;
+  getEventLogClient: () => Promise<IEventLogClient>;
 }
 
 export interface MuteOptions extends IndexType {
@@ -132,6 +136,11 @@ interface UpdateOptions {
   };
 }
 
+interface GetAlertInstanceSummaryParams {
+  id: string;
+  dateStart?: string;
+}
+
 export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
@@ -147,6 +156,7 @@ export class AlertsClient {
   ) => Promise<InvalidateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
+  private readonly getEventLogClient: () => Promise<IEventLogClient>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
   constructor({
@@ -163,6 +173,7 @@ export class AlertsClient {
     encryptedSavedObjectsClient,
     getActionsClient,
     actionsAuthorization,
+    getEventLogClient,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -177,6 +188,7 @@ export class AlertsClient {
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.getActionsClient = getActionsClient;
     this.actionsAuthorization = actionsAuthorization;
+    this.getEventLogClient = getEventLogClient;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
@@ -269,6 +281,52 @@ export class AlertsClient {
     }
   }
 
+  public async getAlertInstanceSummary({
+    id,
+    dateStart,
+  }: GetAlertInstanceSummaryParams): Promise<AlertInstanceSummary> {
+    this.logger.debug(`getAlertInstanceSummary(): getting alert ${id}`);
+    const alert = await this.get({ id });
+    await this.authorization.ensureAuthorized(
+      alert.alertTypeId,
+      alert.consumer,
+      ReadOperations.GetAlertInstanceSummary
+    );
+
+    // default duration of instance summary is 60 * alert interval
+    const dateNow = new Date();
+    const durationMillis = parseDuration(alert.schedule.interval) * 60;
+    const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
+    let events: IEvent[];
+    try {
+      const queryResults = await eventLogClient.findEventsBySavedObject('alert', id, {
+        page: 1,
+        per_page: 10000,
+        start: parsedDateStart.toISOString(),
+        end: dateNow.toISOString(),
+        sort_order: 'desc',
+      });
+      events = queryResults.data;
+    } catch (err) {
+      this.logger.debug(
+        `alertsClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
+      );
+      events = [];
+    }
+
+    return alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart: parsedDateStart.toISOString(),
+      dateEnd: dateNow.toISOString(),
+    });
+  }
+
   public async find({
     options: { fields, ...options } = {},
   }: { options?: FindOptions } = {}): Promise<FindResult> {
@@ -278,12 +336,6 @@ export class AlertsClient {
       logSuccessfulAuthorization,
     } = await this.authorization.getFindAuthorizationFilter();
 
-    if (authorizationFilter) {
-      options.filter = options.filter
-        ? `${options.filter} and ${authorizationFilter}`
-        : authorizationFilter;
-    }
-
     const {
       page,
       per_page: perPage,
@@ -291,6 +343,10 @@ export class AlertsClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
+      filter:
+        (authorizationFilter && options.filter
+          ? and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
+          : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
@@ -883,6 +939,27 @@ export class AlertsClient {
   }
 
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
-    return truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
+    return truncate(`Alerting: ${alertTypeId}/${trim(alertName)}`, { length: 256 });
   }
+}
+
+function parseDate(dateString: string | undefined, propertyName: string, defaultValue: Date): Date {
+  if (dateString === undefined) {
+    return defaultValue;
+  }
+
+  const parsedDate = parseIsoOrRelativeDate(dateString);
+  if (parsedDate === undefined) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerts.alertsClient.invalidDate', {
+        defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
+        values: {
+          field: propertyName,
+          dateValue: dateString,
+        },
+      })
+    );
+  }
+
+  return parsedDate;
 }

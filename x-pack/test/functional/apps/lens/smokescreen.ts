@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens']);
   const find = getService('find');
   const listingTable = getService('listingTable');
+  const testSubjects = getService('testSubjects');
 
   describe('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
@@ -107,6 +108,54 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('line');
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
+    });
+
+    it('should switch from a multi-layer stacked bar to donut chart using suggestions', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.dest',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer();
+
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'terms',
+          field: 'geo.src',
+        },
+        1
+      );
+
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'avg',
+          field: 'bytes',
+        },
+        1
+      );
+      await PageObjects.lens.save('twolayerchart');
+      await testSubjects.click('lnsSuggestion-asDonut > lnsSuggestion');
+
+      expect(await PageObjects.lens.getLayerCount()).to.eql(1);
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
+        'Top values of geo.dest'
+      );
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
+        'Average of bytes'
+      );
     });
 
     it('should allow transition from line chart to donut chart and to bar chart', async () => {

@@ -2,7 +2,7 @@
 
 exports[`interpreter/functions#markdown returns an object with the correct structure 1`] = `
 Object {
-  "as": "visualization",
+  "as": "markdown_vis",
   "type": "render",
   "value": Object {
     "visConfig": Object {

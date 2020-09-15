@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UiActionsEnhancedBaseActionFactoryContext } from '../../../../../ui_actions_enhanced/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/ui_actions/public';
+
 export interface Config {
   dashboardId?: string;
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
 }
+
+export type FactoryContext = UiActionsEnhancedBaseActionFactoryContext<typeof APPLY_FILTER_TRIGGER>;

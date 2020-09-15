@@ -15,41 +15,68 @@ import {
   ToggleField,
 } from '../../../../../../../shared_imports';
 
+import { TextEditor } from '../../field_components';
+import { to, from, EDITOR_PX_HEIGHT } from '../shared';
+
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,
+  deserializer: to.booleanOrUndef,
+  serializer: from.undefinedIfValue(false),
   label: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureFieldLabel',
     {
       defaultMessage: 'Ignore failure',
     }
   ),
+  helpText: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureHelpText',
+    { defaultMessage: 'Ignore failures for this processor.' }
+  ),
   type: FIELD_TYPES.TOGGLE,
 };
 
 const ifConfig: FieldConfig = {
-  defaultValue: undefined,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
     defaultMessage: 'Condition (optional)',
+  }),
+  helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldHelpText', {
+    defaultMessage: 'Conditionally run this processor.',
   }),
   type: FIELD_TYPES.TEXT,
 };
 
 const tagConfig: FieldConfig = {
-  defaultValue: undefined,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldLabel', {
     defaultMessage: 'Tag (optional)',
+  }),
+  helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldHelpText', {
+    defaultMessage: 'Identifier for the processor. Useful for debugging and metrics.',
   }),
   type: FIELD_TYPES.TEXT,
 };
 
 export const CommonProcessorFields: FunctionComponent = () => {
   return (
-    <>
-      <UseField config={ignoreFailureConfig} component={ToggleField} path={'ignore_failure'} />
+    <section>
+      <UseField
+        config={ifConfig}
+        component={TextEditor}
+        componentProps={{
+          editorProps: {
+            languageId: 'painless',
+            height: EDITOR_PX_HEIGHT.extraSmall,
+            options: {
+              lineNumbers: 'off',
+              minimap: { enabled: false },
+            },
+          },
+        }}
+        path="fields.if"
+      />
 
-      <UseField config={ifConfig} component={Field} path={'if'} />
+      <UseField config={tagConfig} component={Field} path="fields.tag" />
 
-      <UseField config={tagConfig} component={Field} path={'tag'} />
-    </>
+      <UseField config={ignoreFailureConfig} component={ToggleField} path="fields.ignore_failure" />
+    </section>
   );
 };

@@ -35,7 +35,7 @@ const { REPO_ROOT, STORY_ENTRY_PATH } = require('./constants');
 const STORE_ENTRY_DIR = dirname(STORY_ENTRY_PATH);
 
 exports.generateStorybookEntry = ({ log, storyGlobs }) => {
-  const globs = ['built_assets/css/**/*.light.css', ...storyGlobs];
+  const globs = [...storyGlobs];
   log.info('Storybook globs:\n', globs);
   const norm = (p) => normalize(relative(STORE_ENTRY_DIR, p));
 

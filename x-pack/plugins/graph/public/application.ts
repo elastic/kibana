@@ -9,7 +9,11 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import '../../../../webpackShims/ace';
+
+import 'brace';
+import 'brace/mode/json';
+import '@elastic/ui-ace/ui-ace';
+
 // required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
 // required for ngRoute
@@ -23,6 +27,7 @@ import {
   SavedObjectsClientContract,
   ToastsStart,
   OverlayStart,
+  AppMountParameters,
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
@@ -69,6 +74,7 @@ export interface GraphDependencies {
   overlays: OverlayStart;
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {

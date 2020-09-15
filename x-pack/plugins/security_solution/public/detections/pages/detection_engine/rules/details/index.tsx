@@ -44,7 +44,7 @@ import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_ab
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
 import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
@@ -71,8 +71,9 @@ import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_o
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
-import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
@@ -123,21 +124,23 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   setAbsoluteRangeDatePicker,
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    hasIndexWrite,
-    signalIndexName,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      hasIndexWrite,
+      signalIndexName,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
-  const { detailName: ruleId } = useParams();
+  const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { rule: maybeRule, refresh: refreshRule, loading: ruleLoading } = useRuleAsync(ruleId);
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
@@ -161,8 +164,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const { globalFullScreen } = useFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
-  const hasMlPermissions =
-    mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+  const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
 
   // persist rule until refresh is complete

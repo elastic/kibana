@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import { I18nStart } from 'kibana/public';
 import { createGetterSetter } from '../../kibana_utils/common';
 import { DataPublicPluginStart } from '../../data/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('metric data.fieldFormats');
+
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');

@@ -116,6 +116,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private readonly config: Promise<ActionsConfig>;
 
   private readonly logger: Logger;
+  private actionsConfig?: ActionsConfig;
   private serverBasePath?: string;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
@@ -158,7 +159,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       );
     }
 
-    plugins.features.registerFeature(ACTIONS_FEATURE);
+    plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
     setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     this.eventLogService = plugins.eventLog;
@@ -173,12 +174,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
-    const actionsConfig = (await this.config) as ActionsConfig;
-    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
+    this.actionsConfig = (await this.config) as ActionsConfig;
+    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
-    for (const preconfiguredId of Object.keys(actionsConfig.preconfigured)) {
+    for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
       this.preconfiguredActions.push({
-        ...actionsConfig.preconfigured[preconfiguredId],
+        ...this.actionsConfig.preconfigured[preconfiguredId],
         id: preconfiguredId,
         isPreconfigured: true,
       });
@@ -317,6 +318,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
+      proxySettings:
+        this.actionsConfig && this.actionsConfig.proxyUrl
+          ? {
+              proxyUrl: this.actionsConfig.proxyUrl,
+              proxyHeaders: this.actionsConfig.proxyHeaders,
+              proxyRejectUnauthorizedCertificates: this.actionsConfig
+                .proxyRejectUnauthorizedCertificates,
+            }
+          : undefined,
     });
 
     taskRunnerFactory!.initialize({

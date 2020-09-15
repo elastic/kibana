@@ -18,6 +18,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { ILegacyClusterClient, ILegacyCustomClusterClient } from './legacy';
 import {
   elasticsearchClientMock,
@@ -32,8 +34,9 @@ import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './ty
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 
-interface MockedElasticSearchServiceSetup {
+export interface MockedElasticSearchServiceSetup {
   legacy: {
+    config$: BehaviorSubject<ElasticsearchConfig>;
     createClient: jest.Mock<ILegacyCustomClusterClient, any>;
     client: jest.Mocked<ILegacyClusterClient>;
   };
@@ -49,6 +52,7 @@ type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup & {
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
     legacy: {
+      config$: new BehaviorSubject({} as ElasticsearchConfig),
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
     },
@@ -65,6 +69,7 @@ const createStartContractMock = () => {
     client: elasticsearchClientMock.createClusterClient(),
     createClient: jest.fn(),
     legacy: {
+      config$: new BehaviorSubject({} as ElasticsearchConfig),
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
     },
@@ -99,7 +104,6 @@ const createInternalSetupContractMock = () => {
       summary: 'Elasticsearch is available',
     }),
     legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
       ...createSetupContractMock().legacy,
     },
   };

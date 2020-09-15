@@ -20,6 +20,11 @@ const serializeValue = (value: any): string => {
   }
   return `${value}`;
 };
+export const convertESFieldsToLogItemFields = (fields: {
+  [field: string]: [value: unknown];
+}): LogEntriesItemField[] => {
+  return Object.keys(fields).map((field) => ({ field, value: serializeValue(fields[field][0]) }));
+};
 
 export const convertDocumentSourceToLogItemFields = (
   source: JsonObject,

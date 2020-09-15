@@ -5,6 +5,11 @@
  */
 import { act } from 'react-dom/test-utils';
 import React from 'react';
+
+import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
+
+import { LocationDescriptorObject } from 'history';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
 import {
   ProcessorsEditorContextProvider,
@@ -12,6 +17,13 @@ import {
   ProcessorsEditor,
   GlobalOnFailureProcessorsEditor,
 } from '../';
+
+import {
+  breadcrumbService,
+  uiMetricService,
+  documentationService,
+  apiService,
+} from '../../../services';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -60,11 +72,27 @@ jest.mock('react-virtualized', () => {
   };
 });
 
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location: LocationDescriptorObject) => {
+  return `${location.pathname}?${location.search}`;
+});
+
+const appServices = {
+  breadcrumbs: breadcrumbService,
+  metric: uiMetricService,
+  documentation: documentationService,
+  api: apiService,
+  notifications: notificationServiceMock.createSetupContract(),
+  history,
+};
+
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => (
-    <ProcessorsEditorContextProvider {...props}>
-      <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
-    </ProcessorsEditorContextProvider>
+    <KibanaContextProvider services={appServices}>
+      <ProcessorsEditorContextProvider {...props}>
+        <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
+      </ProcessorsEditorContextProvider>
+    </KibanaContextProvider>
   ),
   {
     doMountAsync: false,

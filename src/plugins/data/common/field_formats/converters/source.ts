@@ -22,7 +22,7 @@ import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
-import { UI_SETTINGS } from '../../';
+import { UI_SETTINGS } from '../../constants';
 
 /**
  * Remove all of the whitespace between html tags
@@ -60,7 +60,7 @@ export class SourceFormat extends FieldFormat {
   textConvert: TextContextTypeConvert = (value) => JSON.stringify(value);
 
   htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
-    const { field, hit } = options;
+    const { field, hit, indexPattern } = options;
 
     if (!field) {
       const converter = this.getConverterFor('text') as Function;
@@ -69,7 +69,7 @@ export class SourceFormat extends FieldFormat {
     }
 
     const highlights = (hit && hit.highlight) || {};
-    const formatted = field.indexPattern.formatHit(hit);
+    const formatted = indexPattern.formatHit(hit);
     const highlightPairs: any[] = [];
     const sourcePairs: any[] = [];
     const isShortDots = this.getConfig!(UI_SETTINGS.SHORT_DOTS_ENABLE);

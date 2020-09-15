@@ -61,6 +61,16 @@ export default function (providerContext: FtrProviderContext) {
           path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
         });
         expect(res.statusCode).equal(200);
+        const resPipeline1 = await es.transport.request({
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+        });
+        expect(resPipeline1.statusCode).equal(200);
+        const resPipeline2 = await es.transport.request({
+          method: 'GET',
+          path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+        });
+        expect(resPipeline2.statusCode).equal(200);
       });
       it('should have installed the template components', async function () {
         const res = await es.transport.request({
@@ -73,6 +83,13 @@ export default function (providerContext: FtrProviderContext) {
           path: `/_component_template/${logsTemplateName}-settings`,
         });
         expect(resSettings.statusCode).equal(200);
+      });
+      it('should have installed the transform components', async function () {
+        const res = await es.transport.request({
+          method: 'GET',
+          path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
+        });
+        expect(res.statusCode).equal(200);
       });
       it('should have installed the kibana assets', async function () {
         const resIndexPatternLogs = await kibanaServer.savedObjects.get({
@@ -106,18 +123,6 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSearch.id).equal('sample_search');
       });
-      it('should have installed placeholder indices', async function () {
-        const resLogsIndexPatternPlaceholder = await es.transport.request({
-          method: 'GET',
-          path: `/logs-index_pattern_placeholder`,
-        });
-        expect(resLogsIndexPatternPlaceholder.statusCode).equal(200);
-        const resMetricsIndexPatternPlaceholder = await es.transport.request({
-          method: 'GET',
-          path: `/metrics-index_pattern_placeholder`,
-        });
-        expect(resMetricsIndexPatternPlaceholder.statusCode).equal(200);
-      });
       it('should have created the correct saved object', async function () {
         const res = await kibanaServer.savedObjects.get({
           type: 'epm-packages',
@@ -148,12 +153,24 @@ export default function (providerContext: FtrProviderContext) {
               type: 'ingest_pipeline',
             },
             {
+              id: 'logs-all_assets.test_logs-0.1.0-pipeline1',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs-0.1.0-pipeline2',
+              type: 'ingest_pipeline',
+            },
+            {
               id: 'logs-all_assets.test_logs',
               type: 'index_template',
             },
             {
               id: 'metrics-all_assets.test_metrics',
               type: 'index_template',
+            },
+            {
+              id: 'logs-all_assets.test_logs-default-0.1.0',
+              type: 'transform',
             },
           ],
           es_index_patterns: {
@@ -164,6 +181,9 @@ export default function (providerContext: FtrProviderContext) {
           version: '0.1.0',
           internal: false,
           removable: true,
+          install_version: '0.1.0',
+          install_status: 'installed',
+          install_started_at: res.attributes.install_started_at,
         });
       });
     });
@@ -201,6 +221,38 @@ export default function (providerContext: FtrProviderContext) {
           {
             method: 'GET',
             path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(res.statusCode).equal(404);
+        const resPipeline1 = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline1`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resPipeline1.statusCode).equal(404);
+        const resPipeline2 = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_ingest/pipeline/${logsTemplateName}-${pkgVersion}-pipeline2`,
+          },
+          {
+            ignore: [404],
+          }
+        );
+        expect(resPipeline2.statusCode).equal(404);
+      });
+      it('should have uninstalled the transforms', async function () {
+        const res = await es.transport.request(
+          {
+            method: 'GET',
+            path: `/_transform/${logsTemplateName}-default-${pkgVersion}`,
           },
           {
             ignore: [404],

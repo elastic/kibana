@@ -146,10 +146,19 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
 
   /**
-   * Timeouts for processing durations. Response timeout is in milliseconds.
-   * Default value: 2 minutes
+   * Defines per-route timeouts.
    */
-  timeout?: number;
+  timeout?: {
+    /**
+     * Milliseconds to receive the payload
+     */
+    payload?: Method extends 'get' | 'options' ? undefined : number;
+
+    /**
+     * Milliseconds the socket can be idle before it's closed
+     */
+    idleSocket?: number;
+  };
 }
 
 /**

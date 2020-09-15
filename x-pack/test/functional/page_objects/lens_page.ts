@@ -13,14 +13,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects([
-    'header',
-    'common',
-    'visualize',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['header', 'header', 'timePicker']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -89,10 +82,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param opts.dimension - the selector of the dimension being changed
      * @param opts.operation - the desired operation ID for the dimension
      * @param opts.field - the desired field for the dimension
+     * @param layerIndex - the index of the layer
      */
-    async configureDimension(opts: { dimension: string; operation: string; field: string }) {
+    async configureDimension(
+      opts: { dimension: string; operation: string; field: string },
+      layerIndex = 0
+    ) {
       await retry.try(async () => {
-        await testSubjects.click(opts.dimension);
+        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
         await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
       });
 
@@ -101,13 +98,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const target = await testSubjects.find('indexPattern-dimension-field');
       await comboBox.openOptionsList(target);
       await comboBox.setElement(target, opts.field);
+      await testSubjects.click('lns-indexPattern-dimensionContainerTitle');
     },
 
     /**
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
-      await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimensionPopover-remove`);
+      await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
 
     /**

@@ -7,24 +7,21 @@
 import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import { ResolverState, DataAccessLayer, SpyMiddleware } from '../../types';
+import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
+import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
  */
 export class Simulator {
-  /**
-   * A string that uniquely identifies this Resolver instance among others mounted in the DOM.
-   */
-  private readonly resolverComponentInstanceID: string;
   /**
    * The redux store, creating in the constructor using the `dataAccessLayer`.
    * This code subscribes to state transitions.
@@ -43,10 +40,16 @@ export class Simulator {
    * This is used by `debugActions`.
    */
   private readonly spyMiddleware: SpyMiddleware;
+  /**
+   * Simulator which allows you to explicitly simulate resize events and trigger animation frames
+   */
+  private readonly sideEffectSimulator: SideEffectSimulator;
+
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
+    indices,
     history,
   }: {
     /**
@@ -58,12 +61,15 @@ export class Simulator {
      */
     resolverComponentInstanceID: string;
     /**
+     * Indices that the backend would use to find the document ID.
+     */
+    indices: string[];
+    /**
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
-    databaseDocumentID?: string;
+    databaseDocumentID: string;
     history?: HistoryPackageHistoryInterface<never>;
   }) {
-    this.resolverComponentInstanceID = resolverComponentInstanceID;
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
 
@@ -87,16 +93,55 @@ export class Simulator {
     // Used for `KibanaContextProvider`
     const coreStart: CoreStart = coreMock.createStart();
 
+    this.sideEffectSimulator = sideEffectSimulatorFactory();
+
     // Render Resolver via the `MockResolver` component, using `enzyme`.
     this.wrapper = mount(
       <MockResolver
-        resolverComponentInstanceID={this.resolverComponentInstanceID}
+        resolverComponentInstanceID={resolverComponentInstanceID}
         history={this.history}
+        sideEffectSimulator={this.sideEffectSimulator}
         store={this.store}
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
+        indices={indices}
       />
     );
+  }
+
+  /**
+   * Unmount the Resolver component. Use this to test what happens when code that uses Resolver unmounts it.
+   */
+  public unmount(): void {
+    this.wrapper.unmount();
+  }
+
+  /**
+   * Get the component instance ID from the component.
+   */
+  public get resolverComponentInstanceID(): string {
+    return this.wrapper.prop('resolverComponentInstanceID');
+  }
+
+  /**
+   * Change the component instance ID (updates the React component props.)
+   */
+  public set resolverComponentInstanceID(value: string) {
+    this.wrapper.setProps({ resolverComponentInstanceID: value });
+  }
+
+  /**
+   * Change the indices (updates the React component props.)
+   */
+  public set indices(value: string[]) {
+    this.wrapper.setProps({ indices: value });
+  }
+
+  /**
+   * Get the indices (updates the React component props.)
+   */
+  public get indices(): string[] {
+    return this.wrapper.prop('indices');
   }
 
   /**
@@ -150,6 +195,28 @@ export class Simulator {
   }
 
   /**
+   * The button that opens a node's submenu.
+   */
+  public processNodeSubmenuButton(
+    /** nodeID for the related node */ entityID: string
+  ): ReactWrapper {
+    return this.domNodes(
+      `[data-test-subj="resolver:submenu:button"][data-test-resolver-node-id="${entityID}"]`
+    );
+  }
+
+  /**
+   * The primary button (used to select a node) which contains a label for the node as its content.
+   */
+  public processNodePrimaryButton(
+    /** nodeID for the related node */ entityID: string
+  ): ReactWrapper {
+    return this.domNodes(
+      `[data-test-subj="resolver:node:primary-button"][data-test-resolver-node-id="${entityID}"]`
+    );
+  }
+
+  /**
    * Return the node element with the given `entityID`.
    */
   public selectedProcessNode(entityID: string): ReactWrapper {
@@ -174,87 +241,33 @@ export class Simulator {
   }
 
   /**
-   * Return an Enzyme ReactWrapper that includes the Related Events host button for a given process node
-   *
-   * @param entityID The entity ID of the proocess node to select in
+   * This manually runs the animation frames tied to a configurable timestamp in the future.
    */
-  public processNodeRelatedEventButton(entityID: string): ReactWrapper {
-    return this.domNodes(
-      `${processNodeElementSelector({ entityID })} [data-test-subj="resolver:submenu:button"]`
-    );
+  public runAnimationFramesTimeFromNow(time: number = 0) {
+    this.sideEffectSimulator.controls.time = time;
+    this.sideEffectSimulator.controls.provideAnimationFrame();
   }
 
   /**
-   * The items in the submenu that is opened by expanding a node in the map.
+   * The 'search' part of the URL.
    */
-  public processNodeSubmenuItems(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:map:node-submenu-item"]');
+  public get historyLocationSearch(): string {
+    // Wrap the `search` value from the MemoryHistory using `URLSearchParams` in order to standardize it.
+    return new URLSearchParams(this.history.location.search).toString();
   }
 
   /**
-   * Return the selected node query string values.
+   * Given a 'data-test-subj' value, it will resolve the react wrapper or undefined if not found
    */
-  public queryStringValues(): { selectedNode: string[] } {
-    const urlSearchParams = new URLSearchParams(this.history.location.search);
-    return {
-      selectedNode: urlSearchParams.getAll(`resolver-${this.resolverComponentInstanceID}-id`),
-    };
+  public async resolve(selector: string): Promise<ReactWrapper | undefined> {
+    return this.resolveWrapper(() => this.domNodes(`[data-test-subj="${selector}"]`));
   }
 
   /**
-   * The element that shows when Resolver is waiting for the graph data.
+   * Given a 'data-test-subj' selector, it will return the domNode
    */
-  public graphLoadingElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph:loading"]');
-  }
-
-  /**
-   * The element that shows if Resolver couldn't draw the graph.
-   */
-  public graphErrorElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph:error"]');
-  }
-
-  /**
-   * The element where nodes get drawn.
-   */
-  public graphElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph"]');
-  }
-
-  /**
-   * The titles of the links that select a node in the node list view.
-   */
-  public nodeListNodeLinkText(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list:node-link:title"]');
-  }
-
-  /**
-   * The icons in the links that select a node in the node list view.
-   */
-  public nodeListNodeLinkIcons(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list:node-link:icon"]');
-  }
-
-  /**
-   * Link rendered in the breadcrumbs of the node detail view. Takes the user to the node list.
-   */
-  public nodeDetailBreadcrumbNodeListLink(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:breadcrumbs:node-list-link"]');
-  }
-
-  /**
-   * The title element for the node detail view.
-   */
-  public nodeDetailViewTitle(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:title"]');
-  }
-
-  /**
-   * The icon element for the node detail title.
-   */
-  public nodeDetailViewTitleIcon(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:title-icon"]');
+  public testSubject(selector: string): ReactWrapper {
+    return this.domNodes(`[data-test-subj="${selector}"]`);
   }
 
   /**
@@ -297,7 +310,7 @@ export class Simulator {
   public async resolveWrapper(
     wrapperFactory: () => ReactWrapper,
     predicate: (wrapper: ReactWrapper) => boolean = (wrapper) => wrapper.length > 0
-  ): Promise<ReactWrapper | void> {
+  ): Promise<ReactWrapper | undefined> {
     for await (const wrapper of this.map(wrapperFactory)) {
       if (predicate(wrapper)) {
         return wrapper;

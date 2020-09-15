@@ -17,10 +17,15 @@
  * under the License.
  */
 
+import Path from 'path';
+import Fs from 'fs';
+
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
   createAnyInstanceSerializer,
+  createRecursiveSerializer,
+  REPO_ROOT,
 } from '@kbn/dev-utils';
 
 import { Config, Platform } from '../../lib';
@@ -40,6 +45,14 @@ const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Config));
+
+const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (s) => typeof s === 'string' && s.includes(nodeVersion),
+    (s) => s.split(nodeVersion).join('<node version>')
+  )
+);
 
 async function setup(actualShaSums?: Record<string, string>) {
   const config = await Config.create({
@@ -87,7 +100,7 @@ it('checks shasums for each downloaded node build', async () => {
     [MockFunction] {
       "calls": Array [
         Array [
-          "10.21.0",
+          "<node version>",
         ],
       ],
       "results": Array [

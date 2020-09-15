@@ -12,7 +12,8 @@ import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '../';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
-import { ConditionalHeaders, ElementPosition } from '../../../types';
+import { ElementPosition } from '../../../lib/screenshots';
+import { ConditionalHeaders } from '../../../types';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
@@ -303,7 +304,7 @@ export class HeadlessChromiumDriver {
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
         logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
-        throw getDisallowedOutgoingUrlError(interceptedUrl);
+        return;
       }
     });
 

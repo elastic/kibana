@@ -5,6 +5,7 @@
  */
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
   EuiTitle,
@@ -19,11 +20,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { SimulateTemplate } from './simulate_template';
+import { useForm, Form, getUseField, CheckBoxField, FormDataProvider } from '../shared_imports';
+import { SimulateTemplate, Filters } from './simulate_template';
+
+const CheckBox = getUseField({ component: CheckBoxField });
 
 export interface Props {
   onClose(): void;
   getTemplate: () => { [key: string]: any };
+  filters: Filters;
+  onFiltersChange: (filters: Filters) => void;
 }
 
 export const defaultFlyoutProps = {
@@ -31,16 +37,39 @@ export const defaultFlyoutProps = {
   'aria-labelledby': 'simulateTemplateFlyoutTitle',
 };
 
-export const SimulateTemplateFlyoutContent = ({ onClose, getTemplate }: Props) => {
+const i18nTexts = {
+  filters: {
+    label: i18n.translate('xpack.idxMgmt.simulateTemplate.filters.label', {
+      defaultMessage: 'Include:',
+    }),
+    mappings: i18n.translate('xpack.idxMgmt.simulateTemplate.filters.mappings', {
+      defaultMessage: 'Mappings',
+    }),
+    indexSettings: i18n.translate('xpack.idxMgmt.simulateTemplate.filters.indexSettings', {
+      defaultMessage: 'Index settings',
+    }),
+    aliases: i18n.translate('xpack.idxMgmt.simulateTemplate.filters.aliases', {
+      defaultMessage: 'Aliases',
+    }),
+  },
+};
+
+export const SimulateTemplateFlyoutContent = ({
+  onClose,
+  getTemplate,
+  filters,
+  onFiltersChange,
+}: Props) => {
   const isMounted = useRef(false);
-  const [heightCodeBlock, setHeightCodeBlock] = useState(0);
   const [template, setTemplate] = useState<{ [key: string]: any }>({});
+  const { form } = useForm<Filters>({ defaultValue: filters });
+  const { subscribe } = form;
 
   useEffect(() => {
-    setHeightCodeBlock(
-      document.getElementsByClassName('euiFlyoutBody__overflow')[0].clientHeight - 96
-    );
-  }, []);
+    subscribe((formState) => {
+      onFiltersChange(formState.data.format());
+    });
+  }, [subscribe, onFiltersChange]);
 
   const updatePreview = useCallback(async () => {
     const indexTemplate = await getTemplate();
@@ -71,8 +100,8 @@ export const SimulateTemplateFlyoutContent = ({ onClose, getTemplate }: Props) =
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.simulateTemplate.descriptionText"
-                defaultMessage="This is the final template that will be applied to your indices based on the
-                components templates you have selected and any overrides you've added."
+                defaultMessage="This is the final template that will be applied to matching indices based on the
+                component templates you have selected and any overrides you've added."
               />
             </p>
           </EuiText>
@@ -80,7 +109,28 @@ export const SimulateTemplateFlyoutContent = ({ onClose, getTemplate }: Props) =
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="content">
-        <SimulateTemplate template={template} minHeightCodeBlock={`${heightCodeBlock}px`} />
+        <Form form={form}>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>{i18nTexts.filters.label}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CheckBox path="mappings" config={{ label: i18nTexts.filters.mappings }} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CheckBox path="settings" config={{ label: i18nTexts.filters.indexSettings }} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CheckBox path="aliases" config={{ label: i18nTexts.filters.aliases }} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer />
+
+          <FormDataProvider>
+            {(formData) => {
+              return <SimulateTemplate template={template} filters={formData as Filters} />;
+            }}
+          </FormDataProvider>
+        </Form>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

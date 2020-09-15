@@ -47,7 +47,7 @@ export async function getEnvironments(
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED,
+            missing: ENVIRONMENT_NOT_DEFINED.value,
           },
         },
       },

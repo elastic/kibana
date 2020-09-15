@@ -12,7 +12,7 @@ import {
   IngestManagerStartContract,
   ExternalCallback,
 } from '../../../ingest_manager/server';
-import { createPackageConfigServiceMock } from '../../../ingest_manager/server/mocks';
+import { createPackagePolicyServiceMock } from '../../../ingest_manager/server/mocks';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
@@ -96,7 +96,7 @@ export const createMockIngestManagerStartContract = (
     },
     agentService: createMockAgentService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    packageConfigService: createPackageConfigServiceMock(),
+    packagePolicyService: createPackagePolicyServiceMock(),
   };
 };
 

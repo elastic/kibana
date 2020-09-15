@@ -33,7 +33,7 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
-import { uuidServiceMock } from './uuid/uuid_service.mock';
+import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
 
@@ -94,6 +94,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         buildSha: 'buildSha',
         dist: false,
       },
+      instanceUuid: 'instance-uuid',
     },
     config: pluginInitializerContextConfigMock<T>(config),
   };
@@ -130,7 +131,6 @@ function createCoreSetupMock({
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
-    uuid: uuidServiceMock.createSetupContract(),
     auditTrail: auditTrailServiceMock.createSetupContract(),
     logging: loggingServiceMock.createSetupContract(),
     getStartServices: jest
@@ -163,7 +163,7 @@ function createInternalCoreSetupMock() {
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
-    uuid: uuidServiceMock.createSetupContract(),
+    environment: environmentServiceMock.createSetupContract(),
     httpResources: httpResourcesMock.createSetupContract(),
     rendering: renderingMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),

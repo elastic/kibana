@@ -73,8 +73,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   await run(Tasks.CreateNoticeFile);
   await run(Tasks.UpdateLicenseFile);
   await run(Tasks.RemovePackageJsonDeps);
-  await run(Tasks.TranspileScss);
-  await run(Tasks.OptimizeBuild);
   await run(Tasks.CleanTypescript);
   await run(Tasks.CleanExtraFilesFromModules);
   await run(Tasks.CleanEmptyFolders);

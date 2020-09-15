@@ -22,7 +22,7 @@ import { stringify } from 'query-string';
 import { createBrowserHistory, History } from 'history';
 import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
-import { replaceUrlHashQuery } from './format';
+import { replaceUrlHashQuery, replaceUrlQuery } from './format';
 import { url as urlUtils } from '../../../common';
 
 /**
@@ -84,10 +84,14 @@ export function getStateFromKbnUrl<State>(
 export function setStateToKbnUrl<State>(
   key: string,
   state: State,
-  { useHash = false }: { useHash: boolean } = { useHash: false },
+  { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery?: boolean } = {
+    useHash: false,
+    storeInHashQuery: true,
+  },
   rawUrl = window.location.href
 ): string {
-  return replaceUrlHashQuery(rawUrl, (query) => {
+  const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
+  return replacer(rawUrl, (query) => {
     const encoded = encodeState(state, useHash);
     return {
       ...query,

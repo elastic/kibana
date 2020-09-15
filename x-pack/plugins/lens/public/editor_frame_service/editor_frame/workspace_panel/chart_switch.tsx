@@ -66,7 +66,7 @@ function VisualizationSummary(props: Props) {
   return (
     <>
       {description.icon && (
-        <EuiIcon size="xl" className="lnsChartSwitch__summaryIcon" type={description.icon} />
+        <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
       {description.label}
     </>
@@ -181,7 +181,7 @@ export function ChartSwitch(props: Props) {
           v.visualizationTypes.map((t) => ({
             visualizationId: v.id,
             ...t,
-            icon: t.largeIcon || t.icon,
+            icon: t.icon,
           }))
         )
       ).map((visualizationType) => ({
@@ -260,7 +260,7 @@ export function ChartSwitch(props: Props) {
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
-  newVisualization: Visualization<unknown, unknown>,
+  newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {
   const unfilteredSuggestions = getSuggestions({
