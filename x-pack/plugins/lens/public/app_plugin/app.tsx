@@ -42,6 +42,7 @@ export function App({
   redirectTo,
   editorFrame,
   initialInput,
+  incomingState,
   redirectToOrigin,
 }: LensAppProps) {
   const {
@@ -51,7 +52,6 @@ export function App({
     navigation,
     uiSettings,
     application,
-    incomingState,
     notifications,
     attributeService,
     savedObjectsClient,

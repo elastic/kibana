@@ -27,6 +27,7 @@ import { coreMock, httpServiceMock } from '../../../../../../src/core/public/moc
 import { IBasePath } from '../../../../../../src/core/public';
 import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
 import { Ast } from '@kbn/interpreter/common';
+import { LensAttributeService } from '../../lens_attribute_service';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -45,15 +46,20 @@ const savedVis: Document = {
   visualizationType: '',
 };
 
-const attributeServiceMockFromSavedVis = (
-  document: Document
-): AttributeService<LensSavedObjectAttributes, LensByValueInput, LensByReferenceInput> => {
+const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
   const core = coreMock.createStart();
   const service = new AttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
-  >('lens', core.savedObjects.client, core.overlays, core.i18n.Context, core.notifications.toasts);
+  >(
+    'lens',
+    jest.fn(),
+    core.savedObjects.client,
+    core.overlays,
+    core.i18n.Context,
+    core.notifications.toasts
+  );
   service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
     return Promise.resolve({ ...document } as LensSavedObjectAttributes);
   });

@@ -65,6 +65,7 @@ export interface LensAppProps {
   redirectTo: (savedObjectId?: string) => void;
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
   initialInput?: LensEmbeddableInput;
+  incomingState?: EmbeddableEditorState;
 }
 
 export interface LensAppServices {
@@ -80,8 +81,6 @@ export interface LensAppServices {
   attributeService: LensAttributeService;
   savedObjectsClient: SavedObjectsStart['client'];
   getOriginatingAppName: () => string | undefined;
-
-  incomingState?: EmbeddableEditorState;
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;

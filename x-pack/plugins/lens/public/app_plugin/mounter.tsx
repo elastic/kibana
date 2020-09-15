@@ -59,7 +59,6 @@ export async function mountApp(
     uiSettings: coreStart.uiSettings,
     application: coreStart.application,
     notifications: coreStart.notifications,
-    incomingState: embeddableEditorIncomingState,
     savedObjectsClient: coreStart.savedObjects.client,
     getOriginatingAppName: () => {
       return embeddableEditorIncomingState?.originatingApp
@@ -125,6 +124,7 @@ export async function mountApp(
     trackUiEvent('loaded');
     return (
       <App
+        incomingState={embeddableEditorIncomingState}
         editorFrame={instance}
         initialInput={getInitialInput(routeProps)}
         redirectTo={(savedObjectId?: string) => redirectTo(routeProps, savedObjectId)}
