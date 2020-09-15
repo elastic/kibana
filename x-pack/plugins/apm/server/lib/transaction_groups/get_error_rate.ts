@@ -62,7 +62,7 @@ export async function getErrorRate({
         total_transactions: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSize(start, end, 'auto').intervalString,
+            fixed_interval: getBucketSize(start, end).intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
           },

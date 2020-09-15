@@ -40,7 +40,7 @@ export function timeseriesFetcher({
   searchAggregatedTransactions: boolean;
 }) {
   const { start, end, uiFiltersES, apmEventClient } = setup;
-  const { intervalString } = getBucketSize(start, end, 'auto');
+  const { intervalString } = getBucketSize(start, end);
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },

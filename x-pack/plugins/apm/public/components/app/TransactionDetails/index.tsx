@@ -23,7 +23,6 @@ import { ApmHeader } from '../../shared/ApmHeader';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
-import { useLocation } from '../../../hooks/useLocation';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -40,9 +39,11 @@ interface Sample {
 
 type TransactionDetailsProps = RouteComponentProps<{ serviceName: string }>;
 
-export function TransactionDetails({ match }: TransactionDetailsProps) {
+export function TransactionDetails({
+  location,
+  match,
+}: TransactionDetailsProps) {
   const { serviceName } = match.params;
-  const location = useLocation();
   const { urlParams } = useUrlParams();
   const history = useHistory();
   const {

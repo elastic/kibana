@@ -1284,7 +1284,7 @@ _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-pl
 
 | Legacy Platform                                                                    | New Platform                                                                   | Notes |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----- |
-| `server.plugins.xpack_main.registerFeature`                                        | [`plugins.features.registerFeature`](x-pack/plugins/features/server/plugin.ts) |       |
+| `server.plugins.xpack_main.registerFeature`                                        | [`plugins.features.registerKibanaFeature`](x-pack/plugins/features/server/plugin.ts) |       |
 | `server.plugins.xpack_main.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md)               |       |
 
 #### UI Exports

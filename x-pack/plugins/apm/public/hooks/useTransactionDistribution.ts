@@ -5,7 +5,7 @@
  */
 
 import { flatten, omit } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
@@ -21,8 +21,8 @@ const INITIAL_DATA = {
 };
 
 export function useTransactionDistribution(urlParams: IUrlParams) {
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
-    serviceName,
     start,
     end,
     transactionType,

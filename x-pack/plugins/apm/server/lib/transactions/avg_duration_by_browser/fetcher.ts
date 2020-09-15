@@ -31,7 +31,7 @@ export function fetcher(options: Options) {
     searchAggregatedTransactions,
     transactionName,
   } = options;
-  const { intervalString } = getBucketSize(start, end, 'auto');
+  const { intervalString } = getBucketSize(start, end);
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]

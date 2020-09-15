@@ -105,6 +105,24 @@ Array [
                 "field": "transaction.duration.us",
               },
             },
+            "timeseries": Object {
+              "aggs": Object {
+                "average": Object {
+                  "avg": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
           },
           "terms": Object {
             "field": "service.name",
@@ -138,9 +156,9 @@ Array [
   Object {
     "apm": Object {
       "events": Array [
-        "transaction",
         "metric",
         "error",
+        "transaction",
       ],
     },
     "body": Object {
@@ -195,50 +213,18 @@ Array [
       "aggs": Object {
         "services": Object {
           "aggs": Object {
-            "count": Object {
-              "value_count": Object {
-                "field": "transaction.duration.us",
-              },
-            },
-          },
-          "terms": Object {
-            "field": "service.name",
-            "size": 500,
-          },
-        },
-      },
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+            "timeseries": Object {
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
                 },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
               },
             },
-            Object {
-              "term": Object {
-                "my.custom.ui.filter": "foo-bar",
-              },
-            },
-          ],
-        },
-      },
-      "size": 0,
-    },
-  },
-  Object {
-    "apm": Object {
-      "events": Array [
-        "error",
-      ],
-    },
-    "body": Object {
-      "aggs": Object {
-        "services": Object {
+          },
           "terms": Object {
             "field": "service.name",
             "size": 500,
@@ -272,7 +258,78 @@ Array [
     "apm": Object {
       "events": Array [
         "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "outcomes": Object {
+              "terms": Object {
+                "field": "event.outcome",
+              },
+            },
+            "timeseries": Object {
+              "aggs": Object {
+                "outcomes": Object {
+                  "terms": Object {
+                    "field": "event.outcome",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "my.custom.ui.filter": "foo-bar",
+              },
+            },
+            Object {
+              "terms": Object {
+                "event.outcome": Array [
+                  "failure",
+                  "success",
+                ],
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
         "metric",
+        "transaction",
         "error",
       ],
     },
