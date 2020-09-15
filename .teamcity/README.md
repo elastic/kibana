@@ -23,9 +23,15 @@
 
 ### Baseline CI
 
+- Generates baseline metrics needed for PR comparisons
+- Only runs OSS and default builds and visual regression tests
+- Runs for each commit (each build should build a single commit)
+
 ### Full CI
 
-So far:
+- Runs everything in CI
+- Runs hourly, currently only if there are changes since the last run
+- Re-uses builds from Baseline CI if they are finished or in-progress
 
 ![Diagram](Kibana.png)
 
