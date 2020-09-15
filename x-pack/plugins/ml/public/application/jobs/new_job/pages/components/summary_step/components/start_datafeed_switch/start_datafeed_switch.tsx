@@ -17,9 +17,12 @@ export const StartDatafeedSwitch: FC<Props> = ({ startDatafeed, setStartDatafeed
     <>
       <EuiSpacer />
       <EuiFormRow
-        helpText={i18n.translate('xpack.ml.newJob.wizard.summaryStep.startCheckboxHelpText', {
-          defaultMessage: 'If unselected, job can be started later from the jobs list.',
-        })}
+        helpText={i18n.translate(
+          'xpack.ml.newJob.wizard.summaryStep.startDatafeedCheckboxHelpText',
+          {
+            defaultMessage: 'If unselected, job can be started later from the jobs list.',
+          }
+        )}
       >
         <EuiSwitch
           data-test-subj="mlJobWizardStartDatafeedCheckbox"
