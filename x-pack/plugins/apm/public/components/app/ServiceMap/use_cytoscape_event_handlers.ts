@@ -148,29 +148,30 @@ export function useCytoscapeEventHandlers({
         console.debug('cytoscape:', event);
       }
     };
-    const firstDragHandler: cytoscape.EventHandler = (event) => {
-      event.target.data('hasBeenDragged', true);
-    };
+
     const dragHandler: cytoscape.EventHandler = (event) => {
       applyCubicBezierStyles(event.target.connectedEdges());
+
+      if (!event.target.data('hasBeenDragged')) {
+        event.target.data('hasBeenDragged', true);
+      }
     };
 
     if (cy) {
-      cy.on('custom:data layoutstop select unselect', debugHandler);
+      cy.on('custom:data drag layoutstop select unselect', debugHandler);
       cy.on('custom:data', dataHandler);
       cy.on('layoutstop', layoutstopHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', unselectHandler);
-      cy.one('drag', 'node', firstDragHandler);
       cy.on('drag', 'node', dragHandler);
     }
 
     return () => {
       if (cy) {
         cy.removeListener(
-          'custom:data layoutstop select unselect',
+          'custom:data drag layoutstop select unselect',
           undefined,
           debugHandler
         );
@@ -181,7 +182,6 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
         cy.removeListener('drag', 'node', dragHandler);
-        cy.removeListener('drag', 'node', firstDragHandler);
       }
     };
   }, [cy, serviceName, trackApmEvent, theme]);
