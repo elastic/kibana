@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { saveInstalledEsRefs } from '../../packages/install';
 import * as Registry from '../../registry';
@@ -33,7 +33,8 @@ export const installTransformForDataset = async (
   registryPackage: RegistryPackage,
   paths: string[],
   callCluster: CallESAsCurrentUser,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
 ) => {
   const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });
   let previousInstalledTransformEsAssets: EsAssetReference[] = [];
@@ -94,7 +95,7 @@ export const installTransformForDataset = async (
     );
 
     const installationPromises = transforms.map(async (transform) => {
-      return installTransform({ callCluster, transform });
+      return installTransform({ callCluster, transform, logger });
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -136,24 +137,31 @@ const isDatasetTransform = (path: string, datasetName: string) => {
 async function installTransform({
   callCluster,
   transform,
+  logger,
 }: {
   callCluster: CallESAsCurrentUser;
   transform: TransformInstallation;
+  logger: Logger;
 }): Promise<EsAssetReference> {
-  // defer validation on put if the source index is not available
-  await callCluster('transport.request', {
-    method: 'PUT',
-    path: `_transform/${transform.installationName}`,
-    query: 'defer_validation=true',
-    body: transform.content,
-  });
+  try {
+    // defer validation on put if the source index is not available
+    await callCluster('transport.request', {
+      method: 'PUT',
+      path: `_transform/${transform.installationName}`,
+      query: 'defer_validation=true',
+      body: transform.content,
+    });
 
-  await callCluster('transport.request', {
-    method: 'POST',
-    path: `_transform/${transform.installationName}/_start`,
-  });
+    await callCluster('transport.request', {
+      method: 'POST',
+      path: `_transform/${transform.installationName}/_start`,
+    });
 
-  return { id: transform.installationName, type: ElasticsearchAssetType.transform };
+    return { id: transform.installationName, type: ElasticsearchAssetType.transform };
+  } catch (err) {
+    logger.error(err);
+    throw err;
+  }
 }
 
 const getTransformNameForInstallation = (
