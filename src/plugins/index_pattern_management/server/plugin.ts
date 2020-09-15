@@ -20,11 +20,15 @@
 import { PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 
+import { registerPreviewScriptedFieldRoute } from './routes';
+
 export class IndexPatternManagementPlugin implements Plugin<void, void> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
+
+    registerPreviewScriptedFieldRoute(router);
 
     router.get(
       {

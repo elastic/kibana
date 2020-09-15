@@ -17,28 +17,4 @@
  * under the License.
  */
 
-import { ReactText } from 'react';
-import { Query } from 'src/plugins/data/public';
-import { HttpStart } from 'src/core/public';
-
-export interface Sample {
-  input: ReactText | ReactText[];
-  output: string;
-}
-
-export interface ExecuteScriptParams {
-  name: string;
-  script: string;
-  indexPatternTitle: string;
-  query?: Query['query'];
-  additionalFields?: string[];
-  http: HttpStart;
-}
-
-export interface ExecuteScriptResult {
-  status: number;
-  hits?: { hits: any[] };
-  error?: any;
-}
-
-export type ExecuteScript = (params: ExecuteScriptParams) => Promise<ExecuteScriptResult>;
+export * from './preview_scripted_field';
