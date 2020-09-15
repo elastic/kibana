@@ -244,19 +244,9 @@ export class AlertsClient {
         }
         throw e;
       }
-      await this.unsecuredSavedObjectsClient.create<RawAlert>(
-        'alert',
-        {
-          ...createdAlert.attributes,
-          ...encryptedAttributes,
-          scheduledTaskId: scheduledTask.id,
-        },
-        {
-          id: createdAlert.id,
-          overwrite: true,
-          references,
-        }
-      );
+      await this.unsecuredSavedObjectsClient.update<RawAlert>('alert', createdAlert.id, {
+        scheduledTaskId: scheduledTask.id,
+      });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
     return this.getAlertFromRaw(
