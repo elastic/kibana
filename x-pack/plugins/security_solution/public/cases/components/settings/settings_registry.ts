@@ -45,5 +45,8 @@ export const createCaseSettingsRegistry = (): CaseSettingsRegistry => {
       }
       return settings.get(id)!;
     },
+    list: () => {
+      return Array.from(settings).map(([id, setting]) => setting);
+    },
   };
 };

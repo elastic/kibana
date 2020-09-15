@@ -8,25 +8,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 import { Case } from './pages';
-import { CaseSettingsRegistry } from './types';
-import { CaseSettingsContextProvider } from './settings_context';
 import { NotFoundPage } from '../app/404';
-
-export const createCaseRoutes = ({
-  caseSettingsRegistry,
-}: {
-  caseSettingsRegistry: CaseSettingsRegistry;
-}) => {
-  const CasesRoutesComponent: React.FC = () => {
-    return (
-      <CaseSettingsContextProvider value={{ caseSettingsRegistry }}>
-        <CasesRoutes />
-      </CaseSettingsContextProvider>
-    );
-  };
-
-  return CasesRoutesComponent;
-};
 
 export const CasesRoutes: React.FC = () => (
   <Switch>

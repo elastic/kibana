@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { SettingFieldsProps } from '../../../types';
+import { SettingFieldsProps } from '../types';
 import { JiraSettingFields } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
