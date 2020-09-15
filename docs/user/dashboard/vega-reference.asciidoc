@@ -48,7 +48,7 @@ height: container
 {kib} is able to merge your custom `autosize` settings with the defaults. The options `fit-x`
 and `fit-y` are supported but not recommended over the default `fit` setting.
 
-To learn more, read about 
+To learn more, read about
 https://vega.github.io/vega/docs/specification/#autosize[autosize]
 in the Vega documentation.
 

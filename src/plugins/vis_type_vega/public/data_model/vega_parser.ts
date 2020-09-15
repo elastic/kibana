@@ -45,7 +45,6 @@ import {
   ControlsLocation,
   ControlsDirection,
   KibanaConfig,
-  AutoSize,
 } from './types';
 
 // Set default single color to match other Kibana visualizations
@@ -176,12 +175,17 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    * to do more.
    */
   private _compileWithAutosize() {
-    const defaultAutosize: AutoSize = {
+    const defaultAutosize = {
       type: 'fit',
       contains: 'padding',
     };
 
-    if (!this.isVegaLite && this.spec.autosize?.signal) {
+    if (
+      !this.isVegaLite &&
+      this.spec.autosize &&
+      typeof this.spec.autosize === 'object' &&
+      'signal' in this.spec.autosize
+    ) {
       // Vega supports dynamic autosize information, so we ignore it
       return;
     }
@@ -204,7 +208,10 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       this.useResize = this.spec.autosize !== 'none';
       this.spec.autosize = { ...defaultAutosize, type: this.spec.autosize };
     } else if (typeof this.spec.autosize === 'object') {
-      this.spec.autosize = { ...defaultAutosize, ...this.spec.autosize };
+      this.spec.autosize = { ...defaultAutosize, ...this.spec.autosize } as {
+        type: string;
+        contains: string;
+      };
       this.useResize = Boolean(this.spec.autosize?.type && this.spec.autosize?.type !== 'none');
     } else {
       this.spec.autosize = defaultAutosize;
