@@ -5,8 +5,8 @@
  */
 import expect from '@kbn/expect';
 import { sortBy, omit } from 'lodash';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import expectTopTraces from './expectation/top_traces.expectation.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -25,7 +25,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ items: [], isAggregationAccurate: true, bucketSize: 1000 });
+        expectSnapshot(response.body).toMatchInline(`
+          Object {
+            "bucketSize": 1000,
+            "isAggregationAccurate": true,
+            "items": Array [],
+          }
+        `);
       });
     });
 
@@ -44,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', async () => {
-        expect(response.body.items.length).to.be(33);
+        expectSnapshot(response.body.items.length).toMatchInline(`33`);
       });
 
       it('returns the correct buckets', async () => {
@@ -53,12 +59,61 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'impact'
         );
 
-        const expectedTracesWithoutSamples = sortBy(
-          expectTopTraces.map((item: any) => omit(item, 'sample')),
-          'impact'
-        );
+        const firstItem = responseWithoutSamples[0];
+        const lastItem = responseWithoutSamples[responseWithoutSamples.length - 1];
 
-        expect(responseWithoutSamples).to.eql(expectedTracesWithoutSamples);
+        const groups = responseWithoutSamples.map((item) => item.key).slice(0, 5);
+
+        expectSnapshot(responseWithoutSamples).toMatch();
+
+        expectSnapshot(firstItem).toMatchInline(`
+          Object {
+            "averageResponseTime": 2577,
+            "impact": 0,
+            "key": Object {
+              "service.name": "opbeans-node",
+              "transaction.name": "GET /throw-error",
+            },
+            "transactionsPerMinute": 0.5,
+          }
+        `);
+
+        expectSnapshot(lastItem).toMatchInline(`
+          Object {
+            "averageResponseTime": 1745009,
+            "impact": 100,
+            "key": Object {
+              "service.name": "opbeans-node",
+              "transaction.name": "Process payment",
+            },
+            "transactionsPerMinute": 0.25,
+          }
+        `);
+
+        expectSnapshot(groups).toMatchInline(`
+          Array [
+            Object {
+              "service.name": "opbeans-node",
+              "transaction.name": "GET /throw-error",
+            },
+            Object {
+              "service.name": "opbeans-java",
+              "transaction.name": "APIRestController#orders",
+            },
+            Object {
+              "service.name": "opbeans-java",
+              "transaction.name": "APIRestController#order",
+            },
+            Object {
+              "service.name": "opbeans-java",
+              "transaction.name": "APIRestController#product",
+            },
+            Object {
+              "service.name": "opbeans-node",
+              "transaction.name": "GET /api/products/:id/customers",
+            },
+          ]
+        `);
       });
 
       it('returns a sample', async () => {

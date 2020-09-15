@@ -29,15 +29,8 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
     const aggregations: HostAggEsItem = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildHostDetailsQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
     const formattedHostItem = formatHostItem(aggregations);
-    console.log('-------------');
-    console.log(JSON.stringify(options));
-    console.log('------2-------');
-    console.log(JSON.stringify(response));
-    console.log('------3-------');
-    console.log(JSON.stringify({ ...response, inspect, hostDetails: formattedHostItem }));
     return { ...response, inspect, hostDetails: formattedHostItem };
   },
 };
