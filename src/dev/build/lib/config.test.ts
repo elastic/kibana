@@ -19,7 +19,8 @@
 
 import { resolve } from 'path';
 
-import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import pkg from '../../../../package.json';
 import { Config } from './config';
