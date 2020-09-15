@@ -37,7 +37,7 @@ export async function getPipelineStateDocument(
     ignoreUnavailable: true,
     body: {
       _source: { excludes: 'logstash_state.pipeline.representation.plugins' },
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query,
       terminate_after: 1, // Safe to do because all these documents are functionally identical
     },

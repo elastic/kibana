@@ -9,6 +9,7 @@ import {
   ILegacyCustomClusterClient,
   Logger,
   IUiSettingsClient,
+  LegacyCallAPIOptions,
 } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,6 +37,8 @@ import { MonitoringConfig } from '../config';
 import { AlertSeverity } from '../../common/enums';
 import { CommonAlertFilter, CommonAlertParams, CommonBaseAlert } from '../../common/types';
 import { MonitoringLicenseService } from '../types';
+import { mbSafeQuery } from '../lib/mb_safe_query';
+import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 
 export class BaseAlert {
   public type!: string;
@@ -212,13 +215,20 @@ export class BaseAlert {
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
-    const callCluster = this.monitoringCluster
+    const _callCluster = this.monitoringCluster
       ? this.monitoringCluster.callAsInternalUser
       : services.callCluster;
+    const callCluster = async (
+      endpoint: string,
+      clientParams?: Record<string, unknown>,
+      options?: LegacyCallAPIOptions
+    ) => {
+      return await mbSafeQuery(async () => _callCluster(endpoint, clientParams, options));
+    };
     const availableCcs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
     // Support CCS use cases by querying to find available remote clusters
     // and then adding those to the index pattern we are searching against
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
+    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
