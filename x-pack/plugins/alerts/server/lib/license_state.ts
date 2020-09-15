@@ -6,9 +6,9 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
+import { assertNever } from '@kbn/std';
 import { Observable, Subscription } from 'rxjs';
 import { ILicense } from '../../../licensing/common/types';
-import { assertNever } from '../../../../../src/core/server';
 import { PLUGIN } from '../constants/plugin';
 
 export interface AlertingLicenseInformation {

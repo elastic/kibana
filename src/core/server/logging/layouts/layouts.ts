@@ -19,8 +19,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { Layout } from '@kbn/logging';
+import { assertNever } from '@kbn/std';
 
-import { assertNever } from '../../../utils';
 import { JsonLayout, JsonLayoutConfigType } from './json_layout';
 import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';
 

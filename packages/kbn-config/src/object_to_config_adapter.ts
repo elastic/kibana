@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
 import { cloneDeep, get, has } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { getFlattenedObject } from '@kbn/std';
 
-import { getFlattenedObject } from './utils';
-import { Config, ConfigPath } from './config';
+import { Config, ConfigPath } from './';
 
 /**
  * Allows plain javascript object to behave like `RawConfig` instance.

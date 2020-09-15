@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
-import { unset } from '../utils';
+import { set } from '@elastic/safer-lodash-set';
+import { unset } from '@kbn/std';
 import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
 
 const _rename = (

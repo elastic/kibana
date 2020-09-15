@@ -18,9 +18,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { assertNever } from '@kbn/std';
 import { DisposableAppender } from '@kbn/logging';
 
-import { assertNever } from '../../../utils';
 import {
   LegacyAppender,
   LegacyAppenderConfig,

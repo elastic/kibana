@@ -22,6 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { EnvironmentService } from './environment_service';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
+import { writePidFile } from './write_pid_file';
 import { CoreContext } from '../core_context';
 
 import { configServiceMock } from '../config/mocks';
@@ -36,11 +37,19 @@ jest.mock('./create_data_folder', () => ({
   createDataFolder: jest.fn(),
 }));
 
+jest.mock('./write_pid_file', () => ({
+  writePidFile: jest.fn(),
+}));
+
 const pathConfig = {
   data: 'data-folder',
 };
 const serverConfig = {
   uuid: 'SOME_UUID',
+};
+const pidConfig = {
+  file: '/pid/file',
+  exclusive: 'false',
 };
 
 const getConfigService = () => {
@@ -51,6 +60,9 @@ const getConfigService = () => {
     }
     if (path === 'server') {
       return new BehaviorSubject(serverConfig);
+    }
+    if (path === 'pid') {
+      return new BehaviorSubject(pidConfig);
     }
     return new BehaviorSubject({});
   });
@@ -77,7 +89,7 @@ describe('UuidService', () => {
       expect(resolveInstanceUuid).toHaveBeenCalledWith({
         pathConfig,
         serverConfig,
-        logger: logger.get('uuid'),
+        logger: logger.get('environment'),
       });
     });
 
@@ -87,7 +99,17 @@ describe('UuidService', () => {
       expect(createDataFolder).toHaveBeenCalledTimes(1);
       expect(createDataFolder).toHaveBeenCalledWith({
         pathConfig,
-        logger: logger.get('uuid'),
+        logger: logger.get('environment'),
+      });
+    });
+
+    it('calls writePidFile with correct parameters', async () => {
+      const service = new EnvironmentService(coreContext);
+      await service.setup();
+      expect(writePidFile).toHaveBeenCalledTimes(1);
+      expect(writePidFile).toHaveBeenCalledWith({
+        pidConfig,
+        logger: logger.get('environment'),
       });
     });
 
