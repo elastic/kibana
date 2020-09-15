@@ -6,16 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_NETWORK_KPI_DNS = i18n.translate(
-  'xpack.securitySolution.networkKpiDns.errorSearchDescription',
+export const ERROR_NETWORK_KPI_UNIQUE_PRIVATE_IPS = i18n.translate(
+  'xpack.securitySolution.networkKpiUniquePrivateIps.errorSearchDescription',
   {
-    defaultMessage: `An error has occurred on network kpi dns search`,
+    defaultMessage: `An error has occurred on network kpi unique private ips search`,
   }
 );
 
-export const FAIL_NETWORK_KPI_DNS = i18n.translate(
-  'xpack.securitySolution.networkKpiDns.failSearchDescription',
+export const FAIL_NETWORK_KPI_UNIQUE_PRIVATE_IPS = i18n.translate(
+  'xpack.securitySolution.networkKpiUniquePrivateIps.failSearchDescription',
   {
-    defaultMessage: `Failed to run search on network kpi dns`,
+    defaultMessage: `Failed to run search on network kpi unique private ips`,
   }
 );
