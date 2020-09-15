@@ -21,7 +21,7 @@ import { MODES, AUTO_BARS, DEFAULT_INTERVAL } from './constants';
 
 export type RangeTypeLens = RangeType & { label: string };
 
-export type MODES_TYPES = typeof MODES.Range | typeof MODES.Histogram;
+export type MODES_TYPES = typeof MODES[keyof typeof MODES];
 
 export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'range';
@@ -100,7 +100,7 @@ function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
     interval: params.interval === '' ? 0 : params.interval,
     maxBars: params.maxBars === AUTO_BARS ? null : params.maxBars,
     has_extended_bounds: false,
-    min_doc_count: false,
+    min_doc_count: 0,
     extended_bounds: { min: '', max: '' },
   };
 }
@@ -136,9 +136,6 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
       params: getParamsForNewMode(MODES.Histogram, true),
     };
   },
-  onOtherColumnChanged: (currentColumn, columns) => {
-    return currentColumn;
-  },
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
@@ -148,9 +145,6 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
         newField.aggregatable &&
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.range)
     );
-  },
-  transfer: (column, newIndexPattern) => {
-    return column;
   },
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {

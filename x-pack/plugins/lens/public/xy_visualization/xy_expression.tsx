@@ -513,11 +513,18 @@ export function XYChart({
           };
 
           // save the id of the layer with the custom table
-          if (xAccessor) {
-            layersAlreadyFormatted[xAccessor] = table.rows.some((row, i) => {
-              return table.columns.some(({ id }) => row[id] !== tableConverted.rows[i][id]);
-            });
-          }
+          table.columns.reduce<Record<string, boolean>>(
+            (alreadyFormatted: Record<string, boolean>, { id }) => {
+              if (alreadyFormatted[id]) {
+                return alreadyFormatted;
+              }
+              alreadyFormatted[id] = table.rows.some(
+                (row, i) => row[id] !== tableConverted.rows[i][id]
+              );
+              return alreadyFormatted;
+            },
+            layersAlreadyFormatted
+          );
 
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
@@ -554,19 +561,28 @@ export function XYChart({
               // * Key - Y name
               // * Formatted value - Y name
               if (accessors.length > 1) {
-                return d.seriesKeys
+                const result = d.seriesKeys
                   .map((key: string | number, i) => {
-                    if (i === 0 && splitHint) {
+                    if (
+                      i === 0 &&
+                      splitHint &&
+                      splitAccessor &&
+                      !layersAlreadyFormatted[splitAccessor]
+                    ) {
                       return formatFactory(splitHint).convert(key);
                     }
                     return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
                   })
                   .join(' - ');
+                return result;
               }
 
               // For formatted split series, format the key
               // This handles splitting by dates, for example
               if (splitHint) {
+                if (splitAccessor && layersAlreadyFormatted[splitAccessor]) {
+                  return d.seriesKeys[0];
+                }
                 return formatFactory(splitHint).convert(d.seriesKeys[0]);
               }
               // This handles both split and single-y cases:
