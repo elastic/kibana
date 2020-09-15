@@ -114,7 +114,6 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
           );
         }}
         isIconOnly
-        buttonSize="compressed"
       />
     </EuiFormRow>
   );

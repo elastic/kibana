@@ -9,7 +9,7 @@ import { setup as componentTemplateDetailsSetup } from './component_template_det
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../../../../../test_utils';
 
-export { setupEnvironment } from './setup_environment';
+export { setupEnvironment, appDependencies } from './setup_environment';
 
 export const pageHelpers = {
   componentTemplateList: { setup: componentTemplatesListSetup },
