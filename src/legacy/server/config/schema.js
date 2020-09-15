@@ -42,10 +42,7 @@ export default () =>
       basePathProxyTarget: Joi.number().default(5603),
     }).default(),
 
-    pid: Joi.object({
-      file: Joi.string(),
-      exclusive: Joi.boolean().default(false),
-    }).default(),
+    pid: HANDLED_IN_NEW_PLATFORM,
 
     csp: HANDLED_IN_NEW_PLATFORM,
 
