@@ -26,7 +26,6 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertUpdateRequiredFields,
-  AlertStatus,
   AlertInstanceSummary,
 } from './types';
 import { validateAlertTypeParams } from './lib';
@@ -40,7 +39,6 @@ import { TaskManagerStartContract } from '../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 import { RegistryAlertType } from './alert_type_registry';
-import { SavedObjectsClientWithoutUpdates } from './saved_objects';
 import { AlertsAuthorization, WriteOperations, ReadOperations, and } from './authorization';
 import { IEventLogClient } from '../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from './lib/iso_or_relative_date';
@@ -62,7 +60,7 @@ export type InvalidateAPIKeyResult =
 export interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
-  unsecuredSavedObjectsClient: SavedObjectsClientWithoutUpdates;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   authorization: AlertsAuthorization;
   actionsAuthorization: ActionsAuthorization;
   alertTypeRegistry: AlertTypeRegistry;
@@ -150,7 +148,7 @@ export class AlertsClient {
   private readonly spaceId?: string;
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
-  private readonly unsecuredSavedObjectsClient: SavedObjectsClientWithoutUpdates;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertsAuthorization;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;

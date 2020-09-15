@@ -8,8 +8,6 @@ import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
-export { SavedObjectsClientWithoutUpdates } from './saved_objects_client_without_updates';
-
 export const ACTION_SAVED_OBJECT_TYPE = 'action';
 export const ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE = 'action_task_params';
 

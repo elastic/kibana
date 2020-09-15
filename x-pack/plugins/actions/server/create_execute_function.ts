@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
-import {
-  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-  SavedObjectsClientWithoutUpdates,
-} from './saved_objects';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -26,7 +24,7 @@ export interface ExecuteOptions {
 }
 
 export type ExecutionEnqueuer = (
-  savedObjectsClient: SavedObjectsClientWithoutUpdates,
+  savedObjectsClient: SavedObjectsClientContract,
   options: ExecuteOptions
 ) => Promise<void>;
 
@@ -37,7 +35,7 @@ export function createExecutionEnqueuerFunction({
   preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
   return async function execute(
-    savedObjectsClient: SavedObjectsClientWithoutUpdates,
+    savedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, apiKey }: ExecuteOptions
   ) {
     if (isESOUsingEphemeralEncryptionKey === true) {

@@ -115,7 +115,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
         // since IDs are part of the AAD used during encryption, that's why we control them within this
-        // wrapper and don't allow consumers to specify their own IDs directly.
+        // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
         const canSpecifyID = options?.overwrite && object.version;
         if (object.id && !canSpecifyID) {
           throw new Error(
