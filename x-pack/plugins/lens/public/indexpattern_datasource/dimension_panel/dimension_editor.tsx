@@ -14,7 +14,7 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiListGroupItemProps,
-  EuiFormLabel
+  EuiFormLabel,
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from './dimension_panel';
 import { IndexPatternColumn, OperationType, uniqueLabels } from '../indexpattern';

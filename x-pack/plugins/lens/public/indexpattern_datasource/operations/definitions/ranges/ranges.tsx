@@ -83,7 +83,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
-  canAggOrderChangeResult: true,
+  canAggOrderChangeResult: false,
   getAggOrderCopy: (fieldName, otherFieldName) => {
     return {
       topCopy: i18n.translate('xpack.lens.indexPattern.groupingOverallRanges', {
