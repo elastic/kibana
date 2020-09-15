@@ -5,7 +5,7 @@
  */
 import { ConnectableObservable, Observable, Subject, from, merge } from 'rxjs';
 
-import { filter, map, pairwise, switchMap, publishReplay, takeUntil } from 'rxjs/operators';
+import { filter, map, pairwise, exhaustMap, publishReplay, takeUntil } from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import { ILicense } from './types';
 
@@ -15,7 +15,7 @@ export function createLicenseUpdate(
   fetcher: () => Promise<ILicense>,
   initialValues?: ILicense
 ) {
-  const triggerRefresh$ = trigger$.pipe(switchMap(fetcher));
+  const triggerRefresh$ = trigger$.pipe(exhaustMap(fetcher));
   const manuallyFetched$ = new Subject<ILicense>();
 
   const fetched$ = merge(triggerRefresh$, manuallyFetched$).pipe(
