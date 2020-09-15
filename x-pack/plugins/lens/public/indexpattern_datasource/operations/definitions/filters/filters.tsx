@@ -12,13 +12,8 @@ import {
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
   euiDragDropReorder,
-  EuiButtonIcon,
   EuiButtonEmpty,
-  EuiIcon,
   EuiFormRow,
   EuiLink,
   htmlIdGenerator,
@@ -29,6 +24,7 @@ import { FieldBasedIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { IndexPattern } from '../../../types';
 import { Query, esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
+import { CustomBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
 
@@ -238,7 +234,7 @@ export const FilterList = ({
         <EuiDroppable droppableId="FILTERS_DROPPABLE_AREA" spacing="s">
           {localFilters?.map((filter: FilterValue, idx: number) => {
             const { input, label, id } = filter;
-            const queryIsValid = isQueryValid(input, indexPattern);
+            const isInvalid = !isQueryValid(input, indexPattern);
 
             return (
               <EuiDraggable
@@ -249,74 +245,43 @@ export const FilterList = ({
                 disableInteractiveElementBlocking
               >
                 {(provided) => (
-                  <EuiPanel paddingSize="none">
-                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                      <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          size="s"
-                          color={queryIsValid ? 'subdued' : 'danger'}
-                          type={queryIsValid ? 'grab' : 'alert'}
-                          title={
-                            queryIsValid
-                              ? i18n.translate('xpack.lens.indexPattern.filters.dragToReorder', {
-                                  defaultMessage: 'Drag to reorder',
-                                })
-                              : i18n.translate('xpack.lens.indexPattern.filters.isInvalid', {
-                                  defaultMessage: 'This query is invalid',
-                                })
-                          }
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem
-                        grow={true}
-                        data-test-subj="indexPattern-filters-existingFilterContainer"
-                      >
-                        <FilterPopover
-                          isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
-                          setIsOpenByCreation={setIsOpenByCreation}
-                          indexPattern={indexPattern}
-                          filter={filter}
-                          Button={({ onClick }: { onClick: MouseEventHandler }) => (
-                            <EuiLink
-                              className="lnsFiltersOperation__popoverButton"
-                              data-test-subj="indexPattern-filters-existingFilterTrigger"
-                              onClick={onClick}
-                              color={queryIsValid ? 'text' : 'danger'}
-                              title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
-                                defaultMessage: 'Click to edit',
-                              })}
-                            >
-                              {label || input.query || defaultLabel}
-                            </EuiLink>
-                          )}
-                          setFilter={(f: FilterValue) => {
-                            onChangeValue(f.id, f.input, f.label);
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconSize="s"
-                          iconType="cross"
-                          color="danger"
-                          data-test-subj="indexPattern-filters-existingFilterDelete"
-                          onClick={() => {
-                            onRemoveFilter(filter.id);
-                          }}
-                          aria-label={i18n.translate(
-                            'xpack.lens.indexPattern.filters.removeCustomQuery',
-                            {
-                              defaultMessage: 'Remove custom query',
-                            }
-                          )}
-                          title={i18n.translate('xpack.lens.indexPattern.filters.remove', {
-                            defaultMessage: 'Remove',
+                  <CustomBucketContainer
+                    isInvalid={isInvalid}
+                    invalidMessage={i18n.translate('xpack.lens.indexPattern.filters.isInvalid', {
+                      defaultMessage: 'This query is invalid',
+                    })}
+                    onRemoveClick={() => onRemoveFilter(filter.id)}
+                    removeTitle={i18n.translate(
+                      'xpack.lens.indexPattern.filters.removeCustomQuery',
+                      {
+                        defaultMessage: 'Remove custom query',
+                      }
+                    )}
+                  >
+                    <FilterPopover
+                      data-test-subj="indexPattern-filters-existingFilterContainer"
+                      isOpenByCreation={idx === localFilters.length - 1 && isOpenByCreation}
+                      setIsOpenByCreation={setIsOpenByCreation}
+                      indexPattern={indexPattern}
+                      filter={filter}
+                      setFilter={(f: FilterValue) => {
+                        onChangeValue(f.id, f.input, f.label);
+                      }}
+                      Button={({ onClick }: { onClick: MouseEventHandler }) => (
+                        <EuiLink
+                          className="lnsFiltersOperation__popoverButton"
+                          data-test-subj="indexPattern-filters-existingFilterTrigger"
+                          onClick={onClick}
+                          color={isInvalid ? 'danger' : 'text'}
+                          title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
+                            defaultMessage: 'Click to edit',
                           })}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
+                        >
+                          {label || input.query || defaultLabel}
+                        </EuiLink>
+                      )}
+                    />
+                  </CustomBucketContainer>
                 )}
               </EuiDraggable>
             );
