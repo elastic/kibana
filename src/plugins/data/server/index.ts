@@ -286,6 +286,7 @@ export {
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     autocomplete: true,
+    search: true,
   },
   schema: configSchema,
 };

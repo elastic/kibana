@@ -17,24 +17,27 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { BucketAggType } from './bucket_agg_type';
 
-export const configSchema = schema.object({
-  autocomplete: schema.object({
-    querySuggestions: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-    }),
-    valueSuggestions: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-    }),
-  }),
-  search: schema.object({
-    aggs: schema.object({
-      shardDelay: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
-    }),
-  }),
-});
+export const SHARD_DELAY_AGG_NAME = 'shard_delay';
 
-export type ConfigSchema = TypeOf<typeof configSchema>;
+export const getShardDelayBucketAgg = () =>
+  new BucketAggType({
+    name: SHARD_DELAY_AGG_NAME,
+    title: 'Shard Delay',
+    createFilter: () => ({ match_all: {} }),
+    customLabels: false,
+    params: [
+      {
+        name: 'delay',
+        type: 'string',
+        default: '5s',
+        write(aggConfig, output) {
+          output.params = {
+            ...output.params,
+            value: aggConfig.params.delay,
+          };
+        },
+      },
+    ],
+  });

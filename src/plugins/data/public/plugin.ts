@@ -96,7 +96,7 @@ export class DataPublicPlugin
   private readonly storage: IStorageWrapper;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.searchService = new SearchService();
+    this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);

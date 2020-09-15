@@ -28,6 +28,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
+import { first } from 'rxjs/operators';
 import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
 
 import { AggsService, AggsSetupDependencies } from './aggs';
@@ -41,6 +42,11 @@ import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
 import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../common';
+import {
+  getShardDelayBucketAgg,
+  SHARD_DELAY_AGG_NAME,
+} from '../../common/search/aggs/buckets/shard_delay';
+import { ConfigSchema } from '../../config';
 
 type StrategyMap<
   SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
@@ -70,7 +76,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: StrategyMap<any, any> = {};
 
   constructor(
-    private initializerContext: PluginInitializerContext,
+    private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
   ) {}
 
@@ -102,13 +108,25 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
 
+    const aggs = this.aggsService.setup({ registerFunction });
+
+    this.initializerContext.config
+      .create<ConfigSchema>()
+      .pipe(first())
+      .toPromise()
+      .then((value) => {
+        if (value.search.aggs.shardDelay.enabled) {
+          aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+        }
+      });
+
     return {
       __enhance: (enhancements: SearchEnhancements) => {
         if (this.searchStrategies.hasOwnProperty(enhancements.defaultStrategy)) {
           this.defaultSearchStrategyName = enhancements.defaultStrategy;
         }
       },
-      aggs: this.aggsService.setup({ registerFunction }),
+      aggs,
       registerSearchStrategy: this.registerSearchStrategy,
       usage,
     };
