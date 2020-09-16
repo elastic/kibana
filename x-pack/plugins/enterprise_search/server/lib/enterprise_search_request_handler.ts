@@ -191,7 +191,7 @@ export class EnterpriseSearchRequestHandler {
 
   handleReadOnlyModeError(response: KibanaResponseFactory) {
     const errorMessage =
-      'Enterprise Search is in read-only mode. Actions that create, update, or delete information are temporarily disabled.';
+      'Enterprise Search is in read-only mode. Actions that create, update, or delete information are disabled.';
 
     this.log.error(`Cannot perform action: ${errorMessage}`);
     return response.customError({ statusCode: 503, headers: this.headers, body: errorMessage });

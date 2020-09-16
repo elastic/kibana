@@ -248,7 +248,7 @@ describe('EnterpriseSearchRequestHandler', () => {
         headers: { [READ_ONLY_MODE_HEADER]: 'true' },
       });
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Cannot perform action: Enterprise Search is in read-only mode. Actions that create, update, or delete information are temporarily disabled.'
+        'Cannot perform action: Enterprise Search is in read-only mode. Actions that create, update, or delete information are disabled.'
       );
     });
 
