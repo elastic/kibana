@@ -257,7 +257,12 @@ export class NewEventModal extends Component {
 
     return (
       <Fragment>
-        <EuiModal onClose={closeModal} initialFocus="[name=eventDescription]" maxWidth={false}>
+        <EuiModal
+          onClose={closeModal}
+          initialFocus="[name=eventDescription]"
+          maxWidth={false}
+          data-test-subj={'mlCalendarEventForm'}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage

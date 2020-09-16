@@ -192,6 +192,10 @@ export function MachineLearningSettingsCalendarProvider(
       await testSubjects.existOrFail(this.eventRowSelector(eventDescription));
     },
 
+    async assertEventRowMissing(eventDescription: string) {
+      await testSubjects.missingOrFail(this.eventRowSelector(eventDescription));
+    },
+
     async assertDeleteEventButtonEnabled(eventDescription: string, expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         this.eventRowSelector(eventDescription, 'mlCalendarEventDeleteButton')

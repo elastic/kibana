@@ -14,6 +14,7 @@ export function MachineLearningSettingsFilterListProvider(
   mlCommonUI: MlCommonUI
 ) {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
     async parseFilterListTable() {
@@ -21,7 +22,7 @@ export function MachineLearningSettingsFilterListProvider(
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects('~mlCalendarListRow').toArray()) {
+      for (const tr of $.findTestSubjects('~mlFilterListRow').toArray()) {
         const $tr = $(tr);
 
         const inUseSubject = $tr
@@ -111,6 +112,12 @@ export function MachineLearningSettingsFilterListProvider(
       }
 
       await this.assertFilterListRowSelected(filterId, false);
+    },
+
+    async selectFilterListRowEditLink(filterId: string) {
+      await this.assertFilterListRowExists(filterId);
+      await testSubjects.click(this.rowSelector(filterId, `mlEditFilterListLink`));
+      await testSubjects.existOrFail('mlPageFilterListEdit');
     },
 
     async assertCreateFilterListButtonEnabled(expectedValue: boolean) {
@@ -209,6 +216,13 @@ export function MachineLearningSettingsFilterListProvider(
       }
 
       await this.assertFilterItemSelected(filterItem, true);
+    },
+
+    async deleteFilterItem(filterItem: string) {
+      await testSubjects.existOrFail('mlFilterListDeleteItemButton');
+      await this.selectFilterItem(filterItem);
+      await testSubjects.click('mlFilterListDeleteItemButton');
+      await testSubjects.missingOrFail(this.filterItemSelector(filterItem));
     },
 
     async deselectFilterItem(filterItem: string) {

@@ -213,7 +213,7 @@ export function FilterListsTable({
             isSelectable={true}
             data-test-subj="mlFilterListsTable"
             rowProps={(item) => ({
-              'data-test-subj': `mlCalendarListRow row-${item.filter_id}`,
+              'data-test-subj': `mlFilterListRow row-${item.filter_id}`,
             })}
           />
         </div>

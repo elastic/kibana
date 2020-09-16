@@ -97,7 +97,7 @@ export const EditFilterListHeader = ({
 
   if (description !== undefined && description.length > 0) {
     descriptionField = (
-      <EuiText>
+      <EuiText data-test-subj={'mlNewFilterListDescriptionText'}>
         <p>{description}</p>
       </EuiText>
     );
