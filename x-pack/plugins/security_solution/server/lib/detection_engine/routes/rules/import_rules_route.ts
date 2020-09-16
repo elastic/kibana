@@ -194,10 +194,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
 
                   throwHttpError(await mlAuthz.validateRuleType(type));
 
-                  let rule;
-                  if (rules != null) {
-                    rule = rules.find((aRule) => aRule.params.ruleId === ruleId);
-                  }
+                  const rule = rules?.find((aRule) => aRule.params.ruleId === ruleId);
 
                   if (rule == null) {
                     await createRules({

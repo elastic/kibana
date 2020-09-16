@@ -137,18 +137,16 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                   message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
                 });
               }
-              if (ruleId != null) {
-                if (
-                  foundRules != null &&
-                  foundRules.length > 0 &&
-                  foundRules.find((rule) => rule.params.ruleId === ruleId)
-                ) {
-                  return createBulkErrorObject({
-                    ruleId,
-                    statusCode: 409,
-                    message: `rule_id: "${ruleId}" already exists`,
-                  });
-                }
+              if (
+                ruleId != null &&
+                foundRules != null &&
+                foundRules.some((rule) => rule.params.ruleId === ruleId)
+              ) {
+                return createBulkErrorObject({
+                  ruleId,
+                  statusCode: 409,
+                  message: `rule_id: "${ruleId}" already exists`,
+                });
               }
               const createdRule = await createRules({
                 alertsClient,

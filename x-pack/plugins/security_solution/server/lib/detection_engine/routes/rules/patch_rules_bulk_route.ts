@@ -25,6 +25,7 @@ import { updateRulesNotifications } from '../../rules/update_rules_notifications
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { RuleAlertType } from '../../rules/types';
 
 export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.patch(
@@ -58,7 +59,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
         }
         return acc;
       }, []);
-      const foundRules = await readRules({
+      const foundRules: RuleAlertType[] | null = await readRules({
         alertsClient,
         ruleIds,
         id: undefined,
@@ -118,14 +119,12 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const foundRule = foundRules?.find((rule) => rule.params.ruleId === ruleId);
-            let existingRule = foundRule != null ? [foundRule] : null;
-            if (foundRule == null) {
-              // try the id
-              existingRule = await readRules({ alertsClient, ruleIds: undefined, id });
-            }
+            const searchedRule = foundRules?.find((rule) => rule.params.ruleId === ruleId);
+            const existingRule = searchedRule
+              ? [searchedRule]
+              : await readRules({ alertsClient, ruleIds: undefined, id });
 
-            if (existingRule != null && existingRule.length > 0 && existingRule[0].params.type) {
+            if (existingRule != null && existingRule[0].params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule[0].params.type));
             }
