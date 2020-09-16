@@ -67,7 +67,7 @@ describe('licensing update', () => {
 
     trigger$.next();
     // waiting on a promise gives the exhaustMap time to complete and not de-dupe these calls
-    await new Promise((resolve) => resolve());
+    await Promise.resolve();
     trigger$.next();
 
     const [, second] = await license$.pipe(take(2), toArray()).toPromise();
