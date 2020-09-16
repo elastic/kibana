@@ -33,23 +33,23 @@ interface ThroughputManagerOpts {
   pollInterval$: BehaviorSubject<number>;
   startingMaxWorkers: number;
   startingPollInterval: number;
-  storeErrors$: Observable<Error>;
+  errors$: Observable<Error>;
   logger: Logger;
 }
 
 export class ThroughputManager {
   private isStarted: boolean = false;
-  private storeErrorsSubscription?: Subscription;
+  private errorsSubscription?: Subscription;
   private errorCountSinceLastInterval: number = 0;
   private throughputCheckIntervalId?: NodeJS.Timeout;
   private readonly logger: Logger;
   private readonly maxWorkers: DynamicConfiguration<number>;
   private readonly pollInterval: DynamicConfiguration<number>;
-  private readonly storeErrors$: Observable<Error>;
+  private readonly errors$: Observable<Error>;
 
   constructor(opts: ThroughputManagerOpts) {
     this.logger = opts.logger;
-    this.storeErrors$ = opts.storeErrors$;
+    this.errors$ = opts.errors$;
     this.maxWorkers = {
       startingValue: opts.startingMaxWorkers,
       currentValue: opts.startingMaxWorkers,
@@ -63,30 +63,25 @@ export class ThroughputManager {
   }
 
   public start() {
-    if (this.isStarted) {
-      throw new Error('ThroughputManager already started');
+    if (!this.isStarted) {
+      this.errorsSubscription = this.errors$.subscribe(this.storeErrorHandler.bind(this));
+      this.throughputCheckIntervalId = setInterval(
+        this.checkThroughput.bind(this),
+        THROUGHPUT_CHECK_INTERVAL
+      );
+      this.isStarted = true;
     }
-    this.storeErrorsSubscription = this.storeErrors$.subscribe(this.storeErrorHandler.bind(this));
-    this.throughputCheckIntervalId = setInterval(
-      this.checkThroughput.bind(this),
-      THROUGHPUT_CHECK_INTERVAL
-    );
-    this.isStarted = true;
   }
 
   public stop() {
-    if (this.storeErrorsSubscription) {
-      this.storeErrorsSubscription.unsubscribe();
-      delete this.storeErrorsSubscription;
-    }
+    this.errorsSubscription?.unsubscribe();
     if (this.throughputCheckIntervalId) {
       clearInterval(this.throughputCheckIntervalId);
-      delete this.throughputCheckIntervalId;
     }
-
-    // Reset observable values
+    delete this.errorsSubscription;
+    delete this.throughputCheckIntervalId;
+    // Reset observable values to original values
     this.updateConfiguration(this.maxWorkers.startingValue, this.pollInterval.startingValue);
-
     this.isStarted = false;
   }
 
@@ -102,7 +97,6 @@ export class ThroughputManager {
     } else {
       this.increaseThroughput();
     }
-
     this.errorCountSinceLastInterval = 0;
   }
 
@@ -115,7 +109,7 @@ export class ThroughputManager {
       this.pollInterval.currentValue * POLL_INTERVAL_INCREASE_PERCENTAGE
     );
     this.logger.info(
-      `Throughput being reduced after seeing ${this.errorCountSinceLastInterval} errors: maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
+      `Throughput reduced after seeing ${this.errorCountSinceLastInterval} error(s): maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
     );
     this.updateConfiguration(newMaxWorkers, newPollInterval);
   }
@@ -141,9 +135,13 @@ export class ThroughputManager {
   }
 
   private updateConfiguration(newMaxWorkers: number, newPollInterval: number) {
-    this.maxWorkers.currentValue = newMaxWorkers;
-    this.pollInterval.currentValue = newPollInterval;
-    this.maxWorkers.observable$.next(newMaxWorkers);
-    this.pollInterval.observable$.next(newPollInterval);
+    if (this.maxWorkers.currentValue !== newMaxWorkers) {
+      this.maxWorkers.currentValue = newMaxWorkers;
+      this.maxWorkers.observable$.next(newMaxWorkers);
+    }
+    if (this.pollInterval.currentValue !== newPollInterval) {
+      this.pollInterval.currentValue = newPollInterval;
+      this.pollInterval.observable$.next(newPollInterval);
+    }
   }
 }
