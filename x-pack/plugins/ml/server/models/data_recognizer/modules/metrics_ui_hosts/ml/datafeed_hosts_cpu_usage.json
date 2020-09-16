@@ -6,6 +6,10 @@
     "indices_options": {
       "allow_no_indices": true
     },
+    "chunking_config": {
+      "mode": "manual",
+      "time_span": "900s"
+    },
     "query": {
       "bool": {
         "must": [
@@ -21,13 +25,13 @@
       "host.name": {
         "terms": {
           "field": "host.name",
-          "size": 1000
+          "size": 100
         },
         "aggs": {
           "buckets": {
             "date_histogram": {
               "field": "@timestamp",
-              "fixed_interval": "1m"
+              "fixed_interval": "5m"
             },
             "aggs": {
               "@timestamp": {
