@@ -13,6 +13,7 @@ import { shallow } from 'enzyme';
 import { useValues, useActions } from 'kea';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
+import { NotFound } from '../shared/not_found';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { EngineOverview } from './components/engine_overview';
@@ -46,7 +47,7 @@ describe('AppSearchUnconfigured', () => {
 describe('AppSearchConfigured', () => {
   beforeEach(() => {
     // Mock resets
-    (useValues as jest.Mock).mockImplementation(() => ({}));
+    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {} }));
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData: () => {} }));
   });
 
@@ -54,7 +55,6 @@ describe('AppSearchConfigured', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(Layout)).toHaveLength(1);
-    expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 
   it('initializes app data with passed props', () => {
@@ -69,7 +69,7 @@ describe('AppSearchConfigured', () => {
   it('does not re-initialize app data', () => {
     const initializeAppData = jest.fn();
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
-    (useValues as jest.Mock).mockImplementation(() => ({ hasInitialized: true }));
+    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, hasInitialized: true }));
 
     shallow(<AppSearchConfigured />);
 
@@ -77,11 +77,30 @@ describe('AppSearchConfigured', () => {
   });
 
   it('renders ErrorConnecting', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({ errorConnecting: true }));
+    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, errorConnecting: true }));
 
     const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+  });
+
+  describe('ability checks', () => {
+    it('renders a 404 if a user has no view abilities', () => {
+      const wrapper = shallow(<AppSearchConfigured />);
+
+      expect(wrapper.find(NotFound)).toHaveLength(2);
+    });
+
+    it('renders the engines overview if a user can view engines', () => {
+      (useValues as jest.Mock).mockImplementation(() => ({
+        myRole: { canViewEngines: true },
+      }));
+
+      const wrapper = shallow(<AppSearchConfigured />);
+
+      expect(wrapper.find(EngineOverview)).toHaveLength(1);
+      expect(wrapper.find(NotFound)).toHaveLength(1);
+    });
   });
 });
 
@@ -90,9 +109,43 @@ describe('AppSearchNav', () => {
     const wrapper = shallow(<AppSearchNav />);
 
     expect(wrapper.find(SideNav)).toHaveLength(1);
-    expect(wrapper.find(SideNavLink).first().prop('to')).toEqual('/engines');
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as#/role-mappings'
+  });
+
+  it('renders the Engines link', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({
+      myRole: { canViewEngines: true },
+    }));
+    const wrapper = shallow(<AppSearchNav />);
+
+    expect(wrapper.find(SideNavLink).prop('to')).toEqual('/engines');
+  });
+
+  it('renders the Settings link', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({
+      myRole: { canViewSettings: true },
+    }));
+    const wrapper = shallow(<AppSearchNav />);
+
+    expect(wrapper.find(SideNavLink).prop('to')).toEqual(
+      'http://localhost:3002/as/settings/account'
     );
+  });
+
+  it('renders the Credentials link', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({
+      myRole: { canViewAccountCredentials: true },
+    }));
+    const wrapper = shallow(<AppSearchNav />);
+
+    expect(wrapper.find(SideNavLink).prop('to')).toEqual('http://localhost:3002/as/credentials');
+  });
+
+  it('renders the Role Mappings link', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({
+      myRole: { canViewRoleMappings: true },
+    }));
+    const wrapper = shallow(<AppSearchNav />);
+
+    expect(wrapper.find(SideNavLink).prop('to')).toEqual('http://localhost:3002/as#/role-mappings');
   });
 });

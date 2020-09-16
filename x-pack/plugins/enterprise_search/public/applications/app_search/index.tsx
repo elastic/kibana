@@ -49,8 +49,11 @@ export const AppSearchUnconfigured: React.FC = () => (
 );
 
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData } = useActions(AppLogic);
+  const {
+    hasInitialized,
+    myRole: { canViewEngines },
+  } = useValues(AppLogic);
   const { errorConnecting } = useValues(HttpLogic);
 
   useEffect(() => {
@@ -69,11 +72,17 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
           ) : (
             <Switch>
               <Route exact path={ROOT_PATH}>
-                <Redirect to={ENGINES_PATH} />
+                {canViewEngines ? (
+                  <Redirect to={ENGINES_PATH} />
+                ) : (
+                  <NotFound product={APP_SEARCH_PLUGIN} />
+                )}
               </Route>
-              <Route exact path={ENGINES_PATH}>
-                <EngineOverview />
-              </Route>
+              {canViewEngines && (
+                <Route exact path={ENGINES_PATH}>
+                  <EngineOverview />
+                </Route>
+              )}
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
@@ -90,28 +99,40 @@ export const AppSearchNav: React.FC = () => {
     externalUrl: { getAppSearchUrl },
   } = useContext(KibanaContext) as IKibanaContext;
 
+  const {
+    myRole: { canViewEngines, canViewSettings, canViewAccountCredentials, canViewRoleMappings },
+  } = useValues(AppLogic);
+
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
-      <SideNavLink to={ENGINES_PATH} isRoot>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
-          defaultMessage: 'Engines',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
-          defaultMessage: 'Account Settings',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
-          defaultMessage: 'Credentials',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
-          defaultMessage: 'Role Mappings',
-        })}
-      </SideNavLink>
+      {canViewEngines && (
+        <SideNavLink to={ENGINES_PATH} isRoot>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
+            defaultMessage: 'Engines',
+          })}
+        </SideNavLink>
+      )}
+      {canViewSettings && (
+        <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
+            defaultMessage: 'Account Settings',
+          })}
+        </SideNavLink>
+      )}
+      {canViewAccountCredentials && (
+        <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
+            defaultMessage: 'Credentials',
+          })}
+        </SideNavLink>
+      )}
+      {canViewRoleMappings && (
+        <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
+            defaultMessage: 'Role Mappings',
+          })}
+        </SideNavLink>
+      )}
     </SideNav>
   );
 };
