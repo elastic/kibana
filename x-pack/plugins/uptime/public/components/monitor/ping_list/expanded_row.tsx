@@ -12,15 +12,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiBadge,
   EuiText,
+  EuiPopover,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiPanel } from '@elastic/eui';
 import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
-import { EuiPopover } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
 import { PingRedirects } from './ping_redirects';
 
 interface Props {
@@ -64,64 +64,67 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
     });
   }
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // Show the journey
-  const journeyItems = ping.script?.journey?.steps?.map(s => {
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const journeyItems =
+    ping.script?.journey?.steps?.map((s) => {
+      const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
+      const closePopover = () => setIsPopoverOpen(false);
 
-    const onButtonClick = () => setIsPopoverOpen(isPopoverOpen => !isPopoverOpen);
-    const closePopover = () => setIsPopoverOpen(false);
+      const thumbnail = (
+        <img
+          style={{ width: 'auto', height: 'auto', maxWidth: '150px', maxHeight: '150px' }}
+          onClick={onButtonClick}
+          src={'data:image/png;charset=utf-8;base64, ' + s.screenshot}
+        />
+      );
+      const description = (
+        <EuiPopover button={thumbnail} isOpen={isPopoverOpen} closePopover={closePopover}>
+          <img
+            style={{ width: '600px' }}
+            src={'data:image/png;charset=utf-8;base64, ' + s.screenshot}
+          />
+        </EuiPopover>
+      );
 
-    const thumbnail = <img style={{width: "auto", height: "auto", maxWidth: "150px", maxHeight: "150px"}} onClick={onButtonClick} src={"data:image/png;charset=utf-8;base64, " + s.screenshot} />
-    const description = <EuiPopover
-      button={thumbnail}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}>
+      let color = 'primary';
+      let icon = 'checkInCircleFilled';
+      let message = 'Succeeded';
+      if (s.status === 'failed') {
+        color = 'danger';
+        icon = 'crossInACircleFilled';
+        message = `Failure (${s.error.name})`;
+      } else if (s.status === 'skipped') {
+        color = 'hollow';
+        icon = 'questionInCircle';
+        message = 'Skipped';
+      }
 
-      <img style={{width: "600px"}} src={"data:image/png;charset=utf-8;base64, " + s.screenshot} />
-      </EuiPopover>
+      const title = (
+        <>
+          <EuiText>{s.name}</EuiText>
+          <EuiBadge color={color} iconType={icon} iconSide="left">
+            {message}
+          </EuiBadge>
+          <EuiCodeBlock>{s.source}</EuiCodeBlock>
+        </>
+      );
 
-    let color = "primary";
-    let icon = "checkInCircleFilled";
-    let message = "Succeeded";
-    if (s.status === "failed") {
-      color = "danger";
-      icon = "crossInACircleFilled";
-      message = `Failure (${s.error.name})`;
-    } else if (s.status === "skipped") {
-      color = "hollow";
-      icon = "questionInCircle";
-      message = "Skipped";
-    }
-
-    const title = <>
-      <EuiText>{s.name}</EuiText>
-      <EuiBadge color={color} iconType={icon} iconSide="left">
-        {message}
-      </EuiBadge>
-      <EuiCodeBlock>
-        {s.source}
-      </EuiCodeBlock>
-    </>;
-
-
-    return {
-      title,
-      description
-    }
-  }) ?? [];
+      return {
+        title,
+        description,
+      };
+    }) ?? [];
   if (ping.script?.journey) {
     listItems.push({
       title: i18n.translate('xpack.uptime.pingList.expandedRow.journey', {
-        defaultMessage: 'Journey'
+        defaultMessage: 'Journey',
       }),
       description: (
         <EuiPanel>
-          <EuiDescriptionList
-            type="responsiveColumn"
-            listItems={journeyItems}
-          />
+          <EuiDescriptionList type="responsiveColumn" listItems={journeyItems} />
         </EuiPanel>
-      )
+      ),
     });
   }
 
