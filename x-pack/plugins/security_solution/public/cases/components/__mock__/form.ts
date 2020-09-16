@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
+import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
+
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
+jest.mock(
+  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
+);
+
 export const mockFormHook = {
   isSubmitted: false,
   isSubmitting: false,
@@ -41,3 +47,4 @@ export const getFormMock = (sampleData: any) => ({
 });
 
 export const useFormMock = useForm as jest.Mock;
+export const useFormDataMock = useFormData as jest.Mock;

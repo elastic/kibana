@@ -19,8 +19,8 @@
 
 import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
+import { PathConfigType, config as pathConfig } from '@kbn/utils';
 import { pick, deepFreeze } from '@kbn/std';
-
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -30,12 +30,12 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { PathConfigType, config as pathConfig } from '../path';
 import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
 import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '../elasticsearch/elasticsearch_config';
+import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
 export interface InstanceInfo {
@@ -92,16 +92,18 @@ export function createPluginInitializerContext(
          * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
          * @deprecated
          */
-        globalConfig$: combineLatest(
+        globalConfig$: combineLatest([
           coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
           coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
-          coreContext.configService.atPath<PathConfigType>(pathConfig.path)
-        ).pipe(
-          map(([kibana, elasticsearch, path]) =>
+          coreContext.configService.atPath<PathConfigType>(pathConfig.path),
+          coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
+        ]).pipe(
+          map(([kibana, elasticsearch, path, savedObjects]) =>
             deepFreeze({
               kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
               elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
               path: pick(path, SharedGlobalConfigKeys.path),
+              savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),
             })
           )
         ),
