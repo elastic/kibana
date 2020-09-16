@@ -6,7 +6,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
-import { ActionTypeModel } from '../../types';
+import { ActionTypeModel, ActionConnector } from '../../types';
 import { TypeRegistry } from '../type_registry';
 
 export interface ActionsConnectorsContextValue {
@@ -17,7 +17,7 @@ export interface ActionsConnectorsContextValue {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   capabilities: ApplicationStart['capabilities'];
-  reloadConnectors?: () => Promise<void>;
+  reloadConnectors?: () => Promise<ActionConnector[] | void>;
   docLinks: DocLinksStart;
   consumer?: string;
 }
