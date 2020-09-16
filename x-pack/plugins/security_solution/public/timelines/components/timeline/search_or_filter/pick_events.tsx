@@ -16,7 +16,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import debounce from 'lodash/debounce';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -46,6 +47,12 @@ const WarningEuiHealth = styled(EuiHealth)`
   }
 `;
 
+const FilterGroup = styled(EuiButtonGroup)`
+  .euiHealth {
+    display: flex;
+  }
+`;
+
 const PickEventContainer = styled.div`
   .euiSuperSelect {
     width: 170px;
@@ -56,36 +63,30 @@ const PickEventContainer = styled.div`
   }
 `;
 
-export const eventTypeOptions: EuiComboBoxOptionOption = {
-  label: 'filters',
-  options: [
-    {
-      label: 'all',
-      value: 'all',
-    },
-    {
-      label: 'raw',
-      value: 'raw',
-    },
-    {
-      label: 'alert',
-      value: 'alert',
-    },
-  ],
-};
-
 const toggleEventType = [
   {
     id: 'all',
-    label: i18n.ALL_EVENT,
+    label: (
+      <AllEuiHealth color="subdued">
+        <WarningEuiHealth color="warning">{i18n.ALL_EVENT}</WarningEuiHealth>
+      </AllEuiHealth>
+    ),
   },
   {
     id: 'raw',
-    label: i18n.RAW_EVENT,
+    label: <EuiHealth color="subdued"> {i18n.RAW_EVENT}</EuiHealth>,
   },
   {
     id: 'alert',
-    label: i18n.DETECTION_ALERTS_EVENT,
+    label: <EuiHealth color="warning"> {i18n.DETECTION_ALERTS_EVENT}</EuiHealth>,
+  },
+  {
+    id: 'kibana',
+    label: (
+      <>
+        <EuiIcon type="logoKibana" size="s" /> {i18n.KIBANA_INDEX_PATTERNS}
+      </>
+    ),
   },
 ];
 
@@ -101,23 +102,24 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const [isPopoverOpen, setPopover] = useState(false);
 
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { allExistingIndexPatterns, signalIndexName, sourcererScope } = useSelector<
+  const { configIndexPatterns, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
 
   const indexesPatternOptions = useMemo(
     () =>
-      [...allExistingIndexPatterns, signalIndexName].reduce<Array<EuiComboBoxOptionOption<string>>>(
-        (acc, index) => {
-          if (index != null) {
-            return [...acc, { label: index, value: index }];
-          }
-          return acc;
-        },
-        []
-      ),
-    [allExistingIndexPatterns, signalIndexName]
+      [
+        ...configIndexPatterns,
+        ...kibanaIndexPatterns.map((kip) => kip.title),
+        signalIndexName,
+      ].reduce<Array<EuiComboBoxOptionOption<string>>>((acc, index) => {
+        if (index != null && !acc.some((o) => o.label.includes(index))) {
+          return [...acc, { label: index, value: index }];
+        }
+        return acc;
+      }, []),
+    [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
   );
 
   const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
@@ -130,34 +132,16 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const renderOption = useCallback(
     (option) => {
       const { value } = option;
-      if (value === 'all') {
+      if (kibanaIndexPatterns.some((kip) => kip.title === value)) {
         return (
           <>
-            {eventType === 'all' && <EuiIcon type="check" />}{' '}
-            <AllEuiHealth color="subdued">
-              <WarningEuiHealth color="warning">{i18n.ALL_EVENT}</WarningEuiHealth>
-            </AllEuiHealth>
+            <EuiIcon type="logoKibana" size="s" /> {value}
           </>
         );
-      } else if (value === 'raw') {
-        return (
-          <>
-            {eventType === 'raw' && <EuiIcon type="check" />}{' '}
-            <EuiHealth color="subdued"> {i18n.RAW_EVENT}</EuiHealth>
-          </>
-        );
-      } else if (value === 'alert' || value === 'signal') {
-        return (
-          <>
-            {eventType === 'alert' && <EuiIcon type="check" />}{' '}
-            <EuiHealth color="warning"> {i18n.DETECTION_ALERTS_EVENT}</EuiHealth>
-          </>
-        );
-      } else {
-        return <>{value}</>;
       }
+      return <>{value}</>;
     },
-    [eventType]
+    [kibanaIndexPatterns]
   );
 
   const onChangeCombo = useCallback(
@@ -173,17 +157,19 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const onChangeFilter = useCallback(
     (filter) => {
       if (filter === 'all') {
-        onChangeEventTypeAndIndexesName('all', [
-          ...allExistingIndexPatterns,
-          signalIndexName ?? '',
-        ]);
+        onChangeEventTypeAndIndexesName(filter, [...configIndexPatterns, signalIndexName ?? '']);
       } else if (filter === 'raw') {
-        onChangeEventTypeAndIndexesName('raw', allExistingIndexPatterns);
+        onChangeEventTypeAndIndexesName(filter, configIndexPatterns);
       } else if (filter === 'alert') {
-        onChangeEventTypeAndIndexesName('alert', [signalIndexName ?? '']);
+        onChangeEventTypeAndIndexesName(filter, [signalIndexName ?? '']);
+      } else if (filter === 'kibana') {
+        onChangeEventTypeAndIndexesName(
+          filter,
+          kibanaIndexPatterns.map((kip) => kip.title)
+        );
       }
     },
-    [allExistingIndexPatterns, signalIndexName, onChangeEventTypeAndIndexesName]
+    [configIndexPatterns, kibanaIndexPatterns, signalIndexName, onChangeEventTypeAndIndexesName]
   );
 
   const togglePopover = useCallback(
@@ -196,10 +182,14 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const comboBox = useMemo(
     () => (
       <EuiComboBox
-        placeholder="Pick events or index patterns"
+        placeholder="Pick index patterns"
+        fullWidth
         options={indexesPatternOptions}
         selectedOptions={selectedOptions}
-        onChange={onChangeCombo}
+        onChange={debounce(onChangeCombo, 600, {
+          leading: true,
+          trailing: false,
+        })}
         renderOption={renderOption}
       />
     ),
@@ -208,7 +198,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   const filter = useMemo(
     () => (
-      <EuiButtonGroup
+      <FilterGroup
         options={toggleEventType}
         idSelected={eventType}
         onChange={onChangeFilter}
@@ -222,11 +212,16 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   // TODO translation
   const button = useMemo(
     () => (
-      <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover}>
-        indexes
+      <EuiButton
+        iconType="arrowDown"
+        iconSide="right"
+        isLoading={sourcererScope.loading}
+        onClick={togglePopover}
+      >
+        {i18n.KIBANA_INDEX_PATTERNS}
       </EuiButton>
     ),
-    [togglePopover]
+    [sourcererScope.loading, togglePopover]
   );
 
   // TODO find a better way to manage the old timeline
@@ -250,7 +245,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           isOpen={isPopoverOpen}
           closePopover={closePopover}
         >
-          <div style={{ width: '400px' }}>
+          <div style={{ width: '600px' }}>
             {filter}
             <EuiSpacer size="s" />
             {comboBox}

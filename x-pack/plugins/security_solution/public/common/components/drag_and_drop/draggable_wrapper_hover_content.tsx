@@ -20,6 +20,8 @@ import * as i18n from './translations';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../../../timelines/components/timeline/styles';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererScope } from '../../containers/sourcerer';
 
 interface Props {
   closePopOver?: () => void;
@@ -65,13 +67,15 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   //    this component is rendered in the context of the active timeline. This
   //    behavior enables the 'All events' view by appending the alerts index
   //    to the index pattern.
-  const { indexToAdd } = useMemo(
-    () =>
-      timelineId === TimelineId.active
-        ? getManageTimelineById(TimelineId.active)
-        : { indexToAdd: null },
-    [getManageTimelineById, timelineId]
-  );
+  const activeScope: SourcererScopeName =
+    timelineId === TimelineId.active
+      ? SourcererScopeName.timeline
+      : [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
+          timelineId ?? ''
+        )
+      ? SourcererScopeName.detections
+      : SourcererScopeName.default;
+  const { browserFields, indexPattern, selectedPatterns } = useSourcererScope(activeScope);
 
   const handleStartDragToTimeline = useCallback(() => {
     startDragToTimeline();
@@ -120,8 +124,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
       goGetTimelineId(true);
     }
   }, [goGetTimelineId, timelineId]);
-
-  const { browserFields, indexPattern } = useWithSource('default', indexToAdd);
 
   return (
     <>
@@ -187,7 +189,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 field={field}
                 indexPattern={indexPattern}
-                indexToAdd={indexToAdd}
+                indexesName={selectedPatterns}
                 onFilterAdded={onFilterAdded}
                 timelineId={timelineId ?? undefined}
                 toggleTopN={toggleTopN}

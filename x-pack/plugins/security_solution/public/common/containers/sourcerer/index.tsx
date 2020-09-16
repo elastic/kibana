@@ -46,24 +46,15 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
   useIndexFields(scopeId);
 
   const setIndexPatternsList = useCallback(
-    (kibanaIndexPatternsToPersist: KibanaIndexPatterns, allIndexPatternsToPersist: string[]) => {
+    (kibanaIndexPatternsToPersist: KibanaIndexPatterns, configIndexPatternsToPersist: string[]) => {
       dispatch(
         sourcererActions.setIndexPatternsList({
           kibanaIndexPatterns: kibanaIndexPatternsToPersist,
-          allIndexPatterns: allIndexPatternsToPersist,
+          configIndexPatterns: configIndexPatternsToPersist,
         })
       );
     },
     [dispatch]
-  );
-
-  const allIndexPatterns = useMemo(
-    () =>
-      dedupeIndexName(
-        kibanaIndexPatterns.map((kip) => kip.title),
-        configIndex
-      ),
-    [kibanaIndexPatterns, configIndex]
   );
 
   useEffect(() => {
@@ -85,10 +76,10 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
           selectedPatterns: [signalIndexName],
         })
       );
-      setIndexPatternsList(kibanaIndexPatterns, allIndexPatterns);
+      setIndexPatternsList(kibanaIndexPatterns, configIndex);
     }
   }, [
-    allIndexPatterns,
+    configIndex,
     dispatch,
     kibanaIndexPatterns,
     isSignalIndexExists,
@@ -99,9 +90,9 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
 
   useEffect(() => {
     if (scopeId !== SourcererScopeName.detections) {
-      setIndexPatternsList(kibanaIndexPatterns, allIndexPatterns);
+      setIndexPatternsList(kibanaIndexPatterns, configIndex);
     }
-  }, [allIndexPatterns, kibanaIndexPatterns, scopeId, setIndexPatternsList]);
+  }, [configIndex, kibanaIndexPatterns, scopeId, setIndexPatternsList]);
 };
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {

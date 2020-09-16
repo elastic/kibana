@@ -7,7 +7,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.sourcerer', {
-  defaultMessage: 'Sourcerer',
+  defaultMessage: 'Index patterns',
+});
+
+export const ALL_DEFAULT = i18n.translate('xpack.securitySolution.indexPatterns.allDefault', {
+  defaultMessage: 'All default',
 });
 
 export const CHANGE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.help', {

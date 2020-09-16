@@ -18,10 +18,10 @@ import { initialSourcererState, SourcererModel } from './model';
 export type SourcererState = SourcererModel;
 
 export const sourcererReducer = reducerWithInitialState(initialSourcererState)
-  .case(setIndexPatternsList, (state, { kibanaIndexPatterns, allIndexPatterns }) => ({
+  .case(setIndexPatternsList, (state, { kibanaIndexPatterns, configIndexPatterns }) => ({
     ...state,
     kibanaIndexPatterns,
-    allIndexPatterns,
+    configIndexPatterns,
   }))
   .case(setSignalIndexName, (state, { signalIndexName }) => ({
     ...state,

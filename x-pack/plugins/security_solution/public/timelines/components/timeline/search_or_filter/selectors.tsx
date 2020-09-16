@@ -13,7 +13,7 @@ import {
 } from '../../../../common/store/sourcerer/model';
 
 export interface SourcererScopeSelector {
-  allExistingIndexPatterns: string[];
+  configIndexPatterns: string[];
   kibanaIndexPatterns: KibanaIndexPatterns;
   signalIndexName: string | null;
   sourcererScope: ManageScope;
@@ -22,18 +22,18 @@ export interface SourcererScopeSelector {
 export const getSourcererScopeSelector = () => {
   const getkibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
   const getScopesSelector = sourcererSelectors.scopesSelector();
-  const getAllIndexPatternsSelector = sourcererSelectors.allIndexPatternsSelector();
+  const getConfigIndexPatternsSelector = sourcererSelectors.configIndexPatternsSelector();
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
 
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
     const kibanaIndexPatterns = getkibanaIndexPatternsSelector(state);
     const scope = getScopesSelector(state)[scopeId];
-    const allExistingIndexPatterns = getAllIndexPatternsSelector(state);
+    const configIndexPatterns = getConfigIndexPatternsSelector(state);
     const signalIndexName = getSignalIndexNameSelector(state);
 
     return {
       kibanaIndexPatterns,
-      allExistingIndexPatterns,
+      configIndexPatterns,
       signalIndexName,
       sourcererScope: scope,
     };

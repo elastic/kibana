@@ -46,7 +46,7 @@ export type KibanaIndexPatterns = Array<{ id: string; title: string }>;
 // ManageSourcerer
 export interface SourcererModel {
   kibanaIndexPatterns: KibanaIndexPatterns;
-  allIndexPatterns: string[];
+  configIndexPatterns: string[];
   signalIndexName: string | null;
   sourcererScopes: SourcererScopeById;
 }
@@ -63,7 +63,7 @@ const initSourcererScope = {
 
 export const initialSourcererState: SourcererModel = {
   kibanaIndexPatterns: [],
-  allIndexPatterns: [],
+  configIndexPatterns: [],
   signalIndexName: null,
   sourcererScopes: {
     [SourcererScopeName.default]: {

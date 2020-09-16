@@ -14,8 +14,8 @@ export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): Kiba
 export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
   sourcerer.signalIndexName;
 
-export const sourcererallIndexPatternsSelector = ({ sourcerer }: State): string[] =>
-  sourcerer.allIndexPatterns;
+export const sourcererConfigIndexPatternsSelector = ({ sourcerer }: State): string[] =>
+  sourcerer.configIndexPatterns;
 
 export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeById =>
   sourcerer.sourcererScopes;
@@ -31,21 +31,21 @@ export const kibanaIndexPatternsSelector = () =>
 export const signalIndexNameSelector = () =>
   createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
 
-export const allIndexPatternsSelector = () =>
+export const configIndexPatternsSelector = () =>
   createSelector(
-    sourcererallIndexPatternsSelector,
-    (allExistingIndexPatterns) => allExistingIndexPatterns
+    sourcererConfigIndexPatternsSelector,
+    (configIndexPatterns) => configIndexPatterns
   );
 
 export const getIndexesNameSelectedSelector = () => {
   const getScopesSelector = scopesSelector();
-  const getAllIndexPatternsSelector = allIndexPatternsSelector();
+  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): string[] => {
     const scope = getScopesSelector(state)[scopeId];
-    const allExistingIndexPatterns = getAllIndexPatternsSelector(state);
+    const configIndexPatterns = getConfigIndexPatternsSelector(state);
 
-    return scope.selectedPatterns.length === 0 ? allExistingIndexPatterns : scope.selectedPatterns;
+    return scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns;
   };
 
   return mapStateToProps;

@@ -49,7 +49,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   field: string;
   filters: Filter[];
   indexPattern: IIndexPattern;
-  indexToAdd?: string[] | null;
+  indexesName: string[];
   options: TopNOption[];
   query: Query;
   setAbsoluteRangeDatePicker: ActionCreator<{
@@ -75,7 +75,7 @@ const TopNComponent: React.FC<Props> = ({
   field,
   from,
   indexPattern,
-  indexToAdd,
+  indexesName,
   options,
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
@@ -123,7 +123,7 @@ const TopNComponent: React.FC<Props> = ({
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
-            indexToAdd={indexToAdd}
+            indexesName={indexesName}
             onlyField={field}
             query={query}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}

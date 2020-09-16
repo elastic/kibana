@@ -19,7 +19,7 @@ import type { RowRendererId } from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-export type EventType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
+export type EventType = 'all' | 'raw' | 'alert' | 'signal' | 'custom' | 'kibana';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 

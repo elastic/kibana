@@ -7,22 +7,23 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiHighlight,
+  EuiButtonGroup,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiIcon,
   EuiIconTip,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiSelectable,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import debounce from 'lodash/debounce';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import {
-  EuiSelectableOption,
-  EuiSelectableOptionCheckedType,
-} from '@elastic/eui/src/components/selectable/selectable_option';
+import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import * as i18n from './translations';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../containers/sourcerer/constants';
 import { ADD_INDEX_PATH } from '../../../../common/constants';
@@ -30,36 +31,104 @@ import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 
-const ON: EuiSelectableOptionCheckedType = 'on';
-
 interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
 
+const toggleFilter = [
+  {
+    id: 'all',
+    label: <>{i18n.ALL_DEFAULT}</>,
+  },
+  {
+    id: 'kibana',
+    label: (
+      <>
+        <EuiIcon type="logoKibana" size="s" /> {i18n.SOURCERER}
+      </>
+    ),
+  },
+];
+
 export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { allExistingIndexPatterns, sourcererScope } = useSelector<State, SourcererScopeSelector>(
-    (state) => sourcererScopeSelector(state, scopeId),
-    deepEqual
-  );
-
-  const { selectedPatterns: selectedOptions, loading } = sourcererScope;
+  const { configIndexPatterns, kibanaIndexPatterns, sourcererScope } = useSelector<
+    State,
+    SourcererScopeSelector
+  >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
+  const [filter, setFilter] = useState('all');
+  const { selectedPatterns, loading } = sourcererScope;
+  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
 
   const onChangeIndexPattern = useCallback(
-    (selectedPatterns: string[]) => {
+    (newSelectedPatterns: string[]) => {
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: scopeId,
-          selectedPatterns,
+          selectedPatterns: newSelectedPatterns,
         })
       );
     },
     [dispatch, scopeId]
   );
 
-  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
+  const renderOption = useCallback(
+    (option) => {
+      const { value } = option;
+      if (kibanaIndexPatterns.some((kip) => kip.title === value)) {
+        return (
+          <>
+            <EuiIcon type="logoKibana" size="s" /> {value}
+          </>
+        );
+      }
+      return <>{value}</>;
+    },
+    [kibanaIndexPatterns]
+  );
+
+  const onChangeCombo = useCallback(
+    (newSelectedOptions) => {
+      setFilter('custom');
+      onChangeIndexPattern(newSelectedOptions.map((so: { value: string }) => so.value));
+    },
+    [onChangeIndexPattern]
+  );
+
+  const onChangeFilter = useCallback(
+    (newFilter) => {
+      setFilter(newFilter);
+      if (newFilter === 'all') {
+        onChangeIndexPattern(configIndexPatterns);
+      } else if (newFilter === 'kibana') {
+        onChangeIndexPattern(kibanaIndexPatterns.map((kip) => kip.title));
+      }
+    },
+    [configIndexPatterns, kibanaIndexPatterns, onChangeIndexPattern]
+  );
+
+  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+    return selectedPatterns.map((indexSelected) => ({
+      label: indexSelected,
+      value: indexSelected,
+    }));
+  }, [selectedPatterns]);
+
+  const indexesPatternOptions = useMemo(
+    () =>
+      [...configIndexPatterns, ...kibanaIndexPatterns.map((kip) => kip.title)].reduce<
+        Array<EuiComboBoxOptionOption<string>>
+      >((acc, index) => {
+        if (index != null && !acc.some((o) => o.label.includes(index))) {
+          return [...acc, { label: index, value: index }];
+        }
+        return acc;
+      }, []),
+    [configIndexPatterns, kibanaIndexPatterns]
+  );
+
   const trigger = useMemo(
     () => (
       <EuiButtonEmpty
@@ -68,6 +137,7 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
         flush="left"
         iconSide="right"
         iconType="indexSettings"
+        isLoading={loading}
         onClick={setPopoverIsOpenCb}
         size="l"
         title={i18n.SOURCERER}
@@ -75,101 +145,67 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
         {i18n.SOURCERER}
       </EuiButtonEmpty>
     ),
-    [setPopoverIsOpenCb]
+    [setPopoverIsOpenCb, loading]
   );
-  const options: EuiSelectableOption[] = useMemo(
-    () =>
-      loading
-        ? []
-        : [
-            ...allExistingIndexPatterns.sort().map((title, id) => ({
-              label: title,
-              key: `${title}-${id}`,
-              value: title,
-              checked: selectedOptions.includes(title) ? ON : undefined,
-            })),
-          ],
-    [allExistingIndexPatterns, loading, selectedOptions]
-  );
-  // TO DO check if index pattern has results and if it does not, make it unselectable
-  // const unSelectableOptions: EuiSelectableOption[] = useMemo(
-  //   () =>
-  //     []
-  //       .filter((title) => !kibanaIndexPatterns.includes(title))
-  //       .map((title, id) => ({
-  //         label: title,
-  //         key: `${title}-${id}`,
-  //         value: title,
-  //         disabled: true,
-  //         checked: undefined,
-  //       })),
-  //   [kibanaIndexPatterns]
-  // );
-  const renderOption = useCallback(
-    (option, searchValue) => (
-      <>
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        {option.disabled ? (
-          <EuiIconTip position="top" content={i18n.DISABLED_INDEX_PATTERNS} />
-        ) : null}
-      </>
+
+  const indexesfilter = useMemo(
+    () => (
+      <EuiButtonGroup
+        options={toggleFilter}
+        idSelected={filter}
+        onChange={onChangeFilter}
+        buttonSize="compressed"
+        isFullWidth
+      />
     ),
-    []
+    [filter, onChangeFilter]
   );
-  const onChange = useCallback(
-    (choices: EuiSelectableOption[]) => {
-      const choice = choices.reduce<string[]>(
-        (acc, { checked, label }) => (checked === 'on' ? [...acc, label] : acc),
-        []
-      );
-      onChangeIndexPattern(choice);
-    },
-    [onChangeIndexPattern]
+
+  const comboBox = useMemo(
+    () => (
+      <EuiComboBox
+        placeholder="Pick index patterns"
+        fullWidth
+        options={indexesPatternOptions}
+        selectedOptions={selectedOptions}
+        onChange={debounce(onChangeCombo, 600, {
+          leading: true,
+          trailing: false,
+        })}
+        renderOption={renderOption}
+      />
+    ),
+    [indexesPatternOptions, onChangeCombo, renderOption, selectedOptions]
   );
+
   return (
-    <EuiPopover
-      button={trigger}
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopoverIsOpen(false)}
-      display="block"
-      panelPaddingSize="s"
-      ownFocus
-    >
-      <div style={{ width: 320 }}>
-        <EuiPopoverTitle>
-          <>
-            {i18n.CHANGE_INDEX_PATTERNS}
-            <EuiIconTip position="right" content={i18n.CONFIGURE_INDEX_PATTERNS} />
-          </>
-        </EuiPopoverTitle>
-        <EuiSelectable
-          data-test-subj="indexPattern-switcher"
-          searchable
-          isLoading={loading}
-          options={options}
-          onChange={debounce(onChange, 300, {
-            leading: true,
-            trailing: false,
-          })}
-          renderOption={renderOption}
-          searchProps={{
-            compressed: true,
-          }}
-        >
-          {(list, search) => (
+    <EuiToolTip position="top" content={sourcererScope.selectedPatterns.sort().join(', ')}>
+      <EuiPopover
+        button={trigger}
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopoverIsOpen(false)}
+        display="block"
+        panelPaddingSize="s"
+        ownFocus
+      >
+        <div style={{ width: 600 }}>
+          <EuiPopoverTitle>
             <>
-              {search}
-              {list}
+              {i18n.CHANGE_INDEX_PATTERNS}
+              <EuiIconTip position="right" content={i18n.CONFIGURE_INDEX_PATTERNS} />
             </>
-          )}
-        </EuiSelectable>
-        <EuiPopoverFooter>
-          <EuiButton data-test-subj="add-index" href={ADD_INDEX_PATH} fullWidth size="s">
-            {i18n.ADD_INDEX_PATTERNS}
-          </EuiButton>
-        </EuiPopoverFooter>
-      </div>
-    </EuiPopover>
+          </EuiPopoverTitle>
+          {indexesfilter}
+          <EuiSpacer size="s" />
+          {comboBox}
+          <EuiPopoverFooter>
+            <EuiButton data-test-subj="add-index" href={ADD_INDEX_PATH} fullWidth size="s">
+              {i18n.ADD_INDEX_PATTERNS}
+            </EuiButton>
+          </EuiPopoverFooter>
+        </div>
+      </EuiPopover>
+    </EuiToolTip>
   );
 });
 SourcererComponent.displayName = 'Sourcerer';
