@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { LogRecord } from '@kbn/logging';
 import { Conversion } from './type';
-import { LogRecord } from '../../log_record';
 
 export const MetaConversion: Conversion = {
   pattern: /%meta/g,
