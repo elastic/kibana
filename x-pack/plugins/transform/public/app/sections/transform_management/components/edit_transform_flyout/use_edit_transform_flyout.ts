@@ -119,6 +119,7 @@ export interface FormField {
   configFieldName: string;
   defaultValue: string;
   errorMessages: string[];
+  isNullable: boolean;
   isOptional: boolean;
   validator: keyof typeof validate;
   value: string;
@@ -140,6 +141,7 @@ export const initializeField = (
     configFieldName,
     defaultValue,
     errorMessages: [],
+    isNullable: false,
     isOptional: true,
     validator: 'string',
     value,
@@ -174,11 +176,10 @@ interface Action {
 const getUpdateValue = (
   attribute: keyof EditTransformFlyoutFieldsState,
   config: TransformPivotConfig,
-  formState: EditTransformFlyoutFieldsState,
-  nullable: boolean = false
+  formState: EditTransformFlyoutFieldsState
 ) => {
   const formStateAttribute = formState[attribute];
-  const fallbackValue = nullable ? null : formStateAttribute.defaultValue;
+  const fallbackValue = formStateAttribute.isNullable ? null : formStateAttribute.defaultValue;
   const formValue =
     formStateAttribute.value !== ''
       ? formStateAttribute.valueParser(formStateAttribute.value)
@@ -221,8 +222,9 @@ export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyo
 
     // settings.*
     docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
+      isNullable: true,
       validator: 'integerAboveZero',
-      valueParser: (v) => parseInt(v, 10),
+      valueParser: (v) => (v === '' ? null : +v),
     }),
     maxPageSearchSize: initializeField(
       'maxPageSearchSize',
@@ -231,7 +233,7 @@ export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyo
       {
         defaultValue: '500',
         validator: 'integerRange10To10000',
-        valueParser: (v) => parseInt(v, 10),
+        valueParser: (v) => +v,
       }
     ),
   },
