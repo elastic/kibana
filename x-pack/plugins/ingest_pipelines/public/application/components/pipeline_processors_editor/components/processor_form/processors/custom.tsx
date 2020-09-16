@@ -17,6 +17,7 @@ import {
 const { emptyField, isJsonField } = fieldValidators;
 
 import { XJsonEditor } from '../field_components';
+import { Fields } from '../processor_form.container';
 import { EDITOR_PX_HEIGHT } from './shared';
 
 const customConfig: FieldConfig = {
@@ -60,7 +61,7 @@ const customConfig: FieldConfig = {
 };
 
 interface Props {
-  defaultOptions?: any;
+  defaultOptions?: Fields['fields'];
 }
 
 /**
