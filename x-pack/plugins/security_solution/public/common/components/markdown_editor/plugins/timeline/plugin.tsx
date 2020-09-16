@@ -55,7 +55,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
         onTimelineChange={(timelineTitle, timelineId, graphEventId) => {
           const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
             absolute: true,
-            addSearch: false,
+            skipSearch: true,
           });
           onInsert(`[${timelineTitle}](${url})`, {
             block: false,

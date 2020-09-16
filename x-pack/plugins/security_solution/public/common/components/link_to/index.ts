@@ -27,7 +27,7 @@ export {
 
 interface FormatUrlOptions {
   absolute: boolean;
-  addSearch: boolean;
+  skipSearch: boolean;
 }
 
 type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
@@ -36,10 +36,10 @@ export const useFormatUrl = (page: SecurityPageName) => {
   const { getUrlForApp } = useKibana().services.application;
   const search = useGetUrlSearch(navTabs[page]);
   const formatUrl = useCallback<FormatUrl>(
-    (path: string, { absolute, addSearch } = { absolute: false, addSearch: true }) => {
+    (path: string, { absolute = false, skipSearch = false } = {}) => {
       const pathArr = path.split('?');
       const formattedPath = `${pathArr[0]}${
-        addSearch
+        !skipSearch
           ? isEmpty(pathArr[1])
             ? search
             : `?${pathArr[1]}${isEmpty(search) ? '' : `&${search}`}`

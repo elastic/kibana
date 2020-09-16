@@ -26,7 +26,7 @@ export const useInsertTimeline = (value: string, onChange: (newValue: string) =>
     (title: string, id: string | null, graphEventId?: string) => {
       const url = formatUrl(getTimelineUrl(id ?? '', graphEventId), {
         absolute: true,
-        addSearch: false,
+        skipSearch: true,
       });
 
       const newValue: string = [
