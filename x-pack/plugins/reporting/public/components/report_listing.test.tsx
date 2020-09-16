@@ -52,13 +52,14 @@ const toasts = {
   addDanger: jest.fn(),
 } as any;
 
+const fiveSeconds = moment.duration(5, 's');
 const mockPollConfig = {
   jobCompletionNotifier: {
-    interval: moment.duration(5, 's'),
+    interval: fiveSeconds,
     intervalErrorMultiplier: 3,
   },
   jobsRefresh: {
-    interval: moment.duration(5, 's'),
+    interval: fiveSeconds,
     intervalErrorMultiplier: 3,
   },
 };
