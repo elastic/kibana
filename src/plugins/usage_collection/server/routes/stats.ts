@@ -91,7 +91,7 @@ export function registerStatsRoute({
     async (context, req, res) => {
       const isExtended = req.query.extended === '' || req.query.extended;
       const isLegacy = req.query.legacy === '' || req.query.legacy;
-      const shouldGetUsage = req.query.exclude_usage === undefined || !req.query.exclude_usage;
+      const shouldGetUsage = req.query.exclude_usage === false;
 
       let extended;
       if (isExtended) {
