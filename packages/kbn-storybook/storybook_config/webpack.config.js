@@ -22,7 +22,8 @@ const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
+const { REPO_ROOT } = require('@kbn/utils');
+const { DLL_DIST_DIR } = require('../lib/constants');
 // eslint-disable-next-line import/no-unresolved
 const { currentConfig } = require('../../../built_assets/storybook/current.config');
 

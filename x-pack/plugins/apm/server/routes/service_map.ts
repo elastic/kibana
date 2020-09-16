@@ -8,7 +8,7 @@ import Boom from 'boom';
 import * as t from 'io-ts';
 import {
   invalidLicenseMessage,
-  isValidPlatinumLicense,
+  isActivePlatinumLicense,
 } from '../../common/service_map';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
@@ -33,7 +33,7 @@ export const serviceMapRoute = createRoute(() => ({
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
     }
-    if (!isValidPlatinumLicense(context.licensing.license)) {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     context.licensing.featureUsage.notifyUsage(APM_SERVICE_MAPS_FEATURE_NAME);
@@ -59,7 +59,7 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
     }
-    if (!isValidPlatinumLicense(context.licensing.license)) {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const logger = context.logger;

@@ -5,20 +5,29 @@
  */
 
 import { Map as MbMap } from 'mapbox-gl';
-import { DynamicStyleProperty } from './dynamic_style_property';
+import { DynamicStyleProperty, getNumericalMbFeatureStateValue } from './dynamic_style_property';
 import { OrientationDynamicOptions } from '../../../../../common/descriptor_types';
+import { RawValue } from '../../../../../common/constants';
 
 export class DynamicOrientationProperty extends DynamicStyleProperty<OrientationDynamicOptions> {
   syncIconRotationWithMb(symbolLayerId: string, mbMap: MbMap) {
     if (this._field && this._field.isValid()) {
-      const targetName = this._field.getMbPropertyName(this.getStyleName());
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', ['coalesce', ['get', targetName], 0]);
+      const targetName = this.getMbPropertyName();
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
+        'coalesce',
+        [this.getMbLookupFunction(), targetName],
+        0,
+      ]);
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', 0);
     }
   }
 
-  supportsMbFeatureState() {
+  supportsMbFeatureState(): boolean {
     return false;
+  }
+
+  getMbPropertyValue(rawValue: RawValue): RawValue {
+    return getNumericalMbFeatureStateValue(rawValue);
   }
 }
