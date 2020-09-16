@@ -48,6 +48,7 @@ import {
   transactionGroupsRoute,
   transactionGroupsAvgDurationByCountry,
   transactionGroupsAvgDurationByBrowser,
+  transactionSampleForGroupRoute,
   transactionGroupsErrorRateRoute,
 } from './transaction_groups';
 import {
@@ -78,6 +79,7 @@ import {
   rumServicesRoute,
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
+  rumLongTaskMetrics,
 } from './rum_client';
 import {
   observabilityOverviewHasDataRoute,
@@ -139,6 +141,7 @@ const createApmApi = () => {
     .add(transactionGroupsRoute)
     .add(transactionGroupsAvgDurationByBrowser)
     .add(transactionGroupsAvgDurationByCountry)
+    .add(transactionSampleForGroupRoute)
     .add(transactionGroupsErrorRateRoute)
 
     // UI filters
@@ -174,6 +177,7 @@ const createApmApi = () => {
     .add(rumServicesRoute)
     .add(rumVisitorsBreakdownRoute)
     .add(rumWebCoreVitals)
+    .add(rumLongTaskMetrics)
 
     // Observability dashboard
     .add(observabilityOverviewHasDataRoute)
