@@ -39,21 +39,20 @@ export class ReportingStore {
   private logger: LevelLogger;
 
   constructor(reporting: ReportingCore, logger: LevelLogger) {
-    this.logger = logger;
-
     const config = reporting.getConfig();
     const elasticsearch = reporting.getElasticsearchService();
 
     this.client = elasticsearch.legacy.client;
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
-
     this.jobSettings = {
       timeout: durationToNumber(config.get('queue', 'timeout')),
       browser_type: config.get('capture', 'browser', 'type'),
       max_attempts: config.get('capture', 'maxAttempts'),
       priority: 10, // unused
     };
+
+    this.logger = logger;
   }
 
   private async createIndex(indexName: string) {
