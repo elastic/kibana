@@ -5,11 +5,9 @@
  */
 import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { CLS_LABEL, FID_LABEL, LCP_LABEL } from './translations';
 import { CoreVitalItem } from './CoreVitalItem';
+import { UXMetrics } from '../UXMetrics';
 
 const CoreVitalsThresholds = {
   LCP: { good: '2.5s', bad: '4.0s' },
@@ -17,27 +15,12 @@ const CoreVitalsThresholds = {
   CLS: { good: '0.1', bad: '0.25' },
 };
 
-export function CoreVitals() {
-  const { urlParams, uiFilters } = useUrlParams();
+interface Props {
+  data?: UXMetrics | null;
+  loading: boolean;
+}
 
-  const { start, end } = urlParams;
-
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      const { serviceName } = uiFilters;
-      if (start && end && serviceName) {
-        return callApmApi({
-          pathname: '/api/apm/rum-client/web-core-vitals',
-          params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
-          },
-        });
-      }
-      return Promise.resolve(null);
-    },
-    [start, end, uiFilters]
-  );
-
+export function CoreVitals({ data, loading }: Props) {
   const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks } = data || {};
 
   return (
@@ -47,7 +30,7 @@ export function CoreVitals() {
           title={LCP_LABEL}
           value={lcp ? lcp + 's' : '0'}
           ranks={lcpRanks}
-          loading={status !== 'success'}
+          loading={loading}
           thresholds={CoreVitalsThresholds.LCP}
         />
       </EuiFlexItem>
@@ -56,7 +39,7 @@ export function CoreVitals() {
           title={FID_LABEL}
           value={fid ? fid + 's' : '0'}
           ranks={fidRanks}
-          loading={status !== 'success'}
+          loading={loading}
           thresholds={CoreVitalsThresholds.FID}
         />
       </EuiFlexItem>
@@ -65,7 +48,7 @@ export function CoreVitals() {
           title={CLS_LABEL}
           value={cls ?? '0'}
           ranks={clsRanks}
-          loading={status !== 'success'}
+          loading={loading}
           thresholds={CoreVitalsThresholds.CLS}
         />
       </EuiFlexItem>
