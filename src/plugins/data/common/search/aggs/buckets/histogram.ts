@@ -156,7 +156,7 @@ export const getHistogramBucketAgg = ({
             values,
             interval: aggConfig.params.interval,
             maxBucketsUiSettings: getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-            maxBucketsUserInput: aggConfig.params.maxBars,
+            maxBucketsUserInput: aggConfig.params.maxBars || undefined, // Passing undefined makes it correctly handle the '' (empty string) value
             intervalBase: aggConfig.params.intervalBase,
           });
         },
