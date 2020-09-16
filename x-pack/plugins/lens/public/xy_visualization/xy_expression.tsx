@@ -418,7 +418,7 @@ export function XYChart({
             {
               row: table.rows.findIndex((row) => {
                 if (layer.xAccessor) {
-                  if (layer.xAccessor in layersAlreadyFormatted) {
+                  if (layersAlreadyFormatted[layer.xAccessor]) {
                     // stringify the value to compare with the chart value
                     return xAxisFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
                   }
