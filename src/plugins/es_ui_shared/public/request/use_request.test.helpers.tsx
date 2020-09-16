@@ -111,6 +111,8 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
         requestConfig
       );
 
+      // Force a re-render of the component to stress-test the useRequest hook and verify its
+      // state remains unaffected.
       const [, setState] = useState(false);
       useEffect(() => {
         setState(true);
