@@ -4,12 +4,12 @@
       "k8s",
       "metrics"
     ],
-    "description": "Metrics: Kubernetes - Identify unusual spikes in memory usage across kubernetes pods.",
+    "description": "Metrics: Kubernetes - Identify unusual spikes in memory usage across Kubernetes pods.",
     "analysis_config": {
       "bucket_span": "15m",
       "detectors": [
         {
-          "detector_description": "max('kubernetes.pod.memory.usage.node.pct') partitionfield='kubernetes.namespace'",
+          "detector_description": "max('kubernetes.pod.memory.usage.node.pct')",
           "function": "max",
           "field_name": "kubernetes.pod.memory.usage.node.pct",
           "partition_field_name": "kubernetes.namespace",
