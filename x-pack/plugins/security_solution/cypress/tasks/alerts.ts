@@ -85,7 +85,8 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
 
 export const sortRiskScore = () => {
   cy.get(ALERT_RISK_SCORE_HEADER).click();
-  waitForThePageToBeUpdated();
+  cy.get('[data-test-subj="timeline-loading-spinner"]').should('exist');
+  cy.get('[data-test-subj="timeline-loading-spinner"]').should('not.exist');
 };
 
 export const investigateFirstAlertInTimeline = () => {

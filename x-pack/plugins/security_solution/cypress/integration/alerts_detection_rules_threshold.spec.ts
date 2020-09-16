@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newThresholdRule } from '../objects/rule';
+import { indexPatterns, newThresholdRule } from '../objects/rule';
 import {
   ALERT_RULE_METHOD,
   ALERT_RULE_NAME,
@@ -18,20 +18,35 @@ import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
+  RULE_SWITCH,
   RULES_ROW,
   RULES_TABLE,
   SEVERITY,
 } from '../screens/alerts_detection_rules';
 import {
+  ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
   ABOUT_RULE_DESCRIPTION,
+  ADDITIONAL_LOOK_BACK_DETAILS,
+  CUSTOM_QUERY_DETAILS,
+  FALSE_POSITIVES_DETAILS,
+  DEFINITION_DETAILS,
+  getDetails,
+  INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
+  MITRE_ATTACK_DETAILS,
+  REFERENCE_URLS_DETAILS,
+  RISK_SCORE_DETAILS,
   RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
-  getDescriptionForTitle,
-  ABOUT_DETAILS,
-  DEFINITION_DETAILS,
+  RULE_TYPE_DETAILS,
+  RUNS_EVERY_DETAILS,
+  SCHEDULE_DETAILS,
+  SEVERITY_DETAILS,
+  TAGS_DETAILS,
+  THRESHOLD_DETAILS,
+  TIMELINE_TEMPLATE_DETAILS,
 } from '../screens/rule_details';
 
 import {
@@ -53,12 +68,33 @@ import {
   fillDefineThresholdRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectThresholdRuleType,
+  waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
+
+let expectedUrls = '';
+newThresholdRule.referenceUrls.forEach((url) => {
+  expectedUrls = expectedUrls + url;
+});
+let expectedFalsePositives = '';
+newThresholdRule.falsePositivesExamples.forEach((falsePositive) => {
+  expectedFalsePositives = expectedFalsePositives + falsePositive;
+});
+let expectedTags = '';
+newThresholdRule.tags.forEach((tag) => {
+  expectedTags = expectedTags + tag;
+});
+let expectedMitre = '';
+newThresholdRule.mitre.forEach((mitre) => {
+  expectedMitre = expectedMitre + mitre.tactic;
+  mitre.techniques.forEach((technique) => {
+    expectedMitre = expectedMitre + technique;
+  });
+});
 
 describe('Detection rules, threshold', () => {
   before(() => {
@@ -82,7 +118,7 @@ describe('Detection rules, threshold', () => {
     fillScheduleRuleAndContinue(newThresholdRule);
     createAndActivateRule();
 
-    cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
+    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
@@ -97,89 +133,46 @@ describe('Detection rules, threshold', () => {
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
     });
-    cy.get(RULE_NAME).invoke('text').should('eql', newThresholdRule.name);
-    cy.get(RISK_SCORE).invoke('text').should('eql', newThresholdRule.riskScore);
-    cy.get(SEVERITY).invoke('text').should('eql', newThresholdRule.severity);
-    cy.get('[data-test-subj="rule-switch"]').should('have.attr', 'aria-checked', 'true');
+    cy.get(RULE_NAME).should('have.text', newThresholdRule.name);
+    cy.get(RISK_SCORE).should('have.text', newThresholdRule.riskScore);
+    cy.get(SEVERITY).should('have.text', newThresholdRule.severity);
+    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
+    waitForTheRuleToBeExecuted();
 
-    let expectedUrls = '';
-    newThresholdRule.referenceUrls.forEach((url) => {
-      expectedUrls = expectedUrls + url;
-    });
-    let expectedFalsePositives = '';
-    newThresholdRule.falsePositivesExamples.forEach((falsePositive) => {
-      expectedFalsePositives = expectedFalsePositives + falsePositive;
-    });
-    let expectedTags = '';
-    newThresholdRule.tags.forEach((tag) => {
-      expectedTags = expectedTags + tag;
-    });
-    let expectedMitre = '';
-    newThresholdRule.mitre.forEach((mitre) => {
-      expectedMitre = expectedMitre + mitre.tactic;
-      mitre.techniques.forEach((technique) => {
-        expectedMitre = expectedMitre + technique;
-      });
-    });
-    const expectedIndexPatterns = [
-      'apm-*-transaction*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'logs-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ];
-
-    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${newThresholdRule.name} Beta`);
-
-    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', newThresholdRule.description);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newThresholdRule.name} Beta`);
+    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newThresholdRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDescriptionForTitle('Severity').invoke('text').should('eql', newThresholdRule.severity);
-      getDescriptionForTitle('Risk score').invoke('text').should('eql', newThresholdRule.riskScore);
-      getDescriptionForTitle('Reference URLs').invoke('text').should('eql', expectedUrls);
-      getDescriptionForTitle('False positive examples')
-        .invoke('text')
-        .should('eql', expectedFalsePositives);
-      getDescriptionForTitle('MITRE ATT&CK').invoke('text').should('eql', expectedMitre);
-      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
+      getDetails(SEVERITY_DETAILS).should('have.text', newThresholdRule.severity);
+      getDetails(RISK_SCORE_DETAILS).should('have.text', newThresholdRule.riskScore);
+      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
+      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
-
     cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
-    cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', INVESTIGATION_NOTES_MARKDOWN);
-
+    cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDescriptionForTitle('Index patterns')
-        .invoke('text')
-        .should('eql', expectedIndexPatterns.join(''));
-      getDescriptionForTitle('Custom query')
-        .invoke('text')
-        .should('eql', `${newThresholdRule.customQuery} `);
-      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Threshold');
-      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
-      getDescriptionForTitle('Threshold')
-        .invoke('text')
-        .should(
-          'eql',
-          `Results aggregated by ${newThresholdRule.thresholdField} >= ${newThresholdRule.threshold}`
-        );
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', `${newThresholdRule.customQuery} `);
+      getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
+      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+      getDetails(THRESHOLD_DETAILS).should(
+        'have.text',
+        `Results aggregated by ${newThresholdRule.thresholdField} >= ${newThresholdRule.threshold}`
+      );
     });
-
-    cy.get('[data-test-subj=schedule] [data-test-subj="listItemColumnStepRuleDescription"]').within(
-      () => {
-        getDescriptionForTitle('Runs every')
-          .invoke('text')
-          .should(
-            'eql',
-            `${newThresholdRule.runsEvery.interval}${newThresholdRule.runsEvery.type}`
-          );
-        getDescriptionForTitle('Additional look-back time')
-          .invoke('text')
-          .should('eql', `${newThresholdRule.lookBack.interval}${newThresholdRule.lookBack.type}`);
-      }
-    );
+    cy.get(SCHEDULE_DETAILS).within(() => {
+      getDetails(RUNS_EVERY_DETAILS).should(
+        'have.text',
+        `${newThresholdRule.runsEvery.interval}${newThresholdRule.runsEvery.type}`
+      );
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
+        'have.text',
+        `${newThresholdRule.lookBack.interval}${newThresholdRule.lookBack.type}`
+      );
+    });
 
     refreshPage();
 

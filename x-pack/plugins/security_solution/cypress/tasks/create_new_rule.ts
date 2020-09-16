@@ -278,8 +278,15 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
-export const waitForTheRuleToBeExecuted = (rule: CustomRule) => {
-  cy.wait(parseInt(rule.runsEvery.interval, 10) * 1000);
+export const waitForTheRuleToBeExecuted = () => {
+  cy.get('[data-test-subj=ruleStatus]')
+    .invoke('text')
+    .then((ruleStatus) => {
+      if (ruleStatus !== 'succeeded') {
+        cy.get('[data-test-subj=refreshButton]').click();
+        // cy.get('[data-test-subj=ruleStatus]').should('have.text', 'succeeded')
+      }
+    });
 };
 
 export const selectEqlRuleType = () => {

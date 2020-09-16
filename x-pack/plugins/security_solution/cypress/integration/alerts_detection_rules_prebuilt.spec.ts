@@ -56,7 +56,7 @@ describe('Alerts rules, prebuilt rules', () => {
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
-    cy.get(ELASTIC_RULES_BTN).invoke('text').should('eql', expectedElasticRulesBtnText);
+    cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
@@ -81,7 +81,7 @@ describe('Deleting prebuilt rules', () => {
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
-    cy.get(ELASTIC_RULES_BTN).invoke('text').should('eql', expectedElasticRulesBtnText);
+    cy.get(ELASTIC_RULES_BTN).should('have.text', expectedElasticRulesBtnText);
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
@@ -113,16 +113,15 @@ describe('Deleting prebuilt rules', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    cy.get(ELASTIC_RULES_BTN)
-      .invoke('text')
-      .should('eql', `Elastic rules (${expectedNumberOfRulesAfterDeletion})`);
+    cy.get(ELASTIC_RULES_BTN).should(
+      'have.text',
+      `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
+    );
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
     });
     cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
-    cy.get(RELOAD_PREBUILT_RULES_BTN)
-      .invoke('text')
-      .should('eql', 'Install 1 Elastic prebuilt rule ');
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should('have.text', 'Install 1 Elastic prebuilt rule ');
 
     reloadDeletedRules();
 
@@ -135,9 +134,10 @@ describe('Deleting prebuilt rules', () => {
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterRecovering);
     });
-    cy.get(ELASTIC_RULES_BTN)
-      .invoke('text')
-      .should('eql', `Elastic rules (${expectedNumberOfRulesAfterRecovering})`);
+    cy.get(ELASTIC_RULES_BTN).should(
+      'have.text',
+      `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
+    );
   });
 
   it('Deletes and recovers more than one rule', () => {
@@ -152,12 +152,14 @@ describe('Deleting prebuilt rules', () => {
     waitForRulesToBeLoaded();
 
     cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
-    cy.get(RELOAD_PREBUILT_RULES_BTN)
-      .invoke('text')
-      .should('eql', `Install ${numberOfRulesToBeSelected} Elastic prebuilt rules `);
-    cy.get(ELASTIC_RULES_BTN)
-      .invoke('text')
-      .should('eql', `Elastic rules (${expectedNumberOfRulesAfterDeletion})`);
+    cy.get(RELOAD_PREBUILT_RULES_BTN).should(
+      'have.text',
+      `Install ${numberOfRulesToBeSelected} Elastic prebuilt rules `
+    );
+    cy.get(ELASTIC_RULES_BTN).should(
+      'have.text',
+      `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
+    );
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
     });
@@ -173,8 +175,9 @@ describe('Deleting prebuilt rules', () => {
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterRecovering);
     });
-    cy.get(ELASTIC_RULES_BTN)
-      .invoke('text')
-      .should('eql', `Elastic rules (${expectedNumberOfRulesAfterRecovering})`);
+    cy.get(ELASTIC_RULES_BTN).should(
+      'have.text',
+      `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
+    );
   });
 });

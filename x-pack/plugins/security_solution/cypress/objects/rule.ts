@@ -229,3 +229,21 @@ export const eqlRule: CustomRule = {
   runsEvery,
   lookBack,
 };
+
+export const indexPatterns = [
+  'apm-*-transaction*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+];
+
+export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
+
+export const editedRule = {
+  ...existingRule,
+  severity: 'Medium',
+  description: 'Edited Rule description',
+};

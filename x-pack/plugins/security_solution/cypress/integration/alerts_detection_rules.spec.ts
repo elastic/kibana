@@ -43,6 +43,7 @@ describe('Alerts detection rules', () => {
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+
     cy.get(RULE_NAME)
       .eq(FIFTH_RULE)
       .invoke('text')
@@ -56,7 +57,6 @@ describe('Alerts detection rules', () => {
             activateRule(SEVENTH_RULE);
             waitForRuleToBeActivated();
             sortByActivatedRules();
-
             cy.get(RULE_NAME)
               .eq(FIRST_RULE)
               .invoke('text')
@@ -70,7 +70,6 @@ describe('Alerts detection rules', () => {
                     cy.wrap(expectedRulesNames).should('include', seventhRuleName);
                   });
               });
-
             cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
             cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
           });

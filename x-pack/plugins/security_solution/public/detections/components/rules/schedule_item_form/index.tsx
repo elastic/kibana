@@ -145,7 +145,6 @@ export const ScheduleItem = ({
       <EuiFormControlLayout
         append={
           <MyEuiSelect
-            data-test-subj="schedule-units-input"
             fullWidth={false}
             options={timeTypeOptions}
             onChange={onChangeTimeType}
@@ -156,7 +155,6 @@ export const ScheduleItem = ({
         }
       >
         <EuiFieldNumber
-          data-test-subj="schedule-amount-input"
           fullWidth
           min={minimumValue}
           onChange={onChangeTimeVal}
