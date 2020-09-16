@@ -216,10 +216,9 @@ export class AlertsClient {
     this.validateActions(alertType, data.actions);
 
     const { references, actions } = await this.denormalizeActions(data.actions);
-    const encryptedAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
     const rawAlert: RawAlert = {
       ...data,
-      ...encryptedAttributes,
+      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       actions,
       createdBy: username,
       updatedBy: username,
@@ -384,7 +383,7 @@ export class AlertsClient {
 
   public async delete({ id }: { id: string }) {
     let taskIdToRemove: string | undefined | null;
-    let apiKeyToInvalidate: string | null | undefined = null;
+    let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
 
     try {
@@ -531,7 +530,7 @@ export class AlertsClient {
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null | undefined = null;
+    let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
     let version: string | undefined;
 
@@ -660,7 +659,7 @@ export class AlertsClient {
   }
 
   public async disable({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null | undefined = null;
+    let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
     let version: string | undefined;
 
