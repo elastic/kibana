@@ -5,10 +5,14 @@
  */
 
 import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import React, { useEffect, useState, FormEvent } from 'react';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { I18LABELS } from '../../translations';
@@ -22,6 +26,16 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   const { start, end, serviceName } = urlParams;
   const [searchValue, setSearchValue] = useState('');
+
+  const [debouncedValue, setDebouncedValue] = useState('');
+
+  useDebounce(
+    () => {
+      setSearchValue(debouncedValue);
+    },
+    250,
+    [debouncedValue]
+  );
 
   const [checkedUrls, setCheckedUrls] = useState<string[]>([]);
 
@@ -69,18 +83,41 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
         {
           text: I18LABELS.pageViews + ': ' + item.count,
           type: 'deployment',
-          highlightSearchString: true,
+          highlightSearchString: false,
         },
         {
           text: I18LABELS.pageLoadDuration + ': ' + item.pld + ' ms',
           type: 'deployment',
-          highlightSearchString: true,
+          highlightSearchString: false,
         },
       ],
       url: item.url,
       checked: checkedUrls?.includes(item.url) ? 'on' : null,
     })
   );
+
+  const onInputChange = (e: FormEvent<HTMLInputElement>) => {
+    setDebouncedValue(e.currentTarget.value);
+  };
+
+  function PopOverTitle() {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          {searchValue ? I18LABELS.searchResults : I18LABELS.topPages}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            disabled={searchValue === ''}
+            onClick={() => window.alert('Button clicked')}
+          >
+            Match this query
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <EuiSelectableTemplateSitewide
@@ -91,14 +128,14 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
       options={items}
       searchProps={{
         placeholder: I18LABELS.searchByUrl,
-        onSearch: setSearchValue,
+        onInput: onInputChange,
       }}
       popoverProps={{
         closePopover: () => {
           onFilterChange(checkedUrls);
         },
       }}
-      popoverTitle={searchValue ? I18LABELS.searchResults : I18LABELS.topPages}
+      popoverTitle={<PopOverTitle />}
       listProps={{
         showIcons: true,
         onFocusBadge: {
