@@ -47,6 +47,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
+  indexesName,
   to,
   narrowDateRange,
   setQuery,
@@ -55,6 +56,7 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
     filterQuery,
     endDate: to,
+    indexesName,
     startDate: from,
     skip,
   });

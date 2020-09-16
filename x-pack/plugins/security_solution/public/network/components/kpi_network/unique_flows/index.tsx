@@ -28,6 +28,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
+  indexesName,
   to,
   narrowDateRange,
   setQuery,
@@ -36,6 +37,7 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniqueFlows({
     filterQuery,
     endDate: to,
+    indexesName,
     startDate: from,
     skip,
   });
