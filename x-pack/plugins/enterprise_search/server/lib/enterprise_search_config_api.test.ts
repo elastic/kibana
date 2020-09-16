@@ -145,7 +145,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       },
       appSearch: {
         accountId: undefined,
-        onBoardingComplete: false,
+        onboardingComplete: false,
         role: {
           id: undefined,
           roleType: undefined,

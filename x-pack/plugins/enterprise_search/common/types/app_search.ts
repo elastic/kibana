@@ -6,7 +6,7 @@
 
 export interface IAccount {
   accountId: string;
-  onBoardingComplete: boolean;
+  onboardingComplete: boolean;
   role: IRole;
 }
 
