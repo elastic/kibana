@@ -6,6 +6,7 @@
 import Boom from 'boom';
 import {
   ILegacyScopedClusterClient,
+  SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
   KibanaRequest,
@@ -30,7 +31,6 @@ import {
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionType } from '../common';
-import { SavedObjectsClientWithoutUpdates } from './saved_objects';
 import { shouldLegacyRbacApplyBySource } from './authorization/should_legacy_rbac_apply_by_source';
 
 // We are assuming there won't be many actions. This is why we will load
@@ -56,7 +56,7 @@ interface ConstructorOptions {
   defaultKibanaIndex: string;
   scopedClusterClient: ILegacyScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
-  unsecuredSavedObjectsClient: SavedObjectsClientWithoutUpdates;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
@@ -72,7 +72,7 @@ interface UpdateOptions {
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
   private readonly scopedClusterClient: ILegacyScopedClusterClient;
-  private readonly unsecuredSavedObjectsClient: SavedObjectsClientWithoutUpdates;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly actionExecutor: ActionExecutorContract;

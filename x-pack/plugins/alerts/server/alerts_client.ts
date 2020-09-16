@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, omitBy, isUndefined, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -534,7 +534,6 @@ export class AlertsClient {
   public async updateApiKey({ id }: { id: string }) {
     let apiKeyToInvalidate: string | null | undefined = null;
     let attributes: RawAlert;
-    let references: SavedObjectReference[];
     let version: string | undefined;
 
     try {
@@ -544,7 +543,6 @@ export class AlertsClient {
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
-      references = decryptedAlert.references;
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -554,7 +552,6 @@ export class AlertsClient {
       const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
-      references = alert.references;
     }
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
@@ -567,8 +564,9 @@ export class AlertsClient {
     }
 
     const username = await this.getUserName();
-    await this.unsecuredSavedObjectsClient.create<RawAlert>(
+    await this.unsecuredSavedObjectsClient.update(
       'alert',
+      id,
       this.updateMeta({
         ...attributes,
         ...this.apiKeyAsAlertAttributes(
@@ -577,15 +575,7 @@ export class AlertsClient {
         ),
         updatedBy: username,
       }),
-      omitBy(
-        {
-          id,
-          overwrite: true,
-          version,
-          references,
-        },
-        isUndefined
-      )
+      { version }
     );
 
     if (apiKeyToInvalidate) {
@@ -610,10 +600,9 @@ export class AlertsClient {
   }
 
   public async enable({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null | undefined = null;
+    let apiKeyToInvalidate: string | undefined | null = null;
     let attributes: RawAlert;
     let version: string | undefined;
-    let references: SavedObjectReference[];
 
     try {
       const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
@@ -622,7 +611,6 @@ export class AlertsClient {
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
-      references = decryptedAlert.references;
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -632,7 +620,6 @@ export class AlertsClient {
       const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
-      references = alert.references;
     }
 
     await this.authorization.ensureAuthorized(
@@ -647,27 +634,21 @@ export class AlertsClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
-      const updatedAttributes = {
-        ...attributes,
-        enabled: true,
-        ...this.apiKeyAsAlertAttributes(
-          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
-          username
-        ),
-        updatedBy: username,
-      };
-      const updatedAlert = await this.unsecuredSavedObjectsClient.create<RawAlert>(
+      await this.unsecuredSavedObjectsClient.update(
         'alert',
-        updatedAttributes,
-        omitBy(
-          {
-            id,
-            overwrite: true,
-            version,
-            references,
-          },
-          isUndefined
-        )
+        id,
+        this.updateMeta({
+          ...attributes,
+          enabled: true,
+          ...this.apiKeyAsAlertAttributes(
+            await this.createAPIKey(
+              this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+            ),
+            username
+          ),
+          updatedBy: username,
+        }),
+        { version }
       );
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       await this.unsecuredSavedObjectsClient.update('alert', id, {
@@ -683,7 +664,6 @@ export class AlertsClient {
     let apiKeyToInvalidate: string | null | undefined = null;
     let attributes: RawAlert;
     let version: string | undefined;
-    let references: SavedObjectReference[];
 
     try {
       const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
@@ -692,7 +672,6 @@ export class AlertsClient {
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
-      references = decryptedAlert.references;
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -702,7 +681,6 @@ export class AlertsClient {
       const alert = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
-      references = alert.references;
     }
 
     await this.authorization.ensureAuthorized(
@@ -712,27 +690,18 @@ export class AlertsClient {
     );
 
     if (attributes.enabled === true) {
-      await this.unsecuredSavedObjectsClient.create<RawAlert>(
+      await this.unsecuredSavedObjectsClient.update(
         'alert',
+        id,
         this.updateMeta({
-          ...(omit(
-            attributes,
-            'scheduledTaskId',
-            'apiKey',
-            'apiKeyOwner'
-          ) as AlertUpdateRequiredFields),
+          ...attributes,
           enabled: false,
+          scheduledTaskId: null,
+          apiKey: null,
+          apiKeyOwner: null,
           updatedBy: await this.getUserName(),
         }),
-        omitBy(
-          {
-            id,
-            overwrite: true,
-            version,
-            references,
-          },
-          isUndefined
-        )
+        { version }
       );
 
       await Promise.all([
@@ -745,11 +714,9 @@ export class AlertsClient {
   }
 
   public async muteAll({ id }: { id: string }) {
-    const {
-      attributes,
-      references,
-      version,
-    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+    const { attributes } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
+      RawAlert
+    >('alert', id, {
       namespace: this.namespace,
     });
     await this.authorization.ensureAuthorized(
@@ -774,11 +741,9 @@ export class AlertsClient {
   }
 
   public async unmuteAll({ id }: { id: string }) {
-    const {
-      attributes,
-      references,
-      version,
-    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+    const { attributes } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
+      RawAlert
+    >('alert', id, {
       namespace: this.namespace,
     });
     await this.authorization.ensureAuthorized(
@@ -805,7 +770,6 @@ export class AlertsClient {
   public async muteInstance({ alertId, alertInstanceId }: MuteOptions) {
     const {
       attributes,
-      references,
       version,
     } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
@@ -828,7 +792,7 @@ export class AlertsClient {
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
-      await this.unsecuredSavedObjectsClient.create<RawAlert>(
+      await this.unsecuredSavedObjectsClient.update(
         'alert',
         alertId,
         this.updateMeta({
@@ -849,7 +813,6 @@ export class AlertsClient {
   }) {
     const {
       attributes,
-      references,
       version,
     } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
@@ -869,7 +832,7 @@ export class AlertsClient {
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-      await this.unsecuredSavedObjectsClient.create<RawAlert>(
+      await this.unsecuredSavedObjectsClient.update<RawAlert>(
         'alert',
         alertId,
         this.updateMeta({
