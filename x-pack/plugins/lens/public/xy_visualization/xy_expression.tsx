@@ -98,7 +98,7 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['string'],
       help: i18n.translate('xpack.lens.xyChart.yRightTitle.help', {
         defaultMessage: 'Y right axis title',
-      })
+      }),
     },
     legend: {
       types: ['lens_xy_legendConfig'],
