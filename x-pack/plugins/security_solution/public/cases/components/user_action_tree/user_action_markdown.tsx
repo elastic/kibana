@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
 import { Markdown } from '../../../common/components/markdown';
-import { Form, useForm, UseField } from '../../../shared_imports';
+import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 import { schema, Content } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
@@ -41,11 +41,20 @@ export const UserActionMarkdown = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { submit } = form;
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<Content>(
-    form,
-    'content'
+
+  const fieldName = 'content';
+  const { submit, setFieldValue } = form;
+  const [{ content: contentFormValue }] = useFormData({ form, watch: [fieldName] });
+
+  const onContentChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
+    setFieldValue,
+  ]);
+
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline(
+    contentFormValue,
+    onContentChange
   );
+
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
   }, [id, onChangeEditable]);
@@ -93,7 +102,7 @@ export const UserActionMarkdown = ({
   return isEditable ? (
     <Form form={form} data-test-subj="user-action-markdown-form">
       <UseField
-        path="content"
+        path={fieldName}
         component={MarkdownEditorForm}
         componentProps={{
           bottomRightContent: renderButtons({
