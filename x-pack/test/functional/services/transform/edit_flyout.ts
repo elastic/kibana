@@ -36,7 +36,7 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     // for now we expect this to be used only for opening the accordion
-    async clickTransformEditAccordionAdvancedSettings() {
+    async openTransformEditAccordionAdvancedSettings() {
       await testSubjects.click('transformEditAccordionAdvancedSettings');
       await testSubjects.existOrFail('transformEditAccordionAdvancedSettingsContent');
     },
