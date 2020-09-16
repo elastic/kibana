@@ -41,10 +41,8 @@ export function getTransactionGroupsProjection({
       // @ts-expect-error: Property 'must_not' does not exist on type '{ filter: ESFilter[]; }'.
       transactionsProjection.body.query.bool.must_not = [
         {
-          must_not: {
-            exists: {
-              field: PARENT_ID,
-            },
+          exists: {
+            field: PARENT_ID,
           },
         },
       ];
