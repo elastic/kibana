@@ -10,19 +10,11 @@ import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDebounce } from 'react-use';
 import {
-  DraggableLocation,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiDroppable,
-  EuiDragDropContext,
-  euiDragDropReorder,
-  EuiDraggable,
-  EuiPanel,
   EuiIcon,
-  EuiButtonIcon,
   EuiFieldNumber,
   EuiLink,
   EuiText,
@@ -53,7 +45,6 @@ export const RangePopover = ({
   Button,
   isOpenByCreation,
   setIsOpenByCreation,
-  formatter,
 }: {
   range: LocalRangeType;
   setRange: (newRange: LocalRangeType) => void;

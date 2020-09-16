@@ -30,7 +30,7 @@ interface BucketContainerProps {
   invalidMessage: string;
   onRemoveClick: () => void;
   removeTitle: string;
-  isNotRemovable: boolean;
+  isNotRemovable?: boolean;
   children: React.ReactNode;
   dataTestSubj?: string;
 }

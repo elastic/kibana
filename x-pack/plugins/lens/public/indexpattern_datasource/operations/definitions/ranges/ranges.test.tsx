@@ -24,7 +24,6 @@ import { RangeIndexPatternColumn } from './ranges';
 import { autoInterval } from 'src/plugins/data/common';
 import { MODES, DEFAULT_INTERVAL, TYPING_DEBOUNCE_TIME } from './constants';
 import { RangePopover } from './advanced_editor';
-import { EuiButtonIcon } from '@elastic/eui';
 import { DragDropBuckets } from '../shared_components';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
