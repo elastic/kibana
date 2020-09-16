@@ -24,4 +24,10 @@ class KibanaTest {
       it.type == "CloudImage" && it.params.any { param -> param.name == "network" && param.value == "network"}
     })
   }
+
+  @Test
+  fun test_ESVerify() {
+    val project = Kibana()
+    assertTrue(true)
+  }
 }

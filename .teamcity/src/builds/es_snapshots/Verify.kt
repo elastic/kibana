@@ -1,6 +1,11 @@
 package builds.es_snapshots
 
+import builds.default.DefaultSecuritySolution
 import builds.default.defaultCiGroups
+import builds.oss.OssPluginFunctional
+import builds.oss.ossCiGroups
+import builds.test.ApiIntegration
+import builds.test.JestIntegration
 import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
@@ -58,7 +63,7 @@ object EsSnapshotsProject : Project({
     newBuild
   }
 
-  val defaultCiGroupsCloned = defaultCiGroups.map { cloneForVerify(it) }
+  val allTestJobs: ArrayList<BuildType> = ArrayList()
 
   subProject {
     id("ES_Snapshot_Tests")
@@ -66,16 +71,83 @@ object EsSnapshotsProject : Project({
 
     defaultTemplate = KibanaTemplate
 
-    defaultCiGroupsCloned.forEach {
-      buildType(it)
+    subProject {
+      id("ES_Snapshot_Tests_OSS")
+      name = "OSS Distro Tests"
+
+      val buildsToClone = listOf(
+        *ossCiGroups.toTypedArray(),
+        OssPluginFunctional
+      )
+
+      val clonedBuilds = buildsToClone.map { cloneForVerify(it) }
+
+      clonedBuilds.forEach {
+        buildType(it)
+      }
+
+      val composite = BuildType {
+        id("ES_Snapshots_OSS_Tests_Composite")
+        name = "OSS Distro Tests"
+        type = BuildTypeSettings.Type.COMPOSITE
+
+        dependsOn(*clonedBuilds.toTypedArray())
+      }
+
+      buildType(composite)
+      allTestJobs.add(composite)
     }
 
-    buildType(BuildType {
-      id("ES_Snapshots_Default_CIGroups_Composite")
-      name = "CI Groups"
-      type = BuildTypeSettings.Type.COMPOSITE
+    subProject {
+      id("ES_Snapshot_Tests_Default")
+      name = "Default Distro Tests"
 
-      dependsOn(*defaultCiGroupsCloned.toTypedArray())
-    })
+      val buildsToClone = listOf(
+        *defaultCiGroups.toTypedArray(),
+        DefaultSecuritySolution
+      )
+
+      val clonedBuilds = buildsToClone.map { cloneForVerify(it) }
+
+      clonedBuilds.forEach {
+        buildType(it)
+      }
+
+      val composite = BuildType {
+        id("ES_Snapshots_Default_Tests_Composite")
+        name = "Default Distro Tests"
+        type = BuildTypeSettings.Type.COMPOSITE
+
+        dependsOn(*clonedBuilds.toTypedArray())
+      }
+
+      buildType(composite)
+      allTestJobs.add(composite)
+    }
+
+    subProject {
+      id("ES_Snapshot_Tests_Integration")
+      name = "Integration Tests"
+
+      val buildsToClone = listOf(
+        ApiIntegration,
+        JestIntegration
+      )
+
+      val clonedBuilds = buildsToClone.map { cloneForVerify(it) }
+
+      clonedBuilds.forEach {
+        buildType(it)
+        allTestJobs.add(it)
+      }
+    }
   }
+
+  buildType(BuildType {
+    id("ES_Snapshots_All_Tests_Composite")
+    name = "All Tests"
+    type = BuildTypeSettings.Type.COMPOSITE
+
+    dependsOn(*allTestJobs.toTypedArray())
+  })
 })
