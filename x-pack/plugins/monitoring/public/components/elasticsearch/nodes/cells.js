@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
 import {
@@ -94,7 +94,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     );
 
     return (
-      <Fragment>
+      <div data-test-subj={props['data-test-subj']}>
         <EuiPopover ownFocus button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
           <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
             <EuiDescriptionList
@@ -113,7 +113,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
         </EuiPopover>
         &nbsp;
         <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
-      </Fragment>
+      </div>
     );
   }
 

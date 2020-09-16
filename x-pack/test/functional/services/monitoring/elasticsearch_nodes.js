@@ -6,6 +6,10 @@
 
 import { range } from 'lodash';
 
+function trimAll(data) {
+  return data.map((item) => item.trim());
+}
+
 export function MonitoringElasticsearchNodesProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['monitoring']);
@@ -110,10 +114,10 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     async getNodesAll() {
       const names = await testSubjects.getVisibleTextAll(SUBJ_NODES_NAMES);
       const statuses = await testSubjects.getAttributeAll(SUBJ_NODES_STATUSES, 'alt');
-      const cpus = await testSubjects.getVisibleTextAll(SUBJ_NODES_CPUS);
-      const loads = await testSubjects.getVisibleTextAll(SUBJ_NODES_LOADS);
-      const memories = await testSubjects.getVisibleTextAll(SUBJ_NODES_MEMS);
-      const disks = await testSubjects.getVisibleTextAll(SUBJ_NODES_DISKS);
+      const cpus = trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_CPUS));
+      const loads = trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_LOADS));
+      const memories = trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_MEMS));
+      const disks = trimAll(await testSubjects.getVisibleTextAll(SUBJ_NODES_DISKS));
       const shards = await testSubjects.getVisibleTextAll(SUBJ_NODES_SHARDS);
 
       const areasWithText = {
