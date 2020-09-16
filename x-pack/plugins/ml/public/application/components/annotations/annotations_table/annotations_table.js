@@ -269,7 +269,7 @@ class AnnotationsTableUI extends Component {
     // appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
     const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
-    const singleMetricAnnotationLink = await mlUrlGenerator.createUrl({
+    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
       page: ML_PAGES.SINGLE_METRIC_VIEWER,
       pageState: {
         timeRange,
@@ -290,9 +290,9 @@ class AnnotationsTableUI extends Component {
       excludeBasePath: true,
     });
 
-    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricAnnotationLink);
+    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricViewerLink);
     await navigateToApp(PLUGIN_ID, {
-      path: singleMetricAnnotationLink,
+      path: singleMetricViewerLink,
     });
   };
 

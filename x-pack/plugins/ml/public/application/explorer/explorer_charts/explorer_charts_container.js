@@ -130,7 +130,6 @@ function ExplorerChartContainerUI({ series, severity, tooManyBuckets, wrapLabel,
                 iconType="visLine"
                 size="xs"
                 onClick={redirectToSingleMetricViewer}
-                // onClick={() => window.open(getExploreSeriesLink(mlUrlGenerator, series), '_blank')}
               >
                 <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
               </EuiButtonEmpty>

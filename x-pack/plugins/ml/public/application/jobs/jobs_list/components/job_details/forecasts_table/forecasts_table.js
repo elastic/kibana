@@ -126,7 +126,7 @@ export class ForecastsTableUI extends Component {
     }
 
     const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
-    const singleMetricForecastLink = await mlUrlGenerator.createUrl({
+    const singleMetricViewerForecastLink = await mlUrlGenerator.createUrl({
       page: ML_PAGES.SINGLE_METRIC_VIEWER,
       pageState: {
         timeRange: {
@@ -153,10 +153,10 @@ export class ForecastsTableUI extends Component {
     addItemToRecentlyAccessed(
       'timeseriesexplorer',
       this.props.job.job_id,
-      singleMetricForecastLink
+      singleMetricViewerForecastLink
     );
     await navigateToApp(PLUGIN_ID, {
-      path: singleMetricForecastLink,
+      path: singleMetricViewerForecastLink,
     });
   }
 
