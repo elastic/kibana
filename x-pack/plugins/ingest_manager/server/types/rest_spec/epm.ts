@@ -32,7 +32,7 @@ export const GetInfoRequestSchema = {
   }),
 };
 
-export const InstallPackageRequestSchema = {
+export const InstallPackageFromRegistryRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),
   }),
@@ -41,6 +41,10 @@ export const InstallPackageRequestSchema = {
       force: schema.boolean(),
     })
   ),
+};
+
+export const InstallPackageByUploadRequestSchema = {
+  body: schema.buffer(),
 };
 
 export const DeletePackageRequestSchema = {

@@ -17,6 +17,8 @@ import {
   getTermsFields,
   getSourceFields,
   supportsGeoTileAgg,
+  supportsMvt,
+  getMvtDisabledReason,
 } from '../../../index_pattern_util';
 import { SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -42,6 +44,9 @@ export class UpdateSourceEditor extends Component {
     termFields: null,
     sortFields: null,
     supportsClustering: false,
+    supportsMvt: false,
+    mvtDisabledReason: null,
+    clusteringDisabledReason: null,
   };
 
   componentDidMount() {
@@ -94,9 +99,12 @@ export class UpdateSourceEditor extends Component {
       });
     });
 
+    const mvtSupported = supportsMvt(indexPattern, geoField.name);
     this.setState({
       supportsClustering: supportsGeoTileAgg(geoField),
+      supportsMvt: mvtSupported,
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
+      mvtDisabledReason: mvtSupported ? null : getMvtDisabledReason(),
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
@@ -207,7 +215,9 @@ export class UpdateSourceEditor extends Component {
           onChange={this.props.onChange}
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
+          supportsMvt={this.state.supportsMvt}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
+          mvtDisabledReason={this.state.mvtDisabledReason}
           termFields={this.state.termFields}
           topHitsSplitField={this.props.topHitsSplitField}
           topHitsSize={this.props.topHitsSize}

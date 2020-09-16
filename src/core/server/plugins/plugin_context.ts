@@ -19,6 +19,8 @@
 
 import { map, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
+import { PathConfigType, config as pathConfig } from '@kbn/utils';
+import { pick, deepFreeze } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -28,14 +30,16 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { PathConfigType, config as pathConfig } from '../path';
 import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
 import {
   ElasticsearchConfigType,
   config as elasticsearchConfig,
 } from '../elasticsearch/elasticsearch_config';
-import { pick, deepFreeze } from '../../utils';
 import { CoreSetup, CoreStart } from '..';
+
+export interface InstanceInfo {
+  uuid: string;
+}
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -53,7 +57,8 @@ import { CoreSetup, CoreStart } from '..';
 export function createPluginInitializerContext(
   coreContext: CoreContext,
   opaqueId: PluginOpaqueId,
-  pluginManifest: PluginManifest
+  pluginManifest: PluginManifest,
+  instanceInfo: InstanceInfo
 ): PluginInitializerContext {
   return {
     opaqueId,
@@ -64,6 +69,7 @@ export function createPluginInitializerContext(
     env: {
       mode: coreContext.env.mode,
       packageInfo: coreContext.env.packageInfo,
+      instanceUuid: instanceInfo.uuid,
     },
 
     /**
@@ -178,12 +184,13 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     status: {
       core$: deps.status.core$,
+      overall$: deps.status.overall$,
+      set: deps.status.plugins.set.bind(null, plugin.name),
+      dependencies$: deps.status.plugins.getDependenciesStatus$(plugin.name),
+      derivedStatus$: deps.status.plugins.getDerivedStatus$(plugin.name),
     },
     uiSettings: {
       register: deps.uiSettings.register,
-    },
-    uuid: {
-      getInstanceUuid: deps.uuid.getInstanceUuid,
     },
     getStartServices: () => plugin.startDependencies,
     auditTrail: deps.auditTrail,
@@ -229,6 +236,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
     },
     metrics: {
+      collectionInterval: deps.metrics.collectionInterval,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     uiSettings: {

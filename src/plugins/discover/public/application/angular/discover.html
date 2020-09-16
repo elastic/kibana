@@ -5,6 +5,7 @@
   <kbn-top-nav
     app-name="'discover'"
     config="topNavMenu"
+    set-menu-mount-point="setHeaderActionMenu"
     index-patterns="[indexPattern]"
     on-query-submit="handleRefresh"
     on-saved-query-id-change="updateSavedQueryId"
@@ -31,7 +32,6 @@
             on-remove-field="removeColumn"
             selected-index-pattern="searchSource.getField('index')"
             set-index-pattern="setIndexPattern"
-            state="state"
           >
           </discover-sidebar>
         </div>
@@ -78,11 +78,11 @@
               class="dscTimechart"
               ng-if="opts.timefield"
             >
-              <timechart-header 
+              <timechart-header
                 from="toMoment(timeRange.from)"
-                to="toMoment(timeRange.to)" 
-                options="intervalOptions" 
-                on-change-interval="changeInterval" 
+                to="toMoment(timeRange.to)"
+                options="intervalOptions"
+                on-change-interval="changeInterval"
                 state-interval="state.interval"
                 show-scaled-info="bucketInterval.scaled"
                 bucket-interval-description="bucketInterval.description"

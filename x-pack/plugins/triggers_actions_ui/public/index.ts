@@ -21,6 +21,7 @@ export {
   AlertTypeParamsExpressionProps,
   ValidationResult,
   ActionVariable,
+  ActionConnector,
 } from './types';
 export {
   ConnectorAddFlyout,

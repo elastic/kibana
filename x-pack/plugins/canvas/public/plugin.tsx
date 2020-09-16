@@ -40,7 +40,7 @@ export { CoreStart, CoreSetup };
 export interface CanvasSetupDeps {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
   bfetch: BfetchPublicSetup;
 }
@@ -88,7 +88,7 @@ export class CanvasPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: 'canvas',
       title: 'Canvas',
-      euiIconType: 'canvasApp',
+      euiIconType: 'logoKibana',
       order: 3000,
       updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {
@@ -116,7 +116,9 @@ export class CanvasPlugin
       },
     });
 
-    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    }
 
     canvasApi.addArgumentUIs(argTypeSpecs);
     canvasApi.addTransitions(transitions);

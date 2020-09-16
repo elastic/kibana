@@ -20,7 +20,7 @@
 import { exportSavedObjectsToStream } from './get_sorted_objects_for_export';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { Readable } from 'stream';
-import { createPromiseFromStreams, createConcatStream } from '../../../../legacy/utils/streams';
+import { createPromiseFromStreams, createConcatStream } from '../../utils/streams';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -663,6 +663,33 @@ describe('getSortedObjectsForExport()', () => {
               ],
             }
         `);
+  });
+
+  test('modifies return results to redact `namespaces` attribute', async () => {
+    const createSavedObject = (obj: any) => ({ ...obj, attributes: {}, references: [] });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        createSavedObject({ type: 'multi', id: '1', namespaces: ['foo'] }),
+        createSavedObject({ type: 'multi', id: '2', namespaces: ['bar'] }),
+        createSavedObject({ type: 'other', id: '3' }),
+      ],
+    });
+    const exportStream = await exportSavedObjectsToStream({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      objects: [
+        { type: 'multi', id: '1' },
+        { type: 'multi', id: '2' },
+        { type: 'other', id: '3' },
+      ],
+    });
+    const response = await readStreamToCompletion(exportStream);
+    expect(response).toEqual([
+      createSavedObject({ type: 'multi', id: '1' }),
+      createSavedObject({ type: 'multi', id: '2' }),
+      createSavedObject({ type: 'other', id: '3' }),
+      expect.objectContaining({ exportedCount: 3 }),
+    ]);
   });
 
   test('includes nested dependencies when passed in', async () => {

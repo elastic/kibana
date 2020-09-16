@@ -25,6 +25,7 @@ import { Synopsis } from './synopsis';
 test('render', () => {
   const component = shallow(
     <Synopsis
+      id={'tutorial'}
       description="this is a great tutorial about..."
       title="Great tutorial"
       url="link_to_item"
@@ -37,6 +38,7 @@ describe('props', () => {
   test('iconType', () => {
     const component = shallow(
       <Synopsis
+        id={'tutorial'}
         description="this is a great tutorial about..."
         title="Great tutorial"
         url="link_to_item"
@@ -49,6 +51,7 @@ describe('props', () => {
   test('iconUrl', () => {
     const component = shallow(
       <Synopsis
+        id={'tutorial'}
         description="this is a great tutorial about..."
         title="Great tutorial"
         url="link_to_item"
@@ -61,6 +64,7 @@ describe('props', () => {
   test('isBeta', () => {
     const component = shallow(
       <Synopsis
+        id={'tutorial'}
         description="this is a great tutorial about..."
         title="Great tutorial"
         url="link_to_item"

@@ -30,11 +30,8 @@ describe('LensStore', () => {
         title: 'Hello',
         description: 'My doc',
         visualizationType: 'bar',
-        expression: '',
+        references: [],
         state: {
-          datasourceMetaData: {
-            filterableIndexPatterns: [],
-          },
           datasourceStates: {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
@@ -49,11 +46,8 @@ describe('LensStore', () => {
         title: 'Hello',
         description: 'My doc',
         visualizationType: 'bar',
-        expression: '',
+        references: [],
         state: {
-          datasourceMetaData: {
-            filterableIndexPatterns: [],
-          },
           datasourceStates: {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
           },
@@ -64,21 +58,25 @@ describe('LensStore', () => {
       });
 
       expect(client.create).toHaveBeenCalledTimes(1);
-      expect(client.create).toHaveBeenCalledWith('lens', {
-        title: 'Hello',
-        description: 'My doc',
-        visualizationType: 'bar',
-        expression: '',
-        state: {
-          datasourceMetaData: { filterableIndexPatterns: [] },
-          datasourceStates: {
-            indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
+      expect(client.create).toHaveBeenCalledWith(
+        'lens',
+        {
+          title: 'Hello',
+          description: 'My doc',
+          visualizationType: 'bar',
+          state: {
+            datasourceStates: {
+              indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
+            },
+            visualization: { x: 'foo', y: 'baz' },
+            query: { query: '', language: 'lucene' },
+            filters: [],
           },
-          visualization: { x: 'foo', y: 'baz' },
-          query: { query: '', language: 'lucene' },
-          filters: [],
         },
-      });
+        {
+          references: [],
+        }
+      );
     });
 
     test('updates and returns a visualization document', async () => {
@@ -87,9 +85,8 @@ describe('LensStore', () => {
         id: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        expression: '',
+        references: [],
         state: {
-          datasourceMetaData: { filterableIndexPatterns: [] },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },
@@ -101,9 +98,8 @@ describe('LensStore', () => {
         id: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        expression: '',
+        references: [],
         state: {
-          datasourceMetaData: { filterableIndexPatterns: [] },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },
@@ -116,22 +112,21 @@ describe('LensStore', () => {
         {
           type: 'lens',
           id: 'Gandalf',
+          references: [],
           attributes: {
             title: null,
             visualizationType: null,
-            expression: null,
             state: null,
           },
         },
         {
           type: 'lens',
           id: 'Gandalf',
+          references: [],
           attributes: {
             title: 'Even the very wise cannot see all ends.',
             visualizationType: 'line',
-            expression: '',
             state: {
-              datasourceMetaData: { filterableIndexPatterns: [] },
               datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
               visualization: { gear: ['staff', 'pointy hat'] },
               query: { query: '', language: 'lucene' },

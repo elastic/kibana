@@ -79,8 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
       expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_type).to.eql('realm');
+      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });
 
     describe('initiating SPNEGO', () => {
@@ -120,7 +121,14 @@ export default function ({ getService }: FtrProviderContext) {
         const sessionCookie = request.cookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
-        const expectedUserRoles = ['kibana_admin'];
+        const isAnonymousAccessEnabled = (config.get(
+          'esTestCluster.serverArgs'
+        ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+
+        // `superuser_anonymous` role is derived from the enabled anonymous access.
+        const expectedUserRoles = isAnonymousAccessEnabled
+          ? ['kibana_admin', 'superuser_anonymous']
+          : ['kibana_admin'];
 
         await supertest
           .get('/internal/security/me')
@@ -139,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
             authentication_provider: 'kerberos',
+            authentication_type: 'token',
           });
       });
 

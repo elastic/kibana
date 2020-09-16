@@ -20,12 +20,12 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { PathConfigType } from '@kbn/utils';
 
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { PathConfigType } from '../path';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -92,6 +92,12 @@ export type PluginName = string;
 
 /** @public */
 export type PluginOpaqueId = symbol;
+
+/** @internal */
+export interface PluginDependencies {
+  asNames: ReadonlyMap<PluginName, PluginName[]>;
+  asOpaqueIds: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
+}
 
 /**
  * Describes the set of required and optional properties plugin can define in its
@@ -278,6 +284,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: {
     mode: EnvironmentMode;
     packageInfo: Readonly<PackageInfo>;
+    instanceUuid: string;
   };
   logger: LoggerFactory;
   config: {

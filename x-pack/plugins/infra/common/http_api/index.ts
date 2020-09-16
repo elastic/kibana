@@ -9,3 +9,5 @@ export * from './metadata_api';
 export * from './log_entries';
 export * from './metrics_explorer';
 export * from './metrics_api';
+export * from './log_alerts';
+export * from './snapshot_api';

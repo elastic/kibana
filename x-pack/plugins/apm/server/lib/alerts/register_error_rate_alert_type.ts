@@ -75,7 +75,7 @@ export function registerErrorRateAlertType({
       });
 
       const environmentTerm =
-        alertParams.environment === ENVIRONMENT_ALL
+        alertParams.environment === ENVIRONMENT_ALL.value
           ? []
           : [{ term: { [SERVICE_ENVIRONMENT]: alertParams.environment } }];
 

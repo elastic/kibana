@@ -61,7 +61,7 @@ export class GraphPlugin
         }),
         icon: 'graphApp',
         path: '/app/graph',
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }
@@ -74,7 +74,7 @@ export class GraphPlugin
       title: 'Graph',
       order: 6000,
       appRoute: '/app/graph',
-      euiIconType: 'graphApp',
+      euiIconType: 'logoKibana',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
@@ -113,7 +113,8 @@ export class GraphPlugin
       throw new Error('Start called before setup');
     }
     this.licensing.license$.subscribe((license) => {
-      toggleNavLink(checkLicense(license), core.chrome.navLinks);
+      const licenseInformation = checkLicense(license);
+      toggleNavLink(licenseInformation, core.chrome.navLinks);
     });
   }
 

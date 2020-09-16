@@ -15,7 +15,7 @@ export interface BaseUrlConfig {
 }
 
 export interface KibanaUrlConfig extends BaseUrlConfig {
-  time_range: string;
+  time_range?: string;
 }
 
 export type UrlConfig = BaseUrlConfig | KibanaUrlConfig;

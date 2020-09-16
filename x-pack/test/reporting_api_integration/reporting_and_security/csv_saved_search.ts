@@ -293,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
           searchId: 'search:a6d51430-ace2-11ea-815f-39e12f89a8c2',
           postPayload: {
             timerange: { timezone: 'UTC', min: '1979-01-01T10:00:00Z', max: '1981-01-01T10:00:00Z' }, // prettier-ignore
-            state: { query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fel*' } }] } } ] } } ] } } } // prettier-ignore
+            state: { query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fel*' } }] } } ] } } ] } } }, // prettier-ignore
           },
           isImmediate: true,
         };

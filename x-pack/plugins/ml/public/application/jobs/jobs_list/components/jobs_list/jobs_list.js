@@ -7,7 +7,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 
 import { toLocaleString } from '../../../../util/string_utils';

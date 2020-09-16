@@ -90,7 +90,7 @@ class PrChangesTest extends KibanaBasePipelineTest {
     props([
       githubPrs: [
         getChanges: { [
-          [filename: 'docs/developer/architecture/code-exploration.asciidoc'],
+          [filename: 'docs/developer/plugin-list.asciidoc'],
         ] },
       ],
     ])

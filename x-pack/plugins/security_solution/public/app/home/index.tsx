@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineId } from '../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
 import { HeaderGlobal } from '../../common/components/header_global';
@@ -17,6 +18,7 @@ import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useUserInfo } from '../../detections/components/user_info';
 
 const SecuritySolutionAppWrapper = styled.div`
   display: flex;
@@ -52,6 +54,9 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const [showTimeline] = useShowTimeline();
   const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
 
+  // side effect: this will attempt to create the signals index if it doesn't exist
+  useUserInfo();
+
   return (
     <SecuritySolutionAppWrapper>
       <HeaderGlobal />
@@ -62,7 +67,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout timelineId="timeline-1" usersViewing={usersViewing} />
+              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
             </>
           )}
 

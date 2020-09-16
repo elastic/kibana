@@ -19,12 +19,12 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { createPluginInitializerContext } from './plugin_context';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { rawConfigServiceMock } from '../config/raw_config_service.mock';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { PluginManifest } from './types';
 import { Server } from '../server';
 import { fromRoot } from '../utils';
@@ -35,6 +35,7 @@ let coreId: symbol;
 let env: Env;
 let coreContext: CoreContext;
 let server: Server;
+let instanceInfo: InstanceInfo;
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -51,10 +52,13 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
   };
 }
 
-describe('Plugin Context', () => {
+describe('createPluginInitializerContext', () => {
   beforeEach(async () => {
     coreId = Symbol('core');
-    env = Env.createDefault(getEnvOptions());
+    instanceInfo = {
+      uuid: 'instance-uuid',
+    };
+    env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
     await server.setupCoreConfig();
@@ -67,7 +71,8 @@ describe('Plugin Context', () => {
     const pluginInitializerContext = createPluginInitializerContext(
       coreContext,
       opaqueId,
-      manifest
+      manifest,
+      instanceInfo
     );
 
     expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
@@ -89,5 +94,20 @@ describe('Plugin Context', () => {
       },
       path: { data: fromRoot('data') },
     });
+  });
+
+  it('allow to access the provided instance uuid', () => {
+    const manifest = createPluginManifest();
+    const opaqueId = Symbol();
+    instanceInfo = {
+      uuid: 'kibana-uuid',
+    };
+    const pluginInitializerContext = createPluginInitializerContext(
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo
+    );
+    expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
   });
 });

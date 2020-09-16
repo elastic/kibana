@@ -9,10 +9,20 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('blended vector layer', () => {
     before(async () => {
+      await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all']);
       await PageObjects.maps.loadSavedMap('blended document example');
+    });
+
+    afterEach(async () => {
+      await inspector.close();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should request documents when zoomed to smaller regions showing less data', async () => {

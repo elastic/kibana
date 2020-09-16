@@ -64,8 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // Will be enabling this and field formatters after this issue is addressed: https://github.com/elastic/kibana/issues/60030
-    it.skip('Edit field type', async () => {
+    it('Edit field type', async () => {
       await PageObjects.settings.clickEditFieldFormat();
       await a11y.testAppSnapshot();
     });
