@@ -18,10 +18,11 @@
  */
 
 import moment from 'moment';
+
+import { configServiceMock } from '../config/mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { mockCoreContext } from '../core_context.mock';
-import { configServiceMock } from '../config/config_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { take } from 'rxjs/operators';
 

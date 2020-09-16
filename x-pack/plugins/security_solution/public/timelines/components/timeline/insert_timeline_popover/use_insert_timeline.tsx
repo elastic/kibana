@@ -5,37 +5,59 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { CursorPosition } from '../../../../common/components/markdown_editor';
-import { FormData, FormHook } from '../../../../shared_imports';
+import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
+import { setInsertTimeline } from '../../../store/timeline/actions';
 
-export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldName: string) => {
+export const useInsertTimeline = (value: string, onChange: (newValue: string) => void) => {
   const basePath = window.location.origin + useBasePath();
+  const dispatch = useDispatch();
   const [cursorPosition, setCursorPosition] = useState<CursorPosition>({
     start: 0,
     end: 0,
   });
+
+  const insertTimeline = useSelector(timelineSelectors.selectInsertTimeline, shallowEqual);
+
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null, graphEventId?: string) => {
       const builtLink = `${basePath}/app/security/timelines?timeline=(id:'${id}'${
         !isEmpty(graphEventId) ? `,graphEventId:'${graphEventId}'` : ''
       },isOpen:!t)`;
-      const currentValue = form.getFormData()[fieldName];
+
       const newValue: string = [
-        currentValue.slice(0, cursorPosition.start),
+        value.slice(0, cursorPosition.start),
         cursorPosition.start === cursorPosition.end
           ? `[${title}](${builtLink})`
-          : `[${currentValue.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
-        currentValue.slice(cursorPosition.end),
+          : `[${value.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
+        value.slice(cursorPosition.end),
       ].join('');
-      form.setFieldValue(fieldName, newValue);
+
+      onChange(newValue);
     },
-    [basePath, cursorPosition, fieldName, form]
+    [value, onChange, basePath, cursorPosition]
   );
+
   const handleCursorChange = useCallback((cp: CursorPosition) => {
     setCursorPosition(cp);
   }, []);
+
+  // insertTimeline selector is defined to attached a timeline to a case outside of the case page.
+  // FYI, if you are in the case page we only use handleOnTimelineChange to attach a timeline to a case.
+  useEffect(() => {
+    if (insertTimeline != null && value != null) {
+      dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
+      handleOnTimelineChange(
+        insertTimeline.timelineTitle,
+        insertTimeline.timelineSavedObjectId,
+        insertTimeline.graphEventId
+      );
+      dispatch(setInsertTimeline(null));
+    }
+  }, [insertTimeline, dispatch, handleOnTimelineChange, value]);
 
   return {
     cursorPosition,

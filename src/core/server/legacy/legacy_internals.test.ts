@@ -19,7 +19,7 @@
 
 import { Server } from 'hapi';
 
-import { configMock } from '../config/config.mock';
+import { configMock } from '../config/mocks';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
