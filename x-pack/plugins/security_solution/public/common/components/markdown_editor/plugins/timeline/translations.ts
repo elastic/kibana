@@ -20,3 +20,35 @@ export const TIMELINE_ID = (timelineId: string) =>
       timelineId,
     },
   });
+
+export const NO_TIMELINE_NAME_FOUND = i18n.translate(
+  'xpack.securitySolution.markdownEditor.plugins.timeline.noTimelineNameFoundErrorMsg',
+  {
+    defaultMessage: 'No timeline name found',
+  }
+);
+
+export const NO_TIMELINE_ID_FOUND = i18n.translate(
+  'xpack.securitySolution.markdownEditor.plugins.timeline.noTimelineIdFoundErrorMsg',
+  {
+    defaultMessage: 'No timeline id found',
+  }
+);
+
+export const TIMELINE_URL_IS_NOT_VALID = (timelineUrl: string) =>
+  i18n.translate(
+    'xpack.securitySolution.markdownEditor.plugins.timeline.toolTip.timelineUrlIsNotValidErrorMsg',
+    {
+      defaultMessage: 'Timeline URL is not valid => {timelineUrl}',
+      values: {
+        timelineUrl,
+      },
+    }
+  );
+
+export const NO_PARENTHESES = i18n.translate(
+  'xpack.securitySolution.markdownEditor.plugins.timeline.noParenthesesErrorMsg',
+  {
+    defaultMessage: 'Expected left parentheses',
+  }
+);

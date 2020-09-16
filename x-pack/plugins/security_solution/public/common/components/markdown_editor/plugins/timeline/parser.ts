@@ -7,8 +7,9 @@
 import { Plugin } from '@elastic/eui/node_modules/unified';
 import { RemarkTokenizer } from '@elastic/eui';
 import { parse } from 'query-string';
-import { ID, PREFIX } from './constants';
 import { decodeRisonUrlState } from '../../../url_state/helpers';
+import { ID, PREFIX } from './constants';
+import * as i18n from './translations';
 
 export const TimelineParser: Plugin = function () {
   const Parser = this.Parser;
@@ -28,7 +29,10 @@ export const TimelineParser: Plugin = function () {
     }
 
     function readArg(open: string, close: string) {
-      if (value[index] !== open) throw new Error('Expected left bracket');
+      if (value[index] !== open) {
+        throw new Error(i18n.NO_PARENTHESES);
+      }
+
       index++;
 
       let body = '';
@@ -57,7 +61,7 @@ export const TimelineParser: Plugin = function () {
     const now = eat.now();
 
     if (!timelineTitle) {
-      this.file.info('No timeline name found', {
+      this.file.info(i18n.NO_TIMELINE_NAME_FOUND, {
         line: now.line,
         column: now.column,
       });
@@ -72,9 +76,9 @@ export const TimelineParser: Plugin = function () {
       ) ?? { id: null, graphEventId: '' };
 
       if (!timelineId) {
-        this.file.info('No timeline id found', {
+        this.file.info(i18n.NO_TIMELINE_ID_FOUND, {
           line: now.line,
-          column: now.column + 2,
+          column: now.column + timelineUrl.indexOf('id'),
         });
         return false;
       }
@@ -86,7 +90,7 @@ export const TimelineParser: Plugin = function () {
         graphEventId,
       });
     } catch {
-      this.file.info(`Timeline URL is not valid => ${timelineUrl}`, {
+      this.file.info(i18n.TIMELINE_URL_IS_NOT_VALID(timelineUrl), {
         line: now.line,
         column: now.column,
       });

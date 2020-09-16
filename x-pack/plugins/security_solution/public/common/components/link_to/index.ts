@@ -11,7 +11,6 @@ import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
-import { getTimelineUrl } from './redirect_to_timelines';
 
 export { getDetectionEngineUrl } from './redirect_to_detection_engine';
 export { getAppOverviewUrl } from './redirect_to_overview';
