@@ -135,7 +135,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       </EuiFormRow>
       {renderNestedLegendSwitch && (
         <EuiFormRow
-          display="columnCompressed"
+          display="columnCompressedSwitch"
           label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
             defaultMessage: 'Nested',
           })}

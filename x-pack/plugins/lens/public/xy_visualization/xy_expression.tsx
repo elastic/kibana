@@ -84,15 +84,21 @@ export const xyChart: ExpressionFunctionDefinition<
   args: {
     xTitle: {
       types: ['string'],
-      help: 'X axis title',
+      help: i18n.translate('xpack.lens.xyChart.xTitle.help', {
+        defaultMessage: 'X axis title',
+      }),
     },
     yTitle: {
       types: ['string'],
-      help: 'Y left axis title',
+      help: i18n.translate('xpack.lens.xyChart.yLeftTitle.help', {
+        defaultMessage: 'Y left axis title',
+      }),
     },
     yRightTitle: {
       types: ['string'],
-      help: 'Y right axis title',
+      help: i18n.translate('xpack.lens.xyChart.yRightTitle.help', {
+        defaultMessage: 'Y right axis title',
+      })
     },
     legend: {
       types: ['lens_xy_legendConfig'],
