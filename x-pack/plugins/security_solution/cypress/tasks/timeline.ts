@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import {
   BULK_ACTIONS,
   CLOSE_TIMELINE_BTN,
@@ -28,6 +29,10 @@ import {
   TOGGLE_TIMELINE_EXPAND_EVENT,
   REMOVE_COLUMN,
   RESET_FIELDS,
+  ATTACH_TIMELINE_TO_NEW_CASE_ICON,
+  OPEN_TIMELINE_ICON,
+  ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
+  CASE,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
@@ -42,6 +47,20 @@ export const addDescriptionToTimeline = (description: string) => {
 export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_TITLE).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE).should('have.attr', 'value', name);
+};
+
+export const addNewCase = () => {
+  cy.get(ALL_CASES_CREATE_NEW_CASE_TABLE_BTN).click();
+};
+
+export const attachTimelineToNewCase = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click({ force: true });
+};
+
+export const attachTimelineToExistingCase = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
 };
 
 export const checkIdToggleField = () => {
@@ -83,6 +102,11 @@ export const openTimelineFieldsBrowser = () => {
 export const openTimelineInspectButton = () => {
   cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
   cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
+};
+
+export const openTimelineFromSettings = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(OPEN_TIMELINE_ICON).click({ force: true });
 };
 
 export const openTimelineSettings = () => {
@@ -130,6 +154,10 @@ export const removeColumn = (column: number) => {
 
 export const resetFields = () => {
   cy.get(RESET_FIELDS).click({ force: true });
+};
+
+export const selectCase = (caseId: string) => {
+  cy.get(CASE(caseId)).click();
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {
