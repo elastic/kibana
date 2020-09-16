@@ -36,11 +36,11 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Error EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Error FCP_FIELD 1`] = `undefined`;
 
 exports[`Error FID_FIELD 1`] = `undefined`;
-
-exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
@@ -50,13 +50,13 @@ exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
+exports[`Error LCP_FIELD 1`] = `undefined`;
+
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
-
-exports[`Error LCP_FIELD 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 
@@ -206,11 +206,11 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Span EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Span FCP_FIELD 1`] = `undefined`;
 
 exports[`Span FID_FIELD 1`] = `undefined`;
-
-exports[`Span EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Span HOST_NAME 1`] = `undefined`;
 
@@ -220,13 +220,13 @@ exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
+exports[`Span LCP_FIELD 1`] = `undefined`;
+
 exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
 exports[`Span METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES 1`] = `undefined`;
 
 exports[`Span METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
-
-exports[`Span LCP_FIELD 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 
@@ -376,11 +376,11 @@ exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Transaction EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Transaction FCP_FIELD 1`] = `undefined`;
 
 exports[`Transaction FID_FIELD 1`] = `undefined`;
-
-exports[`Transaction EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
@@ -390,13 +390,13 @@ exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
+exports[`Transaction LCP_FIELD 1`] = `undefined`;
+
 exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
-
-exports[`Transaction LCP_FIELD 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 

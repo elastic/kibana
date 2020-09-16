@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
-  METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
@@ -90,12 +89,7 @@ export const percentCgroupMemoryUsedScript = {
 
   double used = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}')){
-    inactive_files = doc['${METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES}'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     `,
 };
 

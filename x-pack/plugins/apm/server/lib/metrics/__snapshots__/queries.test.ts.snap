@@ -235,12 +235,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
           },
         },
@@ -280,12 +275,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
           },
         },
@@ -327,12 +317,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
               },
             },
@@ -372,12 +357,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
               },
             },
@@ -857,12 +837,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
           },
         },
@@ -902,12 +877,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
           },
         },
@@ -949,12 +919,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
               },
             },
@@ -994,12 +959,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
               },
             },
@@ -1475,12 +1435,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
           },
         },
@@ -1520,12 +1475,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
           },
         },
@@ -1567,12 +1517,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
               },
             },
@@ -1612,12 +1557,7 @@ Object {
 
   double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
   
-  double inactive_files = 0;
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.stats.inactive_file.bytes')){
-    inactive_files = doc['system.process.cgroup.memory.stats.inactive_file.bytes'].value
-  }
-  
-  return (used - inactive_files) / total;
+  return used / total;
     ",
               },
             },
