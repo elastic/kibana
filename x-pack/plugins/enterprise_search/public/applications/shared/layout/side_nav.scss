@@ -72,4 +72,10 @@ $euiSizeML: $euiSize * 1.25; // 20px - between medium and large ¯\_(ツ)_/¯
       }
     }
   }
+
+  &__subNav {
+    .enterpriseSearchNavLinks__item {
+      padding-left: $euiSizeXXL;
+    }
+  }
 }
