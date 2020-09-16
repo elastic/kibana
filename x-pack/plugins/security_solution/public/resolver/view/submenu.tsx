@@ -55,13 +55,12 @@ const SubButton = React.memo(
         onClick={action}
         iconType={iconType}
         fill={false}
-        color={'primary'}
+        color="primary"
         size="s"
         iconSide="right"
         tabIndex={-1}
         data-test-subj="resolver:submenu:button"
         data-test-resolver-node-id={nodeID}
-        id={nodeID}
       >
         <FormattedMessage
           id="xpack.securitySolution.resolver.nodeEventMenuButton.label"
