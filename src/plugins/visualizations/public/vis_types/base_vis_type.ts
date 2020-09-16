@@ -45,7 +45,7 @@ export interface BaseVisTypeOptions {
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst;
   isDeprecated?: boolean;
-  getDeprecationMessage?: (vis: Vis) => ReactElement<any> | string;
+  getDeprecationMessage?: (vis: Vis) => Promise<ReactElement<any>>;
 }
 
 export class BaseVisType {
@@ -72,7 +72,7 @@ export class BaseVisType {
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst;
   isDeprecated: boolean;
-  getDeprecationMessage?: (vis: Vis) => ReactElement<any> | string;
+  getDeprecationMessage?: (vis: Vis) => Promise<ReactElement<any>>;
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {

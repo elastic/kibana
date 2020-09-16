@@ -25,6 +25,7 @@ import { createTileMapVisualization } from './tile_map_visualization';
 import { TileMapOptions } from './components/tile_map_options';
 import { supportsCssFilters } from './css_filters';
 import { truncatedColorSchemas } from '../../charts/public';
+import { getDeprecationMessage } from './get_deprecation_message';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -33,13 +34,7 @@ export function createTileMapTypeDefinition(dependencies) {
   return {
     name: 'tile_map',
     isDeprecated: true,
-    getDeprecationMessage: (vis) => {
-      console.log(vis);
-      return i18n.translate('tileMap.vis.deprecationMessage', {
-        defaultMessage:
-          'Coordinate maps will migrate to Maps in 8.0. With Maps, you can add multiple layers and indices, plot individual documents, symbolize features from data values, and more.',
-      });
-    },
+    getDeprecationMessage,
     title: i18n.translate('tileMap.vis.mapTitle', {
       defaultMessage: 'Coordinate Map',
     }),

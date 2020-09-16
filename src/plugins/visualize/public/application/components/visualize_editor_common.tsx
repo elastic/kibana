@@ -81,7 +81,10 @@ export const VisualizeEditorCommon = ({
       )}
       {visInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
       {visInstance?.vis?.type?.isDeprecated && visInstance?.vis?.type?.getDeprecationMessage && (
-        <DeprecatedVisInfo message={visInstance.vis.type.getDeprecationMessage(visInstance?.vis)} />
+        <DeprecatedVisInfo
+          getDeprecationMessage={visInstance.vis.type.getDeprecationMessage}
+          vis={visInstance?.vis}
+        />
       )}
       {visInstance && (
         <EuiScreenReaderOnly>
