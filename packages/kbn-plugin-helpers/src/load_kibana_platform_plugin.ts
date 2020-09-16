@@ -19,12 +19,8 @@
 
 import Path from 'path';
 
-import {
-  REPO_ROOT,
-  parseKibanaPlatformPlugin,
-  KibanaPlatformPlugin,
-  createFailError,
-} from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { parseKibanaPlatformPlugin, KibanaPlatformPlugin, createFailError } from '@kbn/dev-utils';
 
 export type Plugin = KibanaPlatformPlugin;
 

@@ -323,17 +323,7 @@ export {
 } from './metrics';
 
 export { AppCategory } from '../types';
-
-export {
-  DEFAULT_APP_CATEGORIES,
-  getFlattenedObject,
-  URLMeaningfulParts,
-  modifyUrl,
-  isRelativeUrl,
-  Freezable,
-  deepFreeze,
-  assertNever,
-} from '../utils';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {
   SavedObject,

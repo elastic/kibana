@@ -78,6 +78,7 @@ export function PageLoadDistribution() {
           <BreakdownFilter
             selectedBreakdown={breakdown}
             onBreakdownChange={setBreakdown}
+            dataTestSubj={'pldBreakdownFilter'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
