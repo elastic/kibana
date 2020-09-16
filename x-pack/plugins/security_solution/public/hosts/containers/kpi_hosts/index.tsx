@@ -4,82 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
-import { connect, ConnectedProps } from 'react-redux';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { GetKpiHostsQuery, KpiHostsData } from '../../../graphql/types';
-import { inputsModel, inputsSelectors, State } from '../../../common/store';
-import { useUiSetting } from '../../../common/lib/kibana';
-import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
-import { QueryTemplateProps } from '../../../common/containers/query_template';
+import { HostsKpiAuthentications } from './authentications';
+import { HostsKpiHosts } from './hosts';
+import { HostsKpiUniqueIps } from './unique_ips';
+import { HostsKpiProps } from './types';
 
-import { kpiHostsQuery } from './index.gql_query';
-
-const ID = 'kpiHostsQuery';
-
-export interface KpiHostsArgs {
-  id: string;
-  inspect: inputsModel.InspectQuery;
-  kpiHosts: KpiHostsData;
-  loading: boolean;
-  refetch: inputsModel.Refetch;
-}
-
-export interface KpiHostsProps extends QueryTemplateProps {
-  children: (args: KpiHostsArgs) => React.ReactNode;
-}
-
-const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
-  ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
-    <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
-      query={kpiHostsQuery}
-      fetchPolicy={getDefaultFetchPolicy()}
-      notifyOnNetworkStatusChange
-      skip={skip}
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate!,
-          to: endDate!,
-        },
-        filterQuery: createFilter(filterQuery),
-        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-        inspect: isInspected,
-      }}
-    >
-      {({ data, loading, refetch }) => {
-        const kpiHosts = getOr({}, `source.KpiHosts`, data);
-        return children({
-          id,
-          inspect: getOr(null, 'source.KpiHosts.inspect', data),
-          kpiHosts,
-          loading,
-          refetch,
-        });
-      }}
-    </Query>
+export const HostsKpiComponent = React.memo<HostsKpiProps>(
+  ({ filterQuery, from, to, setQuery, skip, narrowDateRange }) => (
+    <EuiFlexGroup wrap>
+      <EuiFlexItem grow={1}>
+        <HostsKpiHosts
+          filterQuery={filterQuery}
+          from={from}
+          to={to}
+          narrowDateRange={narrowDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>
+        <HostsKpiAuthentications
+          filterQuery={filterQuery}
+          from={from}
+          to={to}
+          narrowDateRange={narrowDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>
+        <HostsKpiUniqueIps
+          filterQuery={filterQuery}
+          from={from}
+          to={to}
+          narrowDateRange={narrowDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   )
 );
 
-KpiHostsComponentQuery.displayName = 'KpiHostsComponentQuery';
-
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: KpiHostsProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const KpiHostsQuery = connector(KpiHostsComponentQuery);
+HostsKpiComponent.displayName = 'HostsKpiComponent';

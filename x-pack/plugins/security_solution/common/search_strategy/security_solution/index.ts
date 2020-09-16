@@ -20,6 +20,13 @@ import {
   HostsStrategyResponse,
   HostUncommonProcessesStrategyResponse,
   HostUncommonProcessesRequestOptions,
+  HostsKpiQueries,
+  HostsKpiAuthenticationsStrategyResponse,
+  HostsKpiAuthenticationsRequestOptions,
+  HostsKpiHostsStrategyResponse,
+  HostsKpiHostsRequestOptions,
+  HostsKpiUniqueIpsStrategyResponse,
+  HostsKpiUniqueIpsRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -70,6 +77,7 @@ export * from './network';
 
 export type FactoryQueryTypes =
   | HostsQueries
+  | HostsKpiQueries
   | NetworkQueries
   | NetworkKpiQueries
   | typeof MatrixHistogramQuery;
@@ -106,6 +114,12 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostUncommonProcessesStrategyResponse
+  : T extends NetworkKpiQueries.authentications
+  ? HostsKpiAuthenticationsStrategyResponse
+  : T extends NetworkKpiQueries.hosts
+  ? HostsKpiHostsStrategyResponse
+  : T extends NetworkKpiQueries.uniqueIps
+  ? HostsKpiUniqueIpsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -148,6 +162,12 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostUncommonProcessesRequestOptions
+  : T extends NetworkKpiQueries.authentications
+  ? HostsKpiAuthenticationsRequestOptions
+  : T extends NetworkKpiQueries.hosts
+  ? HostsKpiHostsRequestOptions
+  : T extends NetworkKpiQueries.uniqueIps
+  ? HostsKpiUniqueIpsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns

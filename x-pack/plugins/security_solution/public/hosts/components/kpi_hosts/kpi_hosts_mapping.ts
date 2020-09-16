@@ -29,19 +29,19 @@ export const kpiHostsMapping: Readonly<StatItems[]> = [
     index: 1,
     fields: [
       {
-        key: 'authSuccess',
+        key: 'authenticationsSuccess',
         name: i18n.SUCCESS_CHART_LABEL,
         description: i18n.SUCCESS_UNIT_LABEL,
         value: null,
-        color: KpiHostsChartColors.authSuccess,
+        color: KpiHostsChartColors.authenticationsSuccess,
         icon: 'check',
       },
       {
-        key: 'authFailure',
+        key: 'authenticationsFailure',
         name: i18n.FAIL_CHART_LABEL,
         description: i18n.FAIL_UNIT_LABEL,
         value: null,
-        color: KpiHostsChartColors.authFailure,
+        color: KpiHostsChartColors.authenticationsFailure,
         icon: 'cross',
       },
     ],

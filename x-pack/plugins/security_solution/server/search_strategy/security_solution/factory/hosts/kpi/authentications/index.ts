@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { getOr } from 'lodash/fp';
+
+import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import {
+  HostsKpiQueries,
+  HostsKpiAuthenticationsStrategyResponse,
+  HostsKpiAuthenticationsRequestOptions,
+} from '../../../../../../../common/search_strategy/security_solution/hosts';
+import { inspectStringifyObject } from '../../../../../../utils/build_query';
+import { SecuritySolutionFactory } from '../../../types';
+import { buildHostsKpiAuthenticationsQuery } from './query.hosts_kpi_authentications.dsl';
+import { formatAuthHistogramData } from './helpers';
+
+export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.authentications> = {
+  buildDsl: (options: HostsKpiAuthenticationsRequestOptions) =>
+    buildHostsKpiAuthenticationsQuery(options),
+  parse: async (
+    options: HostsKpiAuthenticationsRequestOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<HostsKpiAuthenticationsStrategyResponse> => {
+    const inspect = {
+      dsl: [inspectStringifyObject(buildHostsKpiAuthenticationsQuery(options))],
+    };
+
+    const authenticationsSuccessHistogram = getOr(
+      null,
+      'aggregations.authentication_success_histogram.buckets',
+      response.rawResponse
+    );
+    const authenticationsFailureHistogram = getOr(
+      null,
+      'aggregations.authentication_failure_histogram.buckets',
+      response.rawResponse
+    );
+
+    return {
+      ...response,
+      inspect,
+      authenticationsSuccess: getOr(
+        null,
+        'aggregations.authentication_success.doc_count',
+        response.rawResponse
+      ),
+      authenticationsSuccessHistogram: formatAuthHistogramData(authenticationsSuccessHistogram),
+      authenticationsFailure: getOr(
+        null,
+        'aggregations.authentication_failure.doc_count',
+        response.rawResponse
+      ),
+      authenticationsFailureHistogram: formatAuthHistogramData(authenticationsFailureHistogram),
+    };
+  },
+};

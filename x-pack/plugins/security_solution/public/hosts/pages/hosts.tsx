@@ -109,27 +109,13 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                   title={i18n.PAGE_TITLE}
                 />
 
-                <KpiHostsQuery
-                  endDate={to}
-                  filterQuery={filterQuery}
+                <KpiHostsComponentManage
+                  from={from}
+                  setQuery={setQuery}
+                  to={to}
                   skip={isInitializing}
-                  sourceId="default"
-                  startDate={from}
-                >
-                  {({ kpiHosts, loading, id, inspect, refetch }) => (
-                    <KpiHostsComponentManage
-                      data={kpiHosts}
-                      from={from}
-                      id={id}
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      to={to}
-                      narrowDateRange={narrowDateRange}
-                    />
-                  )}
-                </KpiHostsQuery>
+                  narrowDateRange={narrowDateRange}
+                />
 
                 <EuiSpacer />
 

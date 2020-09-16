@@ -20,8 +20,8 @@ export const mockKpiHostsData = {
       y: 4,
     },
   ],
-  authSuccess: 61,
-  authSuccessHistogram: [
+  authenticationsSuccess: 61,
+  authenticationsSuccessHistogram: [
     {
       x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 8,
@@ -35,8 +35,8 @@ export const mockKpiHostsData = {
       y: 1,
     },
   ],
-  authFailure: 15722,
-  authFailureHistogram: [
+  authenticationsFailure: 15722,
+  authenticationsFailureHistogram: [
     {
       x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 11731,
@@ -82,8 +82,8 @@ export const mockKpiHostsData = {
   ],
 };
 export const mockKpiHostDetailsData = {
-  authSuccess: 61,
-  authSuccessHistogram: [
+  authenticationsSuccess: 61,
+  authenticationsSuccessHistogram: [
     {
       x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 8,
@@ -97,8 +97,8 @@ export const mockKpiHostDetailsData = {
       y: 1,
     },
   ],
-  authFailure: 15722,
-  authFailureHistogram: [
+  authenticationsFailure: 15722,
+  authenticationsFailureHistogram: [
     {
       x: new Date('2019-05-03T13:00:00.000Z').valueOf(),
       y: 11731,

@@ -14931,7 +14931,7 @@
     "xpack.securitySolution.auditd.violatedSeLinuxPolicyDescription": "已违反 selinux 策略",
     "xpack.securitySolution.auditd.wasAuthorizedToUseDescription": "有权使用",
     "xpack.securitySolution.auditd.withResultDescription": "，结果为",
-    "xpack.securitySolution.authenticationsTable.authenticationFailures": "身份验证",
+    "xpack.securitySolution.authenticationsTable.authenticationsFailures": "身份验证",
     "xpack.securitySolution.authenticationsTable.failures": "错误",
     "xpack.securitySolution.authenticationsTable.lastFailedDestination": "上一失败目标",
     "xpack.securitySolution.authenticationsTable.lastFailedSource": "上一失败源",

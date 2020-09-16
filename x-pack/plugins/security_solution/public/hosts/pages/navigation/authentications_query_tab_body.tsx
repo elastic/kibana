@@ -24,7 +24,7 @@ const AuthenticationTableManage = manageQuery(AuthenticationTable);
 
 const ID = 'authenticationsHistogramQuery';
 
-const authStackByOptions: MatrixHistogramOption[] = [
+const authenticationsStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'event.outcome',
     value: 'event.outcome',
@@ -32,31 +32,32 @@ const authStackByOptions: MatrixHistogramOption[] = [
 ];
 const DEFAULT_STACK_BY = 'event.outcome';
 
-enum AuthMatrixDataGroup {
-  authSuccess = 'success',
-  authFailure = 'failure',
+enum AuthenticationsMatrixDataGroup {
+  authenticationsSuccess = 'success',
+  authenticationsFailure = 'failure',
 }
 
-export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {
-  [AuthMatrixDataGroup.authSuccess]: {
-    key: AuthMatrixDataGroup.authSuccess,
+export const authenticationsMatrixDataMappingFields: MatrixHistogramMappingTypes = {
+  [AuthenticationsMatrixDataGroup.authenticationsSuccess]: {
+    key: AuthenticationsMatrixDataGroup.authenticationsSuccess,
     value: null,
-    color: KpiHostsChartColors.authSuccess,
+    color: KpiHostsChartColors.authenticationsSuccess,
   },
-  [AuthMatrixDataGroup.authFailure]: {
-    key: AuthMatrixDataGroup.authFailure,
+  [AuthenticationsMatrixDataGroup.authenticationsFailure]: {
+    key: AuthenticationsMatrixDataGroup.authenticationsFailure,
     value: null,
-    color: KpiHostsChartColors.authFailure,
+    color: KpiHostsChartColors.authenticationsFailure,
   },
 };
 
 const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
-    authStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? authStackByOptions[0],
+    authenticationsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ??
+    authenticationsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
   histogramType: MatrixHistogramType.authentications,
-  mapping: authMatrixDataMappingFields,
-  stackByOptions: authStackByOptions,
+  mapping: authenticationsMatrixDataMappingFields,
+  stackByOptions: authenticationsStackByOptions,
   title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
 };
 

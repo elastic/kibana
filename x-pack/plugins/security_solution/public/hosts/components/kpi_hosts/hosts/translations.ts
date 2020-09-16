@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum KpiHostsChartColors {
-  authenticationsSuccess = '#54B399',
-  authenticationsFailure = '#E7664C',
-  uniqueSourceIps = '#D36086',
-  uniqueDestinationIps = '#9170B8',
-  hosts = '#6092C0',
-}
+import { i18n } from '@kbn/i18n';
+
+export const DNS_QUERIES = i18n.translate('xpack.securitySolution.kpiNetwork.dnsQueries.title', {
+  defaultMessage: 'DNS queries',
+});
