@@ -47,13 +47,18 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   );
 
   useEffect(() => {
-    if (
-      serviceNames?.length > 0 &&
-      selectedServiceName &&
-      !serviceNames.includes(selectedServiceName)
-    ) {
-      updateServiceName(serviceNames[0]);
+    if (serviceNames?.length > 0) {
+      // select first from the list
+      if (!selectedServiceName) {
+        updateServiceName(serviceNames[0]);
+      }
+
+      // in case serviceName is cached from url and isn't present in current list
+      if (selectedServiceName && !serviceNames.includes(selectedServiceName)) {
+        updateServiceName(serviceNames[0]);
+      }
     }
+
     if (selectedServiceName && serviceNames.length === 0 && !loading) {
       updateServiceName('');
     }
