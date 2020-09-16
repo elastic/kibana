@@ -40,8 +40,8 @@ export function handleLocalStats(
   // eslint-disable-next-line @typescript-eslint/naming-convention
   { cluster_name, cluster_uuid, version }: ESClusterInfo,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
-  kibana: KibanaUsageStats,
-  dataTelemetry: DataTelemetryPayload,
+  kibana: KibanaUsageStats | undefined,
+  dataTelemetry: DataTelemetryPayload | undefined,
   context: StatsCollectionContext
 ) {
   return {

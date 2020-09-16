@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { ESLicense, LicenseGetter } from 'src/plugins/telemetry_collection_manager/server';
 
 let cachedLicense: ESLicense | undefined;

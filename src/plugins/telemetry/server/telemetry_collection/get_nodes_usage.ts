@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { TIMEOUT } from './constants';
 
 export interface NodeAggregation {
