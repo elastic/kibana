@@ -30,7 +30,10 @@ import {
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionType } from '../common';
-import { shouldLegacyRbacApplyBySource } from './authorization/should_legacy_rbac_apply_by_source';
+import {
+  getAuthorizationModeBySource,
+  AuthorizationMode,
+} from './authorization/get_authorization_mode_by_source';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -301,7 +304,10 @@ export class ActionsClient {
     params,
     source,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
-    if (!(await shouldLegacyRbacApplyBySource(this.unsecuredSavedObjectsClient, source))) {
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
       await this.authorization.ensureAuthorized('execute');
     }
     return this.actionExecutor.execute({ actionId, params, source, request: this.request });
@@ -309,7 +315,10 @@ export class ActionsClient {
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
     const { source } = options;
-    if (!(await shouldLegacyRbacApplyBySource(this.unsecuredSavedObjectsClient, source))) {
+    if (
+      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
+      AuthorizationMode.RBAC
+    ) {
       await this.authorization.ensureAuthorized('execute');
     }
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
