@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
       tap(() => log.debug(`checking report status at ${downloadPath}...`)),
       switchMap(() => supertest.get(downloadPath)),
       filter(({ status: statusCode }) => statusCode === 200),
+      tap(() => log.debug(`report at ${downloadPath} is done`)),
       map((response) => response.text),
       first(),
       timeout(15000)
@@ -50,7 +51,35 @@ export default function ({ getService }: FtrProviderContext) {
       // Retry the download URL until a "completed" response status is returned
       const completed$ = getCompleted$(downloadPath);
       const reportCompleted = await completed$.toPromise();
-      expect(reportCompleted).to.match(/^"order_date",/);
+      expect(reportCompleted).to.match(
+        /^"order_date";category;"customer_first_name";"customer_full_name";"total_quantity";"total_unique_products";"taxless_total_price";"taxful_total_price";currency\n"Jul 12, 2019 @ 00:00:00.000";/
+      );
+    });
+
+    it('uses the default space settings', async () => {
+      // MUST NOT have time zone field in the params for space setting to take effect
+      const defaultSpaceJob = await reportingAPI.postJob(
+        `/api/reporting/generate/csv?jobParams=%28conflictedTypesFields%3A%21%28%29%2Cfields%3A%21%28order_date%2Corder_date%2Ccustomer_full_name%2Ctaxful_total_price%29%2CindexPatternId%3Aaac3e500-f2c7-11ea-8250-fb138aa491e7%2CmetaFields%3A%21%28_source%2C_id%2C_type%2C_index%2C_score%29%2CobjectType%3Asearch%2CsearchRequest%3A%28body%3A%28_source%3A%28includes%3A%21%28order_date%2Ccustomer_full_name%2Ctaxful_total_price%29%29%2Cdocvalue_fields%3A%21%28%28field%3Aorder_date%2Cformat%3Adate_time%29%29%2Cquery%3A%28bool%3A%28filter%3A%21%28%28match_all%3A%28%29%29%2C%28range%3A%28order_date%3A%28format%3Astrict_date_optional_time%2Cgte%3A%272019-06-11T04%3A49%3A43.495Z%27%2Clte%3A%272019-07-14T10%3A25%3A34.149Z%27%29%29%29%29%2Cmust%3A%21%28%29%2Cmust_not%3A%21%28%29%2Cshould%3A%21%28%29%29%29%2Cscript_fields%3A%28%29%2Csort%3A%21%28%28order_date%3A%28order%3Adesc%2Cunmapped_type%3Aboolean%29%29%29%2Cstored_fields%3A%21%28order_date%2Ccustomer_full_name%2Ctaxful_total_price%29%2Cversion%3A%21t%29%2Cindex%3A%27ec%2A%27%29%2Ctitle%3A%27EC%20SEARCH%27%29 `
+      );
+
+      const defaultCompleted$ = getCompleted$(defaultSpaceJob);
+      const defaultReport = await defaultCompleted$.toPromise();
+      expect(defaultReport).to.match(
+        /^"order_date","order_date","customer_full_name","taxful_total_price"\n"Jul 12, 2019 @ 00:00:00.000","Jul 12, 2019 @ 00:00:00.000","Sultan Al Boone","173.96"/
+      ); // UTC timezone, comma separator
+    });
+
+    it(`uses browserTimezone in jobParams override space setting`, async () => {
+      // MUST have time zone field in the params and timezone set to `Browser` in Advanced Settings
+      const timezoneParamsJob = await reportingAPI.postJob(
+        `/api/reporting/generate/csv?jobParams=%28browserTimezone%3AAmerica%2FPhoenix%2CconflictedTypesFields%3A%21%28%29%2Cfields%3A%21%28order_date%2Ccategory%2Ccustomer_full_name%2Ctaxful_total_price%2Ccurrency%29%2CindexPatternId%3Aaac3e500-f2c7-11ea-8250-fb138aa491e7%2CmetaFields%3A%21%28_source%2C_id%2C_type%2C_index%2C_score%29%2CobjectType%3Asearch%2CsearchRequest%3A%28body%3A%28_source%3A%28includes%3A%21%28order_date%2Ccategory%2Ccustomer_full_name%2Ctaxful_total_price%2Ccurrency%29%29%2Cdocvalue_fields%3A%21%28%28field%3Aorder_date%2Cformat%3Adate_time%29%29%2Cquery%3A%28bool%3A%28filter%3A%21%28%28match_all%3A%28%29%29%2C%28range%3A%28order_date%3A%28format%3Astrict_date_optional_time%2Cgte%3A%272019-05-30T05%3A09%3A59.743Z%27%2Clte%3A%272019-07-26T08%3A47%3A09.682Z%27%29%29%29%29%2Cmust%3A%21%28%29%2Cmust_not%3A%21%28%29%2Cshould%3A%21%28%29%29%29%2Cscript_fields%3A%28%29%2Csort%3A%21%28%28order_date%3A%28order%3Adesc%2Cunmapped_type%3Aboolean%29%29%29%2Cstored_fields%3A%21%28order_date%2Ccategory%2Ccustomer_full_name%2Ctaxful_total_price%2Ccurrency%29%2Cversion%3A%21t%29%2Cindex%3A%27ec%2A%27%29%2Ctitle%3A%27EC%20SEARCH%20from%20DEFAULT%27%29`
+      );
+
+      const completed$ = getCompleted$(timezoneParamsJob);
+      const report = await completed$.toPromise();
+      expect(report).to.match(
+        /^"order_date",category,"customer_full_name","taxful_total_price",currency\n"Jul 11, 2019 @ 17:00:00.000"/
+      );
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/76551

@@ -17,10 +17,10 @@ export const getAbsoluteUrlFactory = ({
   protocol,
   hostname,
   port,
-  defaultBasePath,
+  defaultBasePath, // never gets an override
 }: AbsoluteURLFactoryOptions) => {
   return function getAbsoluteUrl({
-    basePath = defaultBasePath,
+    basePath = defaultBasePath, // unused
     hash = '',
     path = '/app/kibana',
     search = '',

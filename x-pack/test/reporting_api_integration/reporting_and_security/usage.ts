@@ -115,8 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING: https://github.com/elastic/kibana/issues/76581
-    describe.skip('from new jobs posted', () => {
+    describe('from new jobs posted', () => {
       it('should handle csv', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
@@ -133,7 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
       });
 
-      it('should handle preserve_layout pdf', async () => {
+      // FAILING: https://github.com/elastic/kibana/issues/76581
+      it.skip('should handle preserve_layout pdf', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
             reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3),
@@ -150,7 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
 
-      it('should handle print_layout pdf', async () => {
+      // FAILING: https://github.com/elastic/kibana/issues/76581
+      it.skip('should handle print_layout pdf', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
             reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3),

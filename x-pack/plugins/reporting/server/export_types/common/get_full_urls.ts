@@ -61,7 +61,6 @@ export function getFullUrls<TaskPayloadType>({
   const urls = relativeUrls.map((relativeUrl) => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
-      basePath: job.basePath,
       path: parsedRelative.pathname,
       hash: parsedRelative.hash,
       search: parsedRelative.search,

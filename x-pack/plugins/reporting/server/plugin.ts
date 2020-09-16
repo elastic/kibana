@@ -70,11 +70,11 @@ export class ReportingPlugin
     });
 
     const { elasticsearch, http } = core;
-    const { features, licensing, security } = plugins;
+    const { features, licensing, security, spaces } = plugins;
     const { initializerContext: initContext, reportingCore } = this;
 
     const router = http.createRouter();
-    const basePath = http.basePath.get;
+    const basePath = http.basePath;
 
     reportingCore.pluginSetup({
       features,
@@ -83,6 +83,7 @@ export class ReportingPlugin
       basePath,
       router,
       security,
+      spaces,
     });
 
     registerReportingUsageCollector(reportingCore, plugins);

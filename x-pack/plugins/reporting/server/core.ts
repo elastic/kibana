@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Hapi from 'hapi';
 import * as Rx from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
 import {
@@ -14,10 +15,11 @@ import {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
-} from 'src/core/server';
+} from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
+import { SpacesPluginSetup } from '../../spaces/server';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { checkLicense, getExportTypesRegistry } from './lib';
@@ -26,12 +28,13 @@ import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/scr
 import { ReportingStore } from './lib/store';
 
 export interface ReportingInternalSetup {
+  basePath: Pick<BasePath, 'set'>;
+  router: IRouter;
   features: FeaturesPluginSetup;
   elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;
-  basePath: BasePath['get'];
-  router: IRouter;
   security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface ReportingInternalStart {
@@ -180,14 +183,38 @@ export class ReportingCore {
     return this.getPluginSetupDeps().elasticsearch;
   }
 
-  public async getSavedObjectsClient(fakeRequest: KibanaRequest) {
+  private async getSavedObjectsClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClientContract;
+    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
   public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;
+  }
+
+  public getSpaceId(request: KibanaRequest) {
+    return this.getPluginSetupDeps().spaces?.spacesService?.getSpaceId(request);
+  }
+
+  public getFakeRequest(baseRequest: object, spaceId?: string) {
+    const fakeRequest = KibanaRequest.from({
+      path: '/',
+      route: { settings: {} },
+      url: { href: '/' },
+      raw: { req: { url: '/' } },
+      ...baseRequest,
+    } as Hapi.Request);
+
+    if (spaceId) {
+      this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
+    }
+    return fakeRequest;
+  }
+
+  public async getUiSettingsClient(request: KibanaRequest) {
+    const savedObjectsClient = await this.getSavedObjectsClient(request);
+    return await this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 }

@@ -37,7 +37,7 @@ const createMockPluginSetup = (
   return {
     features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
-    basePath: setupMock.basePath || '/all-about-that-basepath',
+    basePath: { set: jest.fn() },
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
