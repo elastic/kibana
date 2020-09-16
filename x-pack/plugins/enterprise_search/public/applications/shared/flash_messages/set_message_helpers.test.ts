@@ -18,7 +18,7 @@ describe('Flash Message Helpers', () => {
     FlashMessagesLogic.mount();
   });
 
-  it('etSuccessMessage()', () => {
+  it('setSuccessMessage()', () => {
     setSuccessMessage(message);
 
     expect(FlashMessagesLogic.values.messages).toEqual([
