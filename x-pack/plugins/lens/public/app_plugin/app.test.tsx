@@ -670,11 +670,6 @@ describe('Lens App', () => {
           undefined
         );
         expect(props.redirectTo).toHaveBeenCalledWith('aaa');
-
-        await act(async () => {
-          component.setProps({ initialInput: { savedObjectId: 'aaa' } });
-        });
-        expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
       });
 
       it('adds to the recently viewed list on save', async () => {

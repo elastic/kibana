@@ -383,6 +383,24 @@ export function App({
         return;
       }
 
+      if (
+        attributeService.inputIsRefType(newInput) &&
+        newInput.savedObjectId !== originalSavedObjectId
+      ) {
+        chrome.recentlyAccessed.add(
+          getFullPath(newInput.savedObjectId),
+          docToSave.title,
+          newInput.savedObjectId
+        );
+        setState((s) => ({
+          ...s,
+          isSaveModalVisible: false,
+          isLinkedToOriginatingApp: false,
+        }));
+        redirectTo(newInput.savedObjectId);
+        return;
+      }
+
       const newDoc = {
         ...docToSave,
         ...newInput,
@@ -394,18 +412,6 @@ export function App({
         isSaveModalVisible: false,
         isLinkedToOriginatingApp: false,
       }));
-
-      if (
-        attributeService.inputIsRefType(newInput) &&
-        newInput.savedObjectId !== originalSavedObjectId
-      ) {
-        chrome.recentlyAccessed.add(
-          getFullPath(newInput.savedObjectId),
-          docToSave.title,
-          newInput.savedObjectId
-        );
-        redirectTo(newInput.savedObjectId);
-      }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.dir(e);
