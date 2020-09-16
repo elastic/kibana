@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { xpackInfoRoute } from './xpack_info';
+import { PluginInitializerContext } from '../../../../src/core/server';
+import { XpackLegacyPlugin } from './plugin';
+
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new XpackLegacyPlugin(initializerContext);
