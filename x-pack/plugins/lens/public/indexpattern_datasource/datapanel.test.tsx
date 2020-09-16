@@ -623,6 +623,35 @@ describe('IndexPattern Data Panel', () => {
       ).toEqual(['client', 'source', 'timestampLabel']);
     });
 
+    it('should show meta fields accordion', async () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel
+          {...props}
+          indexPatterns={{
+            '1': {
+              ...props.indexPatterns['1'],
+              fields: [
+                ...props.indexPatterns['1'].fields,
+                { name: '_id', displayName: '_id', meta: true, type: 'string' },
+              ],
+            },
+          }}
+        />
+      );
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternMetaFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternMetaFields"]')
+          .find(FieldItem)
+          .first()
+          .prop('field').name
+      ).toEqual('_id');
+    });
+
     it('should display NoFieldsCallout when all fields are empty', async () => {
       const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} existingFields={{ idx1: {} }} />
