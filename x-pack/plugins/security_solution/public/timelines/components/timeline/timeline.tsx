@@ -102,15 +102,15 @@ export interface Props {
   filters: Filter[];
   graphEventId?: string;
   id: string;
+  indexNames: string[];
   indexPattern: IIndexPattern;
-  indexesName: string[];
   isLive: boolean;
-  loadingSourcerer: boolean;
   isSaving: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   kqlQueryExpression: string;
+  loadingSourcerer: boolean;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onClose: () => void;
   onDataProviderEdited: OnDataProviderEdited;
@@ -120,12 +120,12 @@ export interface Props {
   onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  start: string;
   sort: Sort;
+  start: string;
   status: TimelineStatusLiteral;
+  timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
-  timelineType: TimelineType;
 }
 
 /** The parent Timeline component */
@@ -139,7 +139,7 @@ export const TimelineComponent: React.FC<Props> = ({
   graphEventId,
   id,
   indexPattern,
-  indexesName,
+  indexNames,
   isLive,
   loadingSourcerer,
   isSaving,
@@ -268,7 +268,7 @@ export const TimelineComponent: React.FC<Props> = ({
           docValueFields={docValueFields}
           endDate={end}
           id={id}
-          indexesName={indexesName}
+          indexNames={indexNames}
           fields={timelineQueryFields}
           sourceId="default"
           limit={itemsPerPage}

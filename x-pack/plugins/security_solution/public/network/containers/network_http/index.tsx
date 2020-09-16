@@ -44,7 +44,7 @@ export interface NetworkHttpArgs {
 interface UseNetworkHttp {
   id?: string;
   ip?: string;
-  indexesName: string[];
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -56,7 +56,7 @@ export const useNetworkHttp = ({
   endDate,
   filterQuery,
   id = ID,
-  indexesName,
+  indexNames,
   ip,
   skip,
   startDate,
@@ -73,7 +73,7 @@ export const useNetworkHttp = ({
   const [loading, setLoading] = useState(false);
 
   const [networkHttpRequest, setHostRequest] = useState<NetworkHttpRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.http,
     filterQuery: createFilter(filterQuery),
     ip,
@@ -177,7 +177,7 @@ export const useNetworkHttp = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         sort: sort as SortField,
@@ -192,7 +192,7 @@ export const useNetworkHttp = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexesName, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkHttpSearch(networkHttpRequest);

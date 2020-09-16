@@ -26,7 +26,7 @@ import { LinkButton } from '../../../common/components/links';
 export interface OwnProps {
   startDate: GlobalTimeArgs['from'];
   endDate: GlobalTimeArgs['to'];
-  indexesName: string[];
+  indexNames: string[];
   filterQuery?: ESQuery | string;
   setQuery: GlobalTimeArgs['setQuery'];
 }
@@ -37,7 +37,7 @@ export type OverviewHostProps = OwnProps;
 const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   endDate,
   filterQuery,
-  indexesName,
+  indexNames,
   startDate,
   setQuery,
 }) => {
@@ -48,7 +48,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const [loading, { overviewHost, id, inspect, refetch }] = useHostOverview({
     endDate,
     filterQuery,
-    indexesName,
+    indexNames,
     startDate,
   });
 

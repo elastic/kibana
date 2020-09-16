@@ -37,7 +37,7 @@ interface UseNetworkDetails {
   id?: string;
   docValueFields: DocValueFields[];
   ip: string;
-  indexesName: string[];
+  indexNames: string[];
   filterQuery?: ESTermQuery | string;
   skip: boolean;
 }
@@ -45,18 +45,18 @@ interface UseNetworkDetails {
 export const useNetworkDetails = ({
   docValueFields,
   filterQuery,
-  indexesName,
+  indexNames,
   id = ID,
   skip,
   ip,
 }: UseNetworkDetails): [boolean, NetworkDetailsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
   const [networkDetailsRequest, setNetworkDetailsRequest] = useState<NetworkDetailsRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: NetworkQueries.details,
     filterQuery: createFilter(filterQuery),
@@ -133,7 +133,7 @@ export const useNetworkDetails = ({
     setNetworkDetailsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         ip,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
@@ -143,7 +143,7 @@ export const useNetworkDetails = ({
       }
       return prevRequest;
     });
-  }, [indexesName, filterQuery, skip, ip, docValueFields]);
+  }, [indexNames, filterQuery, skip, ip, docValueFields]);
 
   useEffect(() => {
     networkDetailsSearch(networkDetailsRequest);

@@ -118,6 +118,7 @@ describe('Epic Timeline', () => {
             exists: { field: '@timestamp' },
           } as Filter,
         ],
+        indexNames: [],
         isFavorite: false,
         isLive: false,
         isSelectAllChecked: false,

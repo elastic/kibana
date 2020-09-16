@@ -19,7 +19,7 @@ const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 export const IPsQueryTabBody = ({
   endDate,
   filterQuery,
-  indexesName,
+  indexNames,
   skip,
   startDate,
   setQuery,
@@ -32,7 +32,7 @@ export const IPsQueryTabBody = ({
     endDate,
     flowTarget,
     filterQuery,
-    indexesName,
+    indexNames,
     skip,
     startDate,
     type: networkModel.NetworkType.page,

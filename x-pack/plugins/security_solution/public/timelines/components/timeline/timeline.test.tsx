@@ -75,22 +75,20 @@ describe('Timeline', () => {
     props = {
       browserFields: mockBrowserFields,
       columns: defaultHeaders,
-      id: 'foo',
       dataProviders: mockDataProviders,
       docValueFields: [],
       end: endDate,
-      eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
+      id: 'foo',
+      indexNames: [],
       indexPattern,
-      indexToAdd: [],
       isLive: false,
-      isLoadingSource: false,
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      loadingIndexName: false,
+      loadingSourcerer: false,
       onChangeItemsPerPage: jest.fn(),
       onClose: jest.fn(),
       onDataProviderEdited: jest.fn(),
@@ -100,12 +98,12 @@ describe('Timeline', () => {
       onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
-      start: startDate,
       sort,
+      start: startDate,
       status: TimelineStatus.active,
+      timelineType: TimelineType.default,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
-      timelineType: TimelineType.default,
     };
   });
 
@@ -162,7 +160,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <TimelineComponent {...props} isLoadingSource={true} />
+            <TimelineComponent {...props} loadingSourcerer={true} />
           </MockedProvider>
         </TestProviders>
       );

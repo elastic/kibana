@@ -39,7 +39,7 @@ interface UseHostDetails {
   endDate: string;
   hostName: string;
   id?: string;
-  indexesName: string[];
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -47,7 +47,7 @@ interface UseHostDetails {
 export const useHostDetails = ({
   endDate,
   hostName,
-  indexesName,
+  indexNames,
   id = ID,
   skip = false,
   startDate,
@@ -57,7 +57,7 @@ export const useHostDetails = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
   const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     hostName,
     factoryQueryType: HostsQueries.details,
     timerange: {
@@ -138,7 +138,7 @@ export const useHostDetails = ({
     setHostDetailsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         hostName,
         timerange: {
           interval: '12h',
@@ -151,7 +151,7 @@ export const useHostDetails = ({
       }
       return prevRequest;
     });
-  }, [endDate, hostName, indexesName, startDate, skip]);
+  }, [endDate, hostName, indexNames, startDate, skip]);
 
   useEffect(() => {
     hostDetailsSearch(hostDetailsRequest);

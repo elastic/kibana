@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 
-import { getAllFieldsByName, useWithSource } from '../../containers/source';
+import { getAllFieldsByName } from '../../containers/source';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
@@ -30,7 +30,7 @@ interface Props {
   goGetTimelineId?: (args: boolean) => void;
   onFilterAdded?: () => void;
   showTopN: boolean;
-  timelineId?: string | null;
+  timelineId?: TimelineId | null;
   toggleTopN: () => void;
   value?: string[] | string | null;
 }
@@ -51,7 +51,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
     kibana.services.data.query.filterManager,
   ]);
-  const { getManageTimelineById, getTimelineFilterManager } = useManageTimeline();
+  const { getTimelineFilterManager } = useManageTimeline();
 
   const filterManager = useMemo(
     () =>
@@ -70,9 +70,8 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   const activeScope: SourcererScopeName =
     timelineId === TimelineId.active
       ? SourcererScopeName.timeline
-      : [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
-          timelineId ?? ''
-        )
+      : timelineId != null &&
+        [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(timelineId)
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const { browserFields, indexPattern, selectedPatterns } = useSourcererScope(activeScope);
@@ -189,7 +188,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 field={field}
                 indexPattern={indexPattern}
-                indexesName={selectedPatterns}
+                indexNames={selectedPatterns}
                 onFilterAdded={onFilterAdded}
                 timelineId={timelineId ?? undefined}
                 toggleTopN={toggleTopN}

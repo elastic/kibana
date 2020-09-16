@@ -59,7 +59,7 @@ interface MatrixHistogramBasicProps {
 export interface MatrixHistogramQueryProps {
   endDate: string;
   errorMessage: string;
-  indexesName: string[];
+  indexNames: string[];
   filterQuery?: ESQuery | string | undefined;
   setAbsoluteRangeDatePicker?: ActionCreator<{
     id: InputsModelId;

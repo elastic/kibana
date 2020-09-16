@@ -71,7 +71,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   histogramType,
   hideHistogramIfEmpty = false,
   id,
-  indexesName,
+  indexNames,
   legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
@@ -135,7 +135,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     errorMessage,
     filterQuery,
     histogramType,
-    indexesName,
+    indexNames,
     startDate,
     stackByField: selectedStackByOption.value,
   });

@@ -65,7 +65,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
   docValueFields,
   endDate,
   filterQuery,
-  indexesName,
+  indexNames,
   skip,
   setQuery,
   startDate,
@@ -78,7 +78,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
     docValueFields,
     endDate,
     filterQuery,
-    indexesName,
+    indexNames,
     skip,
     startDate,
     type,
@@ -98,7 +98,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
         endDate={endDate}
         filterQuery={filterQuery}
         id={ID}
-        indexesName={indexesName}
+        indexNames={indexNames}
         setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}

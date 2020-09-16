@@ -200,7 +200,6 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}
               onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              signalsIndex={signalIndexName ?? ''}
               to={to}
             />
           </WrapperPage>

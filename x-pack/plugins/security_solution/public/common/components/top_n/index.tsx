@@ -74,7 +74,7 @@ interface OwnProps {
   browserFields: BrowserFields;
   field: string;
   indexPattern: IIndexPattern;
-  indexesName: string[];
+  indexNames: string[];
   timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -93,7 +93,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   dataProviders,
   field,
   indexPattern,
-  indexesName,
+  indexNames,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
@@ -142,7 +142,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
       from={timelineId === TimelineId.active ? activeTimelineFrom : from}
       indexPattern={indexPattern}
-      indexesName={indexesName}
+      indexNames={indexNames}
       options={options}
       query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
       setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}

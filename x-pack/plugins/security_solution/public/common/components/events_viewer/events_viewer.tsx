@@ -95,7 +95,7 @@ interface Props {
   headerFilterGroup?: React.ReactNode;
   height?: number;
   id: string;
-  indexesName: string[];
+  indexNames: string[];
   indexPattern: IIndexPattern;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
@@ -122,7 +122,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   filters,
   headerFilterGroup,
   id,
-  indexesName,
+  indexNames,
   indexPattern,
   isLive,
   isLoadingIndexPattern,
@@ -218,7 +218,7 @@ const EventsViewerComponent: React.FC<Props> = ({
             fields={fields}
             filterQuery={combinedQueries!.filterQuery}
             id={id}
-            indexesName={indexesName}
+            indexNames={indexNames}
             limit={itemsPerPage}
             sortField={sortField}
             sourceId="default"

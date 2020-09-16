@@ -119,7 +119,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 />
 
                 <HostOverviewByNameQuery
-                  indexesName={selectedPatterns}
+                  indexNames={selectedPatterns}
                   sourceId="default"
                   hostName={detailName}
                   skip={isInitializing}
@@ -162,7 +162,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 <EuiHorizontalRule />
 
                 <KpiHostDetailsQuery
-                  indexesName={selectedPatterns}
+                  indexNames={selectedPatterns}
                   sourceId="default"
                   filterQuery={filterQuery}
                   skip={isInitializing}
@@ -195,7 +195,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
 
               <HostDetailsTabs
                 docValueFields={docValueFields}
-                indexesName={selectedPatterns}
+                indexNames={selectedPatterns}
                 isInitializing={isInitializing}
                 deleteQuery={deleteQuery}
                 pageFilters={hostDetailsPageFilters}

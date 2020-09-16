@@ -66,7 +66,7 @@ interface Props {
   savedQueryId: string | null;
   to: string;
   toStr: string;
-  updateEventTypeAndIndexesName: (eventType: EventType, indexesName: string[]) => void;
+  updateEventTypeAndIndexesName: (eventType: EventType, indexNames: string[]) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 

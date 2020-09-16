@@ -36,7 +36,7 @@ const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
     children,
     filterQuery,
     isInspected,
-    indexesName,
+    indexNames,
     skip,
     sourceId,
     startDate,
@@ -55,7 +55,7 @@ const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
           to: endDate!,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         inspect: isInspected,
       }}
     >

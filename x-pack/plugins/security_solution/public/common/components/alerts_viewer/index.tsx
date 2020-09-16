@@ -24,7 +24,7 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
-  indexesName,
+  indexNames,
   pageFilters,
   setQuery,
   startDate,
@@ -63,7 +63,7 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
           endDate={endDate}
           filterQuery={filterQuery}
           id={ID}
-          indexesName={indexesName}
+          indexNames={indexNames}
           setQuery={setQuery}
           startDate={startDate}
           {...alertsHistogramConfigs}

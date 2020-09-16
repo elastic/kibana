@@ -46,7 +46,7 @@ export interface NetworkDnsArgs {
 
 interface UseNetworkDns {
   id?: string;
-  indexesName: string[];
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -58,7 +58,7 @@ export const useNetworkDns = ({
   endDate,
   filterQuery,
   id = ID,
-  indexesName,
+  indexNames,
   skip,
   startDate,
   type,
@@ -74,7 +74,7 @@ export const useNetworkDns = ({
   const [loading, setLoading] = useState(false);
 
   const [networkDnsRequest, setNetworkDnsRequest] = useState<NetworkDnsRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.dns,
     filterQuery: createFilter(filterQuery),
     isPtrIncluded,
@@ -178,7 +178,7 @@ export const useNetworkDns = ({
     setNetworkDnsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         isPtrIncluded,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -194,7 +194,7 @@ export const useNetworkDns = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexesName, endDate, filterQuery, limit, startDate, sort, skip, isPtrIncluded]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, isPtrIncluded]);
 
   useEffect(() => {
     networkDnsSearch(networkDnsRequest);

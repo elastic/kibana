@@ -33,7 +33,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     isInitializing,
     from,
     indexPattern,
-    indexesName,
+    indexNames,
     setQuery,
     setAbsoluteRangeDatePicker,
   }) => {
@@ -84,7 +84,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     const commonProps = {
       startDate: from,
       endDate: to,
-      indexesName,
+      indexNames,
       skip: isInitializing,
       type,
       narrowDateRange,

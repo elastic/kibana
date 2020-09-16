@@ -112,7 +112,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                 <KpiHostsQuery
                   endDate={to}
                   filterQuery={filterQuery}
-                  indexesName={selectedPatterns}
+                  indexNames={selectedPatterns}
                   skip={isInitializing}
                   sourceId="default"
                   startDate={from}
@@ -145,7 +145,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
                 to={to}
                 filterQuery={tabsFilterQuery}
                 isInitializing={isInitializing}
-                indexesName={selectedPatterns}
+                indexNames={selectedPatterns}
                 setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                 setQuery={setQuery}
                 from={from}

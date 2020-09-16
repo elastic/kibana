@@ -261,12 +261,12 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const dispatch = useDispatch();
   const previousIndexesName = useRef<string[]>([]);
 
-  const indexesNameSelectedSelector = useMemo(
+  const indexNamesSelectedSelector = useMemo(
     () => sourcererSelectors.getIndexesNameSelectedSelector(),
     []
   );
-  const indexesName = useSelector<State, string[]>(
-    (state) => indexesNameSelectedSelector(state, sourcererScopeName),
+  const indexNames = useSelector<State, string[]>(
+    (state) => indexNamesSelectedSelector(state, sourcererScopeName),
     shallowEqual
   );
 
@@ -346,8 +346,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   useEffect(() => {
-    if (indexesName.length > 0 && !isEqual(previousIndexesName.current, indexesName)) {
-      indexFieldsSearch(indexesName);
+    if (indexNames.length > 0 && !isEqual(previousIndexesName.current, indexNames)) {
+      indexFieldsSearch(indexNames);
     }
-  }, [indexesName, indexFieldsSearch, previousIndexesName]);
+  }, [indexNames, indexFieldsSearch, previousIndexesName]);
 };

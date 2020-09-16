@@ -168,6 +168,17 @@ const store = createStore(
   storage
 );
 
+let testProps = {
+  browserFields: mockBrowserFields,
+  field,
+  indexNames: [],
+  indexPattern: mockIndexPattern,
+  timelineId: TimelineId.hostsPageExternalAlerts,
+  toggleTopN: jest.fn(),
+  onFilterAdded: jest.fn(),
+  value,
+};
+
 describe('StatefulTopN', () => {
   // Suppress warnings about "react-beautiful-dnd"
   /* eslint-disable no-console */
@@ -189,16 +200,7 @@ describe('StatefulTopN', () => {
       wrapper = mount(
         <TestProviders store={store}>
           <ManageGlobalTimeline>
-            <StatefulTopN
-              browserFields={mockBrowserFields}
-              field={field}
-              indexPattern={mockIndexPattern}
-              indexToAdd={null}
-              timelineId={TimelineId.hostsPageExternalAlerts}
-              toggleTopN={jest.fn()}
-              onFilterAdded={jest.fn()}
-              value={value}
-            />
+            <StatefulTopN {...testProps} />
           </ManageGlobalTimeline>
         </TestProviders>
       );
@@ -277,19 +279,14 @@ describe('StatefulTopN', () => {
           filterManager,
         },
       };
+      testProps = {
+        ...testProps,
+        timelineId: TimelineId.active,
+      };
       wrapper = mount(
         <TestProviders store={store}>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <StatefulTopN
-              browserFields={mockBrowserFields}
-              field={field}
-              indexPattern={mockIndexPattern}
-              indexToAdd={null}
-              timelineId={TimelineId.active}
-              toggleTopN={jest.fn()}
-              onFilterAdded={jest.fn()}
-              value={value}
-            />
+            <StatefulTopN {...testProps} />
           </ManageGlobalTimeline>
         </TestProviders>
       );
@@ -357,19 +354,14 @@ describe('StatefulTopN', () => {
       },
     };
 
+    testProps = {
+      ...testProps,
+      timelineId: TimelineId.detectionsPage,
+    };
     const wrapper = mount(
       <TestProviders store={store}>
         <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-          <StatefulTopN
-            browserFields={mockBrowserFields}
-            field={field}
-            indexPattern={mockIndexPattern}
-            indexToAdd={null}
-            timelineId={TimelineId.detectionsPage}
-            toggleTopN={jest.fn()}
-            onFilterAdded={jest.fn()}
-            value={value}
-          />
+          <StatefulTopN {...testProps} />
         </ManageGlobalTimeline>
       </TestProviders>
     );

@@ -44,7 +44,7 @@ export interface NetworkTopCountriesArgs {
 interface UseNetworkTopCountries {
   flowTarget: FlowTargetSourceDest;
   ip?: string;
-  indexesName: string[];
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -56,7 +56,7 @@ export const useNetworkTopCountries = ({
   endDate,
   filterQuery,
   flowTarget,
-  indexesName,
+  indexNames,
   skip,
   startDate,
   type,
@@ -72,7 +72,7 @@ export const useNetworkTopCountries = ({
   const [loading, setLoading] = useState(false);
 
   const [networkTopCountriesRequest, setHostRequest] = useState<NetworkTopCountriesRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.topCountries,
     filterQuery: createFilter(filterQuery),
     flowTarget,
@@ -176,7 +176,7 @@ export const useNetworkTopCountries = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
@@ -191,7 +191,7 @@ export const useNetworkTopCountries = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexesName, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

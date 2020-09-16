@@ -130,7 +130,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
                 <KpiNetworkQuery
                   endDate={to}
                   filterQuery={filterQuery}
-                  indexesName={selectedPatterns}
+                  indexNames={selectedPatterns}
                   skip={isInitializing}
                   sourceId={sourceId}
                   startDate={from}
@@ -166,7 +166,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
                     from={from}
                     isInitializing={isInitializing}
                     indexPattern={indexPattern}
-                    indexesName={selectedPatterns}
+                    indexNames={selectedPatterns}
                     setQuery={setQuery}
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}

@@ -76,7 +76,7 @@ class TimelineQueryComponent extends QueryTemplate<
       docValueFields,
       endDate,
       id,
-      indexesName,
+      indexNames,
       isInspected,
       limit,
       fields,
@@ -101,7 +101,7 @@ class TimelineQueryComponent extends QueryTemplate<
       },
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex: indexesName,
+      defaultIndex: indexNames,
       docValueFields: docValueFields ?? [],
       inspect: isInspected,
       queryDeduplication,
@@ -112,7 +112,7 @@ class TimelineQueryComponent extends QueryTemplate<
         query={timelineQuery}
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
-        skip={skipQueryForDetectionsPage(id, indexesName)}
+        skip={skipQueryForDetectionsPage(id, indexNames)}
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {

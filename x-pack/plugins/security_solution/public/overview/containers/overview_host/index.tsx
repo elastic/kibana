@@ -35,7 +35,7 @@ export interface HostOverviewArgs {
 interface UseHostOverview {
   filterQuery?: ESQuery | string;
   endDate: string;
-  indexesName: string[];
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -43,7 +43,7 @@ interface UseHostOverview {
 export const useHostOverview = ({
   filterQuery,
   endDate,
-  indexesName,
+  indexNames,
   skip = false,
   startDate,
 }: UseHostOverview): [boolean, HostOverviewArgs] => {
@@ -52,7 +52,7 @@ export const useHostOverview = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
   const [overviewHostRequest, setHostRequest] = useState<HostOverviewRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     factoryQueryType: HostsQueries.overview,
     filterQuery: createFilter(filterQuery),
     timerange: {
@@ -132,7 +132,7 @@ export const useHostOverview = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -145,7 +145,7 @@ export const useHostOverview = ({
       }
       return prevRequest;
     });
-  }, [indexesName, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     overviewHostSearch(overviewHostRequest);

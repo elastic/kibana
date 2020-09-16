@@ -35,7 +35,7 @@ export interface NetworkOverviewArgs {
 interface UseNetworkOverview {
   filterQuery?: ESQuery | string;
   endDate: string;
-  indexesName: string[];
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -43,7 +43,7 @@ interface UseNetworkOverview {
 export const useNetworkOverview = ({
   filterQuery,
   endDate,
-  indexesName,
+  indexNames,
   skip = false,
   startDate,
 }: UseNetworkOverview): [boolean, NetworkOverviewArgs] => {
@@ -52,7 +52,7 @@ export const useNetworkOverview = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
   const [overviewNetworkRequest, setNetworkRequest] = useState<NetworkOverviewRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.overview,
     filterQuery: createFilter(filterQuery),
     timerange: {
@@ -132,7 +132,7 @@ export const useNetworkOverview = ({
     setNetworkRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -145,7 +145,7 @@ export const useNetworkOverview = ({
       }
       return prevRequest;
     });
-  }, [indexesName, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     overviewNetworkSearch(overviewNetworkRequest);

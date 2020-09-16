@@ -36,7 +36,7 @@ const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
     children,
     endDate,
     filterQuery,
-    indexesName,
+    indexNames,
     isInspected,
     skip,
     sourceId,
@@ -55,7 +55,7 @@ const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
           to: endDate!,
         },
         filterQuery: createFilter(filterQuery),
-        defaultIndex: indexesName ?? [],
+        defaultIndex: indexNames ?? [],
         inspect: isInspected,
       }}
     >

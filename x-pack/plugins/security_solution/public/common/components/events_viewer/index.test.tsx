@@ -19,6 +19,7 @@ import { StatefulEventsViewer } from '.';
 import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
@@ -38,6 +39,14 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 const from = '2019-08-27T22:10:56.794Z';
 const to = '2019-08-26T22:10:56.791Z';
 
+const testProps = {
+  defaultModel: eventsDefaultModel,
+  end: to,
+  indexNames: [],
+  id: 'test-stateful-events-viewer',
+  scopeId: SourcererScopeName.default,
+  start: from,
+};
 describe('StatefulEventsViewer', () => {
   const mount = useMountAppended();
 
@@ -45,12 +54,7 @@ describe('StatefulEventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
+          <StatefulEventsViewer {...testProps} />
         </MockedProvider>
       </TestProviders>
     );
@@ -67,12 +71,7 @@ describe('StatefulEventsViewer', () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
+          <StatefulEventsViewer {...testProps} />
         </MockedProvider>
       </TestProviders>
     );

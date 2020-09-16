@@ -66,7 +66,8 @@ export interface TimelineModel {
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
-  indexesName: string[];
+  /** TO DO sourcerer @X define this */
+  indexNames: string[];
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
   /** Events to be rendered as loading **/
@@ -137,6 +138,7 @@ export type SubsetTimelineModel = Readonly<
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
+    | 'indexNames'
     | 'isFavorite'
     | 'isLive'
     | 'isSelectAllChecked'

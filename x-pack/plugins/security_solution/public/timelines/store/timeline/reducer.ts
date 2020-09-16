@@ -522,13 +522,13 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     insertTimeline,
   }))
-  .case(updateIndexesName, (state, { id, indexesName }) => ({
+  .case(updateIndexesName, (state, { id, indexNames }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
       [id]: {
         ...state.timelineById[id],
-        indexesName,
+        indexNames,
       },
     },
   }))

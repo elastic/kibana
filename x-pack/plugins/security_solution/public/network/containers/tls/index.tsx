@@ -41,7 +41,7 @@ export interface NetworkTlsArgs {
 
 interface UseNetworkTls {
   flowTarget: FlowTargetSourceDest;
-  indexesName: string[];
+  indexNames: string[];
   ip: string;
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
@@ -56,7 +56,7 @@ export const useNetworkTls = ({
   filterQuery,
   flowTarget,
   id = ID,
-  indexesName,
+  indexNames,
   ip,
   skip,
   startDate,
@@ -73,7 +73,7 @@ export const useNetworkTls = ({
   const [loading, setLoading] = useState(false);
 
   const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.tls,
     filterQuery: createFilter(filterQuery),
     flowTarget,
@@ -173,7 +173,7 @@ export const useNetworkTls = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
@@ -188,7 +188,7 @@ export const useNetworkTls = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexesName, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkTlsSearch(networkTlsRequest);

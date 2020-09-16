@@ -30,7 +30,7 @@ export interface OverviewNetworkProps {
   startDate: GlobalTimeArgs['from'];
   endDate: GlobalTimeArgs['to'];
   filterQuery?: ESQuery | string;
-  indexesName: string[];
+  indexNames: string[];
   setQuery: GlobalTimeArgs['setQuery'];
 }
 
@@ -39,7 +39,7 @@ const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   endDate,
   filterQuery,
-  indexesName,
+  indexNames,
   startDate,
   setQuery,
 }) => {
@@ -50,7 +50,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   const [loading, { overviewNetwork, id, inspect, refetch }] = useNetworkOverview({
     endDate,
     filterQuery,
-    indexesName,
+    indexNames,
     startDate,
   });
 

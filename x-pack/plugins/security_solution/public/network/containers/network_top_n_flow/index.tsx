@@ -44,7 +44,7 @@ export interface NetworkTopNFlowArgs {
 interface UseNetworkTopNFlow {
   flowTarget: FlowTargetSourceDest;
   ip?: string;
-  indexesName: string[];
+  indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
   endDate: string;
@@ -56,7 +56,7 @@ export const useNetworkTopNFlow = ({
   endDate,
   filterQuery,
   flowTarget,
-  indexesName,
+  indexNames,
   skip,
   startDate,
   type,
@@ -72,7 +72,7 @@ export const useNetworkTopNFlow = ({
   const [loading, setLoading] = useState(false);
 
   const [networkTopNFlowRequest, setTopNFlowRequest] = useState<NetworkTopNFlowRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     factoryQueryType: NetworkQueries.topNFlow,
     filterQuery: createFilter(filterQuery),
     flowTarget,
@@ -174,7 +174,7 @@ export const useNetworkTopNFlow = ({
     setTopNFlowRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
@@ -189,7 +189,7 @@ export const useNetworkTopNFlow = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexesName, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

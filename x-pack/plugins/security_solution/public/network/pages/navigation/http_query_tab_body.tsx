@@ -19,7 +19,7 @@ const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 export const HttpQueryTabBody = ({
   endDate,
   filterQuery,
-  indexesName,
+  indexNames,
   skip,
   startDate,
   setQuery,
@@ -30,7 +30,7 @@ export const HttpQueryTabBody = ({
   ] = useNetworkHttp({
     endDate,
     filterQuery,
-    indexesName,
+    indexNames,
     skip,
     startDate,
     type: networkModel.NetworkType.page,

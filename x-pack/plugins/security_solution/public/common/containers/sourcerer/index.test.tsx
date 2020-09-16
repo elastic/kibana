@@ -23,7 +23,7 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
-const mockSourceDefaults = mockSource(SourcererScopeName.default);
+const mockSourceDefaults = mockSource;
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,

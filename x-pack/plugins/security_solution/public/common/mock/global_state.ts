@@ -205,7 +205,7 @@ export const mockGlobalState: State = {
         id: 'test',
         savedObjectId: null,
         columns: defaultHeaders,
-        indexesName: DEFAULT_INDEX_PATTERN,
+        indexNames: DEFAULT_INDEX_PATTERN,
         itemsPerPage: 5,
         dataProviders: [],
         description: '',
@@ -246,7 +246,6 @@ export const mockGlobalState: State = {
   },
   sourcerer: {
     ...initialSourcererState,
-    allIndexPatterns: DEFAULT_INDEX_PATTERN,
     sourcererScopes: {
       ...initialSourcererState.sourcererScopes,
       [SourcererScopeName.default]: {

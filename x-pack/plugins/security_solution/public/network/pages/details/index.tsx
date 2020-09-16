@@ -96,7 +96,7 @@ const NetworkDetailsComponent: React.FC = () => {
     docValueFields,
     skip: isInitializing,
     filterQuery,
-    indexesName: selectedPatterns,
+    indexNames: selectedPatterns,
     ip,
   });
 
@@ -156,7 +156,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
-                  indexesName={selectedPatterns}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -171,7 +171,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
-                  indexesName={selectedPatterns}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -190,7 +190,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
-                  indexesName={selectedPatterns}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -205,7 +205,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
-                  indexesName={selectedPatterns}
+                  indexNames={selectedPatterns}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -222,7 +222,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={flowTarget}
-              indexesName={selectedPatterns}
+              indexNames={selectedPatterns}
               ip={ip}
               skip={isInitializing}
               startDate={from}
@@ -235,7 +235,7 @@ const NetworkDetailsComponent: React.FC = () => {
             <NetworkHttpQueryTable
               endDate={to}
               filterQuery={filterQuery}
-              indexesName={selectedPatterns}
+              indexNames={selectedPatterns}
               ip={ip}
               skip={isInitializing}
               startDate={from}
@@ -249,7 +249,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
-              indexesName={selectedPatterns}
+              indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
               skip={isInitializing}
@@ -265,7 +265,7 @@ const NetworkDetailsComponent: React.FC = () => {
               startDate={from}
               endDate={to}
               skip={isInitializing}
-              indexesName={selectedPatterns}
+              indexNames={selectedPatterns}
               ip={ip}
               type={type}
               flowTarget={flowTarget}

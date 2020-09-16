@@ -50,7 +50,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
   public render() {
     const {
       id = ID,
-      indexesName,
+      indexNames,
       isInspected,
       children,
       hostName,
@@ -73,7 +73,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
             from: startDate,
             to: endDate,
           },
-          defaultIndex: indexesName,
+          defaultIndex: indexNames,
           inspect: isInspected,
         }}
       >

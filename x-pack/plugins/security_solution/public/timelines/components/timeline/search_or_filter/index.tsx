@@ -114,11 +114,11 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     );
 
     const handleUpdateEventTypeAndIndexesName = useCallback(
-      (newEventType: EventType, indexesName: string[]) =>
+      (newEventType: EventType, indexNames: string[]) =>
         updateEventTypeAndIndexesName({
           id: timelineId,
           eventType: newEventType,
-          indexesName,
+          indexNames,
         }),
       [timelineId, updateEventTypeAndIndexesName]
     );
@@ -217,18 +217,18 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateEventTypeAndIndexesName: ({
     id,
     eventType,
-    indexesName,
+    indexNames,
   }: {
     id: string;
     eventType: EventType;
-    indexesName: string[];
+    indexNames: string[];
   }) => {
     dispatch(timelineActions.updateEventType({ id, eventType }));
-    dispatch(timelineActions.updateIndexesName({ id, indexesName }));
+    dispatch(timelineActions.updateIndexesName({ id, indexNames }));
     dispatch(
       sourcererActions.setSelectedIndexPatterns({
         id: SourcererScopeName.timeline,
-        selectedPatterns: indexesName,
+        selectedPatterns: indexNames,
       })
     );
   },

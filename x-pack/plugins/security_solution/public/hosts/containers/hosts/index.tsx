@@ -49,7 +49,7 @@ interface UseAllHost {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
-  indexesName: string[];
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
@@ -59,7 +59,7 @@ export const useAllHost = ({
   docValueFields,
   filterQuery,
   endDate,
-  indexesName,
+  indexNames,
   skip = false,
   startDate,
   type,
@@ -73,7 +73,7 @@ export const useAllHost = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions>({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.hosts,
     filterQuery: createFilter(filterQuery),
@@ -180,7 +180,7 @@ export const useAllHost = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -205,7 +205,7 @@ export const useAllHost = ({
     docValueFields,
     endDate,
     filterQuery,
-    indexesName,
+    indexNames,
     limit,
     skip,
     startDate,

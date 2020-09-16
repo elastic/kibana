@@ -275,5 +275,5 @@ export const setExcludedRowRendererIds = actionCreator<{
 
 export const updateIndexesName = actionCreator<{
   id: string;
-  indexesName: string[];
+  indexNames: string[];
 }>('UPDATE_INDEXES_NAME');

@@ -51,7 +51,7 @@ interface UseAuthentications {
   docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
-  indexesName: string[];
+  indexNames: string[];
   startDate: string;
   type: hostsModel.HostsType;
   skip: boolean;
@@ -61,7 +61,7 @@ export const useAuthentications = ({
   docValueFields,
   filterQuery,
   endDate,
-  indexesName,
+  indexNames,
   startDate,
   type,
   skip,
@@ -78,7 +78,7 @@ export const useAuthentications = ({
   const [authenticationsRequest, setAuthenticationsRequest] = useState<
     HostAuthenticationsRequestOptions
   >({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
     factoryQueryType: HostsQueries.authentications,
     filterQuery: createFilter(filterQuery),
@@ -182,7 +182,7 @@ export const useAuthentications = ({
     setAuthenticationsRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -197,7 +197,7 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [activePage, docValueFields, endDate, filterQuery, indexesName, limit, skip, startDate]);
+  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, skip, startDate]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

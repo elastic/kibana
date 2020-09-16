@@ -23,7 +23,6 @@ import debounce from 'lodash/debounce';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import * as i18n from './translations';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../containers/sourcerer/constants';
 import { ADD_INDEX_PATH } from '../../../../common/constants';

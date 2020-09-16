@@ -35,7 +35,7 @@ export const useMatrixHistogram = ({
   errorMessage,
   filterQuery,
   histogramType,
-  indexesName,
+  indexNames,
   stackByField,
   startDate,
 }: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs] => {
@@ -46,7 +46,7 @@ export const useMatrixHistogram = ({
   const [matrixHistogramRequest, setMatrixHistogramRequest] = useState<
     MatrixHistogramRequestOptions
   >({
-    defaultIndex: indexesName,
+    defaultIndex: indexNames,
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
     histogramType,
@@ -128,7 +128,7 @@ export const useMatrixHistogram = ({
     setMatrixHistogramRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexesName,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -141,7 +141,7 @@ export const useMatrixHistogram = ({
       }
       return prevRequest;
     });
-  }, [indexesName, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     hostsSearch(matrixHistogramRequest);

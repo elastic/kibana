@@ -279,6 +279,7 @@ export const sendAlertToTimelineAction = async ({
           ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
         ],
         id: TimelineId.active,
+        indexNames: [],
         dateRange: {
           start: from,
           end: to,
@@ -329,6 +330,7 @@ export const sendAlertToTimelineAction = async ({
           },
         ],
         id: TimelineId.active,
+        indexNames: [],
         dateRange: {
           start: from,
           end: to,

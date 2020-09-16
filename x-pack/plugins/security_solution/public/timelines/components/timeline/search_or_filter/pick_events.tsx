@@ -92,7 +92,7 @@ const toggleEventType = [
 
 interface PickEventTypeProps {
   eventType: EventType;
-  onChangeEventTypeAndIndexesName: (value: EventType, indexesName: string[]) => void;
+  onChangeEventTypeAndIndexesName: (value: EventType, indexNames: string[]) => void;
 }
 
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
