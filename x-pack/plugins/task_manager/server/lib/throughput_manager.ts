@@ -8,7 +8,7 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { Logger } from '../types';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
-const THROUGHPUT_CHECK_INTERVAL = 10 * 1000;
+const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
 
 // When errors occur, reduce maxWorkers by MAX_WORKERS_DECREASE_PERCENTAGE
 // When errors no longer occur, start increasing maxWorkers by MAX_WORKERS_INCREASE_PERCENTAGE
@@ -66,8 +66,8 @@ export class ThroughputManager {
     if (!this.isStarted) {
       this.errorsSubscription = this.errors$.subscribe(this.storeErrorHandler.bind(this));
       this.throughputCheckIntervalId = setInterval(
-        this.checkThroughput.bind(this),
-        THROUGHPUT_CHECK_INTERVAL
+        this.adjustThroughput.bind(this),
+        ADJUST_THROUGHPUT_INTERVAL
       );
       this.isStarted = true;
     }
@@ -91,7 +91,7 @@ export class ThroughputManager {
     }
   }
 
-  private checkThroughput() {
+  private adjustThroughput() {
     if (this.errorCountSinceLastInterval > 0) {
       this.reduceThroughput();
     } else {
