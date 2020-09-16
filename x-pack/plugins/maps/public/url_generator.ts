@@ -16,11 +16,13 @@ import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
 import { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY } from '../common/constants';
+import { createTileMapLayerDescriptor } from './classes/layers/create_tile_map_layer_descriptor';
 
 const STATE_STORAGE_KEY = '_a';
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const MAPS_APP_URL_GENERATOR = 'MAPS_APP_URL_GENERATOR';
+export const MAPS_APP_TILE_MAP_URL_GENERATOR = 'MAPS_APP_TILE_MAP_URL_GENERATOR';
 
 export interface MapsUrlGeneratorState {
   /**
@@ -59,51 +61,110 @@ export interface MapsUrlGeneratorState {
   hash?: boolean;
 }
 
+type GetStartServices = () => Promise<{
+  appBasePath: string;
+  useHashedUrl: boolean;
+}>;
+
+async function createMapUrl({
+  getStartServices,
+  mapId,
+  filters,
+  query,
+  refreshInterval,
+  timeRange,
+  initialLayers,
+  hash,
+}: MapsUrlGeneratorState & { getStartServices: GetStartServices }): Promise<string> {
+  const startServices = await getStartServices();
+  const useHash = hash ?? startServices.useHashedUrl;
+  const appBasePath = startServices.appBasePath;
+
+  const appState: {
+    query?: Query;
+    filters?: Filter[];
+    vis?: unknown;
+  } = {};
+  const queryState: QueryState = {};
+
+  if (query) appState.query = query;
+  if (filters && filters.length)
+    appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+
+  if (timeRange) queryState.time = timeRange;
+  if (filters && filters.length)
+    queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+  if (refreshInterval) queryState.refreshInterval = refreshInterval;
+
+  let url = `${appBasePath}/map#/${mapId || ''}`;
+  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
+  url = setStateToKbnUrl(STATE_STORAGE_KEY, appState, { useHash }, url);
+
+  if (initialLayers && initialLayers.length) {
+    // @ts-ignore
+    const risonEncodedInitialLayers = rison.encode_array(initialLayers);
+    url = `${url}&${INITIAL_LAYERS_KEY}=${encodeURIComponent(risonEncodedInitialLayers)}`;
+  }
+
+  return url;
+}
+
 export const createMapsUrlGenerator = (
-  getStartServices: () => Promise<{
-    appBasePath: string;
-    useHashedUrl: boolean;
-  }>
+  getStartServices: GetStartServices
 ): UrlGeneratorsDefinition<typeof MAPS_APP_URL_GENERATOR> => ({
   id: MAPS_APP_URL_GENERATOR,
+  createUrl: async (mapsUrlGeneratorState: MapsUrlGeneratorState): Promise<string> => {
+    return createMapUrl({ ...mapsUrlGeneratorState, getStartServices });
+  },
+});
+
+export const createTileMapUrlGenerator = (
+  getStartServices: GetStartServices
+): UrlGeneratorsDefinition<typeof MAPS_APP_TILE_MAP_URL_GENERATOR> => ({
+  id: MAPS_APP_TILE_MAP_URL_GENERATOR,
   createUrl: async ({
-    mapId,
+    title,
+    mapType,
+    indexPatternId,
+    geoFieldName,
+    metricAgg,
+    metricFieldName,
     filters,
     query,
-    refreshInterval,
     timeRange,
-    initialLayers,
     hash,
-  }: MapsUrlGeneratorState): Promise<string> => {
-    const startServices = await getStartServices();
-    const useHash = hash ?? startServices.useHashedUrl;
-    const appBasePath = startServices.appBasePath;
-
-    const appState: {
-      query?: Query;
-      filters?: Filter[];
-      vis?: unknown;
-    } = {};
-    const queryState: QueryState = {};
-
-    if (query) appState.query = query;
-    if (filters && filters.length)
-      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
-
-    if (timeRange) queryState.time = timeRange;
-    if (filters && filters.length)
-      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
-    if (refreshInterval) queryState.refreshInterval = refreshInterval;
-
-    let url = `${appBasePath}/map#/${mapId || ''}`;
-    url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
-    url = setStateToKbnUrl(STATE_STORAGE_KEY, appState, { useHash }, url);
-
-    if (initialLayers && initialLayers.length) {
-      // @ts-ignore
-      url = `${url}&${INITIAL_LAYERS_KEY}=${rison.encode_array(initialLayers)}`;
+  }: {
+    title?: string;
+    mapType: string;
+    indexPatternId: string;
+    geoFieldName?: string;
+    metricAgg: string;
+    metricFieldName?: string;
+    timeRange?: TimeRange;
+    filters?: Filter[];
+    query?: Query;
+    hash?: boolean;
+  }): Promise<string> => {
+    const initialLayers = [];
+    const tileMapLayerDescriptor = createTileMapLayerDescriptor({
+      title,
+      mapType,
+      indexPatternId,
+      geoFieldName,
+      metricAgg,
+      metricFieldName,
+    });
+    if (tileMapLayerDescriptor) {
+      initialLayers.push(tileMapLayerDescriptor);
     }
 
-    return url;
+    return createMapUrl({
+      initialLayers,
+      filters,
+      query,
+      timeRange,
+      hash: true,
+      getStartServices,
+    });
   },
 });

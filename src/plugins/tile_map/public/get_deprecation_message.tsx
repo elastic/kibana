@@ -22,14 +22,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getCoreService, getQueryService, getShareService } from './services';
+import { indexPatterns } from '../../data/public';
 
 export function getDeprecationMessage(vis: Vis) {
-  const mapsUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
-    'MAPS_APP_URL_GENERATOR'
+  const mapsTileMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
+    'MAPS_APP_TILE_MAP_URL_GENERATOR'
   );
 
   let action;
-  if (!mapsUrlGenerator) {
+  if (!mapsTileMapUrlGenerator) {
     action = (
       <FormattedMessage
         id="tileMap.vis.defaultDistributionMessage"
@@ -54,9 +55,41 @@ export function getDeprecationMessage(vis: Vis) {
         <EuiButton
           onClick={async (e) => {
             e.preventDefault();
-            console.log('vis', vis);
+
+            let geoFieldName: string;
+            const bucketAggs = vis.data?.aggs.byType('buckets');
+            if (bucketAggs.length && bucketAggs[0].type.dslName === 'geohash_grid') {
+              geoFieldName = bucketAggs[0].getField()?.name;
+            } else {
+              // attempt to default to first geo point field when geohash is not configured yet
+              const geoField = vis.data.indexPattern.fields.find((field) => {
+                return (
+                  !indexPatterns.isNestedField(field) &&
+                  field.aggregatable &&
+                  field.type === 'geo_point'
+                );
+              });
+              if (geoField) {
+                geoFieldName = geoField.name;
+              }
+            }
+
+            let metricAgg: string = 'count';
+            let metricFieldName: string;
+            const metricAggs = vis.data?.aggs.byType('metrics');
+            if (metricAggs.length) {
+              metricAgg = metricAggs[0].type.dslName;
+              metricFieldName = metricAggs[0].getField()?.name;
+            }
+
             const query = getQueryService();
-            const url = await mapsUrlGenerator.createUrl({
+            const url = await mapsTileMapUrlGenerator.createUrl({
+              title: vis.title,
+              mapType: vis.params.mapType,
+              indexPatternId: vis.data.indexPattern.id,
+              geoFieldName,
+              metricAgg,
+              metricFieldName,
               filters: query.filterManager.getFilters(),
               query: query.queryString.getQuery(),
               timeRange: query.timefilter.timefilter.getTime(),

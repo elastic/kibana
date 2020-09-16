@@ -32,7 +32,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
-import { createMapsUrlGenerator } from './url_generator';
+import { createMapsUrlGenerator, createTileMapUrlGenerator } from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
@@ -97,15 +97,17 @@ export class MapsPlugin
     setKibanaCommonConfig(plugins.mapsLegacy.config);
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
-    plugins.share.urlGenerators.registerUrlGenerator(
-      createMapsUrlGenerator(async () => {
-        const [coreStart] = await core.getStartServices();
-        return {
-          appBasePath: coreStart.application.getUrlForApp('maps'),
-          useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-        };
-      })
-    );
+
+    // register url generators
+    const getStartServices = async () => {
+      const [coreStart] = await core.getStartServices();
+      return {
+        appBasePath: coreStart.application.getUrlForApp('maps'),
+        useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
+      };
+    };
+    plugins.share.urlGenerators.registerUrlGenerator(createMapsUrlGenerator(getStartServices));
+    plugins.share.urlGenerators.registerUrlGenerator(createTileMapUrlGenerator(getStartServices));
 
     plugins.inspector.registerView(MapView);
     if (plugins.home) {
