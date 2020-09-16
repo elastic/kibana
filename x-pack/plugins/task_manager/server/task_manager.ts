@@ -170,7 +170,7 @@ export class TaskManager {
       startingMaxWorkers: opts.config.max_workers,
       startingPollInterval: opts.config.poll_interval,
       logger: this.logger,
-      storeErrors$: this.store.errors$,
+      errors$: this.store.errors$,
     });
 
     const {
