@@ -1,13 +1,11 @@
 package builds.es_snapshots
 
-import builds.default.DEFAULT_CI_GROUP_COUNT
-import builds.default.DefaultCiGroup
 import builds.default.defaultCiGroups
 import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import kibanaAgent
-import templates.EmptyTemplate
+import templates.KibanaTemplate
 
 object EsSnapshotsProject : Project({
   id("ES_Snapshots")
@@ -16,8 +14,6 @@ object EsSnapshotsProject : Project({
   val esBuild = BuildType {
     id("ES_Build")
     name = "ES Build"
-
-    templates(EmptyTemplate)
 
     kibanaAgent(2)
 
@@ -64,15 +60,22 @@ object EsSnapshotsProject : Project({
 
   val defaultCiGroupsCloned = defaultCiGroups.map { cloneForVerify(it) }
 
-  defaultCiGroupsCloned.forEach {
-    buildType(it)
+  subProject {
+    id("ES_Snapshot_Tests")
+    name = "Tests"
+
+    defaultTemplate = KibanaTemplate
+
+    defaultCiGroupsCloned.forEach {
+      buildType(it)
+    }
+
+    buildType(BuildType {
+      id("ES_Snapshots_Default_CIGroups_Composite")
+      name = "CI Groups"
+      type = BuildTypeSettings.Type.COMPOSITE
+
+      dependsOn(*defaultCiGroupsCloned.toTypedArray())
+    })
   }
-
-  buildType(BuildType {
-    id("ES_Snapshots_Default_CIGroups_Composite")
-    name = "CI Groups"
-    type = BuildTypeSettings.Type.COMPOSITE
-
-    dependsOn(*defaultCiGroupsCloned.toTypedArray())
-  })
 })

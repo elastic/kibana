@@ -9,8 +9,8 @@ import builds.test.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnection
 import kibanaAgent
+import templates.KibanaTemplate
 import templates.DefaultTemplate
-import templates.EmptyTemplate
 
 class KibanaConfiguration() {
   var agentNetwork: String = "teamcity"
@@ -32,8 +32,9 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
     }
 
     vcsRoot(DefaultRoot)
+
     template(DefaultTemplate)
-    template(EmptyTemplate)
+    template(KibanaTemplate)
 
     defaultTemplate = DefaultTemplate
 
@@ -76,79 +77,85 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
       }
     }
 
-    buildType(Lint)
-    buildType(Checks)
-
     subProject {
-      id("Test")
-      name = "Test"
+      id("CI")
+      name = "CI"
+      defaultTemplate = KibanaTemplate
+
+      buildType(Lint)
+      buildType(Checks)
 
       subProject {
-        id("Jest")
-        name = "Jest"
-
-        buildType(Jest)
-        buildType(XPackJest)
-        buildType(JestIntegration)
-      }
-
-      buildType(ApiIntegration)
-      buildType(QuickTests)
-      buildType(AllTests)
-    }
-
-    subProject {
-      id("OSS")
-      name = "OSS Distro"
-
-      buildType(OssBuild)
-
-      subProject {
-        id("OSS_Functional")
-        name = "Functional"
-
-        buildType(OssCiGroups)
-        buildType(OssVisualRegression)
-        buildType(OssFirefox)
-        buildType(OssAccessibility)
-        buildType(OssPluginFunctional)
+        id("Test")
+        name = "Test"
 
         subProject {
-          id("CIGroups")
-          name = "CI Groups"
+          id("Jest")
+          name = "Jest"
 
-          ossCiGroups.forEach { buildType(it) }
+          buildType(Jest)
+          buildType(XPackJest)
+          buildType(JestIntegration)
         }
+
+        buildType(ApiIntegration)
+        buildType(QuickTests)
+        buildType(AllTests)
       }
-    }
-
-    subProject {
-      id("Default")
-      name = "Default Distro"
-
-      buildType(DefaultBuild)
 
       subProject {
-        id("Default_Functional")
-        name = "Functional"
+        id("OSS")
+        name = "OSS Distro"
 
-        buildType(DefaultCiGroups)
-        buildType(DefaultVisualRegression)
-        buildType(DefaultFirefox)
-        buildType(DefaultAccessibility)
-        buildType(DefaultSecuritySolution)
+        buildType(OssBuild)
 
         subProject {
-          id("Default_CIGroups")
-          name = "CI Groups"
+          id("OSS_Functional")
+          name = "Functional"
 
-          defaultCiGroups.forEach { buildType(it) }
+          buildType(OssCiGroups)
+          buildType(OssVisualRegression)
+          buildType(OssFirefox)
+          buildType(OssAccessibility)
+          buildType(OssPluginFunctional)
+
+          subProject {
+            id("CIGroups")
+            name = "CI Groups"
+
+            ossCiGroups.forEach { buildType(it) }
+          }
         }
       }
-    }
 
-    buildType(FullCi)
-    buildType(BaselineCi)
+      subProject {
+        id("Default")
+        name = "Default Distro"
+
+        buildType(DefaultBuild)
+
+        subProject {
+          id("Default_Functional")
+          name = "Functional"
+
+          buildType(DefaultCiGroups)
+          buildType(DefaultVisualRegression)
+          buildType(DefaultFirefox)
+          buildType(DefaultAccessibility)
+          buildType(DefaultSecuritySolution)
+
+          subProject {
+            id("Default_CIGroups")
+            name = "CI Groups"
+
+            defaultCiGroups.forEach { buildType(it) }
+          }
+        }
+      }
+
+      buildType(FullCi)
+      buildType(BaselineCi)
+    }
 
     subProject(EsSnapshotsProject)
   }
