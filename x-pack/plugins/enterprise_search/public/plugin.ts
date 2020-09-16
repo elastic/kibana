@@ -53,6 +53,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: ENTERPRISE_SEARCH_PLUGIN.ID,
       title: ENTERPRISE_SEARCH_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
       appRoute: ENTERPRISE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
