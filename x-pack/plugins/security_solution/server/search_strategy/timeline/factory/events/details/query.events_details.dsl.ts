@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DocValueFields } from '../../../../../common/search_strategy';
+import { DocValueFields } from '../../../../../../common/search_strategy';
 
 export const buildTimelineDetailsQuery = (
   indexName: string,
