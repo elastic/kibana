@@ -27,7 +27,11 @@ import { ObservabilityPluginSetup } from '../../observability/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
 import {
+  APM_CUSTOM_LINKS_FEATURE_NAME,
+  APM_CUSTOM_LINKS_LICENSE_TYPE,
   APM_FEATURE,
+  APM_ML_FEATURE_NAME,
+  APM_ML_LICENSE_TYPE,
   APM_SERVICE_MAPS_FEATURE_NAME,
   APM_SERVICE_MAPS_LICENSE_TYPE,
 } from './feature';
@@ -131,6 +135,14 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     plugins.licensing.featureUsage.register(
       APM_SERVICE_MAPS_FEATURE_NAME,
       APM_SERVICE_MAPS_LICENSE_TYPE
+    );
+    plugins.licensing.featureUsage.register(
+      APM_ML_FEATURE_NAME,
+      APM_ML_LICENSE_TYPE
+    );
+    plugins.licensing.featureUsage.register(
+      APM_CUSTOM_LINKS_FEATURE_NAME,
+      APM_CUSTOM_LINKS_LICENSE_TYPE
     );
 
     createApmApi().init(core, {
