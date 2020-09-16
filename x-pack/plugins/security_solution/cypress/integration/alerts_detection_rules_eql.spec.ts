@@ -15,26 +15,16 @@ import {
   SEVERITY,
 } from '../screens/alerts_detection_rules';
 import {
-  ABOUT_FALSE_POSITIVES,
+  ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
-  ABOUT_MITRE,
-  ABOUT_RISK,
   ABOUT_RULE_DESCRIPTION,
-  ABOUT_SEVERITY,
-  ABOUT_STEP,
-  ABOUT_TAGS,
-  ABOUT_URLS,
-  DEFINITION_CUSTOM_QUERY,
-  DEFINITION_INDEX_PATTERNS,
-  DEFINITION_TIMELINE,
-  DEFINITION_STEP,
+  DEFINITION_DETAILS,
+  getDescriptionForTitle,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
-  SCHEDULE_LOOPBACK,
-  SCHEDULE_RUNS,
-  SCHEDULE_STEP,
+  SCHEDULE_DETAILS,
 } from '../screens/rule_details';
 
 import {
@@ -136,32 +126,34 @@ describe('Detection rules, EQL', () => {
     cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${eqlRule.name} Beta`);
 
     cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', eqlRule.description);
-    cy.get(ABOUT_STEP).eq(ABOUT_SEVERITY).invoke('text').should('eql', eqlRule.severity);
-    cy.get(ABOUT_STEP).eq(ABOUT_RISK).invoke('text').should('eql', eqlRule.riskScore);
-    cy.get(ABOUT_STEP).eq(ABOUT_URLS).invoke('text').should('eql', expectedUrls);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_FALSE_POSITIVES)
-      .invoke('text')
-      .should('eql', expectedFalsePositives);
-    cy.get(ABOUT_STEP).eq(ABOUT_MITRE).invoke('text').should('eql', expectedMitre);
-    cy.get(ABOUT_STEP).eq(ABOUT_TAGS).invoke('text').should('eql', expectedTags);
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDescriptionForTitle('Severity').invoke('text').should('eql', eqlRule.severity);
+      getDescriptionForTitle('Risk score').invoke('text').should('eql', eqlRule.riskScore);
+      getDescriptionForTitle('Reference URLs').invoke('text').should('eql', expectedUrls);
+      getDescriptionForTitle('False positive examples')
+        .invoke('text')
+        .should('eql', expectedFalsePositives);
+      getDescriptionForTitle('MITRE ATT&CK').invoke('text').should('eql', expectedMitre);
+      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
+    });
 
     cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', INVESTIGATION_NOTES_MARKDOWN);
 
-    cy.get(DEFINITION_INDEX_PATTERNS).then((patterns) => {
-      cy.wrap(patterns).each((pattern, index) => {
-        cy.wrap(pattern).invoke('text').should('eql', expectedIndexPatterns[index]);
-      });
+    cy.get(DEFINITION_DETAILS).within(() => {
+      getDescriptionForTitle('Index patterns')
+        .invoke('text')
+        .should('eql', expectedIndexPatterns.join(''));
+      getDescriptionForTitle('Custom query')
+        .invoke('text')
+        .should('eql', `${eqlRule.customQuery} `);
+      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Event Correlation');
+      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
     });
-    cy.get(DEFINITION_STEP)
-      .eq(DEFINITION_CUSTOM_QUERY)
-      .invoke('text')
-      .should('eql', `${eqlRule.customQuery} `);
-    cy.get(DEFINITION_STEP).eq(2).invoke('text').should('eql', 'Event Correlation');
-    cy.get(DEFINITION_STEP).eq(DEFINITION_TIMELINE).invoke('text').should('eql', 'None');
 
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
+    cy.get(SCHEDULE_DETAILS).within(() => {
+      getDescriptionForTitle('Runs every').invoke('text').should('eql', '5m');
+      getDescriptionForTitle('Additional look-back time').invoke('text').should('eql', '1m');
+    });
   });
 });

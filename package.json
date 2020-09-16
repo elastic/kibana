@@ -137,9 +137,11 @@
     "@hapi/wreck": "^15.0.2",
     "@kbn/analytics": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
+    "@kbn/config": "1.0.0",
     "@kbn/config-schema": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
+    "@kbn/logging": "1.0.0",
     "@kbn/pm": "1.0.0",
     "@kbn/std": "1.0.0",
     "@kbn/telemetry-tools": "1.0.0",
@@ -490,7 +492,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.22.0",
+    "node": "10.22.1",
     "yarn": "^1.21.1"
   }
 }
