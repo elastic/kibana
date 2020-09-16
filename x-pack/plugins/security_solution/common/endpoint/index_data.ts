@@ -8,7 +8,6 @@ import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import { KbnClient } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
-import fetch from 'node-fetch';
 import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
@@ -36,7 +35,9 @@ import { HostMetadata } from './types';
 
 export async function indexHostsAndAlerts(
   client: Client,
-  kbnClient: KbnClient,
+  kbnClient: KbnClient & {
+    requestWithApiKey: (path: string, init?: RequestInit | undefined) => Promise<Response>;
+  },
   seed: string,
   numHosts: number,
   numDocs: number,
@@ -82,7 +83,9 @@ function delay(ms: number) {
 async function indexHostDocs(
   numDocs: number,
   client: Client,
-  kbnClient: KbnClient,
+  kbnClient: KbnClient & {
+    requestWithApiKey: (path: string, init?: RequestInit | undefined) => Promise<Response>;
+  },
   realPolicies: Record<string, CreatePackagePolicyResponse['item']>,
   epmEndpointPackage: GetPackagesResponse['response'][0],
   metadataIndex: string,
@@ -265,7 +268,9 @@ const getEndpointPackageInfo = async (
 };
 
 const fleetEnrollAgentForHost = async (
-  kbnClient: KbnClient,
+  kbnClient: KbnClient & {
+    requestWithApiKey: (path: string, init?: RequestInit | undefined) => Promise<Response>;
+  },
   endpointHost: HostMetadata,
   agentPolicyId: string
 ): Promise<undefined | PostAgentEnrollResponse['item']> => {
@@ -330,15 +335,18 @@ const fleetEnrollAgentForHost = async (
 
     // ------------------------------------------------
     // First enroll the agent
-    const res = await fetch(`http://localhost:5601${AGENT_API_ROUTES.ENROLL_PATTERN}`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: {
-        'kbn-xsrf': 'xxx',
-        Authorization: `ApiKey ${enrollmentApiKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const res = await kbnClient.requestWithApiKey(
+      `http://localhost:5601${AGENT_API_ROUTES.ENROLL_PATTERN}`,
+      {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          'kbn-xsrf': 'xxx',
+          Authorization: `ApiKey ${enrollmentApiKey}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     if (res) {
       const enrollObj: PostAgentEnrollResponse = await res.json();
@@ -366,7 +374,7 @@ const fleetEnrollAgentForHost = async (
           },
         ],
       };
-      const checkinRes = await fetch(
+      const checkinRes = await kbnClient.requestWithApiKey(
         `http://localhost:5601${AGENT_API_ROUTES.CHECKIN_PATTERN.replace(
           '{agentId}',
           enrollObj.item.id
@@ -413,7 +421,7 @@ const fleetEnrollAgentForHost = async (
             };
           }),
         };
-        const ackActionResp = await fetch(
+        const ackActionResp = await kbnClient.requestWithApiKey(
           `http://localhost:5601${AGENT_API_ROUTES.ACKS_PATTERN.replace(
             '{agentId}',
             enrollObj.item.id

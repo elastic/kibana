@@ -9,6 +9,8 @@ import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
+import { KibanaConfig } from '@kbn/dev-utils/target/kbn_client/kbn_client_requester';
+import fetch from 'node-fetch';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
 import { FLEET_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../ingest_manager/common/constants';
@@ -16,6 +18,21 @@ import {
   CreateFleetSetupResponse,
   PostIngestSetupResponse,
 } from '../../../ingest_manager/common/types/rest_spec';
+
+class KbnClientWithApiKeySupport extends KbnClient {
+  private kibanaUrlNoAuth: string;
+  constructor(log: ToolingLog, kibanaConfig: KibanaConfig) {
+    super(log, kibanaConfig);
+    // is resolveUrl necessary?
+    const kibanaUrl = this.resolveUrl(kibanaConfig.url);
+    const matches = kibanaUrl.match(/(https?:\/\/)(.*\:.*\@)(.*)/);
+    // strip auth from url
+    this.kibanaUrlNoAuth = matches && matches.length === 3 ? matches[1] + matches[3] : kibanaUrl;
+  }
+  requestWithApiKey(path: string, init?: RequestInit | undefined) {
+    return fetch(`${this.kibanaUrlNoAuth}/${path}`, init);
+  }
+}
 
 main();
 
@@ -196,7 +213,7 @@ async function main() {
       default: false,
     },
   }).argv;
-  const kbnClient = new KbnClient(new ToolingLog(), { url: argv.kibana });
+  const kbnClient = new KbnClientWithApiKeySupport(new ToolingLog(), { url: argv.kibana });
 
   try {
     await doIngestSetup(kbnClient);
