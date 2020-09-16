@@ -138,24 +138,6 @@ export interface RawAlert extends SavedObjectAttributes {
   meta?: AlertMeta;
 }
 
-export type AlertUpdateRequiredFields = Pick<
-  RawAlert,
-  | 'enabled'
-  | 'name'
-  | 'tags'
-  | 'alertTypeId'
-  | 'consumer'
-  | 'schedule'
-  | 'actions'
-  | 'params'
-  | 'createdBy'
-  | 'updatedBy'
-  | 'createdAt'
-  | 'throttle'
-  | 'muteAll'
-  | 'mutedInstanceIds'
->;
-
 export type AlertInfoParams = Pick<
   RawAlert,
   | 'params'

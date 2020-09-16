@@ -26,7 +26,6 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
-  AlertUpdateRequiredFields,
   AlertInstanceSummary,
 } from './types';
 import { validateAlertTypeParams } from './lib';
