@@ -571,7 +571,13 @@ export const StepDetailsForm: FC<Props> = React.memo(
               })}
             >
               <EuiFieldText
-                placeholder="frequency"
+                placeholder={i18n.translate(
+                  'xpack.transform.stepDetailsForm.editFlyoutFormFrequencyPlaceholderText',
+                  {
+                    defaultMessage: 'Default: {defaultValue}',
+                    values: { defaultValue: '1m' },
+                  }
+                )}
                 value={transformFrequency}
                 onChange={(e) => setTransformFrequency(e.target.value)}
                 aria-label={i18n.translate('xpack.transform.stepDetailsForm.frequencyAriaLabel', {
@@ -584,7 +590,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
 
             <EuiFormRow
               label={i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeLabel', {
-                defaultMessage: 'Maxiumum page search size',
+                defaultMessage: 'Maximum page search size',
               })}
               isInvalid={!isTransformSettingsMaxPageSearchSizeValid}
               error={
@@ -604,7 +610,13 @@ export const StepDetailsForm: FC<Props> = React.memo(
               )}
             >
               <EuiFieldText
-                placeholder="max_page_search_size"
+                placeholder={i18n.translate(
+                  'xpack.transform.stepDetailsForm.editFlyoutFormMaxPageSearchSizePlaceholderText',
+                  {
+                    defaultMessage: 'Default: {defaultValue}',
+                    values: { defaultValue: 500 },
+                  }
+                )}
                 value={transformSettingsMaxPageSearchSize.toString()}
                 onChange={(e) =>
                   setTransformSettingsMaxPageSearchSize(parseInt(e.target.value, 10))
