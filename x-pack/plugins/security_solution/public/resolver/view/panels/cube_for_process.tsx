@@ -14,7 +14,7 @@ import React, { memo } from 'react';
 import { useResolverTheme, SymbolIds } from '../assets';
 
 interface StyledSVGCube {
-  readonly isOrigin: boolean;
+  readonly isOrigin?: boolean;
 }
 
 /**
@@ -30,7 +30,7 @@ export const CubeForProcess = memo(function ({
    * True if the process represented by the node is still running.
    */
   running: boolean;
-  isOrigin: boolean;
+  isOrigin?: boolean;
 }) {
   const { cubeAssetsForNode } = useResolverTheme();
   const { cubeSymbol, strokeColor } = cubeAssetsForNode(!running, false);
