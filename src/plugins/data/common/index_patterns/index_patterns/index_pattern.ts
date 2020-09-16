@@ -346,7 +346,7 @@ export class IndexPattern implements IIndexPattern {
     return this.typeMeta?.aggs;
   }
 
-  isWildcard() {
+  private isWildcard() {
     return _.includes(this.title, '*');
   }
 

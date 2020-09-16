@@ -43,10 +43,6 @@ export interface IIndexPattern {
   >;
 }
 
-/**
- * Use data plugin interface instead
- * @deprecated
- */
 export interface IndexPatternAttributes {
   type: string;
   fields: string;
