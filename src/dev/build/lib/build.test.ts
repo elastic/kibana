@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { Config } from './config';
 import { Build } from './build';
