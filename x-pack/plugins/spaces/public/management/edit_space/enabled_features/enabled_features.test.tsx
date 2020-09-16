@@ -204,4 +204,60 @@ describe('EnabledFeatures', () => {
     expect(findTestSubject(wrapper, 'hideAllFeaturesLink')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'showAllFeaturesLink')).toHaveLength(1);
   });
+
+  describe('feature category button', () => {
+    it(`does not toggle visibility when it contains more than one item`, () => {
+      const changeHandler = jest.fn();
+      const wrapper = mountWithIntl(
+        <EnabledFeatures
+          features={features}
+          space={{
+            id: 'my-space',
+            name: 'my space',
+            disabledFeatures: [],
+          }}
+          securityEnabled={true}
+          onChange={changeHandler}
+          getUrlForApp={getUrlForApp}
+        />
+      );
+
+      findTestSubject(wrapper, `featureCategoryButton_kibana`).simulate('click');
+      expect(changeHandler).not.toHaveBeenCalled();
+    });
+
+    it('toggles item visibility when the category contains a single item', () => {
+      const changeHandler = jest.fn();
+      const wrapper = mountWithIntl(
+        <EnabledFeatures
+          features={[
+            ...features,
+            {
+              id: 'feature-3',
+              name: 'Feature 3',
+              icon: 'spacesApp',
+              app: [],
+              category: DEFAULT_APP_CATEGORIES.management,
+              privileges: null,
+            },
+          ]}
+          space={{
+            id: 'my-space',
+            name: 'my space',
+            disabledFeatures: [],
+          }}
+          securityEnabled={true}
+          onChange={changeHandler}
+          getUrlForApp={getUrlForApp}
+        />
+      );
+
+      findTestSubject(wrapper, `featureCategoryButton_management`).simulate('click');
+      expect(changeHandler).toBeCalledTimes(1);
+
+      const updatedSpace = changeHandler.mock.calls[0][0];
+
+      expect(updatedSpace.disabledFeatures).toEqual(['feature-3']);
+    });
+  });
 });

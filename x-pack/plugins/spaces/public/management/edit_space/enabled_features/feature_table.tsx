@@ -55,6 +55,8 @@ export class FeatureTable extends Component<Props, {}> {
       const featureCount = featuresInCategory.length;
       const enabledCount = getEnabledFeatures(featuresInCategory, space).length;
 
+      const canExpandCategory = featuresInCategory.length > 1;
+
       const checkboxProps: EuiCheckboxProps = {
         id: `featureCategoryCheckbox_${category.id}`,
         indeterminate: enabledCount > 0 && enabledCount < featureCount,
@@ -82,6 +84,15 @@ export class FeatureTable extends Component<Props, {}> {
           alignItems={'center'}
           responsive={false}
           gutterSize="m"
+          onClick={() => {
+            if (!canExpandCategory) {
+              const isChecked = enabledCount > 0;
+              this.setFeaturesVisibility(
+                featuresInCategory.map((f) => f.id),
+                !isChecked
+              );
+            }
+          }}
         >
           <EuiFlexItem grow={false}>
             <EuiCheckbox {...checkboxProps} />
@@ -99,30 +110,28 @@ export class FeatureTable extends Component<Props, {}> {
         </EuiFlexGroup>
       );
 
-      // TODO: Enable once https://github.com/elastic/eui/issues/3881 is resolved (will land in version 28.4.0)
-      // const label: string = i18n.translate('xpack.spaces.management.featureAccordionSwitchLabel', {
-      //   defaultMessage: '{enabledCount} / {featureCount} features visible',
-      //   values: {
-      //     enabledCount,
-      //     featureCount,
-      //   },
-      // });
-      // const extraAction = (
-      //   <EuiText size="s" aria-hidden="true" color={'subdued'}>
-      //     {label}
-      //   </EuiText>
-      // );
-
-      const canExpand = featuresInCategory.length > 1;
+      const label: string = i18n.translate('xpack.spaces.management.featureAccordionSwitchLabel', {
+        defaultMessage: '{enabledCount} / {featureCount} features visible',
+        values: {
+          enabledCount,
+          featureCount,
+        },
+      });
+      const extraAction = (
+        <EuiText size="s" aria-hidden="true" color={'subdued'}>
+          {label}
+        </EuiText>
+      );
 
       const accordion = (
         <EuiAccordion
           id={`featureCategory_${category.id}`}
+          data-test-subj={`featureCategory_${category.id}`}
           key={category.id}
-          arrowDisplay={canExpand ? 'right' : 'none'}
-          forceState={canExpand ? undefined : 'closed'}
+          arrowDisplay={canExpandCategory ? 'right' : 'none'}
+          forceState={canExpandCategory ? undefined : 'closed'}
           buttonContent={buttonContent}
-          // extraAction={extraAction}
+          extraAction={canExpandCategory ? extraAction : undefined}
         >
           <div className="spcFeatureTableAccordionContent">
             <EuiSpacer size="s" />
