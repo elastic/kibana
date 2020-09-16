@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { euiStyled } from '../../../../../../observability/public';
+import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {
@@ -18,15 +19,19 @@ const hideHistory = i18n.translate('xpack.infra.hideHistory', {
   defaultMessage: 'Hide history',
 });
 
+const TRANSITION_MS = 300;
+
 export const BottomDrawer: React.FC<{
   measureRef: (instance: HTMLElement | null) => void;
   interval: string;
-}> = ({ measureRef, interval, children }) => {
+  formatter: InfraFormatter;
+}> = ({ measureRef, interval, formatter, children }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   const onClick = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   return (
-    <BottomActionContainer ref={measureRef} isOpen={isOpen}>
-      <BottomActionTopBar>
+    <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen}>
+      <BottomActionTopBar ref={isOpen ? null : measureRef}>
         <EuiFlexItem grow={false}>
           <ShowHideButton iconType={isOpen ? 'arrowDown' : 'arrowRight'} onClick={onClick}>
             {isOpen ? hideHistory : showHistory}
@@ -48,7 +53,7 @@ export const BottomDrawer: React.FC<{
         </EuiFlexItem>
       </BottomActionTopBar>
       <EuiFlexGroup style={{ marginTop: 0 }}>
-        <Timeline interval={interval} />
+        <Timeline interval={interval} yAxisFormatter={formatter} />
       </EuiFlexGroup>
     </BottomActionContainer>
   );
@@ -60,7 +65,7 @@ const BottomActionContainer = euiStyled.div<{ isOpen: boolean }>`
   left: 0;
   bottom: 0;
   right: 0;
-  transition: transform 0.5s;
+  transition: transform ${TRANSITION_MS}ms;
   transform: translateY(${(props) => (props.isOpen ? 0 : '204px')})
 `;
 

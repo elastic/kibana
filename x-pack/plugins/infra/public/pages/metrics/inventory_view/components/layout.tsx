@@ -136,7 +136,7 @@ export const Layout = () => {
                   formatter={formatter}
                   bottomMargin={height}
                 />
-                <BottomDrawer measureRef={measureRef} interval={interval}>
+                <BottomDrawer measureRef={measureRef} interval={interval} formatter={formatter}>
                   <Legend
                     formatter={formatter}
                     bounds={bounds}
