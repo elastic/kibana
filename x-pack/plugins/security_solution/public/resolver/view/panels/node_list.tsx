@@ -26,6 +26,7 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
 import { ResolverState } from '../../types';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { useResolverTheme } from '../assets';
 
 const StyledLimitWarning = styled(LimitWarning)`
   flex-flow: row wrap;
@@ -53,32 +54,28 @@ interface ProcessTableView {
   href: string | undefined;
 }
 
-const StyledProcessLabelWrapper = styled.div`
-  display: inline-block;
-  width: 80%;
-  vertical-align: super;
+const StyledButtonTextContainer = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: row;
 `;
 
 const StyledProcessLabel = styled.div`
-  display: flex;
-  flex-direction: column;
-  text-align: left;
+  display: inline-block;
+  flex: 3;
+  min-width: 0;
 
   & .origin-label {
-    color: #343741;
+    color: ${(props) => props.color};
     font-size: 10.5px;
     font-weight: 700;
   }
 
-  & div {
-    max-width: 100%;
-    display: flex;
-
-    & span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+  & > div {
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 `;
 
@@ -207,6 +204,9 @@ function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }
   const isTerminated = useSelector((state: ResolverState) =>
     entityID === undefined ? false : selectors.isProcessTerminated(state)(entityID)
   );
+  const {
+    colorMap: { descriptionText },
+  } = useResolverTheme();
   return (
     <EuiButtonEmpty {...useNavigateOrReplace({ search: item.href })}>
       {name === '' ? (
@@ -219,34 +219,30 @@ function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }
           )}
         </EuiBadge>
       ) : (
-        <>
+        <StyledButtonTextContainer>
           <CubeForProcess
             running={!isTerminated}
             isOrigin={isOrigin}
             data-test-subj="resolver:node-list:node-link:icon"
           />
-          {isOrigin ? (
-            <StyledProcessLabelWrapper>
-              <StyledProcessLabel>
-                <div data-test-subj="resolver:node-list:node-link:origin" className="origin-label">
-                  <span>
-                    {i18n.translate(
-                      'xpack.securitySolution.endpoint.resolver.panel.table.row.originLabel',
-                      {
-                        defaultMessage: 'Analyzed Event',
-                      }
-                    )}
-                  </span>
-                </div>
-                <div data-test-subj="resolver:node-list:node-link:title">
-                  <span>{name}</span>
-                </div>
-              </StyledProcessLabel>
-            </StyledProcessLabelWrapper>
-          ) : (
-            <span data-test-subj="resolver:node-list:node-link:title">{name}</span>
-          )}
-        </>
+          <StyledProcessLabel color={descriptionText}>
+            {isOrigin && (
+              <div data-test-subj="resolver:node-list:node-link:origin" className="origin-label">
+                <span>
+                  {i18n.translate(
+                    'xpack.securitySolution.endpoint.resolver.panel.table.row.originLabel',
+                    {
+                      defaultMessage: 'Analyzed Event',
+                    }
+                  )}
+                </span>
+              </div>
+            )}
+            <div data-test-subj="resolver:node-list:node-link:title">
+              <span>{name}</span>
+            </div>
+          </StyledProcessLabel>
+        </StyledButtonTextContainer>
       )}
     </EuiButtonEmpty>
   );

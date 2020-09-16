@@ -37,8 +37,8 @@ export const CubeForProcess = memo(function ({
 
   return (
     <StyledSVG
-      width="2em"
-      height="2em"
+      width="2.15em"
+      height="2.15em"
       viewBox="0 0 100% 100%"
       data-test-subj={dataTestSubj}
       isOrigin={isOrigin}
@@ -54,7 +54,7 @@ export const CubeForProcess = memo(function ({
           xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
           fill="transparent"
           x={0}
-          y={0}
+          y={-1}
           stroke={strokeColor}
           strokeDashoffset={0}
           width="100%"
@@ -65,8 +65,8 @@ export const CubeForProcess = memo(function ({
       <use
         role="presentation"
         xlinkHref={cubeSymbol}
-        x={5}
-        y={5}
+        x={5.25}
+        y={4.25}
         width="70%"
         height="70%"
         opacity="1"
@@ -77,8 +77,5 @@ export const CubeForProcess = memo(function ({
 });
 
 const StyledSVG = styled.svg<StyledSVGCube>`
-  position: relative;
-  top: 0.4em;
-  margin-right: 0.25em;
-  vertical-align: ${(props) => (props.isOrigin ? 'top' : 'baseline')};
+  margin-right: ${(props) => (props.isOrigin ? '0.15em' : 0)};
 `;
