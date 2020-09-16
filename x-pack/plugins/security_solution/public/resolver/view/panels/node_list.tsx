@@ -53,6 +53,35 @@ interface ProcessTableView {
   href: string | undefined;
 }
 
+const StyledProcessLabelWrapper = styled.div`
+  display: inline-block;
+  width: 80%;
+  vertical-align: super;
+`;
+
+const StyledProcessLabel = styled.div`
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+
+  & .origin-label {
+    color: #343741;
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+
+  & div {
+    max-width: 100%;
+    display: flex;
+
+    & span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+`;
+
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
  */
@@ -173,6 +202,8 @@ export const NodeList = memo(() => {
 
 function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }) {
   const entityID = event.entityIDSafeVersion(item.event);
+  const originID = useSelector(selectors.originID);
+  const isOrigin = originID === entityID;
   const isTerminated = useSelector((state: ResolverState) =>
     entityID === undefined ? false : selectors.isProcessTerminated(state)(entityID)
   );
@@ -191,9 +222,30 @@ function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }
         <>
           <CubeForProcess
             running={!isTerminated}
+            isOrigin={isOrigin}
             data-test-subj="resolver:node-list:node-link:icon"
           />
-          <span data-test-subj="resolver:node-list:node-link:title">{name}</span>
+          {isOrigin ? (
+            <StyledProcessLabelWrapper>
+              <StyledProcessLabel>
+                <div data-test-subj="resolver:node-list:node-link:origin" className="origin-label">
+                  <span>
+                    {i18n.translate(
+                      'xpack.securitySolution.endpoint.resolver.panel.table.row.originLabel',
+                      {
+                        defaultMessage: 'Analyzed Event',
+                      }
+                    )}
+                  </span>
+                </div>
+                <div data-test-subj="resolver:node-list:node-link:title">
+                  <span>{name}</span>
+                </div>
+              </StyledProcessLabel>
+            </StyledProcessLabelWrapper>
+          ) : (
+            <span data-test-subj="resolver:node-list:node-link:title">{name}</span>
+          )}
         </>
       )}
     </EuiButtonEmpty>

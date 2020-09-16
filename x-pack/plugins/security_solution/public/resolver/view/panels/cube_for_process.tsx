@@ -11,13 +11,18 @@ import { i18n } from '@kbn/i18n';
 /* eslint-disable react/display-name */
 
 import React, { memo } from 'react';
-import { useResolverTheme } from '../assets';
+import { useResolverTheme, SymbolIds } from '../assets';
+
+interface StyledSVGCube {
+  readonly isOrigin: boolean;
+}
 
 /**
  * Icon representing a process node.
  */
 export const CubeForProcess = memo(function ({
   running,
+  isOrigin,
   'data-test-subj': dataTestSubj,
 }: {
   'data-test-subj'?: string;
@@ -25,25 +30,45 @@ export const CubeForProcess = memo(function ({
    * True if the process represented by the node is still running.
    */
   running: boolean;
+  isOrigin: boolean;
 }) {
   const { cubeAssetsForNode } = useResolverTheme();
-  const { cubeSymbol } = cubeAssetsForNode(!running, false);
+  const { cubeSymbol, strokeColor } = cubeAssetsForNode(!running, false);
 
   return (
-    <StyledSVG width="1.5em" height="1.5em" viewBox="0 0 1 1" data-test-subj={dataTestSubj}>
+    <StyledSVG
+      width="2em"
+      height="2em"
+      viewBox="0 0 100% 100%"
+      data-test-subj={dataTestSubj}
+      isOrigin={isOrigin}
+    >
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {
           defaultMessage: '{running, select, true {Running Process} false {Terminated Process}}',
           values: { running },
         })}
       </desc>
+      {isOrigin && (
+        <use
+          xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+          fill="transparent"
+          x={0}
+          y={0}
+          stroke={strokeColor}
+          strokeDashoffset={0}
+          width="100%"
+          height="100%"
+          className="origin"
+        />
+      )}
       <use
         role="presentation"
         xlinkHref={cubeSymbol}
-        x={0}
-        y={0}
-        width={1}
-        height={1}
+        x={5}
+        y={5}
+        width="70%"
+        height="70%"
         opacity="1"
         className="cube"
       />
@@ -51,8 +76,9 @@ export const CubeForProcess = memo(function ({
   );
 });
 
-const StyledSVG = styled.svg`
+const StyledSVG = styled.svg<StyledSVGCube>`
   position: relative;
   top: 0.4em;
   margin-right: 0.25em;
+  vertical-align: ${(props) => (props.isOrigin ? 'top' : 'baseline')};
 `;

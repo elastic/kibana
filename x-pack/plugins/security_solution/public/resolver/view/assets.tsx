@@ -429,7 +429,7 @@ export const useResolverTheme = (): {
   };
 
   const colorMap = {
-    descriptionText: theme.euiColorDarkestShade,
+    descriptionText: theme.euiTextColor,
     full: theme.euiColorFullShade,
     graphControls: theme.euiColorDarkestShade,
     graphControlsBackground: theme.euiColorEmptyShade,
