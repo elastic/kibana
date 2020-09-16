@@ -53,25 +53,6 @@ export interface LegacyConfig {
  * @internal
  * @deprecated
  */
-export interface LegacyPluginPack {
-  getPath(): string;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface LegacyPluginSpec {
-  getId: () => unknown;
-  getExpectedKibanaVersion: () => string;
-  getConfigPrefix: () => string;
-  getPack: () => LegacyPluginPack;
-}
-
-/**
- * @internal
- * @deprecated
- */
 export interface VarsProvider {
   fn: (server: Server, configValue: any) => LegacyVars;
   pluginSpec: {
@@ -94,16 +75,6 @@ export type VarsReplacer = (
   request: LegacyRequest,
   server: Server
 ) => LegacyVars | Promise<LegacyVars>;
-
-/**
- * @internal
- * @deprecated
- */
-export interface LegacyUiExports {
-  defaultInjectedVarProviders?: VarsProvider[];
-  injectedVarsReplacers?: VarsReplacer[];
-  unknown?: [{ pluginSpec: LegacyPluginSpec; type: unknown }];
-}
 
 /**
  * @public

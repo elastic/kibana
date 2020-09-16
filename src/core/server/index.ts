@@ -341,7 +341,6 @@ export {
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyConfig,
-  LegacyUiExports,
   LegacyInternals,
 } from './legacy';
 
