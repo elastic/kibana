@@ -18,7 +18,6 @@
  */
 
 import { PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-import { schema } from '@kbn/config-schema';
 
 import { registerPreviewScriptedFieldRoute, registerResolveIndexRoute } from './routes';
 

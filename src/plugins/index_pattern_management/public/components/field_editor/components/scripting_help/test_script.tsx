@@ -81,7 +81,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
   }
 
   previewScript = async (searchContext?: { query?: Query | undefined }) => {
-    const { indexPattern, lang, name, script, executeScript } = this.props;
+    const { indexPattern, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
       return;
