@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  ManageProcessorForm,
-  ManageProcessorFormOnSubmitArg,
-  OnSubmitHandler,
-} from './manage_processor_form.container';
+export const EDIT_SUBMIT_BUTTON = '[data-test-subj="ruleEditSubmitButton"]';
