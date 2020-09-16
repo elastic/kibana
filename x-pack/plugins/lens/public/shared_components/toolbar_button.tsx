@@ -9,6 +9,13 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
 
+const groupPositionToClassMap = {
+  none: null,
+  left: 'lnsToolbarButton--groupLeft',
+  center: 'lnsToolbarButton--groupCenter',
+  right: 'lnsToolbarButton--groupRight',
+};
+
 export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   /**
    * Determines prominence
@@ -18,6 +25,14 @@ export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
    * Smaller buttons also remove extra shadow for less prominence
    */
   size?: EuiButtonProps['size'];
+  /**
+   * Determines if the button will have a down arrow or not
+   */
+  hasArrow?: boolean;
+  /**
+   * Adjusts the borders for groupings
+   */
+  groupPosition?: 'none' | 'left' | 'center' | 'right';
 };
 
 export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
@@ -25,10 +40,13 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   className,
   fontWeight = 'normal',
   size = 'm',
+  hasArrow = true,
+  groupPosition = 'none',
   ...rest
 }) => {
   const classes = classNames(
     'lnsToolbarButton',
+    groupPositionToClassMap[groupPosition],
     [`lnsToolbarButton--${fontWeight}`, `lnsToolbarButton--${size}`],
     className
   );
@@ -36,7 +54,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
     <EuiButton
       className={classes}
       iconSide="right"
-      iconType="arrowDown"
+      iconType={hasArrow ? 'arrowDown' : ''}
       color="text"
       contentProps={{
         className: 'lnsToolbarButton__content',
