@@ -21,19 +21,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
-  const retry = getService('retry');
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
-  const docTable = getService('docTable');
-  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const TEST_COLUMN_NAMES = ['@message'];
-  const TEST_FILTER_COLUMN_NAMES = [
-    ['extension', 'jpg'],
-    ['geo.src', 'IN'],
-  ];
+  const TEST_FILTER_COLUMN_NAMES = [['extension'], ['geo.src']];
 
   describe('Discover a11y tests', () => {
     before(async () => {
@@ -94,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on tables with columns view', async () => {
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+      for (const [columnName] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItemToggle(columnName);
       }
       await a11y.testAppSnapshot();
