@@ -33,6 +33,8 @@ export interface CustomRule {
   customQuery: string;
   name: string;
   description: string;
+  index?: string[];
+  interval?: string;
   severity: string;
   riskScore: string;
   tags: string[];
@@ -71,6 +73,8 @@ export interface MachineLearningRule {
   falsePositivesExamples: string[];
   mitre: Mitre[];
   note: string;
+  runsEvery: Interval;
+  lookBack: Interval;
 }
 
 const mitre1: Mitre = {
@@ -131,6 +135,31 @@ export const newRule: CustomRule = {
   lookBack,
 };
 
+export const existingRule: CustomRule = {
+  customQuery: 'host.name:*',
+  name: 'Rule 1',
+  description: 'Description for Rule 1',
+  index: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  interval: '4m',
+  severity: 'High',
+  riskScore: '19',
+  tags: ['rule1'],
+  referenceUrls: [],
+  falsePositivesExamples: [],
+  mitre: [],
+  note: 'This is my note',
+  timelineId: '',
+  runsEvery,
+  lookBack,
+};
+
 export const newOverrideRule: OverrideRule = {
   customQuery: 'host.name:*',
   name: 'New Rule Test',
@@ -181,6 +210,8 @@ export const machineLearningRule: MachineLearningRule = {
   falsePositivesExamples: ['False1'],
   mitre: [mitre1],
   note: '# test markdown',
+  runsEvery,
+  lookBack,
 };
 
 export const eqlRule: CustomRule = {
@@ -195,4 +226,6 @@ export const eqlRule: CustomRule = {
   mitre: [mitre1, mitre2],
   note: '# test markdown',
   timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  runsEvery,
+  lookBack,
 };
