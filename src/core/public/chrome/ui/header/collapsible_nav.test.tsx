@@ -67,6 +67,7 @@ function mockProps() {
     onIsLockedUpdate: () => {},
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
+    navigateToUrl: () => Promise.resolve(),
     customNavLink$: new BehaviorSubject(undefined),
   };
 }

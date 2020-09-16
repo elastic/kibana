@@ -42,6 +42,11 @@ export class FeatureUsageService {
   public setup({ http }: SetupDeps): FeatureUsageServiceSetup {
     return {
       register: async (featureName, licenseType) => {
+        // Skip registration if on logged-out page
+        // NOTE: this only works because the login page does a full-page refresh after logging in
+        // If this is ever changed, this code will need to buffer registrations and call them after the user logs in.
+        if (http.anonymousPaths.isAnonymous(window.location.pathname)) return;
+
         await http.post('/internal/licensing/feature_usage/register', {
           body: JSON.stringify({
             featureName,
@@ -55,6 +60,9 @@ export class FeatureUsageService {
   public start({ http }: StartDeps): FeatureUsageServiceStart {
     return {
       notifyUsage: async (featureName, usedAt = Date.now()) => {
+        // Skip notification if on logged-out page
+        if (http.anonymousPaths.isAnonymous(window.location.pathname)) return;
+
         const lastUsed = isDate(usedAt) ? usedAt.getTime() : usedAt;
         await http.post('/internal/licensing/feature_usage/notify', {
           body: JSON.stringify({
