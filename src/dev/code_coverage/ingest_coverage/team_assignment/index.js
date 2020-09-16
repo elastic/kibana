@@ -56,8 +56,7 @@ export const generateTeamAssignments = () => {
       description: `
 
 Create a file defining the team assignments,
- parsed from the source of truth in
- kbn-dev-utils.
+ parsed from .github/CODEOWNERS
 
       `,
       flags,
