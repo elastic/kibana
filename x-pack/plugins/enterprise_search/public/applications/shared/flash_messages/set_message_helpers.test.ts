@@ -14,45 +14,40 @@ import {
 describe('Flash Message Helpers', () => {
   const message = 'I am a message';
 
-  describe('setSuccessMessage()', () => {
-    it('sets a success message', () => {
-      FlashMessagesLogic.mount();
-      setSuccessMessage(message);
-
-      expect(FlashMessagesLogic.values.messages).toEqual([
-        {
-          message,
-          type: 'success',
-        },
-      ]);
-    });
+  beforeEach(() => {
+    FlashMessagesLogic.mount();
   });
 
-  describe('setErrorMessage()', () => {
-    it('sets an error message', () => {
-      FlashMessagesLogic.mount();
-      setErrorMessage(message);
+  it('etSuccessMessage()', () => {
+    setSuccessMessage(message);
 
-      expect(FlashMessagesLogic.values.messages).toEqual([
-        {
-          message,
-          type: 'error',
-        },
-      ]);
-    });
+    expect(FlashMessagesLogic.values.messages).toEqual([
+      {
+        message,
+        type: 'success',
+      },
+    ]);
   });
 
-  describe('setQueuedSuccessMessage()', () => {
-    it('sets a queued success message', () => {
-      FlashMessagesLogic.mount();
-      setQueuedSuccessMessage(message);
+  it('setErrorMessage()', () => {
+    setErrorMessage(message);
 
-      expect(FlashMessagesLogic.values.queuedMessages).toEqual([
-        {
-          message,
-          type: 'success',
-        },
-      ]);
-    });
+    expect(FlashMessagesLogic.values.messages).toEqual([
+      {
+        message,
+        type: 'error',
+      },
+    ]);
+  });
+
+  it('setQueuedSuccessMessage()', () => {
+    setQueuedSuccessMessage(message);
+
+    expect(FlashMessagesLogic.values.queuedMessages).toEqual([
+      {
+        message,
+        type: 'success',
+      },
+    ]);
   });
 });
