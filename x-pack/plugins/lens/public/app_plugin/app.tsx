@@ -39,6 +39,7 @@ import {
   IndexPatternsContract,
   SavedQuery,
 } from '../../../../../src/plugins/data/public';
+import { getFullPath } from '../../common';
 
 interface State {
   indicateNoData: boolean;
@@ -71,6 +72,7 @@ export function App({
   originatingApp,
   navigation,
   onAppLeave,
+  setHeaderActionMenu,
   history,
   getAppNameFromId,
 }: {
@@ -84,6 +86,7 @@ export function App({
   redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
   originatingApp?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: History;
   getAppNameFromId?: (appId: string) => string | undefined;
 }) {
@@ -271,6 +274,7 @@ export function App({
         docStorage
           .load(docId)
           .then((doc) => {
+            core.chrome.recentlyAccessed.add(getFullPath(docId), doc.title, docId);
             getAllIndexPatterns(
               _.uniq(
                 doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
@@ -365,6 +369,7 @@ export function App({
     docStorage
       .save(doc)
       .then(({ id }) => {
+        core.chrome.recentlyAccessed.add(getFullPath(id), doc.title, id);
         // Prevents unnecessary network request and disables save button
         const newDoc = { ...doc, id };
         const currentOriginatingApp = state.originatingApp;
@@ -416,6 +421,7 @@ export function App({
         <div className="lnsApp">
           <div className="lnsApp__header">
             <TopNavMenu
+              setMenuMountPoint={setHeaderActionMenu}
               config={[
                 ...(!!state.originatingApp && lastKnownDoc?.id
                   ? [

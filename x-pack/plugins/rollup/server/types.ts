@@ -9,6 +9,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
 
 import { IndexManagementPluginSetup } from '../../index_management/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { License } from './services';
 import { IndexPatternsFetcher } from './shared_imports';
@@ -22,6 +23,7 @@ export interface Dependencies {
   visTypeTimeseries?: VisTypeTimeseriesSetup;
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface RouteDependencies {

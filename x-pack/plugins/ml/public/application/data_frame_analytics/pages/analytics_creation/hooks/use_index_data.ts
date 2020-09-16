@@ -22,9 +22,9 @@ import {
   useDataGrid,
   useRenderCellValue,
   EsSorting,
-  SearchResponse7,
   UseIndexDataReturnType,
 } from '../../../../components/data_grid';
+import type { SearchResponse7 } from '../../../../../../common/types/es_client';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';

@@ -54,6 +54,7 @@ describe('UrlDrilldown', () => {
     getGlobalScope: () => ({ kibanaUrl: 'http://localhost:5601/' }),
     getOpenModal: () => Promise.resolve(coreMock.createStart().overlays.openModal),
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
+    getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
   });
 

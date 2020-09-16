@@ -37,10 +37,10 @@ import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
 
+export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
-export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingSystemMock } from './logging/logging_system.mock';
