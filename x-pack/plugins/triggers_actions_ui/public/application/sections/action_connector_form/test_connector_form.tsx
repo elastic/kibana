@@ -51,7 +51,7 @@ export const TestConnectorForm = ({
 
   const steps = [
     {
-      title: 'Fill out an example action',
+      title: 'Create an action',
       children: ParamsFieldsComponent ? (
         <Suspense
           fallback={
@@ -84,7 +84,7 @@ export const TestConnectorForm = ({
       ),
     },
     {
-      title: 'Execute the example action',
+      title: 'Run the action',
       children: (
         <Fragment>
           {executeEnabled ? null : (
@@ -92,7 +92,7 @@ export const TestConnectorForm = ({
               <EuiCallOut iconType="alert" color="warning">
                 <p>
                   <FormattedMessage
-                    defaultMessage="Unsaved changes must be saved before the connector can be tested"
+                    defaultMessage="Save your changes before testing the connector."
                     id="xpack.triggersActionsUI.sections.testConnectorForm.executeTestDisabled"
                   />
                 </p>
@@ -109,7 +109,7 @@ export const TestConnectorForm = ({
               onClick={onExecutAction}
             >
               <FormattedMessage
-                defaultMessage="Execute"
+                defaultMessage="Run"
                 id="xpack.triggersActionsUI.sections.testConnectorForm.executeTestButton"
               />
             </EuiButton>
@@ -118,7 +118,7 @@ export const TestConnectorForm = ({
       ),
     },
     {
-      title: 'Execution Result',
+      title: 'Results',
       children: pipe(
         executionResult,
         map((result) =>
@@ -137,20 +137,10 @@ export const TestConnectorForm = ({
 };
 
 const AwaitingExecution = () => (
-  <EuiCallOut
-    title={i18n.translate(
-      'xpack.triggersActionsUI.sections.testConnectorForm.awaitingExecutionTitle',
-      {
-        defaultMessage: 'Awaiting Action Parameters',
-        values: {},
-      }
-    )}
-    data-test-subj="executionAwaiting"
-    iconType="iInCircle"
-  >
+  <EuiCallOut data-test-subj="executionAwaiting">
     <p>
       <FormattedMessage
-        defaultMessage="Once you provide the Action Parameters by filling out the form above, you may execute the action and the result will be displayed here."
+        defaultMessage="When you run the action, the results will show up here."
         id="xpack.triggersActionsUI.sections.testConnectorForm.awaitingExecutionDescription"
       />
     </p>
@@ -162,7 +152,7 @@ const SuccessfulExecution = () => (
     title={i18n.translate(
       'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
       {
-        defaultMessage: 'Success',
+        defaultMessage: 'Action was successful',
         values: {},
       }
     )}
@@ -172,12 +162,13 @@ const SuccessfulExecution = () => (
   >
     <p>
       <FormattedMessage
-        defaultMessage="This action was successfully executed. We recommend you ensure the action has resulted in the expected effect."
+        defaultMessage="Ensure the results are what you expect."
         id="xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulDescription"
       />
     </p>
   </EuiCallOut>
 );
+
 const FailedExecussion = ({
   executionResult: { message, serviceMessage },
 }: {
@@ -188,8 +179,7 @@ const FailedExecussion = ({
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.testConnectorForm.executionFailureDescription',
         {
-          defaultMessage:
-            'This action has failed to execute and has resulted in the following message:',
+          defaultMessage: 'The following error was found:',
         }
       ),
       description:
@@ -207,7 +197,7 @@ const FailedExecussion = ({
       title: i18n.translate(
         'xpack.triggersActionsUI.sections.testConnectorForm.executionFailureAdditionalDetails',
         {
-          defaultMessage: 'Some additional details have been provided by the action:',
+          defaultMessage: 'Details:',
         }
       ),
       description: serviceMessage,
@@ -218,7 +208,7 @@ const FailedExecussion = ({
       title={i18n.translate(
         'xpack.triggersActionsUI.sections.testConnectorForm.executionFailureTitle',
         {
-          defaultMessage: 'Error',
+          defaultMessage: 'Action failed to run',
         }
       )}
       data-test-subj="executionFailureResult"

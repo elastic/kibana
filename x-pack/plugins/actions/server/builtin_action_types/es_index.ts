@@ -90,24 +90,34 @@ async function executor(
 
     const err = find(result.items, 'index.error.reason');
     if (err) {
-      throw new Error(
+      return wrapErr(
         `${err.index.error!.reason}${
           err.index.error?.caused_by ? ` (${err.index.error?.caused_by?.reason})` : ''
-        }`
+        }`,
+        actionId,
+        logger
       );
     }
 
     return { status: 'ok', data: result, actionId };
   } catch (err) {
-    const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
-      defaultMessage: 'error indexing documents',
-    });
-    logger.error(`error indexing documents: ${err.message}`);
-    return {
-      status: 'error',
-      actionId,
-      message,
-      serviceMessage: err.message,
-    };
+    return wrapErr(err.message, actionId, logger);
   }
+}
+
+function wrapErr(
+  errMessage: string,
+  actionId: string,
+  logger: Logger
+): ActionTypeExecutorResult<unknown> {
+  const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
+    defaultMessage: 'error indexing documents',
+  });
+  logger.error(`error indexing documents: ${errMessage}`);
+  return {
+    status: 'error',
+    actionId,
+    message,
+    serviceMessage: errMessage,
+  };
 }
