@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientCommon, DuplicateIndexPatternError } from '../..';
+import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -43,6 +43,7 @@ import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
+import { DuplicateIndexPatternError } from '..';
 
 const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -119,14 +120,6 @@ export class IndexPatternsService {
       return [];
     }
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
-  };
-
-  getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForTimePattern(options);
-  };
-
-  getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
-    return this.apiClient.getFieldsForWildcard(options);
   };
 
   clearCache = (id?: string) => {
