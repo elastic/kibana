@@ -113,15 +113,13 @@ describe('IndexPatterns', () => {
   test('caches saved objects', async () => {
     await indexPatterns.getIds();
     await indexPatterns.getTitles();
-    await indexPatterns.getFields(['id', 'title']);
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
   });
 
   test('can refresh the saved objects caches', async () => {
     await indexPatterns.getIds();
     await indexPatterns.getTitles(true);
-    await indexPatterns.getFields(['id', 'title'], true);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
   });
 
   test('deletes the index pattern', async () => {
