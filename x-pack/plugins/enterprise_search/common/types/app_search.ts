@@ -7,19 +7,17 @@
 export interface IAccount {
   accountId: string;
   onboardingComplete: boolean;
-  role: IRole;
-}
-
-export interface IRole {
-  id: string;
-  roleType: string;
-  ability: {
-    accessAllEngines: boolean;
-    manage: string[];
-    edit: string[];
-    view: string[];
-    credentialTypes: string[];
-    availableRoleTypes: string[];
+  role: {
+    id: string;
+    roleType: string;
+    ability: {
+      accessAllEngines: boolean;
+      manage: string[];
+      edit: string[];
+      view: string[];
+      credentialTypes: string[];
+      availableRoleTypes: string[];
+    };
   };
 }
 
