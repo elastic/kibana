@@ -24,8 +24,10 @@ export async function sendUpgradeAgentAction({
   await createAgentAction(soClient, {
     agent_id: agentId,
     created_at: now,
-    version,
-    source_uri: sourceUri,
+    data: {
+      version,
+      source_uri: sourceUri,
+    },
     type: 'UPGRADE',
   });
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
@@ -37,13 +39,13 @@ export async function ackAgentUpgraded(
   soClient: SavedObjectsClientContract,
   agentAction: AgentAction
 ) {
-  if (!agentAction.version) throw new Error('version is missing in UPGRADE action');
+  if (!agentAction.data.version) throw new Error('version is missing in UPGRADE action');
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentAction.agent_id, {
     upgraded_at: new Date().toISOString(),
     local_metadata: {
       elastic: {
         agent: {
-          version: agentAction.version,
+          version: agentAction.data.version,
         },
       },
     },
