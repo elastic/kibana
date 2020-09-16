@@ -87,6 +87,10 @@ export const getThreatListSearchResponseMock = (): SearchResponse<ThreatListItem
 
 export const getThreatListItemMock = (): ThreatListItem => ({
   '@timestamp': '2020-09-09T21:59:13Z',
+  host: {
+    name: 'host-1',
+    ip: '192.168.0.0.1',
+  },
   source: {
     ip: '127.0.0.1',
     port: 1,
@@ -100,12 +104,50 @@ export const getThreatListItemMock = (): ThreatListItem => ({
 export const getFilterThreatMapping = (): ThreatMapping => [
   {
     entries: [
-      { field: 'destination.ip', type: 'mapping', value: 'destination.ip' },
-      { field: 'destination.port', type: 'mapping', value: 'destination.port' },
+      {
+        field: 'host.name',
+        type: 'mapping',
+        value: 'host.name',
+      },
+      {
+        field: 'host.ip',
+        type: 'mapping',
+        value: 'host.ip',
+      },
     ],
   },
-  { entries: [{ field: 'source.port', type: 'mapping', value: 'source.port' }] },
-  { entries: [{ field: 'source.ip', type: 'mapping', value: 'source.ip' }] },
+  {
+    entries: [
+      {
+        field: 'destination.ip',
+        type: 'mapping',
+        value: 'destination.ip',
+      },
+      {
+        field: 'destination.port',
+        type: 'mapping',
+        value: 'destination.port',
+      },
+    ],
+  },
+  {
+    entries: [
+      {
+        field: 'source.port',
+        type: 'mapping',
+        value: 'source.port',
+      },
+    ],
+  },
+  {
+    entries: [
+      {
+        field: 'source.ip',
+        type: 'mapping',
+        value: 'source.ip',
+      },
+    ],
+  },
 ];
 
 export const getThreatMappingFilterMock = (): Filter => ({
@@ -134,25 +176,13 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [
-                  {
-                    match: {
-                      'destination.ip': '127.0.0.1',
-                    },
-                  },
-                ],
+                should: [{ match: { 'host.name': 'host-1' } }],
                 minimum_should_match: 1,
               },
             },
             {
               bool: {
-                should: [
-                  {
-                    match: {
-                      'destination.port': port,
-                    },
-                  },
-                ],
+                should: [{ match: { 'host.ip': '192.168.0.0.1' } }],
                 minimum_should_match: 1,
               },
             },
@@ -164,13 +194,13 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [
-                  {
-                    match: {
-                      'source.port': port,
-                    },
-                  },
-                ],
+                should: [{ match: { 'destination.ip': '127.0.0.1' } }],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [{ match: { 'destination.port': port } }],
                 minimum_should_match: 1,
               },
             },
@@ -182,13 +212,19 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [
-                  {
-                    match: {
-                      'source.ip': '127.0.0.1',
-                    },
-                  },
-                ],
+                should: [{ match: { 'source.port': port } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ match: { 'source.ip': '127.0.0.1' } }],
                 minimum_should_match: 1,
               },
             },
