@@ -218,6 +218,13 @@ export const nonExistingPolicies: (
 ) => Immutable<EndpointState['nonExistingPolicies']> = (state) => state.nonExistingPolicies;
 
 /**
+ * returns the list of known existing agent policies
+ */
+export const agentPolicies: (
+  state: Immutable<EndpointState>
+) => Immutable<EndpointState['agentPolicies']> = (state) => state.agentPolicies;
+
+/**
  * Return boolean that indicates whether endpoints exist
  * @param state
  */
