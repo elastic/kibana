@@ -43,7 +43,9 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria,
   }, [setErrors, validationErrors]);
 
   const handleValidation = useCallback(() => {
-    start({ http, index, query: fieldValue });
+    if (fieldValue) {
+      start({ http, index, query: fieldValue });
+    }
   }, [fieldValue, http, index, start]);
 
   const handleChange = useCallback(
