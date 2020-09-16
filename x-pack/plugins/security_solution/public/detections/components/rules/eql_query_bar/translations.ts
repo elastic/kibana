@@ -13,6 +13,20 @@ export const EQL_VALIDATION_REQUEST_ERROR = i18n.translate(
   }
 );
 
+export const EQL_VALIDATION_ERRORS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.eqlValidation.title',
+  {
+    defaultMessage: 'EQL Validation Errors',
+  }
+);
+
+export const EQL_VALIDATION_ERROR_POPOVER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.eqlValidation.showErrorsLabel',
+  {
+    defaultMessage: 'Show EQL Validation Errors',
+  }
+);
+
 export const EQL_QUERY_BAR_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.eqlQueryBar.label',
   {
