@@ -141,6 +141,7 @@
     "@kbn/config-schema": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
+    "@kbn/legacy-logging": "1.0.0",
     "@kbn/logging": "1.0.0",
     "@kbn/pm": "1.0.0",
     "@kbn/std": "1.0.0",
