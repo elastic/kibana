@@ -118,6 +118,72 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     expect(updateConfig.settings).toBe(undefined);
     expect(updateConfig.frequency).toBe(undefined);
   });
+
+  it('should include dependent form fields', () => {
+    const transformConfigMock = getTransformConfigMock();
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      dest: {
+        ...transformConfigMock.dest,
+        pipeline: 'the-updated-destination-index',
+      },
+    });
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
+    expect(Object.keys(updateConfig)).toHaveLength(1);
+    // It should include the dependent unchanged destination index
+    expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
+    expect(updateConfig.dest?.pipeline).toBe('the-updated-destination-index');
+  });
+
+  it('should include the destination index when pipeline is unset', () => {
+    const transformConfigMock = {
+      ...getTransformConfigMock(),
+      dest: {
+        index: 'the-untouched-destination-index',
+        pipeline: 'the-original-pipeline',
+      },
+    };
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      dest: {
+        ...transformConfigMock.dest,
+        pipeline: '',
+      },
+    });
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
+    expect(Object.keys(updateConfig)).toHaveLength(1);
+    // It should include the dependent unchanged destination index
+    expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
+    expect(typeof updateConfig.dest?.pipeline).toBe('undefined');
+  });
+
+  it('should exclude unrelated dependent form fields', () => {
+    const transformConfigMock = getTransformConfigMock();
+
+    const formState = getDefaultState({
+      ...transformConfigMock,
+      description: 'the-updated-description',
+    });
+
+    const updateConfig = applyFormFieldsToTransformConfig(
+      transformConfigMock,
+      formState.formFields
+    );
+    expect(Object.keys(updateConfig)).toHaveLength(1);
+    // It should exclude the dependent unchanged destination section
+    expect(typeof updateConfig.dest).toBe('undefined');
+    expect(updateConfig.description).toBe('the-updated-description');
+  });
 });
 
 describe('Transform: formReducerFactory()', () => {

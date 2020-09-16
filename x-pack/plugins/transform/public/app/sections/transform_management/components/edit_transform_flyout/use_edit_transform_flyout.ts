@@ -15,6 +15,56 @@ import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_
 import { TransformPivotConfig } from '../../../../../../common/types/transform';
 import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
+// This custom hook uses nested reducers to provide a generic framework to manage form state
+// and apply it to a final possibly nested configuration object suitable for passing on
+// directly to an API call. For now this is only used for the transform edit form.
+// Once we apply the functionality to other places, e.g. the transform creation wizard,
+// the generic framework code in this file should be moved to a dedicated location.
+
+// The outer most level reducer defines a flat structure of names for form fields.
+// This is a flat structure regardless of whether the final request object will be nested.
+// For example, `destinationIndex` and `destinationPipeline` will later be nested under `dest`.
+interface EditTransformFlyoutFieldsState {
+  [key: string]: FormField;
+  description: FormField;
+  destinationIndex: FormField;
+  destinationPipeline: FormField;
+  frequency: FormField;
+  docsPerSecond: FormField;
+}
+
+// The inner reducers apply validation based on supplied attributes of each field.
+export interface FormField {
+  formFieldName: string;
+  configFieldName: string;
+  defaultValue: string;
+  dependsOn: string[];
+  errorMessages: string[];
+  isNullable: boolean;
+  isOptional: boolean;
+  validator: keyof typeof validate;
+  value: string;
+  valueParser: (value: string) => any;
+}
+
+// The reducers and utility functions in this file provide the following features:
+// - getDefaultState()
+//   Sets up the initial form state. It supports overrides to apply a pre-existing configuration.
+//   The implementation of this function is the only one that's specifically required to define
+//   the features of the transform edit form. All other functions are generic and could be reused
+//   in the future for other forms.
+//
+// - formReducerFactory() / formFieldReducer()
+//   These nested reducers take care of updating and validating the form state.
+//
+// - applyFormFieldsToTransformConfig() (iterates over getUpdateValue())
+//   Once a user hits the update button, these functions take care of extracting the information
+//   necessary to create the update request. They take into account whether a field needs to
+//   be included at all in the request (for example, if it hadn't been changed).
+//   The code is also able to identify relationships/dependencies between form fields.
+//   For example, if the `pipeline` field was changed, it's necessary to make the `index`
+//   field part of the request, otherwise the update would fail.
+
 // A Validator function takes in a value to check and returns an array of error messages.
 // If no messages (empty array) get returned, the value is valid.
 type Validator = (value: any, isOptional?: boolean) => string[];
@@ -114,18 +164,6 @@ const validate = {
   integerRange10To10000: integerRange10To10000Validator,
 } as const;
 
-export interface FormField {
-  formFieldName: string;
-  configFieldName: string;
-  defaultValue: string;
-  errorMessages: string[];
-  isNullable: boolean;
-  isOptional: boolean;
-  validator: keyof typeof validate;
-  value: string;
-  valueParser: (value: string) => any;
-}
-
 export const initializeField = (
   formFieldName: string,
   configFieldName: string,
@@ -140,6 +178,7 @@ export const initializeField = (
     formFieldName,
     configFieldName,
     defaultValue,
+    dependsOn: [],
     errorMessages: [],
     isNullable: false,
     isOptional: true,
@@ -149,15 +188,6 @@ export const initializeField = (
     ...(overloads !== undefined ? { ...overloads } : {}),
   };
 };
-
-interface EditTransformFlyoutFieldsState {
-  [key: string]: FormField;
-  description: FormField;
-  destinationIndex: FormField;
-  destinationPipeline: FormField;
-  frequency: FormField;
-  docsPerSecond: FormField;
-}
 
 export interface EditTransformFlyoutState {
   formFields: EditTransformFlyoutFieldsState;
@@ -172,21 +202,42 @@ interface Action {
   value: string;
 }
 
-// For form values where the attribute directly maps from the form's state to the transform
+// Takes a value from form state and applies it to the structure
+// of the expected final configuration request object.
+// Considers options like if a value is nullable or optional.
 const getUpdateValue = (
   attribute: keyof EditTransformFlyoutFieldsState,
   config: TransformPivotConfig,
-  formState: EditTransformFlyoutFieldsState
+  formState: EditTransformFlyoutFieldsState,
+  enforceFormValue = false
 ) => {
   const formStateAttribute = formState[attribute];
   const fallbackValue = formStateAttribute.isNullable ? null : formStateAttribute.defaultValue;
+
   const formValue =
     formStateAttribute.value !== ''
       ? formStateAttribute.valueParser(formStateAttribute.value)
       : fallbackValue;
+
   const configValue = getNestedProperty(config, formStateAttribute.configFieldName, fallbackValue);
-  return formValue !== configValue
-    ? setNestedProperty({}, formStateAttribute.configFieldName, formValue)
+
+  // only get depending values if we're not already in a call to get dependeing values.
+  const dependsOnConfig: PostTransformsUpdateRequestSchema =
+    enforceFormValue === false
+      ? formStateAttribute.dependsOn.reduce((_dependsOnConfig, dependsOnField) => {
+          return merge(
+            { ..._dependsOnConfig },
+            getUpdateValue(dependsOnField, config, formState, true)
+          );
+        }, {})
+      : {};
+
+  if (formValue === formStateAttribute.defaultValue && formStateAttribute.isOptional) {
+    return formValue !== configValue ? dependsOnConfig : {};
+  }
+
+  return formValue !== configValue || enforceFormValue
+    ? setNestedProperty(dependsOnConfig, formStateAttribute.configFieldName, formValue)
     : {};
 };
 
@@ -196,12 +247,13 @@ const getUpdateValue = (
 export const applyFormFieldsToTransformConfig = (
   config: TransformPivotConfig,
   formState: EditTransformFlyoutFieldsState
-): PostTransformsUpdateRequestSchema => {
-  return Object.keys(formState).reduce(
+): PostTransformsUpdateRequestSchema =>
+  // Iterates over all form fields and only if necessary applies them to
+  // the request object used for updating the transform.
+  Object.keys(formState).reduce(
     (updateConfig, field) => merge({ ...updateConfig }, getUpdateValue(field, config, formState)),
     {}
   );
-};
 
 // Takes in a transform configuration and returns
 // the default state to populate the form.
@@ -216,9 +268,12 @@ export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyo
 
     // dest.*
     destinationIndex: initializeField('destinationIndex', 'dest.index', config, {
+      dependsOn: ['destinationPipeline'],
       isOptional: false,
     }),
-    destinationPipeline: initializeField('destinationPipeline', 'dest.pipeline', config),
+    destinationPipeline: initializeField('destinationPipeline', 'dest.pipeline', config, {
+      dependsOn: ['destinationIndex'],
+    }),
 
     // settings.*
     docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {

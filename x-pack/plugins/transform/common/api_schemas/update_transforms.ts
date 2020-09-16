@@ -16,7 +16,7 @@ export const postTransformsUpdateRequestSchema = schema.object({
   // we cannot reuse `destSchema` because `index` is optional for the update request
   dest: schema.maybe(
     schema.object({
-      index: schema.maybe(schema.string()),
+      index: schema.string(),
       pipeline: schema.maybe(schema.string()),
     })
   ),
