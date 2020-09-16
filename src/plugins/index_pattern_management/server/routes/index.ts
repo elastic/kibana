@@ -17,21 +17,5 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-
-import { registerPreviewScriptedFieldRoute, registerResolveIndexRoute } from './routes';
-
-export class IndexPatternManagementPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-
-    registerPreviewScriptedFieldRoute(router);
-    registerResolveIndexRoute(router);
-  }
-
-  public start() {}
-
-  public stop() {}
-}
+export * from './preview_scripted_field';
+export * from './resolve_index';
