@@ -23,7 +23,7 @@ import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getCoreService, getQueryService, getShareService } from './services';
 
-export async function getDeprecationMessage(vis: Vis) {
+export function getDeprecationMessage(vis: Vis) {
   const mapsUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
     'MAPS_APP_URL_GENERATOR'
   );
@@ -49,17 +49,18 @@ export async function getDeprecationMessage(vis: Vis) {
       />
     );
   } else {
-    const query = getQueryService();
-    const url = await mapsUrlGenerator.createUrl({
-      filters: query.filterManager.getFilters(),
-      query: query.queryString.getQuery(),
-      timeRange: query.timefilter.timefilter.getTime(),
-    });
     action = (
       <div>
         <EuiButton
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
+            console.log('vis', vis);
+            const query = getQueryService();
+            const url = await mapsUrlGenerator.createUrl({
+              filters: query.filterManager.getFilters(),
+              query: query.queryString.getQuery(),
+              timeRange: query.timefilter.timefilter.getTime(),
+            });
             getCoreService().application.navigateToUrl(url);
           }}
           size="s"

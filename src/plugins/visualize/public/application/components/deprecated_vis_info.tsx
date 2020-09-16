@@ -17,51 +17,16 @@
  * under the License.
  */
 
-import React, { Component, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-interface Props {
-  getDeprecationMessage: (vis: Vis) => ReactElement<any>;
-  vis: Vis;
-}
-
-interface State {
-  message?: ReactElement<any>;
-}
-
-export class DeprecatedVisInfo extends Component<Props, State> {
-  private _isMounted: boolean = false;
-
-  state: State = {};
-
-  componentDidMount() {
-    this._isMounted = true;
-    this.loadMessage();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  async loadMessage() {
-    const message = await this.props.getDeprecationMessage(this.props.vis);
-    if (this._isMounted) {
-      this.setState({ message });
-    }
-  }
-
-  render() {
-    if (!this.state.message) {
-      return null;
-    }
-
-    return (
-      <EuiCallOut
-        className="hide-for-sharing"
-        data-test-subj="deprecatedVisInfo"
-        size="s"
-        title={this.state.message}
-      />
-    );
-  }
+export function DeprecatedVisInfo({ message }: ReactElement<any>) {
+  return (
+    <EuiCallOut
+      className="hide-for-sharing"
+      data-test-subj="deprecatedVisInfo"
+      size="s"
+      title={message}
+    />
+  );
 }
