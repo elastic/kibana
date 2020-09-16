@@ -40,7 +40,7 @@ export const flashAPIErrors = (
 
   const errorFlashMessages: IFlashMessage[] = Array.isArray(error?.body?.attributes?.errors)
     ? error.body!.attributes.errors.map((message) => ({ type: 'error', message }))
-    : [{ type: 'error', message: defaultErrorMessage }];
+    : [{ type: 'error', message: error?.body?.message || defaultErrorMessage }];
 
   if (isQueued) {
     FlashMessagesLogic.actions.setQueuedMessages(errorFlashMessages);

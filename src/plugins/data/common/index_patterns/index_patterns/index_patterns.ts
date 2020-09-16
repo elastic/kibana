@@ -48,8 +48,6 @@ const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
-type IndexPatternCachedFieldType = 'id' | 'title';
-
 export interface IndexPatternSavedObjectAttrs {
   title: string;
 }
@@ -123,20 +121,12 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
-  getFields = async (fields: IndexPatternCachedFieldType[], refresh: boolean = false) => {
-    if (!this.savedObjectsCache || refresh) {
-      await this.refreshSavedObjectsCache();
-    }
-    if (!this.savedObjectsCache) {
-      return [];
-    }
-    return this.savedObjectsCache.map((obj: Record<string, any>) => {
-      const result: Partial<Record<IndexPatternCachedFieldType, string>> = {};
-      fields.forEach(
-        (f: IndexPatternCachedFieldType) => (result[f] = obj[f] || obj?.attributes?.[f])
-      );
-      return result;
-    });
+  getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
+    return this.apiClient.getFieldsForTimePattern(options);
+  };
+
+  getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
+    return this.apiClient.getFieldsForWildcard(options);
   };
 
   clearCache = (id?: string) => {
