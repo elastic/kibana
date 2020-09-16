@@ -197,18 +197,6 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                 ),
               }}
             />
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.shortcut"
-              defaultMessage="{what}{how}"
-              values={{
-                what: <EuiFlexItem grow={false}>Shortcut</EuiFlexItem>,
-                how: (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>{isMac ? 'Command + /' : 'Control + /'}</EuiBadge>
-                  </EuiFlexItem>
-                ),
-              }}
-            />
           </EuiFlexGroup>
         </EuiText>
       }
