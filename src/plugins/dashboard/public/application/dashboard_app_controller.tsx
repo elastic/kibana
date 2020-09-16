@@ -346,7 +346,7 @@ export class DashboardAppController {
 
       // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
       if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
-        const originalPanelState = { ...embeddablesMap[incomingEmbeddable.embeddableId] };
+        const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
         embeddablesMap[incomingEmbeddable.embeddableId] = {
           gridData: originalPanelState.gridData,
           type: incomingEmbeddable.type,

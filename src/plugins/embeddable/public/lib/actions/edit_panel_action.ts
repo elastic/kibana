@@ -136,7 +136,7 @@ export class EditPanelAction implements Action<ActionContext> {
 
   private getExplicitInput({ embeddable }: ActionContext): EmbeddableInput {
     return (
-      (embeddable.getRoot() as Container)?.getInput()?.panels[embeddable.id]?.explicitInput ??
+      (embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]?.explicitInput ??
       embeddable.getInput()
     );
   }

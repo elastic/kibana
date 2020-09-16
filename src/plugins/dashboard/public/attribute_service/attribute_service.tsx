@@ -156,12 +156,8 @@ export class AttributeService<
   };
 
   public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
-    return embeddable.getRoot() &&
-      (embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput
-      ? ((embeddable.getRoot() as Container).getInput().panels[embeddable.id].explicitInput as
-          | ValType
-          | RefType)
-      : (embeddable.getInput() as ValType | RefType);
+    return ((embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]
+      ?.explicitInput ?? embeddable.getInput()) as ValType | RefType;
   }
 
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
