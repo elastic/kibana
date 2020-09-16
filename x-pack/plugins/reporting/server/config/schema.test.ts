@@ -8,101 +8,211 @@ import { ConfigSchema } from './schema';
 
 describe('Reporting Config Schema', () => {
   it(`context {"dev":false,"dist":false} produces correct config`, () => {
-    expect(ConfigSchema.validate({}, { dev: false, dist: false })).toMatchObject({
-      capture: {
-        browser: {
-          autoDownload: true,
-          chromium: { proxy: { enabled: false } },
-          type: 'chromium',
+    expect(ConfigSchema.validate({}, { dev: false, dist: false })).toMatchInlineSnapshot(`
+      Object {
+        "capture": Object {
+          "browser": Object {
+            "autoDownload": true,
+            "chromium": Object {
+              "proxy": Object {
+                "enabled": false,
+              },
+            },
+            "type": "chromium",
+          },
+          "loadDelay": "P0D",
+          "maxAttempts": 1,
+          "networkPolicy": Object {
+            "enabled": true,
+            "rules": Array [
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "http:",
+              },
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "https:",
+              },
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "ws:",
+              },
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "wss:",
+              },
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "data:",
+              },
+              Object {
+                "allow": false,
+                "host": undefined,
+                "protocol": undefined,
+              },
+            ],
+          },
+          "timeouts": Object {
+            "openUrl": "P0D",
+            "renderComplete": "P0D",
+            "waitForElements": "P0D",
+          },
+          "viewport": Object {
+            "height": 1200,
+            "width": 1950,
+          },
+          "zoom": 2,
         },
-        loadDelay: 3000,
-        maxAttempts: 1,
-        networkPolicy: {
-          enabled: true,
-          rules: [
-            { allow: true, host: undefined, protocol: 'http:' },
-            { allow: true, host: undefined, protocol: 'https:' },
-            { allow: true, host: undefined, protocol: 'ws:' },
-            { allow: true, host: undefined, protocol: 'wss:' },
-            { allow: true, host: undefined, protocol: 'data:' },
-            { allow: false, host: undefined, protocol: undefined },
+        "csv": Object {
+          "checkForFormulas": true,
+          "enablePanelActionDownload": true,
+          "escapeFormulaValues": false,
+          "maxSizeBytes": ByteSizeValue {
+            "valueInBytes": 10485760,
+          },
+          "scroll": Object {
+            "duration": "30s",
+            "size": 500,
+          },
+          "useByteOrderMarkEncoding": false,
+        },
+        "enabled": true,
+        "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "index": ".reporting",
+        "kibanaServer": Object {},
+        "poll": Object {
+          "jobCompletionNotifier": Object {
+            "interval": "P0D",
+            "intervalErrorMultiplier": 5,
+          },
+          "jobsRefresh": Object {
+            "interval": "P0D",
+            "intervalErrorMultiplier": 5,
+          },
+        },
+        "queue": Object {
+          "indexInterval": "week",
+          "pollEnabled": true,
+          "pollInterval": "P0D",
+          "pollIntervalErrorMultiplier": 10,
+          "timeout": "P0D",
+        },
+        "roles": Object {
+          "allow": Array [
+            "reporting_user",
           ],
         },
-        viewport: { height: 1200, width: 1950 },
-        zoom: 2,
-      },
-      csv: {
-        checkForFormulas: true,
-        enablePanelActionDownload: true,
-        maxSizeBytes: 10485760,
-        scroll: { duration: '30s', size: 500 },
-      },
-      encryptionKey: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      index: '.reporting',
-      kibanaServer: {},
-      poll: {
-        jobCompletionNotifier: { interval: 10000, intervalErrorMultiplier: 5 },
-        jobsRefresh: { interval: 5000, intervalErrorMultiplier: 5 },
-      },
-      queue: {
-        indexInterval: 'week',
-        pollEnabled: true,
-        pollInterval: 3000,
-        pollIntervalErrorMultiplier: 10,
-        timeout: 120000,
-      },
-      roles: { allow: ['reporting_user'] },
-    });
+      }
+    `);
   });
 
   it(`context {"dev":false,"dist":true} produces correct config`, () => {
-    expect(ConfigSchema.validate({}, { dev: false, dist: true })).toMatchObject({
-      capture: {
-        browser: {
-          autoDownload: false,
-          chromium: {
-            inspect: false,
-            proxy: { enabled: false },
+    expect(ConfigSchema.validate({}, { dev: false, dist: true })).toMatchInlineSnapshot(`
+      Object {
+        "capture": Object {
+          "browser": Object {
+            "autoDownload": false,
+            "chromium": Object {
+              "inspect": false,
+              "proxy": Object {
+                "enabled": false,
+              },
+            },
+            "type": "chromium",
           },
-          type: 'chromium',
+          "loadDelay": "P0D",
+          "maxAttempts": 3,
+          "networkPolicy": Object {
+            "enabled": true,
+            "rules": Array [
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "http:",
+              },
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "https:",
+              },
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "ws:",
+              },
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "wss:",
+              },
+              Object {
+                "allow": true,
+                "host": undefined,
+                "protocol": "data:",
+              },
+              Object {
+                "allow": false,
+                "host": undefined,
+                "protocol": undefined,
+              },
+            ],
+          },
+          "timeouts": Object {
+            "openUrl": "P0D",
+            "renderComplete": "P0D",
+            "waitForElements": "P0D",
+          },
+          "viewport": Object {
+            "height": 1200,
+            "width": 1950,
+          },
+          "zoom": 2,
         },
-        loadDelay: 3000,
-        maxAttempts: 3,
-        networkPolicy: {
-          enabled: true,
-          rules: [
-            { allow: true, host: undefined, protocol: 'http:' },
-            { allow: true, host: undefined, protocol: 'https:' },
-            { allow: true, host: undefined, protocol: 'ws:' },
-            { allow: true, host: undefined, protocol: 'wss:' },
-            { allow: true, host: undefined, protocol: 'data:' },
-            { allow: false, host: undefined, protocol: undefined },
+        "csv": Object {
+          "checkForFormulas": true,
+          "enablePanelActionDownload": true,
+          "escapeFormulaValues": false,
+          "maxSizeBytes": ByteSizeValue {
+            "valueInBytes": 10485760,
+          },
+          "scroll": Object {
+            "duration": "30s",
+            "size": 500,
+          },
+          "useByteOrderMarkEncoding": false,
+        },
+        "enabled": true,
+        "index": ".reporting",
+        "kibanaServer": Object {},
+        "poll": Object {
+          "jobCompletionNotifier": Object {
+            "interval": "P0D",
+            "intervalErrorMultiplier": 5,
+          },
+          "jobsRefresh": Object {
+            "interval": "P0D",
+            "intervalErrorMultiplier": 5,
+          },
+        },
+        "queue": Object {
+          "indexInterval": "week",
+          "pollEnabled": true,
+          "pollInterval": "P0D",
+          "pollIntervalErrorMultiplier": 10,
+          "timeout": "P0D",
+        },
+        "roles": Object {
+          "allow": Array [
+            "reporting_user",
           ],
         },
-        viewport: { height: 1200, width: 1950 },
-        zoom: 2,
-      },
-      csv: {
-        checkForFormulas: true,
-        enablePanelActionDownload: true,
-        maxSizeBytes: 10485760,
-        scroll: { duration: '30s', size: 500 },
-      },
-      index: '.reporting',
-      kibanaServer: {},
-      poll: {
-        jobCompletionNotifier: { interval: 10000, intervalErrorMultiplier: 5 },
-        jobsRefresh: { interval: 5000, intervalErrorMultiplier: 5 },
-      },
-      queue: {
-        indexInterval: 'week',
-        pollEnabled: true,
-        pollInterval: 3000,
-        pollIntervalErrorMultiplier: 10,
-        timeout: 120000,
-      },
-      roles: { allow: ['reporting_user'] },
-    });
+      }
+    `);
   });
 
   it('allows Duration values for certain keys', () => {
