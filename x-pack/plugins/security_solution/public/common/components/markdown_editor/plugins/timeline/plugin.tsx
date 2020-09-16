@@ -15,10 +15,11 @@ import {
 import { TimelineType } from '../../../../../../common/types/timeline';
 import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
 import { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
-import { useTimelineUrl } from '../../../link_to';
+import { getTimelineUrl, useFormatUrl } from '../../../link_to';
 
 import { ID } from './constants';
 import * as i18n from './translations';
+import { SecurityPageName } from '../../../../../app/types';
 
 interface TimelineEditorProps {
   onClosePopover: () => void;
@@ -26,7 +27,7 @@ interface TimelineEditorProps {
 }
 
 const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover, onInsert }) => {
-  const { timelineUrl } = useTimelineUrl();
+  const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
 
   const handleGetSelectableOptions = useCallback(
     ({ timelines }: { timelines: OpenTimelineResult[] }) => [
@@ -52,7 +53,10 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
         hideUntitled={true}
         getSelectableOptions={handleGetSelectableOptions}
         onTimelineChange={(timelineTitle, timelineId, graphEventId) => {
-          const url = timelineUrl(timelineId ?? '', graphEventId);
+          const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
+            absolute: true,
+            addSearch: false,
+          });
           onInsert(`[${timelineTitle}](${url})`, {
             block: false,
           });

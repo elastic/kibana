@@ -26,14 +26,27 @@ export {
   getCaseDetailsUrlWithCommentId,
 } from './redirect_to_case';
 
+interface FormatUrlOptions {
+  absolute: boolean;
+  addSearch: boolean;
+}
+
+type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
+
 export const useFormatUrl = (page: SecurityPageName) => {
   const { getUrlForApp } = useKibana().services.application;
   const search = useGetUrlSearch(navTabs[page]);
-  const formatUrl = useCallback(
-    (path: string, absolute: boolean = false) => {
+  const formatUrl = useCallback<FormatUrl>(
+    (path: string, { absolute, addSearch } = { absolute: false, addSearch: true }) => {
       const pathArr = path.split('?');
       const formattedPath = `${pathArr[0]}${
-        isEmpty(pathArr[1]) ? search : `${pathArr[1]}${isEmpty(search) ? '' : `&${search}`}`
+        addSearch
+          ? isEmpty(pathArr[1])
+            ? search
+            : `?${pathArr[1]}${isEmpty(search) ? '' : `&${search}`}`
+          : isEmpty(pathArr[1])
+          ? ''
+          : `?${pathArr[1]}`
       }`;
       return getUrlForApp(`${APP_ID}:${page}`, {
         path: formattedPath,
@@ -43,19 +56,4 @@ export const useFormatUrl = (page: SecurityPageName) => {
     [getUrlForApp, page, search]
   );
   return { formatUrl, search };
-};
-
-export const useTimelineUrl = () => {
-  const { getUrlForApp } = useKibana().services.application;
-  const baseUrl = getUrlForApp(`${APP_ID}:${SecurityPageName.timelines}`, {
-    path: '',
-    absolute: true,
-  });
-
-  const timelineUrl = useCallback(
-    (id: string, graphEventId?: string) => `${baseUrl}${getTimelineUrl(id ?? '', graphEventId)}`,
-    [baseUrl]
-  );
-
-  return { timelineUrl };
 };

@@ -22,7 +22,9 @@ const UserActionCopyLinkComponent = ({ id }: UserActionCopyLinkProps) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.case);
 
   const handleAnchorLink = useCallback(() => {
-    copy(formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId: id }), true));
+    copy(
+      formatUrl(getCaseDetailsUrlWithCommentId({ id: caseId, commentId: id }), { absolute: true })
+    );
   }, [caseId, formatUrl, id]);
 
   return (

@@ -6,7 +6,9 @@
 
 import { Plugin } from '@elastic/eui/node_modules/unified';
 import { RemarkTokenizer } from '@elastic/eui';
+import { parse } from 'query-string';
 import { ID, PREFIX } from './constants';
+import { decodeRisonUrlState } from '../../../url_state/helpers';
 
 export const TimelineParser: Plugin = function () {
   const Parser = this.Parser;
@@ -52,7 +54,6 @@ export const TimelineParser: Plugin = function () {
 
     const timelineTitle = readArg('[', ']');
     const timelineUrl = readArg('(', ')');
-
     const now = eat.now();
 
     if (!timelineTitle) {
@@ -60,45 +61,44 @@ export const TimelineParser: Plugin = function () {
         line: now.line,
         column: now.column,
       });
-    }
-
-    if (!timelineUrl) {
-      this.file.info('No timeline url found', {
-        line: now.line,
-        column: now.column + 2 + timelineUrl.length,
-      });
-    }
-
-    if (!timelineTitle || !timelineUrl) return false;
-
-    const timelineId = timelineUrl.split('timeline=(id:')[1].split("'")[1] ?? '';
-    const graphEventId = timelineUrl.includes('graphEventId:')
-      ? timelineUrl.split('graphEventId:')[1].split("'")[1] ?? ''
-      : '';
-
-    if (!timelineId) {
-      this.file.info('No timeline id found', {
-        line: now.line,
-        column: now.column + 2 + timelineId.length,
-      });
-    }
-
-    if (!timelineId) {
       return false;
     }
 
-    return eat(`[${timelineTitle}](${timelineUrl})`)({
-      type: ID,
-      id: timelineId,
-      title: timelineTitle,
-      graphEventId,
-    });
+    try {
+      const timelineSearch = timelineUrl.split('?');
+      const parseTimelineUrlSearch = parse(timelineSearch[1]) as { timeline: string };
+      const { id: timelineId = '', graphEventId = '' } = decodeRisonUrlState(
+        parseTimelineUrlSearch.timeline ?? ''
+      ) ?? { id: null, graphEventId: '' };
+
+      if (!timelineId) {
+        this.file.info('No timeline id found', {
+          line: now.line,
+          column: now.column + 2,
+        });
+        return false;
+      }
+
+      return eat(`[${timelineTitle}](${timelineUrl})`)({
+        type: ID,
+        id: timelineId,
+        title: timelineTitle,
+        graphEventId,
+      });
+    } catch {
+      this.file.info(`Timeline URL is not valid => ${timelineUrl}`, {
+        line: now.line,
+        column: now.column,
+      });
+    }
+
+    return false;
   };
 
   const tokenizeTimeline: RemarkTokenizer = function tokenizeTimeline(eat, value, silent) {
     if (
       value.startsWith(PREFIX) === false ||
-      (value.startsWith(PREFIX) === true && !value.includes('timelines?timeline=(id:'))
+      (value.startsWith(PREFIX) === true && !value.includes('timelines?timeline=(id'))
     ) {
       return false;
     }

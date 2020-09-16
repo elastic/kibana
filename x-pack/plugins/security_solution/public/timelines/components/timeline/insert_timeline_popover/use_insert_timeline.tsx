@@ -6,14 +6,15 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-import { useTimelineUrl } from '../../../../common/components/link_to';
+import { SecurityPageName } from '../../../../../common/constants';
+import { getTimelineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { CursorPosition } from '../../../../common/components/markdown_editor';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 
 export const useInsertTimeline = (value: string, onChange: (newValue: string) => void) => {
   const dispatch = useDispatch();
-  const { timelineUrl } = useTimelineUrl();
+  const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition>({
     start: 0,
     end: 0,
@@ -23,7 +24,10 @@ export const useInsertTimeline = (value: string, onChange: (newValue: string) =>
 
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null, graphEventId?: string) => {
-      const url = timelineUrl(id ?? '', graphEventId);
+      const url = formatUrl(getTimelineUrl(id ?? '', graphEventId), {
+        absolute: true,
+        addSearch: false,
+      });
 
       const newValue: string = [
         value.slice(0, cursorPosition.start),
@@ -35,7 +39,7 @@ export const useInsertTimeline = (value: string, onChange: (newValue: string) =>
 
       onChange(newValue);
     },
-    [value, onChange, cursorPosition, timelineUrl]
+    [value, onChange, cursorPosition, formatUrl]
   );
 
   const handleCursorChange = useCallback((cp: CursorPosition) => {
