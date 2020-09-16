@@ -141,9 +141,10 @@ describe('once LegacyService is set up with connection info', () => {
       coreId,
       env,
       logger,
-      configService: configService as any,
+      configService,
     });
 
+    await legacyService.setupLegacyConfig();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -151,13 +152,14 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { path: { autoListen: true }, server: { autoListen: true } }, // Because of the mock, path also gets the value
       expect.objectContaining({ get: expect.any(Function) }),
-      expect.any(Object),
-      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {}, navLinks: [] }
+      expect.any(Object)
     );
-    expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
-      path: { autoListen: true },
-      server: { autoListen: true },
-    });
+    expect(MockKbnServer.mock.calls[0][1].get()).toEqual(
+      expect.objectContaining({
+        path: expect.objectContaining({ autoListen: true }),
+        server: expect.objectContaining({ autoListen: true }),
+      })
+    );
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.listen).toHaveBeenCalledTimes(1);
@@ -173,6 +175,7 @@ describe('once LegacyService is set up with connection info', () => {
       logger,
       configService: configService as any,
     });
+    await legacyService.setupLegacyConfig();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -180,13 +183,12 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { path: { autoListen: false }, server: { autoListen: true } },
       expect.objectContaining({ get: expect.any(Function) }),
-      expect.any(Object),
-      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {}, navLinks: [] }
+      expect.any(Object)
     );
-    expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
-      path: { autoListen: false },
-      server: { autoListen: true },
-    });
+
+    const legacyConfig = MockKbnServer.mock.calls[0][1].get();
+    expect(legacyConfig.path.autoListen).toBe(false);
+    expect(legacyConfig.server.autoListen).toBe(true);
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.ready).toHaveBeenCalledTimes(1);
@@ -204,6 +206,7 @@ describe('once LegacyService is set up with connection info', () => {
       configService: configService as any,
     });
 
+    await legacyService.setupLegacyConfig();
     await legacyService.setup(setupDeps);
     await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"something failed"`
@@ -223,8 +226,11 @@ describe('once LegacyService is set up with connection info', () => {
       configService: configService as any,
     });
 
+    await expect(legacyService.setupLegacyConfig()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"something failed"`
+    );
     await expect(legacyService.setup(setupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()"`
+      `"Legacy config not initialized yet. Ensure LegacyService.setupLegacyConfig() is called before LegacyService.setup()"`
     );
     await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Legacy service is not setup yet."`
@@ -241,6 +247,7 @@ describe('once LegacyService is set up with connection info', () => {
       logger,
       configService: configService as any,
     });
+    await legacyService.setupLegacyConfig();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -261,6 +268,7 @@ describe('once LegacyService is set up with connection info', () => {
       logger,
       configService: configService as any,
     });
+    await legacyService.setupLegacyConfig();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -285,6 +293,7 @@ describe('once LegacyService is set up with connection info', () => {
       logger,
       configService: configService as any,
     });
+    await legacyService.setupLegacyConfig();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
 
@@ -304,6 +313,7 @@ describe('once LegacyService is set up without connection info', () => {
   let legacyService: LegacyService;
   beforeEach(async () => {
     legacyService = new LegacyService({ coreId, env, logger, configService: configService as any });
+    await legacyService.setupLegacyConfig();
     await legacyService.setup(setupDeps);
     await legacyService.start(startDeps);
   });
@@ -313,13 +323,13 @@ describe('once LegacyService is set up without connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledWith(
       { path: {}, server: { autoListen: true } },
       expect.objectContaining({ get: expect.any(Function) }),
-      expect.any(Object),
-      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {}, navLinks: [] }
+      expect.any(Object)
     );
-    expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
-      path: {},
-      server: { autoListen: true },
-    });
+    expect(MockKbnServer.mock.calls[0][1].get()).toEqual(
+      expect.objectContaining({
+        server: expect.objectContaining({ autoListen: true }),
+      })
+    );
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
@@ -357,6 +367,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       configService: configService as any,
     });
 
+    await devClusterLegacyService.setupLegacyConfig();
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
@@ -385,6 +396,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       configService: configService as any,
     });
 
+    await devClusterLegacyService.setupLegacyConfig();
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
@@ -425,24 +437,8 @@ test('Sets the server.uuid property on the legacy configuration', async () => {
 
   environmentSetup.instanceUuid = 'UUID_FROM_SERVICE';
 
-  const configSetMock = jest.fn();
-
+  const { legacyConfig } = await legacyService.setupLegacyConfig();
   await legacyService.setup(setupDeps);
 
-  expect(configSetMock).toHaveBeenCalledTimes(1);
-  expect(configSetMock).toHaveBeenCalledWith('server.uuid', 'UUID_FROM_SERVICE');
-
-  /*
-  expect(MockKbnServer).toHaveBeenCalledTimes(1);
-    expect(MockKbnServer).toHaveBeenCalledWith(
-      { path: {}, server: { autoListen: true } },
-      expect.objectContaining({ get: expect.any(Function) }),
-      expect.any(Object),
-      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {}, navLinks: [] }
-    );
-    expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
-      path: {},
-      server: { autoListen: true },
-    });
-   */
+  expect(legacyConfig.get('server.uuid')).toBe('UUID_FROM_SERVICE');
 });
