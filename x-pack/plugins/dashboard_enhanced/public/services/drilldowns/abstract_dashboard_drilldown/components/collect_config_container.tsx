@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
-import { TriggerId } from 'src/plugins/ui_actions/public';
 import { SimpleSavedObject } from '../../../../../../../../src/core/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
@@ -36,7 +35,7 @@ const dashboardSavedObjectToMenuItem = (
 });
 
 export interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, object> {
-  params: Params<TriggerId>;
+  params: Params;
 }
 
 interface CollectConfigContainerState {
