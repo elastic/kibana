@@ -149,14 +149,6 @@ describe('test transform install', () => {
       [
         'transport.request',
         {
-          method: 'GET',
-          path: '/_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0',
-          ignore: [404],
-        },
-      ],
-      [
-        'transport.request',
-        {
           method: 'POST',
           path: '/_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0/_stop',
           query: 'force=true',
@@ -408,14 +400,6 @@ describe('test transform install', () => {
     );
 
     expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
-      [
-        'transport.request',
-        {
-          method: 'GET',
-          path: '/_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
-          ignore: [404],
-        },
-      ],
       [
         'transport.request',
         {
