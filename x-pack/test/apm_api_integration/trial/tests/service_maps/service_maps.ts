@@ -54,17 +54,17 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             elements
               .filter((element) => element.data['service.name'] !== undefined)
               .map((element) => element.data['service.name'])
-          );
+          ).sort();
 
           expectSnapshot(serviceNames).toMatchInline(`
             Array [
-              "opbeans-rum",
+              "opbeans-dotnet",
               "opbeans-go",
+              "opbeans-java",
               "opbeans-node",
               "opbeans-python",
               "opbeans-ruby",
-              "opbeans-java",
-              "opbeans-dotnet",
+              "opbeans-rum",
             ]
           `);
 
@@ -72,12 +72,12 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             elements
               .filter((element) => element.data.target?.startsWith('>'))
               .map((element) => element.data.target)
-          );
+          ).sort();
 
           expectSnapshot(externalDestinations).toMatchInline(`
             Array [
-              ">postgresql",
               ">elasticsearch",
+              ">postgresql",
               ">redis",
             ]
           `);
@@ -153,18 +153,32 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
         );
 
-        expectSnapshot(dataWithAnomalies.length).toMatchInline(`1`);
+        expectSnapshot(dataWithAnomalies.length).toMatchInline(`2`);
         expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
           Array [
             Object {
               "data": Object {
-                "agent.name": "java",
-                "id": "opbeans-java",
-                "service.environment": "production",
-                "service.name": "opbeans-java",
+                "agent.name": "go",
+                "id": "opbeans-go",
+                "service.environment": "testing",
+                "service.name": "opbeans-go",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 1707977.2499999995,
-                  "anomalyScore": 0.12232533657975532,
+                  "actualValue": 3933482.1764705875,
+                  "anomalyScore": 2.6101702751482714,
+                  "jobId": "apm-testing-d457-high_mean_transaction_duration",
+                  "transactionType": "request",
+                },
+              },
+            },
+            Object {
+              "data": Object {
+                "agent.name": "ruby",
+                "id": "opbeans-ruby",
+                "service.environment": "production",
+                "service.name": "opbeans-ruby",
+                "serviceAnomalyStats": Object {
+                  "actualValue": 684716.5813953485,
+                  "anomalyScore": 0.20498907719907372,
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",
                 },
