@@ -149,22 +149,28 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     return { field: find(testSubject as TestSubjects), testSubject };
   };
 
-  const addField = (name: string, type: string) => {
-    form.setInputValue('nameParameterInput', name);
-    find('createFieldForm.fieldType').simulate('change', [
-      {
-        label: type,
-        value: type,
-      },
-    ]);
-    find('createFieldForm.addButton').simulate('click');
+  const addField = async (name: string, type: string) => {
+    await act(async () => {
+      form.setInputValue('nameParameterInput', name);
+      find('createFieldForm.fieldType').simulate('change', [
+        {
+          label: type,
+          value: type,
+        },
+      ]);
+    });
+
+    await act(async () => {
+      find('createFieldForm.addButton').simulate('click');
+    });
+
+    component.update();
   };
 
-  const startEditField = (path: string) => {
+  const startEditField = async (path: string) => {
     const { testSubject } = getFieldAt(path);
-    find(`${testSubject}.editFieldButton` as TestSubjects).simulate('click');
-    act(() => {
-      jest.advanceTimersByTime(1000);
+    await act(async () => {
+      find(`${testSubject}.editFieldButton` as TestSubjects).simulate('click');
     });
     component.update();
   };
@@ -174,34 +180,33 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
       find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
     });
     component.update();
-
-    act(() => {
-      jest.advanceTimersByTime(1000);
-    });
   };
 
-  const showAdvancedSettings = () => {
+  const showAdvancedSettings = async () => {
     if (find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block') {
       // Already opened, nothing else to do
       return;
     }
 
-    find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
-
-    act(() => {
-      jest.advanceTimersByTime(1000);
+    await act(async () => {
+      find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
     });
+
     component.update();
   };
 
-  const selectTab = (tab: 'fields' | 'templates' | 'advanced') => {
+  const selectTab = async (tab: 'fields' | 'templates' | 'advanced') => {
     const index = ['fields', 'templates', 'advanced'].indexOf(tab);
 
     const tabElement = find('formTab').at(index);
     if (tabElement.length === 0) {
       throw new Error(`Tab not found: "${tab}"`);
     }
-    tabElement.simulate('click');
+
+    await act(async () => {
+      tabElement.simulate('click');
+    });
+    component.update();
   };
 
   const updateJsonEditor = (testSubject: TestSubjects, value: object) => {

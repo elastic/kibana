@@ -221,7 +221,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
-  togglePopover: () => void;
+  onClick: () => void;
 };
 
 export interface DatasourceLayerPanelProps<T> {
@@ -417,8 +417,7 @@ export interface FramePublicAPI {
 
 export interface VisualizationType {
   id: string;
-  icon?: IconType;
-  largeIcon?: IconType;
+  icon: IconType;
   label: string;
 }
 

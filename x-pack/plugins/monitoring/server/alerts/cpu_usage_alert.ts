@@ -32,6 +32,7 @@ import {
   CommonAlertParamDetail,
 } from '../../common/types';
 import { AlertingDefaults } from './alerts_common';
+import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 
 const DEFAULT_THRESHOLD = 85;
 const DEFAULT_DURATION = '5m';
@@ -90,7 +91,7 @@ export class CpuUsageAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
+    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }

@@ -5,12 +5,13 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { useFetcher } from './useFetcher';
-import { useUrlParams } from './useUrlParams';
+import { useParams } from 'react-router-dom';
+import { getVizColorForIndex } from '../../common/viz_colors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AvgDurationByBrowserAPIResponse } from '../../server/lib/transactions/avg_duration_by_browser';
 import { TimeSeries } from '../../typings/timeseries';
-import { getVizColorForIndex } from '../../common/viz_colors';
+import { useFetcher } from './useFetcher';
+import { useUrlParams } from './useUrlParams';
 
 function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
   if (!data) {
@@ -27,8 +28,9 @@ function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
 }
 
 export function useAvgDurationByBrowser() {
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
-    urlParams: { serviceName, start, end, transactionName },
+    urlParams: { start, end, transactionName },
     uiFilters,
   } = useUrlParams();
 

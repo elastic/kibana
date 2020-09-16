@@ -9,3 +9,7 @@ export interface Timeline {
   description: string;
   query: string;
 }
+
+export interface TimelineWithId extends Timeline {
+  id: string;
+}
