@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 
 import { dedupeIndexName, useInitSourcerer } from '.';
 import { mockPatterns, mockSource } from './mocks';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+// import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SecurityPageName } from '../../../../common/constants';
 import { createStore, State } from '../../store';

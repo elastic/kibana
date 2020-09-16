@@ -203,7 +203,7 @@ describe('DraggableWrapperHoverContent', () => {
           wrapper = mount(
             <TestProviders>
               <DraggableWrapperHoverContent
-                {...{ ...defaultProps, onFilterAdded, timelineId: 'not-active-timeline' }}
+                {...{ ...defaultProps, onFilterAdded, timelineId: TimelineId.test }}
               />
             </TestProviders>
           );
@@ -311,7 +311,7 @@ describe('DraggableWrapperHoverContent', () => {
                 {...{
                   ...defaultProps,
                   onFilterAdded,
-                  timelineId: 'not-active-timeline',
+                  timelineId: TimelineId.test,
                   value: '',
                 }}
               />
@@ -606,9 +606,7 @@ describe('DraggableWrapperHoverContent', () => {
     test('filter manager, not active timeline', () => {
       mount(
         <TestProviders>
-          <DraggableWrapperHoverContent
-            {...{ ...defaultProps, timelineId: 'not-active-timeline' }}
-          />
+          <DraggableWrapperHoverContent {...{ ...defaultProps, timelineId: TimelineId.test }} />
         </TestProviders>
       );
 

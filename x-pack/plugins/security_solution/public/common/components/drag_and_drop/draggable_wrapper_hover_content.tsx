@@ -30,7 +30,7 @@ interface Props {
   goGetTimelineId?: (args: boolean) => void;
   onFilterAdded?: () => void;
   showTopN: boolean;
-  timelineId?: TimelineId | null;
+  timelineId?: string | null;
   toggleTopN: () => void;
   value?: string[] | string | null;
 }
@@ -71,7 +71,9 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     timelineId === TimelineId.active
       ? SourcererScopeName.timeline
       : timelineId != null &&
-        [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(timelineId)
+        [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
+          timelineId as TimelineId
+        )
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const { browserFields, indexPattern, selectedPatterns } = useSourcererScope(activeScope);
