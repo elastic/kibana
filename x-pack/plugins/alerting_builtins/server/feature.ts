@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ID as IndexThreshold } from './alert_types/index_threshold/alert_type';
+import { GEO_THRESHOLD_ID as GeoThreshold } from './alert_types/geo_threshold/alert_type';
 import { BUILT_IN_ALERTS_FEATURE_ID } from '../common';
 
 export const BUILT_IN_ALERTS_FEATURE = {
@@ -18,7 +19,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [IndexThreshold],
+  alerting: [IndexThreshold, GeoThreshold],
   privileges: {
     all: {
       app: [],
@@ -27,7 +28,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: {
-        all: [IndexThreshold],
+        all: [IndexThreshold, GeoThreshold],
         read: [],
       },
       savedObject: {
@@ -45,7 +46,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
       },
       alerting: {
         all: [],
-        read: [IndexThreshold],
+        read: [IndexThreshold, GeoThreshold],
       },
       savedObject: {
         all: [],

@@ -27,11 +27,15 @@ describe('AlertingBuiltins Plugin', () => {
       const featuresSetup = featuresPluginMock.createSetup();
       await plugin.setup(coreSetup, { alerts: alertingSetup, features: featuresSetup });
 
-      expect(alertingSetup.registerType).toHaveBeenCalledTimes(1);
+      expect(alertingSetup.registerType).toHaveBeenCalledTimes(2);
 
-      const args = alertingSetup.registerType.mock.calls[0][0];
-      const testedArgs = { id: args.id, name: args.name, actionGroups: args.actionGroups };
-      expect(testedArgs).toMatchInlineSnapshot(`
+      const indexThresholdArgs = alertingSetup.registerType.mock.calls[0][0];
+      const testedIndexThresholdArgs = {
+        id: indexThresholdArgs.id,
+        name: indexThresholdArgs.name,
+        actionGroups: indexThresholdArgs.actionGroups,
+      };
+      expect(testedIndexThresholdArgs).toMatchInlineSnapshot(`
         Object {
           "actionGroups": Array [
             Object {
@@ -43,6 +47,26 @@ describe('AlertingBuiltins Plugin', () => {
           "name": "Index threshold",
         }
       `);
+
+      const geoThresholdArgs = alertingSetup.registerType.mock.calls[1][0];
+      const testedGeoThresholdArgs = {
+        id: geoThresholdArgs.id,
+        name: geoThresholdArgs.name,
+        actionGroups: geoThresholdArgs.actionGroups,
+      };
+      expect(testedGeoThresholdArgs).toMatchInlineSnapshot(`
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "tracking threshold met",
+              "name": "Tracking threshold Met",
+            },
+          ],
+          "id": ".geo-threshold",
+          "name": "Geo tracking threshold",
+        }
+      `);
+
       expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith(BUILT_IN_ALERTS_FEATURE);
     });
 
