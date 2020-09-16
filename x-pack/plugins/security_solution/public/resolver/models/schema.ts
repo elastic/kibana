@@ -59,12 +59,19 @@ export function array<V extends Validator<unknown>>(elementValidator: V) {
   };
 }
 
-// Returns the keys of an object if `undefined` is assignable to the value of that key.
+/**
+ * The keys of `T` where `undefined` is assignable to the corresponding value.
+ * Used to figure out which keys could be made optional.
+ */
 type KeysWithOptionalValues<T extends { [key: string]: unknown }> = {
   [K in keyof T]: undefined extends T[K] ? K : never;
 }[keyof T];
 
-// Returns a version of the object that marks keys optional if `undefined` could be assigned to that key
+/**
+ * `T` with required keys changed to optional if the corresponding value could be `undefined`.
+ * Converts a type like `{  key: number | undefined; requiredKey: string }` to a type like `{ key?: number | undefined; requiredKey: string }`
+ * This allows us to write object literals that omit a key if the value can accept `undefined`.
+ */
 type OptionalKeyWhenValueAcceptsUndefined<T extends { [key: string]: unknown }> = {
   [K in Exclude<keyof T, KeysWithOptionalValues<T>>]: T[K];
 } &

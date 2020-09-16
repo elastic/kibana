@@ -52,7 +52,7 @@ export const panelViewAndParameters = createSelector(
       // Equivalent to `null`
       return defaultParameters();
     }
-    const decodedValue = decode(value);
+    const decodedValue: unknown = decode(value);
     if (isPanelViewAndParameters(decodedValue)) {
       return decodedValue;
     }
@@ -60,6 +60,11 @@ export const panelViewAndParameters = createSelector(
   }
 );
 
+/**
+ * Return a relative href (which includes just the 'search' part) that contains an encoded version of `params `.
+ * All other values in the 'search' will be kept. 
+ * Use this to get an `href` for an anchor tag.
+ */
 export const relativeHref: (
   state: ResolverUIState
 ) => (params: PanelViewAndParameters) => string | undefined = createSelector(
@@ -67,6 +72,9 @@ export const relativeHref: (
   (state: ResolverUIState) => state.resolverComponentInstanceID,
   (locationSearch, resolverComponentInstanceID) => {
     return (params: PanelViewAndParameters) => {
+      /**
+       * This is only possible before the first `'appReceivedNewExternalProperties'` action is fired. 
+       */
       if (locationSearch === undefined || resolverComponentInstanceID === undefined) {
         return undefined;
       }

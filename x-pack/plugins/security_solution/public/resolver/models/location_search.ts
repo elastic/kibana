@@ -7,6 +7,10 @@
 import { PanelViewAndParameters } from '../types';
 import * as schema from './schema';
 
+/**
+ * Validates an `unknown` value, narrowing it to `PanelViewAndParameters`.
+ * Use this to validate that the value decoded from the URL is a valid `PanelViewAndParameters` object.
+ */
 export const isPanelViewAndParameters: (
   value: unknown
 ) => value is PanelViewAndParameters = schema.oneOf([
