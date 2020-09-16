@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
-
 import {
   FlashMessagesLogic,
   setSuccessMessage,
@@ -13,7 +11,7 @@ import {
   setQueuedSuccessMessage,
 } from './';
 
-describe('', () => {
+describe('Flash Message Helpers', () => {
   const message = 'I am a message';
 
   describe('setSuccessMessage()', () => {
