@@ -75,7 +75,6 @@ export function App({
       },
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
       isSaveModalVisible: false,
-      validateOnAppLeave: true,
       indicateNoData: false,
       isSaveable: false,
     };
@@ -182,7 +181,6 @@ export function App({
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
       if (
-        state.validateOnAppLeave &&
         application.capabilities.visualize.save &&
         !_.isEqual(state.persistedDoc?.state, getLastKnownDocWithoutPinnedFilters()?.state) &&
         (state.isSaveable || state.persistedDoc)
@@ -204,7 +202,6 @@ export function App({
     lastKnownDoc,
     state.isSaveable,
     state.persistedDoc,
-    state.validateOnAppLeave,
     getLastKnownDocWithoutPinnedFilters,
     application.capabilities.visualize.save,
   ]);
@@ -379,6 +376,9 @@ export function App({
       )) as LensEmbeddableInput;
 
       if (saveProps.returnToOrigin && redirectToOrigin) {
+        onAppLeave((actions) => {
+          return actions.default();
+        });
         redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
         return;
       }
@@ -429,12 +429,16 @@ export function App({
 
   const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
   const topNavConfig = getLensTopNavConfig({
-    isLinkedToOriginatingApp: Boolean(state.isLinkedToOriginatingApp),
+    isLinkedToOriginatingApp: Boolean(
+      state.isLinkedToOriginatingApp && dashboardFeatureFlag.allowByValueEmbeddables
+    ),
     savingPermitted,
     actions: {
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
-          setState((s) => ({ ...s, validateOnAppLeave: false }));
+          onAppLeave((actions) => {
+            return actions.default();
+          });
           runSave(
             {
               newTitle: lastKnownDoc.title,

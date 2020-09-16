@@ -35,7 +35,6 @@ export interface LensAppState {
   indicateNoData: boolean;
   isLoading: boolean;
   isSaveModalVisible: boolean;
-  validateOnAppLeave: boolean;
   indexPatternsForTopNav: IndexPattern[];
   currentInput?: LensEmbeddableInput;
   isLinkedToOriginatingApp?: boolean;
