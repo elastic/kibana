@@ -1,7 +1,9 @@
 package builds.es_snapshots
 
+import builds.default.DefaultBuild
 import builds.default.DefaultSecuritySolution
 import builds.default.defaultCiGroups
+import builds.oss.OssBuild
 import builds.oss.OssPluginFunctional
 import builds.oss.ossCiGroups
 import builds.test.ApiIntegration
@@ -148,6 +150,11 @@ object EsSnapshotsProject : Project({
     name = "All Tests"
     type = BuildTypeSettings.Type.COMPOSITE
 
-    dependsOn(*allTestJobs.toTypedArray())
+    dependsOn(
+      esBuild,
+      OssBuild,
+      DefaultBuild,
+      *allTestJobs.toTypedArray()
+    )
   })
 })
