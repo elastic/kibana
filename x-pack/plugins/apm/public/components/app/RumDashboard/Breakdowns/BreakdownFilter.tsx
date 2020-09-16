@@ -18,11 +18,13 @@ import { BreakdownItem } from '../../../../../typings/ui_filters';
 interface Props {
   selectedBreakdown: BreakdownItem | null;
   onBreakdownChange: (value: BreakdownItem | null) => void;
+  dataTestSubj: string;
 }
 
 export function BreakdownFilter({
   selectedBreakdown,
   onBreakdownChange,
+  dataTestSubj,
 }: Props) {
   const NO_BREAKDOWN = 'noBreakdown';
 
@@ -84,6 +86,7 @@ export function BreakdownFilter({
       options={options}
       valueOfSelected={selectedBreakdown?.fieldName ?? NO_BREAKDOWN}
       onChange={(value) => onOptionChange(value)}
+      data-test-subj={dataTestSubj}
     />
   );
 }

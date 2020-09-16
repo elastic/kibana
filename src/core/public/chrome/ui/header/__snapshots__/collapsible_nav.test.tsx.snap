@@ -279,6 +279,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
     }
   }
   navigateToApp={[Function]}
+  navigateToUrl={[Function]}
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
@@ -2161,6 +2162,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
     }
   }
   navigateToApp={[Function]}
+  navigateToUrl={[Function]}
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
@@ -2396,6 +2398,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
     }
   }
   navigateToApp={[Function]}
+  navigateToUrl={[Function]}
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
@@ -2631,6 +2634,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
     }
   }
   navigateToApp={[Function]}
+  navigateToUrl={[Function]}
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
