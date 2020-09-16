@@ -77,12 +77,7 @@ const calculateForGivenInterval = (
      - The lower power of 10, times 2
      - The lower power of 10, times 5
  **/
-const calculateAutoInterval = (
-  diff: number,
-  maxBucketsUiSettings: CalculateHistogramIntervalParams['maxBucketsUiSettings'],
-  maxBucketsUserInput: CalculateHistogramIntervalParams['maxBucketsUserInput']
-) => {
-  const maxBars = Math.min(maxBucketsUiSettings, maxBucketsUserInput ?? maxBucketsUiSettings);
+const calculateAutoInterval = (diff: number, maxBars: number) => {
   const exactInterval = diff / maxBars;
 
   const lowerPower = Math.pow(10, Math.floor(Math.log10(exactInterval)));
@@ -122,7 +117,10 @@ export const calculateHistogramInterval = ({
 
     if (diff) {
       calculatedInterval = isAuto
-        ? calculateAutoInterval(diff, maxBucketsUiSettings, maxBucketsUserInput)
+        ? calculateAutoInterval(
+            diff,
+            Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings)
+          )
         : calculateForGivenInterval(diff, calculatedInterval, maxBucketsUiSettings);
     }
   }
