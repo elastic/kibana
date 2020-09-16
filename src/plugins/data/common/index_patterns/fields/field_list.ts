@@ -20,7 +20,7 @@
 import { findIndex } from 'lodash';
 import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
-import { FieldSpec } from '../types';
+import { FieldSpec, IndexPatternFieldMap } from '../types';
 import { IndexPattern } from '../index_patterns';
 import { shortenDottedString } from '../../utils';
 
@@ -35,7 +35,9 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
-  toSpec(options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }): FieldSpec[];
+  toSpec(options?: {
+    getFormatterForField?: IndexPattern['getFormatterForField'];
+  }): IndexPatternFieldMap;
 }
 
 // extending the array class and using a constructor doesn't work well
@@ -108,7 +110,12 @@ export const fieldList = (
     }: {
       getFormatterForField?: IndexPattern['getFormatterForField'];
     } = {}) {
-      return [...this.map((field) => field.toSpec({ getFormatterForField }))];
+      return {
+        ...this.reduce<IndexPatternFieldMap>((collector, field) => {
+          collector[field.name] = field.toSpec({ getFormatterForField });
+          return collector;
+        }, {}),
+      };
     }
   }
 

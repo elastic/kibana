@@ -32,10 +32,8 @@ import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { expandShorthand, MappingObject } from '../../field_mapping';
-import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
+import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
-
-const savedObjectType = 'index-pattern';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
@@ -50,7 +48,7 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
-  public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
+  public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
   public intervalName: string | undefined;
   public type: string | undefined;
@@ -123,7 +121,7 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    this.fields.replaceAll(spec.fields || []);
+    this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
 
@@ -150,8 +148,8 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
-  private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = []) =>
-    fldList.reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
+  private fieldSpecsToFieldFormatMap = (fldList: IndexPatternSpec['fields'] = {}) =>
+    Object.values(fldList).reduce<Record<string, SerializedFieldFormat>>((col, fieldSpec) => {
       if (fieldSpec.format) {
         col[fieldSpec.name] = { ...fieldSpec.format };
       }
@@ -179,7 +177,7 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    this.fields.replaceAll(spec.fields || []);
+    this.fields.replaceAll(Object.values(spec.fields || {}));
     this.typeMeta = spec.typeMeta;
     this.type = spec.type;
 
@@ -299,7 +297,7 @@ export class IndexPattern implements IIndexPattern {
     field.count = count;
 
     try {
-      const res = await this.savedObjectsClient.update(savedObjectType, this.id, this.prepBody(), {
+      const res = await this.savedObjectsClient.update('index-pattern', this.id, this.prepBody(), {
         version: this.version,
       });
       this.version = res.version;

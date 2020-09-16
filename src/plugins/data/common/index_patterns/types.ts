@@ -168,6 +168,8 @@ export interface FieldSpec {
   indexed?: boolean;
 }
 
+export type IndexPatternFieldMap = Record<string, FieldSpec>;
+
 export interface IndexPatternSpec {
   id?: string;
   version?: string;
@@ -175,7 +177,7 @@ export interface IndexPatternSpec {
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
-  fields?: FieldSpec[];
+  fields?: IndexPatternFieldMap;
   typeMeta?: TypeMeta;
   type?: string;
 }

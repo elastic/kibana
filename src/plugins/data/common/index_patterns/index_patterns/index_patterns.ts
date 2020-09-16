@@ -36,6 +36,7 @@ import {
   IndexPatternAttributes,
   FieldSpec,
   FieldFormatMap,
+  IndexPatternFieldMap,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
@@ -170,12 +171,12 @@ export class IndexPatternsService {
     }
   };
 
-  private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
+  private isFieldRefreshRequired(specs?: IndexPatternFieldMap): boolean {
     if (!specs) {
       return true;
     }
 
-    return specs.every((spec) => {
+    return Object.values(specs).every((spec) => {
       // See https://github.com/elastic/kibana/pull/8421
       const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
 
@@ -214,20 +215,20 @@ export class IndexPatternsService {
     indexPattern.fields.replaceAll([...fields, ...scripted]);
   };
 
-  private refreshFieldSpecArray = async (
-    fields: FieldSpec[],
+  private refreshFieldSpecMap = async (
+    fields: IndexPatternFieldMap,
     id: string,
     title: string,
     options: GetFieldsOptions
   ) => {
-    const scriptdFields = fields.filter((field) => field.scripted);
+    const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
       const newFields = await this.getFieldsForWildcard(options);
-      return [...newFields, ...scriptdFields];
+      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-        return [];
+        return {};
       }
 
       this.onError(err, {
@@ -249,6 +250,12 @@ export class IndexPatternsService {
     });
   };
 
+  fieldArrayToMap = (fields: FieldSpec[]) =>
+    fields.reduce<IndexPatternFieldMap>((collector, field) => {
+      collector[field.name] = field;
+      return collector;
+    }, {});
+
   savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
     const {
       id,
@@ -265,10 +272,10 @@ export class IndexPatternsService {
       },
     } = savedObject;
 
-    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
-    const parsedFields = fields ? JSON.parse(fields) : [];
-    const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
+    const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
+    const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
+    const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
 
     this.mergeFieldsAndFormats(parsedFields, parsedFieldFormatMap);
     return {
@@ -278,7 +285,7 @@ export class IndexPatternsService {
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
-      fields: parsedFields,
+      fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
     };
@@ -309,7 +316,7 @@ export class IndexPatternsService {
     let isSaveRequired = isFieldRefreshRequired;
     try {
       spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecArray(spec.fields || [], id, spec.title as string, {
+        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
             pattern: title,
             metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
             type,
@@ -335,7 +342,7 @@ export class IndexPatternsService {
     }
 
     Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
-      const field = (spec.fields || []).find((fld: FieldSpec) => fld.name === fieldName);
+      const field = spec.fields?.[fieldName];
       if (field) {
         field.format = value;
       }
