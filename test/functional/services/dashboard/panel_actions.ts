@@ -140,6 +140,10 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async openInspector(parent: WebElementWrapper) {
       await this.openContextMenu(parent);
+      const exists = await testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
+      if (!exists) {
+        await this.clickContextMenuMoreItem();
+      }
       await testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
     }
 
