@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-fields?: FieldSpec[];
+fields?: IndexPatternFieldMap;
 ```

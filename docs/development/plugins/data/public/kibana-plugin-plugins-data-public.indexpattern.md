@@ -21,14 +21,15 @@ export declare class IndexPattern implements IIndexPattern
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpattern.fieldformatmap.md) |  | <code>any</code> |  |
-|  [fields](./kibana-plugin-plugins-data-public.indexpattern.fields.md) |  | <code>IIndexPatternFieldList &amp; {</code><br/><code>        toSpec: () =&gt; FieldSpec[];</code><br/><code>    }</code> |  |
+|  [fields](./kibana-plugin-plugins-data-public.indexpattern.fields.md) |  | <code>IIndexPatternFieldList &amp; {</code><br/><code>        toSpec: () =&gt; IndexPatternFieldMap;</code><br/><code>    }</code> |  |
 |  [flattenHit](./kibana-plugin-plugins-data-public.indexpattern.flattenhit.md) |  | <code>any</code> |  |
 |  [formatField](./kibana-plugin-plugins-data-public.indexpattern.formatfield.md) |  | <code>any</code> |  |
 |  [formatHit](./kibana-plugin-plugins-data-public.indexpattern.formathit.md) |  | <code>any</code> |  |
+|  [getOriginalBody](./kibana-plugin-plugins-data-public.indexpattern.getoriginalbody.md) |  | <code>() =&gt; {</code><br/><code>        [x: string]: any;</code><br/><code>    }</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
-|  [originalBody](./kibana-plugin-plugins-data-public.indexpattern.originalbody.md) |  | <code>{</code><br/><code>        [key: string]: any;</code><br/><code>    }</code> |  |
+|  [resetOriginalBody](./kibana-plugin-plugins-data-public.indexpattern.resetoriginalbody.md) |  | <code>() =&gt; void</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
@@ -49,11 +50,9 @@ export declare class IndexPattern implements IIndexPattern
 |  [getScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  |  |
 |  [getTimeField()](./kibana-plugin-plugins-data-public.indexpattern.gettimefield.md) |  |  |
-|  [initFromSpec(spec)](./kibana-plugin-plugins-data-public.indexpattern.initfromspec.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-public.indexpattern.istimebasedwildcard.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
-|  [isWildcard()](./kibana-plugin-plugins-data-public.indexpattern.iswildcard.md) |  |  |
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
 |  [prepBody()](./kibana-plugin-plugins-data-public.indexpattern.prepbody.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |

@@ -161,38 +161,6 @@ export class IndexPattern implements IIndexPattern {
       return col;
     }, {});
 
-  // this is swallowed by constructor
-  public initFromSpec(spec: IndexPatternSpec) {
-    // create fieldFormatMap from field list
-    /*
-    const fieldFormatMap: Record<string, SerializedFieldFormat> = {};
-    if (_.isArray(spec.fields)) {
-      spec.fields.forEach((field: FieldSpec) => {
-        if (field.format) {
-          fieldFormatMap[field.name as string] = { ...field.format };
-        }
-      });
-    }
-    */
-    const fieldFormatMap = this.fieldSpecsToFieldFormatMap(spec.fields);
-
-    this.version = spec.version;
-
-    this.title = spec.title || '';
-    this.timeFieldName = spec.timeFieldName;
-    this.sourceFilters = spec.sourceFilters;
-
-    this.fields.replaceAll(Object.values(spec.fields || {}));
-    this.typeMeta = spec.typeMeta;
-    this.type = spec.type;
-
-    this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
-      return this.deserializeFieldFormatMap(mapping);
-    });
-
-    return this;
-  }
-
   getComputedFields() {
     const scriptFields: any = {};
     if (!this.fields) {

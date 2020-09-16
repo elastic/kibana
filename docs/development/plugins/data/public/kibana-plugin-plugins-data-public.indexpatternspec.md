@@ -14,7 +14,7 @@ export interface IndexPatternSpec
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [fields](./kibana-plugin-plugins-data-public.indexpatternspec.fields.md) | <code>FieldSpec[]</code> |  |
+|  [fields](./kibana-plugin-plugins-data-public.indexpatternspec.fields.md) | <code>IndexPatternFieldMap</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpatternspec.id.md) | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpatternspec.intervalname.md) | <code>string</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpatternspec.sourcefilters.md) | <code>SourceFilter[]</code> |  |

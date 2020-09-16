@@ -1020,10 +1020,11 @@ export interface IFieldType {
 export interface IIndexPattern {
     // (undocumented)
     [key: string]: any;
-    // Warning: (ae-forgotten-export) The symbol "FieldFormatMap" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    fieldFormatMap?: FieldFormatMap;
+    fieldFormatMap?: Record<string, {
+        id: string;
+        params: unknown;
+    }>;
     // (undocumented)
     fields: IFieldType[];
     // (undocumented)
@@ -1056,10 +1057,12 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
     removeAll(): void;
     // (undocumented)
     replaceAll(specs: FieldSpec[]): void;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
     toSpec(options?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
-    }): FieldSpec[];
+    }): IndexPatternFieldMap;
     // (undocumented)
     update(field: FieldSpec): void;
 }
@@ -1099,7 +1102,7 @@ export class IndexPattern implements IIndexPattern {
     fieldFormatMap: any;
     // (undocumented)
     fields: IIndexPatternFieldList & {
-        toSpec: () => FieldSpec[];
+        toSpec: () => IndexPatternFieldMap;
     };
     // (undocumented)
     flattenHit: any;
@@ -1132,6 +1135,10 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     // (undocumented)
+    getOriginalBody: () => {
+        [x: string]: any;
+    };
+    // (undocumented)
     getScriptedFields(): IndexPatternField[];
     // (undocumented)
     getSourceFiltering(): {
@@ -1142,8 +1149,6 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     id?: string;
     // (undocumented)
-    initFromSpec(spec: IndexPatternSpec): this;
-    // (undocumented)
     intervalName: string | undefined;
     // (undocumented)
     isTimeBased(): boolean;
@@ -1152,13 +1157,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     isTimeNanosBased(): boolean;
     // (undocumented)
-    isWildcard(): boolean;
-    // (undocumented)
     metaFields: string[];
-    // (undocumented)
-    originalBody: {
-        [key: string]: any;
-    };
     // (undocumented)
     popularizeField(fieldName: string, unit?: number): Promise<void>;
     // (undocumented)
@@ -1174,6 +1173,8 @@ export class IndexPattern implements IIndexPattern {
     };
     // (undocumented)
     removeScriptedField(fieldName: string): void;
+    // (undocumented)
+    resetOriginalBody: () => void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1206,7 +1207,7 @@ export type IndexPatternAggRestrictions = Record<string, {
 
 // Warning: (ae-missing-release-tag) "IndexPatternAttributes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public @deprecated
+// @public (undocumented)
 export interface IndexPatternAttributes {
     // (undocumented)
     fieldFormatMap?: string;
@@ -1362,7 +1363,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 // @public (undocumented)
 export interface IndexPatternSpec {
     // (undocumented)
-    fields?: FieldSpec[];
+    fields?: IndexPatternFieldMap;
     // (undocumented)
     id?: string;
     // (undocumented)

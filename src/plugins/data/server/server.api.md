@@ -603,10 +603,11 @@ export interface IFieldType {
 export interface IIndexPattern {
     // (undocumented)
     [key: string]: any;
-    // Warning: (ae-forgotten-export) The symbol "FieldFormatMap" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    fieldFormatMap?: FieldFormatMap;
+    fieldFormatMap?: Record<string, {
+        id: string;
+        params: unknown;
+    }>;
     // (undocumented)
     fields: IFieldType[];
     // (undocumented)
@@ -629,7 +630,7 @@ export type IMetricAggType = MetricAggType;
 
 // Warning: (ae-missing-release-tag) "IndexPatternAttributes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public @deprecated
+// @public (undocumented)
 export interface IndexPatternAttributes {
     // (undocumented)
     fieldFormatMap?: string;

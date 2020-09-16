@@ -48,7 +48,7 @@
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
 |  [IIndexPattern](./kibana-plugin-plugins-data-server.iindexpattern.md) |  |
-|  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Use data plugin interface instead |
+|  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) |  |
 |  [IndexPatternFieldDescriptor](./kibana-plugin-plugins-data-server.indexpatternfielddescriptor.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |

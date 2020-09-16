@@ -43,7 +43,7 @@ import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
-import { DuplicateIndexPatternError } from '..';
+import { DuplicateIndexPatternError } from '../errors';
 
 const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -352,22 +352,6 @@ export class IndexPatternsService {
     indexPattern.resetOriginalBody();
     return indexPattern;
   };
-
-  async specToIndexPattern(spec: IndexPatternSpec) {
-    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-
-    const indexPattern = new IndexPattern({
-      spec,
-      savedObjectsClient: this.savedObjectsClient,
-      fieldFormats: this.fieldFormats,
-      shortDotsEnable,
-      metaFields,
-    });
-
-    indexPattern.initFromSpec(spec);
-    return indexPattern;
-  }
 
   async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
