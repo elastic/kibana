@@ -30,7 +30,7 @@ import {
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 
 /**
- * For Rolling the daily data, we only care about the stored the attributes and the version (to avoid overwriting via concurrent requests)
+ * For Rolling the daily data, we only care about the stored attributes and the version (to avoid overwriting via concurrent requests)
  */
 type ApplicationUsageDailyWithVersion = Pick<
   SavedObject<ApplicationUsageDaily>,
