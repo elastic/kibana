@@ -598,7 +598,7 @@ export class AlertsClient {
   }
 
   public async enable({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | undefined | null = null;
+    let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
     let version: string | undefined;
 
