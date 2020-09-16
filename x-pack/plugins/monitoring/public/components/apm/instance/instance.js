@@ -53,7 +53,7 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
           <h1>
             <FormattedMessage
               id="xpack.monitoring.apm.instance.heading"
-              defaultMessage="APM Instance"
+              defaultMessage="APM server instance"
             />
           </h1>
         </EuiScreenReaderOnly>

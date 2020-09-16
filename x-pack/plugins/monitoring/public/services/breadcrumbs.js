@@ -150,7 +150,7 @@ function getBeatsBreadcrumbs(mainInstance) {
 // generate Apm breadcrumbs
 function getApmBreadcrumbs(mainInstance) {
   const apmLabel = i18n.translate('xpack.monitoring.breadcrumbs.apmLabel', {
-    defaultMessage: 'APM',
+    defaultMessage: 'APM server',
   });
   const breadcrumbs = [];
   if (mainInstance.instance) {

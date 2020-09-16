@@ -41,7 +41,7 @@ uiRoutes.when('/apm/instances/:uuid', {
         title: i18n.translate('xpack.monitoring.apm.instance.routeTitle', {
           defaultMessage: '{apm} - Instance',
           values: {
-            apm: 'APM',
+            apm: 'APM server',
           },
         }),
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
@@ -56,13 +56,13 @@ uiRoutes.when('/apm/instances/:uuid', {
         (data) => {
           this.setPageTitle(
             i18n.translate('xpack.monitoring.apm.instance.pageTitle', {
-              defaultMessage: 'APM instance: {instanceName}',
+              defaultMessage: 'APM server instance: {instanceName}',
               values: {
                 instanceName: get(data, 'apmSummary.name'),
               },
             })
           );
-          title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
+          title($scope.cluster, `APM server - ${get(data, 'apmSummary.name')}`);
           this.renderReact(data);
         }
       );

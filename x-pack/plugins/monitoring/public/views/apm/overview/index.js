@@ -31,9 +31,11 @@ uiRoutes.when('/apm', {
       });
 
       super({
-        title: 'APM',
+        title: i18n.translate('xpack.monitoring.apm.overview.routeTitle', {
+          defaultMessage: 'APM server',
+        }),
         pageTitle: i18n.translate('xpack.monitoring.apm.overview.pageTitle', {
-          defaultMessage: 'APM overview',
+          defaultMessage: 'APM server overview',
         }),
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm`,
         defaultData: {},

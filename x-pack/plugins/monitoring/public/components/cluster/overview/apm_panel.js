@@ -70,14 +70,14 @@ export function ApmPanel(props) {
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel',
                     {
-                      defaultMessage: 'APM Overview',
+                      defaultMessage: 'APM server overview',
                     }
                   )}
                   data-test-subj="apmOverview"
                 >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel"
-                    defaultMessage="Overview"
+                    defaultMessage="APM server overview"
                   />
                 </DisabledIfNoDataAndInSetupModeLink>
               </h3>
@@ -125,7 +125,7 @@ export function ApmPanel(props) {
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
                         {
-                          defaultMessage: 'APM Instances: {apmsTotal}',
+                          defaultMessage: 'APM server instances: {apmsTotal}',
                           values: { apmsTotal },
                         }
                       )}
@@ -133,7 +133,7 @@ export function ApmPanel(props) {
                     >
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
-                        defaultMessage="APM Servers: {apmsTotal}"
+                        defaultMessage="APM servers: {apmsTotal}"
                         values={{ apmsTotal: <span data-test-subj="apmsTotal">{apmsTotal}</span> }}
                       />
                     </EuiLink>
