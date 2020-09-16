@@ -56,6 +56,7 @@ export function createFlyoutManageDrilldowns({
   storage,
   toastService,
   docsLink,
+  triggerPickerDocsLink,
   getTrigger,
 }: {
   actionFactories: ActionFactory[];
@@ -63,6 +64,7 @@ export function createFlyoutManageDrilldowns({
   storage: IStorageWrapper;
   toastService: ToastsStart;
   docsLink?: string;
+  triggerPickerDocsLink?: string;
 }): React.FC<ConnectedFlyoutManageDrilldownsProps> {
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
@@ -153,6 +155,7 @@ export function createFlyoutManageDrilldowns({
         return (
           <FlyoutDrilldownWizard
             docsLink={docsLink}
+            triggerPickerDocsLink={triggerPickerDocsLink}
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
             drilldownActionFactories={actionFactories}

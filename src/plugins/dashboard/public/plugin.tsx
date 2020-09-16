@@ -33,6 +33,7 @@ import {
   SavedObjectsClientContract,
   ScopedHistory,
 } from 'src/core/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -125,6 +126,7 @@ interface SetupDependencies {
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
@@ -133,6 +135,7 @@ interface SetupDependencies {
 interface StartDependencies {
   data: DataPublicPluginStart;
   kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
   navigation: NavigationStart;
@@ -190,7 +193,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
-    { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
+    { share, uiActions, embeddable, home, urlForwarding, data, usageCollection }: SetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
       DashboardFeatureFlagConfig
@@ -298,7 +301,7 @@ export class DashboardPlugin
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
       order: 2500,
-      euiIconType: 'dashboardApp',
+      euiIconType: 'logoKibana',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -311,7 +314,8 @@ export class DashboardPlugin
           navigation,
           share: shareStart,
           data: dataStart,
-          kibanaLegacy: { dashboardConfig, navigateToDefaultApp, navigateToLegacyKibanaUrl },
+          kibanaLegacy: { dashboardConfig },
+          urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
           savedObjects,
         } = pluginsStart;
 
@@ -339,6 +343,7 @@ export class DashboardPlugin
           localStorage: new Storage(localStorage),
           usageCollection,
           scopedHistory: () => this.currentHistory!,
+          setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjects,
           restorePreviousUrl,
         };
@@ -357,7 +362,7 @@ export class DashboardPlugin
     initAngularBootstrap();
 
     core.application.register(app);
-    kibanaLegacy.forwardApp(
+    urlForwarding.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,
       (path) => {
@@ -366,7 +371,7 @@ export class DashboardPlugin
         return `#/list${tail || ''}`;
       }
     );
-    kibanaLegacy.forwardApp(
+    urlForwarding.forwardApp(
       DashboardConstants.DASHBOARD_ID,
       DashboardConstants.DASHBOARDS_ID,
       (path) => {

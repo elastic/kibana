@@ -7,7 +7,7 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiFieldNumber } from '@elastic/eui';
+import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
@@ -619,9 +619,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
           .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
-        expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).not.toHaveLength(
-          0
-        );
+        expect(
+          wrapper.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+        ).toBeDefined();
 
         expect(setState).not.toHaveBeenCalled();
       });
@@ -1188,7 +1188,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(
         wrapper
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
           .prop('value')
       ).toEqual(0);
@@ -1224,9 +1224,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       act(() => {
         wrapper
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
-          .prop('onChange')!({ target: { value: '0' } });
+          .prop('onChange')!({ currentTarget: { value: '0' } });
       });
 
       expect(setState).toHaveBeenCalledWith({
