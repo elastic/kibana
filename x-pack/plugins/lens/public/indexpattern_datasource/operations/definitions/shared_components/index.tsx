@@ -5,4 +5,4 @@
  */
 
 export * from './label_input';
-export * from './bucket_container';
+export * from './buckets';

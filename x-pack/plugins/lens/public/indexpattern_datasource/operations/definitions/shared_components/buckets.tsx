@@ -19,7 +19,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-export interface BucketContainerProps {
+export const NewBucketButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
+  <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={onClick}>
+    {label}
+  </EuiButtonEmpty>
+);
+
+interface BucketContainerProps {
   isInvalid?: boolean;
   invalidMessage: string;
   onRemoveClick: () => void;
@@ -28,7 +34,7 @@ export interface BucketContainerProps {
   dataTestSubj?: string;
 }
 
-export const BucketContainer = ({
+const BucketContainer = ({
   isInvalid,
   invalidMessage,
   onRemoveClick,
@@ -126,9 +132,3 @@ export const DragDropBuckets = ({
     </EuiDragDropContext>
   );
 };
-
-export const NewBucketButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
-  <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={onClick}>
-    {label}
-  </EuiButtonEmpty>
-);
