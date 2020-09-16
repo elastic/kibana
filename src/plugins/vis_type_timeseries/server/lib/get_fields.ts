@@ -20,9 +20,12 @@ import { uniqBy, get } from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
-import { indexPatterns } from '../../../data/server';
 import { Framework } from '../plugin';
-import { IndexPatternFieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
+import {
+  indexPatterns,
+  IndexPatternFieldDescriptor,
+  IndexPatternsFetcher,
+} from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 
 export async function getFields(
@@ -74,8 +77,10 @@ export async function getFields(
   let indexPatternString = indexPattern;
 
   if (!indexPatternString) {
-    const index = await reqFacade.getUiSettingsService().get('defaultIndex');
-    indexPatternString = get(index, 'title', '');
+    const [, { data }] = await framework.core.getStartServices();
+    const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(request);
+    const defaultIndexPattern = await indexPatternsService.getDefault();
+    indexPatternString = get(defaultIndexPattern, 'title', '');
   }
 
   const {

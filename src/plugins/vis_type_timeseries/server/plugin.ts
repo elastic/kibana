@@ -38,6 +38,7 @@ import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { SearchStrategyRegistry } from './lib/search_strategies';
 import { uiSettings } from './ui_settings';
+import { PluginStart as DataPluginStart } from '../../data/server';
 
 export interface LegacySetup {
   server: Server;
@@ -45,6 +46,10 @@ export interface LegacySetup {
 
 interface VisTypeTimeseriesPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+}
+
+export interface VisTypeTimeseriesStartDependencies {
+  data: DataPluginStart;
 }
 
 export interface VisTypeTimeseriesSetup {
@@ -57,7 +62,7 @@ export interface VisTypeTimeseriesSetup {
 }
 
 export interface Framework {
-  core: CoreSetup;
+  core: CoreSetup<VisTypeTimeseriesStartDependencies>;
   plugins: any;
   config$: Observable<VisTypeTimeseriesConfig>;
   globalConfig$: PluginInitializerContext['config']['legacy']['globalConfig$'];
@@ -74,7 +79,10 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     this.validationTelementryService = new ValidationTelemetryService();
   }
 
-  public setup(core: CoreSetup, plugins: VisTypeTimeseriesPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<VisTypeTimeseriesStartDependencies>,
+    plugins: VisTypeTimeseriesPluginSetupDependencies
+  ) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
     core.uiSettings.register(uiSettings);
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
