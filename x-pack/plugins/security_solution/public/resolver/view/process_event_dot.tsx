@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NodeSubMenu, subMenuAssets } from './submenu';
+import { NodeSubMenu } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, ResolverState } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
@@ -19,7 +17,7 @@ import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
-import { useReplaceBreadcrumbParameters } from './use_replace_breadcrumb_parameters';
+import { useNavigateOrReplace } from './use_navigate_or_replace';
 
 interface StyledActionsContainer {
   readonly color: string;
@@ -236,6 +234,16 @@ const UnstyledProcessEventDot = React.memo(
     const isOrigin = nodeID === originID;
 
     const dispatch = useResolverDispatch();
+    const processDetailHref = useSelector((state: ResolverState) =>
+      selectors.relativeHref(state)({
+        panelView: 'nodeDetail',
+        panelParameters: { nodeID },
+      })
+    );
+
+    const processDetailNavProps = useNavigateOrReplace({
+      search: processDetailHref,
+    });
 
     const handleFocus = useCallback(() => {
       dispatch({
@@ -251,57 +259,19 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const pushToQueryParams = useReplaceBreadcrumbParameters();
-
-    const handleClick = useCallback(() => {
-      if (animationTarget.current?.beginElement) {
-        animationTarget.current.beginElement();
-      }
-      dispatch({
-        type: 'userSelectedResolverNode',
-        payload: nodeID,
-      });
-      pushToQueryParams({ crumbId: nodeID, crumbEvent: '' });
-    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
-
-    /**
-     * Enumerates the stats for related events to display with the node as options,
-     * generally in the form `number of related events in category` `category title`
-     * e.g. "10 DNS", "230 File"
-     */
-
-    const relatedEventOptions = useMemo(() => {
-      const relatedStatsList = [];
-
-      if (!relatedEventStats) {
-        // Return an empty set of options if there are no stats to report
-        return [];
-      }
-      // If we have entries to show, map them into options to display in the selectable list
-
-      for (const [category, total] of Object.entries(relatedEventStats.events.byCategory)) {
-        relatedStatsList.push({
-          prefix: <EuiI18nNumber value={total || 0} />,
-          optionTitle: category,
-          action: () => {
-            dispatch({
-              type: 'userSelectedRelatedEventCategory',
-              payload: {
-                subject: event,
-                category,
-              },
-            });
-
-            pushToQueryParams({ crumbId: nodeID, crumbEvent: category });
-          },
+    const handleClick = useCallback(
+      (clickEvent) => {
+        if (animationTarget.current?.beginElement) {
+          animationTarget.current.beginElement();
+        }
+        dispatch({
+          type: 'userSelectedResolverNode',
+          payload: nodeID,
         });
-      }
-      return relatedStatsList;
-    }, [relatedEventStats, dispatch, event, pushToQueryParams, nodeID]);
-
-    const relatedEventStatusOrOptions = !relatedEventStats
-      ? subMenuAssets.initialMenuStatus
-      : relatedEventOptions;
+        processDetailNavProps.onClick(clickEvent);
+      },
+      [animationTarget, dispatch, nodeID, processDetailNavProps]
+    );
 
     const grandTotal: number | null = useSelector((state: ResolverState) =>
       selectors.relatedEventTotalForProcess(state)(event as ResolverEvent)
@@ -331,9 +301,9 @@ const UnstyledProcessEventDot = React.memo(
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
           onClick={
-            () => {
+            (clickEvent) => {
               handleFocus();
-              handleClick();
+              handleClick(clickEvent);
             } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
           }
           role="img"
@@ -468,9 +438,8 @@ const UnstyledProcessEventDot = React.memo(
                   buttonBorderColor={labelButtonFill}
                   buttonFill={colorMap.resolverBackground}
                   menuAction={handleRelatedEventRequest}
-                  menuTitle={subMenuAssets.relatedEvents.title}
                   projectionMatrix={projectionMatrix}
-                  optionsWithActions={relatedEventStatusOrOptions}
+                  relatedEventStats={relatedEventStats}
                   nodeID={nodeID}
                 />
               )}
