@@ -45,6 +45,8 @@ export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
+// for transaction metrics
+export const TRANSACTION_ROOT = 'transaction.root';
 
 export const EVENT_OUTCOME = 'event.outcome';
 

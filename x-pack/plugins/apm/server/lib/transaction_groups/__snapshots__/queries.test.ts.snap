@@ -67,8 +67,10 @@ Array [
           ],
           "must_not": Array [
             Object {
-              "exists": Object {
-                "field": "parent.id",
+              "must_not": Object {
+                "exists": Object {
+                  "field": "parent.id",
+                },
               },
             },
           ],
@@ -134,8 +136,10 @@ Array [
           ],
           "must_not": Array [
             Object {
-              "exists": Object {
-                "field": "parent.id",
+              "must_not": Object {
+                "exists": Object {
+                  "field": "parent.id",
+                },
               },
             },
           ],
@@ -201,8 +205,10 @@ Array [
           ],
           "must_not": Array [
             Object {
-              "exists": Object {
-                "field": "parent.id",
+              "must_not": Object {
+                "exists": Object {
+                  "field": "parent.id",
+                },
               },
             },
           ],
