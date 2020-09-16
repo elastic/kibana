@@ -17,18 +17,13 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
 import { callClient } from './call_client';
 import { SearchStrategySearchParams } from './types';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { FetchHandlers } from '../fetch';
-import { handleResponse } from '../fetch/handle_response';
 import { BehaviorSubject } from 'rxjs';
 
 const mockAbortFn = jest.fn();
-jest.mock('../fetch/handle_response', () => ({
-  handleResponse: jest.fn((request, response) => response),
-}));
 
 jest.mock('./default_search_strategy', () => {
   return {
@@ -50,32 +45,36 @@ jest.mock('./default_search_strategy', () => {
 });
 
 describe('callClient', () => {
+  const handleResponse = jest.fn().mockImplementation((req, res) => res);
+  const handlers = {
+    getConfig: jest.fn(),
+    onResponse: handleResponse,
+    legacy: {
+      callMsearch: jest.fn(),
+      loadingCount$: new BehaviorSubject(0),
+    },
+  } as FetchHandlers;
+
   beforeEach(() => {
-    (handleResponse as jest.Mock).mockClear();
+    handleResponse.mockClear();
   });
 
   test('Passes the additional arguments it is given to the search strategy', () => {
     const searchRequests = [{ _searchStrategyId: 0 }];
-    const args = {
-      http: coreMock.createStart().http,
-      legacySearchService: {},
-      config: { get: jest.fn() },
-      loadingCount$: new BehaviorSubject(0),
-    } as FetchHandlers;
 
-    callClient(searchRequests, [], args);
+    callClient(searchRequests, [], handlers);
 
     expect(defaultSearchStrategy.search).toBeCalled();
     expect((defaultSearchStrategy.search as any).mock.calls[0][0]).toEqual({
       searchRequests,
-      ...args,
+      ...handlers,
     });
   });
 
   test('Returns the responses in the original order', async () => {
     const searchRequests = [{ _searchStrategyId: 1 }, { _searchStrategyId: 0 }];
 
-    const responses = await Promise.all(callClient(searchRequests, [], {} as FetchHandlers));
+    const responses = await Promise.all(callClient(searchRequests, [], handlers));
 
     expect(responses[0]).toEqual({ id: searchRequests[0]._searchStrategyId });
     expect(responses[1]).toEqual({ id: searchRequests[1]._searchStrategyId });
@@ -84,7 +83,7 @@ describe('callClient', () => {
   test('Calls handleResponse with each request and response', async () => {
     const searchRequests = [{ _searchStrategyId: 0 }, { _searchStrategyId: 1 }];
 
-    const responses = callClient(searchRequests, [], {} as FetchHandlers);
+    const responses = callClient(searchRequests, [], handlers);
     await Promise.all(responses);
 
     expect(handleResponse).toBeCalledTimes(2);
@@ -105,7 +104,7 @@ describe('callClient', () => {
       },
     ];
 
-    callClient(searchRequests, requestOptions, {} as FetchHandlers);
+    callClient(searchRequests, requestOptions, handlers);
     abortController.abort();
 
     expect(mockAbortFn).toBeCalled();

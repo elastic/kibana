@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
@@ -25,7 +26,6 @@ import {
   UiSettingsParams,
   UserProvidedValues,
 } from '../../server/types';
-import { deepFreeze } from '../../utils/';
 import { AppCategory } from '../';
 
 export interface InjectedPluginMetadata {
