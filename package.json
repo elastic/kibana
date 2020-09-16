@@ -128,7 +128,7 @@
     "@babel/register": "^7.10.5",
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "7.9.0-rc.2",
-    "@elastic/eui": "28.2.0",
+    "@elastic/eui": "28.4.0",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "^2.5.0",
     "@elastic/request-crypto": "1.1.4",
@@ -489,7 +489,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.22.0",
+    "node": "10.22.1",
     "yarn": "^1.21.1"
   }
 }
