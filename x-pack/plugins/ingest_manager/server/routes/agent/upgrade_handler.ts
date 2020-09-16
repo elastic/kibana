@@ -16,7 +16,7 @@ export const postAgentUpgradeHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    await AgentService.upgradeAgent(soClient, request.params.agentId);
+    await AgentService.sendUpgradeAgentAction(soClient, request.params.agentId);
 
     const body: PostAgentUpgradeResponse = {};
     return response.ok({ body });

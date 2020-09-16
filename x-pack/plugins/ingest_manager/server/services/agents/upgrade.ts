@@ -5,11 +5,14 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { AgentSOAttributes } from '../../types';
+import { AgentAction, AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAgentAction } from './actions';
 
-export async function upgradeAgent(soClient: SavedObjectsClientContract, agentId: string) {
+export async function sendUpgradeAgentAction(
+  soClient: SavedObjectsClientContract,
+  agentId: string
+) {
   const now = new Date().toISOString();
   await createAgentAction(soClient, {
     agent_id: agentId,
@@ -20,5 +23,22 @@ export async function upgradeAgent(soClient: SavedObjectsClientContract, agentId
   });
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     upgrade_started_at: now,
+  });
+}
+
+export async function ackAgentUpgraded(
+  soClient: SavedObjectsClientContract,
+  agentAction: AgentAction
+) {
+  if (!agentAction.version) throw new Error('version is missing in UPGRADE action');
+  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentAction.agent_id, {
+    upgraded_at: new Date().toISOString(),
+    local_metadata: {
+      elastic: {
+        agent: {
+          version: agentAction.version,
+        },
+      },
+    },
   });
 }

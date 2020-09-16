@@ -27,8 +27,6 @@ export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
   sent_at?: string;
-  version?: string;
-  source_uri?: string;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -39,6 +37,8 @@ export interface AgentAction extends NewAgentAction {
   agent_id: string;
   created_at: string;
   ack_data?: any;
+  version?: string;
+  source_uri?: string;
 }
 
 export interface AgentPolicyAction extends NewAgentAction {
