@@ -56,7 +56,7 @@ export function UXMetrics() {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiTitle size="s">
-            <h3>{I18LABELS.userExperienceMetrics}</h3>
+            <h2>{I18LABELS.userExperienceMetrics}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <KeyUXMetrics data={data} loading={status !== 'success'} />
