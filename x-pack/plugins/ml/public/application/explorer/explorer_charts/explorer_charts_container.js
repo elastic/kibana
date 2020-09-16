@@ -55,17 +55,14 @@ function getChartId(series) {
 }
 
 // Wrapper for a single explorer chart
-function ExplorerChartContainerUI({ series, severity, tooManyBuckets, wrapLabel, kibana }) {
-  const {
-    services: {
-      application: { navigateToApp },
-
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
-    },
-  } = kibana;
-  const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+function ExplorerChartContainer({
+  series,
+  severity,
+  tooManyBuckets,
+  wrapLabel,
+  navigateToApp,
+  mlUrlGenerator,
+}) {
   const redirectToSingleMetricViewer = useCallback(async () => {
     const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
     addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, singleMetricViewerLink);
@@ -172,15 +169,25 @@ function ExplorerChartContainerUI({ series, severity, tooManyBuckets, wrapLabel,
   );
 }
 
-const ExplorerChartContainer = withKibana(ExplorerChartContainerUI);
-
 // Flex layout wrapper for all explorer charts
-export const ExplorerChartsContainer = ({
+export const ExplorerChartsContainerUI = ({
   chartsPerRow,
   seriesToPlot,
   severity,
   tooManyBuckets,
+  kibana,
 }) => {
+  const {
+    services: {
+      application: { navigateToApp },
+
+      share: {
+        urlGenerators: { getUrlGenerator },
+      },
+    },
+  } = kibana;
+  const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
   const chartsWidth = chartsPerRow === 1 ? 'calc(100% - 20px)' : 'auto';
@@ -202,9 +209,13 @@ export const ExplorerChartsContainer = ({
               severity={severity}
               tooManyBuckets={tooManyBuckets}
               wrapLabel={wrapLabel}
+              navigateToApp={navigateToApp}
+              mlUrlGenerator={mlUrlGenerator}
             />
           </EuiFlexItem>
         ))}
     </EuiFlexGrid>
   );
 };
+
+export const ExplorerChartsContainer = withKibana(ExplorerChartsContainerUI);
