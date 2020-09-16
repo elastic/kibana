@@ -10,5 +10,8 @@
     "server/**/*.tsx",
     "../../../../typings/**/*",
   ],
-  "exclude": []
+  "exclude": [],
+  "references": [
+    { "path": "../../../../src/core/tsconfig.json" }
+  ]
 }

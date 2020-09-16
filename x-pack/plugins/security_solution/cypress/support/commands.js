@@ -39,6 +39,15 @@ Cypress.Commands.add('stubSecurityApi', function (dataFileName) {
   cy.route('POST', 'api/solutions/security/graphql', `@${dataFileName}JSON`);
 });
 
+Cypress.Commands.add('stubSearchStrategyApi', function (dataFileName) {
+  cy.on('window:before:load', (win) => {
+    win.fetch = null;
+  });
+  cy.server();
+  cy.fixture(dataFileName).as(`${dataFileName}JSON`);
+  cy.route('POST', 'internal/search/securitySolutionSearchStrategy', `@${dataFileName}JSON`);
+});
+
 Cypress.Commands.add(
   'attachFile',
   {

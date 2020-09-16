@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { LogRecord } from '../log_record';
 import { Layout } from './layouts';
@@ -58,7 +58,11 @@ const conversions: Conversion[] = [
 ];
 
 /** @internal */
-export type PatternLayoutConfigType = TypeOf<typeof patternLayoutSchema>;
+export interface PatternLayoutConfigType {
+  kind: 'pattern';
+  highlight?: boolean;
+  pattern?: string;
+}
 
 /**
  * Layout that formats `LogRecord` using the `pattern` string with optional

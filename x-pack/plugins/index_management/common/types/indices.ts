@@ -15,6 +15,14 @@ interface IndexModule {
   number_of_replicas: number;
   auto_expand_replicas: false | string;
   lifecycle: LifecycleModule;
+  routing: {
+    allocation: {
+      enable: 'all' | 'primaries' | 'new_primaries' | 'none';
+    };
+    rebalance: {
+      enable: 'all' | 'primaries' | 'replicas' | 'none';
+    };
+  };
 }
 
 interface AnalysisModule {

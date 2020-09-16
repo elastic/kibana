@@ -19,11 +19,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   IEmbeddable,
+  Container,
+  EmbeddableStart,
+  EmbeddableFactory,
+  EmbeddableFactoryNotFoundError,
 } from '../embeddable_plugin';
 import {
   SavedObjectsClientContract,
@@ -34,17 +39,10 @@ import {
 } from '../../../../core/public';
 import {
   SavedObjectSaveModal,
-  showSaveModal,
   OnSaveProps,
   SaveResult,
   checkForDuplicateTitle,
 } from '../../../saved_objects/public';
-import {
-  EmbeddableStart,
-  EmbeddableFactory,
-  EmbeddableFactoryNotFoundError,
-  Container,
-} from '../../../embeddable/public';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -52,26 +50,46 @@ import {
  * can also be used as a higher level wrapper to transform an embeddable input shape that references a saved object
  * into an embeddable input shape that contains that saved object's attributes by value.
  */
+export const ATTRIBUTE_SERVICE_KEY = 'attributes';
+
+export interface AttributeServiceOptions<A extends { title: string }> {
+  customSaveMethod?: (
+    type: string,
+    attributes: A,
+    savedObjectId?: string
+  ) => Promise<{ id?: string } | { error: Error }>;
+  customUnwrapMethod?: (savedObject: SimpleSavedObject<A>) => A;
+}
+
 export class AttributeService<
   SavedObjectAttributes extends { title: string },
-  ValType extends EmbeddableInput & { attributes: SavedObjectAttributes },
-  RefType extends SavedObjectEmbeddableInput
+  ValType extends EmbeddableInput & {
+    [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
+  } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
+  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > {
-  private embeddableFactory: EmbeddableFactory;
+  private embeddableFactory?: EmbeddableFactory;
 
   constructor(
     private type: string,
+    private showSaveModal: (
+      saveModal: React.ReactElement,
+      I18nContext: I18nStart['Context']
+    ) => void,
     private savedObjectsClient: SavedObjectsClientContract,
     private overlays: OverlayStart,
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
-    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
+    getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'],
+    private options?: AttributeServiceOptions<SavedObjectAttributes>
   ) {
-    const factory = getEmbeddableFactory(this.type);
-    if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(this.type);
+    if (getEmbeddableFactory) {
+      const factory = getEmbeddableFactory(this.type);
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(this.type);
+      }
+      this.embeddableFactory = factory;
     }
-    this.embeddableFactory = factory;
   }
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
@@ -79,43 +97,57 @@ export class AttributeService<
       const savedObject: SimpleSavedObject<SavedObjectAttributes> = await this.savedObjectsClient.get<
         SavedObjectAttributes
       >(this.type, input.savedObjectId);
-      return savedObject.attributes;
+      return this.options?.customUnwrapMethod
+        ? this.options?.customUnwrapMethod(savedObject)
+        : { ...savedObject.attributes };
     }
-    return input.attributes;
+    return input[ATTRIBUTE_SERVICE_KEY];
   }
 
   public async wrapAttributes(
     newAttributes: SavedObjectAttributes,
     useRefType: boolean,
-    embeddable?: IEmbeddable
+    input?: ValType | RefType
   ): Promise<Omit<ValType | RefType, 'id'>> {
+    const originalInput = input ? input : {};
     const savedObjectId =
-      embeddable && isSavedObjectEmbeddableInput(embeddable.getInput())
-        ? (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId
+      input && this.inputIsRefType(input)
+        ? (input as SavedObjectEmbeddableInput).savedObjectId
         : undefined;
     if (!useRefType) {
-      return { attributes: newAttributes } as ValType;
-    } else {
-      try {
-        if (savedObjectId) {
-          await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
-          return { savedObjectId } as RefType;
-        } else {
-          const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
-          return { savedObjectId: savedItem.id } as RefType;
+      return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
+    }
+    try {
+      if (this.options?.customSaveMethod) {
+        const savedItem = await this.options.customSaveMethod(
+          this.type,
+          newAttributes,
+          savedObjectId
+        );
+        if ('id' in savedItem) {
+          return { ...originalInput, savedObjectId: savedItem.id } as RefType;
         }
-      } catch (error) {
-        this.toasts.addDanger({
-          title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
-            defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
-            values: {
-              errorMessage: error.message,
-            },
-          }),
-          'data-test-subj': 'saveDashboardFailure',
-        });
-        return Promise.reject({ error });
+        return { ...originalInput } as RefType;
       }
+
+      if (savedObjectId) {
+        await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
+        return { ...originalInput, savedObjectId } as RefType;
+      }
+
+      const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
+      return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+    } catch (error) {
+      this.toasts.addDanger({
+        title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
+          defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
+          values: {
+            errorMessage: error.message,
+          },
+        }),
+        'data-test-subj': 'saveDashboardFailure',
+      });
+      return Promise.reject({ error });
     }
   }
 
@@ -146,7 +178,7 @@ export class AttributeService<
 
   getInputAsRefType = async (
     input: ValType | RefType,
-    saveOptions?: { showSaveModal: boolean } | { title: string }
+    saveOptions?: { showSaveModal: boolean; saveModalTitle?: string } | { title: string }
   ): Promise<RefType> => {
     if (this.inputIsRefType(input)) {
       return input;
@@ -159,7 +191,7 @@ export class AttributeService<
             copyOnSave: false,
             lastSavedTitle: '',
             getEsType: () => this.type,
-            getDisplayName: this.embeddableFactory.getDisplayName,
+            getDisplayName: this.embeddableFactory?.getDisplayName || (() => this.type),
           },
           props.isTitleDuplicateConfirmed,
           props.onTitleDuplicate,
@@ -169,7 +201,7 @@ export class AttributeService<
           }
         );
         try {
-          const newAttributes = { ...input.attributes };
+          const newAttributes = { ...input[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
           resolve(wrappedInput);
@@ -179,13 +211,12 @@ export class AttributeService<
           return { error };
         }
       };
-
       if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
-        showSaveModal(
+        this.showSaveModal(
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={input.attributes.title}
+            title={get(saveOptions, 'saveModalTitle', input[ATTRIBUTE_SERVICE_KEY].title)}
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}

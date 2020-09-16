@@ -29,11 +29,9 @@ import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
 import { statusMixin } from './status';
-import pidMixin from './pid';
 import configCompleteMixin from './config/complete';
 import { optimizeMixin } from '../../optimize';
 import * as Plugins from './plugins';
-import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
 import { uiMixin } from '../ui';
 import { i18nMixin } from './i18n';
 
@@ -94,9 +92,6 @@ export default class KbnServer {
         warningsMixin,
         statusMixin,
 
-        // writes pid file
-        pidMixin,
-
         // scan translations dirs, register locale files and initialize i18n engine.
         i18nMixin,
 
@@ -107,9 +102,6 @@ export default class KbnServer {
         configCompleteMixin,
 
         uiMixin,
-
-        // setup saved object routes
-        savedObjectsMixin,
 
         // setup routes that serve the @kbn/optimizer output
         optimizeMixin,

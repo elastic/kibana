@@ -12,7 +12,7 @@ import {
   SanitizedAlert as Alert,
   AlertAction,
   AlertTaskState,
-  AlertStatus,
+  AlertInstanceSummary,
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
@@ -21,7 +21,7 @@ export {
   Alert,
   AlertAction,
   AlertTaskState,
-  AlertStatus,
+  AlertInstanceSummary,
   AlertInstanceStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
@@ -54,6 +54,7 @@ export interface ActionParamsProps<TParams> {
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   docLinks: DocLinksStart;
+  actionConnector?: ActionConnector;
 }
 
 export interface Pagination {

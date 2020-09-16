@@ -25,17 +25,51 @@ export const PercentilesKeyedTypeRT = rt.type({
   values: rt.array(rt.type({ key: rt.string, value: NumberOrNullRT })),
 });
 
+export const TopHitsTypeRT = rt.type({
+  hits: rt.type({
+    total: rt.type({
+      value: rt.number,
+      relation: rt.string,
+    }),
+    hits: rt.array(
+      rt.intersection([
+        rt.type({
+          _index: rt.string,
+          _id: rt.string,
+          _score: NumberOrNullRT,
+          _source: rt.object,
+        }),
+        rt.partial({
+          sort: rt.array(rt.union([rt.string, rt.number])),
+          max_score: NumberOrNullRT,
+        }),
+      ])
+    ),
+  }),
+});
+
 export const MetricValueTypeRT = rt.union([
   BasicMetricValueRT,
   NormalizedMetricValueRT,
   PercentilesTypeRT,
   PercentilesKeyedTypeRT,
+  TopHitsTypeRT,
 ]);
 export type MetricValueType = rt.TypeOf<typeof MetricValueTypeRT>;
 
+export const TermsWithMetrics = rt.intersection([
+  rt.type({
+    buckets: rt.array(rt.record(rt.string, rt.union([rt.number, rt.string, MetricValueTypeRT]))),
+  }),
+  rt.partial({
+    sum_other_doc_count: rt.number,
+    doc_count_error_upper_bound: rt.number,
+  }),
+]);
+
 export const HistogramBucketRT = rt.record(
   rt.string,
-  rt.union([rt.number, rt.string, MetricValueTypeRT])
+  rt.union([rt.number, rt.string, MetricValueTypeRT, TermsWithMetrics])
 );
 
 export const HistogramResponseRT = rt.type({
