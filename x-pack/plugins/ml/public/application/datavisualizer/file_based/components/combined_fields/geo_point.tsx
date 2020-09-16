@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 
 import {
   EuiFormRow,
@@ -71,15 +71,15 @@ export class GeoPointForm extends Component<Props, State> {
     };
   }
 
-  onLatFieldChange = (e) => {
+  onLatFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({ latField: e.target.value });
   };
 
-  onLonFieldChange = (e) => {
+  onLonFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({ lonField: e.target.value });
   };
 
-  onGeoPointFieldChange = (e) => {
+  onGeoPointFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     const geoPointField = e.target.value;
     this.setState({ geoPointField });
     this.hasNameCollision(geoPointField);
