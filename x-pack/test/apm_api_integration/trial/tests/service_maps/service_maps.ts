@@ -86,20 +86,18 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         });
 
         it('returns service map elements filtering by environment not defined', async () => {
-          const environment = 'ENVIRONMENT_NOT_DEFINED';
+          const ENVIRONMENT_NOT_DEFINED = 'ENVIRONMENT_NOT_DEFINED';
           const { body, status } = await supertest.get(
-            `/api/apm/service-map?start=${start}&end=${end}&environment=${environment}`
+            `/api/apm/service-map?start=${start}&end=${end}&environment=${ENVIRONMENT_NOT_DEFINED}`
           );
           expect(status).to.be(200);
           const environments = new Set();
           body.elements.forEach((element: { data: Record<string, any> }) => {
             environments.add(element.data['service.environment']);
           });
-          expectSnapshot(environments).toMatchInline(`
-            Set {
-              "ENVIRONMENT_NOT_DEFINED",
-            }
-          `);
+          expect(environments.size).to.eql(1);
+          expect(environments.has(ENVIRONMENT_NOT_DEFINED)).to.eql(true);
+          expectSnapshot(body).toMatch();
         });
       });
     });
