@@ -11,7 +11,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 export const APM_FEATURE = {
   id: 'apm',
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
-    defaultMessage: 'APM',
+    defaultMessage: 'APM and Client Side Monitoring',
   }),
   order: 900,
   category: DEFAULT_APP_CATEGORIES.observability,
