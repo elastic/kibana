@@ -7,14 +7,17 @@ import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import kibanaAgent
+import templates.EmptyTemplate
 
-object VerifyProject : Project({
-  id("ES_Verify")
-  name = "ES Verify"
+object EsSnapshotsProject : Project({
+  id("ES_Snapshots")
+  name = "ES Snapshots"
 
   val esBuild = BuildType {
     id("ES_Build")
     name = "ES Build"
+
+    templates(EmptyTemplate)
 
     kibanaAgent(2)
 
@@ -24,7 +27,7 @@ object VerifyProject : Project({
         scriptContent =
           """
                 #!/bin/bash
-                echo "##teamcity[setParameter name='env.ES_SNAPSHOT_MANIFEST' value='http://localhost']"
+                echo "##teamcity[setParameter name='env.ES_SNAPSHOT_MANIFEST' value='https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/manifest-latest.json']"
         """.trimIndent()
       }
     }
@@ -49,12 +52,13 @@ object VerifyProject : Project({
   val cloneForVerify = { build: BuildType ->
     val newBuild = BuildType()
     build.copyTo(newBuild)
-    newBuild.id("ES_Verify_" + build.id?.toString())
+    newBuild.id = AbsoluteId(build.id?.toString() + "_ES_Snapshots")
     newBuild.params {
       val buildId = esBuild.id?.value ?: ""
       param("env.ES_SNAPSHOT_MANIFEST", "%dep.$buildId.env.ES_SNAPSHOT_MANIFEST%")
     }
     newBuild.dependsOn(esBuild)
+    newBuild.steps.items.removeIf { it.name == "Failed Test Reporter" }
     newBuild
   }
 
@@ -65,7 +69,7 @@ object VerifyProject : Project({
   }
 
   buildType(BuildType {
-    id("ES_Verify_Default_CIGroups_Composite")
+    id("ES_Snapshots_Default_CIGroups_Composite")
     name = "CI Groups"
     type = BuildTypeSettings.Type.COMPOSITE
 

@@ -3,13 +3,14 @@ package projects
 import DefaultRoot
 import builds.*
 import builds.default.*
-import builds.es_snapshots.VerifyProject
+import builds.es_snapshots.EsSnapshotsProject
 import builds.oss.*
 import builds.test.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnection
 import kibanaAgent
 import templates.DefaultTemplate
+import templates.EmptyTemplate
 
 class KibanaConfiguration() {
   var agentNetwork: String = "teamcity"
@@ -32,6 +33,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
 
     vcsRoot(DefaultRoot)
     template(DefaultTemplate)
+    template(EmptyTemplate)
 
     defaultTemplate = DefaultTemplate
 
@@ -148,6 +150,6 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
     buildType(FullCi)
     buildType(BaselineCi)
 
-    subProject(VerifyProject)
+    subProject(EsSnapshotsProject)
   }
 }
