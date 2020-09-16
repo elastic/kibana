@@ -13,7 +13,7 @@ import {
   ApplicationStart,
 } from 'kibana/public';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import {DataPublicPluginSetup, DataPublicPluginStart} from 'src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 

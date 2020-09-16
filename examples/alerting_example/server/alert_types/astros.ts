@@ -68,10 +68,7 @@ export const alertType: AlertType = {
 
     if (getOperator(op)(peopleInCraft.length, outerSpaceCapacity)) {
       peopleInCraft.forEach(({ craft, name }) => {
-        services
-          .alertInstanceFactory(name)
-          .replaceState({ craft })
-          .scheduleActions('default');
+        services.alertInstanceFactory(name).replaceState({ craft }).scheduleActions('default');
       });
     }
 
