@@ -31,7 +31,10 @@ export type SubPluginsInitReducer = HostsPluginReducer &
  */
 export const createInitialState = (
   pluginsInitState: SecuritySubPlugins['store']['initialState'],
-  kibanaIndexPatterns: KibanaIndexPatterns
+  {
+    kibanaIndexPatterns,
+    configIndexPatterns,
+  }: { kibanaIndexPatterns: KibanaIndexPatterns; configIndexPatterns: string[] }
 ): PreloadedState<State> => {
   const preloadedState: PreloadedState<State> = {
     app: initialAppState,
@@ -41,6 +44,7 @@ export const createInitialState = (
     sourcerer: {
       ...sourcererModel.initialSourcererState,
       kibanaIndexPatterns,
+      configIndexPatterns,
     },
   };
   return preloadedState;

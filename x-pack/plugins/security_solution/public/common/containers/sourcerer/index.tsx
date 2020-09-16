@@ -6,14 +6,11 @@
 
 import deepEqual from 'fast-deep-equal';
 import isEqual from 'lodash/isEqual';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { useUiSetting$ } from '../../lib/kibana';
-
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { KibanaIndexPatterns, ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
+import { ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
 import { State } from '../../store';
 import { useUserInfo } from '../../../detections/components/user_info';
@@ -36,7 +33,6 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
   const dispatch = useDispatch();
 
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
-  const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const getKibanaIndexPatternsSelector = useMemo(
     () => sourcererSelectors.kibanaIndexPatternsSelector(),
     []
@@ -44,18 +40,6 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
   const kibanaIndexPatterns = useSelector(getKibanaIndexPatternsSelector, isEqual);
 
   useIndexFields(scopeId);
-
-  const setIndexPatternsList = useCallback(
-    (kibanaIndexPatternsToPersist: KibanaIndexPatterns, configIndexPatternsToPersist: string[]) => {
-      dispatch(
-        sourcererActions.setIndexPatternsList({
-          kibanaIndexPatterns: kibanaIndexPatternsToPersist,
-          configIndexPatterns: configIndexPatternsToPersist,
-        })
-      );
-    },
-    [dispatch]
-  );
 
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null) {
@@ -76,23 +60,8 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
           selectedPatterns: [signalIndexName],
         })
       );
-      setIndexPatternsList(kibanaIndexPatterns, configIndex);
     }
-  }, [
-    configIndex,
-    dispatch,
-    kibanaIndexPatterns,
-    isSignalIndexExists,
-    scopeId,
-    setIndexPatternsList,
-    signalIndexName,
-  ]);
-
-  useEffect(() => {
-    if (scopeId !== SourcererScopeName.detections) {
-      setIndexPatternsList(kibanaIndexPatterns, configIndex);
-    }
-  }, [configIndex, kibanaIndexPatterns, scopeId, setIndexPatternsList]);
+  }, [dispatch, kibanaIndexPatterns, isSignalIndexExists, scopeId, signalIndexName]);
 };
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {

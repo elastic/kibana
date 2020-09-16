@@ -40,6 +40,7 @@ import {
   APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
   APP_PATH,
+  DEFAULT_INDEX_KEY,
 } from '../common/constants';
 import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
 
@@ -55,6 +56,10 @@ import {
   CASE,
   ADMINISTRATION,
 } from './app/home/translations';
+import {
+  IndexFieldsStrategyRequest,
+  IndexFieldsStrategyResponse,
+} from '../common/search_strategy/index_fields';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -385,6 +390,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   private async buildStore(coreStart: CoreStart, startPlugins: StartPlugins, storage: Storage) {
+    const defaultIndicesName = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
     const [
       { composeLibs },
       kibanaIndexPatterns,
@@ -395,10 +401,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         timelinesSubPlugin,
         managementSubPlugin,
       },
+      configIndexPatterns,
     ] = await Promise.all([
       this.downloadAssets(),
       startPlugins.data.indexPatterns.getIdsWithTitle(),
       this.downloadSubPlugins(),
+      startPlugins.data.search
+        .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+          { indices: defaultIndicesName, onlyCheckIfIndicesExist: false },
+          {
+            strategy: 'securitySolutionIndexFields',
+          }
+        )
+        .toPromise(),
     ]);
 
     const { apolloClient } = composeLibs(coreStart);
@@ -431,7 +446,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...timelineInitialState,
           ...managementSubPluginStart.store.initialState,
         },
-        kibanaIndexPatterns
+        {
+          kibanaIndexPatterns,
+          configIndexPatterns: configIndexPatterns.indicesExists,
+        }
       ),
       {
         ...hostsStart.store.reducer,
