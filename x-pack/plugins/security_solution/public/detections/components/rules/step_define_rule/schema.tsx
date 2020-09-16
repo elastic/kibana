@@ -57,12 +57,6 @@ export const schema: FormSchema<DefineStepRule> = {
     ],
   },
   queryBar: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
-      {
-        defaultMessage: 'Custom query',
-      }
-    ),
     validations: [
       {
         validator: (

@@ -4,5 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EqlQueryBar } from './eql_query_bar';
-export { EqlOverviewLink } from './eql_overview_link';
+import * as t from 'io-ts';
+
+export const eqlValidationSchema = t.exact(
+  t.type({
+    valid: t.boolean,
+    errors: t.array(t.string),
+  })
+);
+
+export type EqlValidationSchema = t.TypeOf<typeof eqlValidationSchema>;

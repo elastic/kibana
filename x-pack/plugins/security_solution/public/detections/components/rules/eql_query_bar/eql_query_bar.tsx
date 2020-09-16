@@ -4,22 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, ChangeEvent } from 'react';
+import React, { FC, useCallback, ChangeEvent, useEffect } from 'react';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import { useEqlValidation } from '../../../../common/hooks/eql/use_eql_validation';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import * as i18n from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface EqlQueryBarProps {
   dataTestSubj: string;
   field: FieldHook<DefineStepRule['queryBar']>;
   idAria?: string;
+  index: string[];
 }
 
-export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria }) => {
-  const { setValue } = field;
+export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria, index }) => {
+  const { http } = useKibana().services;
+  const { addError } = useAppToasts();
+  const { error, start, result } = useEqlValidation();
+  const { setErrors, setValue } = field;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const fieldValue = field.value.query.query as string;
+  const validationErrors = result?.errors;
+
+  useEffect(() => {
+    if (error) {
+      addError(error, { title: i18n.EQL_VALIDATION_REQUEST_ERROR });
+    }
+  }, [error, addError]);
+
+  useEffect(() => {
+    if (validationErrors != null && validationErrors.length) {
+      setErrors([{ message: '' }]);
+    }
+  }, [setErrors, validationErrors]);
+
+  const handleValidation = useCallback(() => {
+    start({ http, index, query: fieldValue });
+  }, [fieldValue, http, index, start]);
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -52,6 +77,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria 
         fullWidth
         isInvalid={isInvalid}
         value={fieldValue}
+        onBlur={handleValidation}
         onChange={handleChange}
       />
     </EuiFormRow>

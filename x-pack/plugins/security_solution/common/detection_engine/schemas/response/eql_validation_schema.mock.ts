@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EqlQueryBar } from './eql_query_bar';
-export { EqlOverviewLink } from './eql_overview_link';
+import { EqlValidationSchema } from './eql_validation_schema';
+
+export const getEqlValidationResponseMock = (): EqlValidationSchema => ({
+  valid: false,
+  errors: ['line 3:52: token recognition error at: '],
+});

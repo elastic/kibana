@@ -47,7 +47,7 @@ import {
 import { schema } from './schema';
 import * as i18n from './translations';
 import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { EqlQueryBar } from '../eql_query_bar';
+import { EqlOverviewLink, EqlQueryBar } from '../eql_query_bar';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -239,7 +239,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: indexPatternsLoading,
+                    index,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                  }}
+                  config={{
+                    ...schema.queryBar,
+                    helpText: i18n.EQL_QUERY_BAR_HELP_TEXT,
+                    label: i18n.EQL_QUERY_BAR_LABEL,
+                    labelAppend: <EqlOverviewLink />,
                   }}
                 />
               ) : (
@@ -248,6 +255,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   config={{
                     ...schema.queryBar,
+                    label: i18n.QUERY_BAR_LABEL,
                     labelAppend: (
                       <MyLabelButton
                         data-test-subj="importQueryFromSavedTimeline"

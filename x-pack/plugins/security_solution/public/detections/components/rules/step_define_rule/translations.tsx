@@ -70,3 +70,24 @@ export const ENABLE_ML_JOB_WARNING = i18n.translate(
       'This ML job is not currently running. Please set this job to run via "ML job settings" before activating this rule.',
   }
 );
+
+export const QUERY_BAR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
+  {
+    defaultMessage: 'Custom query',
+  }
+);
+
+export const EQL_QUERY_BAR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
+  {
+    defaultMessage: 'EQL query',
+  }
+);
+
+export const EQL_QUERY_BAR_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarHelpText',
+  {
+    defaultMessage: 'Enter an EQL query',
+  }
+);

@@ -25,6 +25,8 @@ export const validateEql = async ({
 }: ValidateEqlParams): Promise<Validation> => {
   try {
     await client.eql.search({
+      // @ts-expect-error type is missing allow_no_indices
+      allow_no_indices: true,
       index: index.join(','),
       body: {
         query,
