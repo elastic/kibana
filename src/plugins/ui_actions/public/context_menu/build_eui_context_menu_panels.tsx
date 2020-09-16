@@ -148,7 +148,7 @@ export async function buildContextMenuForActions({
     if (!isCompatible) return;
     let parentPanel = '';
     let currentPanel = '';
-    if (action.grouping && action.grouping) {
+    if (action.grouping) {
       for (let i = 0; i < action.grouping.length; i++) {
         const group = action.grouping[i];
         currentPanel = group.id;
@@ -179,7 +179,6 @@ export async function buildContextMenuForActions({
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
       icon: action.getIconType(context),
-      panel: _.get(action, 'childContextMenuPanel.id'),
       'data-test-subj': `embeddablePanelAction-${action.id}`,
       onClick: onClick(action, context, closeMenu),
       href: action.getHref ? await action.getHref(context) : undefined,
