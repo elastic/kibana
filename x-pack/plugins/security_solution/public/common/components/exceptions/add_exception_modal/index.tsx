@@ -308,10 +308,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
+      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
   }, [
     addOrUpdateExceptionItems,
+    ruleId,
     enrichExceptionItems,
     shouldCloseAlert,
     shouldBulkCloseAlert,

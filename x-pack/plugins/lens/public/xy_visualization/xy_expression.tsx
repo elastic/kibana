@@ -17,6 +17,7 @@ import {
   Position,
   GeometryValue,
   XYChartSeriesIdentifier,
+  StackMode,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -84,11 +85,21 @@ export const xyChart: ExpressionFunctionDefinition<
   args: {
     xTitle: {
       types: ['string'],
-      help: 'X axis title',
+      help: i18n.translate('xpack.lens.xyChart.xTitle.help', {
+        defaultMessage: 'X axis title',
+      }),
     },
     yTitle: {
       types: ['string'],
-      help: 'Y axis title',
+      help: i18n.translate('xpack.lens.xyChart.yLeftTitle.help', {
+        defaultMessage: 'Y left axis title',
+      }),
+    },
+    yRightTitle: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.xyChart.yRightTitle.help', {
+        defaultMessage: 'Y right axis title',
+      }),
     },
     legend: {
       types: ['lens_xy_legendConfig'],
@@ -115,16 +126,10 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Show x and y axes gridlines',
       }),
     },
-    showXAxisTitle: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.showXAxisTitle.help', {
-        defaultMessage: 'Show x axis title',
-      }),
-    },
-    showYAxisTitle: {
-      types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.showYAxisTitle.help', {
-        defaultMessage: 'Show y axis title',
+    axisTitlesVisibilitySettings: {
+      types: ['lens_xy_axisTitlesVisibilityConfig'],
+      help: i18n.translate('xpack.lens.xyChart.axisTitlesSettings.help', {
+        defaultMessage: 'Show x and y axes titles',
       }),
     },
     layers: {
@@ -230,11 +235,10 @@ export function XYChart({
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
-      !xAccessor ||
       !accessors.length ||
       !data.tables[layerId] ||
       data.tables[layerId].rows.length === 0 ||
-      data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')
+      (xAccessor && data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined'))
     );
   });
 
@@ -263,15 +267,22 @@ export function XYChart({
 
   const yAxesConfiguration = getAxesConfiguration(
     filteredLayers,
+    shouldRotate,
     data.tables,
-    formatFactory,
-    shouldRotate
+    formatFactory
   );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
-  const showXAxisTitle = args.showXAxisTitle ?? true;
-  const showYAxisTitle = args.showYAxisTitle ?? true;
-  const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || { x: true, y: true };
+  const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
+    x: true,
+    yLeft: true,
+    yRight: true,
+  };
+  const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || {
+    x: true,
+    yLeft: true,
+    yRight: true,
+  };
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
@@ -315,11 +326,11 @@ export function XYChart({
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,
-    index: number
+    groupId: string
   ) => {
-    if (index > 0 && args.yTitle) return;
+    const yTitle = groupId === 'right' ? args.yRightTitle : args.yTitle;
     return (
-      args.yTitle ||
+      yTitle ||
       axisSeries
         .map(
           (series) =>
@@ -327,6 +338,24 @@ export function XYChart({
         )
         .filter((name) => Boolean(name))[0]
     );
+  };
+
+  const getYAxesStyle = (groupId: string) => {
+    const style = {
+      tickLabel: {
+        visible:
+          groupId === 'right'
+            ? tickLabelsVisibilitySettings?.yRight
+            : tickLabelsVisibilitySettings?.yLeft,
+      },
+      axisTitle: {
+        visible:
+          groupId === 'right'
+            ? axisTitlesVisibilitySettings?.yRight
+            : axisTitlesVisibilitySettings?.yLeft,
+      },
+    };
+    return style;
   };
 
   return (
@@ -438,38 +467,34 @@ export function XYChart({
           visible: gridlinesVisibilitySettings?.x,
           strokeWidth: 2,
         }}
-        hide={filteredLayers[0].hide}
+        hide={filteredLayers[0].hide || !filteredLayers[0].xAccessor}
         tickFormat={(d) => safeXAccessorLabelRenderer(d)}
         style={{
           tickLabel: {
             visible: tickLabelsVisibilitySettings?.x,
           },
           axisTitle: {
-            visible: showXAxisTitle,
+            visible: axisTitlesVisibilitySettings.x,
           },
         }}
       />
 
-      {yAxesConfiguration.map((axis, index) => (
+      {yAxesConfiguration.map((axis) => (
         <Axis
           key={axis.groupId}
           id={axis.groupId}
           groupId={axis.groupId}
           position={axis.position}
-          title={getYAxesTitles(axis.series, index)}
+          title={getYAxesTitles(axis.series, axis.groupId)}
           gridLine={{
-            visible: gridlinesVisibilitySettings?.y,
+            visible:
+              axis.groupId === 'right'
+                ? gridlinesVisibilitySettings?.yRight
+                : gridlinesVisibilitySettings?.yLeft,
           }}
           hide={filteredLayers[0].hide}
-          tickFormat={(d) => axis.formatter.convert(d)}
-          style={{
-            tickLabel: {
-              visible: tickLabelsVisibilitySettings?.y,
-            },
-            axisTitle: {
-              visible: showYAxisTitle,
-            },
-          }}
+          tickFormat={(d) => axis.formatter?.convert(d) || ''}
+          style={getYAxesStyle(axis.groupId)}
         />
       ))}
 
@@ -530,8 +555,7 @@ export function XYChart({
           // To not display them in the legend, they need to be filtered out.
           const rows = tableConverted.rows.filter(
             (row) =>
-              xAccessor &&
-              typeof row[xAccessor] !== 'undefined' &&
+              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
               !(
                 splitAccessor &&
                 typeof row[splitAccessor] === 'undefined' &&
@@ -539,21 +563,42 @@ export function XYChart({
               )
           );
 
+          if (!xAccessor) {
+            rows.forEach((row) => {
+              row.unifiedX = i18n.translate('xpack.lens.xyChart.emptyXLabel', {
+                defaultMessage: '(empty)',
+              });
+            });
+          }
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
             id: `${splitAccessor}-${accessor}`,
-            xAccessor,
+            xAccessor: xAccessor || 'unifiedX',
             yAccessors: [accessor],
             data: rows,
-            xScaleType,
+            xScaleType: xAccessor ? xScaleType : 'ordinal',
             yScaleType,
             color: () => getSeriesColor(layer, accessor),
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
+            stackMode: seriesType.includes('percentage') ? StackMode.Percentage : undefined,
             timeZone,
+            areaSeriesStyle: {
+              point: {
+                visible: !xAccessor,
+                radius: 5,
+              },
+            },
+            lineSeriesStyle: {
+              point: {
+                visible: !xAccessor,
+                radius: 5,
+              },
+            },
             name(d) {
               const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
 
@@ -601,10 +646,13 @@ export function XYChart({
               );
             case 'bar':
             case 'bar_stacked':
+            case 'bar_percentage_stacked':
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
+            case 'bar_horizontal_percentage_stacked':
               return <BarSeries key={index} {...seriesProps} />;
             case 'area_stacked':
+            case 'area_percentage_stacked':
               return (
                 <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
               );

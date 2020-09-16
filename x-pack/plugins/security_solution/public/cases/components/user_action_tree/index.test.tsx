@@ -8,7 +8,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
-import { getFormMock, useFormMock } from '../__mock__/form';
+import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { basicCase, basicPush, getUserAction } from '../../containers/mock';
 import { UserActionTree } from '.';
@@ -49,6 +49,7 @@ describe('UserActionTree ', () => {
     }));
     const formHookMock = getFormMock(sampleData);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
+    useFormDataMock.mockImplementation(() => [{ content: sampleData.content, comment: '' }]);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
@@ -69,7 +70,8 @@ describe('UserActionTree ', () => {
       defaultProps.data.createdBy.username
     );
   });
-  it('Renders service now update line with top and bottom when push is required', () => {
+
+  it('Renders service now update line with top and bottom when push is required', async () => {
     const ourActions = [
       getUserAction(['pushed'], 'push-to-service'),
       getUserAction(['comment'], 'update'),
@@ -87,6 +89,7 @@ describe('UserActionTree ', () => {
       },
       caseUserActions: ourActions,
     };
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -94,10 +97,16 @@ describe('UserActionTree ', () => {
         </Router>
       </TestProviders>
     );
+
+    await act(async () => {
+      wrapper.update();
+    });
+
     expect(wrapper.find(`[data-test-subj="show-top-footer"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="show-bottom-footer"]`).exists()).toBeTruthy();
   });
-  it('Renders service now update line with top only when push is up to date', () => {
+
+  it('Renders service now update line with top only when push is up to date', async () => {
     const ourActions = [getUserAction(['pushed'], 'push-to-service')];
     const props = {
       ...defaultProps,
@@ -112,6 +121,7 @@ describe('UserActionTree ', () => {
         },
       },
     };
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -119,16 +129,22 @@ describe('UserActionTree ', () => {
         </Router>
       </TestProviders>
     );
+
+    await act(async () => {
+      wrapper.update();
+    });
+
     expect(wrapper.find(`[data-test-subj="show-top-footer"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="show-bottom-footer"]`).exists()).toBeFalsy();
   });
 
-  it('Outlines comment when update move to link is clicked', () => {
+  it('Outlines comment when update move to link is clicked', async () => {
     const ourActions = [getUserAction(['comment'], 'create'), getUserAction(['comment'], 'update')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
     };
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -136,6 +152,11 @@ describe('UserActionTree ', () => {
         </Router>
       </TestProviders>
     );
+
+    await act(async () => {
+      wrapper.update();
+    });
+
     expect(
       wrapper.find(`[data-test-subj="comment-create-action"]`).first().prop('idToOutline')
     ).toEqual('');
@@ -148,12 +169,13 @@ describe('UserActionTree ', () => {
     ).toEqual(ourActions[0].commentId);
   });
 
-  it('Switches to markdown when edit is clicked and back to panel when canceled', () => {
+  it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
     const ourActions = [getUserAction(['comment'], 'create')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
     };
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -161,6 +183,11 @@ describe('UserActionTree ', () => {
         </Router>
       </TestProviders>
     );
+
+    await act(async () => {
+      wrapper.update();
+    });
+
     expect(
       wrapper
         .find(
@@ -168,14 +195,17 @@ describe('UserActionTree ', () => {
         )
         .exists()
     ).toEqual(false);
+
     wrapper
       .find(`[data-test-subj="comment-create-action"] [data-test-subj="property-actions-ellipses"]`)
       .first()
       .simulate('click');
+
     wrapper
       .find(`[data-test-subj="comment-create-action"] [data-test-subj="property-actions-pencil"]`)
       .first()
       .simulate('click');
+
     expect(
       wrapper
         .find(
@@ -183,12 +213,14 @@ describe('UserActionTree ', () => {
         )
         .exists()
     ).toEqual(true);
+
     wrapper
       .find(
         `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-cancel-markdown"]`
       )
       .first()
       .simulate('click');
+
     expect(
       wrapper
         .find(
@@ -299,23 +331,35 @@ describe('UserActionTree ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
-      .first()
-      .simulate('click');
+
+    await act(async () => {
+      await waitFor(() => {
+        wrapper
+          .find(
+            `[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`
+          )
+          .first()
+          .simulate('click');
+        wrapper.update();
+      });
+    });
+
     wrapper
       .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
       .first()
       .simulate('click');
+
     expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n`);
   });
-  it('Outlines comment when url param is provided', () => {
+
+  it('Outlines comment when url param is provided', async () => {
     const commentId = 'neat-comment-id';
     const ourActions = [getUserAction(['comment'], 'create')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
     };
+
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
     const wrapper = mount(
       <TestProviders>
@@ -324,6 +368,11 @@ describe('UserActionTree ', () => {
         </Router>
       </TestProviders>
     );
+
+    await act(async () => {
+      wrapper.update();
+    });
+
     expect(
       wrapper.find(`[data-test-subj="comment-create-action"]`).first().prop('idToOutline')
     ).toEqual(commentId);

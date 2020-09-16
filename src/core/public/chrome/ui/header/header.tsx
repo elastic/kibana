@@ -184,6 +184,7 @@ export function Header({
           homeHref={homeHref}
           basePath={basePath}
           navigateToApp={application.navigateToApp}
+          navigateToUrl={application.navigateToUrl}
           onIsLockedUpdate={onIsLockedUpdate}
           closeNav={() => {
             setIsNavOpen(false);
