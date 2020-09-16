@@ -17,8 +17,4 @@
  * under the License.
  */
 
-// register and polyfill need to happen in this
-// order and in separate files. Checkout each file
-// for a much more detailed explanation
 require('./register');
-require('./polyfill');

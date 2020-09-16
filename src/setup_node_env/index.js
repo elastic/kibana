@@ -18,4 +18,11 @@
  */
 
 require('./prebuilt_dev_only_entry');
-require('./babel_register');
+
+// register and polyfill need to happen in this
+// order and in separate files. Checkout each file
+// for a much more detailed explanation
+if (!global.__BUILT_WITH_BABEL__) {
+  require('./babel_register');
+}
+require('./polyfill');

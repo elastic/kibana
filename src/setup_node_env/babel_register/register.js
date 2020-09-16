@@ -46,26 +46,12 @@ var ignore = [
 
   // ignore paths matching `/canvas/canvas_plugin/`
   /[\/\\]canvas[\/\\]canvas_plugin[\/\\]/,
-];
 
-if (global.__BUILT_WITH_BABEL__) {
-  // when building the Kibana source we replace the statement
-  // `global.__BUILT_WITH_BABEL__` with the value `true` so that
-  // when @babel/register is required for the first time by users
-  // it will exclude kibana's `src` directory.
-  //
-  // We still need @babel/register for plugins though, we've been
-  // building their server code at require-time since version 4.2
-  // TODO: the plugin install process could transpile plugin server code...
-  ignore.push(resolve(__dirname, '../../../src'));
-} else {
-  ignore.push(
-    // ignore any path in the packages, unless it is in the package's
-    // root `src` directory, in any test or __tests__ directory, or it
-    // ends with .test.js, .test.ts, or .test.tsx
-    /[\/\\]packages[\/\\](eslint-|kbn-)[^\/\\]+[\/\\](?!src[\/\\].*|(.+[\/\\])?(test|__tests__)[\/\\].+|.+\.test\.(js|ts|tsx)$)(.+$)/
-  );
-}
+  // ignore any path in the packages, unless it is in the package's
+  // root `src` directory, in any test or __tests__ directory, or it
+  // ends with .test.js, .test.ts, or .test.tsx
+  /[\/\\]packages[\/\\](eslint-|kbn-)[^\/\\]+[\/\\](?!src[\/\\].*|(.+[\/\\])?(test|__tests__)[\/\\].+|.+\.test\.(js|ts|tsx)$)(.+$)/,
+];
 
 // modifies all future calls to require() to automatically
 // compile the required source with babel
