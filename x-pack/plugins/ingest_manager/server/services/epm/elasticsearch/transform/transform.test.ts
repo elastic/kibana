@@ -29,6 +29,7 @@ import { getInstallation, getInstallationObject } from '../../packages';
 import { getAsset } from './common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { JsonObject } from '../../../../../../infra/common/typed_json';
 
 describe('test transform install', () => {
   let legacyScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
@@ -100,7 +101,9 @@ describe('test transform install', () => {
         },
       } as unknown) as SavedObject<Installation>)
     );
-    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce({ count: 1 });
+    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce(
+      Promise.resolve({ count: 1 } as JsonObject)
+    );
     await installTransformForDataset(
       ({
         name: 'endpoint',
@@ -365,7 +368,10 @@ describe('test transform install', () => {
         attributes: { installed_es: currentInstallation.installed_es },
       } as unknown) as SavedObject<Installation>)
     );
-    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce({ count: 1 });
+
+    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce(
+      Promise.resolve({ count: 1 } as JsonObject)
+    );
     await installTransformForDataset(
       ({
         name: 'endpoint',
