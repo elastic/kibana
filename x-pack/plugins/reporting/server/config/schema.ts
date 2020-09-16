@@ -33,9 +33,13 @@ const KibanaServerSchema = schema.object({
 const QueueSchema = schema.object({
   indexInterval: schema.string({ defaultValue: 'week' }),
   pollEnabled: schema.boolean({ defaultValue: true }),
-  pollInterval: schema.number({ defaultValue: 3000 }),
+  pollInterval: schema.oneOf([schema.number(), schema.duration()], {
+    defaultValue: moment.duration('3s'),
+  }),
   pollIntervalErrorMultiplier: schema.number({ defaultValue: 10 }),
-  timeout: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 120000 }),
+  timeout: schema.oneOf([schema.number(), schema.duration()], {
+    defaultValue: moment.duration('2m'),
+  }),
 });
 
 const RulesSchema = schema.object({
