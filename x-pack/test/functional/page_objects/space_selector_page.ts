@@ -13,7 +13,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'header', 'security']);
+  const PageObjects = getPageObjects(['common']);
 
   class SpaceSelectorPage {
     async initTests() {
