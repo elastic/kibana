@@ -86,75 +86,18 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         });
 
         it('returns service map elements filtering by environment not defined', async () => {
-          const environment = 'ENVIRONMENT_NOT_DEFINED';
-
+          const ENVIRONMENT_NOT_DEFINED = 'ENVIRONMENT_NOT_DEFINED';
           const { body, status } = await supertest.get(
-            `/api/apm/service-map?start=${start}&end=${end}&environment=${environment}`
+            `/api/apm/service-map?start=${start}&end=${end}&environment=${ENVIRONMENT_NOT_DEFINED}`
           );
-
           expect(status).to.be(200);
-          expectSnapshot(body).toMatchInline(`
-            Object {
-              "elements": Array [
-                Object {
-                  "data": Object {
-                    "agent.name": "nodejs",
-                    "id": "opbeans-node",
-                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                    "service.name": "opbeans-node",
-                  },
-                },
-                Object {
-                  "data": Object {
-                    "agent.name": "python",
-                    "id": "opbeans-python",
-                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                    "service.name": "opbeans-python",
-                  },
-                },
-                Object {
-                  "data": Object {
-                    "agent.name": "ruby",
-                    "id": "opbeans-ruby",
-                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                    "service.name": "opbeans-ruby",
-                  },
-                },
-                Object {
-                  "data": Object {
-                    "agent.name": "java",
-                    "id": "opbeans-java",
-                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                    "service.name": "opbeans-java",
-                  },
-                },
-                Object {
-                  "data": Object {
-                    "agent.name": "go",
-                    "id": "opbeans-go",
-                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                    "service.name": "opbeans-go",
-                  },
-                },
-                Object {
-                  "data": Object {
-                    "agent.name": "rum-js",
-                    "id": "opbeans-rum",
-                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                    "service.name": "opbeans-rum",
-                  },
-                },
-                Object {
-                  "data": Object {
-                    "agent.name": "dotnet",
-                    "id": "opbeans-dotnet",
-                    "service.environment": "ENVIRONMENT_NOT_DEFINED",
-                    "service.name": "opbeans-dotnet",
-                  },
-                },
-              ],
-            }
-          `);
+          const environments = new Set();
+          body.elements.forEach((element: { data: Record<string, any> }) => {
+            environments.add(element.data['service.environment']);
+          });
+          expect(environments.size).to.eql(1);
+          expect(environments.has(ENVIRONMENT_NOT_DEFINED)).to.eql(true);
+          expectSnapshot(body).toMatch();
         });
       });
     });
