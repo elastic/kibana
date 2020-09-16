@@ -50,7 +50,15 @@ export interface FlyoutDrilldownWizardProps<
 
   actionFactoryPlaceContext?: ActionFactoryPlaceContext<ActionFactoryContext>;
 
+  /**
+   * General overview of drilldowns
+   */
   docsLink?: string;
+
+  /**
+   * Link that explains different triggers
+   */
+  triggerPickerDocsLink?: string;
 
   getTrigger: (triggerId: TriggerId) => Trigger;
 
@@ -151,6 +159,7 @@ export function FlyoutDrilldownWizard<
   drilldownActionFactories,
   actionFactoryPlaceContext,
   docsLink,
+  triggerPickerDocsLink,
   getTrigger,
   supportedTriggers,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
@@ -223,7 +232,7 @@ export function FlyoutDrilldownWizard<
         onSelectedTriggersChange={setSelectedTriggers}
         supportedTriggers={supportedTriggers}
         getTriggerInfo={getTrigger}
-        triggerPickerDocsLink={docsLink}
+        triggerPickerDocsLink={triggerPickerDocsLink}
       />
       {mode === 'edit' && (
         <>
