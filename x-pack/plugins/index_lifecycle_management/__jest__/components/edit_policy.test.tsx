@@ -467,7 +467,7 @@ describe('edit policy', () => {
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'warm');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
-      expect(nodeAttributesSelect.find('option').length).toBe(1);
+      expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
       const rendered = mountWithIntl(component);
@@ -479,8 +479,10 @@ describe('edit policy', () => {
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'warm');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
-      // Assuming we have node attributes, this select dropdown should default to the first value
-      // which is "attribute:true"
+      expect(findTestSubject(rendered, 'warm-viewNodeDetailsFlyoutButton').exists()).toBeFalsy();
+      expect(nodeAttributesSelect.find('option').length).toBe(2);
+      nodeAttributesSelect.simulate('change', { target: { value: 'attribute:true' } });
+      rendered.update();
       const flyoutButton = findTestSubject(rendered, 'warm-viewNodeDetailsFlyoutButton');
       expect(flyoutButton.exists()).toBeTruthy();
       await act(async () => {
@@ -562,7 +564,7 @@ describe('edit policy', () => {
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
-      expect(nodeAttributesSelect.find('option').length).toBe(1);
+      expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
       const rendered = mountWithIntl(component);
@@ -574,6 +576,10 @@ describe('edit policy', () => {
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'cold-viewNodeDetailsFlyoutButton').exists()).toBeFalsy();
+      expect(nodeAttributesSelect.find('option').length).toBe(2);
+      nodeAttributesSelect.simulate('change', { target: { value: 'attribute:true' } });
+      rendered.update();
       const flyoutButton = findTestSubject(rendered, 'cold-viewNodeDetailsFlyoutButton');
       expect(flyoutButton.exists()).toBeTruthy();
       await act(async () => {
@@ -666,7 +672,7 @@ describe('edit policy', () => {
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'frozen');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
-      expect(nodeAttributesSelect.find('option').length).toBe(1);
+      expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
       http.setupNodeListResponse();
@@ -679,6 +685,10 @@ describe('edit policy', () => {
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'frozen');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'frozen-viewNodeDetailsFlyoutButton').exists()).toBeFalsy();
+      expect(nodeAttributesSelect.find('option').length).toBe(2);
+      nodeAttributesSelect.simulate('change', { target: { value: 'attribute:true' } });
+      rendered.update();
       const flyoutButton = findTestSubject(rendered, 'frozen-viewNodeDetailsFlyoutButton');
       expect(flyoutButton.exists()).toBeTruthy();
       await act(async () => {
