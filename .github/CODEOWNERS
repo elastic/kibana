@@ -130,6 +130,7 @@
 /packages/kbn-test/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
+/packages/kbn-utils/ @elastic/kibana-operations
 /src/legacy/server/keystore/ @elastic/kibana-operations
 /src/legacy/server/pid/ @elastic/kibana-operations
 /src/legacy/server/sass/ @elastic/kibana-operations

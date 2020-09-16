@@ -18,10 +18,10 @@
  */
 
 import { take } from 'rxjs/operators';
+import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { IConfigService } from '../config';
-import { PathConfigType, config as pathConfigDef } from '../path';
 import { HttpConfigType, config as httpConfigDef } from '../http';
 import { PidConfigType, config as pidConfigDef } from './pid_config';
 import { resolveInstanceUuid } from './resolve_uuid';
