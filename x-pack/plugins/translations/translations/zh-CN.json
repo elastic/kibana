@@ -15950,7 +15950,6 @@
     "xpack.securitySolution.endpoint.resolver.panel.processEventCounts.events": "事件",
     "xpack.securitySolution.endpoint.resolver.panel.processEventListByType.eventDescriptiveName": "{descriptor} {subject}",
     "xpack.securitySolution.endpoint.resolver.panel.processEventListByType.events": "事件",
-    "xpack.securitySolution.endpoint.resolver.panel.processEventListByType.wait": "等候事件......",
     "xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb": "{totalCount} 个事件",
     "xpack.securitySolution.endpoint.resolver.panel.relatedDetail.missing": "找不到相关事件。",
     "xpack.securitySolution.endpoint.resolver.panel.relatedDetail.wait": "等候事件......",

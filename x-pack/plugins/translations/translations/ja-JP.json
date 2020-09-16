@@ -15940,7 +15940,6 @@
     "xpack.securitySolution.endpoint.resolver.panel.processEventCounts.events": "イベント",
     "xpack.securitySolution.endpoint.resolver.panel.processEventListByType.eventDescriptiveName": "{descriptor} {subject}",
     "xpack.securitySolution.endpoint.resolver.panel.processEventListByType.events": "イベント",
-    "xpack.securitySolution.endpoint.resolver.panel.processEventListByType.wait": "イベントを待機しています...",
     "xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb": "{totalCount}件のイベント",
     "xpack.securitySolution.endpoint.resolver.panel.relatedDetail.missing": "関連イベントが見つかりません。",
     "xpack.securitySolution.endpoint.resolver.panel.relatedDetail.wait": "イベントを待機しています...",
