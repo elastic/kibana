@@ -175,7 +175,7 @@ export function DiscoverLegacy({
         <main className="container-fluid">
           <div className="row">
             <div
-              className={`col-md-2 dscSidebar__container collapsible-sidebar ${sidebarClassName}`}
+              className={`col-md-2 dscSidebar__container dscCollapsibleSidebar ${sidebarClassName}`}
               id="discover-sidebar"
               data-test-subj="discover-sidebar"
             >
@@ -203,7 +203,7 @@ export function DiscoverLegacy({
                 aria-controls="discover-sidebar"
                 aria-expanded={isSidebarClosed ? 'false' : 'true'}
                 aria-label="Toggle sidebar"
-                className="kbnCollapsibleSidebar__collapseButton"
+                className="dscCollapsibleSidebar__collapseButton"
               />
             </div>
             <div className={`dscWrapper ${mainSectionClassName}`}>
@@ -260,7 +260,7 @@ export function DiscoverLegacy({
 
                   <div className="dscResults">
                     <section
-                      className="dscTable dscFixedScroll"
+                      className="dscTable dscTableFixedScroll"
                       aria-labelledby="documentsAriaLabel"
                       ref={fixedScrollRef}
                     >

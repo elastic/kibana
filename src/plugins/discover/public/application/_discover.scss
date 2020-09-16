@@ -109,14 +109,49 @@ discover-app {
   top: $euiSizeXS;
 }
 
-.dscFixedScroll {
+.dscTableFixedScroll {
   overflow-x: auto;
   padding-bottom: 0;
 
-  + .dscFixedScroll__scroller {
+  + .dscTableFixedScroll__scroller {
     position: fixed;
     bottom: 0;
     overflow-x: auto;
     overflow-y: hidden;
   }
 }
+
+.dscCollapsibleSidebar {
+  position: relative;
+  z-index: $euiZLevel1;
+
+  .dscCollapsibleSidebar__collapseButton {
+    position: absolute;
+    top: 0;
+    right: -20px;
+    cursor: pointer;
+    z-index: -1;
+    min-height: $euiSizeM;
+    min-width: $euiSizeM;
+    padding: $euiSizeXS * .5;
+  }
+
+  &.closed {
+    width: 0 !important;
+    border-right-width: 0;
+    border-left-width: 0;
+  }
+}
+
+@include euiBreakpoint('xs', 's', 'm') {
+  .dscCollapsibleSidebar {
+    &.closed {
+      display: none;
+    }
+
+    .dscCollapsibleSidebar__collapseButton {
+      display: none;
+    }
+  }
+}
+
