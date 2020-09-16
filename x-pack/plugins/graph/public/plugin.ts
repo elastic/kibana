@@ -74,7 +74,7 @@ export class GraphPlugin
       title: 'Graph',
       order: 6000,
       appRoute: '/app/graph',
-      euiIconType: 'graphApp',
+      euiIconType: 'logoKibana',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();

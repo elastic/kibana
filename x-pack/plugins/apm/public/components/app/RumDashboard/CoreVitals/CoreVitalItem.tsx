@@ -118,7 +118,6 @@ export function CoreVitalItem({
           setInFocusInd(ind);
         }}
       />
-      <EuiSpacer size="xl" />
     </>
   );
 }

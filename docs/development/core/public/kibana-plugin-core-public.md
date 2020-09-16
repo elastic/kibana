@@ -27,16 +27,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppNavLinkStatus](./kibana-plugin-core-public.appnavlinkstatus.md) | Status of the application's navLink. |
 |  [AppStatus](./kibana-plugin-core-public.appstatus.md) | Accessibility status of an application. |
 
-## Functions
-
-|  Function | Description |
-|  --- | --- |
-|  [assertNever(x)](./kibana-plugin-core-public.assertnever.md) | Can be used in switch statements to ensure we perform exhaustive checks, see https://www.typescriptlang.org/docs/handbook/advanced-types.html\#exhaustiveness-checking |
-|  [deepFreeze(object)](./kibana-plugin-core-public.deepfreeze.md) | Apply Object.freeze to a value recursively and convert the return type to Readonly variant recursively |
-|  [getFlattenedObject(rootValue)](./kibana-plugin-core-public.getflattenedobject.md) | Flattens a deeply nested object to a map of dot-separated paths pointing to all primitive values \*\*and arrays\*\* from <code>rootValue</code>.<!-- -->example: getFlattenedObject(<!-- -->{ a: { b: 1, c: \[2,3\] } }<!-- -->) // =<!-- -->&gt; { 'a.b': 1, 'a.c': \[2,3\] } |
-|  [isRelativeUrl(candidatePath)](./kibana-plugin-core-public.isrelativeurl.md) | Determine if a url is relative. Any url including a protocol, hostname, or port is not considered relative. This means that absolute \*paths\* are considered to be relative \*urls\* |
-|  [modifyUrl(url, urlModifier)](./kibana-plugin-core-public.modifyurl.md) | Takes a URL and a function that takes the meaningful parts of the URL as a key-value object, modifies some or all of the parts, and returns the modified parts formatted again as a url.<!-- -->Url Parts sent: - protocol - slashes (does the url have the //) - auth - hostname (just the name of the host, no port or auth information) - port - pathname (the path after the hostname, no query or hash, starts with a slash if there was a path) - query (always an object, even when no query on original url) - hash<!-- -->Why? - The default url library in node produces several conflicting properties on the "parsed" output. Modifying any of these might lead to the modifications being ignored (depending on which property was modified) - It's not always clear whether to use path/pathname, host/hostname, so this tries to add helpful constraints |
-
 ## Interfaces
 
 |  Interface | Description |
@@ -65,7 +55,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreSetup](./kibana-plugin-core-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
-|  [EnvironmentMode](./kibana-plugin-core-public.environmentmode.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
@@ -95,7 +84,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |  |
 |  [OverlayRef](./kibana-plugin-core-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay. |
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
-|  [PackageInfo](./kibana-plugin-core-public.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-core-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |
@@ -128,7 +116,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ToastOptions](./kibana-plugin-core-public.toastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
 |  [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-core-public.uisettingsstate.md) |  |
-|  [URLMeaningfulParts](./kibana-plugin-core-public.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
 |  [UserProvidedValues](./kibana-plugin-core-public.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Variables
@@ -156,7 +143,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-core-public.chromenavlinkupdateablefields.md) |  |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
-|  [Freezable](./kibana-plugin-core-public.freezable.md) |  |
 |  [HandlerContextType](./kibana-plugin-core-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-core-public.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-core-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-core-public.handlercontexttype.md)<!-- -->. |

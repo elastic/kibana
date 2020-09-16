@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
-import { BehaviorSubject } from 'rxjs';
+import { SearchResponse } from 'elasticsearch';
 import { GetConfigFn } from '../../../common';
+import { LegacyFetchHandlers } from '../legacy/types';
 
 /**
  * @internal
@@ -31,9 +31,17 @@ import { GetConfigFn } from '../../../common';
 export type SearchRequest = Record<string, any>;
 
 export interface FetchHandlers {
-  config: { get: GetConfigFn };
-  http: HttpStart;
-  loadingCount$: BehaviorSubject<number>;
+  getConfig: GetConfigFn;
+  /**
+   * Callback which can be used to hook into responses, modify them, or perform
+   * side effects like displaying UI errors on the client.
+   */
+  onResponse: (request: SearchRequest, response: SearchResponse<any>) => SearchResponse<any>;
+  /**
+   * These handlers are only used by the legacy defaultSearchStrategy and can be removed
+   * once that strategy has been deprecated.
+   */
+  legacy: LegacyFetchHandlers;
 }
 
 export interface SearchError {
