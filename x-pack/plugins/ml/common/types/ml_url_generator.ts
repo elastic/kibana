@@ -92,7 +92,7 @@ export interface ExplorerUrlPageState {
   /**
    * Job IDs
    */
-  jobIds: JobId[];
+  jobIds?: JobId[];
   /**
    * Optionally set the time range in the time picker.
    */
@@ -110,6 +110,7 @@ export interface ExplorerUrlPageState {
    */
   mlExplorerSwimlane?: ExplorerAppState['mlExplorerSwimlane'];
   mlExplorerFilter?: ExplorerAppState['mlExplorerFilter'];
+  globalState?: MlCommonGlobalState;
 }
 
 export type ExplorerUrlState = MLPageState<typeof ML_PAGES.ANOMALY_EXPLORER, ExplorerUrlPageState>;
@@ -138,12 +139,11 @@ export interface TimeSeriesExplorerAppState {
 export interface TimeSeriesExplorerPageState
   extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
-  jobIds: JobId[];
+  jobIds?: JobId[];
   timeRange?: TimeRange;
   detectorIndex?: number;
   entities?: Record<string, string>;
   forecastId?: string;
-
   globalState?: MlCommonGlobalState;
 }
 

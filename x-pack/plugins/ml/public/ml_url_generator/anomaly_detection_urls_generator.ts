@@ -98,36 +98,35 @@ export function createExplorerUrl(
     query,
     mlExplorerSwimlane = {},
     mlExplorerFilter = {},
+    globalState,
   } = params;
   const appState: Partial<ExplorerAppState> = {
     mlExplorerSwimlane,
     mlExplorerFilter,
   };
+  let queryState: Partial<ExplorerGlobalState> = {};
+  if (globalState) queryState = globalState;
   if (query) appState.query = query;
-
   if (jobIds) {
-    const queryState: Partial<ExplorerGlobalState> = {
-      ml: {
-        jobIds,
-      },
+    queryState.ml = {
+      jobIds,
     };
-
-    if (timeRange) queryState.time = timeRange;
-    if (refreshInterval) queryState.refreshInterval = refreshInterval;
-
-    url = setStateToKbnUrl<Partial<ExplorerGlobalState>>(
-      '_g',
-      queryState,
-      { useHash: false, storeInHashQuery: false },
-      url
-    );
-    url = setStateToKbnUrl<Partial<ExplorerAppState>>(
-      '_a',
-      appState,
-      { useHash: false, storeInHashQuery: false },
-      url
-    );
   }
+  if (refreshInterval) queryState.refreshInterval = refreshInterval;
+  if (timeRange) queryState.time = timeRange;
+
+  url = setStateToKbnUrl<Partial<ExplorerGlobalState>>(
+    '_g',
+    queryState,
+    { useHash: false, storeInHashQuery: false },
+    url
+  );
+  url = setStateToKbnUrl<Partial<ExplorerAppState>>(
+    '_a',
+    appState,
+    { useHash: false, storeInHashQuery: false },
+    url
+  );
 
   return url;
 }
@@ -152,15 +151,19 @@ export function createSingleMetricViewerUrl(
     detectorIndex,
     forecastId,
     entities,
+    globalState,
   } = params;
 
-  const queryState: TimeSeriesExplorerGlobalState = {
-    ml: {
+  let queryState: Partial<TimeSeriesExplorerGlobalState> = {};
+  if (globalState) queryState = globalState;
+
+  if (jobIds) {
+    queryState.ml = {
       jobIds,
-    },
-    refreshInterval,
-    time: timeRange,
-  };
+    };
+  }
+  if (refreshInterval) queryState.refreshInterval = refreshInterval;
+  if (timeRange) queryState.time = timeRange;
 
   const appState: Partial<TimeSeriesExplorerAppState> = {};
   const mlTimeSeriesExplorer: Partial<TimeSeriesExplorerAppState['mlTimeSeriesExplorer']> = {};
@@ -182,7 +185,7 @@ export function createSingleMetricViewerUrl(
     appState.query = {
       query_string: query,
     };
-  url = setStateToKbnUrl<TimeSeriesExplorerGlobalState>(
+  url = setStateToKbnUrl<Partial<TimeSeriesExplorerGlobalState>>(
     '_g',
     queryState,
     { useHash: false, storeInHashQuery: false },
