@@ -7,13 +7,15 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useEffect } from 'react';
+import { first } from 'lodash';
+import { useEffect, useMemo } from 'react';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getIntervalInSeconds } from '../../../../../server/utils/get_interval_in_seconds';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
   SnapshotNodeResponseRT,
   SnapshotNodeResponse,
-  SnapshotGroupBy,
   SnapshotRequest,
   InfraTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
@@ -22,16 +24,40 @@ import {
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
 
-export function useSnapshot(
+const ONE_MINUTE = 60;
+const ONE_HOUR = ONE_MINUTE * 60;
+const ONE_DAY = ONE_HOUR * 24;
+const ONE_WEEK = ONE_DAY * 7;
+
+const getTimeLengthFromInterval = (interval: string | undefined) => {
+  if (interval) {
+    const intervalInSeconds = getIntervalInSeconds(interval);
+    const multiplier =
+      intervalInSeconds < ONE_MINUTE
+        ? ONE_HOUR / intervalInSeconds
+        : intervalInSeconds < ONE_HOUR
+        ? 60
+        : intervalInSeconds < ONE_DAY
+        ? 7
+        : intervalInSeconds < ONE_WEEK
+        ? 30
+        : 1;
+    const timeLength = intervalInSeconds * multiplier;
+    return { timeLength, intervalInSeconds, lookbackSize: Math.max(6, multiplier + 2) };
+  } else {
+    return { timeLength: 0, lookbackSize: 0 };
+  }
+};
+
+export function useTimeline(
   filterQuery: string | null | undefined,
   metrics: Array<{ type: SnapshotMetricType }>,
-  groupBy: SnapshotGroupBy,
   nodeType: InventoryItemType,
   sourceId: string,
   currentTime: number,
   accountId: string,
   region: string,
-  sendRequestImmediatly = true
+  interval: string | undefined
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
@@ -40,11 +66,14 @@ export function useSnapshot(
     );
   };
 
+  const timeLengthResult = useMemo(() => getTimeLengthFromInterval(interval), [interval]);
+  const { timeLength, lookbackSize } = timeLengthResult;
+
   const timerange: InfraTimerangeInput = {
-    interval: '1m',
+    interval: interval ?? '',
     to: currentTime,
-    from: currentTime - 1200 * 1000,
-    lookbackSize: 20,
+    from: currentTime - timeLength * 1000,
+    lookbackSize,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
@@ -52,7 +81,7 @@ export function useSnapshot(
     'POST',
     JSON.stringify({
       metrics,
-      groupBy,
+      groupBy: null,
       nodeType,
       timerange,
       filterQuery,
@@ -66,17 +95,20 @@ export function useSnapshot(
 
   useEffect(() => {
     (async () => {
-      if (sendRequestImmediatly) {
+      if (timeLength) {
         await makeRequest();
       }
     })();
-  }, [makeRequest, sendRequestImmediatly]);
+  }, [makeRequest, timeLength]);
+
+  const timeseries = response
+    ? first(response.nodes.map((node) => first(node.metrics)?.timeseries))
+    : null;
 
   return {
     error: (error && error.message) || null,
-    loading,
-    nodes: response ? response.nodes : [],
-    interval: response ? response.interval : '60s',
+    loading: !interval ? true : loading,
+    timeseries,
     reload: makeRequest,
   };
 }

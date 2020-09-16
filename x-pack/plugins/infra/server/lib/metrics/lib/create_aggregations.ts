@@ -26,6 +26,8 @@ export const createAggregations = (options: MetricsAPIRequest) => {
     },
   };
 
+  console.log('histogramAggregation', histogramAggregation.histogram.aggregations, options.metrics);
+
   if (Array.isArray(options.groupBy) && options.groupBy.length) {
     const limit = options.limit || 9;
     return {

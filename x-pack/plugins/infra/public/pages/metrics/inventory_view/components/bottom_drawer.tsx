@@ -18,12 +18,11 @@ const hideHistory = i18n.translate('xpack.infra.hideHistory', {
   defaultMessage: 'Hide history',
 });
 
-export const BottomDrawer: React.FC<{ measureRef: (instance: HTMLElement | null) => void }> = ({
-  measureRef,
-  children,
-}) => {
+export const BottomDrawer: React.FC<{
+  measureRef: (instance: HTMLElement | null) => void;
+  interval: string;
+}> = ({ measureRef, interval, children }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const onClick = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   return (
     <BottomActionContainer ref={measureRef} isOpen={isOpen}>
@@ -49,7 +48,7 @@ export const BottomDrawer: React.FC<{ measureRef: (instance: HTMLElement | null)
         </EuiFlexItem>
       </BottomActionTopBar>
       <EuiFlexGroup style={{ marginTop: 0 }}>
-        <Timeline />
+        <Timeline interval={interval} />
       </EuiFlexGroup>
     </BottomActionContainer>
   );
