@@ -75,6 +75,10 @@ export function BucketNestingEditor({
         defaultMessage: 'Top values for each {field}',
         values: { field: fieldName },
       }),
+      range: i18n.translate('xpack.lens.indexPattern.groupingOverallRanges', {
+        defaultMessage: 'Top values for each {field}',
+        values: { field: fieldName },
+      }),
     };
 
     const bottomLevelCopy: Record<string, string> = {
@@ -87,6 +91,10 @@ export function BucketNestingEditor({
         values: { target: target.fieldName },
       }),
       date_histogram: i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
+        defaultMessage: 'Overall top {target}',
+        values: { target: target.fieldName },
+      }),
+      range: i18n.translate('xpack.lens.indexPattern.groupingSecondRanges', {
         defaultMessage: 'Overall top {target}',
         values: { target: target.fieldName },
       }),
