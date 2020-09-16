@@ -163,6 +163,7 @@
     "color": "1.0.3",
     "commander": "3.0.2",
     "core-js": "^3.6.4",
+    "cypress-promise": "^1.1.0",
     "deep-freeze-strict": "^1.1.1",
     "del": "^5.1.0",
     "elastic-apm-node": "^3.7.0",

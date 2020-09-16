@@ -9,6 +9,7 @@ import {
   BULK_ACTIONS,
   EXPORT_TIMELINE_ACTION,
   TIMELINES_TABLE,
+  TIMELINE,
 } from '../screens/timelines';
 
 export const exportTimeline = (timelineId: string) => {
@@ -17,8 +18,8 @@ export const exportTimeline = (timelineId: string) => {
   cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
-export const openTimeline = (timeline: string) => {
-  cy.contains(timeline).click();
+export const openTimeline = (id: string) => {
+  cy.get(TIMELINE(id)).click();
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {

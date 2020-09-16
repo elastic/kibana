@@ -48,31 +48,27 @@ import { openTimeline } from '../tasks/timelines';
 import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Timelines', () => {
-  it('Creates a timeline', () => {
+  before(() => {
+    cy.server();
+    cy.route('PATCH', '**/api/timeline').as('timeline');
+  });
+
+  it('Creates a timeline', async () => {
     loginAndWaitForPage(OVERVIEW_URL);
     openTimelineUsingToggle();
-
-    cy.server();
-    cy.route('POST', '**/api/solutions/security/graphql').as('persistTimeline');
-
     populateTimeline();
     addFilter(timeline.filter);
-
-    cy.wait('@persistTimeline');
-    cy.wait('@persistTimeline');
-    cy.wait('@persistTimeline');
-
     pinFirstEvent();
-
-    cy.wait('@persistTimeline', { timeout: 10000 }).then((response) => {
-      cy.wrap(response.status).should('eql', 200);
-      cy.wrap(response.xhr.responseText).should('include', 'persistPinnedEventOnTimeline');
-    });
 
     cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
     cy.get(LOCKED_ICON).should('be.visible');
 
     addNameToTimeline(timeline.title);
+
+    const response = await cy.wait('@timeline').promisify();
+    const timelineId = JSON.parse(response.xhr.responseText).data.persistTimeline.timeline
+      .savedObjectId;
+
     addDescriptionToTimeline(timeline.description);
     addNotesToTimeline(timeline.notes);
     closeNotes();
@@ -89,7 +85,7 @@ describe('Timelines', () => {
     cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
     cy.get(TIMELINES_FAVORITE).first().should('exist');
 
-    openTimeline(timeline.title);
+    openTimeline(timelineId);
 
     cy.get(FAVORITE_TIMELINE).should('exist');
     cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);

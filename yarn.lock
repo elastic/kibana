@@ -9966,6 +9966,11 @@ cypress-multi-reporters@^1.2.3:
     debug "^4.1.1"
     lodash "^4.17.11"
 
+cypress-promise@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/cypress-promise/-/cypress-promise-1.1.0.tgz#f2d66965945fe198431aaf692d5157cea9d47b25"
+  integrity sha512-DhIf5PJ/a0iY+Yii6n7Rbwq+9TJxU4pupXYzf9mZd8nPG0AzQrj9i+pqINv4xbI2EV1p+PKW3maCkR7oPG4GrA==
+
 cypress@5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-5.0.0.tgz#6957e299b790af8b1cd7bea68261b8935646f72e"
