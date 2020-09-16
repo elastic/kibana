@@ -1678,7 +1678,7 @@ describe('disable()', () => {
 describe('muteAll()', () => {
   test('mutes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1708,7 +1708,7 @@ describe('muteAll()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -1763,7 +1763,7 @@ describe('muteAll()', () => {
 describe('unmuteAll()', () => {
   test('unmutes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1794,7 +1794,7 @@ describe('unmuteAll()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -1849,7 +1849,7 @@ describe('unmuteAll()', () => {
 describe('muteInstance()', () => {
   test('mutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1880,7 +1880,7 @@ describe('muteInstance()', () => {
 
   test('skips muting when alert instance already muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1900,7 +1900,7 @@ describe('muteInstance()', () => {
 
   test('skips muting when alert is muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1921,7 +1921,7 @@ describe('muteInstance()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -1984,7 +1984,7 @@ describe('muteInstance()', () => {
 describe('unmuteInstance()', () => {
   test('unmutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2013,7 +2013,7 @@ describe('unmuteInstance()', () => {
 
   test('skips unmuting when alert instance not muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2033,7 +2033,7 @@ describe('unmuteInstance()', () => {
 
   test('skips unmuting when alert is muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2054,7 +2054,7 @@ describe('unmuteInstance()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {

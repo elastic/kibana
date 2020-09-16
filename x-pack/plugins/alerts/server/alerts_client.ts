@@ -713,11 +713,7 @@ export class AlertsClient {
   }
 
   public async muteAll({ id }: { id: string }) {
-    const { attributes } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-      RawAlert
-    >('alert', id, {
-      namespace: this.namespace,
-    });
+    const { attributes } = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
@@ -740,11 +736,7 @@ export class AlertsClient {
   }
 
   public async unmuteAll({ id }: { id: string }) {
-    const { attributes } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-      RawAlert
-    >('alert', id, {
-      namespace: this.namespace,
-    });
+    const { attributes } = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
@@ -767,15 +759,9 @@ export class AlertsClient {
   }
 
   public async muteInstance({ alertId, alertInstanceId }: MuteOptions) {
-    const {
-      attributes,
-      version,
-    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Alert>(
       'alert',
-      alertId,
-      {
-        namespace: this.namespace,
-      }
+      alertId
     );
 
     await this.authorization.ensureAuthorized(
@@ -810,16 +796,11 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const {
-      attributes,
-      version,
-    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<Alert>(
       'alert',
-      alertId,
-      {
-        namespace: this.namespace,
-      }
+      alertId
     );
+
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
