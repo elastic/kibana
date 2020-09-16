@@ -145,9 +145,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
-  const licenseService = useLicense();
-  const license = licenseService.getLicenseInformation();
-  const isGoldPlus = license?.isAvailable && license?.isActive && license?.hasAtLeast('gold');
+  const isGoldPlus = useLicense().isGoldPlus();
 
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
