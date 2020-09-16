@@ -6,9 +6,14 @@
 
 import { TimelineFilter } from '../objects/timeline';
 
+import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
+
 import {
   ADD_FILTER,
   ADD_NOTE_BUTTON,
+  ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
+  ATTACH_TIMELINE_TO_NEW_CASE_ICON,
+  CASE,
   CLOSE_TIMELINE_BTN,
   CLOSE_NOTES_BTN,
   COMBO_BOX,
@@ -19,9 +24,11 @@ import {
   ID_TOGGLE_FIELD,
   NOTES_BUTTON,
   NOTES_TEXT_AREA,
+  OPEN_TIMELINE_ICON,
   PIN_EVENT,
   REMOVE_COLUMN,
   RESET_FIELDS,
+  SAVE_FILTER_BTN,
   SEARCH_OR_FILTER_CONTAINER,
   SERVER_SIDE_EVENT_COUNT,
   STAR_ICON,
@@ -36,7 +43,6 @@ import {
   TIMELINE_TITLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
-  SAVE_FILTER_BTN,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
@@ -69,6 +75,19 @@ export const addFilter = (filter: TimelineFilter) => {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
   cy.get(SAVE_FILTER_BTN).click();
+
+export const addNewCase = () => {
+  cy.get(ALL_CASES_CREATE_NEW_CASE_TABLE_BTN).click();
+};
+
+export const attachTimelineToNewCase = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click({ force: true });
+};
+
+export const attachTimelineToExistingCase = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
 };
 
 export const checkIdToggleField = () => {
@@ -112,6 +131,11 @@ export const openTimelineFieldsBrowser = () => {
 export const openTimelineInspectButton = () => {
   cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled');
   cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
+};
+
+export const openTimelineFromSettings = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(OPEN_TIMELINE_ICON).click({ force: true });
 };
 
 export const openTimelineSettings = () => {
@@ -160,8 +184,17 @@ export const removeColumn = (column: number) => {
 export const resetFields = () => {
   cy.get(RESET_FIELDS).click({ force: true });
 };
-
+  
+export const selectCase = (caseId: string) => {
+  cy.get(CASE(caseId)).click();
+};
+  
 export const waitForTimelineChanges = () => {
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('exist');
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
 };
+
+export const waitForTimelinesPanelToBeLoaded = () => {
+  cy.get(TIMELINES_TABLE).should('exist');
+};
+

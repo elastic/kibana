@@ -6,6 +6,21 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const EQL_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.eqlTypeTitle',
+  {
+    defaultMessage: 'Event Correlation',
+  }
+);
+
+export const EQL_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.eqlTypeDescription',
+  {
+    defaultMessage:
+      'Use Event Query Language (EQL) to match events, generate sequences, and stack data',
+  }
+);
+
 export const QUERY_TYPE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.queryTypeTitle',
   {

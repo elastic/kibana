@@ -95,7 +95,6 @@
     "@types/jsdom": "^16.2.3",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/jsonwebtoken": "^7.2.8",
-    "@types/lodash": "^4.14.159",
     "@types/mapbox-gl": "^1.9.1",
     "@types/memoize-one": "^4.1.0",
     "@types/mime": "^2.0.1",
@@ -207,7 +206,7 @@
     "mocha": "^7.1.1",
     "mocha-junit-reporter": "^1.23.1",
     "mochawesome": "^4.1.0",
-    "mochawesome-merge": "^2.0.1",
+    "mochawesome-merge": "^4.1.0",
     "mustache": "^2.3.0",
     "mutation-observer": "^1.0.3",
     "node-fetch": "^2.6.0",
@@ -268,7 +267,7 @@
     "vinyl-fs": "^3.0.3",
     "whatwg-fetch": "^3.0.0",
     "xml-crypto": "^1.4.0",
-    "yargs": "4.8.1"
+    "yargs": "^15.4.1"
   },
   "dependencies": {
     "@babel/core": "^7.11.1",
@@ -338,7 +337,7 @@
     "js-yaml": "3.13.1",
     "json-stable-stringify": "^1.0.1",
     "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
     "markdown-it": "^10.0.0",
     "mime": "^2.4.4",
     "moment": "^2.24.0",

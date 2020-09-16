@@ -10,10 +10,7 @@ export interface Timeline {
   query: string;
 }
 
-export interface CompleteTimeline {
-  title: string;
-  description: string;
-  query: string;
+export interface CompleteTimeline extends Timeline {
   notes: string;
   filter: TimelineFilter;
 }
@@ -22,6 +19,10 @@ export interface TimelineFilter {
   field: string;
   operator: string;
   value?: string;
+}
+
+export interface TimelineWithId extends Timeline {
+  id: string;
 }
 
 export const filter: TimelineFilter = {
