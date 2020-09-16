@@ -71,11 +71,11 @@ export class GeoPointForm extends Component<Props, State> {
     };
   }
 
-  onLatFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
+  onLatFieldChange = (e: ChangeEvent<HTMLSelectElement>) => {
     this.setState({ latField: e.target.value });
   };
 
-  onLonFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
+  onLonFieldChange = (e: ChangeEvent<HTMLSelectElement>) => {
     this.setState({ lonField: e.target.value });
   };
 

@@ -70,9 +70,11 @@ export class CombinedFieldsForm extends Component<Props, State> {
     const pipeline = this.parsePipeline();
 
     this.props.onMappingsStringChange(
+      // @ts-expect-error
       JSON.stringify(addCombinedFieldsToMappings(mappings, [combinedField]), null, 2)
     );
     this.props.onPipelineStringChange(
+      // @ts-expect-error
       JSON.stringify(addCombinedFieldsToPipeline(pipeline, [combinedField]), null, 2)
     );
     this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
@@ -95,9 +97,11 @@ export class CombinedFieldsForm extends Component<Props, State> {
     const removedCombinedFields = updatedCombinedFields.splice(index, 1);
 
     this.props.onMappingsStringChange(
+      // @ts-expect-error
       JSON.stringify(removeCombinedFieldsFromMappings(mappings, removedCombinedFields), null, 2)
     );
     this.props.onPipelineStringChange(
+      // @ts-expect-error
       JSON.stringify(removeCombinedFieldsFromPipeline(pipeline, removedCombinedFields), null, 2)
     );
     this.props.onCombinedFieldsChange(updatedCombinedFields);

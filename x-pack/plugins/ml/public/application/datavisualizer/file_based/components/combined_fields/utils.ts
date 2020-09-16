@@ -26,7 +26,10 @@ export function getDefaultCombinedFields(results: FindFileStructureResponse) {
   return combinedFields;
 }
 
-export function addCombinedFieldsToMappings(mappings: Mappings, combinedFields: CombinedField[]) {
+export function addCombinedFieldsToMappings(
+  mappings: Mappings,
+  combinedFields: CombinedField[]
+): Mappings {
   const updatedMappings = { ...mappings };
   combinedFields.forEach((combinedField) => {
     updatedMappings.properties[combinedField.combinedFieldName] = {
@@ -68,13 +71,13 @@ export function addCombinedFieldsToPipeline(
 }
 
 export function removeCombinedFieldsFromPipeline(
-  pipeline: unknown,
+  pipeline: IngestPipeline,
   combinedFields: CombinedField[]
 ) {
   return {
     ...pipeline,
-    processors: pipeline.processors.filter((processor: IngestPipeline) => {
-      return processor.hasOwnProperty('set')
+    processors: pipeline.processors.filter((processor) => {
+      return 'set' in processor
         ? !combinedFields.some((combinedField) => {
             return processor.set.field === combinedField.combinedFieldName;
           })
@@ -83,13 +86,16 @@ export function removeCombinedFieldsFromPipeline(
   };
 }
 
-export function isWithinLatRange(fieldName: string, fieldStats: unknown) {
+export function isWithinLatRange(
+  fieldName: string,
+  fieldStats: FindFileStructureResponse['field_stats']
+) {
   return (
-    fieldStats.hasOwnProperty(fieldName) &&
-    fieldStats[fieldName].hasOwnProperty('max_value') &&
-    fieldStats[fieldName].max_value <= 90 &&
-    fieldStats[fieldName].hasOwnProperty('min_value') &&
-    fieldStats[fieldName].min_value >= -90
+    fieldName in fieldStats &&
+    'max_value' in fieldStats[fieldName] &&
+    fieldStats[fieldName]!.max_value! <= 90 &&
+    'min_value' in fieldStats[fieldName] &&
+    fieldStats[fieldName]!.min_value! >= -90
   );
 }
 
@@ -98,11 +104,11 @@ export function isWithinLonRange(
   fieldStats: FindFileStructureResponse['field_stats']
 ) {
   return (
-    fieldStats.hasOwnProperty(fieldName) &&
-    fieldStats[fieldName].hasOwnProperty('max_value') &&
-    fieldStats[fieldName].max_value <= 180 &&
-    fieldStats[fieldName].hasOwnProperty('min_value') &&
-    fieldStats[fieldName].min_value >= -180
+    fieldName in fieldStats &&
+    'max_value' in fieldStats[fieldName] &&
+    fieldStats[fieldName]!.max_value! <= 180 &&
+    'min_value' in fieldStats[fieldName] &&
+    fieldStats[fieldName]!.min_value! >= -180
   );
 }
 

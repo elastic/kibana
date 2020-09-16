@@ -29,6 +29,8 @@ export interface FindFileStructureResponse {
       count: number;
       cardinality: number;
       top_hits: Array<{ count: number; value: any }>;
+      max_value?: number;
+      min_value?: number;
     };
   };
   sample_start: string;
