@@ -198,7 +198,7 @@ describe('configureClient', () => {
     });
 
     describe('logs each queries if `logQueries` is true', () => {
-      function createResponseWithBody(body: RequestBody) {
+      function createResponseWithBody(body?: RequestBody) {
         return createApiResponse({
           body: {},
           statusCode: 200,
@@ -350,7 +350,7 @@ describe('configureClient', () => {
         `);
       });
 
-      it('when request body is null', () => {
+      it('when request body is not defined', () => {
         const client = configureClient(
           createFakeConfig({
             logQueries: true,
@@ -358,7 +358,7 @@ describe('configureClient', () => {
           { logger, scoped: false }
         );
 
-        const response = createResponseWithBody(null);
+        const response = createResponseWithBody();
 
         client.emit('response', null, response);
         expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
