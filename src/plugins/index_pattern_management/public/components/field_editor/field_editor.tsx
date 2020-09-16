@@ -784,7 +784,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
       const isValid = await isScriptValid({
         name: field.name,
-        lang: field.lang as string,
         script: field.script as string,
         indexPatternTitle: indexPattern.title,
         http: this.context.services.http,
