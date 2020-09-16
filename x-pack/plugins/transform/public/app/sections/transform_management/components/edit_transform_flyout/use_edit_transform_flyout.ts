@@ -28,20 +28,22 @@ type Validator = (value: any, isOptional?: boolean) => string[];
 const numberAboveZeroNotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberNotValidErrorMessage',
   {
-    defaultMessage: 'Value needs to be a number above zero.',
+    defaultMessage: 'Value needs to be an integer above zero.',
   }
 );
-export const numberAboveZeroValidator: Validator = (value) =>
-  !isNaN(value) && parseInt(value, 10) > 0 ? [] : [numberAboveZeroNotValidErrorMessage];
+export const integerAboveZeroValidator: Validator = (value) =>
+  !isNaN(value) && Number.isInteger(+value) && +value > 0 && !(value + '').includes('.')
+    ? []
+    : [numberAboveZeroNotValidErrorMessage];
 
 const numberRange10To10000NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage',
   {
-    defaultMessage: 'Value needs to be a number between 10 and 10000.',
+    defaultMessage: 'Value needs to be an integer between 10 and 10000.',
   }
 );
-export const numberRange10To10000Validator: Validator = (value) =>
-  !isNaN(value) && parseInt(value, 10) >= 10 && parseInt(value, 10) <= 10000
+export const integerRange10To10000Validator: Validator = (value) =>
+  integerAboveZeroValidator(value).length === 0 && +value >= 10 && +value <= 10000
     ? []
     : [numberRange10To10000NotValidErrorMessage];
 
@@ -108,8 +110,8 @@ export const frequencyValidator: Validator = (arg) => {
 const validate = {
   string: stringValidator,
   frequency: frequencyValidator,
-  numberAboveZero: numberAboveZeroValidator,
-  numberRange10To10000: numberRange10To10000Validator,
+  integerAboveZero: integerAboveZeroValidator,
+  integerRange10To10000: integerRange10To10000Validator,
 } as const;
 
 export interface FormField {
@@ -219,7 +221,7 @@ export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyo
 
     // settings.*
     docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
-      validator: 'numberAboveZero',
+      validator: 'integerAboveZero',
       valueParser: (v) => parseInt(v, 10),
     }),
     maxPageSearchSize: initializeField(
@@ -228,7 +230,7 @@ export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyo
       config,
       {
         defaultValue: '500',
-        validator: 'numberRange10To10000',
+        validator: 'integerRange10To10000',
         valueParser: (v) => parseInt(v, 10),
       }
     ),

@@ -11,7 +11,7 @@ import {
   formReducerFactory,
   frequencyValidator,
   getDefaultState,
-  numberAboveZeroValidator,
+  integerAboveZeroValidator,
   stringValidator,
 } from './use_edit_transform_flyout';
 
@@ -203,20 +203,24 @@ describe('Transform: frequencyValidator()', () => {
   });
 });
 
-describe('Transform: numberValidator()', () => {
-  it('should only allow numbers', () => {
-    // numberValidator() returns an array of error messages so
+describe('Transform: integerAboveZeroValidator()', () => {
+  it('should only allow integers above zero', () => {
+    // integerAboveZeroValidator() returns an array of error messages so
     // an array with a length of 0 means a successful validation.
 
     // invalid
-    expect(numberAboveZeroValidator('a-string')).toHaveLength(1);
-    expect(numberAboveZeroValidator('0s')).toHaveLength(1);
-    expect(numberAboveZeroValidator('1m')).toHaveLength(1);
-    expect(numberAboveZeroValidator(-1)).toHaveLength(1);
-    expect(numberAboveZeroValidator(0)).toHaveLength(1);
+    expect(integerAboveZeroValidator('a-string')).toHaveLength(1);
+    expect(integerAboveZeroValidator('0s')).toHaveLength(1);
+    expect(integerAboveZeroValidator('1m')).toHaveLength(1);
+    expect(integerAboveZeroValidator('1.')).toHaveLength(1);
+    expect(integerAboveZeroValidator('1..')).toHaveLength(1);
+    expect(integerAboveZeroValidator('1.0')).toHaveLength(1);
+    expect(integerAboveZeroValidator(-1)).toHaveLength(1);
+    expect(integerAboveZeroValidator(0)).toHaveLength(1);
+    expect(integerAboveZeroValidator(0.1)).toHaveLength(1);
 
     // valid
-    expect(numberAboveZeroValidator(1)).toHaveLength(0);
-    expect(numberAboveZeroValidator('1')).toHaveLength(0);
+    expect(integerAboveZeroValidator(1)).toHaveLength(0);
+    expect(integerAboveZeroValidator('1')).toHaveLength(0);
   });
 });
