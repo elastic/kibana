@@ -72,12 +72,12 @@ const mergeTimelineFieldsWithHit = <T>(
           ecs: ecsFields.includes(fieldName)
             ? {
                 ...get('node.ecs', flattenedFields),
-                ...fieldName
-                  .split('.')
-                  .reduceRight(
-                    (obj, next) => ({ [next]: obj }),
-                    toArray(get(esField, hit._source))
-                  ),
+                // @ts-expect-error
+                ...fieldName.split('.').reduceRight(
+                  // @ts-expect-error
+                  (obj, next) => ({ [next]: obj }),
+                  toArray<string>(get(esField, hit._source))
+                ),
               }
             : get('node.ecs', flattenedFields),
         },
