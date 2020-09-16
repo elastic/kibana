@@ -18,7 +18,10 @@ object VerifyProject : Project({
 
     kibanaAgent(2)
 
-    templates(Template())
+    templates(Template {
+      id("Empty_Template")
+      name = "Empty Template"
+    })
 
     steps {
       script {
