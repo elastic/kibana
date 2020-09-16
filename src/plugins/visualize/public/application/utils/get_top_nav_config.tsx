@@ -189,10 +189,10 @@ export const getTopNavConfig = (
         }
       }}
       onCancel={() => {}}
-      title={i18n.translate('visualizations.confirmModal.title', {
+      title={i18n.translate('visualize.confirmModal.title', {
         defaultMessage: 'Unsaved changes',
       })}
-      description={i18n.translate('visualization.confirmModal.confirmTextDescription', {
+      description={i18n.translate('visualize.confirmModal.confirmTextDescription', {
         defaultMessage: 'Leave Visualize editor with unsaved changes?',
       })}
     />
