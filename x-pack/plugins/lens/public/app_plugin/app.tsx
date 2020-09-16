@@ -338,7 +338,7 @@ export function App({
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
     },
-    options: { saveToLibrary: boolean } = { saveToLibrary: false }
+    options: { saveToLibrary: boolean }
   ) => {
     if (!lastKnownDoc) {
       return;
