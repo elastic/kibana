@@ -37,11 +37,11 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
 
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const getkibanaIndexPatternsSelector = useMemo(
+  const getKibanaIndexPatternsSelector = useMemo(
     () => sourcererSelectors.kibanaIndexPatternsSelector(),
     []
   );
-  const kibanaIndexPatterns = useSelector(getkibanaIndexPatternsSelector, isEqual);
+  const kibanaIndexPatterns = useSelector(getKibanaIndexPatternsSelector, isEqual);
 
   useIndexFields(scopeId);
 
