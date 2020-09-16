@@ -39,10 +39,6 @@ interface SavedObjectsNamespaces {
   saved_objects: SavedObjectNamespaces[];
 }
 
-function uniq<T>(arr: T[]): T[] {
-  return Array.from(new Set<T>(arr));
-}
-
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
   private readonly auditLogger: PublicMethodsOf<SecurityAuditLogger>;
@@ -303,19 +299,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private redactAndSortNamespaces(spaceIds: string[], privilegeMap: Record<string, boolean>) {
-    const comparator = (a: string, b: string) => {
-      const _a = a.toLowerCase();
-      const _b = b.toLowerCase();
-      if (_a === '?') {
-        return 1;
-      } else if (_a < _b) {
-        return -1;
-      } else if (_a > _b) {
-        return 1;
-      }
-      return 0;
-    };
-    return spaceIds.map((spaceId) => (privilegeMap[spaceId] ? spaceId : '?')).sort(comparator);
+    return spaceIds.map((x) => (privilegeMap[x] ? x : '?')).sort(namespaceComparator);
   }
 
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
@@ -361,4 +345,26 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       })),
     };
   }
+}
+
+/**
+ * Returns all unique elements of an array.
+ */
+function uniq<T>(arr: T[]): T[] {
+  return Array.from(new Set<T>(arr));
+}
+
+/**
+ * Utility function to sort potentially redacted namespaces.
+ * Sorts in a case-insensitive manner, and ensures that redacted namespaces ('?') always show up at the end of the array.
+ */
+function namespaceComparator(a: string, b: string) {
+  const A = a.toUpperCase();
+  const B = b.toUpperCase();
+  if (A === '?' && B !== '?') {
+    return 1;
+  } else if (A !== '?' && B === '?') {
+    return -1;
+  }
+  return A > B ? 1 : A < B ? -1 : 0;
 }
