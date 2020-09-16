@@ -103,7 +103,28 @@ describe('Histogram Agg', () => {
       });
     });
 
+    describe('maxBars', () => {
+      test('should not be written to the DSL', () => {
+        const aggConfigs = getAggConfigs({
+          maxBars: 50,
+          field: {
+            name: 'field',
+          },
+        });
+        const { [BUCKET_TYPES.HISTOGRAM]: params } = aggConfigs.aggs[0].toDsl();
+
+        expect(params).not.toHaveProperty('maxBars');
+      });
+    });
+
     describe('interval', () => {
+      test('accepts "auto" value', () => {
+        const params = getParams({
+          interval: 'auto',
+        });
+
+        expect(params).toHaveProperty('interval', 1);
+      });
       test('accepts a whole number', () => {
         const params = getParams({
           interval: 100,

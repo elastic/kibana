@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.base.json",
   "include": [
     "mocks.ts",
     "typings/**/*",
@@ -33,12 +33,10 @@
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
       "fixtures/*": ["src/fixtures/*"],
     },
-    "types": [
-      "node",
-      "jest",
-      "flot",
-      "jest-styled-components",
-      "@testing-library/jest-dom"
-    ]
-  }
+    // overhead is too significant
+    "incremental": false,
+  },
+  "references": [
+    { "path": "../src/core/tsconfig.json" }
+  ]
 }

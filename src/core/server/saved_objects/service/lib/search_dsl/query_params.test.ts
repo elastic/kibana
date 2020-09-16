@@ -17,8 +17,9 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../../es_query';
+type KueryNode = any;
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
 import { getQueryParams } from './query_params';

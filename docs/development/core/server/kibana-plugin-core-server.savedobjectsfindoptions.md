@@ -17,7 +17,7 @@ export interface SavedObjectsFindOptions
 |  --- | --- | --- |
 |  [defaultSearchOperator](./kibana-plugin-core-server.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> |  |
 |  [fields](./kibana-plugin-core-server.savedobjectsfindoptions.fields.md) | <code>string[]</code> | An array of fields to include in the results |
-|  [filter](./kibana-plugin-core-server.savedobjectsfindoptions.filter.md) | <code>string</code> |  |
+|  [filter](./kibana-plugin-core-server.savedobjectsfindoptions.filter.md) | <code>string &#124; KueryNode</code> |  |
 |  [hasReference](./kibana-plugin-core-server.savedobjectsfindoptions.hasreference.md) | <code>{</code><br/><code>        type: string;</code><br/><code>        id: string;</code><br/><code>    }</code> |  |
 |  [namespaces](./kibana-plugin-core-server.savedobjectsfindoptions.namespaces.md) | <code>string[]</code> |  |
 |  [page](./kibana-plugin-core-server.savedobjectsfindoptions.page.md) | <code>number</code> |  |

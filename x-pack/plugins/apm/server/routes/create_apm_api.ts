@@ -77,6 +77,8 @@ import {
   rumPageLoadDistBreakdownRoute,
   rumServicesRoute,
   rumVisitorsBreakdownRoute,
+  rumWebCoreVitals,
+  rumLongTaskMetrics,
 } from './rum_client';
 import {
   observabilityOverviewHasDataRoute,
@@ -172,6 +174,8 @@ const createApmApi = () => {
     .add(rumClientMetricsRoute)
     .add(rumServicesRoute)
     .add(rumVisitorsBreakdownRoute)
+    .add(rumWebCoreVitals)
+    .add(rumLongTaskMetrics)
 
     // Observability dashboard
     .add(observabilityOverviewHasDataRoute)

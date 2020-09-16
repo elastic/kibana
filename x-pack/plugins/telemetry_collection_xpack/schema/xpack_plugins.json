@@ -30,6 +30,9 @@
           "properties": {
             "cannot_connect": {
               "type": "long"
+            },
+            "not_found": {
+              "type": "long"
             }
           }
         },
@@ -42,6 +45,27 @@
               "type": "long"
             },
             "engine_table_link": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "enterprise_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "app_search": {
+              "type": "long"
+            },
+            "workplace_search": {
               "type": "long"
             }
           }
@@ -63,6 +87,9 @@
         "ui_error": {
           "properties": {
             "cannot_connect": {
+              "type": "long"
+            },
+            "not_found": {
               "type": "long"
             }
           }
@@ -267,6 +294,28 @@
               }
             }
           }
+        }
+      }
+    },
+    "security": {
+      "properties": {
+        "auditLoggingEnabled": {
+          "type": "boolean"
+        },
+        "loginSelectorEnabled": {
+          "type": "boolean"
+        },
+        "accessAgreementEnabled": {
+          "type": "boolean"
+        },
+        "authProviderCount": {
+          "type": "number"
+        },
+        "enabledAuthProviders": {
+          "type": "keyword"
+        },
+        "httpAuthSchemes": {
+          "type": "keyword"
         }
       }
     },

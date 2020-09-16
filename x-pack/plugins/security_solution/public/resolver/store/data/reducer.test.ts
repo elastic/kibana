@@ -10,8 +10,10 @@ import { dataReducer } from './reducer';
 import * as selectors from './selectors';
 import { DataState } from '../../types';
 import { DataAction } from './action';
-import { ResolverChildNode, ResolverTree } from '../../../../common/endpoint/types';
+import { ResolverChildNode, ResolverEvent, ResolverTree } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
+import { values } from '../../../../common/endpoint/models/ecs_safety_helpers';
+import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
 /**
  * Test the data reducer and selector.
@@ -27,7 +29,7 @@ describe('Resolver Data Middleware', () => {
         type: 'serverReturnedResolverData',
         payload: {
           result: tree,
-          databaseDocumentID: '',
+          parameters: mockTreeFetcherParameters(),
         },
       };
       store.dispatch(action);
@@ -39,7 +41,9 @@ describe('Resolver Data Middleware', () => {
       // Generate a 'tree' using the Resolver generator code. This structure isn't the same as what the API returns.
       const baseTree = generateBaseTree();
       const tree = mockResolverTree({
-        events: baseTree.allEvents,
+        // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+        // a lot of the frontend functions. So casting it back to the unsafe type for now.
+        events: baseTree.allEvents as ResolverEvent[],
         cursors: {
           childrenNextChild: 'aValidChildCursor',
           ancestryNextAncestor: 'aValidAncestorCursor',
@@ -59,6 +63,7 @@ describe('Resolver Data Middleware', () => {
     let firstChildNodeInTree: TreeNode;
     let eventStatsForFirstChildNode: { total: number; byCategory: Record<string, number> };
     let categoryToOverCount: string;
+    let aggregateCategoryTotalForFirstChildNode: number;
     let tree: ResolverTree;
 
     /**
@@ -73,6 +78,7 @@ describe('Resolver Data Middleware', () => {
         firstChildNodeInTree,
         eventStatsForFirstChildNode,
         categoryToOverCount,
+        aggregateCategoryTotalForFirstChildNode,
       } = mockedTree());
       if (tree) {
         dispatchTree(tree);
@@ -86,7 +92,9 @@ describe('Resolver Data Middleware', () => {
           type: 'serverReturnedRelatedEventData',
           payload: {
             entityID: firstChildNodeInTree.id,
-            events: firstChildNodeInTree.relatedEvents,
+            // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+            // a lot of the frontend functions. So casting it back to the unsafe type for now.
+            events: firstChildNodeInTree.relatedEvents as ResolverEvent[],
             nextEvent: null,
           },
         };
@@ -138,6 +146,13 @@ describe('Resolver Data Middleware', () => {
           expect(notDisplayed(typeCounted)).toBe(0);
         }
       });
+      it('should return an overall correct count for the number of related events', () => {
+        const aggregateTotalByEntityId = selectors.relatedEventAggregateTotalByEntityId(
+          store.getState()
+        );
+        const countForId = aggregateTotalByEntityId(firstChildNodeInTree.id);
+        expect(countForId).toBe(aggregateCategoryTotalForFirstChildNode);
+      });
     });
     describe('when data was received and stats show more related events than the API can provide', () => {
       beforeEach(() => {
@@ -152,7 +167,9 @@ describe('Resolver Data Middleware', () => {
             type: 'serverReturnedRelatedEventData',
             payload: {
               entityID: firstChildNodeInTree.id,
-              events: firstChildNodeInTree.relatedEvents,
+              // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+              // a lot of the frontend functions. So casting it back to the unsafe type for now.
+              events: firstChildNodeInTree.relatedEvents as ResolverEvent[],
               nextEvent: 'aValidNextEventCursor',
             },
           };
@@ -222,7 +239,9 @@ function mockedTree() {
   const statsResults = compileStatsForChild(firstChildNodeInTree);
 
   const tree = mockResolverTree({
-    events: baseTree.allEvents,
+    // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+    // a lot of the frontend functions. So casting it back to the unsafe type for now.
+    events: baseTree.allEvents as ResolverEvent[],
     /**
      * Calculate children from the ResolverTree response using the children of the `Tree` we generated using the Resolver data generator code.
      * Compile (and attach) stats to the first child node.
@@ -233,14 +252,15 @@ function mockedTree() {
      * related event limits should be shown.
      */
     children: [...baseTree.children.values()].map((node: TreeNode) => {
-      // Treat each `TreeNode` as a `ResolverChildNode`.
-      // These types are almost close enough to be used interchangably (for the purposes of this test.)
-      const childNode: Partial<ResolverChildNode> = node;
+      const childNode: Partial<ResolverChildNode> = {};
+      // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
+      // a lot of the frontend functions. So casting it back to the unsafe type for now.
+      childNode.lifecycle = node.lifecycle as ResolverEvent[];
 
       // `TreeNode` has `id` which is the same as `entityID`.
       // The `ResolverChildNode` calls the entityID as `entityID`.
       // Set `entityID` on `childNode` since the code in test relies on it.
-      childNode.entityID = (childNode as TreeNode).id;
+      childNode.entityID = node.id;
 
       // This should only be true for the first child.
       if (node.id === firstChildNodeInTree.id) {
@@ -262,6 +282,7 @@ function mockedTree() {
     tree: tree!,
     firstChildNodeInTree,
     eventStatsForFirstChildNode: statsResults.eventStats,
+    aggregateCategoryTotalForFirstChildNode: statsResults.aggregateCategoryTotal,
     categoryToOverCount: statsResults.firstCategory,
   };
 }
@@ -288,6 +309,7 @@ function compileStatsForChild(
   };
   /** The category of the first event.  */
   firstCategory: string;
+  aggregateCategoryTotal: number;
 } {
   const totalRelatedEvents = node.relatedEvents.length;
   // For the purposes of testing, we pick one category to fake an extra event for
@@ -295,12 +317,16 @@ function compileStatsForChild(
 
   let firstCategory: string | undefined;
 
+  // This is the "aggregate total" which is displayed to users as the total count
+  // of related events for the node. It is tallied by incrementing for every discrete
+  // event.category in an event.category array (or just 1 for a plain string). E.g. two events
+  // categories 'file' and ['dns','network'] would have an `aggregate total` of 3.
+  let aggregateCategoryTotal: number = 0;
+
   const compiledStats = node.relatedEvents.reduce(
     (counts: Record<string, number>, relatedEvent) => {
-      // `relatedEvent.event.category` is `string | string[]`.
-      // Wrap it in an array and flatten that array to get a `string[] | [string]`
-      // which we can loop over.
-      const categories: string[] = [relatedEvent.event.category].flat();
+      // get an array of categories regardless of whether category is a string or string[]
+      const categories: string[] = values(relatedEvent.event?.category);
 
       for (const category of categories) {
         // Set the first category as 'categoryToOverCount'
@@ -310,6 +336,7 @@ function compileStatsForChild(
 
         // Increment the count of events with this category
         counts[category] = counts[category] ? counts[category] + 1 : 1;
+        aggregateCategoryTotal++;
       }
       return counts;
     },
@@ -327,5 +354,6 @@ function compileStatsForChild(
       byCategory: compiledStats,
     },
     firstCategory,
+    aggregateCategoryTotal,
   };
 }

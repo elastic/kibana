@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { pkg } from '../../core/server/utils';
 export const IS_KIBANA_DISTRIBUTABLE = pkg.build && pkg.build.distributable === true;
 export const IS_KIBANA_RELEASE = pkg.build && pkg.build.release === true;
