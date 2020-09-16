@@ -24,7 +24,7 @@ import {
   AREA_CHART_VIS_NAME,
   LINE_CHART_VIS_NAME,
 } from '../../page_objects/dashboard_page';
-import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
+// import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardReplacePanel = getService('dashboardReplacePanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const renderable = getService('renderable');
+  // const renderable = getService('renderable');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
         );
       });
     });
-
+    /*
     describe('panel edit controls', function () {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
@@ -287,7 +287,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
     });
-
+*/
     // Panel expand should also be shown in view mode, but only on mouse hover.
     describe('panel expand control', function () {
       it('shown in edit mode', async function () {
