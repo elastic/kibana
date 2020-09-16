@@ -23,7 +23,9 @@ import { EmbeddableInput } from '../types';
 export const telemetryBaseEmbeddableInput = (
   state: EmbeddableInput,
   telemetryData: Record<string, any>
-) => {};
+) => {
+  return telemetryData;
+};
 
 export const extractBaseEmbeddableInput = (state: EmbeddableInput) => {
   return { state, references: [] as SavedObjectReference[] };

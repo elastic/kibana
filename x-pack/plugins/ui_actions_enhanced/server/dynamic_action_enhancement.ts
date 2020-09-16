@@ -16,12 +16,15 @@ export const dynamicActionEnhancement = (
   return {
     id: 'dynamicActions',
     telemetry: (state: SerializableState, telemetry: Record<string, any>) => {
+      let telemetryData = telemetry;
       (state as DynamicActionsState).events.forEach((event: SerializedEvent) => {
         if (uiActionsEnhanced.getActionFactory(event.action.factoryId)) {
-          uiActionsEnhanced.getActionFactory(event.action.factoryId)!.telemetry(event, telemetry);
+          telemetryData = uiActionsEnhanced
+            .getActionFactory(event.action.factoryId)!
+            .telemetry(event, telemetryData);
         }
       });
-      return telemetry;
+      return telemetryData;
     },
     extract: (state: SerializableState) => {
       const references: SavedObjectReference[] = [];

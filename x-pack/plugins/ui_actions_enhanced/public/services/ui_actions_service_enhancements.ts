@@ -166,12 +166,15 @@ export class UiActionsServiceEnhancements
   };
 
   public readonly telemetry = (state: DynamicActionsState, telemetry: Record<string, any> = {}) => {
+    let telemetryData = telemetry;
     state.events.forEach((event: SerializedEvent) => {
       if (this.actionFactories.has(event.action.factoryId)) {
-        this.actionFactories.get(event.action.factoryId)!.telemetry(event, telemetry);
+        telemetryData = this.actionFactories
+          .get(event.action.factoryId)!
+          .telemetry(event, telemetryData);
       }
     });
-    return telemetry;
+    return telemetryData;
   };
 
   public readonly extract = (state: DynamicActionsState) => {

@@ -26,7 +26,6 @@ export enum ViewMode {
   VIEW = 'view',
 }
 
-// eslint-disable-next-line
 export type EmbeddableInput = {
   viewMode?: ViewMode;
   title?: string;
