@@ -5,11 +5,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiIcon } from '@elastic/eui';
-import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
+import { DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -17,14 +16,14 @@ jest.mock('@elastic/eui', () => {
     ...original,
     EuiDragDropContext: 'eui-drag-drop-context',
     EuiDroppable: 'eui-droppable',
-    EuiDraggable: (props) => props.children({ dragHandleProps: {} }),
+    EuiDraggable: (props: any) => props.children(), // eslint-disable-line @typescript-eslint/no-explicit-any
   };
 });
 
 describe('buckets shared components', () => {
   describe('DragDropBuckets', () => {
     it('should call onDragEnd when dragging ended with reordered items', () => {
-      const items = ['first', 'second', 'third'];
+      const items = [<div key="1">first</div>, <div key="2">second</div>, <div key="3">third</div>];
       const defaultProps = {
         items,
         onDragStart: jest.fn(),
@@ -38,7 +37,11 @@ describe('buckets shared components', () => {
         instance.props().onDragEnd({ source: { index: 0 }, destination: { index: 1 } });
       });
 
-      expect(defaultProps.onDragEnd).toHaveBeenCalledWith(['second', 'first', 'third']);
+      expect(defaultProps.onDragEnd).toHaveBeenCalledWith([
+        <div key="2">second</div>,
+        <div key="1">first</div>,
+        <div key="3">third</div>,
+      ]);
     });
   });
   describe('DraggableBucketContainer', () => {
@@ -48,7 +51,7 @@ describe('buckets shared components', () => {
       onRemoveClick: jest.fn(),
       removeTitle: 'remove',
       children: <div data-test-subj="popover">popover</div>,
-      id: 0,
+      id: '0',
       idx: 0,
     };
     it('should render valid component', () => {
