@@ -55,8 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
     };
   }
 
-  const calendarId = `wizard-test-calendar_${Date.now()}`;
-
   describe('single metric without datafeed start', function () {
     this.tags(['mlqa']);
     before(async () => {
@@ -64,7 +62,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
-      await ml.api.createCalendar(calendarId);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
@@ -134,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.toggleStartDatafeedSwitch(false);
 
       await ml.jobWizardCommon.assertCreateJobButtonExists();
-      await ml.jobWizardCommon.createJobAndDoNotWaitForCompletion();
+      await ml.jobWizardCommon.createJobWithoutDatafeedStart();
 
       await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(jobId, 1);

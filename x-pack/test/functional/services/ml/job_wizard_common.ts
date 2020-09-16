@@ -542,8 +542,9 @@ export function MachineLearningJobWizardCommonProvider(
       await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 2 * 60 * 1000 });
     },
 
-    async createJobAndDoNotWaitForCompletion() {
+    async createJobWithoutDatafeedStart() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.existOrFail('mlPageJobManagement');
     },
   };
 }
