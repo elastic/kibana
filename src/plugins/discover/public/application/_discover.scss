@@ -22,9 +22,12 @@ discover-app {
 
 // SASSTODO: replace the z-index value with a variable
 .dscWrapper {
+  padding-left: $euiSizeXL;
   padding-right: $euiSizeS;
-  padding-left: 22px;
   z-index: 1;
+  @include euiBreakpoint('xs', 's', 'm') {
+    padding-left: $euiSizeS;
+  }
 }
 
 @include euiPanel('.dscWrapper__content');
@@ -128,7 +131,7 @@ discover-app {
   .dscCollapsibleSidebar__collapseButton {
     position: absolute;
     top: 0;
-    right: -20px;
+    right: -$euiSizeXL + 4;
     cursor: pointer;
     z-index: -1;
     min-height: $euiSizeM;
@@ -140,6 +143,9 @@ discover-app {
     width: 0 !important;
     border-right-width: 0;
     border-left-width: 0;
+    .dscCollapsibleSidebar__collapseButton {
+      right: -$euiSizeL + 4;
+    }
   }
 }
 
@@ -154,4 +160,3 @@ discover-app {
     }
   }
 }
-

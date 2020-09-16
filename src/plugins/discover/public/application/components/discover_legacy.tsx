@@ -195,8 +195,8 @@ export function DiscoverLegacy({
                 </div>
               )}
               <EuiButtonIcon
-                iconType={isSidebarClosed ? 'arrowRight' : 'arrowLeft'}
-                iconSize="s"
+                iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                iconSize="m"
                 size="s"
                 onClick={() => setIsSidebarClosed(!isSidebarClosed)}
                 data-test-subj="collapseSideBarButton"
