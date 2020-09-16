@@ -401,7 +401,7 @@ export class IndexPatternsService {
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
-    await this.create(indexPattern, override);
+    await this.createSavedObject(indexPattern, override);
     await this.setDefault(indexPattern.id as string);
     return indexPattern;
   }
