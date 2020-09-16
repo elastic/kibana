@@ -46,7 +46,7 @@ const getTransformConfigMock = (): TransformPivotConfig => ({
 });
 
 describe('Transform: applyFormFieldsToTransformConfig()', () => {
-  test('should exclude unchanged form fields', () => {
+  it('should exclude unchanged form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
     const formState = getDefaultState(transformConfigMock);
@@ -67,7 +67,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     expect(updateConfig.frequency).toBe(undefined);
   });
 
-  test('should include previously nonexisting attributes', () => {
+  it('should include previously nonexisting attributes', () => {
     const { description, frequency, ...transformConfigMock } = getTransformConfigMock();
 
     const formState = getDefaultState({
@@ -94,7 +94,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     expect(updateConfig.frequency).toBe('10m');
   });
 
-  test('should only include changed form fields', () => {
+  it('should only include changed form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
     const formState = getDefaultState({
@@ -121,7 +121,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
 });
 
 describe('Transform: formReducerFactory()', () => {
-  test('field updates should trigger form validation', () => {
+  it('field updates should trigger form validation', () => {
     const transformConfigMock = getTransformConfigMock();
     const reducer = formReducerFactory(transformConfigMock);
 
@@ -155,49 +155,56 @@ describe('Transform: formReducerFactory()', () => {
 });
 
 describe('Transfom: stringValidator()', () => {
-  test('it should allow an empty string for optional fields', () => {
+  it('should allow an empty string for optional fields', () => {
     expect(stringValidator('')).toHaveLength(0);
   });
 
-  test('it should not allow an empty string for required fields', () => {
+  it('should not allow an empty string for required fields', () => {
     expect(stringValidator('', false)).toHaveLength(1);
   });
 });
 
 describe('Transform: frequencyValidator()', () => {
-  test('it should only allow values between 1s and 1h', () => {
-    // frequencyValidator() returns an array of error messages so
-    // an array with a length of 0 means a successful validation.
+  const transformFrequencyValidator = (arg: string) => frequencyValidator(arg).length === 0;
 
-    // invalid
-    expect(frequencyValidator(0)).toHaveLength(1);
-    expect(frequencyValidator('0')).toHaveLength(1);
-    expect(frequencyValidator('0s')).toHaveLength(1);
-    expect(frequencyValidator(1)).toHaveLength(1);
-    expect(frequencyValidator('1')).toHaveLength(1);
-    expect(frequencyValidator('1ms')).toHaveLength(1);
-    expect(frequencyValidator('1d')).toHaveLength(1);
-    expect(frequencyValidator('60s')).toHaveLength(1);
-    expect(frequencyValidator('60m')).toHaveLength(1);
-    expect(frequencyValidator('60h')).toHaveLength(1);
-    expect(frequencyValidator('2h')).toHaveLength(1);
-    expect(frequencyValidator('h2')).toHaveLength(1);
-    expect(frequencyValidator('2h2')).toHaveLength(1);
-    expect(frequencyValidator('h2h')).toHaveLength(1);
+  it('should fail when the input is not an integer and valid time unit.', () => {
+    expect(transformFrequencyValidator('0')).toBe(false);
+    expect(transformFrequencyValidator('0.1s')).toBe(false);
+    expect(transformFrequencyValidator('1.1m')).toBe(false);
+    expect(transformFrequencyValidator('10.1asdf')).toBe(false);
+  });
 
-    // valid
-    expect(frequencyValidator('1s')).toHaveLength(0);
-    expect(frequencyValidator('1m')).toHaveLength(0);
-    expect(frequencyValidator('1h')).toHaveLength(0);
-    expect(frequencyValidator('10s')).toHaveLength(0);
-    expect(frequencyValidator('10m')).toHaveLength(0);
-    expect(frequencyValidator('59s')).toHaveLength(0);
-    expect(frequencyValidator('59m')).toHaveLength(0);
+  it('should only allow s/m/h as time unit.', () => {
+    expect(transformFrequencyValidator('1ms')).toBe(false);
+    expect(transformFrequencyValidator('1s')).toBe(true);
+    expect(transformFrequencyValidator('1m')).toBe(true);
+    expect(transformFrequencyValidator('1h')).toBe(true);
+    expect(transformFrequencyValidator('1d')).toBe(false);
+  });
+
+  it('should only allow values above 0 and up to 1 hour.', () => {
+    expect(transformFrequencyValidator('0s')).toBe(false);
+    expect(transformFrequencyValidator('1s')).toBe(true);
+    expect(transformFrequencyValidator('3599s')).toBe(true);
+    expect(transformFrequencyValidator('3600s')).toBe(true);
+    expect(transformFrequencyValidator('3601s')).toBe(false);
+    expect(transformFrequencyValidator('10000s')).toBe(false);
+
+    expect(transformFrequencyValidator('0m')).toBe(false);
+    expect(transformFrequencyValidator('1m')).toBe(true);
+    expect(transformFrequencyValidator('59m')).toBe(true);
+    expect(transformFrequencyValidator('60m')).toBe(true);
+    expect(transformFrequencyValidator('61m')).toBe(false);
+    expect(transformFrequencyValidator('100m')).toBe(false);
+
+    expect(transformFrequencyValidator('0h')).toBe(false);
+    expect(transformFrequencyValidator('1h')).toBe(true);
+    expect(transformFrequencyValidator('2h')).toBe(false);
   });
 });
 
 describe('Transform: numberValidator()', () => {
-  test('it should only allow numbers', () => {
+  it('should only allow numbers', () => {
     // numberValidator() returns an array of error messages so
     // an array with a length of 0 means a successful validation.
 

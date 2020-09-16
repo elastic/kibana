@@ -84,20 +84,25 @@ export const frequencyValidator: Validator = (arg) => {
   // split string by groups of numbers and letters
   const regexStr = arg.match(/[a-z]+|[^a-z]+/gi);
 
-  return (
-    // only valid if one group of numbers and one group of letters
-    regexStr !== null &&
-      regexStr.length === 2 &&
-      // only valid if time unit is one of s/m/h
-      ['s', 'm', 'h'].includes(regexStr[1]) &&
-      // only valid if number is between 1 and 59
-      parseInt(regexStr[0], 10) > 0 &&
-      parseInt(regexStr[0], 10) < 60 &&
-      // if time unit is 'h' then number must not be higher than 1
-      !(parseInt(regexStr[0], 10) > 1 && regexStr[1] === 'h')
-      ? []
-      : [frequencyNotValidErrorMessage]
-  );
+  // only valid if one group of numbers and one group of letters
+  if (regexStr === null || (Array.isArray(regexStr) && regexStr.length !== 2)) {
+    return [frequencyNotValidErrorMessage];
+  }
+
+  const valueNumber = +regexStr[0];
+  const valueTimeUnit = regexStr[1];
+
+  // only valid if number is an integer above 0
+  if (isNaN(valueNumber) || !Number.isInteger(valueNumber) || valueNumber === 0) {
+    return [frequencyNotValidErrorMessage];
+  }
+
+  // only valid if value is up to 1 hour
+  return (valueTimeUnit === 's' && valueNumber <= 3600) ||
+    (valueTimeUnit === 'm' && valueNumber <= 60) ||
+    (valueTimeUnit === 'h' && valueNumber === 1)
+    ? []
+    : [frequencyNotValidErrorMessage];
 };
 
 const validate = {
