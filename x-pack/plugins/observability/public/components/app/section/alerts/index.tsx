@@ -88,7 +88,7 @@ export function AlertsSection({ alerts }: Props) {
                         `/app/management/insightsAndAlerting/triggersActions/alert/${alert.id}`
                       )}
                     >
-                      {alert.name}
+                      <EuiText size="s">{alert.name}</EuiText>
                     </EuiLink>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
