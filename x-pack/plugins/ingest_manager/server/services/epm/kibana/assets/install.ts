@@ -13,6 +13,7 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import * as Registry from '../../registry';
 import { AssetType, KibanaAssetType, AssetReference, AssetParts } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
+import { IndexPatternType } from '../index_pattern/install';
 
 type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
   type: AssetType;
@@ -43,7 +44,7 @@ const AssetInstallers: Record<
   }) => Promise<Array<SavedObject<unknown>>>
 > = {
   [KibanaAssetType.dashboard]: installKibanaSavedObjects,
-  [KibanaAssetType.indexPattern]: installKibanaSavedObjects,
+  [KibanaAssetType.indexPattern]: installKibanaIndexPatterns,
   [KibanaAssetType.map]: installKibanaSavedObjects,
   [KibanaAssetType.search]: installKibanaSavedObjects,
   [KibanaAssetType.visualization]: installKibanaSavedObjects,
@@ -157,6 +158,21 @@ async function installKibanaSavedObjects({
     });
     return createResults.saved_objects;
   }
+}
+
+async function installKibanaIndexPatterns({
+  savedObjectsClient,
+  kibanaAssets,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  kibanaAssets: ArchiveAsset[];
+}) {
+  // Filter out any reserved index patterns
+  const reservedPatterns = Object.values<string>(IndexPatternType).map((pattern) => `${pattern}-*`);
+
+  const nonReservedPatterns = kibanaAssets.filter((asset) => !reservedPatterns.includes(asset.id));
+
+  return installKibanaSavedObjects({ savedObjectsClient, kibanaAssets: nonReservedPatterns });
 }
 
 export function toAssetReference({ id, type }: SavedObject) {
