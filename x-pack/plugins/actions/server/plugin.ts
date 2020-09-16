@@ -26,7 +26,7 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { LICENSE_TYPE } from '../../licensing/common/types';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -87,8 +87,12 @@ export interface PluginSetupContract {
 }
 
 export interface PluginStartContract {
-  isActionTypeEnabled(id: string): boolean;
-  isActionExecutable(actionId: string, actionTypeId: string): boolean;
+  isActionTypeEnabled(id: string, options: { notifyUsage: boolean }): boolean;
+  isActionExecutable(
+    actionId: string,
+    actionTypeId: string,
+    options: { notifyUsage: boolean }
+  ): boolean;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
   preconfiguredActions: PreConfiguredAction[];
@@ -107,6 +111,7 @@ export interface ActionsPluginsSetup {
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
+  licensing: LicensingPluginStart;
 }
 
 const includedHiddenTypes = [ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE];
@@ -186,6 +191,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     }
 
     const actionTypeRegistry = new ActionTypeRegistry({
+      licensing: plugins.licensing,
       taskRunnerFactory,
       taskManager: plugins.taskManager,
       actionsConfigUtils,
@@ -258,6 +264,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
     const {
       logger,
+      licenseState,
       actionExecutor,
       actionTypeRegistry,
       taskRunnerFactory,
@@ -266,6 +273,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       preconfiguredActions,
       instantiateAuthorization,
     } = this;
+
+    licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
@@ -344,11 +353,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
 
     return {
-      isActionTypeEnabled: (id) => {
-        return this.actionTypeRegistry!.isActionTypeEnabled(id);
+      isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
+        return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
       },
-      isActionExecutable: (actionId: string, actionTypeId: string) => {
-        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId);
+      isActionExecutable: (
+        actionId: string,
+        actionTypeId: string,
+        options = { notifyUsage: false }
+      ) => {
+        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
