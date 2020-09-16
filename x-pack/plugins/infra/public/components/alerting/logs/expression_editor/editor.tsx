@@ -34,12 +34,14 @@ interface LogsContextMeta {
   isInternal?: boolean;
 }
 
+export type AlertsContext = AlertsContextValue<LogsContextMeta>;
 interface Props {
   errors: IErrorObject;
   alertParams: Partial<LogDocumentCountAlertParams>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
-  alertsContext: AlertsContextValue<LogsContextMeta>;
+  alertsContext: AlertsContext;
+  sourceId: string;
 }
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
@@ -62,12 +64,12 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
     <>
       {isInternal ? (
         <SourceStatusWrapper {...props}>
-          <Editor {...props} />
+          <Editor {...props} sourceId={sourceId} />
         </SourceStatusWrapper>
       ) : (
         <LogSourceProvider sourceId={sourceId} fetch={props.alertsContext.http.fetch}>
           <SourceStatusWrapper {...props}>
-            <Editor {...props} />
+            <Editor {...props} sourceId={sourceId} />
           </SourceStatusWrapper>
         </LogSourceProvider>
       )}
@@ -119,7 +121,7 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
 };
 
 export const Editor: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors } = props;
+  const { setAlertParams, alertParams, errors, alertsContext, sourceId } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
   useMount(() => {
@@ -227,6 +229,9 @@ export const Editor: React.FC<Props> = (props) => {
         updateCriterion={updateCriterion}
         removeCriterion={removeCriterion}
         errors={errors.criteria as IErrorObject}
+        alertParams={alertParams}
+        context={alertsContext}
+        sourceId={sourceId}
       />
 
       <ForLastExpression

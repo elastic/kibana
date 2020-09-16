@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-import { TRANSFORM_STATE } from '../../../../../../common';
+import { TransformState, TRANSFORM_STATE } from '../../../../../../common/constants';
 import { createCapabilityFailureMessage } from '../../../../lib/authorization';
 import { TransformListRow } from '../../../../common';
 
@@ -18,8 +18,8 @@ export const deleteActionNameText = i18n.translate(
   }
 );
 
-const transformCanNotBeDeleted = (item: TransformListRow) =>
-  ![TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED].includes(item.stats.state);
+const transformCanNotBeDeleted = (i: TransformListRow) =>
+  !([TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED] as TransformState[]).includes(i.stats.state);
 
 export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
   const disabled = items.some(transformCanNotBeDeleted);

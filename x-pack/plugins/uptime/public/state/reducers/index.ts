@@ -20,7 +20,7 @@ import { indexStatusReducer } from './index_status';
 import { mlJobsReducer } from './ml_anomaly';
 import { certificatesReducer } from '../certificates/certificates';
 import { selectedFiltersReducer } from './selected_filters';
-import { alertsReducer } from './alerts';
+import { alertsReducer } from '../alerts/alerts';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,

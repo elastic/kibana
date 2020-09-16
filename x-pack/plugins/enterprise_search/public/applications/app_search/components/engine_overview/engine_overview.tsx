@@ -16,11 +16,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { FlashMessages } from '../../../shared/flash_messages';
 import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
-import EnginesIcon from '../../assets/engine.svg';
-import MetaEnginesIcon from '../../assets/meta_engine.svg';
+import { EngineIcon } from './assets/engine_icon';
+import { MetaEngineIcon } from './assets/meta_engine_icon';
 
 import { EngineOverviewHeader, LoadingState, EmptyState } from './components';
 import { EngineTable } from './engine_table';
@@ -88,10 +89,11 @@ export const EngineOverview: React.FC = () => {
 
       <EngineOverviewHeader />
       <EuiPageContent panelPaddingSize="s" className="engineOverview">
+        <FlashMessages />
         <EuiPageContentHeader>
           <EuiTitle size="s">
             <h2>
-              <img src={EnginesIcon} alt="" className="engineIcon" />
+              <EngineIcon />
               <FormattedMessage
                 id="xpack.enterpriseSearch.appSearch.enginesOverview.engines"
                 defaultMessage="Engines"
@@ -116,7 +118,7 @@ export const EngineOverview: React.FC = () => {
             <EuiPageContentHeader>
               <EuiTitle size="s">
                 <h2>
-                  <img src={MetaEnginesIcon} alt="" className="engineIcon" />
+                  <MetaEngineIcon />
                   <FormattedMessage
                     id="xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines"
                     defaultMessage="Meta Engines"

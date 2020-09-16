@@ -18,6 +18,7 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiButton,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useCore } from '../../../hooks';
 import { Loading } from '../../../components';
@@ -32,17 +33,28 @@ const FlyoutBody = styled(EuiFlyoutBody)`
 export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => void }>(
   ({ policyId, onClose }) => {
     const core = useCore();
-    const { isLoading: isLoadingYaml, data: yamlData } = useGetOneAgentPolicyFull(policyId);
+    const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
     const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
-
-    const body =
-      isLoadingYaml && !yamlData ? (
-        <Loading />
-      ) : (
-        <EuiCodeBlock language="yaml" isCopyable fontSize="m">
-          {fullAgentPolicyToYaml(yamlData!.item)}
-        </EuiCodeBlock>
-      );
+    const body = isLoadingYaml ? (
+      <Loading />
+    ) : error ? (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.ingestManager.policyDetails.ErrorGettingFullAgentPolicy"
+            defaultMessage="Error loading agent policy"
+          />
+        }
+        color="danger"
+        iconType="alert"
+      >
+        {error.message}
+      </EuiCallOut>
+    ) : (
+      <EuiCodeBlock language="yaml" isCopyable fontSize="m">
+        {fullAgentPolicyToYaml(yamlData!.item)}
+      </EuiCodeBlock>
+    );
 
     const downloadLink = core.http.basePath.prepend(
       agentPolicyRouteService.getInfoFullDownloadPath(policyId)

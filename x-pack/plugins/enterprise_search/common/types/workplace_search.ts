@@ -10,10 +10,23 @@ export interface IAccount {
   isAdmin: boolean;
   isCurated: boolean;
   canCreatePersonalSources: boolean;
+  canCreateInvitations?: boolean;
   viewedOnboardingPage: boolean;
 }
 
 export interface IOrganization {
   name: string;
   defaultOrgName: string;
+}
+
+export interface IWorkplaceSearchInitialData {
+  organization: IOrganization;
+  account: IAccount;
+}
+
+export interface IConfiguredLimits {
+  customApiSource: {
+    maxDocumentByteSize: number;
+    totalFields: number;
+  };
 }

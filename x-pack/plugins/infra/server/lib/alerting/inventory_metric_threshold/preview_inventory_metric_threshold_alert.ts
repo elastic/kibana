@@ -26,7 +26,7 @@ interface InventoryMetricThresholdParams {
 interface PreviewInventoryMetricThresholdAlertParams {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   params: InventoryMetricThresholdParams;
-  config: InfraSource['configuration'];
+  source: InfraSource;
   lookback: Unit;
   alertInterval: string;
 }
@@ -34,11 +34,13 @@ interface PreviewInventoryMetricThresholdAlertParams {
 export const previewInventoryMetricThresholdAlert = async ({
   callCluster,
   params,
-  config,
+  source,
   lookback,
   alertInterval,
 }: PreviewInventoryMetricThresholdAlertParams) => {
   const { criteria, filterQuery, nodeType } = params as InventoryMetricThresholdParams;
+
+  if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
   const { timeSize, timeUnit } = criteria[0];
   const bucketInterval = `${timeSize}${timeUnit}`;
@@ -53,11 +55,11 @@ export const previewInventoryMetricThresholdAlert = async ({
   try {
     const results = await Promise.all(
       criteria.map((c) =>
-        evaluateCondition(c, nodeType, config, callCluster, filterQuery, lookbackSize)
+        evaluateCondition(c, nodeType, source, callCluster, filterQuery, lookbackSize)
       )
     );
 
-    const inventoryItems = Object.keys(first(results) as any);
+    const inventoryItems = Object.keys(first(results)!);
     const previewResults = inventoryItems.map((item) => {
       const numberOfResultBuckets = lookbackSize;
       const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);

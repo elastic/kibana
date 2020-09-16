@@ -14,7 +14,7 @@
     "execa": "^4.0.2",
     "inquirer": "^7.3.3",
     "normalize-path": "^3.0.0",
-    "prettier": "^2.0.5",
+    "prettier": "^2.1.1",
     "vinyl": "^2.2.0",
     "vinyl-fs": "^3.0.3"
   },

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { SavedObject } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -22,7 +22,7 @@ export interface RollupJob {
 
 export async function rollupServiceProvider(
   indexPattern: string,
-  { callAsCurrentUser }: ILegacyScopedClusterClient,
+  { asCurrentUser }: IScopedClusterClient,
   savedObjectsClient: SavedObjectsClientContract
 ) {
   const rollupIndexPatternObject = await loadRollupIndexPattern(indexPattern, savedObjectsClient);
@@ -32,8 +32,8 @@ export async function rollupServiceProvider(
     if (rollupIndexPatternObject !== null) {
       const parsedTypeMetaData = JSON.parse(rollupIndexPatternObject.attributes.typeMeta);
       const rollUpIndex: string = parsedTypeMetaData.params.rollup_index;
-      const rollupCaps = await callAsCurrentUser('ml.rollupIndexCapabilities', {
-        indexPattern: rollUpIndex,
+      const { body: rollupCaps } = await asCurrentUser.rollup.getRollupIndexCaps({
+        index: rollUpIndex,
       });
 
       const indexRollupCaps = rollupCaps[rollUpIndex];

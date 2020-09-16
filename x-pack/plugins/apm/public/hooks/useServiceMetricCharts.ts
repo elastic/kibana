@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useParams } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
-import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
@@ -18,7 +19,8 @@ export function useServiceMetricCharts(
   urlParams: IUrlParams,
   agentName?: string
 ) {
-  const { serviceName, start, end, serviceNodeName } = urlParams;
+  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
   const { data = INITIAL_DATA, error, status } = useFetcher(
     (callApmApi) => {
@@ -31,14 +33,13 @@ export function useServiceMetricCharts(
               start,
               end,
               agentName,
-              serviceNodeName,
               uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, agentName, serviceNodeName, uiFilters]
+    [serviceName, start, end, agentName, uiFilters]
   );
 
   return {

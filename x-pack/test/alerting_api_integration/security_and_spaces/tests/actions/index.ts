@@ -4,24 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http from 'http';
-import { getHttpProxyServer } from '../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
-  const configService = getService('config');
-  const kibanaServer = getService('kibanaServer');
-  const log = getService('log');
   describe('Actions', () => {
-    let proxyServer: http.Server | undefined;
-    before(async () => {
-      proxyServer = await getHttpProxyServer(
-        kibanaServer.resolveUrl('/'),
-        configService.get('kbnTestServer.serverArgs'),
-        log
-      );
-    });
     loadTestFile(require.resolve('./builtin_action_types/email'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
     loadTestFile(require.resolve('./builtin_action_types/es_index_preconfigured'));
@@ -39,11 +26,5 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update'));
-
-    after(() => {
-      if (proxyServer) {
-        proxyServer.close();
-      }
-    });
   });
 }

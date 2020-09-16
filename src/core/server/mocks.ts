@@ -18,6 +18,7 @@
  */
 import { of } from 'rxjs';
 import { duration } from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
@@ -33,14 +34,14 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
-import { uuidServiceMock } from './uuid/uuid_service.mock';
+import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
 
+export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
-export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingSystemMock } from './logging/logging_system.mock';
@@ -66,6 +67,9 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       startupTimeout: duration('30s'),
     },
     path: { data: '/tmp' },
+    savedObjects: {
+      maxImportPayloadBytes: new ByteSizeValue(10485760),
+    },
   };
 
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
@@ -94,6 +98,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         buildSha: 'buildSha',
         dist: false,
       },
+      instanceUuid: 'instance-uuid',
     },
     config: pluginInitializerContextConfigMock<T>(config),
   };
@@ -130,7 +135,6 @@ function createCoreSetupMock({
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
-    uuid: uuidServiceMock.createSetupContract(),
     auditTrail: auditTrailServiceMock.createSetupContract(),
     logging: loggingServiceMock.createSetupContract(),
     getStartServices: jest
@@ -163,7 +167,7 @@ function createInternalCoreSetupMock() {
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
-    uuid: uuidServiceMock.createSetupContract(),
+    environment: environmentServiceMock.createSetupContract(),
     httpResources: httpResourcesMock.createSetupContract(),
     rendering: renderingMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),

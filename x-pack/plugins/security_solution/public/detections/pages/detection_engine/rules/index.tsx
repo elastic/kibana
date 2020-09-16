@@ -18,7 +18,7 @@ import { DetectionEngineHeaderPage } from '../../../components/detection_engine_
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
-import { useUserInfo } from '../../../components/user_info';
+import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
 import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
@@ -42,14 +42,16 @@ const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showValueListsModal, setShowValueListsModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    hasIndexWrite,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      hasIndexWrite,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,

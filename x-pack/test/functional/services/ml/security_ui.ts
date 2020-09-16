@@ -31,5 +31,9 @@ export function MachineLearningSecurityUIProvider(
     async loginAsMlViewer() {
       await this.loginAs(USER.ML_VIEWER);
     },
+
+    async logout() {
+      await PageObjects.security.forceLogout();
+    },
   };
 }

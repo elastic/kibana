@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 import http from 'http';
 import getPort from 'get-port';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
@@ -14,11 +16,14 @@ import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simu
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const configService = getService('config');
 
   describe('slack action', () => {
     let simulatedActionId = '';
     let slackSimulatorURL: string = '';
     let slackServer: http.Server;
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
 
     // need to wait for kibanaServer to settle ...
     before(async () => {
@@ -28,6 +33,13 @@ export default function slackTest({ getService }: FtrProviderContext) {
         slackServer.listen(availablePort);
       }
       slackSimulatorURL = `http://localhost:${availablePort}`;
+      proxyServer = await getHttpProxyServer(
+        slackSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
+      );
     });
 
     it('should return 200 when creating a slack action successfully', async () => {
@@ -157,6 +169,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.eql('ok');
+      expect(proxyHaveBeenCalled).to.equal(true);
     });
 
     it('should handle an empty message error', async () => {
@@ -224,6 +237,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     after(() => {
       slackServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
   });
 }
