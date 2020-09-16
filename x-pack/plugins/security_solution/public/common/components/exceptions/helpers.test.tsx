@@ -772,6 +772,28 @@ describe('Exception helpers', () => {
   });
 
   describe('getCodeSignatureValue', () => {
+    test('it returns default if value does not resemble expected code_signature shape', () => {
+      const codeSignatures = getCodeSignatureValue([
+        {
+          field: 'file.Ext.code_signature',
+          value: [JSON.stringify({ not_a_thing: 'some_subject', trusted: 'false' })],
+        },
+      ]);
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
+    test('it returns default if value is not expected type of object', () => {
+      const codeSignatures = getCodeSignatureValue([
+        {
+          field: 'file.Ext.code_signature',
+          value: [JSON.stringify([1, 2, 3])],
+        },
+      ]);
+
+      expect(codeSignatures).toEqual([{ subjectName: '', trusted: '' }]);
+    });
+
     test('it works when file.Ext.code_signature is an object', () => {
       const codeSignatures = getCodeSignatureValue([
         {

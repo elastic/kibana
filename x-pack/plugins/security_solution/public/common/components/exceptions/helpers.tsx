@@ -408,27 +408,31 @@ export const getCodeSignatureValue = (
     data,
     fieldName: 'file.Ext.code_signature',
   });
-  const parsedItem = JSON.parse(item) ?? [{ subject_name: '', trusted: '' }];
+  const parsedItem = item != null ? JSON.parse(item) : [{ subject_name: '', trusted: '' }];
   const signatures = Array.isArray(parsedItem) ? parsedItem : [parsedItem];
+  const allResembleSignature = signatures.every(
+    (sig) =>
+      typeof sig === 'object' &&
+      sig != null &&
+      Object.prototype.hasOwnProperty.call(sig, 'subject_name') &&
+      Object.prototype.hasOwnProperty.call(sig, 'trusted')
+  );
 
-  return signatures.map((signature) => {
-    if (
-      typeof signature === 'object' &&
-      signature != null &&
-      Object.prototype.hasOwnProperty.call(signature, 'subject_name') &&
-      Object.prototype.hasOwnProperty.call(signature, 'trusted')
-    ) {
+  if (allResembleSignature) {
+    return signatures.map((signature) => {
       return {
         subjectName: signature.subject_name ?? '',
         trusted: signature.trusted ?? '',
       };
-    }
-
-    return {
-      subjectName: '',
-      trusted: '',
-    };
-  });
+    });
+  } else {
+    return [
+      {
+        subjectName: '',
+        trusted: '',
+      },
+    ];
+  }
 };
 
 /**
