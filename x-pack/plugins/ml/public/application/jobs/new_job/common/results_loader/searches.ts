@@ -32,7 +32,7 @@ export function getScoresByRecord(
   jobId: string,
   earliestMs: number,
   latestMs: number,
-  interval: string,
+  intervalMs: number,
   firstSplitField: SplitFieldWithValue | null
 ): Promise<ProcessedResults> {
   return new Promise((resolve, reject) => {
@@ -104,7 +104,7 @@ export function getScoresByRecord(
                 byTime: {
                   date_histogram: {
                     field: 'timestamp',
-                    interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: 1,
                     extended_bounds: {
                       min: earliestMs,

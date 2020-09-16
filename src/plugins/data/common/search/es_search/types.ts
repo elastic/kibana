@@ -22,6 +22,17 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
+export interface ISearchOptions {
+  /**
+   * An `AbortSignal` that allows the caller of `search` to abort a search request.
+   */
+  abortSignal?: AbortSignal;
+  /**
+   * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
+   */
+  strategy?: string;
+}
+
 export type ISearchRequestParams<T = Record<string, any>> = {
   trackTotalHits?: boolean;
 } & Search<T>;
@@ -42,3 +53,6 @@ export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
   isPartial?: boolean;
   rawResponse: SearchResponse<Source>;
 }
+
+export const isEsResponse = (response: any): response is IEsSearchResponse =>
+  response && response.rawResponse;

@@ -9,7 +9,7 @@ import { useActions } from 'kea';
 
 import { HttpSetup } from 'src/core/public';
 
-import { HttpLogic, IHttpLogicActions } from './http_logic';
+import { HttpLogic } from './http_logic';
 
 interface IHttpProviderProps {
   http: HttpSetup;
@@ -17,7 +17,7 @@ interface IHttpProviderProps {
 }
 
 export const HttpProvider: React.FC<IHttpProviderProps> = (props) => {
-  const { initializeHttp, initializeHttpInterceptors } = useActions(HttpLogic) as IHttpLogicActions;
+  const { initializeHttp, initializeHttpInterceptors } = useActions(HttpLogic);
 
   useEffect(() => {
     initializeHttp(props);

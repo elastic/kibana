@@ -4,29 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { IInitialAppData } from '../../../common/types';
-import { IWorkplaceSearchInitialData } from '../../../common/types/workplace_search';
-import { IKeaLogic } from '../shared/types';
+import {
+  IOrganization,
+  IWorkplaceSearchInitialData,
+  IAccount,
+} from '../../../common/types/workplace_search';
 
 export interface IAppValues extends IWorkplaceSearchInitialData {
   hasInitialized: boolean;
+  isFederatedAuth: boolean;
 }
 export interface IAppActions {
-  initializeAppData(props: IInitialAppData): void;
+  initializeAppData(props: IInitialAppData): IInitialAppData;
 }
 
-export const AppLogic = kea({
-  actions: (): IAppActions => ({
-    initializeAppData: ({ workplaceSearch }) => workplaceSearch,
-  }),
-  reducers: () => ({
+export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+  actions: {
+    initializeAppData: ({ workplaceSearch, isFederatedAuth }) => ({
+      workplaceSearch,
+      isFederatedAuth,
+    }),
+  },
+  reducers: {
     hasInitialized: [
       false,
       {
         initializeAppData: () => true,
       },
     ],
-  }),
-}) as IKeaLogic<IAppValues, IAppActions>;
+    isFederatedAuth: [
+      true,
+      {
+        initializeAppData: (_, { isFederatedAuth }) => !!isFederatedAuth,
+      },
+    ],
+    organization: [
+      {} as IOrganization,
+      {
+        initializeAppData: (_, { workplaceSearch }) => workplaceSearch!.organization,
+      },
+    ],
+    account: [
+      {} as IAccount,
+      {
+        initializeAppData: (_, { workplaceSearch }) => workplaceSearch!.account,
+      },
+    ],
+  },
+});

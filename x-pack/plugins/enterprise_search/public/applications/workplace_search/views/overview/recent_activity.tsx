@@ -15,9 +15,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ContentSection } from '../../components/shared/content_section';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
-import { getSourcePath } from '../../routes';
+import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
 
-import { OverviewLogic, IOverviewValues } from './overview_logic';
+import { AppLogic } from '../../app_logic';
+import { OverviewLogic } from './overview_logic';
 
 import './recent_activity.scss';
 
@@ -32,8 +33,9 @@ export interface IFeedActivity {
 export const RecentActivity: React.FC = () => {
   const {
     organization: { name, defaultOrgName },
-    activityFeed,
-  } = useValues(OverviewLogic) as IOverviewValues;
+  } = useValues(AppLogic);
+
+  const { activityFeed } = useValues(OverviewLogic);
 
   return (
     <ContentSection
@@ -107,7 +109,7 @@ export const RecentActivityItem: React.FC<IFeedActivity> = ({
   const linkProps = {
     onClick,
     target: '_blank',
-    href: getWorkplaceSearchUrl(getSourcePath(sourceId)),
+    href: getWorkplaceSearchUrl(getContentSourcePath(SOURCE_DETAILS_PATH, sourceId, true)),
     external: true,
     color: status === 'error' ? 'danger' : 'primary',
     'data-test-subj': 'viewSourceDetailsLink',

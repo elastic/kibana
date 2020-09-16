@@ -9,7 +9,7 @@
 import React, { memo, useMemo, HTMLAttributes } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor } from '@elastic/eui';
+import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { StyledDescriptionList, StyledTitle } from './styles';
@@ -57,6 +57,9 @@ const NodeDetailView = memo(function NodeDetailView({
   const isProcessTerminated = useSelector((state: ResolverState) =>
     selectors.isProcessTerminated(state)(entityId)
   );
+  const relatedEventTotal = useSelector((state: ResolverState) => {
+    return selectors.relatedEventAggregateTotalByEntityId(state)(entityId);
+  });
   const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
     const eventTime = event.eventTimestamp(processEvent);
     const dateTime = eventTime === undefined ? null : formatDate(eventTime);
@@ -165,6 +168,17 @@ const NodeDetailView = memo(function NodeDetailView({
     return cubeAssetsForNode(isProcessTerminated, false);
   }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
 
+  const nodeDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeEvents',
+      panelParameters: { nodeID: entityId },
+    })
+  );
+
+  const nodeDetailNavProps = useNavigateOrReplace({
+    search: nodeDetailHref!,
+  });
+
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
@@ -186,6 +200,14 @@ const NodeDetailView = memo(function NodeDetailView({
           <span id={titleID}>{descriptionText}</span>
         </EuiTextColor>
       </EuiText>
+      <EuiSpacer size="s" />
+      <EuiLink {...nodeDetailNavProps}>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.processDescList.numberOfEvents"
+          values={{ relatedEventTotal }}
+          defaultMessage="{relatedEventTotal} Events"
+        />
+      </EuiLink>
       <EuiSpacer size="l" />
       <StyledDescriptionList
         data-test-subj="resolver:node-detail"

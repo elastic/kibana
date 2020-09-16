@@ -12,20 +12,14 @@ Feature: RUM Dashboard
       | os         |
       | location   |
 
-  Scenario: Page load distribution percentiles
+  Scenario: Display RUM Data components
     When a user browses the APM UI application for RUM Data
     Then should display percentile for page load chart
-
-  Scenario: Page load distribution chart tooltip
-    When a user browses the APM UI application for RUM Data
-    Then should display tooltip on hover
-
-  Scenario: Page load distribution chart legends
-    When a user browses the APM UI application for RUM Data
-    Then should display chart legend
+      And should display tooltip on hover
+      And should display chart legend
 
   Scenario: Breakdown filter
-    Given a user click page load breakdown filter
+    Given a user clicks the page load breakdown filter
     When the user selected the breakdown
     Then breakdown series should appear in chart
 

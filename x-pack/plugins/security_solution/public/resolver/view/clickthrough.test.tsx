@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
@@ -19,6 +20,62 @@ let entityIDs: { origin: string; firstChild: string; secondChild: string };
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
+describe("Resolver, when rendered with the `indices` prop set to `[]` and the `databaseDocumentID` prop set to `_id`, and when the document is found in an index called 'awesome_index'", () => {
+  beforeEach(async () => {
+    // create a mock data access layer
+    const {
+      metadata: dataAccessLayerMetadata,
+      dataAccessLayer,
+    } = noAncestorsTwoChildenInIndexCalledAwesomeIndex();
+
+    // save a reference to the entity IDs exposed by the mock data layer
+    entityIDs = dataAccessLayerMetadata.entityIDs;
+
+    // save a reference to the `_id` supported by the mock data layer
+    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+
+    // create a resolver simulator, using the data access layer and an arbitrary component instance ID
+    simulator = new Simulator({
+      databaseDocumentID,
+      dataAccessLayer,
+      resolverComponentInstanceID,
+      indices: [],
+    });
+  });
+
+  it('should render no processes', async () => {
+    await expect(
+      simulator.map(() => ({
+        processes: simulator.processNodeElements().length,
+      }))
+    ).toYieldEqualTo({
+      processes: 0,
+    });
+  });
+
+  describe("when rerendered with the `indices` prop set to `['awesome_index'`]", () => {
+    beforeEach(async () => {
+      simulator.indices = ['awesome_index'];
+    });
+    // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
+    it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected when the simulator has the right indices`, async () => {
+      await expect(
+        simulator.map(() => ({
+          selectedOriginCount: simulator.selectedProcessNode(entityIDs.origin).length,
+          unselectedFirstChildCount: simulator.unselectedProcessNode(entityIDs.firstChild).length,
+          unselectedSecondChildCount: simulator.unselectedProcessNode(entityIDs.secondChild).length,
+          nodePrimaryButtonCount: simulator.testSubject('resolver:node:primary-button').length,
+        }))
+      ).toYieldEqualTo({
+        selectedOriginCount: 1,
+        unselectedFirstChildCount: 1,
+        unselectedSecondChildCount: 1,
+        nodePrimaryButtonCount: 3,
+      });
+    });
+  });
+});
+
 describe('Resolver, when analyzing a tree that has no ancestors and 2 children', () => {
   beforeEach(async () => {
     // create a mock data access layer
@@ -31,7 +88,12 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
 
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
-    simulator = new Simulator({ databaseDocumentID, dataAccessLayer, resolverComponentInstanceID });
+    simulator = new Simulator({
+      databaseDocumentID,
+      dataAccessLayer,
+      resolverComponentInstanceID,
+      indices: [],
+    });
   });
 
   describe('when it has loaded', () => {
@@ -160,7 +222,12 @@ describe('Resolver, when analyzing a tree that has two related events for the or
     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
 
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
-    simulator = new Simulator({ databaseDocumentID, dataAccessLayer, resolverComponentInstanceID });
+    simulator = new Simulator({
+      databaseDocumentID,
+      dataAccessLayer,
+      resolverComponentInstanceID,
+      indices: [],
+    });
   });
 
   describe('when it has loaded', () => {

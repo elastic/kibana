@@ -23,7 +23,6 @@ import { getJobIdUrl, TAB_IDS } from '../../../../../util/get_selected_ids_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
-  getDataFrameAnalyticsProgress,
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
@@ -76,7 +75,6 @@ export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
     defaultMessage: 'Progress',
   }),
-  sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
   truncateText: true,
   render(item: DataFrameAnalyticsListRow) {
     const { currentPhase, progress, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);

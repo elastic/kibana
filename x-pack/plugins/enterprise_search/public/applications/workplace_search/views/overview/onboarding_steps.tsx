@@ -28,7 +28,8 @@ import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { ContentSection } from '../../components/shared/content_section';
 
-import { OverviewLogic, IOverviewValues } from './overview_logic';
+import { AppLogic } from '../../app_logic';
+import { OverviewLogic } from './overview_logic';
 
 import { OnboardingCard } from './onboarding_card';
 
@@ -59,16 +60,18 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
 
 export const OnboardingSteps: React.FC = () => {
   const {
+    isFederatedAuth,
+    organization: { name, defaultOrgName },
+    account: { isCurated, canCreateInvitations },
+  } = useValues(AppLogic);
+
+  const {
     hasUsers,
     hasOrgSources,
     canCreateContentSources,
-    canCreateInvitations,
     accountsCount,
     sourcesCount,
-    fpAccount: { isCurated },
-    organization: { name, defaultOrgName },
-    isFederatedAuth,
-  } = useValues(OverviewLogic) as IOverviewValues;
+  } = useValues(OverviewLogic);
 
   const accountsPath =
     !isFederatedAuth && (canCreateInvitations || isCurated) ? USERS_PATH : undefined;

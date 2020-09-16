@@ -18,7 +18,7 @@
  */
 
 import * as ts from 'typescript';
-import { uniq } from 'lodash';
+import { uniqBy } from 'lodash';
 import {
   getResolvedModuleSourceFile,
   getIdentifierDeclarationFromSource,
@@ -148,7 +148,7 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       .map((typeNode) => getDescriptor(typeNode, program))
       .filter(discardNullOrUndefined);
 
-    const uniqueKinds = uniq(kinds, 'kind');
+    const uniqueKinds = uniqBy(kinds, 'kind');
 
     if (uniqueKinds.length !== 1) {
       throw Error('Mapping does not support conflicting union types.');

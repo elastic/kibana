@@ -143,14 +143,28 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       groups: [
         {
           groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.columns', {
-            defaultMessage: 'Columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdown', {
+            defaultMessage: 'Break down by',
           }),
           layerId: state.layers[0].layerId,
-          accessors: sortedColumns,
+          accessors: sortedColumns.filter((c) => datasource.getOperationForColumnId(c)?.isBucketed),
           supportsMoreColumns: true,
-          filterOperations: () => true,
+          filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
+        },
+        {
+          groupId: 'metrics',
+          groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
+            defaultMessage: 'Metrics',
+          }),
+          layerId: state.layers[0].layerId,
+          accessors: sortedColumns.filter(
+            (c) => !datasource.getOperationForColumnId(c)?.isBucketed
+          ),
+          supportsMoreColumns: true,
+          filterOperations: (op) => !op.isBucketed,
+          required: true,
+          dataTestSubj: 'lnsDatatable_metrics',
         },
       ],
     };

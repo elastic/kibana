@@ -15,15 +15,22 @@ import {
   getTransactionDurationAverages,
   getAgentNames,
   getTransactionRates,
-  getErrorRates,
+  getTransactionErrorRates,
   getEnvironments,
+  getHealthStatuses,
 } from './get_services_items_stats';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 export type ServicesItemsSetup = Setup & SetupTimeRange & SetupUIFilters;
 export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
-export async function getServicesItems(setup: ServicesItemsSetup) {
+export async function getServicesItems({
+  setup,
+  mlAnomaliesEnvironment,
+}: {
+  setup: ServicesItemsSetup;
+  mlAnomaliesEnvironment?: string;
+}) {
   const params = {
     projection: getServicesProjection({ setup }),
     setup,
@@ -33,22 +40,25 @@ export async function getServicesItems(setup: ServicesItemsSetup) {
     transactionDurationAverages,
     agentNames,
     transactionRates,
-    errorRates,
+    transactionErrorRates,
     environments,
+    healthStatuses,
   ] = await Promise.all([
     getTransactionDurationAverages(params),
     getAgentNames(params),
     getTransactionRates(params),
-    getErrorRates(params),
+    getTransactionErrorRates(params),
     getEnvironments(params),
+    getHealthStatuses(params, mlAnomaliesEnvironment),
   ]);
 
   const allMetrics = [
     ...transactionDurationAverages,
     ...agentNames,
     ...transactionRates,
-    ...errorRates,
+    ...transactionErrorRates,
     ...environments,
+    ...healthStatuses,
   ];
 
   return joinByKey(allMetrics, 'serviceName');

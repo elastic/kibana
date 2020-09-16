@@ -12,7 +12,7 @@ import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared
 import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, to, EDITOR_PX_HEIGHT } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
 
@@ -31,15 +31,18 @@ const fieldsConfig: FieldsConfig = {
     validations: [
       {
         validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.failForm.processorRequiredError', {
-            defaultMessage: 'A processor is required.',
-          })
+          i18n.translate(
+            'xpack.ingestPipelines.pipelineEditor.foreachForm.processorRequiredError',
+            {
+              defaultMessage: 'A processor is required.',
+            }
+          )
         ),
       },
       {
         validator: isJsonField(
           i18n.translate(
-            'xpack.ingestPipelines.pipelineEditor.failForm.processorInvalidJsonError',
+            'xpack.ingestPipelines.pipelineEditor.foreachForm.processorInvalidJsonError',
             {
               defaultMessage: 'Invalid JSON',
             }
@@ -64,9 +67,9 @@ export const Foreach: FunctionComponent = () => {
         component={XJsonEditor}
         componentProps={{
           editorProps: {
-            height: 200,
+            height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
-              'xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel',
+              'xpack.ingestPipelines.pipelineEditor.foreachForm.optionsFieldAriaLabel',
               {
                 defaultMessage: 'Configuration JSON editor',
               }

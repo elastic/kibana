@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -24,20 +25,22 @@ import {
   Plugin,
   PluginInitializerContext,
   RequestHandlerContext,
-} from '../../../../core/server';
+  SharedGlobalConfig,
+  StartServicesAccessor,
+} from 'src/core/server';
 import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
 
 import { AggsService, AggsSetupDependencies } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
-import { registerSearchRoute } from './routes';
+import { registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
-import { IEsSearchRequest, IEsSearchResponse } from '../../common';
+import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../common';
 
 type StrategyMap<
   SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
@@ -55,6 +58,12 @@ export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
+/** @internal */
+export interface SearchRouteDependencies {
+  getStartServices: StartServicesAccessor<{}, DataPluginStart>;
+  globalConfig$: Observable<SharedGlobalConfig>;
+}
+
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
@@ -66,10 +75,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ) {}
 
   public setup(
-    core: CoreSetup<object, DataPluginStart>,
+    core: CoreSetup<{}, DataPluginStart>,
     { registerFunction, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
+
+    const router = core.http.createRouter();
+    const routeDependencies = {
+      getStartServices: core.getStartServices,
+      globalConfig$: this.initializerContext.config.legacy.globalConfig$,
+    };
+    registerSearchRoute(router, routeDependencies);
+    registerMsearchRoute(router, routeDependencies);
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
@@ -84,8 +101,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     if (usageCollection) {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
-
-    registerSearchRoute(core);
 
     return {
       __enhance: (enhancements: SearchEnhancements) => {
@@ -102,11 +117,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private search(
     context: RequestHandlerContext,
     searchRequest: IEsSearchRequest,
-    options: Record<string, any>
+    options: ISearchOptions
   ) {
-    return this.getSearchStrategy(
-      options.strategy || this.defaultSearchStrategyName
-    ).search(context, searchRequest, { signal: options.signal });
+    return this.getSearchStrategy(options.strategy || this.defaultSearchStrategyName).search(
+      context,
+      searchRequest,
+      options
+    );
   }
 
   public start(

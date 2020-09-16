@@ -19,7 +19,6 @@
 
 import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
-import { LegacyApiCaller } from './legacy/es_client';
 import { ISearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 import { SearchUsageCollector } from './collectors';
@@ -29,14 +28,10 @@ import {
   IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchOptions,
 } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-
-export interface ISearchOptions {
-  signal?: AbortSignal;
-  strategy?: string;
-}
 
 export type ISearch = (
   request: IKibanaSearchRequest,
@@ -50,10 +45,6 @@ export type ISearchGeneric = <
   request: SearchStrategyRequest,
   options?: ISearchOptions
 ) => Observable<SearchStrategyResponse>;
-
-export interface ISearchStartLegacy {
-  esClient: LegacyApiCaller;
-}
 
 export interface SearchEnhancements {
   searchInterceptor: ISearchInterceptor;
@@ -71,18 +62,42 @@ export interface ISearchSetup {
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
-export interface ISearchStart {
-  aggs: AggsStart;
-  search: ISearchGeneric;
-  searchSource: {
-    create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
-    createEmpty: () => ISearchSource;
-  };
+/**
+ * high level search service
+ * @public
+ */
+export interface ISearchStartSearchSource {
   /**
-   * @deprecated
-   * @internal
+   * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
+   * @param fields
    */
-  __LEGACY: ISearchStartLegacy;
+  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+  /**
+   * creates empty {@link SearchSource}
+   */
+  createEmpty: () => ISearchSource;
+}
+/**
+ * search service
+ * @public
+ */
+export interface ISearchStart {
+  /**
+   * agg config sub service
+   * {@link AggsStart}
+   *
+   */
+  aggs: AggsStart;
+  /**
+   * low level search
+   * {@link ISearchGeneric}
+   */
+  search: ISearchGeneric;
+  /**
+   * high level search
+   * {@link ISearchStartSearchSource}
+   */
+  searchSource: ISearchStartSearchSource;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

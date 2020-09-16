@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { History, Location } from 'history';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-// @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 import { px } from '../../../../../../style/variables';
@@ -110,6 +109,7 @@ export function Waterfall({
         onClickWaterfallItem={(item: IWaterfallItem) =>
           toggleFlyout({ history, item, location })
         }
+        onToggleEntryTransaction={() => setIsAccordionOpen((isOpen) => !isOpen)}
       />
     );
   }

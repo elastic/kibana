@@ -78,6 +78,7 @@ export function getApmTelemetryMapping() {
     properties: {
       expected_metric_document_count: long,
       transaction_count: long,
+      ratio: long,
     },
   };
 
@@ -102,10 +103,14 @@ export function getApmTelemetryMapping() {
         properties: {
           current_implementation: aggregatedTransactionsProperties,
           no_observer_name: aggregatedTransactionsProperties,
-          no_rum: aggregatedTransactionsProperties,
-          no_rum_no_observer_name: aggregatedTransactionsProperties,
-          only_rum: aggregatedTransactionsProperties,
-          only_rum_no_observer_name: aggregatedTransactionsProperties,
+          with_country: aggregatedTransactionsProperties,
+        },
+      },
+      environments: {
+        properties: {
+          services_without_environment: long,
+          services_with_multiple_environments: long,
+          top_enviroments: keyword,
         },
       },
       cloud: {
@@ -227,6 +232,7 @@ export function getApmTelemetryMapping() {
           agents: tookProperties,
           cardinality: tookProperties,
           cloud: tookProperties,
+          environments: tookProperties,
           groupings: tookProperties,
           indices_stats: tookProperties,
           integrations: tookProperties,

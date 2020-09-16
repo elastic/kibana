@@ -328,16 +328,20 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
+    const switchDisabled = !!this._field && !this._field.canReadFromGeoJson();
+
     return this.isCategorical() ? (
       <CategoricalFieldMetaPopover
         fieldMetaOptions={this.getFieldMetaOptions()}
         onChange={onFieldMetaOptionsChange}
+        switchDisabled={switchDisabled}
       />
     ) : (
       <OrdinalFieldMetaPopover
         fieldMetaOptions={this.getFieldMetaOptions()}
         styleName={this.getStyleName()}
         onChange={onFieldMetaOptionsChange}
+        switchDisabled={switchDisabled}
       />
     );
   }

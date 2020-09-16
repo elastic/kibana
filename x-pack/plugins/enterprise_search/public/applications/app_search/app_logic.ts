@@ -4,28 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { IInitialAppData } from '../../../common/types';
-import { IKeaLogic } from '../shared/types';
 
-export interface IAppLogicValues {
+export interface IAppValues {
   hasInitialized: boolean;
 }
-export interface IAppLogicActions {
+export interface IAppActions {
   initializeAppData(props: IInitialAppData): void;
 }
 
-export const AppLogic = kea({
-  actions: (): IAppLogicActions => ({
+export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+  actions: {
     initializeAppData: (props) => props,
-  }),
-  reducers: () => ({
+  },
+  reducers: {
     hasInitialized: [
       false,
       {
         initializeAppData: () => true,
       },
     ],
-  }),
-}) as IKeaLogic<IAppLogicValues, IAppLogicActions>;
+  },
+});

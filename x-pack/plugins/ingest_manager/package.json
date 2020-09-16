@@ -5,6 +5,7 @@
   "private": true,
   "license": "Elastic-License",
   "dependencies": {
-    "abort-controller": "^3.0.0"
+    "abort-controller": "^3.0.0",
+    "ajv": "^6.12.4"
   }
 }

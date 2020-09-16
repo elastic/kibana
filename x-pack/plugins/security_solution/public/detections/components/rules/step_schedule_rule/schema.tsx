@@ -9,9 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 import { OptionalFieldLabel } from '../optional_field_label';
+import { ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
 import { FormSchema } from '../../../../shared_imports';
 
-export const schema: FormSchema = {
+export const schema: FormSchema<ScheduleStepRule> = {
   interval: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.fieldIntervalLabel',

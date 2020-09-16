@@ -7,15 +7,14 @@
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
+import isEqual from 'lodash/isEqual';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import {
@@ -42,9 +41,8 @@ import {
   getUseField,
   UseField,
   UseMultiFields,
-  FormDataProvider,
   useForm,
-  FormSchema,
+  useFormData,
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
@@ -52,13 +50,12 @@ import * as i18n from './translations';
 const CommonUseField = getUseField({ component: Field });
 
 interface StepDefineRuleProps extends RuleStepProps {
-  defaultValues?: DefineStepRule | null;
+  defaultValues?: DefineStepRule;
 }
 
 const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
-  isNew: true,
   machineLearningJobId: '',
   ruleType: 'query',
   queryBar: {
@@ -103,8 +100,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
+  onSubmit,
   setForm,
-  setStepData,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -112,38 +109,54 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const initialState = defaultValues ?? {
     ...stepDefineDefaultValue,
-    index: indicesConfig ?? [],
+    index: indicesConfig,
   };
-  const [localRuleType, setLocalRuleType] = useState(initialState.ruleType);
-  const [myStepData, setMyStepData] = useState<DefineStepRule>(initialState);
-  const [
-    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(myStepData.index, 'step_define_rule');
-
-  const { form } = useForm({
+  const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, reset, submit } = form;
-  const clearErrors = useCallback(() => reset({ resetValues: false }), [reset]);
+  const { getFields, getFormData, reset, submit } = form;
+  const [{ index: formIndex, ruleType: formRuleType }] = (useFormData({
+    form,
+    watch: ['index', 'ruleType'],
+  }) as unknown) as [Partial<DefineStepRule>];
+  const index = formIndex || initialState.index;
+  const ruleType = formRuleType || initialState.ruleType;
+  const [
+    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
+  ] = useFetchIndexPatterns(index, RuleStep.defineRule);
 
-  const onSubmit = useCallback(async () => {
-    if (setStepData) {
-      setStepData(RuleStep.defineRule, null, false);
-      const { isValid, data } = await submit();
-      if (isValid && setStepData) {
-        setStepData(RuleStep.defineRule, data, isValid);
-        setMyStepData({ ...data, isNew: false } as DefineStepRule);
-      }
+  // reset form when rule type changes
+  useEffect(() => {
+    reset({ resetValues: false });
+  }, [reset, ruleType]);
+
+  useEffect(() => {
+    setIndexModified(!isEqual(index, indicesConfig));
+  }, [index, indicesConfig]);
+
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit();
     }
-  }, [setStepData, submit]);
+  }, [onSubmit]);
+
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result?.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
 
   useEffect(() => {
     if (setForm) {
-      setForm(RuleStep.defineRule, form);
+      setForm(RuleStep.defineRule, getData);
     }
-  }, [form, setForm]);
+  }, [getData, setForm]);
 
   const handleResetIndices = useCallback(() => {
     const indexField = getFields().index;
@@ -173,9 +186,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={indexPatternQueryBar as IIndexPattern}
-        schema={filterRuleFieldsForType(schema as FormSchema & RuleFields, myStepData.ruleType)}
-        data={filterRuleFieldsForType(myStepData, myStepData.ruleType)}
+        indexPatterns={indexPatternQueryBar}
+        schema={filterRuleFieldsForType(schema as typeof schema & RuleFields, ruleType)}
+        data={filterRuleFieldsForType(initialState, ruleType)}
       />
     </StepContentWrapper>
   ) : (
@@ -192,7 +205,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />
-          <RuleTypeEuiFormRow $isVisible={!isMlRule(localRuleType)} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
               <CommonUseField
                 path="index"
@@ -241,7 +254,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow $isVisible={isMlRule(localRuleType)} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
                 path="machineLearningJobId"
@@ -260,7 +273,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
           <RuleTypeEuiFormRow
-            $isVisible={localRuleType === 'threshold'}
+            $isVisible={ruleType === 'threshold'}
             data-test-subj="thresholdInput"
             fullWidth
           >
@@ -269,11 +282,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 fields={{
                   thresholdField: {
                     path: 'threshold.field',
-                    defaultValue: initialState.threshold.field,
                   },
                   thresholdValue: {
                     path: 'threshold.value',
-                    defaultValue: initialState.threshold.value,
                   },
                 }}
               >
@@ -290,31 +301,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
-          <FormDataProvider pathsToWatch={['index', 'ruleType']}>
-            {({ index, ruleType }) => {
-              if (index != null) {
-                if (deepEqual(index, indicesConfig) && indexModified) {
-                  setIndexModified(false);
-                } else if (!deepEqual(index, indicesConfig) && !indexModified) {
-                  setIndexModified(true);
-                }
-                if (myStepData.index !== index) {
-                  setMyStepData((prevValue) => ({ ...prevValue, index }));
-                }
-              }
-
-              if (ruleType !== localRuleType) {
-                setLocalRuleType(ruleType);
-                clearErrors();
-              }
-              return null;
-            }}
-          </FormDataProvider>
         </Form>
       </StepContentWrapper>
 
       {!isUpdateView && (
-        <NextStep dataTestSubj="define-continue" onClick={onSubmit} isDisabled={isLoading} />
+        <NextStep dataTestSubj="define-continue" onClick={handleSubmit} isDisabled={isLoading} />
       )}
     </>
   );
