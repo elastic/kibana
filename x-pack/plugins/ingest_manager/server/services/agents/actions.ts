@@ -66,6 +66,9 @@ async function createAction(
 
   if (isAgentActionSavedObject(actionSO)) {
     const agentAction = savedObjectToAgentAction(actionSO);
+    // Action `data` is encrypted, so is not returned from the saved object
+    // so we add back the original value from the request to form the expected
+    // response shape for POST create agent action endpoint
     agentAction.data = newAgentAction.data;
 
     return agentAction;
@@ -104,12 +107,12 @@ async function bulkCreateActions(
   return actionSOs.map((actionSO) => {
     if (isAgentActionSavedObject(actionSO)) {
       const agentAction = savedObjectToAgentAction(actionSO);
-      // TODO: Is this needed?
-      // agentAction.data = newAgentAction.data;
+      // Compared to single create (createAction()), we don't add back the
+      // original value of `agentAction.data` as this method isn't exposed
+      // via an HTTP endpoint
       return agentAction;
     } else if (isPolicyActionSavedObject(actionSO)) {
       const agentAction = savedObjectToAgentAction(actionSO);
-      // agentAction.data = newAgentAction.data;
       return agentAction;
     }
     throw new Error('Invalid action');
