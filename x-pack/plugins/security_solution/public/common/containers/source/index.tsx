@@ -285,7 +285,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
         setLoading(true);
         const searchSubscription$ = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: indicesName },
+            { indices: indicesName, onlyCheckIfIndicesExist: false },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'securitySolutionIndexFields',

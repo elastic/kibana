@@ -8,14 +8,14 @@ import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
-import {
-  PinnedEvent,
-  TimelineNonEcsData,
+import { PinnedEvent } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import type {
   TimelineType,
   TimelineStatus,
-} from '../../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
-import type { RowRendererId } from '../../../../common/types/timeline';
+  RowRendererId,
+} from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';

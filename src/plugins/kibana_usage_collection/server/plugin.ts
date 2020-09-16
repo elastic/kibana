@@ -30,6 +30,7 @@ import {
   CoreStart,
   SavedObjectsServiceSetup,
   OpsMetrics,
+  Logger,
 } from '../../../core/server';
 import {
   registerApplicationUsageCollector,
@@ -47,12 +48,14 @@ interface KibanaUsageCollectionPluginsDepsSetup {
 type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
 
 export class KibanaUsageCollectionPlugin implements Plugin {
+  private readonly logger: Logger;
   private readonly legacyConfig$: Observable<SharedGlobalConfig>;
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
   }
@@ -88,7 +91,12 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
-    registerApplicationUsageCollector(usageCollection, registerType, getSavedObjectsClient);
+    registerApplicationUsageCollector(
+      this.logger.get('application-usage'),
+      usageCollection,
+      registerType,
+      getSavedObjectsClient
+    );
     registerCspCollector(usageCollection, coreSetup.http);
   }
 }

@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
@@ -18,6 +17,11 @@ import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useTimelineEvents } from '../../../timelines/containers';
+
+jest.mock('../../../timelines/containers', () => ({
+  useTimelineEvents: jest.fn(),
+}));
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
@@ -39,12 +43,12 @@ const testProps = {
 describe('StatefulEventsViewer', () => {
   const mount = useMountAppended();
 
+  (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
+
   test('it renders the events viewer', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer {...testProps} />
-        </MockedProvider>
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
@@ -59,9 +63,7 @@ describe('StatefulEventsViewer', () => {
   test('it renders InspectButtonContainer', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer {...testProps} />
-        </MockedProvider>
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 

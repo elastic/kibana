@@ -35,10 +35,14 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
           )
           .map((p) => p.catch((e) => false))
       );
-      const indexFields = await formatIndexFields(
-        responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-        request.indices
-      );
+      let indexFields: IndexField[] = [];
+
+      if (!request.onlyCheckIfIndicesExist) {
+        indexFields = await formatIndexFields(
+          responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
+          request.indices
+        );
+      }
 
       return Promise.resolve({
         indexFields,
