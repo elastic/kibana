@@ -23,7 +23,7 @@ describe('', () => {
 
       expect(FlashMessagesLogic.values.messages).toEqual([
         {
-          message: 'I am a message',
+          message,
           type: 'success',
         },
       ]);
@@ -37,7 +37,7 @@ describe('', () => {
 
       expect(FlashMessagesLogic.values.messages).toEqual([
         {
-          message: 'I am a message',
+          message,
           type: 'error',
         },
       ]);
@@ -51,7 +51,7 @@ describe('', () => {
 
       expect(FlashMessagesLogic.values.queuedMessages).toEqual([
         {
-          message: 'I am a message',
+          message,
           type: 'success',
         },
       ]);
