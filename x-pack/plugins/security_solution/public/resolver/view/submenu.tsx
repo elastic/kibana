@@ -10,32 +10,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
 import { EuiI18nNumber, EuiButton, EuiPopover, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { Matrix3 } from '../types';
 import { useResolverTheme } from './assets';
-
-/**
- * i18n-translated titles for submenus and identifiers for display of states:
- *   initialMenuStatus: submenu before it has been opened / requested data
- *   menuError: if the submenu requested data, but received an error
- */
-export const subMenuAssets = {
-  initialMenuStatus: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.relatedNotRetrieved',
-    {
-      defaultMessage: 'Related Events have not yet been retrieved.',
-    }
-  ),
-  menuError: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedRetrievalError', {
-    defaultMessage: 'There was an error retrieving related events.',
-  }),
-  relatedEvents: {
-    title: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedEvents', {
-      defaultMessage: 'Events',
-    }),
-  },
-};
 
 interface ResolverSubmenuOption {
   optionTitle: string;
@@ -84,7 +63,11 @@ const SubButton = React.memo(
         data-test-resolver-node-id={nodeID}
         id={nodeID}
       >
-        {count ? <EuiI18nNumber value={count} /> : ''} {subMenuAssets.relatedEvents.title}
+        <FormattedMessage
+          id="xpack.securitySolution.resolver.nodeEventMenuButton.label"
+          defaultMessage="{count} Events"
+          values={{ count }}
+        />
       </StyledActionButton>
     );
   }
@@ -202,7 +185,9 @@ const NodeSubMenuComponents = React.memo(
             size="s"
             tabIndex={-1}
           >
-            {subMenuAssets.relatedEvents.title}
+            {i18n.translate('xpack.securitySolution.endpoint.resolver.relatedEvents', {
+              defaultMessage: 'Events',
+            })}
           </EuiButton>
         </div>
       );
