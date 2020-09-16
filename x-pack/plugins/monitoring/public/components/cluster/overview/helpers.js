@@ -33,7 +33,7 @@ export function HealthLabel(props) {
   }
 
   if (props.status === 'red') {
-    return i18n.translate('xpack.monitoring.cluster.health.healthy', {
+    return i18n.translate('xpack.monitoring.cluster.health.primaryShards', {
       defaultMessage: 'Missing primary shards',
     });
   }
