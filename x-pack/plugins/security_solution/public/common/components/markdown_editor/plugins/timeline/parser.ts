@@ -4,31 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
 import { Plugin } from '@elastic/eui/node_modules/unified';
 import { RemarkTokenizer } from '@elastic/eui';
-import { ID, PREFIX, OLD_PREFIX } from './constants';
-import { TimelineConfiguration } from './types';
-
-const START_POS = PREFIX.length;
-
-const requiredFields = ['id', 'title'];
-
-const validateConfiguration = (configuration: TimelineConfiguration) => {
-  requiredFields.forEach((field) => {
-    if (isEmpty(configuration[field])) {
-      throw new Error(`${field} is missing.`);
-    }
-  });
-};
+import { ID, PREFIX } from './constants';
 
 export const TimelineParser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
-  let oldFormat = false;
 
-  const parseOldFormat: RemarkTokenizer = function (eat, value, silent) {
+  const parseTimeline: RemarkTokenizer = function (eat, value, silent) {
     let index = 0;
     const nextChar = value[index];
 
@@ -110,81 +95,19 @@ export const TimelineParser: Plugin = function () {
     });
   };
 
-  const parseNewFormat: RemarkTokenizer = function (eat, value, silent) {
-    const nextChar = value[START_POS];
-
-    if (nextChar !== '{') {
-      return false;
-    }
-
-    if (silent) {
-      return true;
-    }
-
-    const hasConfiguration = nextChar === '{';
-
-    let match = PREFIX;
-    let configuration = { id: null, title: '', url: '' };
-
-    if (hasConfiguration) {
-      let configurationString = '';
-
-      let openObjects = 0;
-
-      for (let i = START_POS; i < value.length; i++) {
-        const char = value[i];
-        if (char === '{') {
-          openObjects++;
-          configurationString += char;
-        } else if (char === '}') {
-          openObjects--;
-          if (openObjects === -1) {
-            break;
-          }
-          configurationString += char;
-        } else {
-          configurationString += char;
-        }
-      }
-
-      match += configurationString;
-      try {
-        configuration = JSON.parse(configurationString);
-        validateConfiguration(configuration);
-      } catch (e) {
-        const now = eat.now();
-        this.file.fail(`Timeline parsing error: ${e}`, {
-          line: now.line,
-          column: now.column + 7,
-        });
-      }
-    }
-
-    match += '}';
-    return eat(match)({
-      type: ID,
-      ...configuration,
-    });
-  };
-
   const tokenizeTimeline: RemarkTokenizer = function tokenizeTimeline(eat, value, silent) {
     if (
-      (value.startsWith(PREFIX) === false && value.startsWith(OLD_PREFIX) === false) ||
-      (value.startsWith(OLD_PREFIX) === true && !value.includes('timelines?timeline=(id:'))
+      value.startsWith(PREFIX) === false ||
+      (value.startsWith(PREFIX) === true && !value.includes('timelines?timeline=(id:'))
     ) {
       return false;
     }
 
-    if (value.startsWith(OLD_PREFIX)) {
-      oldFormat = true;
-      return parseOldFormat.call(this, eat, value, silent);
-    }
-
-    return parseNewFormat.call(this, eat, value, silent);
+    return parseTimeline.call(this, eat, value, silent);
   };
 
   tokenizeTimeline.locator = (value: string, fromIndex: number) => {
-    return value.indexOf(oldFormat ? OLD_PREFIX : PREFIX, fromIndex);
+    return value.indexOf(PREFIX, fromIndex);
   };
 
   tokenizers.timeline = tokenizeTimeline;

@@ -17,7 +17,7 @@ const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
 const timelineId = '1e10f150-949b-11ea-b63c-2bc51864784c';
-const timelineMarkdown = `!{timeline{"id":"${timelineId}","title":"timeline"}}`;
+const timelineMarkdown = `[timeline](http://localhost:5601/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t))`;
 const defaultProps = {
   content: `A link to a timeline ${timelineMarkdown}`,
   id: 'markdown-id',
@@ -49,7 +49,7 @@ describe('UserActionMarkdown ', () => {
 
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
-      graphEventId: undefined,
+      graphEventId: '',
       timelineId,
       updateIsLoading: expect.any(Function),
       updateTimeline: expect.any(Function),
@@ -79,7 +79,7 @@ describe('UserActionMarkdown ', () => {
       .simulate('click');
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
-      graphEventId: undefined,
+      graphEventId: '',
       timelineId,
       updateIsLoading: expect.any(Function),
       updateTimeline: expect.any(Function),

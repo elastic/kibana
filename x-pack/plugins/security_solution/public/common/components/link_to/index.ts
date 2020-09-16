@@ -11,12 +11,13 @@ import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { navTabs } from '../../../app/home/home_navigations';
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
+import { getTimelineUrl } from './redirect_to_timelines';
 
 export { getDetectionEngineUrl } from './redirect_to_detection_engine';
 export { getAppOverviewUrl } from './redirect_to_overview';
 export { getHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
-export { getTimelinesUrl, getTimelineTabsUrl } from './redirect_to_timelines';
+export { getTimelinesUrl, getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';
 export {
   getCaseDetailsUrl,
   getCaseUrl,
@@ -42,4 +43,19 @@ export const useFormatUrl = (page: SecurityPageName) => {
     [getUrlForApp, page, search]
   );
   return { formatUrl, search };
+};
+
+export const useTimelineUrl = () => {
+  const { getUrlForApp } = useKibana().services.application;
+  const baseUrl = getUrlForApp(`${APP_ID}:${SecurityPageName.timelines}`, {
+    path: '',
+    absolute: true,
+  });
+
+  const timelineUrl = useCallback(
+    (id: string, graphEventId?: string) => `${baseUrl}${getTimelineUrl(id ?? '', graphEventId)}`,
+    [baseUrl]
+  );
+
+  return { timelineUrl };
 };

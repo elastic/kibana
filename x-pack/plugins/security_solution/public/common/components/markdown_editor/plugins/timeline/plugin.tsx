@@ -15,8 +15,9 @@ import {
 import { TimelineType } from '../../../../../../common/types/timeline';
 import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
 import { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
+import { useTimelineUrl } from '../../../link_to';
 
-import { ID, PREFIX } from './constants';
+import { ID } from './constants';
 import * as i18n from './translations';
 
 interface TimelineEditorProps {
@@ -25,6 +26,8 @@ interface TimelineEditorProps {
 }
 
 const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover, onInsert }) => {
+  const { timelineUrl } = useTimelineUrl();
+
   const handleGetSelectableOptions = useCallback(
     ({ timelines }: { timelines: OpenTimelineResult[] }) => [
       ...timelines.map(
@@ -49,16 +52,10 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
         hideUntitled={true}
         getSelectableOptions={handleGetSelectableOptions}
         onTimelineChange={(timelineTitle, timelineId, graphEventId) => {
-          onInsert(
-            `${PREFIX}${JSON.stringify({
-              id: timelineId,
-              title: timelineTitle,
-              graphEventId,
-            })}}`,
-            {
-              block: false,
-            }
-          );
+          const url = timelineUrl(timelineId ?? '', graphEventId);
+          onInsert(`[${timelineTitle}](${url})`, {
+            block: false,
+          });
         }}
         onClosePopover={onClosePopover}
         timelineType={TimelineType.default}
@@ -76,8 +73,8 @@ export const plugin: EuiMarkdownEditorUiPlugin = {
     iconType: 'timeline',
   },
   helpText: (
-    <EuiCodeBlock language="js" paddingSize="s" fontSize="l">
-      {`${PREFIX}{"id":"Timeline id","title":"Timeline title"}}`}
+    <EuiCodeBlock language="md" paddingSize="s" fontSize="l">
+      {'[title](url)'}
     </EuiCodeBlock>
   ),
   editor: function editor({ node, onSave, onCancel }) {

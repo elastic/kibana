@@ -11,7 +11,7 @@ import {
   addNewCase,
   selectCase,
 } from '../tasks/timeline';
-import { DESCRIPTION_INPUT } from '../screens/create_new_case';
+import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../screens/create_new_case';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { caseTimeline, TIMELINE_CASE_ID } from '../objects/case';
 
@@ -66,7 +66,7 @@ describe('attach timeline to case', () => {
       selectCase(TIMELINE_CASE_ID);
 
       cy.location('origin').then((origin) => {
-        cy.get(DESCRIPTION_INPUT).should(
+        cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
           `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id:'${caseTimeline.id}',isOpen:!t))`
         );
