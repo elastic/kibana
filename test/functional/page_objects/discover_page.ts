@@ -118,9 +118,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async loadSavedSearch(searchName: string) {
+      // data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byButtonText(searchName);
-      await searchLink.click();
+      // const searchLink = await find.byButtonText(searchName);
+      //
+      // await searchLink.click();
+      await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -386,6 +389,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await retry.waitFor('Discover app on screen', async () => {
         return await this.isDiscoverAppOnScreen();
       });
+    }
+
+    public async showAllFilterActions() {
+      await testSubjects.click('showFilterActions');
     }
   }
 
