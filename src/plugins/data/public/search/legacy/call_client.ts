@@ -19,7 +19,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ISearchOptions } from 'src/plugins/data/common';
-import { FetchHandlers, handleResponse } from '../fetch';
+import { FetchHandlers } from '../fetch';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { SearchRequest } from '../index';
 
@@ -42,7 +42,7 @@ export function callClient(
   });
 
   searchRequests.forEach((request, i) => {
-    const response = searching.then((results) => handleResponse(request, results[i]));
+    const response = searching.then((results) => fetchHandlers.onResponse(request, results[i]));
     const { abortSignal = null } = requestOptionsMap.get(request) || {};
     if (abortSignal) abortSignal.addEventListener('abort', abort);
     requestResponseMap.set(request, response);

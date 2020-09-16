@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery } from '../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../es_query';
 
 import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './filter_utils';
 
