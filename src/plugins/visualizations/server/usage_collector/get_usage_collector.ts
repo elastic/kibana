@@ -55,7 +55,7 @@ async function getStats(callCluster: LegacyAPICaller, index: string) {
     },
   };
   const esResponse: ESResponse = await callCluster('search', searchParams);
-  const size = get(esResponse, 'hits.hits.length');
+  const size = get(esResponse, 'hits.hits.length', 0);
   if (size < 1) {
     return;
   }

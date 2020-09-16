@@ -12,5 +12,6 @@ export declare type SharedGlobalConfig = RecursiveReadonly<{
     kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+    savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 ```
