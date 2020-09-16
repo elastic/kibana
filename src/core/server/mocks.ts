@@ -18,6 +18,7 @@
  */
 import { of } from 'rxjs';
 import { duration } from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
@@ -66,6 +67,9 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       startupTimeout: duration('30s'),
     },
     path: { data: '/tmp' },
+    savedObjects: {
+      maxImportPayloadBytes: new ByteSizeValue(10485760),
+    },
   };
 
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
