@@ -174,7 +174,7 @@ manufacturer: Gnomehouse
 . For a more complex query with AND and OR, enter:
 +
 [source,text]
-manufacturer: Gnomehouse AND (manufacturer: Low Tide Media OR manufacturer:"Kibana Airlines")
+manufacturer: Gnomehouse AND (manufacturer: Low Tide Media OR manufacturer: Tigress Enterprises)
 +
 The dashboard panels update to display the flights out of Rome on JetBeats and 
 {kib} Airlines.  
