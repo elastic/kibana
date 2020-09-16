@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { ExceptionListItemSchema } from '../../../../../lists/common/shared_exports';
-import { TrustedApp } from '../../../../common/endpoint/types';
+import { NewTrustedApp, TrustedApp } from '../../../../common/endpoint/types';
+import { ExceptionListClient } from '../../../../../lists/server';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+
+type NewExecptionItem = Parameters<ExceptionListClient['createExceptionListItem']>[0];
 
 /**
  * Map an ExcptionListItem to a TrustedApp item
@@ -39,4 +44,29 @@ const osFromTagsList = (tags: string[]): TrustedApp['os'] | 'unknown' => {
     }
   }
   return 'unknown';
+};
+
+export const newTrustedAppItemToExceptionItem = ({
+  os,
+  entries,
+  name,
+  description = '',
+}: NewTrustedApp): NewExecptionItem => {
+  return {
+    _tags: tagsListFromOs(os),
+    comments: [],
+    description,
+    entries,
+    itemId: uuid.v4(),
+    listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+    meta: undefined,
+    name,
+    namespaceType: 'agnostic',
+    tags: [],
+    type: 'simple',
+  };
+};
+
+const tagsListFromOs = (os: NewTrustedApp['os']): NewExecptionItem['_tags'] => {
+  return [`os:${os}`];
 };

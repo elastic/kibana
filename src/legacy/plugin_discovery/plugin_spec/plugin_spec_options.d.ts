@@ -18,14 +18,10 @@
  */
 import { Server } from '../../server/kbn_server';
 import { Capabilities } from '../../../core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsLegacyManagementDefinition } from '../../../core/server/saved_objects/types';
 
 export type InitPluginFunction = (server: Server) => void;
 export interface UiExports {
   injectDefaultVars?: (server: Server) => { [key: string]: any };
-  savedObjectsManagement?: SavedObjectsLegacyManagementDefinition;
-  mappings?: unknown;
 }
 
 export interface PluginSpecOptions {

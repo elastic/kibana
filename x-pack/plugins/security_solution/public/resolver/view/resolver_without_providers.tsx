@@ -31,7 +31,7 @@ export const ResolverWithoutProviders = React.memo(
    * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
    */
   React.forwardRef(function (
-    { className, databaseDocumentID, resolverComponentInstanceID }: ResolverProps,
+    { className, databaseDocumentID, resolverComponentInstanceID, indices }: ResolverProps,
     refToForward
   ) {
     useResolverQueryParamCleaner();
@@ -39,7 +39,7 @@ export const ResolverWithoutProviders = React.memo(
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
      */
-    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID });
+    useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID, indices });
 
     const { timestamp } = useContext(SideEffectContext);
 
@@ -69,8 +69,8 @@ export const ResolverWithoutProviders = React.memo(
       },
       [cameraRef, refToForward]
     );
-    const isLoading = useSelector(selectors.isLoading);
-    const hasError = useSelector(selectors.hasError);
+    const isLoading = useSelector(selectors.isTreeLoading);
+    const hasError = useSelector(selectors.hadErrorLoadingTree);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const { colorMap } = useResolverTheme();
 

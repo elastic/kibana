@@ -18,21 +18,22 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { FetchOptions, FetchHandlers, handleResponse } from '../fetch';
+import { ISearchOptions } from 'src/plugins/data/common';
+import { FetchHandlers } from '../fetch';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { SearchRequest } from '../index';
 
 export function callClient(
   searchRequests: SearchRequest[],
-  requestsOptions: FetchOptions[] = [],
+  requestsOptions: ISearchOptions[] = [],
   fetchHandlers: FetchHandlers
 ) {
   // Correlate the options with the request that they're associated with
   const requestOptionEntries: Array<[
     SearchRequest,
-    FetchOptions
+    ISearchOptions
   ]> = searchRequests.map((request, i) => [request, requestsOptions[i]]);
-  const requestOptionsMap = new Map<SearchRequest, FetchOptions>(requestOptionEntries);
+  const requestOptionsMap = new Map<SearchRequest, ISearchOptions>(requestOptionEntries);
   const requestResponseMap = new Map<SearchRequest, Promise<SearchResponse<any>>>();
 
   const { searching, abort } = defaultSearchStrategy.search({
@@ -41,7 +42,7 @@ export function callClient(
   });
 
   searchRequests.forEach((request, i) => {
-    const response = searching.then((results) => handleResponse(request, results[i]));
+    const response = searching.then((results) => fetchHandlers.onResponse(request, results[i]));
     const { abortSignal = null } = requestOptionsMap.get(request) || {};
     if (abortSignal) abortSignal.addEventListener('abort', abort);
     requestResponseMap.set(request, response);

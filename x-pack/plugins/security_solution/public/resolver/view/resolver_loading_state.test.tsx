@@ -26,6 +26,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        indices: [],
       });
     });
 
@@ -56,6 +57,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        indices: [],
       });
     });
 
@@ -85,6 +87,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        indices: [],
       });
     });
 
@@ -114,6 +117,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        indices: [],
       });
     });
 
@@ -145,6 +149,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        indices: [],
       });
     });
 

@@ -16,18 +16,17 @@ import { BASE_PATH, Section } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editRepository, useLoadRepository } from '../../services/http';
+import { useDecodedParams } from '../../lib';
 
 interface MatchParams {
   name: string;
 }
 
 export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
   history,
 }) => {
   const { i18n } = useServices();
+  const { name } = useDecodedParams<MatchParams>();
   const section = 'repositories' as Section;
 
   // Set breadcrumb and page title
@@ -70,7 +69,9 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     if (error) {
       setSaveError(error);
     } else {
-      history.push(`${BASE_PATH}/${section}/${name}`);
+      history.push(
+        encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
+      );
     }
   };
 

@@ -16,7 +16,7 @@ import { TransactionDistributionAPIResponse } from '../../../../../server/lib/tr
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { getDurationFormatter } from '../../../../utils/formatters';
-// @ts-ignore
+// @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';

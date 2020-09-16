@@ -27,12 +27,6 @@ describe('Range Agg', () => {
   const getAggConfigs = () => {
     const field = {
       name: 'bytes',
-      format: new NumberFormat(
-        {
-          pattern: '0,0.[000] b',
-        },
-        getConfig
-      ),
     };
 
     const indexPattern = {
@@ -42,6 +36,13 @@ describe('Range Agg', () => {
         getByName: () => field,
         filter: () => [field],
       },
+      getFormatterForField: () =>
+        new NumberFormat(
+          {
+            pattern: '0,0.[000] b',
+          },
+          getConfig
+        ),
     } as any;
 
     return new AggConfigs(

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
 import { updateState } from './common';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
@@ -36,13 +36,11 @@ export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Pi
 
 const getAnomalies = async (
   plugins: UptimeCorePlugins,
-  mlClusterClient: ILegacyScopedClusterClient,
   params: Record<any, any>,
   lastCheckedAt: string
 ) => {
-  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(mlClusterClient, {
-    params: 'DummyKibanaRequest',
-  } as any);
+  const fakeRequest = {} as KibanaRequest;
+  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(fakeRequest);
 
   return await getAnomaliesTableData(
     [getMLJobId(params.monitorId)],
@@ -82,23 +80,12 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
   producer: 'uptime',
   async executor(options) {
     const {
-      services: {
-        alertInstanceFactory,
-        callCluster,
-        savedObjectsClient,
-        getLegacyScopedClusterClient,
-      },
+      services: { alertInstanceFactory, callCluster, savedObjectsClient },
       state,
       params,
     } = options;
 
-    const { anomalies } =
-      (await getAnomalies(
-        plugins,
-        getLegacyScopedClusterClient(plugins.ml.mlClient),
-        params,
-        state.lastCheckedAt
-      )) ?? {};
+    const { anomalies } = (await getAnomalies(plugins, params, state.lastCheckedAt)) ?? {};
 
     const foundAnomalies = anomalies?.length > 0;
 

@@ -5,30 +5,26 @@
  */
 
 import {
-  Plugin,
-  PluginInitializerContext,
+  AppMountParameters,
   CoreSetup,
   CoreStart,
-  AppMountParameters,
   HttpSetup,
+  Plugin,
+  PluginInitializerContext,
 } from 'src/core/public';
-import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-
-import { IInitialAppData } from '../common/types';
 import {
-  ENTERPRISE_SEARCH_PLUGIN,
   APP_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
+import { IInitialAppData } from '../common/types';
 import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
-import AppSearchLogo from './applications/app_search/assets/logo.svg';
-import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
 
 export interface ClientConfigType {
   host?: string;
@@ -55,8 +51,29 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     core.application.register({
+      id: ENTERPRISE_SEARCH_PLUGIN.ID,
+      title: ENTERPRISE_SEARCH_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
+      appRoute: ENTERPRISE_SEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const { chrome } = coreStart;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
+
+        await this.getInitialData(coreStart.http);
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearch } = await import('./applications/enterprise_search');
+
+        return renderApp(EnterpriseSearch, params, coreStart, plugins, this.config, this.data);
+      },
+    });
+
+    core.application.register({
       id: APP_SEARCH_PLUGIN.ID,
       title: APP_SEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
       appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -76,6 +93,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: WORKPLACE_SEARCH_PLUGIN.ID,
       title: WORKPLACE_SEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
       appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -96,28 +114,16 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.registerSolution({
         id: ENTERPRISE_SEARCH_PLUGIN.ID,
         title: ENTERPRISE_SEARCH_PLUGIN.NAME,
-        subtitle: i18n.translate('xpack.enterpriseSearch.featureCatalogue.subtitle', {
-          defaultMessage: 'Search everything',
-        }),
+        subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
         icon: 'logoEnterpriseSearch',
-        descriptions: [
-          i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription1', {
-            defaultMessage: 'Build a powerful search experience.',
-          }),
-          i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription2', {
-            defaultMessage: 'Connect your users to relevant data.',
-          }),
-          i18n.translate('xpack.enterpriseSearch.featureCatalogueDescription3', {
-            defaultMessage: 'Unify your team content.',
-          }),
-        ],
-        path: APP_SEARCH_PLUGIN.URL, // TODO: Change this to enterprise search overview page once available
+        descriptions: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTIONS,
+        path: ENTERPRISE_SEARCH_PLUGIN.URL,
       });
 
       plugins.home.featureCatalogue.register({
         id: APP_SEARCH_PLUGIN.ID,
         title: APP_SEARCH_PLUGIN.NAME,
-        icon: AppSearchLogo,
+        icon: 'appSearchApp',
         description: APP_SEARCH_PLUGIN.DESCRIPTION,
         path: APP_SEARCH_PLUGIN.URL,
         category: FeatureCatalogueCategory.DATA,
@@ -127,7 +133,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.register({
         id: WORKPLACE_SEARCH_PLUGIN.ID,
         title: WORKPLACE_SEARCH_PLUGIN.NAME,
-        icon: WorkplaceSearchLogo,
+        icon: 'workplaceSearchApp',
         description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
         path: WORKPLACE_SEARCH_PLUGIN.URL,
         category: FeatureCatalogueCategory.DATA,

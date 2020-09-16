@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectXPackInfoSignature } from './inject_xpack_info_signature';
 import { XPackInfo } from './xpack_info';
 
 /**
@@ -19,11 +18,6 @@ export function setupXPackMain(server) {
   const info = new XPackInfo(server, { licensing: server.newPlatform.setup.plugins.licensing });
 
   server.expose('info', info);
-
-  server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
-
-  const { getFeatures } = server.newPlatform.setup.plugins.features;
-  server.expose('getFeatures', getFeatures);
 
   const setPluginStatus = () => {
     if (info.isAvailable()) {

@@ -97,6 +97,5 @@ describe('test actions handlers', () => {
       ?.body as unknown) as PostNewAgentActionResponse;
 
     expect(expectedAgentActionResponse.item).toEqual(agentAction);
-    expect(expectedAgentActionResponse.success).toEqual(true);
   });
 });

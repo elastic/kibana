@@ -77,13 +77,6 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
       },
 
       /**
-       * Get an array of index patterns that contain events.
-       */
-      indexPatterns(): string[] {
-        return ['index pattern'];
-      },
-
-      /**
        * Get entities matching a document.
        */
       entities(): Promise<ResolverEntityIndex> {

@@ -9,7 +9,7 @@ import { TIMELINE_URL } from '../../../../common/constants';
 
 import { ConfigType } from '../../..';
 import { SetupPlugins } from '../../../plugin';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 
@@ -31,7 +31,7 @@ export const createTimelinesRoute = (
     {
       path: TIMELINE_URL,
       validate: {
-        body: buildRouteValidation(createTimelineSchema),
+        body: buildRouteValidationWithExcess(createTimelineSchema),
       },
       options: {
         tags: ['access:securitySolution'],
