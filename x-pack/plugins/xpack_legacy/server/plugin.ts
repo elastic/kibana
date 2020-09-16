@@ -4,19 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+
 import {
   PluginInitializerContext,
   CoreStart,
   CoreSetup,
   Plugin,
 } from '../../../../src/core/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { registerSettingsRoute } from './routes/settings';
+
+interface SetupPluginDeps {
+  usageCollection: UsageCollectionSetup;
+}
 
 export class XpackLegacyPlugin implements Plugin {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, { usageCollection }: SetupPluginDeps) {
+    const router = core.http.createRouter();
+    const globalConfig = await this.initContext.config.legacy.globalConfig$
+      .pipe(first())
+      .toPromise();
+    const serverInfo = core.http.getServerInfo();
+
+    registerSettingsRoute({
+      router,
+      usageCollection,
+      overallStatus$: core.status.overall$,
+      config: {
+        kibanaIndex: globalConfig.kibana.index,
+        kibanaVersion: this.initContext.env.packageInfo.version,
+        uuid: this.initContext.env.instanceUuid,
+        server: serverInfo,
+      },
+    });
+
     core.uiSettings.register({
       'xPack:defaultAdminEmail': {
         name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
@@ -36,7 +62,7 @@ export class XpackLegacyPlugin implements Plugin {
         type: 'string',
         value: null,
         schema: schema.maybe(schema.nullable(schema.string())),
-      },
+      }
     });
   }
 
