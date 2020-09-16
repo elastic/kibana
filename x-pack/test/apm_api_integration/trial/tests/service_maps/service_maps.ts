@@ -86,14 +86,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         });
 
         it('returns service map elements filtering by environment not defined', async () => {
-          const start = encodeURIComponent('2020-06-28T10:24:46.055Z');
-          const end = encodeURIComponent('2020-06-29T10:24:46.055Z');
+          const encodedStart = encodeURIComponent('2020-06-28T10:24:46.055Z');
+          const encodedEnd = encodeURIComponent('2020-06-29T10:24:46.055Z');
           const environment = 'ENVIRONMENT_NOT_DEFINED';
-          const response = await supertest.get(
-            `/api/apm/service-map?start=${start}&end=${end}&environment=${environment}`
+          const resp = await supertest.get(
+            `/api/apm/service-map?start=${encodedStart}&end=${encodedEnd}&environment=${environment}`
           );
-          expect(response.status).to.be(200);
-          expectSnapshot(response.body).toMatchInline(`
+          expect(resp.status).to.be(200);
+          expectSnapshot(resp.body).toMatchInline(`
             Object {
               "elements": Array [
                 Object {
