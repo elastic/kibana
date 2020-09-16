@@ -23,6 +23,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { CoreStart } from 'src/core/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { FetchResult } from 'src/plugins/newsfeed/public';
 import { Overview } from './overview';
 
 interface KibanaOverviewAppDeps {

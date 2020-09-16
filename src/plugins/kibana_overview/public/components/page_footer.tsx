@@ -18,35 +18,30 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Capabilities } from 'kibana/public';
+import { createAppNavigationHandler } from '../app_navigation_handler';
 
 interface Props {
-  findDirectoryById: (id: string) => FeatureCatalogueEntry | undefined;
+  capabilities: Capabilities;
 }
 
-export const PageFooter: FC<Props> = ({ findDirectoryById, navigateToApp }) => {
-  const advancedSettings = findDirectoryById('advanced_settings');
+export const PageFooter: FC<Props> = ({ capabilities }) => {
+  const showAdvancedSettings = capabilities.advancedSettings?.show;
 
   return (
-    <footer>
-      <EuiHorizontalRule margin="xl" aria-hidden="true" />
-
-      <EuiFlexGroup
-        className="homPageFooter"
-        alignItems="center"
-        gutterSize="s"
-        justifyContent="spaceBetween"
-      >
+    <footer className="kbnOverviewFooter">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {advancedSettings ? (
+          {showAdvancedSettings ? (
             <EuiButtonEmpty
               iconType="home"
               onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
               size="xs"
             >
               <FormattedMessage
-                id="home.changeHomeRouteLink"
+                id="kibana.overview.footer.changeHomeRouteLink"
                 defaultMessage="Display a different page on log in"
               />
             </EuiButtonEmpty>
@@ -57,11 +52,10 @@ export const PageFooter: FC<Props> = ({ findDirectoryById, navigateToApp }) => {
             data-test-subj="allPlugins"
             href="#/feature_directory"
             size="xs"
-            flush="right"
             iconType="apps"
           >
             <FormattedMessage
-              id="home.appDirectory.appDirectoryButtonLabel"
+              id="kibana.overview.footer.appDirectoryButtonLabel"
               defaultMessage="View app directory"
             />
           </EuiButtonEmpty>

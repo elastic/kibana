@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { Moment } from 'moment';
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useLayoutEffect } from 'react';
 import { Observable } from 'rxjs';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -39,10 +37,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FetchResult } from 'src/plugins/newsfeed/public';
 import { PLUGIN_ID } from '../../../common';
 import { createAppNavigationHandler } from '../../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 import { PageHeader } from '../page_header';
+import { PageFooter } from '../page_footer';
 
 const apps = {
   dashboards: {
@@ -108,6 +108,7 @@ const solutions = {
     description:
       'Build a leading search experience using a refined set of APIs and powerful search-based UI.',
     icon: 'logoEnterpriseSearch',
+    path: '/app/enterprise_search/overview',
   },
   observability: {
     id: 'observability',
@@ -115,6 +116,7 @@ const solutions = {
     description:
       'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
     icon: 'logoObservability',
+    path: '/app/observability/overview',
   },
   securitySolution: {
     id: 'security_solution',
@@ -122,19 +124,9 @@ const solutions = {
     description:
       'Combine network and host data integrations, sharable analytics, and explore your security data.',
     icon: 'logoSecurity',
+    path: '/app/security/overview',
   },
 };
-
-interface FeedItem {
-  title: string;
-  description: string;
-  link: string;
-  publishOn: Moment;
-}
-
-interface FetchResult {
-  feedItems: FeedItem[];
-}
 
 interface Props {
   newsfeed$: Observable<FetchResult | null | void>;
@@ -153,13 +145,10 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
     }_2x.png`;
 
   useEffect(() => {
-    function handleStatusChange(fetchResult: FetchResult | void | null) {
-      setNewsFetchResult(fetchResult);
-    }
-
     const subscription = newsfeed$.subscribe((res: FetchResult | void | null) => {
-      handleStatusChange(res);
+      setNewsFetchResult(res);
     });
+
     return () => subscription.unsubscribe();
   }, [newsfeed$]);
 
@@ -249,7 +238,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
     );
   };
 
-  const renderFeedItem = ({ title, description, link, publishOn }: FeedItem) => (
+  const renderFeedItem = ({ title, description, link, publishOn }) => (
     <article key={title}>
       <header>
         <EuiTitle size="xxs">
@@ -300,7 +289,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
 
   const renderNormal = () => {
     const mainApps = ['dashboards', 'discover'];
-    const otherApps = Object.keys(apps).filter((appId) => !mainApps.includes(appId));
+    const remainingApps = Object.keys(apps).filter((appId) => !mainApps.includes(appId));
 
     return (
       <>
@@ -314,21 +303,27 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
             </h2>
           </EuiScreenReaderOnly>
 
-          <EuiFlexGroup
-            className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-            justifyContent="center"
-          >
-            {mainApps.map(renderAppCard)}
-          </EuiFlexGroup>
+          {mainApps.length ? (
+            <>
+              <EuiFlexGroup
+                className="kbnOverviewApps__group kbnOverviewApps__group--primary"
+                justifyContent="center"
+              >
+                {mainApps.map(renderAppCard)}
+              </EuiFlexGroup>
 
-          <EuiSpacer size="l" />
+              <EuiSpacer size="l" />
+            </>
+          ) : null}
 
-          <EuiFlexGroup
-            className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
-            justifyContent="center"
-          >
-            {otherApps.map(renderAppCard)}
-          </EuiFlexGroup>
+          {remainingApps.length ? (
+            <EuiFlexGroup
+              className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
+              justifyContent="center"
+            >
+              {remainingApps.map(renderAppCard)}
+            </EuiFlexGroup>
+          ) : null}
         </section>
 
         <EuiHorizontalRule aria-hidden="true" margin="xl" />
@@ -338,7 +333,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
             <section aria-labelledby="kbnOverviewNews__title" className="kbnOverviewNews">
               <EuiTitle size="s">
                 <h2 id="kbnOverviewNews__title">
-                  <FormattedMessage id="kibana.overview.news.title" defaultMessage="Kibana news" />
+                  <FormattedMessage id="kibana.overview.news.title" defaultMessage="What's new?" />
                 </h2>
               </EuiTitle>
 
@@ -364,7 +359,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
               <EuiSpacer size="m" />
 
               <EuiFlexGroup>
-                {Object.values(solutions).map(({ id, title, description, icon }) => (
+                {Object.values(solutions).map(({ id, title, description, icon, path }) => (
                   <EuiFlexItem key={id}>
                     <EuiCard
                       title={
@@ -383,6 +378,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
                         />
                       }
                       image={<EuiImage url={addBasePath(getSolutionGraphicURL(id))} alt={title} />}
+                      onClick={createAppNavigationHandler(path)}
                     />
                   </EuiFlexItem>
                 ))}
@@ -396,43 +392,14 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
 
   return (
     <main aria-labelledby="kbnOverviewHeader__title" className="kbnOverviewWrapper">
-      <PageHeader />
+      <PageHeader capabilities={capabilities} />
 
       <div className="kbnOverviewContent">
         {isNewKibanaInstance ? renderGettingStarted() : renderNormal()}
 
         <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-        <footer className="kbnOverviewFooter">
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="home"
-                onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
-                size="xs"
-              >
-                <FormattedMessage
-                  id="kibana.overview.footer.changeHomeRouteLink"
-                  defaultMessage="Display a different page on log in"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="allPlugins"
-                href="#/feature_directory"
-                size="xs"
-                iconType="apps"
-              >
-                <FormattedMessage
-                  id="kibana.overview.footer.appDirectoryButtonLabel"
-                  defaultMessage="View app directory"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </footer>
+        <PageFooter capabilities={capabilities} />
       </div>
     </main>
   );

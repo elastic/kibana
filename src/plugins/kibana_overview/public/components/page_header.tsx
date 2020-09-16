@@ -17,15 +17,21 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Capabilities } from 'kibana/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 
-export const PageHeader = () => {
-  const devTools = { path: '/app/dev_tools#/console' };
-  const stackManagement = { path: '/app/management' };
+interface Props {
+  capabilities: Capabilities;
+}
+
+export const PageHeader: FC<Props> = ({ capabilities }) => {
+  const { navLinks } = capabilities;
+  const showStackManagement = navLinks.management;
+  const showDevTools = navLinks.dev_tools;
 
   return (
     <header className="kbnOverviewHeader">
@@ -50,18 +56,21 @@ export const PageHeader = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup className="kbnOverviewHeader__actions" responsive={false} wrap>
               <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
-                <EuiButtonEmpty href="#/tutorial_directory" iconType="indexOpen">
+                <EuiButtonEmpty
+                  onClick={createAppNavigationHandler('/app/management')}
+                  iconType="indexOpen"
+                >
                   {i18n.translate('kibana.overview.header.addDataButtonLabel', {
                     defaultMessage: 'Add data',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
 
-              {stackManagement ? (
+              {showStackManagement ? (
                 <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
                     iconType="gear"
-                    onClick={createAppNavigationHandler(stackManagement.path)}
+                    onClick={createAppNavigationHandler('/app/management')}
                   >
                     {i18n.translate('kibana.overview.header.stackManagementButtonLabel', {
                       defaultMessage: 'Manage',
@@ -70,11 +79,11 @@ export const PageHeader = () => {
                 </EuiFlexItem>
               ) : null}
 
-              {devTools ? (
+              {showDevTools ? (
                 <EuiFlexItem className="kbnOverviewHeader__actionItem" grow={false}>
                   <EuiButtonEmpty
                     iconType="wrench"
-                    onClick={createAppNavigationHandler(devTools.path)}
+                    onClick={createAppNavigationHandler('/app/dev_tools#/console')}
                   >
                     {i18n.translate('kibana.overview.header.devToolsButtonLabel', {
                       defaultMessage: 'Dev tools',

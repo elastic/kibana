@@ -90,7 +90,9 @@ export class NewsfeedApiDriver {
         .fetch(fullUrl, {
           method: 'GET',
         })
-        .then(({ items }) => this.modelItems(items))
+        .then(({ items }) => {
+          return this.modelItems(items);
+        })
     );
   }
 
@@ -177,7 +179,6 @@ export function getApi(
   const userLanguage = i18n.getLocale();
   const fetchInterval = config.fetchInterval.asMilliseconds();
   const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
-
   return Rx.timer(0, config.mainInterval.asMilliseconds()).pipe(
     filter(() => driver.shouldFetch()),
     mergeMap(() =>

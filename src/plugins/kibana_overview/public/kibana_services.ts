@@ -27,7 +27,6 @@ import {
   IUiSettingsClient,
   ApplicationStart,
 } from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
 import { IndexPatternsContract } from '../../../../src/plugins/data/public';
 
 export interface KibanaServices {

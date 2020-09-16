@@ -19,8 +19,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import * as Rx from 'rxjs';
-import { catchError, takeUntil } from 'rxjs/operators';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
 import { KibanaOverviewApp } from './components/app';
@@ -31,11 +29,6 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   const { notifications, http } = core;
-  const stop$ = new Rx.ReplaySubject(1);
-  const newsfeed$ = newsfeed.fetchNewsFeed().pipe(
-    takeUntil(stop$), // stop the interval when stop method is called
-    catchError(() => Rx.of(null)) // do not throw error
-  );
 
   ReactDOM.render(
     <KibanaOverviewApp
@@ -43,7 +36,7 @@ export const renderApp = (
       notifications={notifications}
       http={http}
       navigation={navigation}
-      newsfeed$={newsfeed$}
+      newsfeed$={newsfeed.newsfeed$}
     />,
     element
   );
