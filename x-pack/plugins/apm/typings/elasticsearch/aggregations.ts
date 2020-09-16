@@ -94,6 +94,9 @@ export interface AggregationOptionsByType {
     percents?: number[];
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
+  stats: {
+    field: string;
+  };
   extended_stats: {
     field: string;
   };
@@ -216,6 +219,13 @@ interface AggregationResponsePart<
   };
   percentiles: {
     values: Record<string, number | null>;
+  };
+  stats: {
+    count: number;
+    min: number | null;
+    max: number | null;
+    avg: number | null;
+    sum: number | null;
   };
   extended_stats: {
     count: number;
