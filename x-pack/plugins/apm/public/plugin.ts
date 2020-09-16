@@ -47,7 +47,7 @@ export interface ApmPluginSetupDeps {
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   observability?: ObservabilityPluginSetup;
 }
 
@@ -56,7 +56,7 @@ export interface ApmPluginStartDeps {
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -139,7 +139,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     toggleAppLinkInNav(core, this.initializerContext.config.get());
 
-    plugins.triggers_actions_ui.alertTypeRegistry.register({
+    plugins.triggersActionsUi.alertTypeRegistry.register({
       id: AlertType.ErrorRate,
       name: i18n.translate('xpack.apm.alertTypes.errorRate', {
         defaultMessage: 'Error rate',
@@ -154,7 +154,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       requiresAppContext: true,
     });
 
-    plugins.triggers_actions_ui.alertTypeRegistry.register({
+    plugins.triggersActionsUi.alertTypeRegistry.register({
       id: AlertType.TransactionDuration,
       name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
         defaultMessage: 'Transaction duration',
@@ -169,7 +169,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       requiresAppContext: true,
     });
 
-    plugins.triggers_actions_ui.alertTypeRegistry.register({
+    plugins.triggersActionsUi.alertTypeRegistry.register({
       id: AlertType.TransactionDurationAnomaly,
       name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
         defaultMessage: 'Transaction duration anomaly',

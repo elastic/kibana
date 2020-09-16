@@ -27,7 +27,7 @@ import { Inspect } from '../common/search_strategy';
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
-  triggers_actions_ui: TriggersActionsSetup;
+  triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -38,7 +38,7 @@ export interface StartPlugins {
   ingestManager?: IngestManagerStart;
   lists?: ListsPluginStart;
   newsfeed?: NewsfeedStart;
-  triggers_actions_ui: TriggersActionsStart;
+  triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
 }
 

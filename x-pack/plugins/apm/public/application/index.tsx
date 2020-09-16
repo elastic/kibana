@@ -92,8 +92,8 @@ export function ApmAppRoot({
             docLinks: core.docLinks,
             capabilities: core.application.capabilities,
             toastNotifications: core.notifications.toasts,
-            actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-            alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
+            actionTypeRegistry: plugins.triggersActionsUi.actionTypeRegistry,
+            alertTypeRegistry: plugins.triggersActionsUi.alertTypeRegistry,
           }}
         >
           <KibanaContextProvider services={{ ...core, ...plugins }}>

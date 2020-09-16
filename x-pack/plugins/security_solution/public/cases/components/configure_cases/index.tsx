@@ -56,7 +56,7 @@ interface ConfigureCasesComponentProps {
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
+  const { http, triggersActionsUi, notifications, application, docLinks } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -197,7 +197,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       <ActionsConnectorsContextProvider
         value={{
           http,
-          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+          actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
           toastNotifications: notifications.toasts,
           capabilities: application.capabilities,
           reloadConnectors,

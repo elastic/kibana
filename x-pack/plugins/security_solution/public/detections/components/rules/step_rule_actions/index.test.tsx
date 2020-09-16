@@ -15,7 +15,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       application: {
         getUrlForApp: jest.fn(),
       },
-      triggers_actions_ui: {
+      triggersActionsUi: {
         actionTypeRegistry: jest.fn(),
       },
     },

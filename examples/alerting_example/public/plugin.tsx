@@ -32,13 +32,13 @@ export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
   alerts: AlertingSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   developerExamples: DeveloperExamplesSetup;
 }
 
 export interface AlertingExamplePublicStartDeps {
   alerts: AlertingSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
 }
@@ -47,7 +47,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
   public setup(
     core: CoreSetup<AlertingExamplePublicStartDeps, Start>,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { alerts, triggers_actions_ui, developerExamples }: AlertingExamplePublicSetupDeps
+    { alerts, triggersActionsUi, developerExamples }: AlertingExamplePublicSetupDeps
   ) {
     core.application.register({
       id: 'AlertingExample',
@@ -60,8 +60,8 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
       },
     });
 
-    triggers_actions_ui.alertTypeRegistry.register(getAlwaysFiringAlertType());
-    triggers_actions_ui.alertTypeRegistry.register(getPeopleInSpaceAlertType());
+    triggersActionsUi.alertTypeRegistry.register(getAlwaysFiringAlertType());
+    triggersActionsUi.alertTypeRegistry.register(getPeopleInSpaceAlertType());
 
     registerNavigation(alerts);
 
