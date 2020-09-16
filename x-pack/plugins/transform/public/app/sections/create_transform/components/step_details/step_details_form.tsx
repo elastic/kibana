@@ -590,7 +590,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
               error={
                 !isTransformSettingsMaxPageSearchSizeValid && [
                   i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeError', {
-                    defaultMessage: 'Invalid max_page_search_size value',
+                    defaultMessage:
+                      'max_page_search_size needs to be a number between 10 and 10000.',
                   }),
                 ]
               }
