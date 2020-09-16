@@ -100,7 +100,7 @@ describe('test transform install', () => {
         },
       } as unknown) as SavedObject<Installation>)
     );
-
+    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce({ count: 1 });
     await installTransformForDataset(
       ({
         name: 'endpoint',
@@ -145,8 +145,15 @@ describe('test transform install', () => {
       savedObjectsClient,
       logger.get('ingest')
     );
-
     expect(legacyScopedClusterClient.callAsCurrentUser.mock.calls).toEqual([
+      [
+        'transport.request',
+        {
+          method: 'GET',
+          path: '_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0',
+          ignore: [404],
+        },
+      ],
       [
         'transport.request',
         {
@@ -358,7 +365,7 @@ describe('test transform install', () => {
         attributes: { installed_es: currentInstallation.installed_es },
       } as unknown) as SavedObject<Installation>)
     );
-
+    legacyScopedClusterClient.callAsCurrentUser.mockReturnValueOnce({ count: 1 });
     await installTransformForDataset(
       ({
         name: 'endpoint',
@@ -404,19 +411,27 @@ describe('test transform install', () => {
       [
         'transport.request',
         {
+          method: 'GET',
+          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
           ignore: [404],
-          method: 'POST',
-          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
-          query: 'force=true',
         },
       ],
       [
         'transport.request',
         {
-          ignore: [404],
-          method: 'DELETE',
-          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          method: 'POST',
+          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
           query: 'force=true',
+          ignore: [404],
+        },
+      ],
+      [
+        'transport.request',
+        {
+          method: 'DELETE',
+          query: 'force=true',
+          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
     ]);

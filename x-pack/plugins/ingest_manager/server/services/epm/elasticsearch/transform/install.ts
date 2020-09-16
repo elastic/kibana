@@ -36,87 +36,97 @@ export const installTransformForDataset = async (
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger
 ) => {
-  const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });
-  let previousInstalledTransformEsAssets: EsAssetReference[] = [];
-  if (installation) {
-    previousInstalledTransformEsAssets = installation.installed_es.filter(
-      ({ type, id }) => type === ElasticsearchAssetType.transform
-    );
-  }
-
-  // delete all previous transform
-  await deleteTransforms(
-    callCluster,
-    previousInstalledTransformEsAssets.map((asset) => asset.id)
-  );
-  // install the latest dataset
-  const datasets = registryPackage.datasets;
-  if (!datasets?.length) return [];
-  const installNameSuffix = `${registryPackage.version}`;
-
-  const transformPaths = paths.filter((path) => isTransform(path));
-  let installedTransforms: EsAssetReference[] = [];
-  if (transformPaths.length > 0) {
-    const transformPathDatasets = datasets.reduce<TransformPathDataset[]>((acc, dataset) => {
-      transformPaths.forEach((path) => {
-        if (isDatasetTransform(path, dataset.path)) {
-          acc.push({ path, dataset });
-        }
-      });
-      return acc;
-    }, []);
-
-    const transformRefs = transformPathDatasets.reduce<EsAssetReference[]>(
-      (acc, transformPathDataset) => {
-        if (transformPathDataset) {
-          acc.push({
-            id: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
-            type: ElasticsearchAssetType.transform,
-          });
-        }
-        return acc;
-      },
-      []
-    );
-
-    // get and save transform refs before installing transforms
-    await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
-
-    const transforms: TransformInstallation[] = transformPathDatasets.map(
-      (transformPathDataset: TransformPathDataset) => {
-        return {
-          installationName: getTransformNameForInstallation(
-            transformPathDataset,
-            installNameSuffix
-          ),
-          content: getAsset(transformPathDataset.path).toString('utf-8'),
-        };
-      }
-    );
-
-    const installationPromises = transforms.map(async (transform) => {
-      return installTransform({ callCluster, transform, logger });
-    });
-
-    installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
-  }
-
-  if (previousInstalledTransformEsAssets.length > 0) {
-    const currentInstallation = await getInstallation({
+  try {
+    const installation = await getInstallation({
       savedObjectsClient,
       pkgName: registryPackage.name,
     });
+    let previousInstalledTransformEsAssets: EsAssetReference[] = [];
+    if (installation) {
+      previousInstalledTransformEsAssets = installation.installed_es.filter(
+        ({ type, id }) => type === ElasticsearchAssetType.transform
+      );
+    }
 
-    // remove the saved object reference
-    await deleteTransformRefs(
-      savedObjectsClient,
-      currentInstallation?.installed_es || [],
-      registryPackage.name,
-      previousInstalledTransformEsAssets.map((asset) => asset.id),
-      installedTransforms.map((installed) => installed.id)
+    // delete all previous transform
+    await deleteTransforms(
+      callCluster,
+      previousInstalledTransformEsAssets.map((asset) => asset.id)
     );
+    // install the latest dataset
+    const datasets = registryPackage.datasets;
+    if (!datasets?.length) return [];
+    const installNameSuffix = `${registryPackage.version}`;
+
+    const transformPaths = paths.filter((path) => isTransform(path));
+    let installedTransforms: EsAssetReference[] = [];
+    if (transformPaths.length > 0) {
+      const transformPathDatasets = datasets.reduce<TransformPathDataset[]>((acc, dataset) => {
+        transformPaths.forEach((path) => {
+          if (isDatasetTransform(path, dataset.path)) {
+            acc.push({ path, dataset });
+          }
+        });
+        return acc;
+      }, []);
+
+      const transformRefs = transformPathDatasets.reduce<EsAssetReference[]>(
+        (acc, transformPathDataset) => {
+          if (transformPathDataset) {
+            acc.push({
+              id: getTransformNameForInstallation(transformPathDataset, installNameSuffix),
+              type: ElasticsearchAssetType.transform,
+            });
+          }
+          return acc;
+        },
+        []
+      );
+
+      // get and save transform refs before installing transforms
+      await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, transformRefs);
+
+      const transforms: TransformInstallation[] = transformPathDatasets.map(
+        (transformPathDataset: TransformPathDataset) => {
+          return {
+            installationName: getTransformNameForInstallation(
+              transformPathDataset,
+              installNameSuffix
+            ),
+            content: getAsset(transformPathDataset.path).toString('utf-8'),
+          };
+        }
+      );
+
+      const installationPromises = transforms.map(async (transform) => {
+        return installTransform({ callCluster, transform, logger });
+      });
+
+      installedTransforms = await Promise.all(installationPromises).then((results) =>
+        results.flat()
+      );
+    }
+
+    if (previousInstalledTransformEsAssets.length > 0) {
+      const currentInstallation = await getInstallation({
+        savedObjectsClient,
+        pkgName: registryPackage.name,
+      });
+
+      // remove the saved object reference
+      await deleteTransformRefs(
+        savedObjectsClient,
+        currentInstallation?.installed_es || [],
+        registryPackage.name,
+        previousInstalledTransformEsAssets.map((asset) => asset.id),
+        installedTransforms.map((installed) => installed.id)
+      );
+    }
+    return installedTransforms;
+  } catch (err) {
+    logger.error(err);
+    throw err;
   }
-  return installedTransforms;
 };
 
 const isTransform = (path: string) => {

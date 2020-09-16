@@ -25,13 +25,20 @@ export const deleteTransforms = async (
 ) => {
   await Promise.all(
     transformIds.map(async (transformId) => {
-      await stopTransforms([transformId], callCluster);
-      await callCluster('transport.request', {
-        method: 'DELETE',
-        query: 'force=true',
+      const response = await callCluster('transport.request', {
+        method: 'GET',
         path: `_transform/${transformId}`,
         ignore: [404],
       });
+      if (response && response.count > 0) {
+        await stopTransforms([transformId], callCluster);
+        await callCluster('transport.request', {
+          method: 'DELETE',
+          query: 'force=true',
+          path: `_transform/${transformId}`,
+          ignore: [404],
+        });
+      }
     })
   );
 };
