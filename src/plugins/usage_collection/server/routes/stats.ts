@@ -80,23 +80,18 @@ export function registerStatsRoute({
       },
       validate: {
         query: schema.object({
-          extended: schema.maybe(
-            schema.oneOf([schema.literal(''), schema.literal('true'), schema.literal('false')])
-          ),
-          legacy: schema.maybe(
-            schema.oneOf([schema.literal(''), schema.literal('true'), schema.literal('false')])
-          ),
-          exclude_usage: schema.maybe(
-            schema.oneOf([schema.literal(''), schema.literal('true'), schema.literal('false')])
-          ),
+          extended: schema.oneOf([schema.literal(''), schema.boolean()], { defaultValue: false }),
+          legacy: schema.oneOf([schema.literal(''), schema.boolean()], { defaultValue: false }),
+          exclude_usage: schema.oneOf([schema.literal(''), schema.boolean()], {
+            defaultValue: false,
+          }),
         }),
       },
     },
     async (context, req, res) => {
-      const isExtended = req.query.extended === '' || req.query.extended === 'true';
-      const isLegacy = req.query.legacy === '' || req.query.legacy === 'true';
-      const shouldGetUsage =
-        req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
+      const isExtended = req.query.extended === '' || req.query.extended;
+      const isLegacy = req.query.legacy === '' || req.query.legacy;
+      const shouldGetUsage = req.query.exclude_usage === undefined || !req.query.exclude_usage;
 
       let extended;
       if (isExtended) {
@@ -153,7 +148,11 @@ export function registerStatsRoute({
       }
 
       // Guranteed to resolve immediately due to replay effect on getOpsMetrics$
-      const lastMetrics = await metrics.getOpsMetrics$().pipe(first()).toPromise();
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { collected_at, ...lastMetrics } = await metrics
+        .getOpsMetrics$()
+        .pipe(first())
+        .toPromise();
 
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
       const kibanaStats = collectorSet.toApiFieldNames({
@@ -169,7 +168,7 @@ export function registerStatsRoute({
           snapshot: SNAPSHOT_REGEX.test(config.kibanaVersion),
           status: ServiceStatusToLegacyState[overallStatus.level.toString()],
         },
-        last_updated: lastMetrics.collected_at.toISOString(),
+        last_updated: collected_at.toISOString(),
         collection_interval_in_millis: metrics.collectionInterval,
       });
 
