@@ -25,6 +25,7 @@ import { RangeIndexPatternColumn } from './ranges';
 import { autoInterval } from 'src/plugins/data/common';
 import { MODES, DEFAULT_INTERVAL, TYPING_DEBOUNCE_TIME } from './constants';
 import { RangePopover } from './advanced_editor';
+import { EuiButtonIcon } from '@elastic/eui';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
@@ -512,7 +513,7 @@ describe('ranges', () => {
         });
       });
 
-      it('should not accept not valid ranges', () => {
+      it('should not accept invalid ranges', () => {
         const setStateSpy = jest.fn();
 
         const instance = mount(
@@ -553,8 +554,15 @@ describe('ranges', () => {
         });
       });
 
-      it('should set custom labels on ranges', () => {
+      it('should be possible to remove a range if multiple', () => {
         const setStateSpy = jest.fn();
+
+        // Add an extra range
+        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
+          from: DEFAULT_INTERVAL,
+          to: 2 * DEFAULT_INTERVAL,
+          label: '',
+        });
 
         const instance = mount(
           <InlineOptions
@@ -567,41 +575,22 @@ describe('ranges', () => {
           />
         );
 
+        expect(instance.find(RangePopover)).toHaveLength(2);
+
         // This series of act clojures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).prop('onClick')!({} as ReactMouseEvent);
+          instance
+            .find('[data-test-subj="indexPattern-ranges-container"]')
+            .find(EuiButtonIcon)
+            .last()
+            .prop('onClick')!({} as ReactMouseEvent);
         });
 
         act(() => {
           // need another wrapping for this in order to work
           instance.update();
 
-          // edit the range "to" field
-          instance.find(RangePopover).find(EuiFieldText).prop('onChange')!({
-            target: {
-              value: 'MyCustomLabel',
-            },
-          } as React.ChangeEvent<HTMLInputElement>);
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(setStateSpy).toHaveBeenCalledWith({
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    ...state.layers.first.columns.col1,
-                    params: {
-                      ...state.layers.first.columns.col1.params,
-                      ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: 'MyCustomLabel' }],
-                    },
-                  },
-                },
-              },
-            },
-          });
+          expect(instance.find(RangePopover)).toHaveLength(1);
         });
       });
     });
