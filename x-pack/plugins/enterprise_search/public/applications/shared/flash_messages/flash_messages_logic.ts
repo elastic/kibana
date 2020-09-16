@@ -80,10 +80,3 @@ export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlash
     },
   }),
 });
-
-export const setSuccessMessage = (message: string) => {
-  FlashMessagesLogic.actions.setFlashMessages({
-    type: 'success',
-    message,
-  });
-};

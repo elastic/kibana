@@ -6,7 +6,7 @@
 
 import { resetContext } from 'kea';
 
-import { FlashMessagesLogic, IFlashMessage, setSuccessMessage } from './flash_messages_logic';
+import { FlashMessagesLogic, IFlashMessage } from './flash_messages_logic';
 
 describe('FlashMessagesLogic', () => {
   const DEFAULT_VALUES = {
@@ -77,21 +77,6 @@ describe('FlashMessagesLogic', () => {
       FlashMessagesLogic.actions.clearQueuedMessages();
 
       expect(FlashMessagesLogic.values.queuedMessages).toEqual([]);
-    });
-  });
-
-  describe('setSuccessMessage()', () => {
-    it('sets a flash message', () => {
-      const message = 'I am a message';
-      FlashMessagesLogic.mount();
-      setSuccessMessage(message);
-
-      expect(FlashMessagesLogic.values.messages).toEqual([
-        {
-          message: 'I am a message',
-          type: 'success',
-        },
-      ]);
     });
   });
 
