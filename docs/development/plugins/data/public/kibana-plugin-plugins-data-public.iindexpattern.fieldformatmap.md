@@ -7,8 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-fieldFormatMap?: Record<string, {
-        id: string;
-        params: unknown;
-    }>;
+fieldFormatMap?: FieldFormatMap;
 ```

@@ -133,7 +133,7 @@ export interface FieldEdiorProps {
   spec: IndexPatternField['spec'];
   services: {
     redirectAway: () => void;
-    saveIndexPattern: DataPublicPluginStart['indexPatterns']['save'];
+    saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
   };
 }
 
@@ -826,7 +826,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         this.context.services.notifications.toasts.addSuccess(message);
         redirectAway();
       })
-      .catch((error) => {
+      .catch(() => {
         if (oldField) {
           indexPattern.fields.update(oldField);
         } else {

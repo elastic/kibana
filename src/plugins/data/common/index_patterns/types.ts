@@ -34,7 +34,13 @@ export interface IIndexPattern {
   type?: string;
   timeFieldName?: string;
   getTimeField?(): IFieldType | undefined;
-  fieldFormatMap?: FieldFormatMap;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
 }
 
 /**

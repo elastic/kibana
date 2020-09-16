@@ -123,7 +123,7 @@ export const EditIndexPattern = withRouter(
         if (isConfirmed) {
           // todo catch error as in index_pattern
           await data.indexPatterns.refreshFields(indexPattern);
-          await data.indexPatterns.save(indexPattern);
+          await data.indexPatterns.updateSavedObject(indexPattern);
           setFields(indexPattern.getNonScriptedFields());
         }
       });
@@ -238,7 +238,7 @@ export const EditIndexPattern = withRouter(
           <EuiSpacer />
           <Tabs
             indexPattern={indexPattern}
-            saveIndexPattern={data.indexPatterns.save.bind(data.indexPatterns)}
+            saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
             fields={fields}
             history={history}
             location={location}

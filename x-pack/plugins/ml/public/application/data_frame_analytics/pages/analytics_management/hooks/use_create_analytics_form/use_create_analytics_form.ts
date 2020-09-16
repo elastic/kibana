@@ -131,7 +131,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const indexPatternName = destinationIndex;
 
     try {
-      await mlContext.indexPatterns.newIndexPatternAndSave({
+      await mlContext.indexPatterns.createAndSave({
         title: indexPatternName,
       });
 

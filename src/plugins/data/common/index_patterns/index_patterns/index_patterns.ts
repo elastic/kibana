@@ -345,7 +345,7 @@ export class IndexPatternsService {
     indexPatternCache.set(id, indexPattern);
     if (isSaveRequired) {
       try {
-        this.save(indexPattern);
+        this.updateSavedObject(indexPattern);
       } catch (err) {
         this.onError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
@@ -380,7 +380,7 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  async newIndexPattern(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
+  async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
@@ -399,14 +399,14 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  async newIndexPatternAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
-    const indexPattern = await this.newIndexPattern(spec, skipFetchFields);
+  async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
+    const indexPattern = await this.create(spec, skipFetchFields);
     await this.create(indexPattern, override);
     await this.setDefault(indexPattern.id as string);
     return indexPattern;
   }
 
-  async create(indexPattern: IndexPattern, override = false) {
+  async createSavedObject(indexPattern: IndexPattern, override = false) {
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe) {
       if (override) {
@@ -425,7 +425,10 @@ export class IndexPatternsService {
     return indexPattern;
   }
 
-  async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
+  async updateSavedObject(
+    indexPattern: IndexPattern,
+    saveAttempts: number = 0
+  ): Promise<void | Error> {
     if (!indexPattern.id) return;
 
     // get the list of attributes
@@ -493,7 +496,7 @@ export class IndexPatternsService {
           indexPatternCache.clear(indexPattern.id!);
 
           // Try the save again
-          return this.save(indexPattern, saveAttempts);
+          return this.updateSavedObject(indexPattern, saveAttempts);
         }
         throw err;
       });

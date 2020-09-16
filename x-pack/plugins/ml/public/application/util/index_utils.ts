@@ -107,7 +107,7 @@ export function getIndexPatternById(id: string): Promise<IndexPattern> {
     if (id) {
       return indexPatternsContract.get(id);
     } else {
-      return indexPatternsContract.newIndexPattern({});
+      return indexPatternsContract.create({});
     }
   } else {
     throw new Error('Index patterns are not initialized!');

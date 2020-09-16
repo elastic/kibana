@@ -98,7 +98,7 @@ async function importIndexPattern(
   addJsonFieldToIndexPattern(indexPatternSpec, sourceFilters, 'sourceFilters', title);
   addJsonFieldToIndexPattern(indexPatternSpec, typeMeta, 'typeMeta', title);
   try {
-    emptyPattern = await indexPatterns.newIndexPatternAndSave(indexPatternSpec, overwriteAll, true);
+    emptyPattern = await indexPatterns.createAndSave(indexPatternSpec, overwriteAll, true);
   } catch (err) {
     if (err instanceof DuplicateIndexPatternError) {
       // We can override and we want to prompt for confirmation
@@ -122,7 +122,7 @@ async function importIndexPattern(
       );
 
       if (isConfirmed) {
-        emptyPattern = await indexPatterns.newIndexPatternAndSave(indexPatternSpec, true, true);
+        emptyPattern = await indexPatterns.createAndSave(indexPatternSpec, true, true);
       } else {
         return;
       }

@@ -162,7 +162,7 @@ export class CreateIndexPatternWizard extends Component<
     const { indexPattern } = this.state;
 
     try {
-      emptyPattern = await this.context.services.data.indexPatterns.newIndexPatternAndSave({
+      emptyPattern = await this.context.services.data.indexPatterns.createAndSave({
         id: indexPatternId,
         title: indexPattern,
         timeFieldName,

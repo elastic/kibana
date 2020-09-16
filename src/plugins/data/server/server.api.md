@@ -597,11 +597,10 @@ export interface IFieldType {
 export interface IIndexPattern {
     // (undocumented)
     [key: string]: any;
+    // Warning: (ae-forgotten-export) The symbol "FieldFormatMap" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    fieldFormatMap?: Record<string, {
-        id: string;
-        params: unknown;
-    }>;
+    fieldFormatMap?: FieldFormatMap;
     // (undocumented)
     fields: IFieldType[];
     // (undocumented)
