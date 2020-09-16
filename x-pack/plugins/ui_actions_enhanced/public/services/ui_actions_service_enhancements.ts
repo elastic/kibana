@@ -19,10 +19,9 @@ import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/p
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type DynamicActionsState = {
-  events: SerializedEvent[];
-};
+import { DynamicActionsState } from '../../common/types';
+
+export { DynamicActionsState };
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;

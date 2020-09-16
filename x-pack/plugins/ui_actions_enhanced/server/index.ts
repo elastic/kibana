@@ -19,6 +19,11 @@ export {
 export {
   ActionFactoryDefinition as UiActionsEnhancedActionFactoryDefinition,
   ActionFactory as UiActionsEnhancedActionFactory,
+} from './types';
+
+export {
+  DynamicActionsState,
+  BaseActionConfig as UiActionsEnhancedBaseActionConfig,
   SerializedAction as UiActionsEnhancedSerializedAction,
   SerializedEvent as UiActionsEnhancedSerializedEvent,
-} from './types';
+} from '../common/types';
