@@ -21,8 +21,8 @@ import { run, createFlagError, REPO_ROOT } from '@kbn/dev-utils';
 import { parse } from './parse_owners';
 import { flush } from './flush';
 import { enumeratePatterns } from './enumerate_patterns';
-import { push } from './enumeration_helpers';
 import { pipe } from '../utils';
+import { reduce } from 'rxjs/operators';
 
 const flags = {
   string: ['src', 'dest'],
@@ -32,25 +32,19 @@ const flags = {
         `,
 };
 
-const data = [];
-const mutateData = push(data);
-
 export const generateTeamAssignments = () => {
   run(
     ({ flags, log }) => {
       if (flags.src === '') throw createFlagError('please provide a single --src flag');
       if (flags.dest === '') throw createFlagError('please provide a single --dest flag');
 
-      parse(flags.src).subscribe(
-        mutateData,
-        (e) => log.error(e),
-        () =>
-          pipe(
-            logSuccess(flags.src, log),
-            enumeratePatterns(REPO_ROOT)(log),
-            flush(flags.dest)(log)
-          )(new Map(data))
+      const logCreepAndFlush = pipe(
+        logSuccess(flags.src, log),
+        enumeratePatterns(REPO_ROOT)(log),
+        flush(flags.dest)(log)
       );
+
+      parse(flags.src).pipe(reduce(toMap, new Map())).subscribe(logCreepAndFlush);
     },
     {
       description: `
@@ -63,6 +57,11 @@ Create a file defining the team assignments,
     }
   );
 };
+
+function toMap(acc, x) {
+  acc.set(x[0], x[1][0]);
+  return acc;
+}
 
 function logSuccess(src, log) {
   return (dataObj) => {

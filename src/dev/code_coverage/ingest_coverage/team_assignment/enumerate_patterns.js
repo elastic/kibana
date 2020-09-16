@@ -38,10 +38,9 @@ export const enumeratePatterns = (rootPath) => (log) => (patterns) => {
   const logNotFound = notFound(log);
 
   for (const entry of patterns) {
-    const [pathPattern, teams] = entry;
+    const [pathPattern, team] = entry;
     const cleaned = stripLeading(pathPattern);
-    const owner = teams[0];
-    const existsWithOwner = pathExists(owner);
+    const existsWithOwner = pathExists(team);
 
     const collect = (x) => existsWithOwner(x).forEach(resPush);
     tryPath(cleaned).fold(logNotFound, collect);
