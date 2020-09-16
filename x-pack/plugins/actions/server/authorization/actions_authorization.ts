@@ -15,7 +15,7 @@ export interface ConstructorOptions {
   auditLogger: ActionsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
   authentication?: SecurityPluginSetup['authc'];
-  // In order to support legacy Alerts which predate the introduciton of the
+  // In order to support legacy Alerts which predate the introduction of the
   // Actions feature in Kibana we need a way of "dialing down" the level of
   // authorization for certain opearations.
   // Specifically, we want to allow these old alerts and their scheduled
