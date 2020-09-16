@@ -8,6 +8,7 @@
   "requiredPlugins": ["uiActions", "uiActionsEnhanced", "data", "discover", "dashboard", "developerExamples"],
   "optionalPlugins": [],
   "requiredBundles": [
+    "dashboardEnhanced",
     "kibanaUtils",
     "kibanaReact",
     "share"
