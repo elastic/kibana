@@ -88,6 +88,10 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
     },
 
+    async navigateToCalendarManagement() {
+      await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
+    },
+
     async navigateToStackManagementJobsListPage() {
       // clicks the jobsListLink and loads the jobs list page
       await testSubjects.click('jobsListLink');

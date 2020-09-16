@@ -112,7 +112,11 @@ export class AddItemPopover extends Component {
                 />
               }
             >
-              <EuiTextArea value={this.state.itemsText} onChange={this.onItemsTextChange} />
+              <EuiTextArea
+                value={this.state.itemsText}
+                onChange={this.onItemsTextChange}
+                data-test-subj={'mlAddFilterListItemTextArea'}
+              />
             </EuiFormRow>
           </EuiForm>
           <EuiText size="xs">
@@ -127,6 +131,7 @@ export class AddItemPopover extends Component {
               <EuiButton
                 onClick={this.onAddButtonClick}
                 disabled={this.state.itemsText.length === 0}
+                data-test-subj={'mlAddFilterListItemButton'}
               >
                 <FormattedMessage
                   id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"

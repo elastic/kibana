@@ -7,8 +7,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
 
-export function MachineLearningSettingsFilterListProvider({ getService }: FtrProviderContext) {
+export function MachineLearningSettingsFilterListProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const testSubjects = getService('testSubjects');
 
   return {
@@ -53,6 +57,14 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
     rowSelector(filterId: string, subSelector?: string) {
       const row = `~mlFilterListsTable > ~row-${filterId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
+    },
+
+    async assertFilterListRowExists(filterId: string) {
+      return await testSubjects.existOrFail(this.rowSelector(filterId));
+    },
+
+    async assertFilterListRowMissing(filterId: string) {
+      return await testSubjects.missingOrFail(this.rowSelector(filterId));
     },
 
     async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
@@ -156,6 +168,16 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       );
     },
 
+    async assertSaveFilterListButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlSaveFilterListButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "save filter list" button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
     filterItemSelector(filterItem: string, subSelector?: string) {
       const row = `mlGridItem ${filterItem}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
@@ -195,6 +217,65 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       }
 
       await this.assertFilterItemSelected(filterItem, false);
+    },
+
+    async navigateToFilterListCreationPage() {
+      await this.assertCreateFilterListButtonEnabled(true);
+      await testSubjects.click('mlFilterListsButtonCreate');
+      await testSubjects.existOrFail('mlPageFilterListEdit');
+    },
+
+    async setFilterListId(filterId: string) {
+      const subj = 'mlNewFilterListIdInput';
+      await mlCommonUI.setValueWithChecks(subj, filterId, {
+        clearWithKeyboard: true,
+      });
+      const actualFilterListId = await testSubjects.getAttribute(subj, 'value');
+      expect(actualFilterListId).to.eql(
+        filterId,
+        `Filter list id should be '${filterId}' (got '${actualFilterListId}')`
+      );
+    },
+
+    async setFilterListDescription(description: string) {
+      await this.assertEditDescriptionButtonEnabled(true);
+      await testSubjects.click('mlFilterListEditDescriptionButton');
+      await testSubjects.existOrFail('mlFilterListDescriptionInput');
+      await mlCommonUI.setValueWithChecks('mlFilterListDescriptionInput', description, {
+        clearWithKeyboard: true,
+      });
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await this.assertFilterListDescriptionEql(description);
+    },
+
+    async addFilterListKeywords(keywords: string[]) {
+      await this.assertAddItemButtonEnabled(true);
+      await testSubjects.click('mlFilterListAddItemButton');
+      await mlCommonUI.setValueWithChecks('mlAddFilterListItemTextArea', keywords.join('\n'), {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.existOrFail('mlAddFilterListItemButton');
+      await testSubjects.click('mlAddFilterListItemButton');
+
+      for (let index = 0; index < keywords.length; index++) {
+        await this.assertFilterItemExists(keywords[index]);
+      }
+    },
+
+    async assertFilterListDescriptionEql(expectedDescription: string) {
+      const actualFilterListDescription = await testSubjects.getVisibleText(
+        'mlNewFilterListDescriptionText'
+      );
+      expect(actualFilterListDescription).to.eql(
+        expectedDescription,
+        `Filter list description should be '${expectedDescription}' (got '${actualFilterListDescription}')`
+      );
+    },
+
+    async saveFilterList() {
+      await this.assertSaveFilterListButtonEnabled(true);
+      await testSubjects.click('mlSaveFilterListButton');
+      await testSubjects.existOrFail('mlPageFilterListManagement');
     },
   };
 }

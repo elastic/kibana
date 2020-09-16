@@ -283,6 +283,7 @@ export class NewEventModal extends Component {
                   onChange={this.onDescriptionChange}
                   isInvalid={!description}
                   fullWidth
+                  data-test-subj={'mlCalendarEventDescriptionInput'}
                 />
               </EuiFormRow>
 
@@ -293,13 +294,18 @@ export class NewEventModal extends Component {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>
+            <EuiButtonEmpty onClick={closeModal} data-test-subj={'mlCancelCalendarEvent'}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
-            <EuiButton onClick={this.handleAddEvent} fill disabled={!description}>
+            <EuiButton
+              onClick={this.handleAddEvent}
+              fill
+              disabled={!description}
+              data-test-subj={'mlAddCalendarEvent'}
+            >
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.newEventModal.addButtonLabel"
                 defaultMessage="Add"

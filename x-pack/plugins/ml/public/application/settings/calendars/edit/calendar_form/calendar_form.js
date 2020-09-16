@@ -113,6 +113,7 @@ export const CalendarForm = ({
               value={calendarId}
               onChange={onCalendarIdChange}
               disabled={isEdit === true || saving === true}
+              data-test-subj="mlCalendarIdInput"
             />
           </EuiFormRow>
 
@@ -129,6 +130,7 @@ export const CalendarForm = ({
               value={description}
               onChange={onDescriptionChange}
               disabled={isEdit === true || saving === true}
+              data-test-subj="mlCalendarDescriptionInput"
             />
           </EuiFormRow>
         </Fragment>

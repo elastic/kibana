@@ -10,7 +10,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('machine learning', function () {
-    this.tags('ciGroup3');
+    this.tags('quynh');
 
     before(async () => {
       await ml.securityCommon.createMlRoles();
@@ -40,11 +40,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityUI.logout();
     });
 
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./permissions'));
-    loadTestFile(require.resolve('./pages'));
-    loadTestFile(require.resolve('./anomaly_detection'));
-    loadTestFile(require.resolve('./data_visualizer'));
-    loadTestFile(require.resolve('./data_frame_analytics'));
+    // loadTestFile(require.resolve('./feature_controls'));
+    // loadTestFile(require.resolve('./permissions'));
+    // loadTestFile(require.resolve('./pages'));
+    // loadTestFile(require.resolve('./anomaly_detection'));
+    // loadTestFile(require.resolve('./data_visualizer'));
+    // loadTestFile(require.resolve('./data_frame_analytics'));
+    loadTestFile(require.resolve('./settings'));
   });
 }

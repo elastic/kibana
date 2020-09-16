@@ -355,7 +355,10 @@ export class EditFilterListUI extends Component {
               />
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={returnToFiltersList}>
+                  <EuiButtonEmpty
+                    onClick={returnToFiltersList}
+                    data-test-subj={'mlCancelFilterListButton'}
+                  >
                     <FormattedMessage
                       id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
                       defaultMessage="Cancel"
@@ -371,6 +374,7 @@ export class EditFilterListUI extends Component {
                       canCreateFilter === false
                     }
                     fill
+                    data-test-subj={'mlSaveFilterListButton'}
                   >
                     <FormattedMessage
                       id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
