@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { When, Then } from 'cypress-cucumber-preprocessor/steps';
+import { DEFAULT_TIMEOUT } from './csm_dashboard';
+
+When(`a user click inside url search field`, () => {
+  // wait for all loading to finish
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('span[data-cy=csmUrlFilter]', DEFAULT_TIMEOUT).within(() => {
+    cy.get('input.euiFieldSearch').click();
+  });
+});
+
+Then(`it display top pages in the suggestion popover`, () => {
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+
+  cy.get('div.euiPopover__panel-isOpen', DEFAULT_TIMEOUT).within(() => {
+    const listOfUrls = cy.get('li.euiSelectableListItem');
+    listOfUrls.should('have.length', 5);
+
+    const actualUrlsText = [
+      'http://opbeans-node:3000/dashboardPage views: 17Page load duration: 108.734 ms Select',
+      'http://opbeans-node:3000/ordersPage views: 14Page load duration: 71.5895 ms',
+    ];
+
+    cy.get('li.euiSelectableListItem')
+      .eq(0)
+      .should('have.text', actualUrlsText[0]);
+    cy.get('li.euiSelectableListItem')
+      .eq(1)
+      .should('have.text', actualUrlsText[1]);
+  });
+});

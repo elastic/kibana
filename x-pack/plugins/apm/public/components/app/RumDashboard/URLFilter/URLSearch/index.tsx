@@ -84,6 +84,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   return (
     <EuiSelectableTemplateSitewide
+      data-test-subj="csmSearchFieldSuggestion"
       singleSelection={false}
       isLoading={status !== 'success'}
       onChange={onChange}

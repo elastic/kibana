@@ -28,7 +28,7 @@ export function URLFilter() {
   });
 
   return (
-    <>
+    <span data-cy="csmUrlFilter">
       <EuiSpacer size="s" />
       <EuiTitle size="xxxs" textTransform="uppercase">
         <h4>{I18LABELS.url}</h4>
@@ -60,6 +60,6 @@ export function URLFilter() {
         );
       })}
       <EuiSpacer size="s" />
-    </>
+    </span>
   );
 }
