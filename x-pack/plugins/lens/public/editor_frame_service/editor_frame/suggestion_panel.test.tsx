@@ -20,8 +20,8 @@ import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plug
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import chartTableSVG from '../../..assets/chart_datatable.svg';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { LensIconChartDatatable } from '../../assets/chart_datatable';
 
 jest.mock('./suggestion_helpers');
 
@@ -260,7 +260,7 @@ describe('suggestion_panel', () => {
     getSuggestionsMock.mockReturnValue([
       {
         datasourceState: {},
-        previewIcon: chartTableSVG,
+        previewIcon: LensIconChartDatatable,
         score: 0.5,
         visualizationState: suggestion1State,
         visualizationId: 'vis',
@@ -288,6 +288,6 @@ describe('suggestion_panel', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     expect(wrapper.find(EuiIcon)).toHaveLength(1);
-    expect(wrapper.find(EuiIcon).prop('type')).toEqual(chartTableSVG);
+    expect(wrapper.find(EuiIcon).prop('type')).toEqual(LensIconChartDatatable);
   });
 });
