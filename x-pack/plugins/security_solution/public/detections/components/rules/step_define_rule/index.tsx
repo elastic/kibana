@@ -244,7 +244,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   }}
                   config={{
                     ...schema.queryBar,
-                    helpText: i18n.EQL_QUERY_BAR_HELP_TEXT,
                     label: i18n.EQL_QUERY_BAR_LABEL,
                     labelAppend: <EqlOverviewLink />,
                   }}

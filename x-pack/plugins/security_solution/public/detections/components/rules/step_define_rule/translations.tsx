@@ -84,10 +84,3 @@ export const EQL_QUERY_BAR_LABEL = i18n.translate(
     defaultMessage: 'EQL query',
   }
 );
-
-export const EQL_QUERY_BAR_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarHelpText',
-  {
-    defaultMessage: 'Enter an EQL query',
-  }
-);
