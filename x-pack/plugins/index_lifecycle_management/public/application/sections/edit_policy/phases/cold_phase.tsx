@@ -31,25 +31,10 @@ const i18nTexts = {
     defaultMessage: 'Freeze index',
   }),
   dataTierAllocation: {
-    title: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.dataTier.title', {
-      defaultMessage: 'Move data to cold tier',
-    }),
     description: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.dataTier.description', {
-      defaultMessage: 'Store infrequently accessed data on inexpensive hardware.',
+      defaultMessage:
+        'Move data to data nodes optimized for less frequent, read-only access. Cold data can be stored on inexpensive hardware.',
     }),
-    defaultAllocationNotAvailable: {
-      title: i18n.translate(
-        'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableTitle',
-        { defaultMessage: 'No nodes assigned to the cold tier' }
-      ),
-      body: i18n.translate(
-        'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableBody',
-        {
-          defaultMessage:
-            'This policy will not complete allocation because there are no cold nodes. Assign at least one node to the cold tier.',
-        }
-      ),
-    },
   },
 };
 
@@ -132,18 +117,11 @@ export const ColdPhase: FunctionComponent<Props> = ({
           <Fragment>
             {/* Data tier allocation section */}
             <DataTierAllocationField
-              title={i18nTexts.dataTierAllocation.title}
               description={i18nTexts.dataTierAllocation.description}
               phase={coldProperty}
               setPhaseData={setPhaseData}
               isShowingErrors={isShowingErrors}
               phaseData={phaseData}
-              defaultAllocationWarningTitle={
-                i18nTexts.dataTierAllocation.defaultAllocationNotAvailable.title
-              }
-              defaultAllocationWarningBody={
-                i18nTexts.dataTierAllocation.defaultAllocationNotAvailable.body
-              }
             />
 
             {/* Replicas section */}

@@ -6,32 +6,56 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import { i18nTexts } from './data_tier_allocation';
+import { PhaseWithAllocation } from '../../../../../../common/types';
 
-export const NoNodeAttributesWarning: FunctionComponent = () => {
+const i18nTexts = {
+  title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingLabel', {
+    defaultMessage: 'No node attributes configured in elasticsearch.yml',
+  }),
+  warm: {
+    body: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.warm.nodeAttributesMissingDescription',
+      {
+        defaultMessage:
+          'Define custom node attributes in elasticsearch.yml to use attribute-based allocation. Warm nodes will be used instead.',
+      }
+    ),
+  },
+  cold: {
+    body: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.cold.nodeAttributesMissingDescription',
+      {
+        defaultMessage:
+          'Define custom node attributes in elasticsearch.yml to use attribute-based allocation. Cold nodes will be used instead.',
+      }
+    ),
+  },
+  frozen: {
+    body: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.frozen.nodeAttributesMissingDescription',
+      {
+        defaultMessage:
+          'Define custom node attributes in elasticsearch.yml to use attribute-based allocation. Frozen nodes will be used instead.',
+      }
+    ),
+  },
+};
+
+export const NoNodeAttributesWarning: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
+  phase,
+}) => {
   return (
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
         data-test-subj="noNodeAttributesWarning"
         style={{ maxWidth: 400 }}
-        title={
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingLabel"
-            defaultMessage="No node attributes configured in elasticsearch.yml"
-          />
-        }
+        title={i18nTexts.title}
         color="warning"
       >
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingDescription"
-          defaultMessage="You must define custom node attributes to control shard allocation. {defaultOption} allocation will be used."
-          values={{
-            defaultOption: <b>{i18nTexts.allocationOptions.default.input}</b>,
-          }}
-        />
+        {i18nTexts[phase].body}
       </EuiCallOut>
     </>
   );

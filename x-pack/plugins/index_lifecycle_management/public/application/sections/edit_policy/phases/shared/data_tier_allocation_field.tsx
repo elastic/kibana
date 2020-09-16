@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 import { PhaseWithAllocationAction, PhaseWithAllocation } from '../../../../../../common/types';
@@ -18,31 +19,31 @@ import {
 import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
 import { isPhaseDefaultDataAllocationCompatible } from '../../../../lib/data_tiers';
 
+const i18nTexts = {
+  title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
+    defaultMessage: 'Data allocation',
+  }),
+};
+
 interface Props {
-  title: React.ReactNode;
   description: React.ReactNode;
   phase: PhaseWithAllocation;
   setPhaseData: (dataKey: keyof PhaseWithAllocationAction, value: string) => void;
   isShowingErrors: boolean;
   errors?: PhaseValidationErrors<PhaseWithAllocationAction>;
   phaseData: PhaseWithAllocationAction;
-  defaultAllocationWarningTitle: string;
-  defaultAllocationWarningBody: string;
 }
 
 /**
  * Top-level layout control for the data tier allocation field.
  */
 export const DataTierAllocationField: FunctionComponent<Props> = ({
-  title,
   description,
   phase,
   phaseData,
   setPhaseData,
   isShowingErrors,
   errors,
-  defaultAllocationWarningBody,
-  defaultAllocationWarningTitle,
 }) => {
   return (
     <NodesDataProvider>
@@ -51,7 +52,11 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
         const hasNodeAttrs = Boolean(Object.keys(nodesData.nodesByAttributes ?? {}).length);
 
         return (
-          <EuiDescribedFormGroup title={<h3>{title}</h3>} description={description} fullWidth>
+          <EuiDescribedFormGroup
+            title={<h3>{i18nTexts.title}</h3>}
+            description={description}
+            fullWidth
+          >
             <EuiFormRow>
               <>
                 <DataTierAllocation
@@ -67,14 +72,11 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({
                 {/* Data tier related warnings */}
 
                 {phaseData.dataTierAllocationType === 'default' && !isCompatible && (
-                  <DefaultAllocationWarning
-                    title={defaultAllocationWarningTitle}
-                    body={defaultAllocationWarningBody}
-                  />
+                  <DefaultAllocationWarning phase={phase} />
                 )}
 
                 {phaseData.dataTierAllocationType === 'custom' && !hasNodeAttrs && (
-                  <NoNodeAttributesWarning />
+                  <NoNodeAttributesWarning phase={phase} />
                 )}
               </>
             </EuiFormRow>

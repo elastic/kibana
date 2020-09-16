@@ -16,41 +16,107 @@ import './data_tier_allocation.scss';
 
 type SelectOptions = EuiSuperSelectOption<DataTierAllocationType>;
 
-export const i18nTexts = {
+const i18nTexts = {
   allocationFieldLabel: i18n.translate(
     'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.allocationFieldLabel',
     { defaultMessage: 'Data tier options' }
   ),
   allocationOptions: {
-    default: {
-      input: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.defaultOption.input',
-        { defaultMessage: 'Default' }
-      ),
-      helpText: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.autoOption.helpText',
-        { defaultMessage: 'Recommended for most cases.' }
-      ),
+    warm: {
+      default: {
+        input: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.defaultOption.input',
+          { defaultMessage: 'Use warm nodes (recommended)' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.defaultOption.helpText',
+          { defaultMessage: 'Move data to nodes in the warm tier.' }
+        ),
+      },
+      none: {
+        inputDisplay: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.noneOption.input',
+          { defaultMessage: 'Off' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.noneOption.helpText',
+          { defaultMessage: 'Do not move data in the warm phase.' }
+        ),
+      },
+      custom: {
+        inputDisplay: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.customOption.input',
+          { defaultMessage: 'Custom' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.customOption.helpText',
+          { defaultMessage: 'Move data based on node attributes.' }
+        ),
+      },
     },
-    none: {
-      inputDisplay: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.input',
-        { defaultMessage: 'Off' }
-      ),
-      helpText: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.noneOption.helpText',
-        { defaultMessage: 'Data will not be moved in this phase.' }
-      ),
+    cold: {
+      default: {
+        input: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.defaultOption.input',
+          { defaultMessage: 'Use cold nodes (recommended)' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.defaultOption.helpText',
+          { defaultMessage: 'Move data to nodes in the cold tier.' }
+        ),
+      },
+      none: {
+        inputDisplay: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.noneOption.input',
+          { defaultMessage: 'Off' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.noneOption.helpText',
+          { defaultMessage: 'Do not move data in the cold phase.' }
+        ),
+      },
+      custom: {
+        inputDisplay: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.customOption.input',
+          { defaultMessage: 'Custom' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.customOption.helpText',
+          { defaultMessage: 'Move data based on node attributes.' }
+        ),
+      },
     },
-    custom: {
-      inputDisplay: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.customOption.input',
-        { defaultMessage: 'Custom' }
-      ),
-      helpText: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.customOption.helpText',
-        { defaultMessage: 'Configure node attribute-based allocation.' }
-      ),
+    frozen: {
+      default: {
+        input: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.defaultOption.input',
+          { defaultMessage: 'Use frozen nodes (recommended)' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.defaultOption.helpText',
+          { defaultMessage: 'Move data to nodes in the frozen tier.' }
+        ),
+      },
+      none: {
+        inputDisplay: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.noneOption.input',
+          { defaultMessage: 'Off' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.noneOption.helpText',
+          { defaultMessage: 'Do not move data in the frozen phase.' }
+        ),
+      },
+      custom: {
+        inputDisplay: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.customOption.input',
+          { defaultMessage: 'Custom' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.customOption.helpText',
+          { defaultMessage: 'Move data based on node attributes.' }
+        ),
+      },
     },
   },
 };
@@ -70,13 +136,13 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
             [
               {
                 value: 'default',
-                inputDisplay: i18nTexts.allocationOptions.default.input,
+                inputDisplay: i18nTexts.allocationOptions[phase].default.input,
                 dropdownDisplay: (
                   <>
-                    <strong>{i18nTexts.allocationOptions.default.input}</strong>
+                    <strong>{i18nTexts.allocationOptions[phase].default.input}</strong>
                     <EuiText size="s" color="subdued">
                       <p className="euiTextColor--subdued">
-                        {i18nTexts.allocationOptions.default.helpText}
+                        {i18nTexts.allocationOptions[phase].default.helpText}
                       </p>
                     </EuiText>
                   </>
@@ -84,13 +150,13 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
               },
               {
                 value: 'none',
-                inputDisplay: i18nTexts.allocationOptions.none.inputDisplay,
+                inputDisplay: i18nTexts.allocationOptions[phase].none.inputDisplay,
                 dropdownDisplay: (
                   <>
-                    <strong>{i18nTexts.allocationOptions.none.inputDisplay}</strong>
+                    <strong>{i18nTexts.allocationOptions[phase].none.inputDisplay}</strong>
                     <EuiText size="s" color="subdued">
                       <p className="euiTextColor--subdued">
-                        {i18nTexts.allocationOptions.none.helpText}
+                        {i18nTexts.allocationOptions[phase].none.helpText}
                       </p>
                     </EuiText>
                   </>
@@ -99,13 +165,13 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
               {
                 'data-test-subj': 'customDataAllocationOption',
                 value: 'custom',
-                inputDisplay: i18nTexts.allocationOptions.custom.inputDisplay,
+                inputDisplay: i18nTexts.allocationOptions[phase].custom.inputDisplay,
                 dropdownDisplay: (
                   <>
-                    <strong>{i18nTexts.allocationOptions.custom.inputDisplay}</strong>
+                    <strong>{i18nTexts.allocationOptions[phase].custom.inputDisplay}</strong>
                     <EuiText size="s" color="subdued">
                       <p className="euiTextColor--subdued">
-                        {i18nTexts.allocationOptions.custom.helpText}
+                        {i18nTexts.allocationOptions[phase].custom.helpText}
                       </p>
                     </EuiText>
                   </>
