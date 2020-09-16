@@ -33,7 +33,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
    */
   class ListingTable {
     private async getSearchFilter() {
-      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      const searchFilter = await find.allByCssSelector('main .euiFieldSearch');
       return searchFilter[0];
     }
 

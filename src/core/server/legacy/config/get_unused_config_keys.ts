@@ -18,8 +18,8 @@
  */
 
 import { difference } from 'lodash';
+import { getFlattenedObject } from '@kbn/std';
 import { unset } from '../../../../legacy/utils';
-import { getFlattenedObject } from '../../../utils';
 import { hasConfigPathIntersection } from '../../config';
 import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getFlattenedObject } from '../../../../../../../src/core/public';
+export { getFlattenedObject } from '@kbn/std';
 
 export {
   AgentStatusKueryHelper,
