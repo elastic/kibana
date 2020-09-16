@@ -131,7 +131,12 @@ export default () =>
       }),
     }).default(),
 
-    plugins: HANDLED_IN_NEW_PLATFORM,
+    // still used by the legacy i18n mixin
+    plugins: Joi.object({
+      paths: Joi.array().items(Joi.string()).default([]),
+      scanDirs: Joi.array().items(Joi.string()).default([]),
+      initialize: Joi.boolean().default(true),
+    }).default(),
 
     path: HANDLED_IN_NEW_PLATFORM,
 
