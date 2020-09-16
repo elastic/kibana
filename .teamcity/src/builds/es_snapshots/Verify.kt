@@ -2,10 +2,9 @@ package builds.es_snapshots
 
 import builds.default.DEFAULT_CI_GROUP_COUNT
 import builds.default.DefaultCiGroup
+import builds.default.defaultCiGroups
 import dependsOn
-import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
-import jetbrains.buildServer.configs.kotlin.v2019_2.BuildTypeSettings
-import jetbrains.buildServer.configs.kotlin.v2019_2.Project
+import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import kibanaAgent
 
@@ -18,6 +17,8 @@ object VerifyProject : Project({
     name = "ES Build"
 
     kibanaAgent(2)
+
+    templates(Template())
 
     steps {
       script {
@@ -33,26 +34,42 @@ object VerifyProject : Project({
 
   buildType(esBuild)
 
-  val defaultCiGroups = (1..DEFAULT_CI_GROUP_COUNT).map {
-    DefaultCiGroup(it) {
-      id("ES_Verify_DefaultCiGroup_$it")
+//  val defaultCiGroups = (1..DEFAULT_CI_GROUP_COUNT).map {
+//    DefaultCiGroup(it) {
+//      id("ES_Verify_DefaultCiGroup_$it")
+//
+//      // this.depParamRefs
+//      params {
+//        val buildId = esBuild.id?.value ?: ""
+//        param("env.ES_SNAPSHOT_MANIFEST", "%dep.$buildId.env.ES_SNAPSHOT_MANIFEST%")
+//      }
+//
+//      dependsOn(esBuild)
+//    }
+//  }
 
+  val cloneForVerify = { build: BuildType ->
+    build.copy {
+      id("ES_Verify_" + build.id?.toString())
       params {
         val buildId = esBuild.id?.value ?: ""
         param("env.ES_SNAPSHOT_MANIFEST", "%dep.$buildId.env.ES_SNAPSHOT_MANIFEST%")
       }
-
       dependsOn(esBuild)
     }
   }
 
-  defaultCiGroups.forEach { buildType(it) }
+  val defaultCiGroupsCloned = defaultCiGroups.map { cloneForVerify(it) }
+
+  defaultCiGroupsCloned.forEach {
+    buildType(it)
+  }
 
   buildType(BuildType {
     id("ES_Verify_Default_CIGroups_Composite")
     name = "CI Groups"
     type = BuildTypeSettings.Type.COMPOSITE
 
-    dependsOn(*defaultCiGroups.toTypedArray())
+    dependsOn(*defaultCiGroupsCloned.toTypedArray())
   })
 })
