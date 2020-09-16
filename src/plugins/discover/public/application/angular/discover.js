@@ -972,7 +972,15 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
-    $scope.indexPattern.popularizeField(field, 1);
+    const { indexPattern } = $scope;
+    indexPattern.fields.getByName(field.name).count += 1;
+    core.savedObjects.client
+      .update('index-pattern', indexPattern.id, indexPattern.prepBody(), {
+        version: indexPattern.version,
+      })
+      .then((res) => {
+        indexPattern.version = res.version;
+      });
     const newFilters = esFilters.generateFilters(
       filterManager,
       field,
@@ -985,7 +993,15 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.addColumn = function addColumn(columnName) {
     if (uiCapabilities.discover.save) {
-      $scope.indexPattern.popularizeField(columnName, 1);
+      const { indexPattern } = $scope;
+      indexPattern.fields.getByName(columnName).count += 1;
+      core.savedObjects.client
+        .update('index-pattern', indexPattern.id, indexPattern.prepBody(), {
+          version: indexPattern.version,
+        })
+        .then((res) => {
+          indexPattern.version = res.version;
+        });
     }
     const columns = columnActions.addColumn($scope.state.columns, columnName);
     setAppState({ columns });
@@ -993,7 +1009,15 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.removeColumn = function removeColumn(columnName) {
     if (uiCapabilities.discover.save) {
-      $scope.indexPattern.popularizeField(columnName, 1);
+      const { indexPattern } = $scope;
+      indexPattern.fields.getByName(columnName).count += 1;
+      core.savedObjects.client
+        .update('index-pattern', indexPattern.id, indexPattern.prepBody(), {
+          version: indexPattern.version,
+        })
+        .then((res) => {
+          indexPattern.version = res.version;
+        });
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
     // The state's sort property is an array of [sortByColumn,sortDirection]
