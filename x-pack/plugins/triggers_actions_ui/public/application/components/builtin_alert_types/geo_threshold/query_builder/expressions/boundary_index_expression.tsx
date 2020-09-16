@@ -31,12 +31,7 @@ export const BoundaryIndexExpression: React.FunctionComponent<AlertTypeParamsExp
 
   const indexPopover = (
     <Fragment>
-      <EuiFormRow
-        id="geoIndexPatternSelect"
-        fullWidth
-        isInvalid={false /* TODO: Determine error conditions */}
-        error={errors.index}
-      >
+      <EuiFormRow id="geoIndexPatternSelect" fullWidth error={errors.index}>
         <GeoIndexPatternSelect
           onChange={(_indexPattern) => {
             if (!_indexPattern) {
@@ -54,12 +49,12 @@ export const BoundaryIndexExpression: React.FunctionComponent<AlertTypeParamsExp
       <EuiFormRow
         id="geoField"
         fullWidth
-        label={i18n.translate('xpack.maps.source.esSearch.geofieldLabel', {
+        label={i18n.translate('xpack.triggersActionsUI.geoThreshold.geofieldLabel', {
           defaultMessage: 'Geospatial field',
         })}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.source.esSearch.selectLabel', {
+          placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.selectLabel', {
             defaultMessage: 'Select geo field',
           })}
           value={boundaryGeoField}
@@ -80,12 +75,9 @@ export const BoundaryIndexExpression: React.FunctionComponent<AlertTypeParamsExp
       defaultValue={'Select an index pattern and geo shape field'}
       value={boundaryIndexPattern.title}
       popoverContent={indexPopover}
-      expressionDescription={i18n.translate(
-        'xpack.triggersActionsUI.sections.alertAdd.geoThreshold.indexLabel',
-        {
-          defaultMessage: 'index',
-        }
-      )}
+      expressionDescription={i18n.translate('xpack.triggersActionsUI.geoThreshold.indexLabel', {
+        defaultMessage: 'index',
+      })}
     />
   );
 };

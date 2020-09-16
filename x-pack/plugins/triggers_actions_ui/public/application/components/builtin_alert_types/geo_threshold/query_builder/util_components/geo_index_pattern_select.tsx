@@ -72,39 +72,42 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     return (
       <>
         <EuiCallOut
-          title={i18n.translate('xpack.maps.noIndexPattern.messageTitle', {
-            defaultMessage: `Couldn't find any index patterns with geospatial fields`,
-          })}
+          title={i18n.translate(
+            'xpack.triggersActionsUI.geoThreshold.noIndexPattern.messageTitle',
+            {
+              defaultMessage: `Couldn't find any index patterns with geospatial fields`,
+            }
+          )}
           color="warning"
         >
           <p>
             <FormattedMessage
-              id="xpack.maps.noIndexPattern.doThisPrefixDescription"
+              id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
             <EuiLink
               href={this.props.http.basePath.prepend(`/app/management/kibana/indexPatterns`)}
             >
               <FormattedMessage
-                id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
+                id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.doThisLinkTextDescription"
                 defaultMessage="create an index pattern"
               />
             </EuiLink>
             <FormattedMessage
-              id="xpack.maps.noIndexPattern.doThisSuffixDescription"
+              id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.doThisSuffixDescription"
               defaultMessage=" with geospatial fields."
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.maps.noIndexPattern.hintDescription"
+              id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.hintDescription"
               defaultMessage="Don't have any geospatial data sets? "
             />
             <EuiLink
               href={this.props.http.basePath.prepend('/app/home#/tutorial_directory/sampleData')}
             >
               <FormattedMessage
-                id="xpack.maps.noIndexPattern.getStartedLinkText"
+                id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.getStartedLinkText"
                 defaultMessage="Get started with some sample data sets."
               />
             </EuiLink>
@@ -122,7 +125,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
         {this._renderNoIndexPatternWarning()}
 
         <EuiFormRow
-          label={i18n.translate('xpack.maps.indexPatternSelectLabel', {
+          label={i18n.translate('xpack.triggersActionsUI.geoThreshold.indexPatternSelectLabel', {
             defaultMessage: 'Index pattern',
           })}
         >
@@ -130,9 +133,12 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             isDisabled={this.state.noGeoIndexPatternsExist}
             indexPatternId={this.props.value}
             onChange={this._onIndexPatternSelect}
-            placeholder={i18n.translate('xpack.maps.indexPatternSelectPlaceholder', {
-              defaultMessage: 'Select index pattern',
-            })}
+            placeholder={i18n.translate(
+              'xpack.triggersActionsUI.geoThreshold.indexPatternSelectPlaceholder',
+              {
+                defaultMessage: 'Select index pattern',
+              }
+            )}
             fieldTypes={this.props.geoTypes || ES_GEO_FIELD_TYPES}
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}

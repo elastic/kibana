@@ -66,7 +66,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
 
   const hasExpressionErrors = false;
   const expressionErrorMessage = i18n.translate(
-    'xpack.triggersActionsUI.sections.alertAdd.geoThreshold.fixErrorInExpressionBelowValidationMessage',
+    'xpack.triggersActionsUI.geoThreshold.fixErrorInExpressionBelowValidationMessage',
     {
       defaultMessage: 'Expression contains errors.',
     }
@@ -113,7 +113,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.selectEntity"
+            id="xpack.triggersActionsUI.geoThreshold.selectEntity"
             defaultMessage="Select entity:"
           />
         </h5>
@@ -143,7 +143,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+            id="xpack.triggersActionsUI.geoThreshold.selectIndex"
             defaultMessage="Define the condition:"
           />
         </h5>
@@ -172,7 +172,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           </EuiFormRow>
         }
         expressionDescription={i18n.translate(
-          'xpack.triggersActionsUI.sections.alertAdd.geoThreshold.indexLabel',
+          'xpack.triggersActionsUI.geoThreshold.whenEntityLabel',
           {
             defaultMessage: 'when entity',
           }
@@ -183,7 +183,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+            id="xpack.triggersActionsUI.geoThreshold.selectBoundaryIndex"
             defaultMessage="Select boundary:"
           />
         </h5>

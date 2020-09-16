@@ -10,14 +10,10 @@ import {
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeParamsExpressionProps } from '../../../../../../types';
-import { GeoThresholdAlertParams } from '../../types';
-import { AlertsContextValue } from '../../../../../context/alerts_context';
 
 export const ExpressionWithPopover: ({
   popoverContent,

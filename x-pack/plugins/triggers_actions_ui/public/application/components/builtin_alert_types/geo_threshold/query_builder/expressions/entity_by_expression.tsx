@@ -18,15 +18,10 @@ export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressi
   AlertsContextValue
 >> = ({ errors, entity, setAlertParamsEntity, indexFields, isInvalid }) => {
   const indexPopover = (
-    <EuiFormRow
-      id="someSelect"
-      fullWidth
-      isInvalid={false /* TODO: Determine error conditions */}
-      error={errors.index}
-    >
+    <EuiFormRow id="someSelect" fullWidth error={errors.index}>
       <SingleFieldSelect
         placeholder={i18n.translate(
-          'xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder',
+          'xpack.triggersActionsUI.geoThreshold.topHitsSplitFieldSelectPlaceholder',
           {
             defaultMessage: 'Select entity field',
           }
@@ -46,12 +41,9 @@ export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressi
       value={entity}
       defaultValue={'Select entity field'}
       popoverContent={indexPopover}
-      expressionDescription={i18n.translate(
-        'xpack.triggersActionsUI.sections.alertAdd.geoThreshold.entityByLabel',
-        {
-          defaultMessage: 'by',
-        }
-      )}
+      expressionDescription={i18n.translate('xpack.triggersActionsUI.geoThreshold.entityByLabel', {
+        defaultMessage: 'by',
+      })}
     />
   );
 };

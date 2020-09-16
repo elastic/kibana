@@ -72,12 +72,7 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
 
   const indexPopover = (
     <Fragment>
-      <EuiFormRow
-        id="geoIndexPatternSelect"
-        fullWidth
-        isInvalid={false /* TODO: Determine error conditions */}
-        error={errors.index}
-      >
+      <EuiFormRow id="geoIndexPatternSelect" fullWidth error={errors.index}>
         <GeoIndexPatternSelect
           onChange={(_indexPattern) => {
             // reset time field and expression fields if indices are deleted
@@ -99,15 +94,13 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
         fullWidth
         label={
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.threshold.timeFieldLabel"
+            id="xpack.triggersActionsUI.geoThreshold.timeFieldLabel"
             defaultMessage="Time field"
           />
         }
-        isInvalid={false /* TODO: Determine error conditions */}
-        error={'' /* TODO: Determine error conditions */}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.source.esSearch.selectLabel', {
+          placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.selectTimeLabel', {
             defaultMessage: 'Select time field',
           })}
           value={timeField}
@@ -121,12 +114,12 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
       <EuiFormRow
         id="geoField"
         fullWidth
-        label={i18n.translate('xpack.maps.source.esSearch.geofieldLabel', {
+        label={i18n.translate('xpack.triggersActionsUI.geoThreshold.geofieldLabel', {
           defaultMessage: 'Geospatial field',
         })}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.source.esSearch.selectLabel', {
+          placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.selectGeoLabel', {
             defaultMessage: 'Select geo field',
           })}
           value={geoField}
@@ -147,7 +140,7 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
       defaultValue={'Select an index pattern and geo shape/point field'}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate(
-        'xpack.triggersActionsUI.sections.alertAdd.geoThreshold.entityIndexLabel',
+        'xpack.triggersActionsUI.geoThreshold.entityIndexLabel',
         {
           defaultMessage: 'index',
         }
