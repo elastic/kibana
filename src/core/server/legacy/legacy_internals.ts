@@ -19,6 +19,7 @@
 
 import { KibanaRequest, LegacyRequest } from '../http';
 import { ILegacyInternals, LegacyVars, VarsInjector } from './types';
+import { mergeVars } from './merge_vars';
 
 /**
  * @internal
@@ -52,6 +53,6 @@ export class LegacyInternals implements ILegacyInternals {
     request: KibanaRequest | LegacyRequest,
     injected: LegacyVars = {}
   ) {
-    return Promise.resolve(injected);
+    return mergeVars({}, await this.getInjectedUiAppVars(id), injected);
   }
 }

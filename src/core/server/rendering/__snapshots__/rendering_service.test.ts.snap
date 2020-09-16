@@ -34,7 +34,6 @@ Object {
     "buildSha": Any<String>,
     "bundleId": "app:core",
     "devMode": true,
-    "nav": Array [],
     "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
@@ -87,7 +86,6 @@ Object {
     "buildSha": Any<String>,
     "bundleId": "app:core",
     "devMode": true,
-    "nav": Array [],
     "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
@@ -140,7 +138,6 @@ Object {
     "buildSha": Any<String>,
     "bundleId": "app:core",
     "devMode": true,
-    "nav": Array [],
     "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
@@ -197,7 +194,6 @@ Object {
     "buildSha": Any<String>,
     "bundleId": "app:core",
     "devMode": true,
-    "nav": Array [],
     "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
@@ -250,7 +246,6 @@ Object {
     "buildSha": Any<String>,
     "bundleId": "app:core",
     "devMode": true,
-    "nav": Array [],
     "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
