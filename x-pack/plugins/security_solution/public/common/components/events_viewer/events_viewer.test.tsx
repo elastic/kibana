@@ -9,7 +9,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
-import { mockIndexPattern, TestProviders } from '../../mock';
+import { mockIndexNames, mockIndexPattern, TestProviders } from '../../mock';
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
 import { wait as waitFor } from '@testing-library/react';
 
@@ -17,7 +17,7 @@ import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { EventsViewer } from './events_viewer';
 import { defaultHeaders } from './default_headers';
-import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
+import { useSourcererScope } from '../../containers/sourcerer';
 import { mockBrowserFields, mockDocValueFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -30,8 +30,8 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
-const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
-jest.mock('../../../detections/containers/detection_engine/rules/fetch_index_patterns');
+const mockUseSourcererScope: jest.Mock = useSourcererScope as jest.Mock;
+jest.mock('../../containers/sourcerer');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -42,9 +42,10 @@ const to = '2019-08-27T22:10:56.794Z';
 
 const defaultMocks = {
   browserFields: mockBrowserFields,
-  indexPatterns: mockIndexPattern,
   docValueFields: mockDocValueFields,
-  isLoading: false,
+  indexPattern: mockIndexPattern,
+  loading: false,
+  selectedPatterns: mockIndexNames,
 };
 
 const utilityBar = (refetch: inputsModel.Refetch, totalCount: number) => (
@@ -60,7 +61,7 @@ const eventsViewerDefaultProps = {
   end: to,
   filters: [],
   id: TimelineId.detectionsPage,
-  indexNames: [],
+  indexNames: mockIndexNames,
   indexPattern: mockIndexPattern,
   isLive: false,
   isLoadingIndexPattern: false,
@@ -77,7 +78,7 @@ const eventsViewerDefaultProps = {
     columnId: 'foo',
     sortDirection: 'none' as SortDirection,
   },
-  scopeId: SourcererScopeName.default,
+  scopeId: SourcererScopeName.timeline,
   toggleColumn: jest.fn(),
   utilityBar,
 };
@@ -90,131 +91,31 @@ describe('EventsViewer', () => {
     end: to,
     id: 'test-stateful-events-viewer',
     start: from,
-    scopeId: SourcererScopeName.default,
+    scopeId: SourcererScopeName.timeline,
   };
 
-  beforeEach(() => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks }]);
+  beforeAll(() => {
+    mockUseSourcererScope.mockImplementation(() => defaultMocks);
   });
-
-  test('it renders the "Showing..." subtitle with the expected event count', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer {...testProps} />
-        </MockedProvider>
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual(
-        'Showing: 12 events'
+  describe('rendering', () => {
+    test('it renders the "Showing..." subtitle with the expected event count', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <StatefulEventsViewer {...testProps} />
+          </MockedProvider>
+        </TestProviders>
       );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual(
+          'Showing: 12 events'
+        );
+      });
     });
-  });
 
-  test('it does NOT render fetch index pattern is loading', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
-
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer {...testProps} />
-        </MockedProvider>
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
-        false
-      );
-    });
-  });
-
-  test('it does NOT render when start is empty', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
-    testProps = {
-      ...testProps,
-      start: '',
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer {...testProps} />
-        </MockedProvider>
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
-        false
-      );
-    });
-  });
-
-  test('it does NOT render when end is empty', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
-    testProps = {
-      ...testProps,
-      end: '',
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer {...testProps} />
-        </MockedProvider>
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
-        false
-      );
-    });
-  });
-
-  test('it renders the Fields Browser as a settings gear', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer {...testProps} />
-        </MockedProvider>
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
-    });
-  });
-
-  test('it renders the footer containing the Load More button', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer {...testProps} />
-        </MockedProvider>
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find(`[data-test-subj="TimelineMoreButton"]`).first().exists()).toBe(true);
-    });
-  });
-
-  defaultHeaders.forEach((header) => {
-    test(`it renders the ${header.id} default EventsViewer column header`, async () => {
+    test('it renders the Fields Browser as a settings gear', async () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
@@ -226,11 +127,111 @@ describe('EventsViewer', () => {
       await waitFor(() => {
         wrapper.update();
 
-        defaultHeaders.forEach((h) =>
-          expect(wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()).toBe(
-            true
-          )
+        expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
+      });
+    });
+
+    test('it renders the footer containing the Load More button', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <StatefulEventsViewer {...testProps} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="TimelineMoreButton"]`).first().exists()).toBe(true);
+      });
+    });
+
+    defaultHeaders.forEach((header) => {
+      test(`it renders the ${header.id} default EventsViewer column header`, async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+              <StatefulEventsViewer {...testProps} />
+            </MockedProvider>
+          </TestProviders>
         );
+
+        await waitFor(() => {
+          wrapper.update();
+
+          defaultHeaders.forEach((h) =>
+            expect(
+              wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()
+            ).toBe(true)
+          );
+        });
+      });
+    });
+    describe('loading', () => {
+      beforeAll(() => {
+        mockUseSourcererScope.mockImplementation(() => ({ ...defaultMocks, loading: true }));
+      });
+      test('it does NOT render fetch index pattern is loading', async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+              <StatefulEventsViewer {...testProps} />
+            </MockedProvider>
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          wrapper.update();
+
+          expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+            false
+          );
+        });
+      });
+
+      test('it does NOT render when start is empty', async () => {
+        testProps = {
+          ...testProps,
+          start: '',
+        };
+        const wrapper = mount(
+          <TestProviders>
+            <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+              <StatefulEventsViewer {...testProps} />
+            </MockedProvider>
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          wrapper.update();
+
+          expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+            false
+          );
+        });
+      });
+
+      test('it does NOT render when end is empty', async () => {
+        testProps = {
+          ...testProps,
+          end: '',
+        };
+        const wrapper = mount(
+          <TestProviders>
+            <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+              <StatefulEventsViewer {...testProps} />
+            </MockedProvider>
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          wrapper.update();
+
+          expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+            false
+          );
+        });
       });
     });
   });

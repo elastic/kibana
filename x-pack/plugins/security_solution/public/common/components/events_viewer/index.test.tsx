@@ -11,26 +11,15 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import '../../mock/match_media';
 // we don't have the types for waitFor just yet, so using "as waitFor" until when we do
 import { wait as waitFor } from '@testing-library/react';
-import { mockIndexPattern, TestProviders } from '../../mock';
+import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
-import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
-import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
-
-const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
-jest.mock('../../../detections/containers/detection_engine/rules/fetch_index_patterns');
-mockUseFetchIndexPatterns.mockImplementation(() => [
-  {
-    browserFields: mockBrowserFields,
-    indexPatterns: mockIndexPattern,
-  },
-]);
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
