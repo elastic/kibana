@@ -4,58 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Comparator {
-  text: string;
-  value: string;
-  requiredValues: number;
-}
-
-export interface AggregationType {
-  text: string;
-  fieldRequired: boolean;
-  value: string;
-  validNormalizedTypes: string[];
-}
-
-export interface GroupByType {
-  text: string;
-  sizeRequired: boolean;
-  value: string;
-  validNormalizedTypes: string[];
-}
-
-export interface IndexThresholdAlertParams {
-  index: string[];
-  timeField?: string;
-  aggType: string;
-  aggField?: string;
-  groupBy?: string;
-  termSize?: number;
-  termField?: string;
-  thresholdComparator?: string;
-  threshold: number[];
-  timeWindowSize: number;
-  timeWindowUnit: string;
-}
-
 export enum TrackingEvent {
   entered = 'entered',
   exited = 'exited',
 }
 
-interface ShapeQueryData {
-  index: string;
-  id: string;
-  path: string;
-}
-
 export interface GeoThresholdAlertParams {
-  trackingEvent: TrackingEvent;
+  indexTitle: string;
+  indexId: string;
+  geoField: string;
   entity: string;
-  index: string;
   dateField: string;
-  shapesArr: ShapeQueryData[];
-  type: string;
+  trackingEvent: TrackingEvent;
+  boundaryType: string;
+  boundaryIndexTitle: string;
+  boundaryIndexId: string;
+  boundaryGeoField: string;
 }
 
 export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];

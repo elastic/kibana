@@ -6,7 +6,7 @@
 import { lazy } from 'react';
 
 import { AlertTypeModel } from '../../../../types';
-// import { validateExpression } from './validation';
+import { validateExpression } from './validation';
 import { GeoThresholdAlertParams } from './types';
 import { AlertsContextValue } from '../../../context/alerts_context';
 
@@ -16,14 +16,7 @@ export function getAlertType(): AlertTypeModel<GeoThresholdAlertParams, AlertsCo
     name: 'Tracking threshold',
     iconClass: 'globe',
     alertParamsExpression: lazy(() => import('./query_builder')),
-    // validate: validateExpression,
-    validate: (alertParams: string) => {
-      return {
-        errors: {
-          geo: new Array<string>(),
-        },
-      };
-    },
+    validate: validateExpression,
     requiresAppContext: false,
   };
 }
