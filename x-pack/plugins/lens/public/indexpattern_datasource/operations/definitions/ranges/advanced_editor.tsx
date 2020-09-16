@@ -34,6 +34,7 @@ import { keys } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
 import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
+import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
 
@@ -219,19 +220,6 @@ export const AdvancedRangeEditor = ({
     ]);
   };
 
-  const onDragEnd = ({
-    source,
-    destination,
-  }: {
-    source?: DraggableLocation;
-    destination?: DraggableLocation;
-  }) => {
-    if (source && destination) {
-      const items = euiDragDropReorder(localRanges, source.index, destination.index);
-      setLocalRanges(items);
-    }
-  };
-
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.indexPattern.ranges.intervals', {
@@ -249,110 +237,73 @@ export const AdvancedRangeEditor = ({
       }
     >
       <>
-        <EuiDragDropContext onDragEnd={onDragEnd}>
-          <EuiDroppable
-            droppableId="RANGES_DROPPABLE_AREA"
-            spacing="s"
-            data-test-subj="indexPattern-ranges-container"
-          >
-            {localRanges.map((range: LocalRangeType, idx: number) => {
-              return (
-                <EuiDraggable
-                  spacing="m"
-                  key={range.id}
-                  index={idx}
-                  draggableId={range.id}
-                  disableInteractiveElementBlocking
-                >
-                  {() => {
-                    return (
-                      <EuiPanel paddingSize="s">
-                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <div className="lnsLayerPanel_dndGrab">
-                              <EuiIcon
-                                type="grab"
-                                aria-label={i18n.translate(
-                                  'xpack.lens.indexPattern.ranges.grabIcon',
-                                  {
-                                    defaultMessage: 'Grab Icon',
-                                  }
-                                )}
-                              />
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow>
-                            <RangePopover
-                              range={range}
-                              isOpenByCreation={idx === lastIndex && isOpenByCreation}
-                              setIsOpenByCreation={setIsOpenByCreation}
-                              setRange={(newRange: LocalRangeType) => {
-                                const newRanges = [...localRanges];
-                                if (newRange.id === newRanges[idx].id) {
-                                  newRanges[idx] = newRange;
-                                } else {
-                                  newRanges.push(newRange);
-                                }
-                                setLocalRanges(newRanges);
-                              }}
-                              formatter={formatter}
-                              Button={({ onClick }: { onClick: MouseEventHandler }) => (
-                                <EuiLink
-                                  color="text"
-                                  onClick={onClick}
-                                  className="lnsRangesOperation__popoverButton"
-                                  data-test-subj="indexPattern-ranges-popover-trigger"
-                                >
-                                  <EuiText
-                                    size="s"
-                                    textAlign="left"
-                                    color={isValidRange(range) ? 'default' : 'danger'}
-                                  >
-                                    {getBetterLabel(range, formatter)}
-                                  </EuiText>
-                                </EuiLink>
-                              )}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              size="m"
-                              iconType="cross"
-                              color="danger"
-                              onClick={() => {
-                                const newRanges = localRanges.filter((_, i) => i !== idx);
-                                setLocalRanges(newRanges);
-                              }}
-                              disabled={localRanges.length === 1}
-                              aria-label={i18n.translate(
-                                'xpack.lens.indexPattern.ranges.deleteRange',
-                                {
-                                  defaultMessage: 'Delete range',
-                                }
-                              )}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiPanel>
-                    );
-                  }}
-                </EuiDraggable>
-              );
-            })}
-          </EuiDroppable>
-        </EuiDragDropContext>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="plusInCircle"
+        <DragDropBuckets
+          onDragEnd={setLocalRanges}
+          onDragStart={() => setIsOpenByCreation(false)}
+          droppableId="RANGES_DROPPABLE_AREA"
+          items={localRanges}
+        >
+          {localRanges.map((range: LocalRangeType, idx: number) => (
+            <DraggableBucketContainer
+              key={range.id}
+              idx={idx}
+              id={range.id}
+              isInvalid={!isValidRange(range)}
+              invalidMessage={i18n.translate('xpack.lens.indexPattern.range.isInvalid', {
+                defaultMessage: 'This range is invalid',
+              })}
+              onRemoveClick={() => {
+                const newRanges = localRanges.filter((_, i) => i !== idx);
+                setLocalRanges(newRanges);
+              }}
+              removeTitle={i18n.translate('xpack.lens.indexPattern.ranges.deleteRange', {
+                defaultMessage: 'Delete range',
+              })}
+              isNotRemovable={localRanges.length === 1}
+            >
+              <RangePopover
+                range={range}
+                isOpenByCreation={idx === lastIndex && isOpenByCreation}
+                setIsOpenByCreation={setIsOpenByCreation}
+                setRange={(newRange: LocalRangeType) => {
+                  const newRanges = [...localRanges];
+                  if (newRange.id === newRanges[idx].id) {
+                    newRanges[idx] = newRange;
+                  } else {
+                    newRanges.push(newRange);
+                  }
+                  setLocalRanges(newRanges);
+                }}
+                formatter={formatter}
+                Button={({ onClick }: { onClick: MouseEventHandler }) => (
+                  <EuiLink
+                    color="text"
+                    onClick={onClick}
+                    className="lnsRangesOperation__popoverButton"
+                    data-test-subj="indexPattern-ranges-popover-trigger"
+                  >
+                    <EuiText
+                      size="s"
+                      textAlign="left"
+                      color={isValidRange(range) ? 'default' : 'danger'}
+                    >
+                      {getBetterLabel(range, formatter)}
+                    </EuiText>
+                  </EuiLink>
+                )}
+              />
+            </DraggableBucketContainer>
+          ))}
+        </DragDropBuckets>
+        <NewBucketButton
           onClick={() => {
             addNewRange();
             setIsOpenByCreation(true);
           }}
-        >
-          {i18n.translate('xpack.lens.indexPattern.ranges.addInterval', {
+          label={i18n.translate('xpack.lens.indexPattern.ranges.addInterval', {
             defaultMessage: 'Add interval',
           })}
-        </EuiButtonEmpty>
+        />
       </>
     </EuiFormRow>
   );
