@@ -156,19 +156,22 @@ export const AlertPreview: React.FC<Props> = (props) => {
           <>
             <EuiSpacer size={'s'} />
             <EuiCallOut
-              iconType="iInCircle"
+              size="s"
               title={
                 <>
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.alertPreviewResult"
-                    defaultMessage="This alert would have occurred {firedTimes}"
+                    defaultMessage="There were {firedTimes}"
                     values={{
                       firedTimes: (
                         <strong>
-                          {previewResult.resultTotals.fired}{' '}
-                          {previewResult.resultTotals.fired === 1
-                            ? firedTimeLabel
-                            : firedTimesLabel}
+                          <FormattedMessage
+                            id="xpack.infra.metrics.alertFlyout.firedTimes"
+                            defaultMessage="{fired, plural, one {# instance} other {# instances}}"
+                            values={{
+                              fired: previewResult.resultTotals.fired,
+                            }}
+                          />
                         </strong>
                       ),
                     }}
@@ -193,7 +196,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
                   ) : null}
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.alertPreviewResultLookback"
-                    defaultMessage="in the last {lookback}."
+                    defaultMessage="that satisfied the conditions of this alert in the last {lookback}."
                     values={{
                       lookback: previewOptions.find(
                         (e) => e.value === previewResult.previewLookbackInterval
@@ -236,9 +239,9 @@ export const AlertPreview: React.FC<Props> = (props) => {
                   <EuiSpacer size={'s'} />
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.alertPreviewTotalNotifications"
-                    defaultMessage="Based on the {notifyEvery} setting, this alert would have sent {notifications}."
+                    defaultMessage='As a result, this alert would have sent {notifications} based on the selected "notify every" setting of "{alertThrottle}."'
                     values={{
-                      notifyEvery: <strong>notify every</strong>,
+                      alertThrottle,
                       notifications: (
                         <strong>
                           {i18n.translate(
@@ -264,6 +267,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
           <>
             <EuiSpacer size={'s'} />
             <EuiCallOut
+              size="s"
               title={
                 <FormattedMessage
                   id="xpack.infra.metrics.alertFlyout.previewIntervalTooShortTitle"
@@ -288,6 +292,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
             <EuiSpacer size={'s'} />
             {previewError.body?.statusCode === 508 ? (
               <EuiCallOut
+                size="s"
                 title={
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.tooManyBucketsErrorTitle"
@@ -310,6 +315,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
               </EuiCallOut>
             ) : (
               <EuiCallOut
+                size="s"
                 title={
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.alertPreviewError"
@@ -395,10 +401,3 @@ const previewOptions = [
 const previewDOMOptions: Array<{ text: string; value: string }> = previewOptions.map((o) =>
   omit(o, 'shortText')
 );
-
-const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime', {
-  defaultMessage: 'time',
-});
-const firedTimesLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTimes', {
-  defaultMessage: 'times',
-});
