@@ -39,6 +39,8 @@ import {
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
+import { ConfirmModal } from './confirm_modal';
+import { showConfirmModal } from './show_visualize_confirm_modal';
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
@@ -179,6 +181,30 @@ export const getTopNavConfig = (
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
 
+  const confirmModal = (
+    <ConfirmModal
+      onConfirm={() => {
+        if (originatingApp) {
+          stateTransfer.navigateToWithEmbeddablePackage(originatingApp);
+        }
+      }}
+      onCancel={() => {}}
+      title={i18n.translate('visualizations.confirmModal.title', {
+        defaultMessage: 'Unsaved changes',
+      })}
+      description={i18n.translate('visualization.confirmModal.confirmTextDescription', {
+        defaultMessage: 'Leave Visualize editor with unsaved changes?',
+      })}
+    />
+  );
+
+  const cancelAndReturn = () => {
+    if (!originatingApp) {
+      return;
+    }
+    showConfirmModal(confirmModal, I18nContext);
+  };
+
   const topNavMenu: TopNavMenuData[] = [
     ...(originatingApp && ((savedVis && savedVis.id) || embeddableId)
       ? [
@@ -301,6 +327,40 @@ export const getTopNavConfig = (
                 createVisReference();
               } else if (savedVis) {
                 showSaveModal(saveModal, I18nContext);
+              }
+            },
+          },
+        ]
+      : []),
+    ...(originatingApp === 'dashboards' &&
+    dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables
+      ? [
+          {
+            id: 'cancel',
+            label: i18n.translate('visualize.topNavMenu.cancelButtonLabel', {
+              defaultMessage: 'Cancel',
+            }),
+            emphasize: false,
+            description: i18n.translate('visualize.topNavMenu.cancelButtonAriaLabel', {
+              defaultMessage: 'Return to the last app without saving changes',
+            }),
+            testId: 'visualizeCancelAndReturnButton',
+            tooltip() {
+              if (hasUnappliedChanges) {
+                return i18n.translate(
+                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
+                  {
+                    defaultMessage: 'Apply or Discard your changes before finishing',
+                  }
+                );
+              }
+            },
+            run: async () => {
+              if (
+                originatingApp === 'dashboards' &&
+                dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables
+              ) {
+                return cancelAndReturn();
               }
             },
           },
