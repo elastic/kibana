@@ -8,11 +8,33 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
+import { useSelector } from 'react-redux';
 import { StyledBreadcrumbs } from './panel_content_utilities';
-
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
-import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
+import * as selectors from '../../store/selectors';
+import { ResolverState } from '../../types';
+import { StyledPanel } from '../styles';
+import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { PanelLoading } from './panel_loading';
+
+export function NodeEvents({ nodeID }: { nodeID: string }) {
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  const relatedEventsStats = useSelector((state: ResolverState) =>
+    selectors.relatedEventsStats(state)(nodeID)
+  );
+  if (processEvent === null || relatedEventsStats === undefined) {
+    return <PanelLoading />;
+  } else {
+    return (
+      <StyledPanel>
+        <EventCountsForProcess processEvent={processEvent} relatedStats={relatedEventsStats} />
+      </StyledPanel>
+    );
+  }
+}
 
 /**
  * This view gives counts for all the related events of a process grouped by related event type.
@@ -25,7 +47,7 @@ import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parame
  * | 2                      | Network                    |
  *
  */
-export const EventCountsForProcess = memo(function EventCountsForProcess({
+const EventCountsForProcess = memo(function EventCountsForProcess({
   processEvent,
   relatedStats,
 }: {
@@ -60,37 +82,64 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
       defaultMessage: 'Events',
     }
   );
-  const pushToQueryParams = useReplaceBreadcrumbParameters();
+  const eventsHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({ panelView: 'nodes' })
+  );
+
+  const eventLinkNavProps = useNavigateOrReplace({
+    search: eventsHref,
+  });
+
+  const processDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeDetail',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+
+  const processDetailNavProps = useNavigateOrReplace({
+    search: processDetailHref,
+  });
+
+  const nodeDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeEvents',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+
+  const nodeDetailNavProps = useNavigateOrReplace({
+    search: nodeDetailHref!,
+  });
   const crumbs = useMemo(() => {
     return [
       {
         text: eventsString,
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
+        ...eventLinkNavProps,
       },
       {
         text: processName,
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: '' });
-        },
+        ...processDetailNavProps,
       },
       {
         text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb"
-              values={{ totalCount }}
-              defaultMessage="{totalCount} Events"
-            />
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb"
+            values={{ totalCount }}
+            defaultMessage="{totalCount} Events"
+          />
         ),
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: '' });
-        },
+        ...nodeDetailNavProps,
       },
     ];
-  }, [processName, totalCount, processEntityId, pushToQueryParams, eventsString]);
+  }, [
+    processName,
+    totalCount,
+    eventsString,
+    eventLinkNavProps,
+    nodeDetailNavProps,
+    processDetailNavProps,
+  ]);
   const rows = useMemo(() => {
     return Object.entries(relatedEventsState.stats).map(
       ([eventType, count]): EventCountsTableView => {
@@ -101,6 +150,17 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
       }
     );
   }, [relatedEventsState]);
+
+  const eventDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'eventDetail',
+      panelParameters: { nodeID: processEntityId, eventType: name, eventID: processEntityId },
+    })
+  );
+
+  const eventDetailNavProps = useNavigateOrReplace({
+    search: eventDetailHref,
+  });
   const columns = useMemo<Array<EuiBasicTableColumn<EventCountsTableView>>>(
     () => [
       {
@@ -119,19 +179,11 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
         width: '80%',
         sortable: true,
         render(name: string) {
-          return (
-            <EuiButtonEmpty
-              onClick={() => {
-                pushToQueryParams({ crumbId: event.entityId(processEvent), crumbEvent: name });
-              }}
-            >
-              {name}
-            </EuiButtonEmpty>
-          );
+          return <EuiButtonEmpty {...eventDetailNavProps}>{name}</EuiButtonEmpty>;
         },
       },
     ],
-    [pushToQueryParams, processEvent]
+    [eventDetailNavProps]
   );
   return (
     <>

@@ -3,21 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/* eslint-disable react/display-name */
+
 import React, { memo, useMemo, HTMLAttributes } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import {
-  htmlIdGenerator,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiTextColor,
-  EuiDescriptionList,
-  EuiLink,
-} from '@elastic/eui';
-import styled from 'styled-components';
+import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
 import { formatDate, StyledBreadcrumbs, GeneratedText } from './panel_content_utilities';
@@ -33,23 +28,26 @@ import { CubeForProcess } from './cube_for_process';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { useResolverTheme } from '../assets';
 import { ResolverState } from '../../types';
-import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
+import { PanelLoading } from './panel_loading';
+import { StyledPanel } from '../styles';
+import { useNavigateOrReplace } from '../use_navigate_or_replace';
 
-const StyledDescriptionList = styled(EuiDescriptionList)`
-  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 10em;
-  }
-`;
-
-const StyledTitle = styled('h4')`
-  overflow-wrap: break-word;
-`;
+export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  return (
+    <StyledPanel>
+      {processEvent === null ? <PanelLoading /> : <NodeDetailView processEvent={processEvent} />}
+    </StyledPanel>
+  );
+});
 
 /**
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
  */
-export const ProcessDetails = memo(function ProcessDetails({
+const NodeDetailView = memo(function NodeDetailView({
   processEvent,
 }: {
   processEvent: ResolverEvent;
@@ -130,7 +128,13 @@ export const ProcessDetails = memo(function ProcessDetails({
     return processDescriptionListData;
   }, [processEvent]);
 
-  const pushToQueryParams = useReplaceBreadcrumbParameters();
+  const nodesHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({ panelView: 'nodes' })
+  );
+
+  const nodesLinkNavProps = useNavigateOrReplace({
+    search: nodesHref,
+  });
 
   const crumbs = useMemo(() => {
     return [
@@ -142,24 +146,20 @@ export const ProcessDetails = memo(function ProcessDetails({
           }
         ),
         'data-test-subj': 'resolver:node-detail:breadcrumbs:node-list-link',
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
+        ...nodesLinkNavProps,
       },
       {
         text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.detailsForProcessName"
-              values={{ processName }}
-              defaultMessage="Details for: {processName}"
-            />
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.detailsForProcessName"
+            values={{ processName }}
+            defaultMessage="Details for: {processName}"
+          />
         ),
         onClick: () => {},
       },
     ];
-  }, [processName, pushToQueryParams]);
+  }, [processName, nodesLinkNavProps]);
   const { cubeAssetsForNode } = useResolverTheme();
   const { descriptionText } = useMemo(() => {
     if (!processEvent) {
@@ -168,11 +168,16 @@ export const ProcessDetails = memo(function ProcessDetails({
     return cubeAssetsForNode(isProcessTerminated, false);
   }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
 
-  const handleEventsLinkClick = useMemo(() => {
-    return () => {
-      pushToQueryParams({ crumbId: entityId, crumbEvent: 'all' });
-    };
-  }, [entityId, pushToQueryParams]);
+  const nodeDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeEvents',
+      panelParameters: { nodeID: entityId },
+    })
+  );
+
+  const nodeDetailNavProps = useNavigateOrReplace({
+    search: nodeDetailHref!,
+  });
 
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
@@ -196,7 +201,7 @@ export const ProcessDetails = memo(function ProcessDetails({
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiLink onClick={handleEventsLinkClick}>
+      <EuiLink {...nodeDetailNavProps}>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.resolver.panel.processDescList.numberOfEvents"
           values={{ relatedEventTotal }}
