@@ -10,7 +10,7 @@ import React from 'react';
 
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { Details } from '../helpers';
-import { Ecs } from '../../../../../../graphql/types';
+import { Ecs } from '../../../../../../../common/ecs';
 import { NetflowRenderer } from '../netflow';
 
 import { DnsRequestEventDetailsLine } from './dns_request_event_details_line';

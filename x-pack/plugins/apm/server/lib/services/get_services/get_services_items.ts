@@ -26,14 +26,20 @@ export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
 export async function getServicesItems({
   setup,
+  searchAggregatedTransactions,
   mlAnomaliesEnvironment,
 }: {
   setup: ServicesItemsSetup;
+  searchAggregatedTransactions: boolean;
   mlAnomaliesEnvironment?: string;
 }) {
   const params = {
-    projection: getServicesProjection({ setup }),
+    projection: getServicesProjection({
+      setup,
+      searchAggregatedTransactions,
+    }),
     setup,
+    searchAggregatedTransactions,
   };
 
   const [
