@@ -37,7 +37,7 @@ const StyledActionButton = styled(EuiButton)`
  * This will be the "host button" that displays the "total number of related events" and opens
  * the sumbmenu (with counts by category) when clicked.
  */
-const SubButton = React.memo(
+const Button = React.memo(
   ({
     menuIsOpen,
     action,
@@ -198,7 +198,7 @@ const NodeSubMenuComponents = React.memo(
 
     return (
       <>
-        <SubButton
+        <Button
           menuIsOpen={menuIsOpen}
           action={handleMenuOpenClick}
           count={count}
