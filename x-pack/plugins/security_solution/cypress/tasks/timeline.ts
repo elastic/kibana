@@ -44,6 +44,7 @@ import {
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
 } from '../screens/timeline';
+import { TIMELINES_TABLE } from '../screens/timelines';
 
 import { drag, drop } from '../tasks/common';
 
@@ -75,6 +76,7 @@ export const addFilter = (filter: TimelineFilter) => {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
   cy.get(SAVE_FILTER_BTN).click();
+};
 
 export const addNewCase = () => {
   cy.get(ALL_CASES_CREATE_NEW_CASE_TABLE_BTN).click();
@@ -184,11 +186,11 @@ export const removeColumn = (column: number) => {
 export const resetFields = () => {
   cy.get(RESET_FIELDS).click({ force: true });
 };
-  
+
 export const selectCase = (caseId: string) => {
   cy.get(CASE(caseId)).click();
 };
-  
+
 export const waitForTimelineChanges = () => {
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('exist');
   cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
@@ -197,4 +199,3 @@ export const waitForTimelineChanges = () => {
 export const waitForTimelinesPanelToBeLoaded = () => {
   cy.get(TIMELINES_TABLE).should('exist');
 };
-
