@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
 import {
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPopover,
   EuiIcon,
   EuiDescriptionList,
   EuiSpacer,
+  EuiKeyboardAccessible,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -82,41 +81,39 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     ];
 
     const button = (
-      <EuiIcon
-        onClick={onButtonClick}
-        tabIndex="0"
-        type={getIcon(slope)}
-        data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
-        title={i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel', {
-          defaultMessage: 'More information about this metric',
-        })}
-      />
+      <EuiKeyboardAccessible>
+        <EuiIcon
+          onClick={onButtonClick}
+          type={getIcon(slope)}
+          data-test-subj={`monitoringCellIcon-${props['data-test-subj']}`}
+          title={i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.iconLabel', {
+            defaultMessage: 'More information about this metric',
+          })}
+        />
+      </EuiKeyboardAccessible>
     );
 
     return (
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover ownFocus button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-            <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
-              <EuiDescriptionList
-                type="column"
-                compressed
-                listItems={tooltipItems}
-                style={{ maxWidth: '150px' }}
-              />
-              <EuiSpacer size="s" />
-              <EuiText size="xs">
-                {i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.preface', {
-                  defaultMessage: 'Applies to current time period',
-                })}
-              </EuiText>
-            </div>
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Fragment>
+        <EuiPopover ownFocus button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+          <div data-test-subj={`monitoringCellPopover-${props['data-test-subj']}`}>
+            <EuiDescriptionList
+              type="column"
+              compressed
+              listItems={tooltipItems}
+              style={{ maxWidth: '150px' }}
+            />
+            <EuiSpacer size="s" />
+            <EuiText size="xs">
+              {i18n.translate('xpack.monitoring.elasticsearch.node.cells.tooltip.preface', {
+                defaultMessage: 'Applies to current time period',
+              })}
+            </EuiText>
+          </div>
+        </EuiPopover>
+        &nbsp;
+        <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
+      </Fragment>
     );
   }
 
