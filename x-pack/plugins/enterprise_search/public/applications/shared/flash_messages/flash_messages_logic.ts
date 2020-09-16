@@ -32,6 +32,7 @@ const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
   !Array.isArray(messages) ? [messages] : messages;
 
 export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlashMessagesActions>>({
+  path: ['enterprise_search', 'flash_messages'],
   actions: {
     setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),
     clearFlashMessages: () => null,
