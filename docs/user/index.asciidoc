@@ -11,7 +11,7 @@ include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
 
 include::security/securing-kibana.asciidoc[]
 
-include::getting-started.asciidoc[]
+include::getting-started/tutorial-sample-data.asciidoc[]
 
 include::discover.asciidoc[]
 
