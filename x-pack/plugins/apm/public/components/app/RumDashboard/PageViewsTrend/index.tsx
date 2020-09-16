@@ -56,6 +56,7 @@ export function PageViewsTrend() {
           <BreakdownFilter
             selectedBreakdown={breakdown}
             onBreakdownChange={setBreakdown}
+            dataTestSubj={'pvBreakdownFilter'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

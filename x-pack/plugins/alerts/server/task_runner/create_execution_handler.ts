@@ -7,7 +7,10 @@
 import { map } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
+import {
+  PluginStartContract as ActionsPluginStartContract,
+  asSavedObjectExecutionSource,
+} from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import {
@@ -97,6 +100,10 @@ export function createExecutionHandler({
         params: action.params,
         spaceId,
         apiKey,
+        source: asSavedObjectExecutionSource({
+          id: alertId,
+          type: 'alert',
+        }),
       });
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
