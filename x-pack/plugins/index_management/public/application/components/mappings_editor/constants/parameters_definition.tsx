@@ -445,6 +445,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
             }
 
             const json = JSON.parse(value);
+            const valuesAreNotString = Object.values(json).some((v) => typeof v !== 'string');
 
             if (Array.isArray(json)) {
               return {
@@ -452,6 +453,15 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
                   'xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorArraysNotAllowedError',
                   {
                     defaultMessage: 'Arrays are not allowed.',
+                  }
+                ),
+              };
+            } else if (valuesAreNotString) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorOnlyStringValuesAllowedError',
+                  {
+                    defaultMessage: 'Values must be a string.',
                   }
                 ),
               };
