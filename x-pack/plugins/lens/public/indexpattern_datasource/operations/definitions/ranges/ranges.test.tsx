@@ -25,6 +25,7 @@ import { autoInterval } from 'src/plugins/data/common';
 import { MODES, DEFAULT_INTERVAL, TYPING_DEBOUNCE_TIME } from './constants';
 import { RangePopover } from './advanced_editor';
 import { EuiButtonIcon } from '@elastic/eui';
+import { DragDropBuckets } from '../shared_components';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
@@ -398,9 +399,7 @@ describe('ranges', () => {
           />
         );
 
-        expect(
-          instance.find('[data-test-subj="indexPattern-ranges-container"]').children
-        ).toHaveLength(1);
+        expect(instance.find(DragDropBuckets).children).toHaveLength(1);
       });
 
       it('should add a new range', () => {
@@ -576,11 +575,10 @@ describe('ranges', () => {
 
         expect(instance.find(RangePopover)).toHaveLength(2);
 
-        // This series of act clojures are made to make it work properly the update flush
+        // This series of act closures are made to make it work properly the update flush
         act(() => {
           instance
-            .find('[data-test-subj="indexPattern-ranges-container"]')
-            .find(EuiButtonIcon)
+            .find('[data-test-subj="lns-customBucketContainer-remove"]')
             .last()
             .prop('onClick')!({} as ReactMouseEvent);
         });
