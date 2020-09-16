@@ -12,7 +12,7 @@
 
   display: block;
   background-color: $euiColorEmptyShade;
-  height: $pageHeight;
+  min-height: $pageHeight;
   position: relative;
   left: $sideBarWidth;
   width: calc(100% - #{$sideBarWidth});
