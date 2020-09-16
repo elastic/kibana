@@ -281,6 +281,8 @@
 /x-pack/test/token_api_integration/ @elastic/kibana-security
 #CC# /src/legacy/ui/public/capabilities @elastic/kibana-security
 #CC# /x-pack/legacy/plugins/encrypted_saved_objects/ @elastic/kibana-security
+#CC# /x-pack/plugins/security_solution/ @elastic/kibana-security
+#CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization
@@ -418,4 +420,10 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Security design
 /x-pack/plugins/endpoint/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution/**/*.scss @elastic/security-design
+
+# Logstash
+#CC# /x-pack/plugins/logstash/ @elastic/logstash
+
+# Reporting
+#CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
