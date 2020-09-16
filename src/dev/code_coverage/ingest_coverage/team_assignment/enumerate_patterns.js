@@ -23,8 +23,8 @@ import {
   push,
   prokGlob,
   trim,
-  isBlackListedDir,
-  isWhiteListedFile,
+  isRejectedDir,
+  isFileAllowed,
   isDir,
   tryPath,
   dropEmpty,
@@ -73,7 +73,7 @@ function creepFsSync(aPath, xs, rootPath, owner) {
     const full = isADir ? join(aPath, entry) : entry;
     const fullIsDir = statSync(full).isDirectory();
 
-    if (fullIsDir && !isBlackListedDir(full)) xs = creepFsSync(full, xs, rootPath, owner);
-    else if (isWhiteListedFile(full)) xs.push(`${trimRoot(full)} ${owner}`);
+    if (fullIsDir && !isRejectedDir(full)) xs = creepFsSync(full, xs, rootPath, owner);
+    else if (isFileAllowed(full)) xs.push(`${trimRoot(full)} ${owner}`);
   }
 }

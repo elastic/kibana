@@ -27,11 +27,11 @@ export const pathExists = (x) => tryCatch(() => statSync(x)).fold(left, right);
 export const isDir = (x) => statSync(x).isDirectory();
 export const prokGlob = (x) => glob.sync(x, { nonull: true });
 export const trim = (ROOT) => (x) => x.replace(`${ROOT}/`, '');
-export const isWhiteListedFile = (x) => {
+export const isFileAllowed = (x) => {
   const isJsOrTsOrTsxOrJsx = /.(j|t)(s|sx)$/gm;
   return isJsOrTsOrTsxOrJsx.test(x);
 };
-export const isBlackListedDir = (x) =>
+export const isRejectedDir = (x) =>
   /node_modules|__tests__|__fixture__|__fixtures__|build/gm.test(x);
 const isGlobFound = (x) => (xs) => (x === xs[0] ? false : true);
 export const globExpands = (x) => isGlobFound(x)(prokGlob(x));
