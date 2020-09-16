@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
@@ -109,10 +110,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
-   * Function turning a column into an agg config passed to the `esaggs` function
+   * Function turning a column into an agg_type Ast passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+  toEsAggsFn: (column: C, columnId: string, indexPattern: IndexPattern) => ExpressionFunctionAST;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern

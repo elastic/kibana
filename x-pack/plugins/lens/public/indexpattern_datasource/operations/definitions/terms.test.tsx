@@ -65,20 +65,18 @@ describe('terms', () => {
     };
   });
 
-  describe('toEsAggsConfig', () => {
+  describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
-      const esAggsConfig = termsOperation.toEsAggsConfig(
+      const esAggsConfig = termsOperation.toEsAggsFn(
         state.layers.first.columns.col1 as TermsIndexPatternColumn,
         'col1',
         {} as IndexPattern
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsConfig.arguments).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            orderBy: '_key',
-            field: 'category',
-            size: 3,
-          }),
+          orderBy: ['_key'],
+          field: ['category'],
+          size: [3],
         })
       );
     });

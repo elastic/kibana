@@ -5,11 +5,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/common';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn } from './column_types';
 
 type MetricColumn<T> = FormattedIndexPatternColumn & {
   operationType: T;
+};
+
+const typeToFn: Record<string, string> = {
+  min: 'aggMin',
+  max: 'aggMax',
+  avg: 'aggAvg',
+  sum: 'aggSum',
 };
 
 function buildMetricOperation<T extends MetricColumn<string>>({
@@ -68,16 +76,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    toEsAggsConfig: (column, columnId, _indexPattern) => ({
-      id: columnId,
-      enabled: true,
-      type: column.operationType,
-      schema: 'metric',
-      params: {
-        field: column.sourceField,
-        missing: 0,
-      },
-    }),
+    toEsAggsFn: (column, columnId, _indexPattern) =>
+      buildExpressionFunction(typeToFn[type], {
+        id: [columnId],
+        enabled: [true],
+        schema: ['metric'],
+        field: [column.sourceField],
+      }).toAst(),
   } as OperationDefinition<T>;
 }
 

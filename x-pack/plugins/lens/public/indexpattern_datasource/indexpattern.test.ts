@@ -310,7 +310,57 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "aggConfigs": Array [
-                  "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "enabled": Array [
+                            true,
+                          ],
+                          "id": Array [
+                            "col1",
+                          ],
+                          "schema": Array [
+                            "metric",
+                          ],
+                        },
+                        "function": "aggCount",
+                        "type": "function",
+                      },
+                      Object {
+                        "arguments": Object {
+                          "drop_partials": Array [
+                            false,
+                          ],
+                          "enabled": Array [
+                            true,
+                          ],
+                          "field": Array [
+                            "timestamp",
+                          ],
+                          "id": Array [
+                            "col2",
+                          ],
+                          "interval": Array [
+                            "1d",
+                          ],
+                          "min_doc_count": Array [
+                            0,
+                          ],
+                          "schema": Array [
+                            "segment",
+                          ],
+                          "time_zone": Array [],
+                          "useNormalizedEsInterval": Array [
+                            true,
+                          ],
+                        },
+                        "function": "aggDateHistogram",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
                 "includeFormatHints": Array [
                   true,

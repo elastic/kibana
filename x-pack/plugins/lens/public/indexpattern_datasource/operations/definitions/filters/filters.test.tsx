@@ -86,17 +86,17 @@ describe('filters', () => {
     };
   });
 
-  describe('toEsAggsConfig', () => {
+  describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
-      const esAggsConfig = filtersOperation.toEsAggsConfig(
+      const esAggsConfig = filtersOperation.toEsAggsFn(
         state.layers.first.columns.col1 as FiltersIndexPatternColumn,
         'col1',
         state.indexPatterns['1']
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsConfig.arguments).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            filters: [
+          filters: [
+            JSON.stringify([
               {
                 input: { query: 'bytes >= 1', language: 'kuery' },
                 label: 'More than one',
@@ -105,8 +105,8 @@ describe('filters', () => {
                 input: { query: 'src : 2', language: 'kuery' },
                 label: '',
               },
-            ],
-          }),
+            ]),
+          ],
         })
       );
     });

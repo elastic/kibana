@@ -56,12 +56,14 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
           : undefined,
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: 'count',
-    schema: 'metric',
-    params: {},
+  toEsAggsFn: (column, columnId) => ({
+    type: 'function',
+    function: 'aggCount',
+    arguments: {
+      id: [columnId],
+      enabled: [true],
+      schema: ['metric'],
+    },
   }),
   isTransferable: () => {
     return true;

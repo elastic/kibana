@@ -130,17 +130,21 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn> = 
     };
   },
 
-  toEsAggsConfig: (column, columnId, indexPattern) => {
+  toEsAggsFn: (column, columnId, indexPattern) => {
     const validFilters = column.params.filters?.filter((f: Filter) =>
       isQueryValid(f.input, indexPattern)
     );
     return {
-      id: columnId,
-      enabled: true,
-      type: 'filters',
-      schema: 'segment',
-      params: {
-        filters: validFilters?.length > 0 ? validFilters : [defaultFilter],
+      type: 'function',
+      function: 'aggFilters',
+      arguments: {
+        id: [columnId],
+        enabled: [true],
+        schema: ['segment'],
+        filters:
+          validFilters?.length > 0
+            ? [JSON.stringify(validFilters)]
+            : [JSON.stringify(defaultFilter)],
       },
     };
   },

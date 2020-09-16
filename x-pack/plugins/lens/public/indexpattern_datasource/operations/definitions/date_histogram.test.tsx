@@ -227,26 +227,24 @@ describe('date_histogram', () => {
     });
   });
 
-  describe('toEsAggsConfig', () => {
+  describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
-      const esAggsConfig = dateHistogramOperation.toEsAggsConfig(
+      const esAggsConfig = dateHistogramOperation.toEsAggsFn(
         state.layers.first.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
         state.indexPatterns['1']
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsConfig.arguments).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            interval: '42w',
-            field: 'timestamp',
-            useNormalizedEsInterval: true,
-          }),
+          interval: ['42w'],
+          field: ['timestamp'],
+          useNormalizedEsInterval: [true],
         })
       );
     });
 
     it('should not use normalized es interval for rollups', () => {
-      const esAggsConfig = dateHistogramOperation.toEsAggsConfig(
+      const esAggsConfig = dateHistogramOperation.toEsAggsFn(
         state.layers.first.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
         {
@@ -269,13 +267,11 @@ describe('date_histogram', () => {
           ],
         }
       );
-      expect(esAggsConfig).toEqual(
+      expect(esAggsConfig.arguments).toEqual(
         expect.objectContaining({
-          params: expect.objectContaining({
-            interval: '42w',
-            field: 'timestamp',
-            useNormalizedEsInterval: false,
-          }),
+          interval: ['42w'],
+          field: ['timestamp'],
+          useNormalizedEsInterval: [false],
         })
       );
     });

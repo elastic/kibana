@@ -21,11 +21,7 @@ function getExpressionForLayer(
   }
 
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    return operationDefinitionMap[column.operationType].toEsAggsConfig(
-      column,
-      columnId,
-      indexPattern
-    );
+    return operationDefinitionMap[column.operationType].toEsAggsFn(column, columnId, indexPattern);
   }
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
@@ -108,7 +104,12 @@ function getExpressionForLayer(
             partialRows: [true],
             includeFormatHints: [true],
             timeFields: allDateHistogramFields,
-            aggConfigs: [JSON.stringify(aggs)],
+            aggConfigs: [
+              {
+                type: 'expression',
+                chain: aggs,
+              },
+            ],
           },
         },
         {

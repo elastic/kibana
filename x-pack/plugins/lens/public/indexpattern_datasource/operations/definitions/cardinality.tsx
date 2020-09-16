@@ -66,14 +66,15 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
           : undefined,
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: OPERATION_TYPE,
-    schema: 'metric',
-    params: {
-      field: column.sourceField,
-      missing: 0,
+  toEsAggsFn: (column, columnId) => ({
+    type: 'function',
+    function: 'aggCardinality',
+    arguments: {
+      id: [columnId],
+      enabled: [true],
+      schema: ['metric'],
+      field: [column.sourceField],
+      missing: [0],
     },
   }),
   onFieldChange: (oldColumn, indexPattern, field) => {

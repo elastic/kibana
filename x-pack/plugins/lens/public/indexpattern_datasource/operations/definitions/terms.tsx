@@ -95,21 +95,22 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       },
     };
   },
-  toEsAggsConfig: (column, columnId, _indexPattern) => ({
-    id: columnId,
-    enabled: true,
-    type: 'terms',
-    schema: 'segment',
-    params: {
-      field: column.sourceField,
+  toEsAggsFn: (column, columnId, _indexPattern) => ({
+    type: 'function',
+    function: 'aggTerms',
+    arguments: {
+      id: [columnId],
+      enabled: [true],
+      schema: ['segment'],
+      field: [column.sourceField],
       orderBy:
-        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
-      order: column.params.orderDirection,
-      size: column.params.size,
-      otherBucket: false,
-      otherBucketLabel: 'Other',
-      missingBucket: false,
-      missingBucketLabel: 'Missing',
+        column.params.orderBy.type === 'alphabetical' ? ['_key'] : [column.params.orderBy.columnId],
+      order: [column.params.orderDirection],
+      size: [column.params.size],
+      otherBucket: [false],
+      otherBucketLabel: ['Other'],
+      missingBucket: [false],
+      missingBucketLabel: ['Missing'],
     },
   }),
   onFieldChange: (oldColumn, indexPattern, field) => {
