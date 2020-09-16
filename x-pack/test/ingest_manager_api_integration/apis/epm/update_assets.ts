@@ -322,6 +322,9 @@ export default function (providerContext: FtrProviderContext) {
         version: '0.2.0',
         internal: false,
         removable: true,
+        install_version: '0.2.0',
+        install_status: 'installed',
+        install_started_at: res.attributes.install_started_at,
       });
     });
   });

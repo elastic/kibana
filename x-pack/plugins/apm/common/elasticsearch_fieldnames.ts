@@ -31,12 +31,13 @@ export const USER_AGENT_NAME = 'user_agent.name';
 
 export const DESTINATION_ADDRESS = 'destination.address';
 
-export const OBSERVER_NAME = 'observer.name';
+export const OBSERVER_HOSTNAME = 'observer.hostname';
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
+export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
@@ -44,6 +45,10 @@ export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
+// for transaction metrics
+export const TRANSACTION_ROOT = 'transaction.root';
+
+export const EVENT_OUTCOME = 'event.outcome';
 
 export const TRACE_ID = 'trace.id';
 
@@ -95,7 +100,18 @@ export const POD_NAME = 'kubernetes.pod.name';
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
 
 // RUM Labels
-export const TRANSACTION_URL = 'transaction.page.url';
+export const TRANSACTION_URL = 'url.full';
 export const CLIENT_GEO = 'client.geo';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
+
+export const TRANSACTION_TIME_TO_FIRST_BYTE =
+  'transaction.marks.agent.timeToFirstByte';
+export const TRANSACTION_DOM_INTERACTIVE =
+  'transaction.marks.agent.domInteractive';
+
+export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
+export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
+export const TBT_FIELD = 'transaction.experience.tbt';
+export const FID_FIELD = 'transaction.experience.fid';
+export const CLS_FIELD = 'transaction.experience.cls';

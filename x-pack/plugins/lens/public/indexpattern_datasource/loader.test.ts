@@ -40,6 +40,7 @@ const indexPattern1 = ({
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
+  hasRestrictions: false,
   fields: [
     {
       name: 'timestamp',
@@ -92,6 +93,16 @@ const indexPattern1 = ({
       searchable: true,
       esTypes: ['keyword'],
     },
+    {
+      name: 'scripted',
+      displayName: 'Scripted',
+      type: 'string',
+      searchable: true,
+      aggregatable: true,
+      scripted: true,
+      lang: 'painless',
+      script: '1234',
+    },
     documentField,
   ],
 } as unknown) as IndexPattern;
@@ -105,6 +116,7 @@ const indexPattern2 = ({
   id: '2',
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
+  hasRestrictions: true,
   fields: [
     {
       name: 'timestamp',
@@ -154,12 +166,13 @@ const indexPattern2 = ({
       aggregatable: true,
       searchable: true,
       scripted: true,
+      lang: 'painless',
+      script: '1234',
       aggregationRestrictions: {
         terms: {
           agg: 'terms',
         },
       },
-      esTypes: ['keyword'],
     },
     documentField,
   ],
@@ -733,9 +746,9 @@ describe('loader', () => {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
         indexPatterns: [
-          { id: '1', title: '1', fields: [] },
-          { id: '2', title: '1', fields: [] },
-          { id: '3', title: '1', fields: [] },
+          { id: '1', title: '1', fields: [], hasRestrictions: false },
+          { id: '2', title: '1', fields: [], hasRestrictions: false },
+          { id: '3', title: '1', fields: [], hasRestrictions: false },
         ],
         setState,
         dslQuery,
@@ -783,9 +796,9 @@ describe('loader', () => {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
         indexPatterns: [
-          { id: '1', title: '1', fields: [] },
-          { id: '2', title: '1', fields: [] },
-          { id: 'c', title: '1', fields: [] },
+          { id: '1', title: '1', fields: [], hasRestrictions: false },
+          { id: '2', title: '1', fields: [], hasRestrictions: false },
+          { id: 'c', title: '1', fields: [], hasRestrictions: false },
         ],
         setState,
         dslQuery,
@@ -817,6 +830,7 @@ describe('loader', () => {
           {
             id: '1',
             title: '1',
+            hasRestrictions: false,
             fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
           },
         ],

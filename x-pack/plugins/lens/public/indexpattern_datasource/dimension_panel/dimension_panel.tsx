@@ -15,11 +15,12 @@ import {
   DatasourceDimensionEditorProps,
   DatasourceDimensionDropProps,
   DatasourceDimensionDropHandlerProps,
+  isDraggedOperation,
 } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
-import { PopoverEditor } from './popover_editor';
+import { DimensionEditor } from './dimension_editor';
 import { changeColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -99,21 +100,66 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
     return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
   }
 
-  return (
-    isDraggedField(dragging) &&
-    layerIndexPatternId === dragging.indexPatternId &&
-    Boolean(hasOperationForField(dragging.field))
-  );
+  if (isDraggedField(dragging)) {
+    return (
+      layerIndexPatternId === dragging.indexPatternId &&
+      Boolean(hasOperationForField(dragging.field))
+    );
+  }
+
+  if (
+    isDraggedOperation(dragging) &&
+    dragging.layerId === props.layerId &&
+    props.columnId !== dragging.columnId
+  ) {
+    const op = props.state.layers[props.layerId].columns[dragging.columnId];
+    return props.filterOperations(op);
+  }
+  return false;
 }
 
-export function onDrop(
-  props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>
-): boolean {
+export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
   const droppedItem = props.droppedItem;
 
   function hasOperationForField(field: IndexPatternField) {
     return Boolean(operationFieldSupportMatrix.operationByField[field.name]);
+  }
+
+  if (isDraggedOperation(droppedItem) && droppedItem.layerId === props.layerId) {
+    const layer = props.state.layers[props.layerId];
+    const op = { ...layer.columns[droppedItem.columnId] };
+    if (!props.filterOperations(op)) {
+      return false;
+    }
+
+    const newColumns = { ...layer.columns };
+    delete newColumns[droppedItem.columnId];
+    newColumns[props.columnId] = op;
+
+    const newColumnOrder = [...layer.columnOrder];
+    const oldIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
+    const newIndex = newColumnOrder.findIndex((c) => c === props.columnId);
+
+    if (newIndex === -1) {
+      newColumnOrder[oldIndex] = props.columnId;
+    } else {
+      newColumnOrder.splice(oldIndex, 1);
+    }
+
+    // Time to replace
+    props.setState({
+      ...props.state,
+      layers: {
+        ...props.state.layers,
+        [props.layerId]: {
+          ...layer,
+          columnOrder: newColumnOrder,
+          columns: newColumns,
+        },
+      },
+    });
+    return { deleted: droppedItem.columnId };
   }
 
   if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
@@ -193,9 +239,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     <EuiLink
       id={columnId}
       className="lnsLayerPanel__triggerLink"
-      onClick={() => {
-        props.togglePopover();
-      }}
+      onClick={props.onClick}
       data-test-subj="lns-dimensionTrigger"
       aria-label={i18n.translate('xpack.lens.configure.editConfig', {
         defaultMessage: 'Edit configuration',
@@ -221,7 +265,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
     props.state.layers[layerId].columns[props.columnId] || null;
 
   return (
-    <PopoverEditor
+    <DimensionEditor
       {...props}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}

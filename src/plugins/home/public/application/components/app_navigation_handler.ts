@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { MouseEvent } from 'react';
 import { getServices } from '../kibana_services';
 
 export const createAppNavigationHandler = (targetUrl: string) => (event: MouseEvent) => {

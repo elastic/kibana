@@ -4,12 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const ATTACH_TIMELINE_TO_NEW_CASE_ICON = '[data-test-subj="attach-timeline-case"]';
+
+export const ATTACH_TIMELINE_TO_EXISTING_CASE_ICON =
+  '[data-test-subj="attach-timeline-existing-case"]';
+
+export const BULK_ACTIONS = '[data-test-subj="utility-bar-action-button"]';
+
+export const CASE = (id: string) => {
+  return `[data-test-subj="cases-table-row-${id}"]`;
+};
+
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
 export const DRAGGABLE_HEADER =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="headers-group"] [data-test-subj="draggable-header"]';
+
+export const EXPORT_TIMELINE_ACTION = '[data-test-subj="export-timeline-action"]';
 
 export const HEADER = '[data-test-subj="header"]';
 
@@ -20,6 +33,8 @@ export const ID_HEADER_FIELD = '[data-test-subj="timeline"] [data-test-subj="hea
 export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name-_id"]';
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
+
+export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
@@ -37,6 +52,12 @@ export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count
 
 export const TIMELINE = (id: string) => {
   return `[data-test-subj="title-${id}"]`;
+};
+
+export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiProgress';
+
+export const TIMELINE_CHECKBOX = (id: string) => {
+  return `[data-test-subj="checkboxSelectRow-${id}"]`;
 };
 
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
@@ -67,6 +88,8 @@ export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-gear"]';
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
+
+export const TIMELINES_TABLE = '[data-test-subj="timelines-table"]';
 
 export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
 

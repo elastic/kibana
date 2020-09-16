@@ -18,10 +18,13 @@ import {
 } from '@elastic/eui';
 
 import { Document } from '../../../types';
-import { HandleTestPipelineArgs } from '../test_pipeline_flyout';
+import { TestPipelineConfig } from '../test_pipeline_flyout.container';
 
 interface Props {
-  handleTestPipeline: (data: HandleTestPipelineArgs) => void;
+  handleTestPipeline: (
+    testPipelineConfig: TestPipelineConfig,
+    refreshOutputPerProcessor?: boolean
+  ) => Promise<{ isSuccessful: boolean }>;
   isRunningTest: boolean;
   cachedVerbose?: boolean;
   cachedDocuments: Document[];
@@ -37,12 +40,6 @@ export const OutputTab: React.FunctionComponent<Props> = ({
 }) => {
   const [isVerboseEnabled, setIsVerboseEnabled] = useState(Boolean(cachedVerbose));
 
-  const onEnableVerbose = (isVerbose: boolean) => {
-    setIsVerboseEnabled(isVerbose);
-
-    handleTestPipeline({ documents: cachedDocuments!, verbose: isVerbose });
-  };
-
   let content: React.ReactNode | undefined;
 
   if (isRunningTest) {
@@ -56,7 +53,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <>
+    <div data-test-subj="outputTabContent">
       <EuiText>
         <p>
           <FormattedMessage
@@ -78,16 +75,26 @@ export const OutputTab: React.FunctionComponent<Props> = ({
               />
             }
             checked={isVerboseEnabled}
-            onChange={(e) => onEnableVerbose(e.target.checked)}
+            data-test-subj="verboseOutputToggle"
+            onChange={async (e) => {
+              const isVerbose = e.target.checked;
+              setIsVerboseEnabled(isVerbose);
+
+              await handleTestPipeline({ documents: cachedDocuments!, verbose: isVerbose });
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             size="s"
-            onClick={() =>
-              handleTestPipeline({ documents: cachedDocuments!, verbose: isVerboseEnabled })
+            onClick={async () =>
+              await handleTestPipeline(
+                { documents: cachedDocuments!, verbose: isVerboseEnabled },
+                true
+              )
             }
             iconType="refresh"
+            data-test-subj="refreshOutputButton"
           >
             <FormattedMessage
               id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
@@ -100,6 +107,6 @@ export const OutputTab: React.FunctionComponent<Props> = ({
       <EuiSpacer size="m" />
 
       {content}
-    </>
+    </div>
   );
 };

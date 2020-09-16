@@ -4,43 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 
-function getAllCalendars(legacyClient: ILegacyScopedClusterClient) {
-  const cal = new CalendarManager(legacyClient);
+function getAllCalendars(client: IScopedClusterClient) {
+  const cal = new CalendarManager(client);
   return cal.getAllCalendars();
 }
 
-function getCalendar(legacyClient: ILegacyScopedClusterClient, calendarId: string) {
-  const cal = new CalendarManager(legacyClient);
+function getCalendar(client: IScopedClusterClient, calendarId: string) {
+  const cal = new CalendarManager(client);
   return cal.getCalendar(calendarId);
 }
 
-function newCalendar(legacyClient: ILegacyScopedClusterClient, calendar: FormCalendar) {
-  const cal = new CalendarManager(legacyClient);
+function newCalendar(client: IScopedClusterClient, calendar: FormCalendar) {
+  const cal = new CalendarManager(client);
   return cal.newCalendar(calendar);
 }
 
-function updateCalendar(
-  legacyClient: ILegacyScopedClusterClient,
-  calendarId: string,
-  calendar: Calendar
-) {
-  const cal = new CalendarManager(legacyClient);
+function updateCalendar(client: IScopedClusterClient, calendarId: string, calendar: Calendar) {
+  const cal = new CalendarManager(client);
   return cal.updateCalendar(calendarId, calendar);
 }
 
-function deleteCalendar(legacyClient: ILegacyScopedClusterClient, calendarId: string) {
-  const cal = new CalendarManager(legacyClient);
+function deleteCalendar(client: IScopedClusterClient, calendarId: string) {
+  const cal = new CalendarManager(client);
   return cal.deleteCalendar(calendarId);
 }
 
-function getCalendarsByIds(legacyClient: ILegacyScopedClusterClient, calendarIds: string) {
-  const cal = new CalendarManager(legacyClient);
+function getCalendarsByIds(client: IScopedClusterClient, calendarIds: string) {
+  const cal = new CalendarManager(client);
   return cal.getCalendarsByIds(calendarIds);
 }
 
@@ -60,9 +56,9 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetCalendars'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const resp = await getAllCalendars(legacyClient);
+        const resp = await getAllCalendars(client);
 
         return response.ok({
           body: resp,
@@ -92,15 +88,15 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetCalendars'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       let returnValue;
       try {
         const calendarIds = request.params.calendarIds.split(',');
 
         if (calendarIds.length === 1) {
-          returnValue = await getCalendar(legacyClient, calendarIds[0]);
+          returnValue = await getCalendar(client, calendarIds[0]);
         } else {
-          returnValue = await getCalendarsByIds(legacyClient, calendarIds);
+          returnValue = await getCalendarsByIds(client, calendarIds);
         }
 
         return response.ok({
@@ -131,10 +127,10 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const body = request.body;
-        const resp = await newCalendar(legacyClient, body);
+        const resp = await newCalendar(client, body);
 
         return response.ok({
           body: resp,
@@ -166,11 +162,11 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { calendarId } = request.params;
         const body = request.body;
-        const resp = await updateCalendar(legacyClient, calendarId, body);
+        const resp = await updateCalendar(client, calendarId, body);
 
         return response.ok({
           body: resp,
@@ -200,10 +196,10 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteCalendar'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { calendarId } = request.params;
-        const resp = await deleteCalendar(legacyClient, calendarId);
+        const resp = await deleteCalendar(client, calendarId);
 
         return response.ok({
           body: resp,

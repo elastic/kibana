@@ -44,7 +44,6 @@ import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
-  APP_ICON,
   SERVER_APP_ID,
   SecurityPageName,
   SIGNALS_ID,
@@ -60,7 +59,9 @@ import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 import { AppRequestContext } from './types';
+import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
+import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -167,15 +168,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
+    registerTrustedAppsRoutes(router, endpointContext);
     registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
 
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
       name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: APP_ICON,
+      icon: 'logoSecurity',
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
@@ -270,9 +272,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.getStartServices().then(([_, depsStart]) => {
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
+      const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
+        depsStart.data
+      );
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionTimelineSearchStrategy',
+        securitySolutionTimelineSearchStrategy
       );
     });
 

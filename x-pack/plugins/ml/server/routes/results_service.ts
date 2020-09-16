@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -23,8 +23,8 @@ import {
   getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
 
-function getAnomaliesTableData(legacyClient: ILegacyScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(legacyClient);
+function getAnomaliesTableData(client: IScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(client);
   const {
     jobIds,
     criteriaFields,
@@ -53,39 +53,39 @@ function getAnomaliesTableData(legacyClient: ILegacyScopedClusterClient, payload
   );
 }
 
-function getCategoryDefinition(legacyClient: ILegacyScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(legacyClient);
+function getCategoryDefinition(client: IScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(client);
   return rs.getCategoryDefinition(payload.jobId, payload.categoryId);
 }
 
-function getCategoryExamples(legacyClient: ILegacyScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(legacyClient);
+function getCategoryExamples(client: IScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(client);
   const { jobId, categoryIds, maxExamples } = payload;
   return rs.getCategoryExamples(jobId, categoryIds, maxExamples);
 }
 
-function getMaxAnomalyScore(legacyClient: ILegacyScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(legacyClient);
+function getMaxAnomalyScore(client: IScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(client);
   const { jobIds, earliestMs, latestMs } = payload;
   return rs.getMaxAnomalyScore(jobIds, earliestMs, latestMs);
 }
 
-function getPartitionFieldsValues(legacyClient: ILegacyScopedClusterClient, payload: any) {
-  const rs = resultsServiceProvider(legacyClient);
+function getPartitionFieldsValues(client: IScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(client);
   const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
 }
 
-function getCategorizerStats(legacyClient: ILegacyScopedClusterClient, params: any, query: any) {
+function getCategorizerStats(client: IScopedClusterClient, params: any, query: any) {
   const { jobId } = params;
   const { partitionByValue } = query;
-  const rs = resultsServiceProvider(legacyClient);
+  const rs = resultsServiceProvider(client);
   return rs.getCategorizerStats(jobId, partitionByValue);
 }
 
-function getCategoryStoppedPartitions(legacyClient: ILegacyScopedClusterClient, payload: any) {
+function getCategoryStoppedPartitions(client: IScopedClusterClient, payload: any) {
   const { jobIds, fieldToBucket } = payload;
-  const rs = resultsServiceProvider(legacyClient);
+  const rs = resultsServiceProvider(client);
   return rs.getCategoryStoppedPartitions(jobIds, fieldToBucket);
 }
 
@@ -112,9 +112,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getAnomaliesTableData(legacyClient, request.body);
+        const resp = await getAnomaliesTableData(client, request.body);
 
         return response.ok({
           body: resp,
@@ -144,9 +144,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getCategoryDefinition(legacyClient, request.body);
+        const resp = await getCategoryDefinition(client, request.body);
 
         return response.ok({
           body: resp,
@@ -176,9 +176,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getMaxAnomalyScore(legacyClient, request.body);
+        const resp = await getMaxAnomalyScore(client, request.body);
 
         return response.ok({
           body: resp,
@@ -208,9 +208,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getCategoryExamples(legacyClient, request.body);
+        const resp = await getCategoryExamples(client, request.body);
 
         return response.ok({
           body: resp,
@@ -240,9 +240,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getPartitionFieldsValues(legacyClient, request.body);
+        const resp = await getPartitionFieldsValues(client, request.body);
 
         return response.ok({
           body: resp,
@@ -269,14 +269,14 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
-      const body = {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      const { body } = await client.asInternalUser.search({
         ...request.body,
         index: ML_RESULTS_INDEX_PATTERN,
-      };
+      });
       try {
         return response.ok({
-          body: await legacyClient.callAsInternalUser('search', body),
+          body,
         });
       } catch (error) {
         return response.customError(wrapError(error));
@@ -304,9 +304,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getCategorizerStats(legacyClient, request.params, request.query);
+        const resp = await getCategorizerStats(client, request.params, request.query);
         return response.ok({
           body: resp,
         });
@@ -334,9 +334,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getCategoryStoppedPartitions(legacyClient, request.body);
+        const resp = await getCategoryStoppedPartitions(client, request.body);
         return response.ok({
           body: resp,
         });

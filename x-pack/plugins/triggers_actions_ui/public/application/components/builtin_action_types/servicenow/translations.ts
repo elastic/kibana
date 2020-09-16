@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const SERVICENOW_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.selectMessageText',
   {
-    defaultMessage: 'Push or update data to a new incident in ServiceNow.',
+    defaultMessage: 'Create an incident in ServiceNow.',
   }
 );
 

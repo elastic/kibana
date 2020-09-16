@@ -8,7 +8,11 @@ import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { SeriesType, visualizationTypes, LayerConfig, YConfig } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
-  return seriesType === 'bar_horizontal' || seriesType === 'bar_horizontal_stacked';
+  return (
+    seriesType === 'bar_horizontal' ||
+    seriesType === 'bar_horizontal_stacked' ||
+    seriesType === 'bar_horizontal_percentage_stacked'
+  );
 }
 
 export function isHorizontalChart(layers: Array<{ seriesType: SeriesType }>) {

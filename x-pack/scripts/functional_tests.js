@@ -56,7 +56,6 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/upgrade_assistant_integration/config.js'),
   require.resolve('../test/licensing_plugin/config.ts'),
   require.resolve('../test/licensing_plugin/config.public.ts'),
-  require.resolve('../test/licensing_plugin/config.legacy.ts'),
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
   require.resolve('../test/reporting_api_integration/reporting_and_security.config.ts'),
   require.resolve('../test/reporting_api_integration/reporting_without_security.config.ts'),
@@ -64,7 +63,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/ingest_manager_api_integration/config.ts'),
 ];
 
-require('@kbn/plugin-helpers').babelRegister();
+require('../../src/setup_node_env');
 require('@kbn/test').runTestsCli([
   ...alwaysImportedTests,
   ...(!!process.env.CODE_COVERAGE ? [] : onlyNotInCoverageTests),

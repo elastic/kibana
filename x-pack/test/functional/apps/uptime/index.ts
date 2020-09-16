@@ -12,6 +12,28 @@ import {
 
 const ARCHIVE = 'uptime/full_heartbeat';
 
+export const deleteUptimeSettingsObject = async (server: any) => {
+  // delete the saved object
+  try {
+    await server.savedObjects.delete({
+      type: settingsObjectType,
+      id: settingsObjectId,
+    });
+  } catch (e) {
+    // a 404 just means the doc is already missing
+    if (e.response.status !== 404) {
+      const { status, statusText, data, headers, config } = e.response;
+      throw new Error(
+        `error attempting to delete settings:\n${JSON.stringify(
+          { status, statusText, data, headers, config },
+          null,
+          2
+        )}`
+      );
+    }
+  }
+};
+
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -22,25 +44,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     this.tags('ciGroup6');
 
     beforeEach('delete settings', async () => {
-      // delete the saved object
-      try {
-        await server.savedObjects.delete({
-          type: settingsObjectType,
-          id: settingsObjectId,
-        });
-      } catch (e) {
-        // a 404 just means the doc is already missing
-        if (e.response.status !== 404) {
-          const { status, statusText, data, headers, config } = e.response;
-          throw new Error(
-            `error attempting to delete settings:\n${JSON.stringify(
-              { status, statusText, data, headers, config },
-              null,
-              2
-            )}`
-          );
-        }
-      }
+      await deleteUptimeSettingsObject(server);
     });
 
     describe('with generated data', () => {

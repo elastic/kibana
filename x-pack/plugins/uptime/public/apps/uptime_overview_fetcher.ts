@@ -24,7 +24,7 @@ async function fetchUptimeOverviewData({
   const pings = await fetchPingHistogram({ dateStart: start, dateEnd: end, bucketSize });
 
   const response: UptimeFetchDataResponse = {
-    appLink: `/app/uptime#/?dateRangeStart=${relativeTime.start}&dateRangeEnd=${relativeTime.end}`,
+    appLink: `/app/uptime?dateRangeStart=${relativeTime.start}&dateRangeEnd=${relativeTime.end}`,
     stats: {
       monitors: {
         type: 'number',

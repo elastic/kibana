@@ -24,6 +24,7 @@ describe('acknowledge_schema', () => {
   });
   test('it should NOT accept an undefined for "ok"', () => {
     const payload = getAcknowledgeSchemaResponseMock();
+    // @ts-expect-error
     delete payload.acknowledged;
     const decoded = acknowledgeSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
