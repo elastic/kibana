@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
@@ -60,7 +62,7 @@ const StyledRelatedLimitWarning = styled(RelatedEventLimitWarning)`
   }
 `;
 
-const NodeCategoryEntries = memo(function DisplayList({
+const NodeCategoryEntries = memo(function ({
   crumbs,
   matchingEventEntries,
   eventType,
@@ -152,7 +154,7 @@ export function NodeEventsOfType({ nodeID, eventType }: { nodeID: string; eventT
   );
 }
 
-const NodeEventList = memo(function ProcessEventList({
+const NodeEventList = memo(function ({
   processEvent,
   eventType,
   relatedStats,
@@ -193,15 +195,6 @@ const NodeEventList = memo(function ProcessEventList({
       });
     }
   }, [relatedsReady, dispatch, processEntityId]);
-
-  const waitCrumbs = useMemo(() => {
-    return [
-      {
-        text: eventsString,
-        ...nodesLinkNavProps,
-      },
-    ];
-  }, [nodesLinkNavProps, eventsString]);
 
   const relatedByCategory = useSelector(selectors.relatedEventsByCategory);
   const eventsForCurrentCategory = relatedByCategory(processEntityId)(eventType);
@@ -305,4 +298,3 @@ const NodeEventList = memo(function ProcessEventList({
     />
   );
 });
-NodeEventList.displayName = 'NodeEventList';

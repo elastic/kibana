@@ -62,7 +62,7 @@ export const panelViewAndParameters = createSelector(
 
 /**
  * Return a relative href (which includes just the 'search' part) that contains an encoded version of `params `.
- * All other values in the 'search' will be kept. 
+ * All other values in the 'search' will be kept.
  * Use this to get an `href` for an anchor tag.
  */
 export const relativeHref: (
@@ -73,7 +73,7 @@ export const relativeHref: (
   (locationSearch, resolverComponentInstanceID) => {
     return (params: PanelViewAndParameters) => {
       /**
-       * This is only possible before the first `'appReceivedNewExternalProperties'` action is fired. 
+       * This is only possible before the first `'appReceivedNewExternalProperties'` action is fired.
        */
       if (locationSearch === undefined || resolverComponentInstanceID === undefined) {
         return undefined;
@@ -88,6 +88,7 @@ export const relativeHref: (
 
 /**
  * Returns a map of ecs category name to urls for use in panel navigation.
+ * @deprecated
  */
 export const relatedEventsRelativeHrefs: (
   state: ResolverUIState
@@ -116,6 +117,7 @@ export const relatedEventsRelativeHrefs: (
 
 /**
  * Returns a map of event entity ids to urls for use in navigation.
+ * @deprecated
  */
 export const relatedEventDetailHrefs: (
   state: ResolverUIState

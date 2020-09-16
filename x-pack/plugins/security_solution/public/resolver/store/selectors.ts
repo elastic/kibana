@@ -246,6 +246,7 @@ const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.node
 
 /**
  * Total count of related events for a process.
+ * @deprecated
  */
 export const relatedEventTotalForProcess = composeSelectors(
   dataStateSelector,
@@ -328,11 +329,17 @@ export const panelViewAndParameters = composeSelectors(
 
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
 
+/**
+ * @deprecated
+ */
 export const relatedEventsRelativeHrefs = composeSelectors(
   uiStateSelector,
   uiSelectors.relatedEventsRelativeHrefs
 );
 
+/**
+ * @deprecated
+ */
 export const relatedEventDetailHrefs = composeSelectors(
   uiStateSelector,
   uiSelectors.relatedEventDetailHrefs

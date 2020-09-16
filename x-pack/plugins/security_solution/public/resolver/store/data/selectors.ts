@@ -300,7 +300,7 @@ export const relatedEventsByCategory: (
   state: DataState
 ) => (entityID: string) => (ecsCategory: string) => ResolverEvent[] = createSelector(
   relatedEventsByEntityId,
-  function provideGettersByCategory(
+  function (
     /* eslint-disable no-shadow */
     relatedEventsByEntityId
     /* eslint-enable no-shadow */

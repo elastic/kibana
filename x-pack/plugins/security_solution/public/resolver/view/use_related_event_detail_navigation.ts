@@ -10,6 +10,9 @@ import { ResolverState } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import * as selectors from '../store/selectors';
 
+/**
+ * @deprecated
+ */
 export function useRelatedEventDetailNavigation({
   nodeID,
   category,
