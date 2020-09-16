@@ -14,7 +14,6 @@ import {
   EuiRange,
   EuiButtonEmpty,
   EuiLink,
-  EuiFieldText,
 } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';

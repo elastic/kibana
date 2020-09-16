@@ -74,8 +74,6 @@ export const RangePopover = ({
   };
   const { from, to } = tempRange;
 
-  const safeLabel = getBetterLabel(tempRange, formatter);
-
   const lteAppendLabel = i18n.translate('xpack.lens.indexPattern.ranges.lessThanOrEqualAppend', {
     defaultMessage: '\u2264',
   });
