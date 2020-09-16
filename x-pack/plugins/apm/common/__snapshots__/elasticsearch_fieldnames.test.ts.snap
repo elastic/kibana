@@ -54,8 +54,6 @@ exports[`Error LCP_FIELD 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
-exports[`Error METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES 1`] = `undefined`;
-
 exports[`Error METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
@@ -224,8 +222,6 @@ exports[`Span LCP_FIELD 1`] = `undefined`;
 
 exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
-exports[`Span METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES 1`] = `undefined`;
-
 exports[`Span METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
@@ -393,8 +389,6 @@ exports[`Transaction LABEL_NAME 1`] = `undefined`;
 exports[`Transaction LCP_FIELD 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
-
-exports[`Transaction METRIC_CGROUP_MEMORY_STATS_INACTIVE_FILE_BYTES 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
