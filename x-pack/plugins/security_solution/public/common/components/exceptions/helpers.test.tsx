@@ -25,6 +25,9 @@ import {
   entryHasNonEcsType,
   prepareExceptionItemsForBulkClose,
   lowercaseHashValues,
+  getPrepopulatedItem,
+  getCodeSignatureValue,
+  defaultEndpointExceptionItems,
 } from './helpers';
 import { EmptyEntry } from './types';
 import {
@@ -705,6 +708,175 @@ describe('Exception helpers', () => {
             { field: 'user.hash', type: 'match_any', value: ['aaabbb', 'dddfff'] },
           ] as EntriesArray,
         },
+      ]);
+    });
+  });
+
+  describe('getPrepopulatedItem', () => {
+    test('it returns prepopulated items with empty values if values do not exist', () => {
+      const prepopulatedItem = getPrepopulatedItem({
+        listType: 'endpoint',
+        listId: 'some_id',
+        ruleName: 'my rule',
+        codeSignature: undefined,
+        filePath: undefined,
+        sha256Hash: undefined,
+        eventCode: undefined,
+      });
+
+      expect(prepopulatedItem.entries).toEqual([
+        {
+          entries: [
+            { field: 'subject_name', operator: 'included', type: 'match', value: '' },
+            { field: 'trusted', operator: 'included', type: 'match', value: '' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        { field: 'file.path.text', operator: 'included', type: 'match', value: '' },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: '' },
+        { field: 'event.code', operator: 'included', type: 'match', value: '' },
+      ]);
+    });
+
+    test('it returns prepopulated items with values', () => {
+      const prepopulatedItem = getPrepopulatedItem({
+        listType: 'endpoint',
+        listId: 'some_id',
+        ruleName: 'my rule',
+        codeSignature: { subjectName: 'someSubjectName', trusted: 'false' },
+        filePath: 'some-file-path',
+        sha256Hash: 'some-hash',
+        eventCode: 'some-event-code',
+      });
+
+      expect(prepopulatedItem.entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'someSubjectName',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        { field: 'file.path.text', operator: 'included', type: 'match', value: 'some-file-path' },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some-hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some-event-code' },
+      ]);
+    });
+  });
+
+  describe('getCodeSignatureValue', () => {
+    test('it works when file.Ext.code_signature is an object', () => {
+      const codeSignatures = getCodeSignatureValue([
+        {
+          field: 'file.Ext.code_signature',
+          value: [JSON.stringify({ subject_name: 'some_subject', trusted: 'false' })],
+        },
+      ]);
+
+      expect(codeSignatures).toEqual([{ subjectName: 'some_subject', trusted: 'false' }]);
+    });
+
+    test('it works when file.Ext.code_signature is nested type', () => {
+      const codeSignatures = getCodeSignatureValue([
+        {
+          field: 'file.Ext.code_signature',
+          value: [
+            JSON.stringify([
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
+            ]),
+          ],
+        },
+      ]);
+
+      expect(codeSignatures).toEqual([
+        { subjectName: 'some_subject', trusted: 'false' },
+        {
+          subjectName: 'some_subject_2',
+          trusted: 'true',
+        },
+      ]);
+    });
+  });
+
+  describe('defaultEndpointExceptionItems', () => {
+    test('it should return pre-populated items', () => {
+      const defaultItems = defaultEndpointExceptionItems('endpoint', 'list_id', 'my_rule', [
+        {
+          field: 'file.Ext.code_signature',
+          value: [
+            JSON.stringify([
+              { subject_name: 'some_subject', trusted: 'false' },
+              { subject_name: 'some_subject_2', trusted: 'true' },
+            ]),
+          ],
+        },
+        {
+          field: 'file.path',
+          value: ['some file path'],
+        },
+        {
+          field: 'file.hash.sha256',
+          value: ['some hash'],
+        },
+        {
+          field: 'event.code',
+          value: ['some event code'],
+        },
+      ]);
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'false' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        {
+          field: 'file.path.text',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
+      ]);
+      expect(defaultItems[1].entries).toEqual([
+        {
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'some_subject_2',
+            },
+            { field: 'trusted', operator: 'included', type: 'match', value: 'true' },
+          ],
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+        },
+        {
+          field: 'file.path.text',
+          operator: 'included',
+          type: 'match',
+          value: 'some file path',
+        },
+        { field: 'file.hash.sha256', operator: 'included', type: 'match', value: 'some hash' },
+        { field: 'event.code', operator: 'included', type: 'match', value: 'some event code' },
       ]);
     });
   });

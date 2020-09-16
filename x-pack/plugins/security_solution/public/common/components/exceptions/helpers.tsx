@@ -377,7 +377,7 @@ export const getMappedNonEcsValue = ({
   data: TimelineNonEcsData[];
   fieldName: string;
 }): string[] => {
-  const item = data.find((d) => d.field === fieldName);
+  const item = data.find(({ field }) => field === fieldName);
   if (item != null && item.value != null) {
     return item.value;
   }
@@ -395,6 +395,105 @@ export const entryHasListType = (
     }
   }
   return false;
+};
+
+/**
+ * Returns the value for `file.Ext.code_signature` which
+ * can be an object or array of objects
+ */
+export const getCodeSignatureValue = (
+  data: TimelineNonEcsData[]
+): Array<{ subjectName: string; trusted: string }> => {
+  const [item] = getMappedNonEcsValue({
+    data,
+    fieldName: 'file.Ext.code_signature',
+  });
+  const parsedItem = JSON.parse(item) ?? [{ subject_name: '', trusted: '' }];
+  const signatures = Array.isArray(parsedItem) ? parsedItem : [parsedItem];
+
+  return signatures.map((signature) => {
+    if (
+      typeof signature === 'object' &&
+      signature != null &&
+      Object.prototype.hasOwnProperty.call(signature, 'subject_name') &&
+      Object.prototype.hasOwnProperty.call(signature, 'trusted')
+    ) {
+      return {
+        subjectName: signature.subject_name ?? '',
+        trusted: signature.trusted ?? '',
+      };
+    }
+
+    return {
+      subjectName: '',
+      trusted: '',
+    };
+  });
+};
+
+/**
+ * Returns the default values from the alert data to autofill new endpoint exceptions
+ */
+export const getPrepopulatedItem = ({
+  listType,
+  listId,
+  ruleName,
+  codeSignature,
+  filePath,
+  sha256Hash,
+  eventCode,
+  listNamespace = 'agnostic',
+}: {
+  listType: ExceptionListType;
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  codeSignature: { subjectName: string; trusted: string } | undefined;
+  filePath: string | undefined;
+  sha256Hash: string | undefined;
+  eventCode: string | undefined;
+}): ExceptionsBuilderExceptionItem => {
+  return {
+    ...getNewExceptionItem({ listType, listId, namespaceType: listNamespace, ruleName }),
+    entries: [
+      {
+        field: 'file.Ext.code_signature',
+        type: 'nested',
+        entries: [
+          {
+            field: 'subject_name',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.subjectName : '',
+          },
+          {
+            field: 'trusted',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.trusted : '',
+          },
+        ],
+      },
+      {
+        field: 'file.path.text',
+        operator: 'included',
+        type: 'match',
+        value: filePath ?? '',
+      },
+      {
+        field: 'file.hash.sha256',
+        operator: 'included',
+        type: 'match',
+        value: sha256Hash ?? '',
+      },
+      {
+        field: 'event.code',
+        operator: 'included',
+        type: 'match',
+        value: eventCode ?? '',
+      },
+    ],
+  };
 };
 
 /**
@@ -437,59 +536,19 @@ export const defaultEndpointExceptionItems = (
   alertData: TimelineNonEcsData[]
 ): ExceptionsBuilderExceptionItem[] => {
   const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' });
-  const [signatureSigner] = getMappedNonEcsValue({
-    data: alertData,
-    fieldName: 'file.Ext.code_signature.subject_name',
-  });
-  const [signatureTrusted] = getMappedNonEcsValue({
-    data: alertData,
-    fieldName: 'file.Ext.code_signature.trusted',
-  });
+  const codeSignatures = getCodeSignatureValue(alertData);
   const [sha256Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha256' });
   const [eventCode] = getMappedNonEcsValue({ data: alertData, fieldName: 'event.code' });
-  const namespaceType = 'agnostic';
 
-  return [
-    {
-      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
-      entries: [
-        {
-          field: 'file.Ext.code_signature',
-          type: 'nested',
-          entries: [
-            {
-              field: 'subject_name',
-              operator: 'included',
-              type: 'match',
-              value: signatureSigner ?? '',
-            },
-            {
-              field: 'trusted',
-              operator: 'included',
-              type: 'match',
-              value: signatureTrusted ?? '',
-            },
-          ],
-        },
-        {
-          field: 'file.path.text',
-          operator: 'included',
-          type: 'match',
-          value: filePath ?? '',
-        },
-        {
-          field: 'file.hash.sha256',
-          operator: 'included',
-          type: 'match',
-          value: sha256Hash ?? '',
-        },
-        {
-          field: 'event.code',
-          operator: 'included',
-          type: 'match',
-          value: eventCode ?? '',
-        },
-      ],
-    },
-  ];
+  return codeSignatures.map((codeSignature) =>
+    getPrepopulatedItem({
+      listType,
+      listId,
+      ruleName,
+      filePath,
+      sha256Hash,
+      eventCode,
+      codeSignature,
+    })
+  );
 };
