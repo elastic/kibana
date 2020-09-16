@@ -42,7 +42,7 @@ export function createFixedScroll($scope, $timeout) {
   return function (el) {
     const $el = typeof el.css === 'function' ? el : $(el);
     let $window = $(window);
-    let $scroller = $('<div class="fixed-scroll-scroller">').height(SCROLLER_HEIGHT);
+    let $scroller = $('<div class="dscFixedScroll__scroller">').height(SCROLLER_HEIGHT);
 
     /**
      * Remove the listeners bound in listen()

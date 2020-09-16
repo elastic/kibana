@@ -18,7 +18,7 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import classNames from 'classnames';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'kibana/public';
@@ -153,14 +153,9 @@ export function DiscoverLegacy({
     'col-md-12': isSidebarClosed,
   });
 
-  const sidebarCloseIcon = classNames({
-    'fa-chevron-circle-right': isSidebarClosed,
-    'fa-chevron-circle-left': !isSidebarClosed,
-  });
-
   return (
     <I18nProvider>
-      <div className="app-container" data-fetch-counter={fetchCounter}>
+      <div className="dscAppContainer" data-fetch-counter={fetchCounter}>
         <h1 className="euiScreenReaderOnly">{savedSearch.title}</h1>
         <TopNavMenu
           appName="discover"
@@ -199,16 +194,17 @@ export function DiscoverLegacy({
                   />
                 </div>
               )}
-              <button
+              <EuiButtonIcon
+                iconType={isSidebarClosed ? 'arrowRight' : 'arrowLeft'}
+                iconSize="s"
+                size="s"
                 onClick={() => setIsSidebarClosed(!isSidebarClosed)}
                 data-test-subj="collapseSideBarButton"
                 aria-controls="discover-sidebar"
                 aria-expanded={isSidebarClosed ? 'false' : 'true'}
                 aria-label="Toggle sidebar"
-                className="kuiCollapseButton kbnCollapsibleSidebar__collapseButton"
-              >
-                <span className={`kuiIcon ${sidebarCloseIcon}`} />
-              </button>
+                className="kbnCollapsibleSidebar__collapseButton"
+              />
             </div>
             <div className={`dscWrapper ${mainSectionClassName}`}>
               {resultState === 'none' && (
@@ -264,7 +260,7 @@ export function DiscoverLegacy({
 
                   <div className="dscResults">
                     <section
-                      className="dscTable fixed-scroll"
+                      className="dscTable dscFixedScroll"
                       aria-labelledby="documentsAriaLabel"
                       ref={fixedScrollRef}
                     >

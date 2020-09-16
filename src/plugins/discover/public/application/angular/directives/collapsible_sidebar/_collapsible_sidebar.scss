@@ -7,9 +7,12 @@
   .kbnCollapsibleSidebar__collapseButton {
     position: absolute;
     top: 0;
-    right: -21px;
+    right: -20px;
     cursor: pointer;
     z-index: -1;
+    min-height: $euiSizeM;
+    min-width: $euiSizeM;
+    padding: $euiSizeXS * .5;
   }
 
   &.closed {

@@ -122,7 +122,7 @@ describe('FixedScroll directive', function () {
         return {
           $container: $el,
           $content: $content,
-          $scroller: $parent.find('.fixed-scroll-scroller'),
+          $scroller: $parent.find('.dscFixedScroll__scroller'),
         };
       };
     });
