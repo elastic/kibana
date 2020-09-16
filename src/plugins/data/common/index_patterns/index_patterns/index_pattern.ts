@@ -56,16 +56,15 @@ export class IndexPattern implements IIndexPattern {
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
-
-  // todo rename
+  // savedObject version
   public version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   public sourceFilters?: SourceFilter[];
-  // todo make read  only, update via  method or factor out
-  public originalBody: { [key: string]: any } = {};
+  private originalBody: { [key: string]: any } = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
 
+  // todo  get rid  of this
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
     timeFieldName: ES_FIELD_TYPES.KEYWORD,
@@ -129,6 +128,12 @@ export class IndexPattern implements IIndexPattern {
       return this.deserializeFieldFormatMap(mapping);
     });
   }
+
+  getOriginalBody = () => ({ ...this.originalBody });
+
+  resetOriginalBody = () => {
+    this.originalBody = this.prepBody();
+  };
 
   private serializeFieldFormatMap(flat: any, format: string, field: string | undefined) {
     if (format && field) {

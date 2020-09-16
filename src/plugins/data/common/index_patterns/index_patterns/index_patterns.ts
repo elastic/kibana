@@ -367,7 +367,7 @@ export class IndexPatternsService {
       }
     }
     // todo better way to do this
-    indexPattern.originalBody = indexPattern.prepBody();
+    indexPattern.resetOriginalBody();
     return indexPattern;
   };
 
@@ -440,11 +440,12 @@ export class IndexPatternsService {
 
     // get the list of attributes
     const body = indexPattern.prepBody();
+    const originalBody = indexPattern.getOriginalBody();
 
     // get changed keys
     const originalChangedKeys: string[] = [];
     Object.entries(body).forEach(([key, value]) => {
-      if (value !== indexPattern.originalBody[key]) {
+      if (value !== originalBody[key]) {
         originalChangedKeys.push(key);
       }
     });
@@ -468,7 +469,7 @@ export class IndexPatternsService {
 
           const serverChangedKeys: string[] = [];
           Object.entries(updatedBody).forEach(([key, value]) => {
-            if (value !== (body as any)[key] && value !== indexPattern.originalBody[key]) {
+            if (value !== (body as any)[key] && value !== originalBody[key]) {
               serverChangedKeys.push(key);
             }
           });
