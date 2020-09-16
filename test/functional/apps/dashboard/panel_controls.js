@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
     'discover',
     'timePicker',
   ]);
-  const dashboardName = 'Dashboard Panel Controls Test';
+  // const dashboardName = 'Dashboard Panel Controls Test';
 
   describe('dashboard panel controls', function viewEditModeTests() {
     before(async function () {
@@ -288,6 +288,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 */
+
+    /*
     // Panel expand should also be shown in view mode, but only on mouse hover.
     describe('panel expand control', function () {
       it('shown in edit mode', async function () {
@@ -296,5 +298,6 @@ export default function ({ getService, getPageObjects }) {
         await dashboardPanelActions.expectExistsToggleExpandAction();
       });
     });
+    */
   });
 }
