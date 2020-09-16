@@ -115,7 +115,8 @@ describe('licensing plugin', () => {
             refresh();
           } else if (i === 2) {
             expect(value.type).toBe('gold');
-            refresh();
+            // if we just call refresh() immediately here, the exhaustMap de-dupes the call
+            Promise.resolve().then(() => refresh());
           } else if (i === 3) {
             expect(value.type).toBe('platinum');
             done();
