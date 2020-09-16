@@ -49,6 +49,11 @@ type ProcessRunningFields = Partial<
     }
 >;
 
+/**
+ * Checks if an event describes a process as running (whether it was started, already running, or changed)
+ *
+ * @param event a document to check for running fields
+ */
 export function isProcessRunning(event: ProcessRunningFields): boolean {
   if (isLegacyEventSafeVersion(event)) {
     return (
@@ -70,6 +75,12 @@ export function isProcessRunning(event: ProcessRunningFields): boolean {
  */
 type TimestampFields = Pick<SafeResolverEvent, '@timestamp'>;
 
+/**
+ * Extracts the first non null value from the `@timestamp` field in the document. Returns undefined if the field doesn't
+ * exist in the document.
+ *
+ * @param event a document from ES
+ */
 export function timestampSafeVersion(event: TimestampFields): undefined | number {
   return firstNonNullValue(event?.['@timestamp']);
 }
@@ -136,6 +147,11 @@ type EventSequenceFields = Partial<
     }
 >;
 
+/**
+ * Extract the first non null event sequence value from a document. Returns undefined if the field doesn't exist in the document.
+ *
+ * @param event a document from ES
+ */
 export function eventSequence(event: EventSequenceFields): number | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return firstNonNullValue(event.endgame?.serial_event_id);
@@ -172,6 +188,12 @@ type EntityIDFields = Partial<
     }
 >;
 
+/**
+ * Extract the first non null value from either the `entity_id` or `unique_pid` depending on the document type. Returns
+ * undefined if the field doesn't exist in the document.
+ *
+ * @param event a document from ES
+ */
 export function entityIDSafeVersion(event: EntityIDFields): string | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return event.endgame?.unique_pid === undefined
@@ -207,6 +229,12 @@ type ParentEntityIDFields = Partial<
     }
 >;
 
+/**
+ * Extract the first non null value from either the `parent.entity_id` or `unique_ppid` depending on the document type. Returns
+ * undefined if the field doesn't exist in the document.
+ *
+ * @param event a document from ES
+ */
 export function parentEntityIDSafeVersion(event: ParentEntityIDFields): string | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return String(firstNonNullValue(event.endgame?.unique_ppid));
@@ -214,6 +242,9 @@ export function parentEntityIDSafeVersion(event: ParentEntityIDFields): string |
   return firstNonNullValue(event.process?.parent?.entity_id);
 }
 
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
 type AncestryArrayFields = Partial<
   | {
       endgame: object;
@@ -227,6 +258,11 @@ type AncestryArrayFields = Partial<
     }
 >;
 
+/**
+ * Extracts all ancestry array from a document if it exists.
+ *
+ * @param event an ES document
+ */
 export function ancestryArray(event: AncestryArrayFields): string[] | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return undefined;
@@ -241,6 +277,11 @@ export function ancestryArray(event: AncestryArrayFields): string[] | undefined 
  */
 type GetAncestryArrayFields = AncestryArrayFields & ParentEntityIDFields;
 
+/**
+ * Returns an array of strings representing the ancestry for a process.
+ *
+ * @param event an ES document
+ */
 export function getAncestryAsArray(event: GetAncestryArrayFields | undefined): string[] {
   if (!event) {
     return [];
