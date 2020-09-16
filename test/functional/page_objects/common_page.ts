@@ -496,6 +496,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       const input = await find.byCssSelector('.euiFilePicker__input');
       await input.type(path);
     }
+
+    async scrollKibanaBodyTop() {
+      await browser.setScrollToById('kibana-body', 0, 0);
+    }
   }
 
   return new CommonPage();

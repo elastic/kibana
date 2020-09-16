@@ -15,8 +15,9 @@ import {
 } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
 import { ProcessorEvent } from '../../common/processor_event';
+import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 
-export function getRumOverviewProjection({
+export function getRumPageLoadTransactionsProjection({
   setup,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
@@ -26,9 +27,10 @@ export function getRumOverviewProjection({
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
-      { term: { [TRANSACTION_TYPE]: 'page-load' } },
+      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
       {
         // Adding this filter to cater for some inconsistent rum data
+        // not available on aggregated transactions
         exists: {
           field: 'transaction.marks.navigationTiming.fetchStart',
         },
