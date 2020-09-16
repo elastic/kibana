@@ -78,7 +78,7 @@ describe(`#getAuthorizationModeBySource`, () => {
     ).toEqual(AuthorizationMode.RBAC);
   });
 
-  test('should return RBAC if source alert is marked with a last modified version', async () => {
+  test('should return RBAC if source alert doesnt have a last modified version', async () => {
     const id = uuid.v4();
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAlert({ id, attributes: { meta: {} } }));
     expect(

@@ -23,7 +23,7 @@ export interface ConstructorOptions {
   // actions to continue to execute - which requires that we exempt auth on
   // `get` for Connectors and `execute` for Action execution when used by
   // these legacy alerts
-  shouldUseLegacyRbac?: boolean;
+  authorizationMode?: AuthorizationMode;
 }
 
 const operationAlias: Record<
@@ -50,7 +50,7 @@ export class ActionsAuthorization {
     authorization,
     authentication,
     auditLogger,
-    authorizationMode = AuthorizationMode.RBC,
+    authorizationMode = AuthorizationMode.RBAC,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
