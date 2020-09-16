@@ -29,7 +29,10 @@ describe('local ui filter queries', () => {
       getLocalUIFilters({
         setup,
         localFilterNames: ['transactionResult', 'host'],
-        projection: getServicesProjection({ setup }),
+        projection: getServicesProjection({
+          setup,
+          searchAggregatedTransactions: false,
+        }),
         uiFilters: {
           transactionResult: ['2xx'],
         },

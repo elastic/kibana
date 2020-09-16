@@ -68,12 +68,12 @@ export const rumPageLoadDistBreakdownRoute = createRoute(() => ({
       query: { minPercentile, maxPercentile, breakdown },
     } = context.params;
 
-    return getPageLoadDistBreakdown(
+    return getPageLoadDistBreakdown({
       setup,
-      Number(minPercentile),
-      Number(maxPercentile),
-      breakdown
-    );
+      minDuration: Number(minPercentile),
+      maxDuration: Number(maxPercentile),
+      breakdown,
+    });
   },
 }));
 

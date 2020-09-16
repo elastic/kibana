@@ -24,7 +24,7 @@ interface Props {
 function ServiceNameFilter({ loading, serviceNames }: Props) {
   const history = useHistory();
   const {
-    urlParams: { serviceName },
+    urlParams: { serviceName: selectedServiceName },
   } = useUrlParams();
 
   const options = serviceNames.map((type) => ({
@@ -47,10 +47,22 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   );
 
   useEffect(() => {
-    if (!serviceName && serviceNames.length > 0) {
-      updateServiceName(serviceNames[0]);
+    if (serviceNames?.length > 0) {
+      // select first from the list
+      if (!selectedServiceName) {
+        updateServiceName(serviceNames[0]);
+      }
+
+      // in case serviceName is cached from url and isn't present in current list
+      if (selectedServiceName && !serviceNames.includes(selectedServiceName)) {
+        updateServiceName(serviceNames[0]);
+      }
     }
-  }, [serviceNames, serviceName, updateServiceName]);
+
+    if (selectedServiceName && serviceNames.length === 0 && !loading) {
+      updateServiceName('');
+    }
+  }, [serviceNames, selectedServiceName, updateServiceName, loading]);
 
   return (
     <>
@@ -68,7 +80,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
         isLoading={loading}
         data-cy="serviceNameFilter"
         options={options}
-        value={serviceName}
+        value={selectedServiceName}
         compressed={true}
         onChange={(event) => {
           updateServiceName(event.target.value);

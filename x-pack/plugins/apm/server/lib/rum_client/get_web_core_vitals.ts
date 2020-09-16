@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -16,6 +16,7 @@ import {
   FCP_FIELD,
   FID_FIELD,
   LCP_FIELD,
+  USER_AGENT_NAME,
   TBT_FIELD,
 } from '../../../common/elasticsearch_fieldnames';
 
@@ -24,7 +25,7 @@ export async function getWebCoreVitals({
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
@@ -37,7 +38,7 @@ export async function getWebCoreVitals({
             ...projection.body.query.bool.filter,
             {
               term: {
-                'user_agent.name': 'Chrome',
+                [USER_AGENT_NAME]: 'Chrome',
               },
             },
           ],

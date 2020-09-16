@@ -17,7 +17,7 @@ export const UrlDecode: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.urlDecodeForm.fieldNameHelpText',
-          { defaultMessage: 'The field to decode.' }
+          { defaultMessage: 'Field to decode. For an array of strings, each element is decoded.' }
         )}
       />
 
