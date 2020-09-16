@@ -686,6 +686,7 @@ describe('when on the list page', () => {
       hostInfo = {
         host_status: hosts[0].host_status,
         metadata: hosts[0].metadata,
+        query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
       };
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
