@@ -60,13 +60,11 @@ const StyledActionButton = styled(EuiButton)`
  */
 const SubButton = React.memo(
   ({
-    hasMenu,
     menuIsOpen,
     action,
     count,
     nodeID,
   }: {
-    hasMenu: boolean;
     menuIsOpen?: boolean;
     action: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     count?: number;
@@ -76,7 +74,7 @@ const SubButton = React.memo(
     return (
       <StyledActionButton
         onClick={action}
-        iconType={hasMenu ? iconType : 'none'}
+        iconType={iconType}
         fill={false}
         color={'primary'}
         size="s"
@@ -217,7 +215,6 @@ const NodeSubMenuComponents = React.memo(
     return (
       <>
         <SubButton
-          hasMenu={true}
           menuIsOpen={menuIsOpen}
           action={handleMenuOpenClick}
           count={count}
