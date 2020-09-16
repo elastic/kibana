@@ -656,7 +656,7 @@ describe('Lens App', () => {
       });
 
       it('saves new docs', async () => {
-        const { props, services, component } = await save({
+        const { props, services } = await save({
           initialSavedObjectId: undefined,
           newCopyOnSave: false,
           newTitle: 'hello there',
