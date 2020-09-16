@@ -20,176 +20,37 @@
 import * as React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/public';
+import { buildContextMenuForActions, Action } from '../../../../src/plugins/ui_actions/public';
+import { sampleAction } from './util';
 
 export const PanelViewWithSharingLong: React.FC = () => {
   const [open, setOpen] = React.useState(false);
 
   const context = {};
   const trigger: any = 'TEST_TRIGGER';
+  const grouping: Action['grouping'] = [
+    {
+      id: 'sharing',
+      getDisplayName: () => 'Sharing',
+      getIconType: () => 'share',
+      order: 50,
+    },
+  ];
+  const actions = [
+    sampleAction('test-1', 100, 'Explore underlying data', 'discoverApp'),
+    sampleAction('test-2', 99, 'Customize time range', 'calendar'),
+    sampleAction('test-3', 98, 'Inspect', 'inspect'),
+    sampleAction('test-4', 97, 'Full screen', 'fullScreen'),
+    sampleAction('test-5', 10, 'Copy link', 'link', grouping),
+    sampleAction('test-6', 9, 'Copy .png', 'image', grouping),
+    sampleAction('test-7', 8, 'Copy .pdf', 'link', grouping),
+    sampleAction('test-8', 7, 'Send to slack', 'link', grouping),
+    sampleAction('test-9', 6, 'Send by e-mail', 'email', grouping),
+  ];
 
   const panels = useAsync(() =>
     buildContextMenuForActions({
-      actions: [
-        {
-          action: {
-            id: 'test-1',
-            type: 'test-1' as any,
-            order: 100,
-            getDisplayName: () => 'Explore underlying data',
-            getIconType: () => 'discoverApp',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-2',
-            type: 'test-2' as any,
-            order: 99,
-            getDisplayName: () => 'Customize time range',
-            getIconType: () => 'calendar',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-3',
-            type: 'test-3' as any,
-            order: 98,
-            getDisplayName: () => 'Inspect',
-            getIconType: () => 'inspect',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-4',
-            type: 'test-4' as any,
-            order: 97,
-            getDisplayName: () => 'Full screen',
-            getIconType: () => 'fullScreen',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-5',
-            type: 'test-5' as any,
-            order: 10,
-            grouping: [
-              {
-                id: 'sharing',
-                getDisplayName: () => 'Sharing',
-                getIconType: () => 'share',
-                order: 50,
-              },
-            ],
-            getDisplayName: () => 'Copy link',
-            getIconType: () => 'link',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-6',
-            type: 'test-6' as any,
-            order: 9,
-            grouping: [
-              {
-                id: 'sharing',
-                getDisplayName: () => 'Sharing',
-                getIconType: () => 'share',
-                order: 50,
-              },
-            ],
-            getDisplayName: () => 'Copy .png',
-            getIconType: () => 'image',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-7',
-            type: 'test-7' as any,
-            order: 9,
-            grouping: [
-              {
-                id: 'sharing',
-                getDisplayName: () => 'Sharing',
-                getIconType: () => 'share',
-                order: 50,
-              },
-            ],
-            getDisplayName: () => 'Copy .pdf',
-            getIconType: () => 'link',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-8',
-            type: 'test-8' as any,
-            order: 9,
-            grouping: [
-              {
-                id: 'sharing',
-                getDisplayName: () => 'Sharing',
-                getIconType: () => 'share',
-                order: 50,
-              },
-            ],
-            getDisplayName: () => 'Send to slack',
-            getIconType: () => 'link',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-9',
-            type: 'test-9' as any,
-            order: 8,
-            grouping: [
-              {
-                id: 'sharing',
-                getDisplayName: () => 'Sharing',
-                getIconType: () => 'share',
-                order: 50,
-              },
-            ],
-            getDisplayName: () => 'Send by e-mail',
-            getIconType: () => 'email',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-      ],
-      closeMenu: () => {},
+      actions: actions.map((action) => ({ action, context, trigger })),
     })
   );
 

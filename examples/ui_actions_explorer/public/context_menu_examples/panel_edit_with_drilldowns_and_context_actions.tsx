@@ -20,255 +20,62 @@
 import * as React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import { buildContextMenuForActions } from '../../../../src/plugins/ui_actions/public';
+import { buildContextMenuForActions, Action } from '../../../../src/plugins/ui_actions/public';
+import { sampleAction } from './util';
 
 export const PanelEditWithDrilldownsAndContextActions: React.FC = () => {
   const [open, setOpen] = React.useState(false);
 
   const context = {};
   const trigger: any = 'TEST_TRIGGER';
+  const drilldownGrouping: Action['grouping'] = [
+    {
+      id: 'drilldowns',
+      getDisplayName: () => 'Drilldowns',
+      getIconType: () => 'popout',
+      order: 20,
+    },
+  ];
+  const customActionGrouping: Action['grouping'] = [
+    {
+      id: 'actions',
+      getDisplayName: () => 'Custom actions',
+      getIconType: () => 'cloudStormy',
+      order: 20,
+    },
+  ];
+  const actions = [
+    sampleAction('test-1', 100, 'Edit visualization', 'pencil'),
+    sampleAction('test-2', 99, 'Clone panel', 'partial'),
+    sampleAction('test-3', 98, 'Edit panel title', 'pencil'),
+    sampleAction('test-4', 97, 'Customize time range', 'calendar'),
+    sampleAction('test-5', 96, 'Inspect', 'inspect'),
+    sampleAction('test-6', 95, 'Full screen', 'fullScreen'),
+    sampleAction('test-7', 94, 'Replace panel', 'submodule'),
+    sampleAction('test-8', 93, 'Delete from dashboard', 'trash'),
+
+    sampleAction('test-9', 10, 'Create drilldown', 'plusInCircle', drilldownGrouping),
+    sampleAction('test-10', 9, 'Manage drilldowns', 'list', drilldownGrouping),
+
+    sampleAction('test-11', 10, 'Go to Sales dashboard', 'dashboardApp', customActionGrouping),
+    sampleAction('test-12', 9, 'Go to Traffic dashboard', 'dashboardApp', customActionGrouping),
+    sampleAction('test-13', 8, 'Custom actions', 'cloudStormy', customActionGrouping),
+    sampleAction('test-14', 7, 'View in Salesforce', 'link', customActionGrouping),
+  ];
 
   const panels = useAsync(() =>
     buildContextMenuForActions({
-      actions: [
-        {
-          action: {
-            id: 'test-1',
-            type: 'test-1' as any,
-            order: 100,
-            getDisplayName: () => 'Edit visualization',
-            getIconType: () => 'pencil',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-2',
-            type: 'test-2' as any,
-            order: 99,
-            getDisplayName: () => 'Clone panel',
-            getIconType: () => 'partial',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-3',
-            type: 'test-3' as any,
-            order: 98,
-            getDisplayName: () => 'Edit panel title',
-            getIconType: () => 'pencil',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-4',
-            type: 'test-4' as any,
-            order: 97,
-            getDisplayName: () => 'Customize time range',
-            getIconType: () => 'calendar',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-5',
-            type: 'test-5' as any,
-            order: 96,
-            getDisplayName: () => 'Inspect',
-            getIconType: () => 'inspect',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-6',
-            type: 'test-6' as any,
-            order: 95,
-            getDisplayName: () => 'Full screen',
-            getIconType: () => 'fullScreen',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-7',
-            type: 'test-7' as any,
-            order: 94,
-            getDisplayName: () => 'Replace panel',
-            getIconType: () => 'submodule',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-8',
-            type: 'test-8' as any,
-            order: 93,
-            getDisplayName: () => 'Delete from dashboard',
-            getIconType: () => 'trash',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-9',
-            type: 'test-9' as any,
-            order: 10,
-            grouping: [
-              {
-                id: 'drilldowns',
-                getDisplayName: () => 'Drilldowns',
-                getIconType: () => 'popout',
-                order: 20,
-              },
-            ],
-            getDisplayName: () => 'Create drilldown',
-            getIconType: () => 'plusInCircle',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-10',
-            type: 'test-10' as any,
-            order: 9,
-            grouping: [
-              {
-                id: 'drilldowns',
-                getDisplayName: () => 'Drilldowns',
-                getIconType: () => 'popout',
-                order: 20,
-              },
-            ],
-            getDisplayName: () => 'Manage drilldowns',
-            getIconType: () => 'list',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-11',
-            type: 'test-11' as any,
-            order: 10,
-            grouping: [
-              {
-                id: 'actions',
-                getDisplayName: () => 'Custom actions',
-                getIconType: () => 'cloudStormy',
-                order: 20,
-              },
-            ],
-            getDisplayName: () => 'Go to Sales dashboard',
-            getIconType: () => 'dashboardApp',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-12',
-            type: 'test-12' as any,
-            order: 9,
-            grouping: [
-              {
-                id: 'actions',
-                getDisplayName: () => 'Custom actions',
-                getIconType: () => 'cloudStormy',
-                order: 20,
-              },
-            ],
-            getDisplayName: () => 'Go to Traffic dashboard',
-            getIconType: () => 'dashboardApp',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-13',
-            type: 'test-13' as any,
-            order: 8,
-            grouping: [
-              {
-                id: 'actions',
-                getDisplayName: () => 'Custom actions',
-                getIconType: () => 'cloudStormy',
-                order: 20,
-              },
-            ],
-            getDisplayName: () => 'Go to planning search',
-            getIconType: () => 'discoverApp',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-        {
-          action: {
-            id: 'test-14',
-            type: 'test-14' as any,
-            order: 7,
-            grouping: [
-              {
-                id: 'actions',
-                getDisplayName: () => 'Custom actions',
-                getIconType: () => 'cloudStormy',
-                order: 20,
-              },
-            ],
-            getDisplayName: () => 'View in Salesforce',
-            getIconType: () => 'link',
-            isCompatible: async () => true,
-            execute: async () => {},
-          },
-          context,
-          trigger,
-        },
-      ],
-      closeMenu: () => {},
+      actions: actions.map((action) => ({ action, context, trigger })),
     })
   );
 
   return (
     <EuiPopover
-      button={<EuiButton onClick={() => setOpen((x) => !x)}>Edit mode with drilldowns</EuiButton>}
+      button={
+        <EuiButton onClick={() => setOpen((x) => !x)}>
+          Edit mode with drilldowns and custom actions
+        </EuiButton>
+      }
       isOpen={open}
       panelPaddingSize="none"
       anchorPosition="downLeft"
