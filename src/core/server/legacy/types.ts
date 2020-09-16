@@ -128,6 +128,15 @@ export interface LegacyServiceStartDeps {
  * @internal
  * @deprecated
  */
+export interface LegacyServiceSetupConfig {
+  legacyConfig: LegacyConfig;
+  settings: LegacyVars;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
 export interface ILegacyInternals {
   /**
    * Inject UI app vars for a particular plugin

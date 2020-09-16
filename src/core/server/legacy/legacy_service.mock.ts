@@ -24,6 +24,7 @@ type LegacyServiceMock = jest.Mocked<PublicMethodsOf<LegacyService> & { legacyId
 
 const createLegacyServiceMock = (): LegacyServiceMock => ({
   legacyId: Symbol(),
+  setupLegacyConfig: jest.fn(),
   setup: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),

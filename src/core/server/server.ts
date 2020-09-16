@@ -26,7 +26,7 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LegacyService } from './legacy';
+import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -107,15 +107,18 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
 
-    // Immediately terminate in case of invalid configuration
-    await this.configService.validate();
-
     const environmentSetup = await this.environment.setup();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const { pluginTree, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
+    const legacyConfigSetup = await this.legacy.setupLegacyConfig();
+
+    // Immediately terminate in case of invalid configuration
+    // This needs to be done after plugin discovery
+    await this.configService.validate();
+    await ensureValidConfiguration(this.configService, legacyConfigSetup);
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:

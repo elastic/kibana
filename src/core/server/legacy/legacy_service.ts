@@ -48,7 +48,7 @@ interface LegacyKbnServer {
   close: () => Promise<void>;
 }
 
-function getLegacyRawConfig(config: Config, pathConfig: PathConfigType, serverUuid: string) {
+function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
   const rawConfig = config.toRaw();
 
   // Elasticsearch config is solely handled by the core and legacy platform
@@ -59,10 +59,6 @@ function getLegacyRawConfig(config: Config, pathConfig: PathConfigType, serverUu
 
   return {
     ...rawConfig,
-    server: {
-      ...rawConfig.server,
-      uuid: serverUuid,
-    },
     // We rely heavily in the default value of 'path.data' in the legacy world and,
     // since it has been moved to NP, it won't show up in RawConfig.
     path: pathConfig,
@@ -100,20 +96,14 @@ export class LegacyService implements CoreService {
     ).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
   }
 
-  public async setup(setupDeps: LegacyServiceSetupDeps) {
-    this.log.debug('setting up legacy service');
-
-    const serverUuid = setupDeps.core.environment.instanceUuid;
-
+  public async setupLegacyConfig() {
     this.update$ = combineLatest([
       this.coreContext.configService.getConfig$(),
       this.coreContext.configService.atPath<PathConfigType>('path'),
     ]).pipe(
       tap(([config, pathConfig]) => {
         if (this.kbnServer !== undefined) {
-          this.kbnServer.applyLoggingConfiguration(
-            getLegacyRawConfig(config, pathConfig, serverUuid)
-          );
+          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
         }
       }),
       tap({ error: (err) => this.log.error(err) }),
@@ -125,11 +115,29 @@ export class LegacyService implements CoreService {
     this.settings = await this.update$
       .pipe(
         first(),
-        map(([config, pathConfig]) => getLegacyRawConfig(config, pathConfig, serverUuid))
+        map(([config, pathConfig]) => getLegacyRawConfig(config, pathConfig))
       )
       .toPromise();
 
     this.legacyRawConfig = LegacyConfigClass.withDefaultSchema(this.settings);
+
+    return {
+      settings: this.settings,
+      legacyConfig: this.legacyRawConfig!,
+    };
+  }
+
+  public async setup(setupDeps: LegacyServiceSetupDeps) {
+    this.log.debug('setting up legacy service');
+
+    if (!this.legacyRawConfig) {
+      throw new Error(
+        'Legacy config not initialized yet. Ensure LegacyService.setupLegacyConfig() is called before LegacyService.setup()'
+      );
+    }
+
+    // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
+    this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
 
     this.setupDeps = setupDeps;
     this.legacyInternals = new LegacyInternals();
@@ -138,7 +146,7 @@ export class LegacyService implements CoreService {
   public async start(startDeps: LegacyServiceStartDeps) {
     const { setupDeps } = this;
 
-    if (!setupDeps) {
+    if (!setupDeps || !this.legacyRawConfig) {
       throw new Error('Legacy service is not setup yet.');
     }
 

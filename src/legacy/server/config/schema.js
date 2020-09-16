@@ -131,11 +131,7 @@ export default () =>
       }),
     }).default(),
 
-    plugins: Joi.object({
-      paths: Joi.array().items(Joi.string()).default([]),
-      scanDirs: Joi.array().items(Joi.string()).default([]),
-      initialize: Joi.boolean().default(true),
-    }).default(),
+    plugins: HANDLED_IN_NEW_PLATFORM,
 
     path: HANDLED_IN_NEW_PLATFORM,
 
@@ -146,6 +142,7 @@ export default () =>
     status: Joi.object({
       allowAnonymous: Joi.boolean().default(false),
     }).default(),
+
     map: Joi.object({
       includeElasticMapsService: Joi.boolean().default(true),
       proxyElasticMapsServiceInMaps: Joi.boolean().default(false),
