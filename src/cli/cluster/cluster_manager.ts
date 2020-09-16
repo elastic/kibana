@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 
 import opn from 'opn';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { FSWatcher } from 'chokidar';
 import * as Rx from 'rxjs';
 import { startWith, mapTo, filter, map, take, tap } from 'rxjs/operators';
