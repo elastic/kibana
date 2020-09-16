@@ -21,7 +21,8 @@ import 'source-map-support/register';
 
 import Path from 'path';
 
-import { run, REPO_ROOT, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';

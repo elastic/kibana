@@ -89,6 +89,7 @@ export const getFilter = async ({
   };
 
   switch (type) {
+    case 'eql':
     case 'threshold': {
       return savedId != null ? savedQueryFilter() : queryFilter();
     }
