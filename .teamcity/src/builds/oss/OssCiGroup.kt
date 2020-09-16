@@ -7,7 +7,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 import junit
 
-class OssCiGroup(val ciGroup: Int) : BuildType({
+open class OssCiGroup(val ciGroup: Int, init: BuildType.() -> Unit = {}) : BuildType({
   id("OssCiGroup_$ciGroup")
   name = "CI Group $ciGroup"
   paused = true
@@ -39,4 +39,6 @@ class OssCiGroup(val ciGroup: Int) : BuildType({
 
   addTestArtifacts()
   addSlackNotifications()
+
+  init()
 })

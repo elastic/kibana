@@ -13,3 +13,7 @@ object DefaultCiGroups : BuildType({
 
   dependsOn(*defaultCiGroups.toTypedArray())
 })
+
+object X : DefaultCiGroup(1, {
+  id("x")
+})

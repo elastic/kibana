@@ -3,6 +3,7 @@ package projects
 import DefaultRoot
 import builds.*
 import builds.default.*
+import builds.es_snapshots.VerifyProject
 import builds.oss.*
 import builds.test.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
@@ -146,5 +147,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
 
     buildType(FullCi)
     buildType(BaselineCi)
+
+    subProject(VerifyProject)
   }
 }
