@@ -22,6 +22,11 @@ export const calculateAdditiveMax = (existingTimers: string[], newTimers: string
   return [String(numericNewTimerMax + numericExistingTimerMax)];
 };
 
+/**
+ * Combines two results together and returns the results combined
+ * @param currentResult The current result to combine with a newResult
+ * @param newResult The new result to combine
+ */
 export const combineResults = (
   currentResult: SearchAfterAndBulkCreateReturnType,
   newResult: SearchAfterAndBulkCreateReturnType

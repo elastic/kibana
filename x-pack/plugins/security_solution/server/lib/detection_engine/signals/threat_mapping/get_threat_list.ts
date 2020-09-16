@@ -33,9 +33,6 @@ export const getThreatList = async ({
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-  // TODO: Send in the threatMapping and do a loop over it to append to the queryFilter an "exists" clause for each element
-  // to ensure that we only get from the threat list that which we are mapping and not things that do not "exist"
-
   const queryFilter = getQueryFilter(query, 'kuery', threatFilters, index, exceptionItems);
   const response: SearchResponse<ThreatListItem> = await callCluster('search', {
     body: {

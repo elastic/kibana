@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { calculateAdditiveMax } from './utils';
+
+import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
+
+import { calculateAdditiveMax, combineResults, isThreatMatchRule } from './utils';
 
 describe('utils', () => {
   describe('calculateAdditiveMax', () => {
@@ -30,6 +33,103 @@ describe('utils', () => {
     test('it should return 10 for the max of the two arrays added together when the max of each array is 5, "5 + 5 = 10"', () => {
       const max = calculateAdditiveMax(['3', '5', '1'], ['3', '5', '1']);
       expect(max).toEqual(['10']);
+    });
+  });
+
+  describe('isThreatMatchRule', () => {
+    test('it returns true if a threat match rule', () => {
+      expect(isThreatMatchRule('threat_match')).toEqual(true);
+    });
+
+    test('it returns false if not a threat match rule', () => {
+      expect(isThreatMatchRule('query')).toEqual(false);
+    });
+  });
+
+  describe('combineResults', () => {
+    test('it should combine two results with success set to "true" if both are "true"', () => {
+      const existingResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        searchAfterTimes: ['10', '20', '30'],
+        bulkCreateTimes: ['5', '15', '25'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+      };
+
+      const newResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        searchAfterTimes: ['10', '20', '30'],
+        bulkCreateTimes: ['5', '15', '25'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+      };
+      const combinedResults = combineResults(existingResult, newResult);
+      expect(combinedResults.success).toEqual(true);
+    });
+
+    test('it should combine two results with success set to "false" if one of them is "false"', () => {
+      const existingResult: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        searchAfterTimes: ['10', '20', '30'],
+        bulkCreateTimes: ['5', '15', '25'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+      };
+
+      const newResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        searchAfterTimes: ['10', '20', '30'],
+        bulkCreateTimes: ['5', '15', '25'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+      };
+      const combinedResults = combineResults(existingResult, newResult);
+      expect(combinedResults.success).toEqual(false);
+    });
+
+    test('it should use the latest date if it is set in the new result', () => {
+      const existingResult: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        searchAfterTimes: ['10', '20', '30'],
+        bulkCreateTimes: ['5', '15', '25'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+      };
+
+      const newResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        searchAfterTimes: ['10', '20', '30'],
+        bulkCreateTimes: ['5', '15', '25'],
+        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
+        createdSignalsCount: 3,
+      };
+      const combinedResults = combineResults(existingResult, newResult);
+      expect(combinedResults.lastLookBackDate?.toISOString()).toEqual('2020-09-16T03:34:32.390Z');
+    });
+
+    test('it should combine the searchAfterTimes and the bulkCreateTimes', () => {
+      const existingResult: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        searchAfterTimes: ['10', '20', '30'],
+        bulkCreateTimes: ['5', '15', '25'],
+        lastLookBackDate: undefined,
+        createdSignalsCount: 3,
+      };
+
+      const newResult: SearchAfterAndBulkCreateReturnType = {
+        success: true,
+        searchAfterTimes: ['10', '20', '30'],
+        bulkCreateTimes: ['5', '15', '25'],
+        lastLookBackDate: new Date('2020-09-16T03:34:32.390Z'),
+        createdSignalsCount: 3,
+      };
+      const combinedResults = combineResults(existingResult, newResult);
+      expect(combinedResults).toEqual(
+        expect.objectContaining({
+          searchAfterTimes: ['60'],
+          bulkCreateTimes: ['50'],
+        })
+      );
     });
   });
 });
