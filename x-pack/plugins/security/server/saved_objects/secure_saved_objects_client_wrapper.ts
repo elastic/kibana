@@ -39,6 +39,11 @@ interface SavedObjectsNamespaces {
   saved_objects: SavedObjectNamespaces[];
 }
 
+interface EnsureAuthorizedOptions {
+  args?: Record<string, unknown>;
+  auditAction?: string;
+}
+
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
   private readonly auditLogger: PublicMethodsOf<SecurityAuditLogger>;
@@ -68,7 +73,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    await this.ensureAuthorized(type, 'create', options.namespace, { type, attributes, options });
+    const args = { type, attributes, options };
+    await this.ensureAuthorized(type, 'create', options.namespace, { args });
 
     const savedObject = await this.baseClient.create(type, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
@@ -78,9 +84,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: SavedObjectsCheckConflictsObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ) {
-    const types = this.getUniqueObjectTypes(objects);
     const args = { objects, options };
-    await this.ensureAuthorized(types, 'bulk_create', options.namespace, args, 'checkConflicts');
+    const types = this.getUniqueObjectTypes(objects);
+    await this.ensureAuthorized(types, 'bulk_create', options.namespace, {
+      args,
+      auditAction: 'checkConflicts',
+    });
 
     const response = await this.baseClient.checkConflicts(objects, options);
     return response;
@@ -90,11 +99,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsBaseOptions = {}
   ) {
+    const args = { objects, options };
     await this.ensureAuthorized(
       this.getUniqueObjectTypes(objects),
       'bulk_create',
       options.namespace,
-      { objects, options }
+      { args }
     );
 
     const response = await this.baseClient.bulkCreate(objects, options);
@@ -102,7 +112,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    await this.ensureAuthorized(type, 'delete', options.namespace, { type, id, options });
+    const args = { type, id, options };
+    await this.ensureAuthorized(type, 'delete', options.namespace, { args });
 
     return await this.baseClient.delete(type, id, options);
   }
@@ -117,7 +128,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         `_find across namespaces is not permitted when the Spaces plugin is disabled.`
       );
     }
-    await this.ensureAuthorized(options.type, 'find', options.namespaces, { options });
+    const args = { options };
+    await this.ensureAuthorized(options.type, 'find', options.namespaces, { args });
 
     const response = await this.baseClient.find<T>(options);
     return await this.redactSavedObjectsNamespaces(response);
@@ -127,9 +139,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ) {
+    const args = { objects, options };
     await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_get', options.namespace, {
-      objects,
-      options,
+      args,
     });
 
     const response = await this.baseClient.bulkGet<T>(objects, options);
@@ -137,7 +149,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
-    await this.ensureAuthorized(type, 'get', options.namespace, { type, id, options });
+    const args = { type, id, options };
+    await this.ensureAuthorized(type, 'get', options.namespace, { args });
 
     const savedObject = await this.baseClient.get<T>(type, id, options);
     return await this.redactSavedObjectNamespaces(savedObject);
@@ -150,7 +163,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsUpdateOptions = {}
   ) {
     const args = { type, id, attributes, options };
-    await this.ensureAuthorized(type, 'update', options.namespace, args);
+    await this.ensureAuthorized(type, 'update', options.namespace, { args });
 
     const savedObject = await this.baseClient.update(type, id, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
@@ -165,13 +178,19 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const args = { type, id, namespaces, options };
     const { namespace } = options;
     // To share an object, the user must have the "create" permission in each of the destination namespaces.
-    await this.ensureAuthorized(type, 'create', namespaces, args, 'addToNamespacesCreate');
+    await this.ensureAuthorized(type, 'create', namespaces, {
+      args,
+      auditAction: 'addToNamespacesCreate',
+    });
 
     // To share an object, the user must also have the "update" permission in one or more of the source namespaces. Because the
     // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "update" permission in the
     // current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation will
     // result in a 404 error.
-    await this.ensureAuthorized(type, 'update', namespace, args, 'addToNamespacesUpdate');
+    await this.ensureAuthorized(type, 'update', namespace, {
+      args,
+      auditAction: 'addToNamespacesUpdate',
+    });
 
     const result = await this.baseClient.addToNamespaces(type, id, namespaces, options);
     return await this.redactSavedObjectNamespaces(result);
@@ -185,7 +204,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     const args = { type, id, namespaces, options };
     // To un-share an object, the user must have the "delete" permission in each of the target namespaces.
-    await this.ensureAuthorized(type, 'delete', namespaces, args, 'deleteFromNamespaces');
+    await this.ensureAuthorized(type, 'delete', namespaces, {
+      args,
+      auditAction: 'deleteFromNamespaces',
+    });
 
     const result = await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
     return await this.redactSavedObjectNamespaces(result);
@@ -201,9 +223,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       .filter(({ namespace }) => namespace !== undefined)
       .map(({ namespace }) => namespace!);
     const namespaces = [options?.namespace, ...objectNamespaces];
+    const args = { objects, options };
     await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_update', namespaces, {
-      objects,
-      options,
+      args,
     });
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
@@ -224,11 +246,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private async ensureAuthorized(
     typeOrTypes: string | string[],
     action: string,
-    namespaceOrNamespaces?: string | Array<undefined | string>,
-    args?: Record<string, unknown>,
-    auditAction: string = action,
-    requiresAll = true
+    namespaceOrNamespaces: undefined | string | Array<undefined | string>,
+    options: EnsureAuthorizedOptions = {}
   ) {
+    const { args, auditAction = action } = options;
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(
       types.map((type) => [this.actions.savedObject.get(type, action), type])
@@ -241,10 +262,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       privileges.kibana.map(({ resource }) => resource).filter((x) => x !== undefined)
     ).sort() as string[];
 
-    const isAuthorized =
-      (requiresAll && hasAllRequested) ||
-      (!requiresAll && privileges.kibana.some(({ authorized }) => authorized));
-    if (isAuthorized) {
+    if (hasAllRequested) {
       this.auditLogger.savedObjectsAuthorizationSuccess(
         username,
         auditAction,
