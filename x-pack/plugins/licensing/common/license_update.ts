@@ -49,7 +49,7 @@ export function createLicenseUpdate(
     license$,
     refreshManually() {
       const licensePromise = fetched$.pipe(take(1)).toPromise();
-      manuallyRefresh$.next('foo');
+      manuallyRefresh$.next();
       return licensePromise;
     },
   };
