@@ -22,7 +22,13 @@ import { act } from 'react-dom/test-utils';
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
 
 import { Form, UseField } from '../components';
-import { FormSubmitHandler, OnUpdateHandler, FormHook, ValidationFunc } from '../types';
+import {
+  FormSubmitHandler,
+  OnUpdateHandler,
+  FormHook,
+  ValidationFunc,
+  FieldConfig,
+} from '../types';
 import { useForm } from './use_form';
 
 interface MyForm {
@@ -39,7 +45,7 @@ const onFormHook = (_form: FormHook<any>) => {
   formHook = _form;
 };
 
-describe('use_form() hook', () => {
+describe('useForm() hook', () => {
   beforeEach(() => {
     formHook = null;
   });
@@ -440,6 +446,58 @@ describe('use_form() hook', () => {
         city: 'configDefaultValue', // Inline default value **is not** kept after resetting with undefined "city" value
         deeply: { nested: { value: '' } }, // Fallback to empty string as no config was provided
       });
+    });
+
+    test('should not validate the fields after resetting its value (form validity should be undefined)', async () => {
+      const fieldConfig: FieldConfig = {
+        defaultValue: '',
+        validations: [
+          {
+            validator: ({ value }) => {
+              if ((value as string).trim() === '') {
+                return { message: 'Error: empty string' };
+              }
+            },
+          },
+        ],
+      };
+
+      const TestResetComp = () => {
+        const { form } = useForm();
+
+        useEffect(() => {
+          formHook = form;
+        }, [form]);
+
+        return (
+          <Form form={form}>
+            <UseField path="username" config={fieldConfig} data-test-subj="myField" />
+          </Form>
+        );
+      };
+
+      const {
+        form: { setInputValue },
+      } = registerTestBed(TestResetComp, {
+        memoryRouter: { wrapComponent: false },
+      })() as TestBed;
+
+      let { isValid } = formHook!;
+      expect(isValid).toBeUndefined();
+
+      await act(async () => {
+        setInputValue('myField', 'changedValue');
+      });
+      ({ isValid } = formHook!);
+      expect(isValid).toBe(true);
+
+      await act(async () => {
+        // When we reset the form, value is back to "", which is invalid for the field
+        formHook!.reset();
+      });
+
+      ({ isValid } = formHook!);
+      expect(isValid).toBeUndefined(); // Make sure it is "undefined" and not "false".
     });
   });
 });

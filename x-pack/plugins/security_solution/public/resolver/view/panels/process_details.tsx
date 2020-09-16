@@ -13,13 +13,14 @@ import {
   EuiText,
   EuiTextColor,
   EuiDescriptionList,
+  EuiLink,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from 'react-intl';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
-import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
+import { formatDate, StyledBreadcrumbs, GeneratedText } from './panel_content_utilities';
 import {
   processPath,
   processPid,
@@ -31,11 +32,17 @@ import {
 import { CubeForProcess } from './cube_for_process';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { useResolverTheme } from '../assets';
+import { ResolverState } from '../../types';
+import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
 
 const StyledDescriptionList = styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
     max-width: 10em;
   }
+`;
+
+const StyledTitle = styled('h4')`
+  overflow-wrap: break-word;
 `;
 
 /**
@@ -44,14 +51,17 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
  */
 export const ProcessDetails = memo(function ProcessDetails({
   processEvent,
-  pushToQueryParams,
 }: {
   processEvent: ResolverEvent;
-  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
 }) {
   const processName = event.eventName(processEvent);
   const entityId = event.entityId(processEvent);
-  const isProcessTerminated = useSelector(selectors.isProcessTerminated)(entityId);
+  const isProcessTerminated = useSelector((state: ResolverState) =>
+    selectors.isProcessTerminated(state)(entityId)
+  );
+  const relatedEventTotal = useSelector((state: ResolverState) => {
+    return selectors.relatedEventAggregateTotalByEntityId(state)(entityId);
+  });
   const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
     const eventTime = event.eventTimestamp(processEvent);
     const dateTime = eventTime === undefined ? null : formatDate(eventTime);
@@ -113,12 +123,14 @@ export const ProcessDetails = memo(function ProcessDetails({
       .map((entry) => {
         return {
           ...entry,
-          description: String(entry.description),
+          description: <GeneratedText>{String(entry.description)}</GeneratedText>,
         };
       });
 
     return processDescriptionListData;
   }, [processEvent]);
+
+  const pushToQueryParams = useReplaceBreadcrumbParameters();
 
   const crumbs = useMemo(() => {
     return [
@@ -156,25 +168,41 @@ export const ProcessDetails = memo(function ProcessDetails({
     return cubeAssetsForNode(isProcessTerminated, false);
   }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
 
+  const handleEventsLinkClick = useMemo(() => {
+    return () => {
+      pushToQueryParams({ crumbId: entityId, crumbEvent: 'all' });
+    };
+  }, [entityId, pushToQueryParams]);
+
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
-        <h4 aria-describedby={titleID}>
+        <StyledTitle aria-describedby={titleID}>
           <CubeForProcess
             data-test-subj="resolver:node-detail:title-icon"
             running={!isProcessTerminated}
           />
-          <span data-test-subj="resolver:node-detail:title">{processName}</span>
-        </h4>
+          <span data-test-subj="resolver:node-detail:title">
+            <GeneratedText>{processName}</GeneratedText>
+          </span>
+        </StyledTitle>
       </EuiTitle>
       <EuiText>
         <EuiTextColor color="subdued">
           <span id={titleID}>{descriptionText}</span>
         </EuiTextColor>
       </EuiText>
+      <EuiSpacer size="s" />
+      <EuiLink onClick={handleEventsLinkClick}>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.processDescList.numberOfEvents"
+          values={{ relatedEventTotal }}
+          defaultMessage="{relatedEventTotal} Events"
+        />
+      </EuiLink>
       <EuiSpacer size="l" />
       <StyledDescriptionList
         data-test-subj="resolver:node-detail"

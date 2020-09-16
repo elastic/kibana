@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { expectType } from 'tsd';
+import { expectAssignable } from 'tsd';
 import { UnwrapObservable, ObservableLike } from '../index';
 
 type STRING = UnwrapObservable<ObservableLike<string>>;
 
-expectType<STRING>('adf');
+expectAssignable<STRING>('adf');

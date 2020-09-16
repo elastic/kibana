@@ -243,13 +243,13 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         // and will be automatically updated on resize events.
         // We delete width & height if the autosize is set to "fit"
         // We also set useResize=true in case autosize=none, and width & height are not set
-        const autosize = this.spec.autosize.type || this.spec.autosize;
+        const autosize = this.spec.autosize?.type || this.spec.autosize;
         if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
           this.useResize = true;
         }
       }
 
-      if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
+      if (this.useResize && this.spec.padding && this.spec.autosize?.contains !== 'padding') {
         if (typeof this.spec.padding === 'object') {
           this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
           this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);

@@ -18,7 +18,7 @@ import {
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../graphql/types';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('apollo-client');
 
@@ -67,7 +67,10 @@ describe('alert actions', () => {
         });
 
         expect(updateTimelineIsLoading).toHaveBeenCalledTimes(1);
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({ id: 'timeline-1', isLoading: true });
+        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: true,
+        });
       });
 
       test('it invokes createTimeline with designated timeline template if "timelineTemplate" exists', async () => {
@@ -313,9 +316,12 @@ describe('alert actions', () => {
           updateTimelineIsLoading,
         });
 
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({ id: 'timeline-1', isLoading: true });
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: 'timeline-1',
+          id: TimelineId.active,
+          isLoading: true,
+        });
+        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
           isLoading: false,
         });
         expect(createTimeline).toHaveBeenCalledTimes(1);

@@ -23,6 +23,7 @@ describe('ServiceNowParamsFields renders', () => {
         externalId: null,
       },
     };
+
     const wrapper = mountWithIntl(
       <ServiceNowParamsFields
         actionParams={actionParams}

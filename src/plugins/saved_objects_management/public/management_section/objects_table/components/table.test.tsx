@@ -23,11 +23,14 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { keys } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
+import { columnServiceMock } from '../../../services/column_service.mock';
+import { SavedObjectsManagementAction } from '../../..';
 import { Table, TableProps } from './table';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
   actionRegistry: actionServiceMock.createStart(),
+  columnRegistry: columnServiceMock.createStart(),
   selectedSavedObjects: [
     {
       id: '1',
@@ -50,6 +53,7 @@ const defaultProps: TableProps = {
   },
   filterOptions: [{ value: 2 }],
   onDelete: () => {},
+  onActionRefresh: () => {},
   onExport: () => {},
   goInspectObject: () => {},
   canGoInApp: () => true,
@@ -121,5 +125,33 @@ describe('Table', () => {
     const component = shallowWithI18nProvider(<Table {...customizedProps} />);
 
     expect(component).toMatchSnapshot();
+  });
+
+  it(`allows for automatic refreshing after an action`, () => {
+    const actionRegistry = actionServiceMock.createStart();
+    actionRegistry.getAll.mockReturnValue([
+      {
+        // minimal action mock to exercise this test case
+        id: 'someAction',
+        render: () => <div>action!</div>,
+        refreshOnFinish: () => true,
+        euiAction: { name: 'foo', description: 'bar', icon: 'beaker', type: 'icon' },
+        registerOnFinishCallback: (callback: Function) => callback(), // call the callback immediately for this test
+      } as SavedObjectsManagementAction,
+    ]);
+    const onActionRefresh = jest.fn();
+    const customizedProps = { ...defaultProps, actionRegistry, onActionRefresh };
+    const component = shallowWithI18nProvider(<Table {...customizedProps} />);
+
+    const table = component.find('EuiBasicTable');
+    const columns = table.prop('columns') as any[];
+    const actionColumn = columns.find((x) => x.hasOwnProperty('actions')) as { actions: any[] };
+    const someAction = actionColumn.actions.find(
+      (x) => x['data-test-subj'] === 'savedObjectsTableAction-someAction'
+    );
+
+    expect(onActionRefresh).not.toHaveBeenCalled();
+    someAction.onClick();
+    expect(onActionRefresh).toHaveBeenCalled();
   });
 });

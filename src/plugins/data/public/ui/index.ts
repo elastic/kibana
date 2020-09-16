@@ -24,11 +24,7 @@ export { QueryStringInput } from './query_string_input/query_string_input';
 export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
 
 // @internal
-export {
-  ShardFailureOpenModalButton,
-  ShardFailureRequest,
-  ShardFailureResponse,
-} from './shard_failure_modal';
+export { ShardFailureOpenModalButton, ShardFailureRequest } from './shard_failure_modal';
 
 // @internal
 export { SavedQueryManagementComponent } from './saved_query_management';

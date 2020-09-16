@@ -8,12 +8,13 @@ export {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
+  UseRequestResponse,
   sendRequest,
   useRequest,
   Forms,
   extractQueryParams,
   GlobalFlyout,
-} from '../../../../src/plugins/es_ui_shared/public/';
+} from '../../../../src/plugins/es_ui_shared/public';
 
 export {
   FormSchema,
@@ -21,6 +22,7 @@ export {
   VALIDATION_TYPES,
   FieldConfig,
   useForm,
+  useFormData,
   Form,
   getUseField,
   UseField,

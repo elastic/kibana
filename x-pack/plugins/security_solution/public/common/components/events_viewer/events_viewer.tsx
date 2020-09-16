@@ -277,6 +277,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                       docValueFields={docValueFields}
                       id={id}
                       isEventViewer={true}
+                      refetch={refetch}
                       sort={sort}
                       toggleColumn={toggleColumn}
                     />

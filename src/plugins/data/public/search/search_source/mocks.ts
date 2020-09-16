@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { ISearchSource, SearchSource } from './search_source';
@@ -52,12 +53,10 @@ export const searchSourceMock = {
 export const createSearchSourceMock = (fields?: SearchSourceFields) =>
   new SearchSource(fields, {
     getConfig: uiSettingsServiceMock.createStartContract().get,
-    esShardTimeout: 30000,
     search: jest.fn(),
-    legacySearch: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
+    onResponse: jest.fn().mockImplementation((req, res) => res),
+    legacy: {
+      callMsearch: jest.fn(),
+      loadingCount$: new BehaviorSubject(0),
     },
   });

@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import { isActivePlatinumLicense } from '../../../common/service_map';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { APMConfig } from '../..';
@@ -98,7 +99,14 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       context,
       request,
     }),
-    ml: getMlSetup(context, request),
+    ml:
+      context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
+        ? getMlSetup(
+            context.plugins.ml,
+            context.core.savedObjects.client,
+            request
+          )
+        : undefined,
     config,
   };
 
@@ -110,20 +118,14 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   } as InferSetup<TParams>;
 }
 
-function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
-  if (!context.plugins.ml) {
-    return;
-  }
-  const ml = context.plugins.ml;
-  const mlClient = ml.mlClient.asScoped(request);
+function getMlSetup(
+  ml: Required<APMRequestHandlerContext['plugins']>['ml'],
+  savedObjectsClient: APMRequestHandlerContext['core']['savedObjects']['client'],
+  request: KibanaRequest
+) {
   return {
-    mlSystem: ml.mlSystemProvider(mlClient, request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient, request),
-    modules: ml.modulesProvider(
-      mlClient,
-      request,
-      context.core.savedObjects.client
-    ),
-    mlClient,
+    mlSystem: ml.mlSystemProvider(request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    modules: ml.modulesProvider(request, savedObjectsClient),
   };
 }

@@ -14,6 +14,7 @@ import {
   getResultsUrl,
   DataFrameAnalyticsListRow,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';
 
 interface Props {
   item: DataFrameAnalyticsListRow;
@@ -27,23 +28,28 @@ export const ViewLink: FC<Props> = ({ item }) => {
     navigateToPath(getResultsUrl(item.id, analysisType));
   }, []);
 
-  const openJobsInAnomalyExplorerText = i18n.translate(
+  const { disabled, tooltipContent } = getViewLinkStatus(item);
+
+  const viewJobResultsButtonText = i18n.translate(
     'xpack.ml.overview.analytics.resultActions.openJobText',
     {
       defaultMessage: 'View job results',
     }
   );
 
+  const tooltipText = disabled === false ? viewJobResultsButtonText : tooltipContent;
+
   return (
-    <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
+    <EuiToolTip position="bottom" content={tooltipText}>
       <EuiButtonEmpty
         color="text"
         size="xs"
         onClick={clickHandler}
         iconType="visTable"
-        aria-label={openJobsInAnomalyExplorerText}
+        aria-label={viewJobResultsButtonText}
         className="results-button"
-        data-test-subj="mlAnalyticsJobViewButton"
+        data-test-subj="mlOverviewAnalyticsJobViewButton"
+        isDisabled={disabled}
       >
         {i18n.translate('xpack.ml.overview.analytics.viewActionName', {
           defaultMessage: 'View',

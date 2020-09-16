@@ -43,12 +43,9 @@
                     },
                     "perPage": {
                       "type": "number"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["items", "total", "page", "perPage", "success"]
+                  "required": ["items", "total", "page", "perPage"]
                 },
                 "examples": {
                   "success": {
@@ -71,8 +68,7 @@
                       ],
                       "total": 1,
                       "page": 1,
-                      "perPage": 50,
-                      "success": true
+                      "perPage": 50
                     }
                   }
                 }
@@ -107,9 +103,6 @@
                   "properties": {
                     "item": {
                       "$ref": "#/components/schemas/AgentPolicy"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   }
                 }
@@ -159,12 +152,9 @@
                   "properties": {
                     "item": {
                       "$ref": "#/components/schemas/AgentPolicy"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 },
                 "examples": {
                   "success": {
@@ -707,8 +697,7 @@
                         "revision": 2,
                         "updated_on": "2020-05-06T17:32:21.905Z",
                         "updated_by": "system"
-                      },
-                      "success": true
+                      }
                     }
                   }
                 }
@@ -733,12 +722,9 @@
                   "properties": {
                     "item": {
                       "$ref": "#/components/schemas/AgentPolicy"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 },
                 "examples": {
                   "example-1": {
@@ -751,8 +737,7 @@
                         "updated_on": "Fri Feb 28 2020 16:22:31 GMT-0500 (Eastern Standard Time)",
                         "updated_by": "elastic",
                         "packagePolicies": []
-                      },
-                      "success": true
+                      }
                     }
                   }
                 }
@@ -810,12 +795,9 @@
                   "properties": {
                     "item": {
                       "$ref": "#/components/schemas/AgentPolicy"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 }
               }
             }
@@ -948,12 +930,9 @@
                     },
                     "perPage": {
                       "type": "number"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["items", "success"]
+                  "required": ["items"]
                 },
                 "examples": {
                   "example-1": {
@@ -1157,8 +1136,7 @@
                       ],
                       "total": 6,
                       "page": 1,
-                      "perPage": 20,
-                      "success": true
+                      "perPage": 20
                     }
                   }
                 }
@@ -1251,12 +1229,9 @@
                   "properties": {
                     "item": {
                       "$ref": "#/components/schemas/PackagePolicy"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 }
               }
             }
@@ -1415,9 +1390,6 @@
                       "properties": {
                         "response": {
                           "$ref": "#/components/schemas/PackageInfo"
-                        },
-                        "success": {
-                          "type": "boolean"
                         }
                       }
                     },
@@ -1453,11 +1425,13 @@
                         },
                         "icons": [
                           {
-                            "src": "/package/coredns-1.0.1/img/icon.png",
+                            "path": "/package/coredns-1.0.1/img/icon.png",
+                            "src": "/img/icon.png",
                             "size": "1800x1800"
                           },
                           {
-                            "src": "/package/coredns-1.0.1/img/icon.svg",
+                            "path": "/package/coredns-1.0.1/img/icon.svg",
+                            "src": "/img/icon.svg",
                             "size": "255x144",
                             "type": "image/svg+xml"
                           }
@@ -1709,8 +1683,7 @@
                           },
                           "references": []
                         }
-                      },
-                      "success": true
+                      }
                     }
                   },
                   "required-package": {
@@ -1733,7 +1706,8 @@
                         },
                         "icons": [
                           {
-                            "src": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
+                            "path": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
+                            "src": "/img/logo-endpoint-64-color.svg",
                             "size": "16x16",
                             "type": "image/svg+xml"
                           }
@@ -1899,8 +1873,7 @@
                           },
                           "references": []
                         }
-                      },
-                      "success": true
+                      }
                     }
                   }
                 }
@@ -1950,12 +1923,9 @@
                         },
                         "required": ["id", "type"]
                       }
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["response", "success"]
+                  "required": ["response"]
                 }
               }
             }
@@ -1994,12 +1964,9 @@
                         },
                         "required": ["id", "type"]
                       }
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["response", "success"]
+                  "required": ["response"]
                 }
               }
             }
@@ -2037,7 +2004,8 @@
                           "download": "/epr/aws/aws-0.0.3.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/aws/0.0.3/img/logo_aws.svg",
+                              "path": "/package/aws/0.0.3/img/logo_aws.svg",
+                              "src": "/img/logo_aws.svg",
                               "title": "logo aws",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2055,7 +2023,8 @@
                           "download": "/epr/endpoint/endpoint-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/endpoint/0.1.0/img/logo-endpoint-64-color.svg",
+                              "path": "/package/endpoint/0.1.0/img/logo-endpoint-64-color.svg",
+                              "src": "/img/logo-endpoint-64-color.svg",
                               "size": "16x16",
                               "type": "image/svg+xml"
                             }
@@ -2123,7 +2092,8 @@
                           "download": "/epr/log/log-0.9.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/log/0.9.0/img/icon.svg",
+                              "path": "/package/log/0.9.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2139,7 +2109,8 @@
                           "download": "/epr/longdocs/longdocs-1.0.4.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/longdocs/1.0.4/img/icon.svg",
+                              "path": "/package/longdocs/1.0.4/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2155,7 +2126,8 @@
                           "download": "/epr/metricsonly/metricsonly-2.0.1.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/metricsonly/2.0.1/img/icon.svg",
+                              "path": "/package/metricsonly/2.0.1/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2171,7 +2143,8 @@
                           "download": "/epr/multiversion/multiversion-1.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/multiversion/1.1.0/img/icon.svg",
+                              "path": "/package/multiversion/1.1.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2187,7 +2160,8 @@
                           "download": "/epr/mysql/mysql-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/mysql/0.1.0/img/logo_mysql.svg",
+                              "path": "/package/mysql/0.1.0/img/logo_mysql.svg",
+                              "src": "/img/logo_mysql.svg",
                               "title": "logo mysql",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2205,7 +2179,8 @@
                           "download": "/epr/nginx/nginx-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/nginx/0.1.0/img/logo_nginx.svg",
+                              "path": "/package/nginx/0.1.0/img/logo_nginx.svg",
+                              "src": "/img/logo_nginx.svg",
                               "title": "logo nginx",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2223,7 +2198,8 @@
                           "download": "/epr/redis/redis-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/redis/0.1.0/img/logo_redis.svg",
+                              "path": "/package/redis/0.1.0/img/logo_redis.svg",
+                              "src": "/img/logo_redis.svg",
                               "title": "logo redis",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2241,7 +2217,8 @@
                           "download": "/epr/reference/reference-1.0.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/reference/1.0.0/img/icon.svg",
+                              "path": "/package/reference/1.0.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "size": "32x32",
                               "type": "image/svg+xml"
                             }
@@ -2258,7 +2235,8 @@
                           "download": "/epr/system/system-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/system/0.1.0/img/system.svg",
+                              "path": "/package/system/0.1.0/img/system.svg",
+                              "src": "/img/system.svg",
                               "title": "system",
                               "size": "1000x1000",
                               "type": "image/svg+xml"
@@ -2678,8 +2656,7 @@
                           "version": "1.0.0",
                           "status": "not_installed"
                         }
-                      ],
-                      "success": true
+                      ]
                     }
                   }
                 }
@@ -2743,9 +2720,6 @@
                         "type": "object"
                       }
                     },
-                    "success": {
-                      "type": "boolean"
-                    },
                     "total": {
                       "type": "number"
                     },
@@ -2756,7 +2730,7 @@
                       "type": "number"
                     }
                   },
-                  "required": ["list", "success", "total", "page", "perPage"]
+                  "required": ["list", "total", "page", "perPage"]
                 },
                 "examples": {
                   "example-1": {
@@ -2793,7 +2767,6 @@
                           "status": "online"
                         }
                       ],
-                      "success": true,
                       "total": 1,
                       "page": 1,
                       "perPage": 20
@@ -2836,12 +2809,9 @@
                   "properties": {
                     "item": {
                       "type": "object"
-                    },
-                    "success": {
-                      "type": "string"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 }
               }
             }
@@ -2916,9 +2886,6 @@
                       "type": "string",
                       "enum": ["checkin"]
                     },
-                    "success": {
-                      "type": "string"
-                    },
                     "actions": {
                       "type": "array",
                       "items": {
@@ -2950,7 +2917,6 @@
                   "success": {
                     "value": {
                       "action": "checkin",
-                      "success": true,
                       "actions": [
                         {
                           "agent_id": "a6f14bd2-1a2a-481c-9212-9494d064ffdf",
@@ -3346,21 +3312,17 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
                     "action": {
                       "type": "string",
                       "enum": ["acks"]
                     }
                   },
-                  "required": ["success", "action"]
+                  "required": ["action"]
                 },
                 "examples": {
                   "success": {
                     "value": {
-                      "action": "checkin",
-                      "success": true
+                      "action": "checkin"
                     }
                   }
                 }
@@ -3417,9 +3379,6 @@
                     "action": {
                       "type": "string"
                     },
-                    "success": {
-                      "type": "boolean"
-                    },
                     "item": {
                       "$ref": "#/components/schemas/Agent"
                     }
@@ -3429,7 +3388,6 @@
                   "success": {
                     "value": {
                       "action": "created",
-                      "success": true,
                       "item": {
                         "id": "8086fb1a-72ca-4a67-8533-09300c1639fa",
                         "active": true,
@@ -3969,11 +3927,20 @@
                 "src": {
                   "type": "string"
                 },
+                "path": {
+                  "type": "string"
+                },
                 "title": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "string"
+                },
+                "type": {
                   "type": "string"
                 }
               },
-              "required": ["src"]
+              "required": ["src", "path"]
             }
           },
           "icons": {

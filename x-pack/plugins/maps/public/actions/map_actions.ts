@@ -271,7 +271,7 @@ export function triggerRefreshTimer() {
   };
 }
 
-export function updateDrawState(drawState: DrawState) {
+export function updateDrawState(drawState: DrawState | null) {
   return (dispatch: Dispatch) => {
     if (drawState !== null) {
       dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way

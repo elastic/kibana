@@ -22,15 +22,16 @@ import Boom from 'boom';
 import { IndexMapping } from '../../../mappings';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KueryNode } from '../../../../../../plugins/data/server';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+
+type KueryNode = any;
 
 interface GetSearchDslOptions {
   type: string | string[];
   search?: string;
   defaultSearchOperator?: string;
   searchFields?: string[];
+  rootSearchFields?: string[];
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];
@@ -51,6 +52,7 @@ export function getSearchDsl(
     search,
     defaultSearchOperator,
     searchFields,
+    rootSearchFields,
     sortField,
     sortOrder,
     namespaces,
@@ -74,6 +76,7 @@ export function getSearchDsl(
       type,
       search,
       searchFields,
+      rootSearchFields,
       defaultSearchOperator,
       hasReference,
       kueryNode,

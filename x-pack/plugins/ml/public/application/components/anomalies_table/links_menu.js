@@ -390,6 +390,7 @@ class LinksMenuUI extends Component {
           defaultMessage: 'Select action for anomaly at {time}',
           values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
         })}
+        data-test-subj="mlAnomaliesListRowActionsButton"
       />
     );
 
@@ -404,6 +405,7 @@ class LinksMenuUI extends Component {
               this.closePopover();
               this.openCustomUrl(customUrl);
             }}
+            data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
           >
             {customUrl.url_name}
           </EuiContextMenuItem>
@@ -420,6 +422,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.viewSeries();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
@@ -438,6 +441,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.viewExamples();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
@@ -456,6 +460,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.props.showRuleEditorFlyout(anomaly);
           }}
+          data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
@@ -473,7 +478,7 @@ class LinksMenuUI extends Component {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
       </EuiPopover>
     );
   }
