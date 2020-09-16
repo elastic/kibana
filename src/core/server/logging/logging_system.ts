@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Appenders, DisposableAppender } from './appenders/appenders';
+import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
+import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
-import { LogLevel } from './log_level';
-import { BaseLogger, Logger } from './logger';
+import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
-import { LoggerFactory } from './logger_factory';
 import {
   LoggingConfigType,
   LoggerConfigType,
