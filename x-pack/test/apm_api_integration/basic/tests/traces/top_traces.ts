@@ -70,6 +70,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "service.name": "opbeans-ruby",
               "transaction.name": "Api::OrdersController#create",
             },
+            "serviceName": "opbeans-ruby",
+            "transactionName": "Api::OrdersController#create",
+            "transactionType": "request",
             "transactionsPerMinute": 0.016666666666666666,
           }
         `);
@@ -82,6 +85,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "service.name": "opbeans-python",
               "transaction.name": "opbeans.tasks.sync_customers",
             },
+            "serviceName": "opbeans-python",
+            "transactionName": "opbeans.tasks.sync_customers",
+            "transactionType": "celery",
             "transactionsPerMinute": 1.2166666666666666,
           }
         `);
