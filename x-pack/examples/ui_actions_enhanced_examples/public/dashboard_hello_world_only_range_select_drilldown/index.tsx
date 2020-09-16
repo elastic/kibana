@@ -13,7 +13,6 @@ import { CollectConfigProps } from '../../../../../src/plugins/kibana_utils/publ
 import { SELECT_RANGE_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 import { BaseActionFactoryContext } from '../../../../plugins/ui_actions_enhanced/public/dynamic_actions';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Config = {
   name: string;
 };

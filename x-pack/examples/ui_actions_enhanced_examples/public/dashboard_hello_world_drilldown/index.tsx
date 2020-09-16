@@ -17,7 +17,6 @@ import {
 
 export type ActionContext = ChartActionContext;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Config = {
   name: string;
 };

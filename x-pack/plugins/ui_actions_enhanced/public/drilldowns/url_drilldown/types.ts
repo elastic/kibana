@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line
 export type UrlDrilldownConfig = {
   url: { format?: 'handlebars_v1'; template: string };
   openInNewTab: boolean;

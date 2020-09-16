@@ -9,7 +9,6 @@ import { ApplyGlobalFilterActionContext } from '../../../../../src/plugins/data/
 
 export type ActionContext = ApplyGlobalFilterActionContext;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Config = {
   /**
    * Whether to use a user selected index pattern, stored in `indexPatternId` field.
