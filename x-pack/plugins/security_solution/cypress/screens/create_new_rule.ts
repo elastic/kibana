@@ -8,6 +8,13 @@ export const ABOUT_CONTINUE_BTN = '[data-test-subj="about-continue"]';
 
 export const ABOUT_EDIT_BUTTON = '[data-test-subj="edit-about-rule"]';
 
+export const ABOUT_EDIT_TAB = '[data-test-subj="edit-rule-about-tab"]';
+
+export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
+
+export const ACTIONS_THROTTLE_INPUT =
+  '[data-test-subj="stepRuleActions"] [data-test-subj="select"]';
+
 export const ADD_FALSE_POSITIVE_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] .euiButtonEmpty__text';
 
@@ -29,6 +36,11 @@ export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';
+
+export const DEFINE_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
+
+export const DEFINE_INDEX_INPUT =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="input"]';
 
 export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
 
@@ -81,12 +93,29 @@ export const RULE_TIMESTAMP_OVERRIDE =
 
 export const SCHEDULE_CONTINUE_BUTTON = '[data-test-subj="schedule-continue"]';
 
+export const SCHEDULE_EDIT_TAB = '[data-test-subj="edit-rule-schedule-tab"]';
+
+export const SCHEDULE_INTERVAL_AMOUNT_INPUT =
+  '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="schedule-amount-input"]';
+
+export const SCHEDULE_INTERVAL_UNITS_INPUT =
+  '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="schedule-units-input"]';
+
+export const SCHEDULE_LOOKBACK_AMOUNT_INPUT =
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="schedule-amount-input"]';
+
+export const SCHEDULE_LOOKBACK_UNITS_INPUT =
+  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="schedule-units-input"]';
+
 export const SEVERITY_DROPDOWN =
   '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';
 
 export const SEVERITY_MAPPING_OVERRIDE_OPTION = '#severity-mapping-override';
 
 export const SEVERITY_OVERRIDE_ROW = '[data-test-subj="severityOverrideRow"]';
+
+export const TAGS_FIELD =
+  '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxInput"]';
 
 export const TAGS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxSearchInput"]';
