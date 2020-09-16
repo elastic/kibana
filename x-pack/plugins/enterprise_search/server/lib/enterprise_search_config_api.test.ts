@@ -70,7 +70,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
           role_type: 'owner',
           ability: {
             access_all_engines: true,
-            destroy: ['session'],
             manage: ['account_credentials', 'account_engines'], // etc
             edit: ['LocoMoco::Account'], // etc
             view: ['Engine'], // etc
@@ -151,7 +150,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
           roleType: undefined,
           ability: {
             accessAllEngines: false,
-            destroy: [],
             manage: [],
             edit: [],
             view: [],

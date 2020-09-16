@@ -95,7 +95,6 @@ export const callEnterpriseSearchConfigAPI = async ({
           roleType: data?.current_user?.app_search?.role?.role_type,
           ability: {
             accessAllEngines: !!data?.current_user?.app_search?.role?.ability?.access_all_engines,
-            destroy: data?.current_user?.app_search?.role?.ability?.destroy || [],
             manage: data?.current_user?.app_search?.role?.ability?.manage || [],
             edit: data?.current_user?.app_search?.role?.ability?.edit || [],
             view: data?.current_user?.app_search?.role?.ability?.view || [],

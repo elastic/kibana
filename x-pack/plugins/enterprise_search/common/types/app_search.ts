@@ -15,7 +15,6 @@ export interface IRole {
   roleType: string;
   ability: {
     accessAllEngines: boolean;
-    destroy: string[];
     manage: string[];
     edit: string[];
     view: string[];

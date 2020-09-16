@@ -30,7 +30,6 @@ export const DEFAULT_INITIAL_APP_DATA = {
       roleType: 'owner',
       ability: {
         accessAllEngines: true,
-        destroy: ['session'],
         manage: ['account_credentials', 'account_engines'], // etc
         edit: ['LocoMoco::Account'], // etc
         view: ['Engine'], // etc
