@@ -109,6 +109,10 @@ export interface AllocateAction {
     [attribute: string]: string;
   };
   migrate?: {
+    /**
+     * If enabled is ever set it will only be set to `false` because the default value
+     * for this is `true`. Rather leave unspecified for true.
+     */
     enabled: false;
   };
 }
