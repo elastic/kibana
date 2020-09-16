@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMEOUT } from './rum_dashboard';
+import { DEFAULT_TIMEOUT } from './csm_dashboard';
 
 /**
  * Verifies the behavior of the client metrics component
@@ -21,9 +21,7 @@ export function verifyClientMetrics(
   cy.get('kbnLoadingIndicator').should('not.be.visible');
 
   if (checkTitleStatus) {
-    cy.get('.euiStat__title', { timeout: DEFAULT_TIMEOUT }).should(
-      'be.visible'
-    );
+    cy.get('.euiStat__title', DEFAULT_TIMEOUT).should('be.visible');
     cy.get('.euiSelect-isLoading').should('not.be.visible');
   }
 

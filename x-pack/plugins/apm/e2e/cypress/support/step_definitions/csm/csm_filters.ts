@@ -5,7 +5,8 @@
  */
 
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
-import { DEFAULT_TIMEOUT } from '../apm';
+import { DEFAULT_TIMEOUT } from './csm_dashboard';
+import { verifyClientMetrics } from './client_metrics_helper';
 
 When(/^the user filters by "([^"]*)"$/, (filterName) => {
   // wait for all loading to finish
@@ -14,29 +15,26 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
   cy.get(`#local-filter-${filterName}`).click();
 
   if (filterName === 'os') {
-    cy.get('button.euiSelectableListItem[title="Mac OS X"]', {
-      timeout: DEFAULT_TIMEOUT,
-    }).click();
+    cy.get('span.euiSelectableListItem__text', DEFAULT_TIMEOUT)
+      .contains('Mac OS X')
+      .click();
   } else {
-    cy.get('button.euiSelectableListItem[title="DE"]', {
-      timeout: DEFAULT_TIMEOUT,
-    }).click();
+    cy.get('span.euiSelectableListItem__text', DEFAULT_TIMEOUT)
+      .contains('DE')
+      .click();
   }
   cy.get('[data-cy=applyFilter]').click();
 });
 
-Then(`it filters the client metrics`, () => {
-  const clientMetrics = '[data-cy=client-metrics] .euiStat__title';
-
+Then(/^it filters the client metrics "([^"]*)"$/, (filterName) => {
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
 
-  cy.get(clientMetrics).eq(2).invoke('text').snapshot();
+  const data =
+    filterName === 'os' ? ['5 ms', '0.06 s', '8 '] : ['4 ms', '0.05 s', '28 '];
 
-  cy.get(clientMetrics).eq(1).invoke('text').snapshot();
+  verifyClientMetrics(data, true);
 
-  cy.get(clientMetrics).eq(0).invoke('text').snapshot();
-
-  cy.get('[data-cy=clearFilters]').click();
+  cy.get('[data-cy=clearFilters]', DEFAULT_TIMEOUT).click();
 });
