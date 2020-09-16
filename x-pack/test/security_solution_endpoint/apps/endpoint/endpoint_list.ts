@@ -163,6 +163,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Just check the href link is correct - would need to load ingest data to validate the integration
         it('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
+          // The prior test results in a tooltip. We need to move the mouse to clear it and allow the click
+          await (await testSubjects.find('hostnameCellLink')).moveMouseTo();
           await (await testSubjects.find('hostnameCellLink')).click();
           const endpointDetailsLinkToIngestButton = await testSubjects.find(
             'endpointDetailsLinkToIngest'
