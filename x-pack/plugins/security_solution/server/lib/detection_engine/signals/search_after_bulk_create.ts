@@ -91,7 +91,7 @@ export const searchAfterAndBulkCreate = async ({
   };
 
   // sortId tells us where to start our next consecutive search_after query
-  let sortId;
+  let sortId: string | undefined;
 
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
@@ -235,13 +235,9 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
           );
 
-          if (
-            filteredEvents.hits.hits[0].sort != null &&
-            filteredEvents.hits.hits[0].sort.length !== 0
-          ) {
-            sortId = filteredEvents.hits.hits[0].sort
-              ? filteredEvents.hits.hits[0].sort[0]
-              : undefined;
+          const lastSortId = filteredEvents.hits.hits[filteredEvents.hits.hits.length - 1].sort;
+          if (lastSortId != null && lastSortId.length !== 0) {
+            sortId = lastSortId[0];
           } else {
             logger.debug(buildRuleMessage('sortIds was empty on filteredEvents'));
             toReturn.success = true;
@@ -251,11 +247,9 @@ export const searchAfterAndBulkCreate = async ({
           // we are guaranteed to have searchResult hits at this point
           // because we check before if the totalHits or
           // searchResult.hits.hits.length is 0
-          if (
-            searchResult.hits.hits[0].sort != null &&
-            searchResult.hits.hits[0].sort.length !== 0
-          ) {
-            sortId = searchResult.hits.hits[0].sort ? searchResult.hits.hits[0].sort[0] : undefined;
+          const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1].sort;
+          if (lastSortId != null && lastSortId.length !== 0) {
+            sortId = lastSortId[0];
           } else {
             logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
             toReturn.success = true;
