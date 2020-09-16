@@ -31,7 +31,7 @@ export const hostsFactory: Record<
   [HostsQueries.firstLastSeen]: firstLastSeenHost,
   [HostsQueries.uncommonProcesses]: uncommonProcesses,
   [HostsQueries.authentications]: authentications,
-  [HostsKpiQueries.authentications]: hostsKpiAuthentications,
-  [HostsKpiQueries.hosts]: hostsKpiHosts,
-  [HostsKpiQueries.uniqueIps]: hostsKpiUniqueIps,
+  [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,
+  [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
+  [HostsKpiQueries.kpiUniqueIps]: hostsKpiUniqueIps,
 };

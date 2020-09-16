@@ -56,7 +56,7 @@ export const useHostsKpiAuthentications = ({
     HostsKpiAuthenticationsRequestOptions
   >({
     defaultIndex,
-    factoryQueryType: HostsKpiQueries.authentications,
+    factoryQueryType: HostsKpiQueries.kpiAuthentications,
     filterQuery: createFilter(filterQuery),
     id: ID,
     timerange: {

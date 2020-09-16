@@ -17,7 +17,7 @@ import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiAuthenticationsQuery } from './query.hosts_kpi_authentications.dsl';
 import { formatAuthenticationsHistogramData } from './helpers';
 
-export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.authentications> = {
+export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.kpiAuthentications> = {
   buildDsl: (options: HostsKpiAuthenticationsRequestOptions) =>
     buildHostsKpiAuthenticationsQuery(options),
   parse: async (

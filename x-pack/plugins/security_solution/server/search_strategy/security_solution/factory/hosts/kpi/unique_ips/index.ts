@@ -17,7 +17,7 @@ import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiUniqueIpsQuery } from './query.hosts_kpi_unique_ips.dsl';
 import { formatGeneralHistogramData } from '../common';
 
-export const hostsKpiUniqueIps: SecuritySolutionFactory<HostsKpiQueries.uniqueIps> = {
+export const hostsKpiUniqueIps: SecuritySolutionFactory<HostsKpiQueries.kpiUniqueIps> = {
   buildDsl: (options: HostsKpiUniqueIpsRequestOptions) => buildHostsKpiUniqueIpsQuery(options),
   parse: async (
     options: HostsKpiUniqueIpsRequestOptions,

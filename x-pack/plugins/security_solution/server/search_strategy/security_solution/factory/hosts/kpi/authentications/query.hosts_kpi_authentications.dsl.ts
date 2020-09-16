@@ -36,13 +36,11 @@ export const buildHostsKpiAuthenticationsQuery = ({
     },
   ];
 
-  const dslQuery = [
-    {
-      index: defaultIndex,
-      allowNoIndices: true,
-      ignoreUnavailable: true,
-    },
-    {
+  const dslQuery = {
+    index: defaultIndex,
+    allowNoIndices: true,
+    ignoreUnavailable: true,
+    body: {
       aggs: {
         authentication_success: {
           filter: {
@@ -97,6 +95,7 @@ export const buildHostsKpiAuthenticationsQuery = ({
       size: 0,
       track_total_hits: false,
     },
-  ];
+  };
+
   return dslQuery;
 };

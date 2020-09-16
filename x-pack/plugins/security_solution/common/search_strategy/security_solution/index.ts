@@ -114,11 +114,11 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostUncommonProcessesStrategyResponse
-  : T extends HostsKpiQueries.authentications
+  : T extends HostsKpiQueries.kpiAuthentications
   ? HostsKpiAuthenticationsStrategyResponse
-  : T extends HostsKpiQueries.hosts
+  : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
-  : T extends HostsKpiQueries.uniqueIps
+  : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
@@ -162,11 +162,11 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostUncommonProcessesRequestOptions
-  : T extends HostsKpiQueries.authentications
+  : T extends HostsKpiQueries.kpiAuthentications
   ? HostsKpiAuthenticationsRequestOptions
-  : T extends HostsKpiQueries.hosts
+  : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsRequestOptions
-  : T extends HostsKpiQueries.uniqueIps
+  : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions

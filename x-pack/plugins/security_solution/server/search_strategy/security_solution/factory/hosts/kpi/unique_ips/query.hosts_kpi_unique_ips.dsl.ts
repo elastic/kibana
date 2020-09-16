@@ -25,13 +25,11 @@ export const buildHostsKpiUniqueIpsQuery = ({
     },
   ];
 
-  const dslQuery = [
-    {
-      index: defaultIndex,
-      allowNoIndices: true,
-      ignoreUnavailable: true,
-    },
-    {
+  const dslQuery = {
+    index: defaultIndex,
+    allowNoIndices: true,
+    ignoreUnavailable: true,
+    body: {
       aggregations: {
         unique_source_ips: {
           cardinality: {
@@ -78,7 +76,7 @@ export const buildHostsKpiUniqueIpsQuery = ({
       size: 0,
       track_total_hits: false,
     },
-  ];
+  };
 
   return dslQuery;
 };

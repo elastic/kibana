@@ -56,7 +56,7 @@ export const useHostsKpiUniqueIps = ({
     HostsKpiUniqueIpsRequestOptions
   >({
     defaultIndex,
-    factoryQueryType: HostsKpiQueries.uniqueIps,
+    factoryQueryType: HostsKpiQueries.kpiUniqueIps,
     filterQuery: createFilter(filterQuery),
     id: ID,
     timerange: {

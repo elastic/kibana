@@ -53,7 +53,7 @@ export const useHostsKpiHosts = ({
   const [loading, setLoading] = useState(false);
   const [hostsKpiHostsRequest, setHostsKpiHostsRequest] = useState<HostsKpiHostsRequestOptions>({
     defaultIndex,
-    factoryQueryType: HostsKpiQueries.hosts,
+    factoryQueryType: HostsKpiQueries.kpiHosts,
     filterQuery: createFilter(filterQuery),
     id: ID,
     timerange: {

@@ -17,7 +17,7 @@ import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiHostsQuery } from './query.hosts_kpi_hosts.dsl';
 import { formatGeneralHistogramData } from '../common';
 
-export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.hosts> = {
+export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
   buildDsl: (options: HostsKpiHostsRequestOptions) => buildHostsKpiHostsQuery(options),
   parse: async (
     options: HostsKpiHostsRequestOptions,
