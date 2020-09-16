@@ -61,10 +61,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Array [
               undefined,
               undefined,
-              undefined,
-              undefined,
-              undefined,
               "warning",
+              "warning",
+              undefined,
+              undefined,
               undefined,
             ]
           `);
