@@ -7,8 +7,8 @@
 /* eslint-disable react/display-name */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
-import { EuiI18nNumber, EuiButton, EuiPopover, ButtonColor } from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
+import { EuiI18nNumber, EuiButton, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
@@ -40,19 +40,19 @@ const StyledActionButton = styled(EuiButton)`
 const Button = React.memo(
   ({
     menuIsOpen,
-    action,
+    onClick,
     count,
     nodeID,
   }: {
     menuIsOpen?: boolean;
-    action: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onClick: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     count?: number;
     nodeID: string;
   }) => {
     const iconType = menuIsOpen === true ? 'arrowUp' : 'arrowDown';
     return (
       <StyledActionButton
-        onClick={action}
+        onClick={onClick}
         iconType={iconType}
         fill={false}
         color="primary"
@@ -83,7 +83,6 @@ const NodeSubMenuComponents = React.memo(
     buttonBorderColor,
     menuAction,
     className,
-    projectionMatrix,
     nodeID,
     relatedEventStats,
   }: {
@@ -96,14 +95,11 @@ const NodeSubMenuComponents = React.memo(
     /**
      * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.
      */
-    projectionMatrix: Matrix3;
     nodeID: string;
     relatedEventStats: ResolverNodeStats | undefined;
   }) => {
-    // keep a ref to the popover so we can call its reposition method
-    const popoverRef = useRef<EuiPopover>(null);
-
     const [menuIsOpen, setMenuOpen] = useState(false);
+
     const handleMenuOpenClick = useCallback(
       (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         // stopping propagation/default to prevent other node animations from triggering
@@ -113,6 +109,7 @@ const NodeSubMenuComponents = React.memo(
       },
       [menuIsOpen]
     );
+
     const handleMenuActionClick = useCallback(
       (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         // stopping propagation/default to prevent other node animations from triggering
@@ -124,8 +121,6 @@ const NodeSubMenuComponents = React.memo(
       [menuAction]
     );
 
-    // The last projection matrix that was used to position the popover
-    const projectionMatrixAtLastRender = useRef<Matrix3>();
     const relatedEventCallbacks = useRelatedEventByCategoryNavigation({
       nodeID,
       categories: relatedEventStats?.events?.byCategory,
@@ -144,24 +139,6 @@ const NodeSubMenuComponents = React.memo(
       }
     }, [relatedEventStats, relatedEventCallbacks]);
 
-    useLayoutEffect(() => {
-      if (
-        /**
-         * If there is a popover component reference,
-         * and this isn't the first render,
-         * and the projectionMatrix has changed since last render,
-         * then force the popover to reposition itself.
-         */
-        popoverRef.current &&
-        projectionMatrixAtLastRender.current &&
-        projectionMatrixAtLastRender.current !== projectionMatrix
-      ) {
-        popoverRef.current.positionPopoverFixed();
-      }
-
-      // no matter what, keep track of the last project matrix that was used to size the popover
-      projectionMatrixAtLastRender.current = projectionMatrix;
-    }, [projectionMatrixAtLastRender, projectionMatrix]);
     const {
       colorMap: { pillStroke: pillBorderStroke, resolverBackground: pillFill },
     } = useResolverTheme();
@@ -171,6 +148,7 @@ const NodeSubMenuComponents = React.memo(
         backgroundColor: pillFill,
       };
     }, [pillBorderStroke, pillFill]);
+
     if (relatedEventStats === undefined) {
       /**
        * When called with a `menuAction`
@@ -200,16 +178,12 @@ const NodeSubMenuComponents = React.memo(
       <>
         <Button
           menuIsOpen={menuIsOpen}
-          action={handleMenuOpenClick}
+          onClick={handleMenuOpenClick}
           count={count}
           nodeID={nodeID}
         />
         {menuIsOpen ? (
-          <ul
-            className={`${className} options`}
-            aria-hidden={!menuIsOpen}
-            aria-describedby={nodeID}
-          >
+          <ul className={`${className} options`} aria-hidden={!menuIsOpen}>
             {relatedEventOptions
               .sort((opta, optb) => {
                 return opta.optionTitle.localeCompare(optb.optionTitle);

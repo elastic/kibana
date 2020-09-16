@@ -438,7 +438,6 @@ const UnstyledProcessEventDot = React.memo(
                   buttonBorderColor={labelButtonFill}
                   buttonFill={colorMap.resolverBackground}
                   menuAction={handleRelatedEventRequest}
-                  projectionMatrix={projectionMatrix}
                   relatedEventStats={relatedEventStats}
                   nodeID={nodeID}
                 />
