@@ -115,7 +115,7 @@ export class AddItemPopover extends Component {
               <EuiTextArea
                 value={this.state.itemsText}
                 onChange={this.onItemsTextChange}
-                data-test-subj={'mlAddFilterListItemTextArea'}
+                data-test-subj={'mlFilterListAddItemTextArea'}
               />
             </EuiFormRow>
           </EuiForm>

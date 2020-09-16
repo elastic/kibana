@@ -256,14 +256,14 @@ export function MachineLearningSettingsCalendarProvider(
     },
 
     async cancelNewCalendarEvent() {
-      await testSubjects.existOrFail('mlCancelCalendarEvent');
-      await testSubjects.click('mlCancelCalendarEvent');
+      await testSubjects.existOrFail('mlCalendarCancelEventButton');
+      await testSubjects.click('mlCalendarCancelEventButton');
       await testSubjects.missingOrFail('mlCalendarEventForm');
     },
 
     async addNewCalendarEvent() {
-      await testSubjects.existOrFail('mlAddCalendarEvent');
-      await testSubjects.click('mlAddCalendarEvent');
+      await testSubjects.existOrFail('mlCalendarAddEventButton');
+      await testSubjects.click('mlCalendarAddEventButton');
       await testSubjects.missingOrFail('mlCalendarEventForm');
     },
     async assertJobSelection(expectedIdentifier: string[]) {

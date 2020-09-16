@@ -45,14 +45,19 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToCalendarManagement();
 
+      await ml.testExecution.logTestStep('calendar delete selects multiple calendars for deletion');
       await asyncForEach(testDataList, async ({ calendarId }) => {
         await ml.settingsCalendar.assertCalendarRowExists(calendarId);
         await ml.settingsCalendar.selectCalendarRow(calendarId);
       });
 
+      await ml.testExecution.logTestStep('calendar delete clicks the delete button');
       await ml.settingsCalendar.assertDeleteCalendarButtonEnabled(true);
       await testSubjects.click('mlCalendarButtonDelete');
 
+      await ml.testExecution.logTestStep(
+        'calendar delete validates the calendars are deleted from the table'
+      );
       await asyncForEach(testDataList, async ({ calendarId }) => {
         await ml.settingsCalendar.assertEventRowMissing(calendarId);
       });

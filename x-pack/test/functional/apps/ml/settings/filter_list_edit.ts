@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.deleteFilter(filterId);
     });
 
-    it('filter list edit updates previous list', async () => {
+    it('filter list edit updates existing list', async () => {
       await ml.testExecution.logTestStep('filter list edit loads the filter list management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsFilterList.assertFilterItemExists(keywordToDelete);
       await ml.settingsFilterList.assertFilterListDescriptionEql(oldDescription);
 
-      await ml.testExecution.logTestStep('filter list edit deletes keyword');
+      await ml.testExecution.logTestStep('filter list edit deletes existing filter item');
       await ml.settingsFilterList.deleteFilterItem(keywordToDelete);
 
       await ml.testExecution.logTestStep('filter list edit sets new keywords and description');

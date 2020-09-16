@@ -176,7 +176,7 @@ export function MachineLearningSettingsFilterListProvider(
     },
 
     async assertSaveFilterListButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlSaveFilterListButton');
+      const isEnabled = await testSubjects.isEnabled('mlFilterListSaveButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "save filter list" button to be '${
@@ -265,7 +265,7 @@ export function MachineLearningSettingsFilterListProvider(
     async addFilterListKeywords(keywords: string[]) {
       await this.assertAddItemButtonEnabled(true);
       await testSubjects.click('mlFilterListAddItemButton');
-      await mlCommonUI.setValueWithChecks('mlAddFilterListItemTextArea', keywords.join('\n'), {
+      await mlCommonUI.setValueWithChecks('mlFilterListAddItemTextArea', keywords.join('\n'), {
         clearWithKeyboard: true,
       });
       await testSubjects.existOrFail('mlAddFilterListItemButton');
@@ -288,7 +288,7 @@ export function MachineLearningSettingsFilterListProvider(
 
     async saveFilterList() {
       await this.assertSaveFilterListButtonEnabled(true);
-      await testSubjects.click('mlSaveFilterListButton');
+      await testSubjects.click('mlFilterListSaveButton');
       await testSubjects.existOrFail('mlPageFilterListManagement');
     },
   };
