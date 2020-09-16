@@ -6,8 +6,9 @@
 
 import expect from '@kbn/expect';
 import { map as mapAsync } from 'bluebird';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function RollupPageProvider({ getService, getPageObjects }) {
+export function RollupPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const find = getService('find');
@@ -15,16 +16,16 @@ export function RollupPageProvider({ getService, getPageObjects }) {
 
   class RollupJobPage {
     async createNewRollUpJob(
-      jobName,
-      indexPattern,
-      indexName,
-      interval,
+      jobName: string,
+      indexPattern: string,
+      indexName: string,
+      interval: string,
       delay = '1d',
       startImmediately = false,
       scheduledTime = { time: 'minute', cron: true }
     ) {
       let stepNum = 1;
-      //Step 1
+      // Step 1
       await testSubjects.click('createRollupJobButton');
       await this.verifyStepIsActive(stepNum);
       await this.addRollupNameandIndexPattern(jobName, indexPattern);
@@ -34,47 +35,47 @@ export function RollupPageProvider({ getService, getPageObjects }) {
       await this.setRollupDelay(delay);
       stepNum = await this.moveToNextStep(stepNum);
 
-      //Step 2: Histogram
+      // Step 2: Histogram
       await this.verifyStepIsActive(stepNum);
       await this.setJobInterval(interval);
       stepNum = await this.moveToNextStep(stepNum);
 
-      //Step 3: Terms (optional)
+      // Step 3: Terms (optional)
       await this.verifyStepIsActive(stepNum);
       stepNum = await this.moveToNextStep();
 
-      //Step 4: Histogram(optional)
+      // Step 4: Histogram(optional)
       await this.verifyStepIsActive(stepNum);
       stepNum = await this.moveToNextStep();
 
-      //Step 5: Metrics(optional)
+      // Step 5: Metrics(optional)
       await this.verifyStepIsActive(stepNum);
       stepNum = await this.moveToNextStep();
 
-      //Step 6: saveJob and verify the name in the list
+      // Step 6: saveJob and verify the name in the list
       await this.verifyStepIsActive(stepNum);
       await this.saveJob(startImmediately);
     }
 
-    async verifyStepIsActive(stepNumber) {
+    async verifyStepIsActive(stepNumber = 0) {
       await testSubjects.exists(`createRollupStep${stepNumber}--active`);
     }
 
-    async setScheduleTime(time, cron) {
-      if (cron) {
+    async setScheduleTime(time: string, isCron: boolean) {
+      if (isCron) {
         await testSubjects.click('rollupShowAdvancedCronLink');
         await testSubjects.setValue('rollupAdvancedCron', time);
       }
       // TODO: Add handling for if Cron is false to go through clicking options.
     }
 
-    async addRollupNameandIndexPattern(name, indexPattern) {
+    async addRollupNameandIndexPattern(name: string, indexPattern: string) {
       log.debug(`Adding name ${name} to form`);
       await testSubjects.setValue('rollupJobName', name);
       await testSubjects.setValue('rollupIndexPattern', indexPattern);
     }
 
-    async setRollupDelay(time) {
+    async setRollupDelay(time: string) {
       log.debug(`Setting rollup delay to "${time}"`);
       await testSubjects.setValue('rollupDelay', time);
     }
@@ -86,20 +87,20 @@ export function RollupPageProvider({ getService, getPageObjects }) {
       expect(text).to.be.equal('Success! Index pattern has matching indices.');
     }
 
-    async setIndexName(name) {
+    async setIndexName(name: string) {
       await testSubjects.setValue('rollupIndexName', name);
     }
 
-    async moveToNextStep(stepNum) {
+    async moveToNextStep(stepNum = 0) {
       await testSubjects.click('rollupJobNextButton');
       return stepNum + 1;
     }
 
-    async setJobInterval(time) {
+    async setJobInterval(time: string) {
       await testSubjects.setValue('rollupJobInterval', time);
     }
 
-    async saveJob(startImmediately) {
+    async saveJob(startImmediately: boolean) {
       if (startImmediately) {
         const checkbox = await find.byCssSelector('.euiCheckbox');
         await checkbox.click();
