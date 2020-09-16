@@ -60,7 +60,10 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
     this.license = new License();
   }
 
-  async setup({ http }: CoreSetup, { licensing, indexManagement }: Dependencies): Promise<void> {
+  async setup(
+    { http }: CoreSetup,
+    { licensing, indexManagement, features }: Dependencies
+  ): Promise<void> {
     const router = http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
 
@@ -77,6 +80,19 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: 'index_lifecycle_management',
+      management: {
+        data: ['index_lifecycle_management'],
+      },
+      privileges: [
+        {
+          requiredClusterPrivileges: ['manage_ilm'],
+          ui: [],
+        },
+      ],
+    });
 
     registerApiRoutes({
       router,

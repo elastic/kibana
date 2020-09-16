@@ -20,6 +20,7 @@ import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 
 jest.mock('../../../../../../src/core/server', () => {
   return {
+    ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
     exportSavedObjectsToStream: jest.fn(),
     importSavedObjectsFromStream: jest.fn(),
   };

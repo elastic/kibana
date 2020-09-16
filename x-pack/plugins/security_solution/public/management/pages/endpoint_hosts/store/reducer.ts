@@ -30,7 +30,10 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   policyItemsLoading: false,
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
+  agentPolicies: {},
   endpointsExist: true,
+  patterns: [],
+  patternsError: undefined,
   isAutoRefreshEnabled: true,
   autoRefreshInterval: DEFAULT_POLL_INTERVAL,
 };
@@ -69,6 +72,26 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         ...state.nonExistingPolicies,
         ...action.payload,
       },
+    };
+  } else if (action.type === 'serverReturnedEndpointAgentPolicies') {
+    return {
+      ...state,
+      agentPolicies: {
+        ...state.agentPolicies,
+        ...action.payload,
+      },
+    };
+  } else if (action.type === 'serverReturnedMetadataPatterns') {
+    // handle error case
+    return {
+      ...state,
+      patterns: action.payload,
+      patternsError: undefined,
+    };
+  } else if (action.type === 'serverFailedToReturnMetadataPatterns') {
+    return {
+      ...state,
+      patternsError: action.payload,
     };
   } else if (action.type === 'serverReturnedEndpointDetails') {
     return {

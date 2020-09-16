@@ -7,18 +7,18 @@
 import { getSpacesUsageCollector, UsageStats } from './spaces_usage_collector';
 import * as Rx from 'rxjs';
 import { PluginsSetup } from '../plugin';
-import { Feature } from '../../../features/server';
+import { KibanaFeature } from '../../../features/server';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
 import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
-  features?: Feature[];
+  features?: KibanaFeature[];
 }
 
 function setup({
   license = { isAvailable: true },
-  features = [{ id: 'feature1' } as Feature, { id: 'feature2' } as Feature],
+  features = [{ id: 'feature1' } as KibanaFeature, { id: 'feature2' } as KibanaFeature],
 }: SetupOpts = {}) {
   class MockUsageCollector {
     private fetch: any;
@@ -37,7 +37,7 @@ function setup({
   } as LicensingPluginSetup;
 
   const featuresSetup = ({
-    getFeatures: jest.fn().mockReturnValue(features),
+    getKibanaFeatures: jest.fn().mockReturnValue(features),
   } as unknown) as PluginsSetup['features'];
 
   return {

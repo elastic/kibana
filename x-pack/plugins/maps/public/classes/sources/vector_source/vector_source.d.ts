@@ -36,7 +36,7 @@ export type BoundsFilters = {
 };
 
 export interface IVectorSource extends ISource {
-  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
@@ -58,7 +58,7 @@ export interface IVectorSource extends ISource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void

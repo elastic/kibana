@@ -5,16 +5,20 @@
  */
 import expect from '@kbn/expect';
 import { sortBy, omit } from 'lodash';
+import archives_metadata from '../../../common/archives_metadata';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import expectTopTraces from './expectation/top_traces.expectation.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  const archiveName = 'apm_8.0.0';
+  const metadata = archives_metadata[archiveName];
+
   // url parameters
-  const start = encodeURIComponent('2020-06-29T06:45:00.000Z');
-  const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
+  const start = encodeURIComponent(metadata.start);
+  const end = encodeURIComponent(metadata.end);
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
   describe('Top traces', () => {
@@ -25,26 +29,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ items: [], isAggregationAccurate: true, bucketSize: 1000 });
+        expect(response.body.items.length).to.be(0);
+        expect(response.body.isAggregationAccurate).to.be(true);
       });
     });
 
     describe('when data is loaded', () => {
       let response: any;
       before(async () => {
-        await esArchiver.load('8.0.0');
+        await esArchiver.load(archiveName);
         response = await supertest.get(
           `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
       });
-      after(() => esArchiver.unload('8.0.0'));
+      after(() => esArchiver.unload(archiveName));
 
       it('returns the correct status code', async () => {
         expect(response.status).to.be(200);
       });
 
       it('returns the correct number of buckets', async () => {
-        expect(response.body.items.length).to.be(33);
+        expectSnapshot(response.body.items.length).toMatchInline(`59`);
       });
 
       it('returns the correct buckets', async () => {
@@ -53,12 +58,61 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'impact'
         );
 
-        const expectedTracesWithoutSamples = sortBy(
-          expectTopTraces.map((item: any) => omit(item, 'sample')),
-          'impact'
-        );
+        const firstItem = responseWithoutSamples[0];
+        const lastItem = responseWithoutSamples[responseWithoutSamples.length - 1];
 
-        expect(responseWithoutSamples).to.eql(expectedTracesWithoutSamples);
+        const groups = responseWithoutSamples.map((item) => item.key).slice(0, 5);
+
+        expectSnapshot(responseWithoutSamples).toMatch();
+
+        expectSnapshot(firstItem).toMatchInline(`
+          Object {
+            "averageResponseTime": 1137,
+            "impact": 0,
+            "key": Object {
+              "service.name": "opbeans-node",
+              "transaction.name": "POST /api/orders",
+            },
+            "transactionsPerMinute": 0.03333333333333333,
+          }
+        `);
+
+        expectSnapshot(lastItem).toMatchInline(`
+          Object {
+            "averageResponseTime": 1724883.75,
+            "impact": 100,
+            "key": Object {
+              "service.name": "opbeans-python",
+              "transaction.name": "opbeans.tasks.sync_customers",
+            },
+            "transactionsPerMinute": 1.2,
+          }
+        `);
+
+        expectSnapshot(groups).toMatchInline(`
+          Array [
+            Object {
+              "service.name": "opbeans-node",
+              "transaction.name": "POST /api/orders",
+            },
+            Object {
+              "service.name": "opbeans-python",
+              "transaction.name": "GET opbeans.views.stats",
+            },
+            Object {
+              "service.name": "opbeans-node",
+              "transaction.name": "GET /api/customers/:id",
+            },
+            Object {
+              "service.name": "opbeans-node",
+              "transaction.name": "GET /api/products/top",
+            },
+            Object {
+              "service.name": "opbeans-ruby",
+              "transaction.name": "Api::OrdersController#show",
+            },
+          ]
+        `);
       });
 
       it('returns a sample', async () => {

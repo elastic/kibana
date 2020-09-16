@@ -173,7 +173,7 @@ export class IngestManagerPlugin
     // Register feature
     // TODO: Flesh out privileges
     if (deps.features) {
-      deps.features.registerFeature({
+      deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
         name: 'Ingest Manager',
         icon: 'savedObjectsApp',

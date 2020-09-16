@@ -51,7 +51,6 @@ export const ExplorationPageWrapper: FC<Props> = ({ jobId, title, EvaluatePanel 
       />
     );
   }
-
   return (
     <>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
