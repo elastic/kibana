@@ -8,6 +8,9 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { TrustedAppsPage } from './trusted_apps_page';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { fireEvent } from '@testing-library/dom';
+import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
+import { NewTrustedApp, PostTrustedAppCreateResponse } from '../../../../../common/endpoint/types';
+import { HttpFetchOptions } from 'kibana/public';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -15,12 +18,16 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 
 describe('TrustedAppsPage', () => {
   let history: AppContextTestRender['history'];
+  let coreStart: AppContextTestRender['coreStart'];
+  let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
     history = mockedContext.history;
+    coreStart = mockedContext.coreStart;
+    waitForAction = mockedContext.middlewareSpy.waitForAction;
     render = () => mockedContext.render(<TrustedAppsPage />);
     reactTestingLibrary.act(() => {
       history.push('/trusted_apps');
@@ -93,7 +100,7 @@ describe('TrustedAppsPage', () => {
       expect(history.location.search).toBe('');
     });
 
-    it('should close flyout if flyout button is clicked', async () => {
+    it('should close flyout if flyout close button is clicked', async () => {
       const { getByTestId, queryByTestId } = await renderAndClickAddButton();
       const flyoutCloseButton = getByTestId('euiFlyoutCloseButton');
       reactTestingLibrary.act(() => {
@@ -106,21 +113,22 @@ describe('TrustedAppsPage', () => {
     describe('and when the form data is valid', () => {
       const fillInCreateForm = ({ getByTestId }: ReturnType<AppContextTestRender['render']>) => {
         reactTestingLibrary.act(() => {
-          getByTestId('addTrustedAppFlyout-createForm-nameTextField').setAttribute(
-            'value',
-            'trusted app A'
+          fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-nameTextField'), {
+            target: { value: 'trusted app A' },
+          });
+
+          fireEvent.change(
+            getByTestId('addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value'),
+            { target: { value: 'SOME$HASH#HERE' } }
           );
-          getByTestId(
-            'addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value'
-          ).setAttribute('value', 'SOME$HASH#HERE');
-          getByTestId('addTrustedAppFlyout-createForm-descriptionField').setAttribute(
-            'value',
-            'let this be'
-          );
+
+          fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-descriptionField'), {
+            target: { value: 'let this be' },
+          });
         });
       };
 
-      it.skip('should enable the Flyout Add button', async () => {
+      it('should enable the Flyout Add button', async () => {
         const renderResult = await renderAndClickAddButton();
         const { getByTestId } = renderResult;
         fillInCreateForm(renderResult);
@@ -131,28 +139,135 @@ describe('TrustedAppsPage', () => {
       });
 
       describe('and the Flyout Add button is clicked', () => {
-        it.todo('should disable the Cancel button');
+        let renderResult: ReturnType<AppContextTestRender['render']>;
+        let resolveHttpPost: (response?: PostTrustedAppCreateResponse) => void;
+        let httpPostBody: string;
+        let rejectHttpPost: (response: Error) => void;
 
-        it.todo('should hide the dialog close button');
+        beforeEach(async () => {
+          // Mock the http.post() call and expose `resolveHttpPost()` method so that
+          // we can control when the API call response is returned, which will allow us
+          // to test the UI behaviours while the API call is in flight
+          coreStart.http.post.mockImplementation(
+            // @ts-ignore
+            async (path: string, options: HttpFetchOptions) => {
+              return new Promise((resolve, reject) => {
+                httpPostBody = options.body as string;
+                resolveHttpPost = resolve;
+                rejectHttpPost = reject;
+              });
+            }
+          );
 
-        it.todo('should disable the flyout Add button and set it to loading');
+          renderResult = await renderAndClickAddButton();
+          fillInCreateForm(renderResult);
+          const userClickedSaveActionWatcher = waitForAction('userClickedSaveNewTrustedAppButton');
+          reactTestingLibrary.act(() => {
+            fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'), {
+              button: 1,
+            });
+          });
+          await reactTestingLibrary.act(async () => {
+            await userClickedSaveActionWatcher;
+          });
+        });
+
+        afterEach(() => resolveHttpPost());
+
+        it('should disable the Cancel button', async () => {
+          expect(
+            (renderResult.getByTestId('addTrustedAppFlyout-cancelButton') as HTMLButtonElement)
+              .disabled
+          ).toBe(true);
+          resolveHttpPost();
+        });
+
+        it('should hide the dialog close button', async () => {
+          expect(renderResult.queryByTestId('euiFlyoutCloseButton')).toBeNull();
+        });
+
+        it('should disable the flyout Add button and set it to loading', async () => {
+          const saveButton = renderResult.getByTestId(
+            'addTrustedAppFlyout-createButton'
+          ) as HTMLButtonElement;
+          expect(saveButton.disabled).toBe(true);
+          expect(saveButton.querySelector('.euiLoadingSpinner')).not.toBeNull();
+        });
 
         describe('and if create was successful', () => {
-          it.todo('should close the flyout');
+          beforeEach(async () => {
+            const successCreateApiResponse: PostTrustedAppCreateResponse = {
+              data: {
+                ...(JSON.parse(httpPostBody) as NewTrustedApp),
+                id: '1',
+                created_at: '2020-09-16T14:09:45.484Z',
+                created_by: 'kibana',
+              },
+            };
+            await reactTestingLibrary.act(async () => {
+              const serverResponseAction = waitForAction('serverReturnedCreateTrustedAppSuccess');
+              coreStart.http.get.mockClear();
+              resolveHttpPost(successCreateApiResponse);
+              await serverResponseAction;
+            });
+          });
 
-          it.todo('should show success toast notification');
+          it('should close the flyout', async () => {
+            expect(renderResult.queryByTestId('addTrustedAppFlyout')).toBeNull();
+          });
 
-          it.todo('should trigger the List to reload');
+          it('should show success toast notification', async () => {
+            expect(coreStart.notifications.toasts.addSuccess.mock.calls[0][0]).toEqual(
+              '"trusted app A" has been added to the Trusted Applications list.'
+            );
+          });
+
+          it('should trigger the List to reload', async () => {
+            expect(coreStart.http.get.mock.calls[0][0]).toEqual('/api/endpoint/trusted_apps');
+          });
         });
 
         describe('and if create failed', () => {
-          it.todo('should enable the Cancel Button');
+          beforeEach(async () => {
+            const failedCreateApiResponse: Error & { body?: { message: string } } = new Error(
+              'Bad call'
+            );
+            failedCreateApiResponse.body = {
+              message: 'bad call',
+            };
+            await reactTestingLibrary.act(async () => {
+              const serverResponseAction = waitForAction('serverReturnedCreateTrustedAppFailure');
+              coreStart.http.get.mockClear();
+              rejectHttpPost(failedCreateApiResponse);
+              await serverResponseAction;
+            });
+          });
 
-          it.todo('should show the dialog close button');
+          it('should continue to show the flyout', async () => {
+            expect(renderResult.getByTestId('addTrustedAppFlyout')).not.toBeNull();
+          });
 
-          it.todo('should enable the flyout Add button and remove loading indicating');
+          it('should enable the Cancel Button', async () => {
+            expect(
+              (renderResult.getByTestId('addTrustedAppFlyout-cancelButton') as HTMLButtonElement)
+                .disabled
+            ).toBe(false);
+          });
 
-          it.todo('should show API errors in the form');
+          it('should show the dialog close button', async () => {
+            expect(renderResult.getByTestId('euiFlyoutCloseButton')).not.toBeNull();
+          });
+
+          it('should enable the flyout Add button and remove loading indicating', () => {
+            expect(
+              (renderResult.getByTestId('addTrustedAppFlyout-createButton') as HTMLButtonElement)
+                .disabled
+            ).toBe(false);
+          });
+
+          it('should show API errors in the form', async () => {
+            expect(renderResult.container.querySelector('.euiForm__errors')).not.toBeNull();
+          });
         });
       });
     });
