@@ -8,6 +8,7 @@ import { ActionFactoryRegistry } from '../types';
 import {
   ActionFactory,
   ActionFactoryDefinition,
+  BaseActionConfig,
   BaseActionFactoryContext,
   SerializedEvent,
 } from '../dynamic_actions';
@@ -16,10 +17,7 @@ import { ILicense } from '../../../licensing/common/types';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import {
-  PersistableStateDefinition,
-  SerializableState,
-} from '../../../../../src/plugins/kibana_utils/common';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type DynamicActionsState = {
@@ -48,7 +46,7 @@ export class UiActionsServiceEnhancements
    * serialize/deserialize dynamic actions.
    */
   public readonly registerActionFactory = <
-    Config extends SerializableState = SerializableState,
+    Config extends BaseActionConfig = BaseActionConfig,
     SupportedTriggers extends TriggerId = TriggerId,
     FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
       triggers: SupportedTriggers[];
@@ -93,7 +91,7 @@ export class UiActionsServiceEnhancements
    * Convenience method to register a {@link DrilldownDefinition | drilldown}.
    */
   public readonly registerDrilldown = <
-    Config extends SerializableState = SerializableState,
+    Config extends BaseActionConfig = BaseActionConfig,
     SupportedTriggers extends TriggerId = TriggerId,
     FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
       triggers: SupportedTriggers[];

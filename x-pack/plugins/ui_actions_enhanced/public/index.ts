@@ -29,6 +29,7 @@ export {
   DynamicActionManagerState as UiActionsEnhancedDynamicActionManagerState,
   MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
   BaseActionFactoryContext as UiActionsEnhancedBaseActionFactoryContext,
+  BaseActionConfig as UiActionsEnhancedBaseActionConfig,
 } from './dynamic_actions';
 
 export { DynamicActionsState } from './services/ui_actions_service_enhancements';

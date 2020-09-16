@@ -11,10 +11,7 @@ import {
   UiActionsEnhancedSerializedAction,
 } from '../../../index';
 import { TriggerContextMapping } from '../../../../../../../src/plugins/ui_actions/public';
-import {
-  createStateContainer,
-  SerializableState,
-} from '../../../../../../../src/plugins/kibana_utils/common';
+import { createStateContainer } from '../../../../../../../src/plugins/kibana_utils/common';
 
 class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> {
   public readonly state = createStateContainer<DynamicActionManagerState>({
@@ -63,7 +60,7 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
 
   async updateEvent(
     eventId: string,
-    action: UiActionsEnhancedSerializedAction<SerializableState>,
+    action: UiActionsEnhancedSerializedAction,
     triggers: Array<keyof TriggerContextMapping>
   ) {
     const state = this.state.get();

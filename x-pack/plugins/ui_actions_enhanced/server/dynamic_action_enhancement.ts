@@ -8,11 +8,11 @@ import { EnhancementRegistryDefinition } from '../../../../src/plugins/embeddabl
 import { SavedObjectReference } from '../../../../src/core/types';
 import { DynamicActionsState, SerializedEvent } from './types';
 import { AdvancedUiActionsPublicPlugin } from './plugin';
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common/persistable_state';
+import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 
 export const dynamicActionEnhancement = (
   uiActionsEnhanced: AdvancedUiActionsPublicPlugin
-): EnhancementRegistryDefinition<SerializableState> => {
+): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
     telemetry: (state: SerializableState, telemetry: Record<string, any>) => {
@@ -48,5 +48,5 @@ export const dynamicActionEnhancement = (
         }),
       } as DynamicActionsState;
     },
-  } as EnhancementRegistryDefinition<SerializableState>;
+  } as EnhancementRegistryDefinition;
 };
