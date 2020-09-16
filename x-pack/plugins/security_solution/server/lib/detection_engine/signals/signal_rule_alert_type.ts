@@ -101,6 +101,7 @@ export const signalRulesAlertType = ({
         searchAfterTimes: [],
         lastLookBackDate: null,
         createdSignalsCount: 0,
+        errors: [],
       };
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
@@ -221,7 +222,12 @@ export const signalRulesAlertType = ({
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
           }
 
-          const { success, bulkCreateDuration, createdItemsCount } = await bulkCreateMlSignals({
+          const {
+            success,
+            errors,
+            bulkCreateDuration,
+            createdItemsCount,
+          } = await bulkCreateMlSignals({
             actions,
             throttle,
             someResult: anomalyResults,
@@ -241,6 +247,7 @@ export const signalRulesAlertType = ({
             tags,
           });
           result.success = success;
+          result.errors = errors;
           result.createdSignalsCount = createdItemsCount;
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
@@ -274,6 +281,7 @@ export const signalRulesAlertType = ({
             success,
             bulkCreateDuration,
             createdItemsCount,
+            errors,
           } = await bulkCreateThresholdSignals({
             actions,
             throttle,
@@ -297,6 +305,7 @@ export const signalRulesAlertType = ({
             tags,
           });
           result.success = success;
+          result.errors = errors;
           result.createdSignalsCount = createdItemsCount;
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
@@ -391,7 +400,8 @@ export const signalRulesAlertType = ({
           }
         } else {
           const errorMessage = buildRuleMessage(
-            'Bulk Indexing of signals failed. Check logs for further details.'
+            'Bulk Indexing of signals failed:',
+            result.errors.join()
           );
           logger.error(errorMessage);
           await ruleStatusService.error(errorMessage, {

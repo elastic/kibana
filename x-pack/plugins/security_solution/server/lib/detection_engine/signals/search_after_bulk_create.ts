@@ -53,6 +53,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
+  errors: string[];
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -88,6 +89,7 @@ export const searchAfterAndBulkCreate = async ({
     bulkCreateTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
+    errors: [],
   };
 
   // sortId tells us where to start our next consecutive search_after query
@@ -204,6 +206,8 @@ export const searchAfterAndBulkCreate = async ({
           const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
+            success: bulkSuccess,
+            errors: bulkErrors,
           } = await singleBulkCreate({
             filteredEvents,
             ruleParams,
@@ -244,7 +248,8 @@ export const searchAfterAndBulkCreate = async ({
               : undefined;
           } else {
             logger.debug(buildRuleMessage('sortIds was empty on filteredEvents'));
-            toReturn.success = true;
+            toReturn.success = toReturn.success ? bulkSuccess : false;
+            toReturn.errors = [...new Set([...toReturn.errors, ...bulkErrors])];
             break;
           }
         } else {
