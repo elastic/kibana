@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, ByteSizeValue, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
   hostname: schema.maybe(
@@ -45,9 +46,15 @@ const RulesSchema = schema.object({
 
 const CaptureSchema = schema.object({
   timeouts: schema.object({
-    openUrl: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 30000 }),
-    waitForElements: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 30000 }),
-    renderComplete: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 30000 }),
+    openUrl: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration('1m'),
+    }),
+    waitForElements: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration('30s'),
+    }),
+    renderComplete: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration('30s'),
+    }),
   }),
   networkPolicy: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -67,7 +74,9 @@ const CaptureSchema = schema.object({
     width: schema.number({ defaultValue: 1950 }),
     height: schema.number({ defaultValue: 1200 }),
   }),
-  loadDelay: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 3000 }),
+  loadDelay: schema.oneOf([schema.number(), schema.duration()], {
+    defaultValue: moment.duration('3s'),
+  }),
   browser: schema.object({
     autoDownload: schema.conditional(
       schema.contextRef('dist'),
@@ -114,12 +123,12 @@ const CsvSchema = schema.object({
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
   enablePanelActionDownload: schema.boolean({ defaultValue: true }),
   maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
-    defaultValue: ByteSizeValue.parse('10mb').getValueInBytes(),
+    defaultValue: ByteSizeValue.parse('10mb'),
   }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
     duration: schema.string({
-      defaultValue: '30s',
+      defaultValue: '30s', // this value is passed directly to ES, so string only format is preferred
       validate(value) {
         if (!/^[0-9]+(d|h|m|s|ms|micros|nanos)$/.test(value)) {
           return 'must be a duration string';
@@ -145,11 +154,15 @@ const IndexSchema = schema.string({ defaultValue: '.reporting' });
 
 const PollSchema = schema.object({
   jobCompletionNotifier: schema.object({
-    interval: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 10000 }),
+    interval: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration('10s'),
+    }),
     intervalErrorMultiplier: schema.number({ defaultValue: 5 }),
   }),
   jobsRefresh: schema.object({
-    interval: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 5000 }),
+    interval: schema.oneOf([schema.number(), schema.duration()], {
+      defaultValue: moment.duration('5s'),
+    }),
     intervalErrorMultiplier: schema.number({ defaultValue: 5 }),
   }),
 });
