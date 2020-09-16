@@ -24,7 +24,6 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiFieldNumber,
-  EuiFieldText,
   EuiLink,
   EuiText,
   EuiPopover,
@@ -163,23 +162,6 @@ export const RangePopover = ({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFormRow>
-        <EuiFormRow fullWidth>
-          <EuiFieldText
-            compressed
-            value={safeLabel}
-            prepend={i18n.translate('xpack.lens.indexPattern.ranges.customIntervalPopoverLabel', {
-              defaultMessage: 'Label',
-            })}
-            onChange={({ target }) => {
-              const newRange = {
-                ...tempRange,
-                label: target.value,
-              };
-              setTempRange(newRange);
-              saveRangeAndReset(newRange);
-            }}
-          />
         </EuiFormRow>
       </EuiForm>
     </EuiPopover>
