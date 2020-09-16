@@ -185,7 +185,6 @@ class ReportListingUi extends Component<Props, State> {
   public componentDidMount() {
     this.mounted = true;
     const { pollConfig, license$ } = this.props;
-
     const pollFrequencyInMillis = durationToNumber(pollConfig.jobsRefresh.interval);
     this.poller = new Poller({
       functionToPoll: () => {
