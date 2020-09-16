@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { xpackInfoRoute } from './xpack_info';
+export { LogicalConditionBuilder } from './logical_condition_builder';
