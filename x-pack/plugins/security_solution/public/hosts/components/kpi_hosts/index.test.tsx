@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockKpiHostsData, mockKpiHostDetailsData } from './mock';
+import { mockHostsKpiData, mockKpiHostDetailsData } from './mock';
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import '../../../common/mock/match_media';
-import { KpiHostsComponentBase } from '.';
+import { HostsKpiComponentBase } from '.';
 import * as statItems from '../../../common/components/stat_items';
-import { kpiHostsMapping } from './kpi_hosts_mapping';
-import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
 
-describe('kpiHostsComponent', () => {
+describe('HostsKpiComponent', () => {
   const ID = 'kpiHost';
   const from = '2019-06-15T06:00:00.000Z';
   const to = '2019-06-18T06:00:00.000Z';
@@ -21,8 +19,8 @@ describe('kpiHostsComponent', () => {
   describe('render', () => {
     test('it should render spinner if it is loading', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponentBase
-          data={mockKpiHostsData}
+        <HostsKpiComponentBase
+          data={mockHostsKpiData}
           from={from}
           id={ID}
           loading={true}
@@ -33,10 +31,10 @@ describe('kpiHostsComponent', () => {
       expect(wrapper).toMatchSnapshot();
     });
 
-    test('it should render KpiHostsData', () => {
+    test('it should render HostsKpiData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponentBase
-          data={mockKpiHostsData}
+        <HostsKpiComponentBase
+          data={mockHostsKpiData}
           from={from}
           id={ID}
           loading={false}
@@ -49,7 +47,7 @@ describe('kpiHostsComponent', () => {
 
     test('it should render KpiHostDetailsData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponentBase
+        <HostsKpiComponentBase
           data={mockKpiHostDetailsData}
           from={from}
           id={ID}
@@ -63,7 +61,7 @@ describe('kpiHostsComponent', () => {
   });
 
   const table = [
-    [mockKpiHostsData, kpiHostsMapping] as [typeof mockKpiHostsData, typeof kpiHostsMapping],
+    [mockHostsKpiData, HostsKpiMapping] as [typeof mockHostsKpiData, typeof HostsKpiMapping],
     [mockKpiHostDetailsData, kpiHostDetailsMapping] as [
       typeof mockKpiHostDetailsData,
       typeof kpiHostDetailsMapping
@@ -71,7 +69,7 @@ describe('kpiHostsComponent', () => {
   ];
 
   describe.each(table)(
-    'it should handle KpiHostsProps and KpiHostDetailsProps',
+    'it should handle HostsKpiProps and KpiHostDetailsProps',
     (data, mapping) => {
       let mockUseKpiMatrixStatus: jest.SpyInstance;
       beforeAll(() => {
@@ -80,7 +78,7 @@ describe('kpiHostsComponent', () => {
 
       beforeEach(() => {
         shallow(
-          <KpiHostsComponentBase
+          <HostsKpiComponentBase
             data={data}
             from={from}
             id={ID}

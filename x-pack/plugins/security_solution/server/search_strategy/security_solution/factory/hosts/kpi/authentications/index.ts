@@ -15,7 +15,7 @@ import {
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiAuthenticationsQuery } from './query.hosts_kpi_authentications.dsl';
-import { formatAuthHistogramData } from './helpers';
+import { formatAuthenticationsHistogramData } from './helpers';
 
 export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.authentications> = {
   buildDsl: (options: HostsKpiAuthenticationsRequestOptions) =>
@@ -47,13 +47,17 @@ export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.au
         'aggregations.authentication_success.doc_count',
         response.rawResponse
       ),
-      authenticationsSuccessHistogram: formatAuthHistogramData(authenticationsSuccessHistogram),
+      authenticationsSuccessHistogram: formatAuthenticationsHistogramData(
+        authenticationsSuccessHistogram
+      ),
       authenticationsFailure: getOr(
         null,
         'aggregations.authentication_failure.doc_count',
         response.rawResponse
       ),
-      authenticationsFailureHistogram: formatAuthHistogramData(authenticationsFailureHistogram),
+      authenticationsFailureHistogram: formatAuthenticationsHistogramData(
+        authenticationsFailureHistogram
+      ),
     };
   },
 };

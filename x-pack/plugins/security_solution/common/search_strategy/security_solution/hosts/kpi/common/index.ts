@@ -10,6 +10,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Maybe } from '../../../../common';
+
 export interface HostsKpiHistogramData {
   x?: Maybe<number>;
   y?: Maybe<number>;

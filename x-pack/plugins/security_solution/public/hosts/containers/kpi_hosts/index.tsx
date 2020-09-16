@@ -4,49 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-
-import { HostsKpiAuthentications } from './authentications';
-import { HostsKpiHosts } from './hosts';
-import { HostsKpiUniqueIps } from './unique_ips';
-import { HostsKpiProps } from './types';
-
-export const HostsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, to, setQuery, skip, narrowDateRange }) => (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        <HostsKpiHosts
-          filterQuery={filterQuery}
-          from={from}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <HostsKpiAuthentications
-          filterQuery={filterQuery}
-          from={from}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <HostsKpiUniqueIps
-          filterQuery={filterQuery}
-          from={from}
-          to={to}
-          narrowDateRange={narrowDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  )
-);
-
-HostsKpiComponent.displayName = 'HostsKpiComponent';
+export * from './authentications';
+export * from './hosts';
+export * from './unique_ips';

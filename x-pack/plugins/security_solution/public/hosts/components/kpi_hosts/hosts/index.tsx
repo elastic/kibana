@@ -9,19 +9,22 @@ import React from 'react';
 import { StatItems } from '../../../../common/components/stat_items';
 import { useHostsKpiHosts } from '../../../containers/kpi_hosts/hosts';
 import { HostsKpiBaseComponentManage } from '../common';
-import { HostsKpiProps } from '../types';
+import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
-    key: 'dnsQueries',
+    key: 'hosts',
     fields: [
       {
-        key: 'dnsQueries',
+        key: 'hosts',
         value: null,
+        color: HostsKpiChartColors.hosts,
+        icon: 'storage',
       },
     ],
-    description: i18n.DNS_QUERIES,
+    enableAreaChart: true,
+    description: i18n.HOSTS,
   },
 ];
 
@@ -33,7 +36,7 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiHosts({
+  const [loading, { refetch, id, ...data }] = useHostsKpiHosts({
     filterQuery,
     endDate: to,
     startDate: from,
@@ -44,7 +47,6 @@ const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
     <HostsKpiBaseComponentManage
       data={data}
       id={id}
-      inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}

@@ -6,6 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DNS_QUERIES = i18n.translate('xpack.securitySolution.kpiNetwork.dnsQueries.title', {
-  defaultMessage: 'DNS queries',
+export const HOSTS = i18n.translate('xpack.securitySolution.kpiHosts.hosts.title', {
+  defaultMessage: 'Hosts',
 });

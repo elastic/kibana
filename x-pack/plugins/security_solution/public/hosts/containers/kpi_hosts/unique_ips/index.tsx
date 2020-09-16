@@ -26,8 +26,8 @@ import { InspectResponse } from '../../../../types';
 
 const ID = 'hostsKpiUniqueIpsQuery';
 
-export interface HostsKpiUniqueIpsArgs {
-  dnsQueries: number;
+export interface HostsKpiUniqueIpsArgs
+  extends Omit<HostsKpiUniqueIpsStrategyResponse, 'rawResponse'> {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
@@ -68,7 +68,10 @@ export const useHostsKpiUniqueIps = ({
 
   const [hostsKpiUniqueIpsResponse, setHostsKpiUniqueIpsResponse] = useState<HostsKpiUniqueIpsArgs>(
     {
-      dnsQueries: 0,
+      uniqueSourceIps: 0,
+      uniqueSourceIpsHistogram: [],
+      uniqueDestinationIps: 0,
+      uniqueDestinationIpsHistogram: [],
       id: ID,
       inspect: {
         dsl: [],

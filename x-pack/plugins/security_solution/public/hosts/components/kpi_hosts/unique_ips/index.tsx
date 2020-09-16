@@ -9,19 +9,33 @@ import React from 'react';
 import { StatItems } from '../../../../common/components/stat_items';
 import { useHostsKpiUniqueIps } from '../../../containers/kpi_hosts/unique_ips';
 import { HostsKpiBaseComponentManage } from '../common';
-import { HostsKpiProps } from '../types';
+import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
-    key: 'dnsQueries',
+    key: 'uniqueIps',
     fields: [
       {
-        key: 'dnsQueries',
+        key: 'uniqueSourceIps',
+        name: i18n.SOURCE_CHART_LABEL,
+        description: i18n.SOURCE_UNIT_LABEL,
         value: null,
+        color: HostsKpiChartColors.uniqueSourceIps,
+        icon: 'visMapCoordinate',
+      },
+      {
+        key: 'uniqueDestinationIps',
+        name: i18n.DESTINATION_CHART_LABEL,
+        description: i18n.DESTINATION_UNIT_LABEL,
+        value: null,
+        color: HostsKpiChartColors.uniqueDestinationIps,
+        icon: 'visMapCoordinate',
       },
     ],
-    description: i18n.DNS_QUERIES,
+    enableAreaChart: true,
+    enableBarChart: true,
+    description: i18n.UNIQUE_IPS,
   },
 ];
 
@@ -33,7 +47,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
+  const [loading, { refetch, id, ...data }] = useHostsKpiUniqueIps({
     filterQuery,
     endDate: to,
     startDate: from,
@@ -44,7 +58,6 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
     <HostsKpiBaseComponentManage
       data={data}
       id={id}
-      inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}

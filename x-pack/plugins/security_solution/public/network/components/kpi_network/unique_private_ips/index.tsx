@@ -9,7 +9,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { useNetworkKpiUniquePrivateIps } from '../../../containers/kpi_network/unique_private_ips';
-import { KpiNetworkBaseComponentManage } from '../common';
+import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
@@ -52,7 +52,7 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
+  const [loading, { refetch, id, ...data }] = useNetworkKpiUniquePrivateIps({
     filterQuery,
     endDate: to,
     startDate: from,
@@ -60,10 +60,9 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   });
 
   return (
-    <KpiNetworkBaseComponentManage
+    <NetworkKpiBaseComponentManage
       data={data}
       id={id}
-      inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}

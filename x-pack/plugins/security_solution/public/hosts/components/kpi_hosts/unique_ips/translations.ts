@@ -6,6 +6,34 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DNS_QUERIES = i18n.translate('xpack.securitySolution.kpiNetwork.dnsQueries.title', {
-  defaultMessage: 'DNS queries',
+export const UNIQUE_IPS = i18n.translate('xpack.securitySolution.kpiHosts.uniqueIps.title', {
+  defaultMessage: 'Unique IPs',
 });
+
+export const SOURCE_UNIT_LABEL = i18n.translate(
+  'xpack.securitySolution.kpiHosts.uniqueIps.sourceUnitLabel',
+  {
+    defaultMessage: 'source',
+  }
+);
+
+export const DESTINATION_UNIT_LABEL = i18n.translate(
+  'xpack.securitySolution.kpiHosts.uniqueIps.destinationUnitLabel',
+  {
+    defaultMessage: 'destination',
+  }
+);
+
+export const SOURCE_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.kpiHosts.uniqueIps.sourceChartLabel',
+  {
+    defaultMessage: 'Src.',
+  }
+);
+
+export const DESTINATION_CHART_LABEL = i18n.translate(
+  'xpack.securitySolution.kpiHosts.uniqueIps.destinationChartLabel',
+  {
+    defaultMessage: 'Dest.',
+  }
+);

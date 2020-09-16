@@ -12,7 +12,7 @@ import { HostsKpiHistogramData } from '../common';
 export type HostsKpiHostsRequestOptions = RequestBasicOptions;
 
 export interface HostsKpiHostsStrategyResponse extends IEsSearchResponse {
-  hosts?: Maybe<number>;
-  hostsHistogram?: Maybe<HostsKpiHistogramData[]>;
-  inspect?: Maybe<Inspect>;
+  hosts: Maybe<number>;
+  hostsHistogram: Maybe<HostsKpiHistogramData[]>;
+  inspect: Maybe<Inspect>;
 }

@@ -12,9 +12,9 @@ import { HostsKpiHistogramData } from '../common';
 export type HostsKpiUniqueIpsRequestOptions = RequestBasicOptions;
 
 export interface HostsKpiUniqueIpsStrategyResponse extends IEsSearchResponse {
-  uniqueSourceIps?: Maybe<number>;
-  uniqueSourceIpsHistogram?: Maybe<HostsKpiHistogramData[]>;
-  uniqueDestinationIps?: Maybe<number>;
-  uniqueDestinationIpsHistogram?: Maybe<HostsKpiHistogramData[]>;
-  inspect?: Maybe<Inspect>;
+  uniqueSourceIps: Maybe<number>;
+  uniqueSourceIpsHistogram: Maybe<HostsKpiHistogramData[]>;
+  uniqueDestinationIps: Maybe<number>;
+  uniqueDestinationIpsHistogram: Maybe<HostsKpiHistogramData[]>;
+  inspect: Maybe<Inspect>;
 }

@@ -19,7 +19,7 @@ import {
 } from '../../../../common/components/stat_items';
 import { UpdateDateRange } from '../../../../common/components/charts/common';
 
-const kpiWidgetHeight = 228;
+const kpiWidgetHeight = 247;
 
 export const FlexGroup = styled(EuiFlexGroup)`
   min-height: ${kpiWidgetHeight}px;

@@ -16,7 +16,7 @@ import {
   MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
-import { KpiHostsChartColors } from '../../components/kpi_hosts/types';
+import { HostsKpiChartColors } from '../../components/kpi_hosts/types';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 
@@ -41,12 +41,12 @@ export const authenticationsMatrixDataMappingFields: MatrixHistogramMappingTypes
   [AuthenticationsMatrixDataGroup.authenticationsSuccess]: {
     key: AuthenticationsMatrixDataGroup.authenticationsSuccess,
     value: null,
-    color: KpiHostsChartColors.authenticationsSuccess,
+    color: HostsKpiChartColors.authenticationsSuccess,
   },
   [AuthenticationsMatrixDataGroup.authenticationsFailure]: {
     key: AuthenticationsMatrixDataGroup.authenticationsFailure,
     value: null,
-    color: KpiHostsChartColors.authenticationsFailure,
+    color: HostsKpiChartColors.authenticationsFailure,
   },
 };
 

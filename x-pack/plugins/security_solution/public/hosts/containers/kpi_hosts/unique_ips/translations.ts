@@ -6,16 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_HOSTS_KPI_HOSTS = i18n.translate(
-  'xpack.securitySolution.hostsKpiHosts.errorSearchDescription',
+export const ERROR_HOSTS_KPI_UNIQUE_IPS = i18n.translate(
+  'xpack.securitySolution.hostsKpiUniqueIps.errorSearchDescription',
   {
-    defaultMessage: `An error has occurred on hosts kpi hosts search`,
+    defaultMessage: `An error has occurred on hosts kpi unique ips search`,
   }
 );
 
-export const FAIL_HOSTS_KPI_HOSTS = i18n.translate(
-  'xpack.securitySolution.hostsKpiHosts.failSearchDescription',
+export const FAIL_HOSTS_KPI_UNIQUE_IPS = i18n.translate(
+  'xpack.securitySolution.hostsKpiUniqueIps.failSearchDescription',
   {
-    defaultMessage: `Failed to run search on hosts kpi hosts`,
+    defaultMessage: `Failed to run search on hosts kpi unique ips`,
   }
 );

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
+import { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildHostsKpiHostsQuery = ({

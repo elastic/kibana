@@ -26,8 +26,7 @@ import { InspectResponse } from '../../../../types';
 
 const ID = 'hostsKpiHostsQuery';
 
-export interface HostsKpiHostsArgs {
-  dnsQueries: number;
+export interface HostsKpiHostsArgs extends Omit<HostsKpiHostsStrategyResponse, 'rawResponse'> {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
@@ -65,7 +64,8 @@ export const useHostsKpiHosts = ({
   });
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
-    dnsQueries: 0,
+    hosts: 0,
+    hostsHistogram: [],
     id: ID,
     inspect: {
       dsl: [],
