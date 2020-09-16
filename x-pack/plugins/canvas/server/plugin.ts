@@ -41,7 +41,7 @@ export class CanvasPlugin implements Plugin {
     plugins.features.registerKibanaFeature({
       id: 'canvas',
       name: 'Canvas',
-      order: 400,
+      order: 300,
       category: DEFAULT_APP_CATEGORIES.kibana,
       icon: 'canvasApp',
       navLinkId: 'canvas',

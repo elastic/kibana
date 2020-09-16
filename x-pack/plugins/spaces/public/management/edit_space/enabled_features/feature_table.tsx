@@ -113,11 +113,14 @@ export class FeatureTable extends Component<Props, {}> {
       //   </EuiText>
       // );
 
+      const canExpand = featuresInCategory.length > 1;
+
       const accordion = (
         <EuiAccordion
           id={`featureCategory_${category.id}`}
           key={category.id}
-          arrowDisplay="right"
+          arrowDisplay={canExpand ? 'right' : 'none'}
+          forceState={canExpand ? undefined : 'closed'}
           buttonContent={buttonContent}
           // extraAction={extraAction}
         >
@@ -146,13 +149,13 @@ export class FeatureTable extends Component<Props, {}> {
         </EuiAccordion>
       );
 
-      accordians.push({
+      accordions.push({
         order: category.order ?? Number.MAX_SAFE_INTEGER,
-        element: accordian,
+        element: accordion,
       });
     });
 
-    accordians.sort((a1, a2) => a1.order - a2.order);
+    accordions.sort((a1, a2) => a1.order - a2.order);
 
     const featureCount = this.props.features.length;
     const enabledCount = getEnabledFeatures(this.props.features, this.props.space).length;
@@ -161,8 +164,8 @@ export class FeatureTable extends Component<Props, {}> {
       controls.push(
         <EuiLink onClick={() => this.showAll()} data-test-subj="showAllFeaturesLink">
           <EuiText size="xs">
-            {i18n.translate('xpack.spaces.management.showAllFeaturesLink', {
-              defaultMessage: 'Show all',
+            {i18n.translate('xpack.spaces.management.selectAllFeaturesLink', {
+              defaultMessage: 'Select all',
             })}
           </EuiText>
         </EuiLink>
@@ -172,8 +175,8 @@ export class FeatureTable extends Component<Props, {}> {
       controls.push(
         <EuiLink onClick={() => this.hideAll()} data-test-subj="hideAllFeaturesLink">
           <EuiText size="xs">
-            {i18n.translate('xpack.spaces.management.hideAllFeaturesLink', {
-              defaultMessage: 'Hide all',
+            {i18n.translate('xpack.spaces.management.deselectAllFeaturesLink', {
+              defaultMessage: 'Deselect all',
             })}
           </EuiText>
         </EuiLink>
@@ -185,7 +188,11 @@ export class FeatureTable extends Component<Props, {}> {
         <EuiFlexGroup alignItems={'flexEnd'}>
           <EuiFlexItem>
             <EuiText size="xs">
-              <b>Feature visibility</b>
+              <b>
+                {i18n.translate('xpack.spaces.management.featureVisibilityTitle', {
+                  defaultMessage: 'Feature visibility',
+                })}
+              </b>
             </EuiText>
           </EuiFlexItem>
           {controls.map((control, idx) => (
@@ -195,7 +202,7 @@ export class FeatureTable extends Component<Props, {}> {
           ))}
         </EuiFlexGroup>
         <EuiHorizontalRule margin={'m'} />
-        {accordians.flatMap((a, idx) => [
+        {accordions.flatMap((a, idx) => [
           a.element,
           <EuiHorizontalRule key={`accordion-hr-${idx}`} margin={'m'} />,
         ])}

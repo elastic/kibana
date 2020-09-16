@@ -80,7 +80,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.visualizeFeatureName', {
         defaultMessage: 'Visualize',
       }),
-      order: 200,
+      order: 700,
       category: DEFAULT_APP_CATEGORIES.kibana,
       icon: 'visualizeApp',
       navLinkId: 'visualize',
@@ -141,7 +141,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.dashboardFeatureName', {
         defaultMessage: 'Dashboard',
       }),
-      order: 300,
+      order: 200,
       category: DEFAULT_APP_CATEGORIES.kibana,
       icon: 'dashboardApp',
       navLinkId: 'dashboards',

@@ -47,7 +47,7 @@ export class GraphPlugin implements Plugin {
         name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
           defaultMessage: 'Graph',
         }),
-        order: 1200,
+        order: 600,
         category: DEFAULT_APP_CATEGORIES.kibana,
         icon: 'graphApp',
         navLinkId: 'graph',

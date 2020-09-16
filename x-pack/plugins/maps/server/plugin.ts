@@ -169,7 +169,7 @@ export class MapsPlugin implements Plugin {
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
-      order: 600,
+      order: 400,
       category: DEFAULT_APP_CATEGORIES.kibana,
       icon: APP_ICON,
       navLinkId: APP_ID,
