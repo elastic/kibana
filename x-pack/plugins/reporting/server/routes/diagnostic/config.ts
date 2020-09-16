@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { defaults, get } from 'lodash';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
+import { numberToByteSizeValue } from '../../../common/schema_utils';
 import { LevelLogger as Logger } from '../../lib';
 import { DiagnosticResponse } from '../../types';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
@@ -43,11 +44,7 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
         '100mb'
       );
       const elasticSearchMaxContentBytes = ByteSizeValue.parse(elasticSearchMaxContent);
-      const kibanaMaxContentBytesRaw = config.get('csv', 'maxSizeBytes');
-      const kibanaMaxContentBytes =
-        typeof kibanaMaxContentBytesRaw === 'number'
-          ? new ByteSizeValue(kibanaMaxContentBytesRaw)
-          : kibanaMaxContentBytesRaw;
+      const kibanaMaxContentBytes = numberToByteSizeValue(config.get('csv', 'maxSizeBytes'));
 
       if (kibanaMaxContentBytes.isGreaterThan(elasticSearchMaxContentBytes)) {
         const maxContentSizeWarning = i18n.translate(

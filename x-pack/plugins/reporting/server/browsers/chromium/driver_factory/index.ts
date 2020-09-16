@@ -21,6 +21,7 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
 import { BROWSER_TYPE } from '../../../../common/constants';
+import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
@@ -90,9 +91,7 @@ export class HeadlessChromiumDriverFactory {
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
-        const timeoutRaw = this.captureConfig.timeouts.openUrl;
-        const timeout = typeof timeoutRaw === 'number' ? timeoutRaw : timeoutRaw.asMilliseconds();
-        page.setDefaultTimeout(timeout);
+        page.setDefaultTimeout(durationToNumber(this.captureConfig.timeouts.openUrl));
 
         logger.debug(`Browser page driver created`);
       } catch (err) {

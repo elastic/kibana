@@ -5,16 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Duration } from 'moment';
+import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import { LevelLogger, startTrace } from '../';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
-
-const toMilliseconds = (rawValue: number | Duration) => {
-  return typeof rawValue === 'number' ? rawValue : rawValue.asMilliseconds();
-};
 
 export const waitForRenderComplete = async (
   captureConfig: CaptureConfig,
@@ -72,7 +68,7 @@ export const waitForRenderComplete = async (
 
           return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
         },
-        args: [layout.selectors.renderComplete, toMilliseconds(captureConfig.loadDelay)],
+        args: [layout.selectors.renderComplete, durationToNumber(captureConfig.loadDelay)],
       },
       { context: CONTEXT_WAITFORRENDER },
       logger

@@ -5,8 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver } from '../../browsers';
+import { durationToNumber } from '../../../common/schema_utils';
 import { LevelLogger, startTrace } from '../';
+import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import { LayoutInstance } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
@@ -40,8 +41,7 @@ export const waitForVisualizations = async (
   );
 
   try {
-    const timeoutRaw = captureConfig.timeouts.renderComplete;
-    const timeout = typeof timeoutRaw === 'number' ? timeoutRaw : timeoutRaw.asMilliseconds();
+    const timeout = durationToNumber(captureConfig.timeouts.renderComplete);
     await browser.waitFor(
       { fn: getCompletedItemsCount, args: [{ renderCompleteSelector }], toEqual, timeout },
       { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },

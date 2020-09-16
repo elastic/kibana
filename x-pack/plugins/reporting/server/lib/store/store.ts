@@ -5,6 +5,7 @@
  */
 
 import { ElasticsearchServiceSetup } from 'src/core/server';
+import { durationToNumber } from '../../../common/schema_utils';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
 import { BaseParams, BaseParamsEncryptedFields, ReportingUser } from '../../types';
@@ -47,9 +48,8 @@ export class ReportingStore {
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
 
-    const timeoutRaw = config.get('queue', 'timeout');
     this.jobSettings = {
-      timeout: typeof timeoutRaw === 'number' ? timeoutRaw : timeoutRaw.asMilliseconds(),
+      timeout: durationToNumber(config.get('queue', 'timeout')),
       browser_type: config.get('capture', 'browser', 'type'),
       max_attempts: config.get('capture', 'maxAttempts'),
       priority: 10, // unused

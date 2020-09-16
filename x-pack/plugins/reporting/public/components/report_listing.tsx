@@ -6,8 +6,8 @@
 
 import {
   EuiBasicTable,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -23,6 +23,7 @@ import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
+import { durationToNumber } from '../../common/schema_utils';
 import { JobStatuses } from '../../constants';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
@@ -185,10 +186,7 @@ class ReportListingUi extends Component<Props, State> {
     this.mounted = true;
     const { pollConfig, license$ } = this.props;
 
-    const pollFrequencyInMillis =
-      typeof pollConfig.jobsRefresh.interval === 'number'
-        ? pollConfig.jobsRefresh.interval
-        : pollConfig.jobsRefresh.interval.asMilliseconds();
+    const pollFrequencyInMillis = durationToNumber(pollConfig.jobsRefresh.interval);
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
