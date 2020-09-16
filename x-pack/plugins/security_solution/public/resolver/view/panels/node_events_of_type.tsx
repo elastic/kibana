@@ -4,19 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
+import { StyledPanel } from '../styles';
 import { formatDate, StyledBreadcrumbs, BoldCode, StyledTime } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { RelatedEventLimitWarning } from '../limit_warnings';
-import { useReplaceBreadcrumbParameters } from '../use_replace_breadcrumb_parameters';
+import { ResolverState } from '../../types';
+import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { useRelatedEventDetailNavigation } from '../use_related_event_detail_navigation';
+import { PanelLoading } from './panel_loading';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -56,13 +62,17 @@ const StyledRelatedLimitWarning = styled(RelatedEventLimitWarning)`
   }
 `;
 
-const DisplayList = memo(function DisplayList({
+const NodeCategoryEntries = memo(function ({
   crumbs,
   matchingEventEntries,
   eventType,
   processEntityId,
 }: {
-  crumbs: Array<{ text: string | JSX.Element; onClick: () => void }>;
+  crumbs: Array<{
+    text: string | JSX.Element | null;
+    onClick: (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => void;
+    href?: string;
+  }>;
   matchingEventEntries: MatchingEventEntry[];
   eventType: string;
   processEntityId: string;
@@ -125,36 +135,55 @@ const DisplayList = memo(function DisplayList({
   );
 });
 
-export const ProcessEventList = memo(function ProcessEventList({
+export function NodeEventsOfType({ nodeID, eventType }: { nodeID: string; eventType: string }) {
+  const processEvent = useSelector((state: ResolverState) =>
+    selectors.processEventForID(state)(nodeID)
+  );
+  const relatedEventsStats = useSelector((state: ResolverState) =>
+    selectors.relatedEventsStats(state)(nodeID)
+  );
+
+  return (
+    <StyledPanel>
+      <NodeEventList
+        processEvent={processEvent}
+        eventType={eventType}
+        relatedStats={relatedEventsStats}
+      />
+    </StyledPanel>
+  );
+}
+
+const NodeEventList = memo(function ({
   processEvent,
   eventType,
   relatedStats,
 }: {
-  processEvent: ResolverEvent;
+  processEvent: ResolverEvent | null;
   eventType: string;
-  relatedStats: ResolverNodeStats;
+  relatedStats: ResolverNodeStats | undefined;
 }) {
   const processName = processEvent && event.eventName(processEvent);
-  const processEntityId = event.entityId(processEvent);
-  const totalCount = Object.values(relatedStats.events.byCategory).reduce(
-    (sum, val) => sum + val,
-    0
+  const processEntityId = processEvent ? event.entityId(processEvent) : '';
+  const nodesHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({ panelView: 'nodes' })
   );
+
+  const nodesLinkNavProps = useNavigateOrReplace({
+    search: nodesHref,
+  });
+  const totalCount = relatedStats
+    ? Object.values(relatedStats.events.byCategory).reduce((sum, val) => sum + val, 0)
+    : 0;
   const eventsString = i18n.translate(
     'xpack.securitySolution.endpoint.resolver.panel.processEventListByType.events',
     {
       defaultMessage: 'Events',
     }
   );
-  const waitingString = i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.panel.processEventListByType.wait',
-    {
-      defaultMessage: 'Waiting For Events...',
-    }
-  );
 
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
-  const relatedsReady = relatedsReadyMap.get(processEntityId);
+  const relatedsReady = processEntityId && relatedsReadyMap.get(processEntityId);
 
   const dispatch = useResolverDispatch();
 
@@ -167,83 +196,80 @@ export const ProcessEventList = memo(function ProcessEventList({
     }
   }, [relatedsReady, dispatch, processEntityId]);
 
-  const pushToQueryParams = useReplaceBreadcrumbParameters();
-
-  const waitCrumbs = useMemo(() => {
-    return [
-      {
-        text: eventsString,
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
-      },
-    ];
-  }, [pushToQueryParams, eventsString]);
-
   const relatedByCategory = useSelector(selectors.relatedEventsByCategory);
+  const eventsForCurrentCategory = relatedByCategory(processEntityId)(eventType);
+  const relatedEventDetailNavigation = useRelatedEventDetailNavigation({
+    nodeID: processEntityId,
+    category: eventType,
+    events: eventsForCurrentCategory,
+  });
 
   /**
    * A list entry will be displayed for each of these
    */
   const matchingEventEntries: MatchingEventEntry[] = useMemo(() => {
-    const relateds = relatedByCategory(processEntityId)(eventType).map((resolverEvent) => {
+    return eventsForCurrentCategory.map((resolverEvent) => {
       const eventTime = event.eventTimestamp(resolverEvent);
       const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime);
       const entityId = event.eventId(resolverEvent);
-
       return {
         formattedDate,
         eventCategory: `${eventType}`,
         eventType: `${event.ecsEventType(resolverEvent)}`,
         name: event.descriptiveName(resolverEvent),
-        setQueryParams: () => {
-          pushToQueryParams({
-            crumbId: entityId === undefined ? '' : String(entityId),
-            crumbEvent: processEntityId,
-          });
-        },
+        setQueryParams: () => relatedEventDetailNavigation(entityId),
       };
     });
-    return relateds;
-  }, [relatedByCategory, eventType, processEntityId, pushToQueryParams]);
+  }, [eventType, eventsForCurrentCategory, relatedEventDetailNavigation]);
 
+  const nodeDetailHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeDetail',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+
+  const nodeDetailNavProps = useNavigateOrReplace({
+    search: nodeDetailHref,
+  });
+
+  const nodeEventsHref = useSelector((state: ResolverState) =>
+    selectors.relativeHref(state)({
+      panelView: 'nodeEvents',
+      panelParameters: { nodeID: processEntityId },
+    })
+  );
+
+  const nodeEventsNavProps = useNavigateOrReplace({
+    search: nodeEventsHref,
+  });
   const crumbs = useMemo(() => {
     return [
       {
         text: eventsString,
-        onClick: () => {
-          pushToQueryParams({ crumbId: '', crumbEvent: '' });
-        },
+        ...nodesLinkNavProps,
       },
       {
         text: processName,
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: '' });
-        },
+        ...nodeDetailNavProps,
       },
       {
         text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.numberOfEvents"
-              values={{ totalCount }}
-              defaultMessage="{totalCount} Events"
-            />
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.numberOfEvents"
+            values={{ totalCount }}
+            defaultMessage="{totalCount} Events"
+          />
         ),
-        onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: 'all' });
-        },
+        ...nodeEventsNavProps,
       },
       {
         text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.countByCategory"
-              values={{ count: matchingEventEntries.length, category: eventType }}
-              defaultMessage="{count} {category}"
-            />
-          </>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.countByCategory"
+            values={{ count: matchingEventEntries.length, category: eventType }}
+            defaultMessage="{count} {category}"
+          />
         ),
         onClick: () => {},
       },
@@ -252,29 +278,19 @@ export const ProcessEventList = memo(function ProcessEventList({
     eventType,
     eventsString,
     matchingEventEntries.length,
-    processEntityId,
     processName,
-    pushToQueryParams,
     totalCount,
+    nodeDetailNavProps,
+    nodesLinkNavProps,
+    nodeEventsNavProps,
   ]);
 
-  /**
-   * Wait here until the effect resolves...
-   */
   if (!relatedsReady) {
-    return (
-      <>
-        <StyledBreadcrumbs breadcrumbs={waitCrumbs} />
-        <EuiSpacer size="l" />
-        <EuiTitle>
-          <h4>{waitingString}</h4>
-        </EuiTitle>
-      </>
-    );
+    return <PanelLoading />;
   }
 
   return (
-    <DisplayList
+    <NodeCategoryEntries
       crumbs={crumbs}
       processEntityId={processEntityId}
       matchingEventEntries={matchingEventEntries}
@@ -282,4 +298,3 @@ export const ProcessEventList = memo(function ProcessEventList({
     />
   );
 });
-ProcessEventList.displayName = 'ProcessEventList';
