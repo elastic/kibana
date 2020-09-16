@@ -226,7 +226,7 @@ export const useTimelineEvents = ({
       return prevRequest;
     });
   }, [
-      indexNames,
+    indexNames,
     docValueFields,
     endDate,
     filterQuery,
