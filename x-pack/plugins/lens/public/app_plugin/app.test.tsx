@@ -30,21 +30,15 @@ import {
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
-import { Optional } from '@kbn/utility-types';
 import {
-  LensEmbeddableInput,
   LensByValueInput,
   LensSavedObjectAttributes,
   LensByReferenceInput,
 } from '../editor_frame_service/embeddable/embeddable';
 import { SavedObjectReference } from '../../../../../src/core/types';
-import {
-  AttributeService,
-  mockAttributeService,
-} from '../../../../../src/plugins/dashboard/public';
-import { getLensAttributeService, LensAttributeService } from '../lens_attribute_service';
+import { mockAttributeService } from '../../../../../src/plugins/dashboard/public/mocks';
+import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { nextTick } from 'test_utils/enzyme_helpers';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');

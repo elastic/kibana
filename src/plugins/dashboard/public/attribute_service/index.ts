@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { mockAttributeService } from './attribute_service_mock';
+export { mockAttributeService } from './attribute_service.mock';
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute_service';
