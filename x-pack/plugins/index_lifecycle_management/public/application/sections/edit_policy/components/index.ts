@@ -21,3 +21,4 @@ export {
   DefaultAllocationWarning,
 } from './data_tier_allocation';
 export { DescribedFormField } from './described_form_field';
+export { Forcemerge } from './forcemerge';

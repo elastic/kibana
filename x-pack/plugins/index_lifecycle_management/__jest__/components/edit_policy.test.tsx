@@ -288,6 +288,40 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
+    test('should show forcemerge input when rollover enabled', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      expect(findTestSubject(rendered, 'hot-forceMergeSwitch').exists()).toBeTruthy();
+    });
+    test('should hide forcemerge input when rollover is disabled', () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      noRollover(rendered);
+      rendered.update();
+      expect(findTestSubject(rendered, 'hot-forceMergeSwitch').exists()).toBeFalsy();
+    });
+    test('should show positive number required above zero error when trying to save hot phase with 0 for force merge', async () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
+      rendered.update();
+      const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
+      forcemergeInput.simulate('change', { target: { value: '0' } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
+    test('should show positive number above 0 required error when trying to save hot phase with -1 for force merge', async () => {
+      const rendered = mountWithIntl(component);
+      setPolicyName(rendered, 'mypolicy');
+      findTestSubject(rendered, 'hot-forceMergeSwitch').simulate('click');
+      rendered.update();
+      const forcemergeInput = findTestSubject(rendered, 'hot-selectedForceMergeSegments');
+      forcemergeInput.simulate('change', { target: { value: '-1' } });
+      rendered.update();
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+    });
     test('should show positive number required error when trying to save with -1 for index priority', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
@@ -377,10 +411,10 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '1');
-      findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
+      findTestSubject(rendered, 'warm-forceMergeSwitch').simulate('click');
       rendered.update();
-      const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
-      shrinkInput.simulate('change', { target: { value: '0' } });
+      const forcemergeInput = findTestSubject(rendered, 'warm-selectedForceMergeSegments');
+      forcemergeInput.simulate('change', { target: { value: '0' } });
       rendered.update();
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
@@ -391,10 +425,10 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '1');
-      findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
+      findTestSubject(rendered, 'warm-forceMergeSwitch').simulate('click');
       rendered.update();
-      const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
-      shrinkInput.simulate('change', { target: { value: '-1' } });
+      const forcemergeInput = findTestSubject(rendered, 'warm-selectedForceMergeSegments');
+      forcemergeInput.simulate('change', { target: { value: '-1' } });
       rendered.update();
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);

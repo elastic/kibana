@@ -29,15 +29,13 @@ import {
   SetPriorityInput,
   MinAgeInput,
   DescribedFormField,
+  Forcemerge,
 } from '../components';
 import { DataTierAllocationField } from './shared';
 
 const i18nTexts = {
   shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
     defaultMessage: 'Shrink index',
-  }),
-  forcemergeLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel', {
-    defaultMessage: 'Force merge data',
   }),
   moveToWarmPhaseOnRolloverLabel: i18n.translate(
     'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
@@ -309,64 +307,13 @@ export const WarmPhase: FunctionComponent<Props> = ({
                 </div>
               </Fragment>
             </EuiDescribedFormGroup>
-            <EuiDescribedFormGroup
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataText"
-                    defaultMessage="Force merge"
-                  />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataExplanationText"
-                    defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
-                  />{' '}
-                  <LearnMoreLink docPath="indices-forcemerge.html" />
-                </EuiTextColor>
-              }
-              titleSize="xs"
-              fullWidth
-            >
-              <EuiSwitch
-                data-test-subj="forceMergeSwitch"
-                label={i18nTexts.forcemergeLabel}
-                aria-label={i18nTexts.forcemergeLabel}
-                checked={phaseData.forceMergeEnabled}
-                onChange={(e) => {
-                  setPhaseData(phaseProperty('forceMergeEnabled'), e.target.checked);
-                }}
-                aria-controls="forcemergeContent"
-              />
-
-              <EuiSpacer />
-              <div id="forcemergeContent" aria-live="polite" role="region">
-                {phaseData.forceMergeEnabled ? (
-                  <ErrableFormRow
-                    id={`${warmProperty}-${phaseProperty('selectedForceMergeSegments')}`}
-                    label={i18n.translate(
-                      'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
-                      {
-                        defaultMessage: 'Number of segments',
-                      }
-                    )}
-                    isShowingErrors={isShowingErrors}
-                    errors={errors?.selectedForceMergeSegments}
-                  >
-                    <EuiFieldNumber
-                      id={`${warmProperty}-${phaseProperty('selectedForceMergeSegments')}`}
-                      value={phaseData.selectedForceMergeSegments}
-                      onChange={(e) => {
-                        setPhaseData(phaseProperty('selectedForceMergeSegments'), e.target.value);
-                      }}
-                      min={1}
-                    />
-                  </ErrableFormRow>
-                ) : null}
-              </div>
-            </EuiDescribedFormGroup>
+            <Forcemerge
+              phase={'warm'}
+              phaseData={phaseData}
+              setPhaseData={setPhaseData}
+              isShowingErrors={isShowingErrors}
+              errors={errors}
+            />
             <SetPriorityInput<WarmPhaseInterface>
               errors={errors}
               phaseData={phaseData}
