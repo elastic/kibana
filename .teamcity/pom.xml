@@ -41,7 +41,7 @@
     </repository>
     <repository>
       <id>teamcity-server</id>
-      <url>https://teamcity.kibana.dev/app/dsl-plugins-repository</url>
+      <url>https://ci.elastic.dev/app/dsl-plugins-repository</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
