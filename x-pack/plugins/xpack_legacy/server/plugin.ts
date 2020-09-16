@@ -62,7 +62,7 @@ export class XpackLegacyPlugin implements Plugin {
         type: 'string',
         value: null,
         schema: schema.maybe(schema.nullable(schema.string())),
-      }
+      },
     });
   }
 
