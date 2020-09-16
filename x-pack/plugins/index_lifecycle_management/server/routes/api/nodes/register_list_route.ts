@@ -6,7 +6,7 @@
 
 import { LegacyAPICaller } from 'src/core/server';
 
-import { ListNodesRouteResponse, NodeRole } from '../../../../common/types';
+import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -36,10 +36,10 @@ function convertStatsIntoList(
         }
       }
 
-      const dataRoles = nodeStats.roles.filter((r) => r.startsWith('data')) as NodeRole[];
+      const dataRoles = nodeStats.roles.filter((r) => r.startsWith('data')) as NodeDataRole[];
       for (const role of dataRoles) {
-        accum.nodesByRoles[role as NodeRole] = accum.nodesByRoles[role] ?? [];
-        accum.nodesByRoles[role as NodeRole]!.push(nodeId);
+        accum.nodesByRoles[role as NodeDataRole] = accum.nodesByRoles[role] ?? [];
+        accum.nodesByRoles[role as NodeDataRole]!.push(nodeId);
       }
       return accum;
     },

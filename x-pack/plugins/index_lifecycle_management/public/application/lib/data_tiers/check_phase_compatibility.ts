@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NodeRole, ListNodesRouteResponse, PhaseWithAllocation } from '../../../../common/types';
+import {
+  NodeDataRole,
+  ListNodesRouteResponse,
+  PhaseWithAllocation,
+} from '../../../../common/types';
 
 /**
  * Given a phase and current node roles, determine whether the phase
@@ -23,7 +27,7 @@ export const isPhaseDefaultDataAllocationCompatible = (
   }
 
   // Otherwise we need to check whether a node role for the specific phase exists
-  if (nodesByRoles[`data_${phase}` as NodeRole]?.length) {
+  if (nodesByRoles[`data_${phase}` as NodeDataRole]?.length) {
     return true;
   }
 

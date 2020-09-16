@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type NodeRole = 'data' | 'data_hot' | 'data_warm' | 'data_cold' | 'data_frozen';
+export type NodeDataRole = 'data' | 'data_hot' | 'data_warm' | 'data_cold' | 'data_frozen';
 
 export interface ListNodesRouteResponse {
   nodesByAttributes: { [attributePair: string]: string[] };
-  nodesByRoles: { [role in NodeRole]?: string[] };
+  nodesByRoles: { [role in NodeDataRole]?: string[] };
 }
