@@ -56,6 +56,7 @@ export function getQueryParameterActions(filterManager, indexPatterns) {
     filterManager.addFilters(newFilters);
     if (indexPatterns) {
       const indexPattern = await indexPatterns.get(indexPatternId);
+      throw new Error('test error - actions');
       indexPattern.popularizeField(field.name, 1);
     }
   };
