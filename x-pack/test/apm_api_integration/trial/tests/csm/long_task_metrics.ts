@@ -12,15 +12,19 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('RUM Services', () => {
+  describe('CSM long task metrics', () => {
     describe('when there is no data', () => {
       it('returns empty list', async () => {
         const response = await supertest.get(
-          '/api/apm/rum-client/services?start=2020-06-28T10%3A24%3A46.055Z&end=2020-07-29T10%3A24%3A46.055Z&uiFilters=%7B%22agentName%22%3A%5B%22js-base%22%2C%22rum-js%22%5D%7D'
+          '/api/apm/rum-client/long-task-metrics?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-14T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22elastic-co-rum-test%22%5D%7D'
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql([]);
+        expect(response.body).to.eql({
+          longestLongTask: 0,
+          noOfLongTasks: 0,
+          sumOfLongTasks: 0,
+        });
       });
     });
 
@@ -34,18 +38,19 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
         await esArchiver.unload('rum_8.0.0');
       });
 
-      it('returns rum services list', async () => {
+      it('returns web core vitals values', async () => {
         const response = await supertest.get(
-          '/api/apm/rum-client/services?start=2020-06-28T10%3A24%3A46.055Z&end=2020-07-29T10%3A24%3A46.055Z&uiFilters=%7B%22agentName%22%3A%5B%22js-base%22%2C%22rum-js%22%5D%7D'
+          '/api/apm/rum-client/long-task-metrics?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22kibana-frontend-8_0_0%22%5D%7D'
         );
 
         expect(response.status).to.be(200);
 
         expectSnapshot(response.body).toMatchInline(`
-          Array [
-            "client",
-            "opbean-client-rum",
-          ]
+          Object {
+            "longestLongTask": 109000,
+            "noOfLongTasks": 2,
+            "sumOfLongTasks": 168000,
+          }
         `);
       });
     });

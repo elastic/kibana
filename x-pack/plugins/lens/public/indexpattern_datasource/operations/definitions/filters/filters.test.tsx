@@ -231,7 +231,7 @@ describe('filters', () => {
         expect(
           instance
             .find('[data-test-subj="indexPattern-filters-existingFilterContainer"]')
-            .at(2)
+            .at(3)
             .text()
         ).toEqual('src : 2');
       });
@@ -250,7 +250,7 @@ describe('filters', () => {
         );
 
         instance
-          .find('[data-test-subj="indexPattern-filters-existingFilterDelete"]')
+          .find('[data-test-subj="lns-customBucketContainer-remove"]')
           .at(2)
           .simulate('click');
         expect(setStateSpy).toHaveBeenCalledWith({
