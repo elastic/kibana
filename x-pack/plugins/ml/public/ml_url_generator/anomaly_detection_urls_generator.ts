@@ -143,7 +143,16 @@ export function createSingleMetricViewerUrl(
   if (!params) {
     return url;
   }
-  const { timeRange, jobIds, refreshInterval, zoom, query, detectorIndex, entities } = params;
+  const {
+    timeRange,
+    jobIds,
+    refreshInterval,
+    zoom,
+    query,
+    detectorIndex,
+    forecastId,
+    entities,
+  } = params;
 
   const queryState: TimeSeriesExplorerGlobalState = {
     ml: {
@@ -155,6 +164,10 @@ export function createSingleMetricViewerUrl(
 
   const appState: Partial<TimeSeriesExplorerAppState> = {};
   const mlTimeSeriesExplorer: Partial<TimeSeriesExplorerAppState['mlTimeSeriesExplorer']> = {};
+
+  if (forecastId !== undefined) {
+    mlTimeSeriesExplorer.forecastId = forecastId;
+  }
 
   if (detectorIndex !== undefined) {
     mlTimeSeriesExplorer.detectorIndex = detectorIndex;

@@ -128,6 +128,7 @@ export interface TimeSeriesExplorerAppState {
     to?: string;
   };
   mlTimeSeriesExplorer?: {
+    forecastId?: string;
     detectorIndex?: number;
     entities?: Record<string, string>;
   };
@@ -141,6 +142,8 @@ export interface TimeSeriesExplorerPageState
   timeRange?: TimeRange;
   detectorIndex?: number;
   entities?: Record<string, string>;
+  forecastId?: string;
+
   globalState?: MlCommonGlobalState;
 }
 
