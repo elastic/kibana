@@ -131,7 +131,6 @@ export class IndexPatternsService {
     }
   };
 
-  // rename
   getCache = async () => {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
@@ -331,7 +330,7 @@ export class IndexPatternsService {
       }
     });
 
-    const indexPattern = await this.specToIndexPattern(spec);
+    const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);
     if (isSaveRequired) {
       try {
