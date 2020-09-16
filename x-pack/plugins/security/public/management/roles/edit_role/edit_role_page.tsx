@@ -552,7 +552,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     } catch (error) {
       notifications.toasts.addDanger(
         error?.data?.message ??
-          i18n.translate('xpack.security.management.editRole.errorSavingRoleError', {
+          i18n.translate('xpack.security.management.editRole.errorDeletingRoleError', {
             defaultMessage: 'Error deleting role',
           })
       );
