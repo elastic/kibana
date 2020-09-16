@@ -68,8 +68,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Array [
               "opbeans-python",
               "opbeans-node",
-              "opbeans-ruby",
               "opbeans-go",
+              "opbeans-ruby",
               "opbeans-dotnet",
               "opbeans-java",
               "opbeans-rum",
@@ -91,76 +91,76 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Array [
               Object {
                 "avgResponseTime": Object {
-                  "value": 208079.9121184089,
+                  "value": 213583.7652495379,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.041666666666666664,
+                  "value": 0,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 18.016666666666666,
+                  "value": 18.033333333333335,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 578297.1431623931,
+                  "value": 600255.7079646018,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.03317535545023697,
+                  "value": 0,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 7.8,
+                  "value": 7.533333333333333,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 60518.587926509186,
+                  "value": 1818501.060810811,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.013123359580052493,
+                  "value": 0.02027027027027027,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 6.35,
+                  "value": 4.933333333333334,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 25259.78717201166,
+                  "value": 290900.5714285714,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.014577259475218658,
+                  "value": 0.013605442176870748,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 5.716666666666667,
+                  "value": 4.9,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 527290.3218390804,
+                  "value": 1123903.7027027027,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.01532567049808429,
+                  "value": 0.009009009009009009,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 4.35,
+                  "value": 3.7,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 530245.8571428572,
+                  "value": 80364.62962962964,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.15384615384615385,
+                  "value": 0.18518518518518517,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 3.033333333333333,
+                  "value": 3.6,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 896134.328358209,
+                  "value": 1365102.9411764706,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 2.2333333333333334,
+                  "value": 2.2666666666666666,
                 },
               },
             ]
@@ -178,10 +178,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "testing",
               ],
               Array [
-                "production",
+                "testing",
               ],
               Array [
-                "testing",
+                "production",
               ],
               Array [
                 "production",
