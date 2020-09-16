@@ -32,6 +32,7 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
       >
         <div
           data-euiicon-type="arrowDown"
+          data-test-subj="monitoringCellIcon-testCell2"
           tabindex="0"
           title="More information about this metric"
         />
@@ -65,6 +66,7 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
       >
         <div
           data-euiicon-type="arrowDown"
+          data-test-subj="monitoringCellIcon-testCell"
           tabindex="0"
           title="More information about this metric"
         />

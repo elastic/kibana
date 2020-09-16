@@ -52,7 +52,6 @@ const metricVal = (metric, format, isPercent, units) => {
 
 function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const onButtonClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
@@ -95,7 +94,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     );
 
     return (
-      <EuiFlexGroup gutterSize="none" {...props}>
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiText>{metricVal(lastVal, format, isPercent)}</EuiText>
         </EuiFlexItem>

@@ -30,7 +30,7 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <h2>
               <FormattedMessage
-                defaultMessage="Active Beats in Last Day"
+                defaultMessage="Active Beats in last day"
                 id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
                 values={Object {}}
               />
@@ -72,7 +72,7 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <h2>
               <FormattedMessage
-                defaultMessage="Top 5 Beat Types in Last Day"
+                defaultMessage="Top 5 Beat Types in last day"
                 id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
                 values={Object {}}
               />
@@ -106,7 +106,7 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <h2>
               <FormattedMessage
-                defaultMessage="Top 5 Versions in Last Day"
+                defaultMessage="Top 5 Versions in last day"
                 id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
                 values={Object {}}
               />

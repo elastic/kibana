@@ -34,7 +34,7 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
             <h2>
               <FormattedMessage
                 id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
-                defaultMessage="Active Beats in Last Day"
+                defaultMessage="Active Beats in last day"
               />
             </h2>
           </EuiTitle>
@@ -46,7 +46,7 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
             <h2>
               <FormattedMessage
                 id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
-                defaultMessage="Top 5 Beat Types in Last Day"
+                defaultMessage="Top 5 Beat Types in last day"
               />
             </h2>
           </EuiTitle>
@@ -58,7 +58,7 @@ function renderLatestActive(latestActive, latestTypes, latestVersions) {
             <h2>
               <FormattedMessage
                 id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
-                defaultMessage="Top 5 Versions in Last Day"
+                defaultMessage="Top 5 Versions in last day"
               />
             </h2>
           </EuiTitle>
