@@ -42,6 +42,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
             nodeName,
           },
         }),
+        telemetryPageViewTitle: 'elasticsearch_node',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchNodeApp',

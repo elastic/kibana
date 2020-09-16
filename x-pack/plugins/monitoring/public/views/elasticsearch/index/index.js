@@ -66,6 +66,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
             indexName,
           },
         }),
+        telemetryPageViewTitle: 'elasticsearch_index',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchIndexApp',

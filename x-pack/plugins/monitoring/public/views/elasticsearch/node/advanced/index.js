@@ -60,6 +60,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchAdvancedNodeApp',
+        telemetryPageViewTitle: 'elasticsearch_node_advanced',
         $scope,
         $injector,
         alerts: {
