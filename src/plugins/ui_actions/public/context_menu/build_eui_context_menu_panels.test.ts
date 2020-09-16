@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { buildContextMenuForActions } from './build_eui_context_menu_panels';
 import { Action, createAction } from '../actions';
 
@@ -25,9 +26,9 @@ const createTestAction = ({
   dispayName,
   order,
 }: {
-  type: string;
+  type?: string;
   dispayName: string;
-  order: number;
+  order?: number;
 }) =>
   createAction({
     type: type as any, // mapping doesn't matter for this test
@@ -35,6 +36,10 @@ const createTestAction = ({
     order,
     execute: async () => {},
   });
+
+const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({
+  items: panel.items ? panel.items.map((item) => ({ name: item.name })) : [],
+});
 
 test('sorts items in DESC order by "order" field first, then by display name', async () => {
   const actions: Action[] = [
@@ -69,11 +74,7 @@ test('sorts items in DESC order by "order" field first, then by display name', a
     actions: actions.map((action) => ({ action, context: {}, trigger: '' as any })),
   });
 
-  expect(
-    result.map((panel) => ({
-      items: panel.items ? panel.items.map((item) => ({ name: item.name })) : [],
-    }))
-  ).toMatchInlineSnapshot(`
+  expect(result.map(resultMapper)).toMatchInlineSnapshot(`
     Array [
       Object {
         "items": Array [
@@ -111,12 +112,10 @@ test('builds empty menu when no actions provided', async () => {
     closeMenu: () => {},
   });
 
-  expect(menu).toMatchInlineSnapshot(`
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
     Array [
       Object {
-        "id": "mainMenu",
         "items": Array [],
-        "title": "Options",
       },
     ]
   `);
@@ -126,14 +125,9 @@ test('can build menu with one action', async () => {
   const menu = await buildContextMenuForActions({
     actions: [
       {
-        action: {
-          id: 'foo',
-          type: 'foo' as any,
-          getDisplayName: () => 'Foo',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
+        action: createTestAction({
+          dispayName: 'Foo',
+        }),
         context: {},
         trigger: 'TETS_TRIGGER' as any,
       },
@@ -141,92 +135,49 @@ test('can build menu with one action', async () => {
     closeMenu: () => {},
   });
 
-  expect(menu).toMatchInlineSnapshot(`
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
     Array [
       Object {
-        "id": "mainMenu",
         "items": Array [
           Object {
-            "data-test-subj": "embeddablePanelAction-foo",
-            "href": undefined,
-            "icon": "empty",
             "name": "Foo",
-            "onClick": [Function],
-            "panel": undefined,
           },
         ],
-        "title": "Options",
       },
     ]
   `);
 });
 
 test('orders items according to "order" field', async () => {
+  const actions = [
+    createTestAction({
+      order: 1,
+      dispayName: 'Foo',
+    }),
+    createTestAction({
+      order: 2,
+      dispayName: 'Bar',
+    }),
+  ];
   const menu = await buildContextMenuForActions({
-    actions: [
-      {
-        action: {
-          id: 'foo',
-          type: 'foo' as any,
-          order: 1,
-          getDisplayName: () => 'Foo',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-      {
-        action: {
-          id: 'bar',
-          type: 'bar' as any,
-          order: 2,
-          getDisplayName: () => 'Bar',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-    ],
-    closeMenu: () => {},
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
   });
 
   expect(menu[0].items![0].name).toBe('Bar');
   expect(menu[0].items![1].name).toBe('Foo');
 
+  const actions2 = [
+    createTestAction({
+      order: 2,
+      dispayName: 'Bar',
+    }),
+    createTestAction({
+      order: 1,
+      dispayName: 'Foo',
+    }),
+  ];
   const menu2 = await buildContextMenuForActions({
-    actions: [
-      {
-        action: {
-          id: 'bar',
-          type: 'bar' as any,
-          order: 2,
-          getDisplayName: () => 'Bar',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-      {
-        action: {
-          id: 'foo',
-          type: 'foo' as any,
-          order: 1,
-          getDisplayName: () => 'Foo',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-    ],
-    closeMenu: () => {},
+    actions: actions2.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
   });
 
   expect(menu2[0].items![0].name).toBe('Bar');
@@ -234,136 +185,54 @@ test('orders items according to "order" field', async () => {
 });
 
 test('hides items behind in "More" submenu if there are more than 4 actions', async () => {
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 1',
+    }),
+    createTestAction({
+      dispayName: 'Foo 2',
+    }),
+    createTestAction({
+      dispayName: 'Foo 3',
+    }),
+    createTestAction({
+      dispayName: 'Foo 4',
+    }),
+    createTestAction({
+      dispayName: 'Foo 5',
+    }),
+  ];
   const menu = await buildContextMenuForActions({
-    actions: [
-      {
-        action: {
-          id: 'foo1',
-          type: 'foo' as any,
-          order: 1,
-          getDisplayName: () => 'Foo 1',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-      {
-        action: {
-          id: 'foo2',
-          type: 'foo' as any,
-          order: 1,
-          getDisplayName: () => 'Foo 2',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-      {
-        action: {
-          id: 'foo3',
-          type: 'foo' as any,
-          order: 1,
-          getDisplayName: () => 'Foo 3',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-      {
-        action: {
-          id: 'foo4',
-          type: 'foo' as any,
-          order: 1,
-          getDisplayName: () => 'Foo 4',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-      {
-        action: {
-          id: 'foo5',
-          type: 'foo' as any,
-          order: 1,
-          getDisplayName: () => 'Foo 5',
-          getIconType: () => 'empty',
-          isCompatible: async () => true,
-          execute: async () => {},
-        },
-        context: {},
-        trigger: 'TETS_TRIGGER' as any,
-      },
-    ],
-    closeMenu: () => {},
+    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
   });
 
-  expect(menu).toMatchInlineSnapshot(`
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
     Array [
       Object {
-        "id": "mainMenu",
         "items": Array [
           Object {
-            "data-test-subj": "embeddablePanelAction-foo1",
-            "href": undefined,
-            "icon": "empty",
             "name": "Foo 1",
-            "onClick": [Function],
-            "panel": undefined,
           },
           Object {
-            "data-test-subj": "embeddablePanelAction-foo2",
-            "href": undefined,
-            "icon": "empty",
             "name": "Foo 2",
-            "onClick": [Function],
-            "panel": undefined,
           },
           Object {
-            "data-test-subj": "embeddablePanelAction-foo3",
-            "href": undefined,
-            "icon": "empty",
             "name": "Foo 3",
-            "onClick": [Function],
-            "panel": undefined,
           },
           Object {
-            "data-test-subj": "embeddablePanelMore-mainMenu",
-            "icon": "boxesHorizontal",
             "name": "More",
-            "panel": "mainMenu__more",
           },
         ],
-        "title": "Options",
       },
       Object {
-        "id": "mainMenu__more",
         "items": Array [
           Object {
-            "data-test-subj": "embeddablePanelAction-foo4",
-            "href": undefined,
-            "icon": "empty",
             "name": "Foo 4",
-            "onClick": [Function],
-            "panel": undefined,
           },
           Object {
-            "data-test-subj": "embeddablePanelAction-foo5",
-            "href": undefined,
-            "icon": "empty",
             "name": "Foo 5",
-            "onClick": [Function],
-            "panel": undefined,
           },
         ],
-        "title": "Options",
       },
     ]
   `);
