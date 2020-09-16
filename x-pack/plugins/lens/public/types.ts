@@ -419,6 +419,7 @@ export interface VisualizationType {
   id: string;
   icon: IconType;
   label: string;
+  sectionLabel: string;
 }
 
 export interface Visualization<T = unknown> {
