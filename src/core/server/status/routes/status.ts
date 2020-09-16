@@ -108,7 +108,7 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
   // the plugins status when Kibana starts up so this endpoint responds quickly on first boot.
   const combinedStatus$ = new ReplaySubject<
     [ServiceStatus<unknown>, CoreStatus, Record<string, ServiceStatus<unknown>>]
-  >();
+  >(1);
   combineLatest([status.overall$, status.core$, status.plugins$]).subscribe(combinedStatus$);
 
   router.get(
