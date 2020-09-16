@@ -49,14 +49,15 @@ object VerifyProject : Project({
 //  }
 
   val cloneForVerify = { build: BuildType ->
-    build.copy {
-      id("ES_Verify_" + build.id?.toString())
-      params {
-        val buildId = esBuild.id?.value ?: ""
-        param("env.ES_SNAPSHOT_MANIFEST", "%dep.$buildId.env.ES_SNAPSHOT_MANIFEST%")
-      }
-      dependsOn(esBuild)
+    val newBuild = BuildType()
+    build.copyTo(newBuild)
+    newBuild.id("ES_Verify_" + build.id?.toString())
+    newBuild.params {
+      val buildId = esBuild.id?.value ?: ""
+      param("env.ES_SNAPSHOT_MANIFEST", "%dep.$buildId.env.ES_SNAPSHOT_MANIFEST%")
     }
+    newBuild.dependsOn(esBuild)
+    newBuild
   }
 
   val defaultCiGroupsCloned = defaultCiGroups.map { cloneForVerify(it) }
