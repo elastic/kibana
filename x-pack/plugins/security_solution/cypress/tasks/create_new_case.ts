@@ -29,6 +29,18 @@ export const createNewCase = (newCase: TestCase) => {
   });
   cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `, { force: true });
 
+  cy.get(SUBMIT_BTN).click({ force: true });
+  cy.get(LOADING_SPINNER).should('exist');
+  cy.get(LOADING_SPINNER).should('not.exist');
+};
+
+export const createNewCaseWithTimeline = (newCase: TestCase) => {
+  cy.get(TITLE_INPUT).type(newCase.name, { force: true });
+  newCase.tags.forEach((tag) => {
+    cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
+  });
+  cy.get(DESCRIPTION_INPUT).type(`${newCase.description} `, { force: true });
+
   cy.get(INSERT_TIMELINE_BTN).click({ force: true });
   cy.get(TIMELINE_SEARCHBOX).type(`${newCase.timeline.title}{enter}`);
   cy.get(TIMELINE).should('be.visible');
