@@ -21,12 +21,12 @@ interface GroupIdLink {
   children: string;
 }
 
-type ADJobIdLinkProps = JobIdLink | GroupIdLink;
+type AnomalyDetectionJobIdLinkProps = JobIdLink | GroupIdLink;
 
 function isGroupIdLink(props: JobIdLink | GroupIdLink): props is GroupIdLink {
   return (props as GroupIdLink).groupId !== undefined;
 }
-export const ADJobIdLink = (props: ADJobIdLinkProps) => {
+export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps) => {
   const mlUrlGenerator = useMlUrlGenerator();
   const {
     services: {

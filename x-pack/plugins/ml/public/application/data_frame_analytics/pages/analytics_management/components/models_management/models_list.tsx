@@ -37,6 +37,7 @@ import {
   TrainedModelStat,
 } from '../../../../../../../common/types/inference';
 import {
+  getAnalysisType,
   REFRESH_ANALYTICS_LIST_STATE,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
@@ -286,9 +287,9 @@ export const ModelsList: FC = () => {
           page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
           pageState: {
             jobId: item.metadata?.analytics_config.id as string,
-            analysisType: Object.keys(
-              item.metadata?.analytics_config.analysis
-            )[0] as DataFrameAnalysisConfigType,
+            analysisType: getAnalysisType(
+              item.metadata?.analytics_config
+            ) as DataFrameAnalysisConfigType,
           },
         });
 

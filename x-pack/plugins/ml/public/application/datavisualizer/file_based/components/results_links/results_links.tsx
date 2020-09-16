@@ -62,7 +62,7 @@ export const ResultsLinks: FC<Props> = ({
   } = useMlKibana();
 
   useEffect(() => {
-    let unamounted = false;
+    let unmounted = false;
 
     const getDiscoverUrl = async (): Promise<void> => {
       const state: DiscoverUrlGeneratorState = {
@@ -72,7 +72,7 @@ export const ResultsLinks: FC<Props> = ({
       if (globalState?.time) {
         state.timeRange = globalState.time;
       }
-      if (!unamounted) {
+      if (!unmounted) {
         const discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
         const discoverUrl = await discoverUrlGenerator.createUrl(state);
         setDiscoverLink(discoverUrl);
@@ -81,7 +81,7 @@ export const ResultsLinks: FC<Props> = ({
     getDiscoverUrl();
 
     return () => {
-      unamounted = true;
+      unmounted = true;
     };
   }, [indexPatternId, getUrlGenerator]);
 

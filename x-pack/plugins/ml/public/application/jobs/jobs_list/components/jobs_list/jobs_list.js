@@ -19,7 +19,7 @@ import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ADJobIdLink } from './job_id_link';
+import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -71,7 +71,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <ADJobIdLink key={id} id={id} />;
+    return <AnomalyDetectionJobIdLink key={id} id={id} />;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {

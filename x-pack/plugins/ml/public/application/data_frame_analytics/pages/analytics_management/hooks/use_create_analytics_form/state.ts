@@ -8,7 +8,7 @@ import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/com
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
-import { defaultSearchQuery } from '../../../../common/analytics';
+import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 import {
   DataFrameAnalyticsConfig,
@@ -291,7 +291,7 @@ export function getFormStateFromJobConfig(
   analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
   isClone: boolean = true
 ): Partial<State['form']> {
-  const jobType = Object.keys(analyticsJobConfig.analysis)[0] as DataFrameAnalysisConfigType;
+  const jobType = getAnalysisType(analyticsJobConfig.analysis) as DataFrameAnalysisConfigType;
 
   const resultState: Partial<State['form']> = {
     jobType,

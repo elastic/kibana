@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { JobGroup } from '../job_group';
-import { ADJobIdLink } from './job_id_link';
+import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 export function JobDescription({ job, isManagementTable }) {
   return (
@@ -17,7 +17,7 @@ export function JobDescription({ job, isManagementTable }) {
         {job.description} &nbsp;
         {job.groups.map((group) => {
           if (isManagementTable === true) {
-            return <ADJobIdLink key={group} groupId={group} />;
+            return <AnomalyDetectionJobIdLink key={group} groupId={group} />;
           }
           return <JobGroup key={group} name={group} />;
         })}
