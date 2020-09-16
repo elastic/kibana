@@ -10,9 +10,14 @@ import { EuiSwitch, EuiFormRow, EuiSpacer } from '@elastic/eui';
 interface Props {
   startDatafeed: boolean;
   setStartDatafeed(start: boolean): void;
+  disabled?: boolean;
 }
 
-export const StartDatafeedSwitch: FC<Props> = ({ startDatafeed, setStartDatafeed }) => {
+export const StartDatafeedSwitch: FC<Props> = ({
+  startDatafeed,
+  setStartDatafeed,
+  disabled = false,
+}) => {
   return (
     <>
       <EuiSpacer />
@@ -31,6 +36,7 @@ export const StartDatafeedSwitch: FC<Props> = ({ startDatafeed, setStartDatafeed
           })}
           checked={startDatafeed}
           onChange={(e) => setStartDatafeed(e.target.checked)}
+          disabled={disabled}
         />
       </EuiFormRow>
     </>

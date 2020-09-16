@@ -61,6 +61,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }, []);
 
   async function start() {
+    setCreatingJob(true);
     if (isAdvanced) {
       await createAdvancedJob();
     } else if (startDatafeed === true) {
@@ -71,7 +72,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   async function createAndStartJob() {
-    setCreatingJob(true);
     try {
       const jr = await jobCreator.createAndStartJob();
       setJobRunner(jr);
@@ -81,7 +81,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   async function createAdvancedJob(showStartModal: boolean = true) {
-    setCreatingJob(true);
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
@@ -139,6 +138,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
             <StartDatafeedSwitch
               startDatafeed={startDatafeed}
               setStartDatafeed={setStartDatafeed}
+              disabled={creatingJob}
             />
           )}
 
