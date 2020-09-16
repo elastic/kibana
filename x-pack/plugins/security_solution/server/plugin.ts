@@ -171,7 +171,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
 
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
       name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
         defaultMessage: 'Security',

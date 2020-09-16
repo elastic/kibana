@@ -11,24 +11,14 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { EuiTheme } from '../../../../../observability/public';
 import { defaultIcon, iconForNode } from './icons';
-import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
-import { severity, getSeverity } from './Popover/getSeverity';
+import {
+  getSeverity,
+  getSeverityColor,
+  ServiceAnomalyStats,
+  Severity,
+} from '../../../../common/anomaly_detection';
 
 export const popoverWidth = 280;
-
-export function getSeverityColor(theme: EuiTheme, nodeSeverity?: string) {
-  switch (nodeSeverity) {
-    case severity.warning:
-      return theme.eui.euiColorVis0;
-    case severity.minor:
-    case severity.major:
-      return theme.eui.euiColorVis5;
-    case severity.critical:
-      return theme.eui.euiColorVis9;
-    default:
-      return;
-  }
-}
 
 function getNodeSeverity(el: cytoscape.NodeSingular) {
   const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(
@@ -60,7 +50,7 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
   cytoscape.Css.LineStyle
 > = (el: cytoscape.NodeSingular) => {
   const nodeSeverity = getNodeSeverity(el);
-  if (nodeSeverity === severity.critical) {
+  if (nodeSeverity === Severity.critical) {
     return 'double';
   } else {
     return 'solid';
@@ -70,9 +60,9 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
 function getBorderWidth(el: cytoscape.NodeSingular) {
   const nodeSeverity = getNodeSeverity(el);
 
-  if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
+  if (nodeSeverity === Severity.minor || nodeSeverity === Severity.major) {
     return 4;
-  } else if (nodeSeverity === severity.critical) {
+  } else if (nodeSeverity === Severity.critical) {
     return 8;
   } else {
     return 4;

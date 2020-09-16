@@ -7,6 +7,8 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, CreateOptions, ConstructorOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../src/core/server/mocks';
+import { nodeTypes } from '../../../../src/plugins/data/common';
+import { esKuery } from '../../../../src/plugins/data/server';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { alertsAuthorizationMock } from './authorization/alerts_authorization.mock';
@@ -31,6 +33,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 
+const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
@@ -46,6 +49,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
+  kibanaVersion,
 };
 
 beforeEach(() => {
@@ -372,6 +376,9 @@ describe('create()', () => {
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
         "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -424,10 +431,10 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "scheduledTaskId": "task-123",
-                                                                                                                  }
-                                                                            `);
+      Object {
+        "scheduledTaskId": "task-123",
+      }
+    `);
   });
 
   test('creates an alert with multiple actions', async () => {
@@ -997,6 +1004,9 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         enabled: true,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
         schedule: { interval: '10s' },
         throttle: null,
         muteAll: false,
@@ -1110,6 +1120,9 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         enabled: false,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
         schedule: { interval: '10s' },
         throttle: null,
         muteAll: false,
@@ -1235,6 +1248,9 @@ describe('enable()', () => {
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
         updatedBy: 'elastic',
         apiKey: null,
         apiKeyOwner: null,
@@ -1320,6 +1336,9 @@ describe('enable()', () => {
         alertTypeId: 'myType',
         consumer: 'myApp',
         enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
@@ -1485,6 +1504,9 @@ describe('disable()', () => {
         apiKey: null,
         apiKeyOwner: null,
         enabled: false,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
         scheduledTaskId: null,
         updatedBy: 'elastic',
         actions: [
@@ -1525,6 +1547,9 @@ describe('disable()', () => {
         apiKey: null,
         apiKeyOwner: null,
         enabled: false,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
         scheduledTaskId: null,
         updatedBy: 'elastic',
         actions: [
@@ -2722,6 +2747,7 @@ describe('find()', () => {
       Array [
         Object {
           "fields": undefined,
+          "filter": undefined,
           "type": "alert",
         },
       ]
@@ -2730,9 +2756,11 @@ describe('find()', () => {
 
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
+      const filter = esKuery.fromKueryExpression(
+        '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
+      );
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        filter:
-          '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))',
+        filter,
         ensureAlertTypeIsAuthorized() {},
         logSuccessfulAuthorization() {},
       });
@@ -2741,8 +2769,8 @@ describe('find()', () => {
       await alertsClient.find({ options: { filter: 'someTerm' } });
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
-      expect(options.filter).toMatchInlineSnapshot(
-        `"someTerm and ((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))"`
+      expect(options.filter).toEqual(
+        nodeTypes.function.buildNode('and', [esKuery.fromKueryExpression('someTerm'), filter])
       );
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });
@@ -2759,7 +2787,6 @@ describe('find()', () => {
       const ensureAlertTypeIsAuthorized = jest.fn();
       const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
-        filter: '',
         ensureAlertTypeIsAuthorized,
         logSuccessfulAuthorization,
       });
@@ -3199,6 +3226,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -3356,6 +3386,9 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
         "enabled": true,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -3507,6 +3540,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": false,
+        "meta": Object {
+          "versionApiKeyLastmodified": "v7.10.0",
+        },
         "name": "abc",
         "params": Object {
           "bar": true,
@@ -4192,6 +4228,9 @@ describe('updateApiKey()', () => {
             },
           },
         ],
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
       },
       { version: '123' }
     );
@@ -4228,6 +4267,9 @@ describe('updateApiKey()', () => {
             },
           },
         ],
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
       },
       { version: '123' }
     );

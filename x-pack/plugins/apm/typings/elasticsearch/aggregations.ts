@@ -94,6 +94,9 @@ export interface AggregationOptionsByType {
     percents?: number[];
     hdr?: { number_of_significant_value_digits: number };
   } & AggregationSourceOptions;
+  stats: {
+    field: string;
+  };
   extended_stats: {
     field: string;
   };
@@ -223,6 +226,13 @@ interface AggregationResponsePart<
   percentiles: {
     values: Record<string, number | null>;
   };
+  stats: {
+    count: number;
+    min: number | null;
+    max: number | null;
+    avg: number | null;
+    sum: number | null;
+  };
   extended_stats: {
     count: number;
     min: number | null;
@@ -345,6 +355,12 @@ interface AggregationResponsePart<
 export type ValidAggregationKeysOf<
   T extends Record<string, any>
 > = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
+
+export type AggregationResultOf<
+  TAggregationOptionsMap extends AggregationOptionsMap,
+  TDocument
+> = AggregationResponsePart<TAggregationOptionsMap, TDocument>[AggregationType &
+  ValidAggregationKeysOf<TAggregationOptionsMap>];
 
 export type AggregationResponseMap<
   TAggregationInputMap extends AggregationInputMap | undefined,

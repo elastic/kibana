@@ -9,9 +9,8 @@ import moment from 'moment';
 import deepmerge from 'deepmerge';
 
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { isMlRule } from '../../../../../../common/machine_learning/helpers';
-import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
 import { Rule } from '../../../../containers/detection_engine/rules';
@@ -88,16 +87,25 @@ const isThresholdFields = <T>(
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: Type) => {
-  if (isMlRule(type)) {
-    const { index, queryBar, threshold, ...mlRuleFields } = fields;
-    return mlRuleFields;
-  } else if (isThresholdRule(type)) {
-    const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
-    return thresholdRuleFields;
-  } else {
-    const { anomalyThreshold, machineLearningJobId, threshold, ...queryRuleFields } = fields;
-    return queryRuleFields;
+  switch (type) {
+    case 'machine_learning':
+      const { index, queryBar, threshold, ...mlRuleFields } = fields;
+      return mlRuleFields;
+    case 'threshold':
+      const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
+      return thresholdRuleFields;
+    case 'query':
+    case 'saved_query':
+    case 'eql':
+      const {
+        anomalyThreshold: _a,
+        machineLearningJobId: _m,
+        threshold: _t,
+        ...queryRuleFields
+      } = fields;
+      return queryRuleFields;
   }
+  assertUnreachable(type);
 };
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
