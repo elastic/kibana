@@ -84,7 +84,7 @@ export function ApmPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.apmPanel.processedEventsLabel"
                   defaultMessage="Processed Events"
@@ -93,7 +93,7 @@ export function ApmPanel(props) {
               <EuiDescriptionListDescription data-test-subj="apmsTotalEvents">
                 {formatMetric(props.totalEvents, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.apmPanel.lastEventLabel"
                   defaultMessage="Last Event"
@@ -144,7 +144,7 @@ export function ApmPanel(props) {
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.apmPanel.memoryUsageLabel"
                   defaultMessage="Memory Usage"

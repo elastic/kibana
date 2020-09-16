@@ -12,6 +12,7 @@ import {
   ClusterItemContainer,
   BytesPercentageUsage,
   DisabledIfNoDataAndInSetupModeLink,
+  HealthLabel,
 } from './helpers';
 import {
   EuiFlexGrid,
@@ -93,7 +94,7 @@ function renderLogs(props) {
     <EuiDescriptionList type="column">
       {props.logs.types.map((log, index) => (
         <Fragment key={index}>
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle className="eui-textBreakWord">
             <FormattedMessage
               id="xpack.monitoring.cluster.overview.logsPanel.logTypeTitle"
               defaultMessage="{type}"
@@ -190,7 +191,7 @@ export function ElasticsearchPanel(props) {
       const gotoURL = getSafeForExternalLink('#/elasticsearch/ml_jobs');
       return (
         <>
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle className="eui-textBreakWord">
             <DisabledIfNoDataAndInSetupModeLink
               setupModeEnabled={setupMode.enabled}
               setupModeData={setupModeData}
@@ -276,7 +277,7 @@ export function ElasticsearchPanel(props) {
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.healthLabel"
                   defaultMessage="Health"
@@ -284,14 +285,10 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <EuiHealth color={statusColorMap[clusterStats.status]} data-test-subj="statusIcon">
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.healthStatusDescription"
-                    defaultMessage="Health is {status}"
-                    values={{ status: clusterStats.status || 'n/a' }}
-                  />
+                  <HealthLabel status={clusterStats.status} />
                 </EuiHealth>
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.versionLabel"
                   defaultMessage="Version"
@@ -306,7 +303,7 @@ export function ElasticsearchPanel(props) {
                     }
                   )}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.uptimeLabel"
                   defaultMessage="Uptime"
@@ -316,7 +313,7 @@ export function ElasticsearchPanel(props) {
                 {formatNumber(get(nodes, 'jvm.max_uptime_in_millis'), 'time_since')}
               </EuiDescriptionListDescription>
               {showMlJobs()}
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.licenseLabel"
                   defaultMessage="License"
@@ -377,7 +374,7 @@ export function ElasticsearchPanel(props) {
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.diskAvailableLabel"
                   defaultMessage="Disk Available"
@@ -389,7 +386,7 @@ export function ElasticsearchPanel(props) {
                   maxBytes={get(nodes, 'fs.total_in_bytes')}
                 />
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.jvmHeapLabel"
                   defaultMessage="{javaVirtualMachine} Heap"
@@ -433,7 +430,7 @@ export function ElasticsearchPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.documentsLabel"
                   defaultMessage="Documents"
@@ -443,7 +440,7 @@ export function ElasticsearchPanel(props) {
                 {formatNumber(get(indices, 'docs.count'), 'int_commas')}
               </EuiDescriptionListDescription>
 
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.diskUsageLabel"
                   defaultMessage="Disk Usage"
@@ -453,7 +450,7 @@ export function ElasticsearchPanel(props) {
                 {formatNumber(get(indices, 'store.size_in_bytes'), 'byte')}
               </EuiDescriptionListDescription>
 
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.primaryShardsLabel"
                   defaultMessage="Primary Shards"
@@ -463,7 +460,7 @@ export function ElasticsearchPanel(props) {
                 {primaries}
               </EuiDescriptionListDescription>
 
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.replicaShardsLabel"
                   defaultMessage="Replica Shards"
