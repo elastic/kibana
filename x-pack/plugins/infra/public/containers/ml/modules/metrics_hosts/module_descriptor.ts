@@ -60,9 +60,6 @@ const setUpModule = async (
   const jobIds = ['hosts_cpu_usage', 'hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
   const jobOverrides = jobIds.map((id) => ({
     job_id: id,
-    analysis_config: {
-      bucket_span: `${bucketSpan}ms`,
-    },
     data_description: {
       time_field: timestampField,
     },

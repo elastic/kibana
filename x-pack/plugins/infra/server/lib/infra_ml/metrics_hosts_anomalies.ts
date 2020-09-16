@@ -36,17 +36,23 @@ async function getCompatibleAnomaliesJobIds(
   sourceId: string,
   mlAnomalyDetectors: MlAnomalyDetectors
 ) {
-  const metricsHostsJobId = getJobId(spaceId, sourceId, metricsHostsJobTypes[1]);
+  const metricsHostsJobIds = metricsHostsJobTypes.map((jt) => getJobId(spaceId, sourceId, jt));
 
   const jobIds: string[] = [];
   let jobSpans: TracingSpan[] = [];
 
   try {
-    const {
-      timing: { spans },
-    } = await fetchMlJob(mlAnomalyDetectors, metricsHostsJobId);
-    jobIds.push(metricsHostsJobId);
-    jobSpans = [...jobSpans, ...spans];
+    await Promise.all(
+      metricsHostsJobIds.map((id) => {
+        return (async () => {
+          const {
+            timing: { spans },
+          } = await fetchMlJob(mlAnomalyDetectors, id);
+          jobIds.push(id);
+          jobSpans = [...jobSpans, ...spans];
+        })();
+      })
+    );
   } catch (e) {
     if (isMlPrivilegesError(e)) {
       throw e;

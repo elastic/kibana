@@ -57,6 +57,22 @@ export const JobSetupScreen = (props: Props) => {
     }
   }, [props.jobType, k.cleanUpAndSetUpModule, h.cleanUpAndSetUpModule]);
 
+  const setUpModule = useMemo(() => {
+    if (props.jobType === 'kubernetes') {
+      return k.setUpModule;
+    } else {
+      return h.setUpModule;
+    }
+  }, [props.jobType, k.setUpModule, h.setUpModule]);
+
+  const hasSummaries = useMemo(() => {
+    if (props.jobType === 'kubernetes') {
+      return k.jobSummaries.length > 0;
+    } else {
+      return h.jobSummaries.length > 0;
+    }
+  }, [props.jobType, k.jobSummaries, h.jobSummaries]);
+
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
   ]);
@@ -66,14 +82,24 @@ export const JobSetupScreen = (props: Props) => {
   }, []);
 
   const createJobs = useCallback(() => {
-    cleanUpAndSetUpModule(
-      indicies,
-      moment(startDate).toDate().getTime(),
-      undefined,
-      { type: 'includeAll' },
-      partitionField ? partitionField[0] : undefined
-    );
-  }, [cleanUpAndSetUpModule, indicies, partitionField, startDate]);
+    if (hasSummaries) {
+      cleanUpAndSetUpModule(
+        indicies,
+        moment(startDate).toDate().getTime(),
+        undefined,
+        { type: 'includeAll' },
+        partitionField ? partitionField[0] : undefined
+      );
+    } else {
+      setUpModule(
+        indicies,
+        moment(startDate).toDate().getTime(),
+        undefined,
+        { type: 'includeAll' },
+        partitionField ? partitionField[0] : undefined
+      );
+    }
+  }, [cleanUpAndSetUpModule, setUpModule, hasSummaries, indicies, partitionField, startDate]);
 
   const onPartitionFieldChange = useCallback((value: Array<{ label: string }>) => {
     setPartitionField(value.map((v) => v.label));

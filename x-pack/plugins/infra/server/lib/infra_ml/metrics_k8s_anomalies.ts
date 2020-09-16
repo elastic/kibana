@@ -35,17 +35,23 @@ async function getCompatibleAnomaliesJobIds(
   sourceId: string,
   mlAnomalyDetectors: MlAnomalyDetectors
 ) {
-  const metricsK8sJobId = getJobId(spaceId, sourceId, metricsK8SJobTypes[0]);
+  const metricsK8sJobIds = metricsK8SJobTypes.map((jt) => getJobId(spaceId, sourceId, jt));
 
   const jobIds: string[] = [];
   let jobSpans: TracingSpan[] = [];
 
   try {
-    const {
-      timing: { spans },
-    } = await fetchMlJob(mlAnomalyDetectors, metricsK8sJobId);
-    jobIds.push(metricsK8sJobId);
-    jobSpans = [...jobSpans, ...spans];
+    await Promise.all(
+      metricsK8sJobIds.map((id) => {
+        return (async () => {
+          const {
+            timing: { spans },
+          } = await fetchMlJob(mlAnomalyDetectors, id);
+          jobIds.push(id);
+          jobSpans = [...jobSpans, ...spans];
+        })();
+      })
+    );
   } catch (e) {
     if (isMlPrivilegesError(e)) {
       throw e;

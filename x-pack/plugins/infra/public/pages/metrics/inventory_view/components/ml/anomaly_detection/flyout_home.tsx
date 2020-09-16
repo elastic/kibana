@@ -113,11 +113,15 @@ export const FlyoutHome = (props: Props) => {
             </EuiTab>
           </EuiTabs>
           <EuiSpacer size="l" />
-          <JobsEnabledCallout
-            hasHostJobs={hostJobSummaries.length > 0}
-            hasK8sJobs={k8sJobSummaries.length > 0}
-          />
-          <EuiSpacer size="l" />
+          {hostJobSummaries.length > 0 && (
+            <>
+              <JobsEnabledCallout
+                hasHostJobs={hostJobSummaries.length > 0}
+                hasK8sJobs={k8sJobSummaries.length > 0}
+              />
+              <EuiSpacer size="l" />
+            </>
+          )}
           <CreateJobTab
             hasHostJobs={hostJobSummaries.length > 0}
             hasK8sJobs={k8sJobSummaries.length > 0}
@@ -136,6 +140,23 @@ interface CalloutProps {
   hasK8sJobs: boolean;
 }
 const JobsEnabledCallout = (props: CalloutProps) => {
+  let target = '';
+  if (props.hasHostJobs && props.hasK8sJobs) {
+    target = `${i18n.translate('xpack.infra.ml.anomalyFlyout.create.hostTitle', {
+      defaultMessage: 'Hosts',
+    })} and ${i18n.translate('xpack.infra.ml.anomalyFlyout.create.k8sTitle', {
+      defaultMessage: 'Kubernetes',
+    })}`;
+  } else if (props.hasHostJobs) {
+    target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.hostTitle', {
+      defaultMessage: 'Hosts',
+    });
+  } else if (props.hasK8sJobs) {
+    target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.k8sTitle', {
+      defaultMessage: 'Hosts',
+    });
+  }
+
   return (
     <>
       <EuiCallOut
@@ -143,8 +164,9 @@ const JobsEnabledCallout = (props: CalloutProps) => {
         color="success"
         title={
           <FormattedMessage
-            defaultMessage="Anomaly detection enabled for Hosts."
+            defaultMessage="Anomaly detection enabled for {target}"
             id="xpack.infra.ml.anomalyFlyout.enabledCallout"
+            values={{ target }}
           />
         }
         iconType="check"
