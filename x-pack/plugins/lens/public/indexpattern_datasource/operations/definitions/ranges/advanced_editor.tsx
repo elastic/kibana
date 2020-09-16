@@ -30,6 +30,7 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
 import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
@@ -91,16 +92,18 @@ export const RangePopover = ({
     defaultMessage: 'Less than',
   });
 
+  const onSubmit = () => {
+    setIsPopoverOpen(false);
+    setIsOpenByCreation(false);
+    saveRangeAndReset(tempRange, true);
+  };
+
   return (
     <EuiPopover
       display="block"
       ownFocus
       isOpen={isOpenByCreation || isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-        setIsOpenByCreation(false);
-        saveRangeAndReset(tempRange, true);
-      }}
+      closePopover={onSubmit}
       button={
         <Button
           onClick={() => {
@@ -159,6 +162,11 @@ export const RangePopover = ({
                 compressed
                 placeholder={TO_PLACEHOLDER}
                 isInvalid={!isValidRange(tempRange)}
+                onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
+                  if (keys.ENTER === key && onSubmit) {
+                    onSubmit();
+                  }
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
