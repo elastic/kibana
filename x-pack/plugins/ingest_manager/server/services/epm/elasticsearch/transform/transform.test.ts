@@ -150,7 +150,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'GET',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0',
+          path: '/_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0',
           ignore: [404],
         },
       ],
@@ -158,7 +158,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0/_stop',
+          path: '/_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0/_stop',
           query: 'force=true',
           ignore: [404],
         },
@@ -168,7 +168,7 @@ describe('test transform install', () => {
         {
           method: 'DELETE',
           query: 'force=true',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0',
+          path: '/_transform/metrics-endpoint.metadata_current-default-0.15.0-dev.0',
           ignore: [404],
         },
       ],
@@ -176,7 +176,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'PUT',
-          path: '_transform/metrics-endpoint.metadata-default-0.16.0-dev.0',
+          path: '/_transform/metrics-endpoint.metadata-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -185,7 +185,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'PUT',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -194,14 +194,14 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '_transform/metrics-endpoint.metadata-default-0.16.0-dev.0/_start',
+          path: '/_transform/metrics-endpoint.metadata-default-0.16.0-dev.0/_start',
         },
       ],
       [
         'transport.request',
         {
           method: 'POST',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
         },
       ],
     ]);
@@ -314,7 +314,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'PUT',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
+          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0',
           query: 'defer_validation=true',
           body: '{"content": "data"}',
         },
@@ -323,7 +323,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          path: '/_transform/metrics-endpoint.metadata_current-default-0.16.0-dev.0/_start',
         },
       ],
     ]);
@@ -412,7 +412,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'GET',
-          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          path: '/_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
           ignore: [404],
         },
       ],
@@ -420,7 +420,7 @@ describe('test transform install', () => {
         'transport.request',
         {
           method: 'POST',
-          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
+          path: '/_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0/_stop',
           query: 'force=true',
           ignore: [404],
         },
@@ -430,7 +430,7 @@ describe('test transform install', () => {
         {
           method: 'DELETE',
           query: 'force=true',
-          path: '_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
+          path: '/_transform/metrics-endpoint.metadata-current-default-0.15.0-dev.0',
           ignore: [404],
         },
       ],
