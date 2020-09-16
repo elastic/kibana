@@ -132,7 +132,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   fetchIndexPatterns = async () => {
-    const indexPatterns = await this.props.indexPatterns.getFields(['id', 'title']);
+    const indexPatterns = (await this.props.indexPatterns.getCache())?.map((savedObject) => ({
+      id: savedObject.id,
+      title: savedObject.attributes.title,
+    }));
     this.setState({ indexPatterns } as any);
   };
 
