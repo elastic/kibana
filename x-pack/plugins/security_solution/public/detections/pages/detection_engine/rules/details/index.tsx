@@ -385,7 +385,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     <EuiToolTip
                       position="top"
                       content={
-                        rule?.type === 'machine_learning' && !hasMlPermissions
+                        isMlRule(rule?.type) && !hasMlPermissions
                           ? detectionI18n.ML_RULES_DISABLED_MESSAGE
                           : undefined
                       }

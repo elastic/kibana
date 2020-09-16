@@ -46,7 +46,7 @@ import {
   UrlDecode,
   UserAgent,
   FormFieldsComponent,
-} from '../manage_processor_form/processors';
+} from '../processor_form/processors';
 
 interface FieldDescriptor {
   FieldsComponent?: FormFieldsComponent;
