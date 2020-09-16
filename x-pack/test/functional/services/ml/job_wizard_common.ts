@@ -358,7 +358,7 @@ export function MachineLearningJobWizardCommonProvider(
 
     async toggleStartDatafeedSwitch(toggle: boolean) {
       const subj = 'mlJobWizardStartDatafeedCheckbox';
-      if ((await this.getStartDatafeedSwitchCheckedState()) === !toggle) {
+      if ((await this.getStartDatafeedSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
           await testSubjects.clickWhenNotDisabled(subj);
           await this.assertStartDatafeedSwitchCheckedState(toggle);
