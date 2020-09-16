@@ -11,3 +11,11 @@
     }
   }
 }
+
+.dscSidebar__mobile {
+  width: 100%;
+  padding: 0 $euiSize $euiSizeL $euiSize;
+  .dscSidebar__sectionStatic {
+    padding: 0;
+  }
+}

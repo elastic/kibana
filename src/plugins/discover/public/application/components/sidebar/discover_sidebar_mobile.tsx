@@ -130,7 +130,6 @@ export function DiscoverSidebarMobile({
           defaultMessage: 'Index and fields',
         })}
       >
-        {selectedFields.length}
         <div className="dscSidebar__sectionStatic">
           <DiscoverIndexPattern
             selectedIndexPattern={selectedIndexPattern}

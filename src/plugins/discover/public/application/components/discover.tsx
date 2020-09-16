@@ -22,6 +22,7 @@ import rison from 'rison-node';
 // import { EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import {
+  EuiBadge,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButton,
@@ -29,6 +30,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIcon,
 } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
 import { DiscoverGrid } from './discover_grid/discover_grid';
@@ -210,17 +212,31 @@ export function Discover({
                 setIndexPattern={setIndexPattern}
               />
             ) : (
-              <DiscoverSidebarMobile
-                columns={state.columns}
-                fieldCounts={fieldCounts}
-                hits={rows}
-                indexPatternList={indexPatternList}
-                onAddField={addColumn}
-                onAddFilter={onAddFilter}
-                onRemoveField={onRemoveColumn}
-                selectedIndexPattern={searchSource && searchSource.getField('index')}
-                setIndexPattern={setIndexPattern}
-              />
+              <div className="dscSidebar__mobile">
+                <DiscoverSidebarMobile
+                  columns={state.columns}
+                  fieldCounts={fieldCounts}
+                  hits={rows}
+                  indexPatternList={indexPatternList}
+                  onAddField={addColumn}
+                  onAddFilter={onAddFilter}
+                  onRemoveField={onRemoveColumn}
+                  selectedIndexPattern={searchSource && searchSource.getField('index')}
+                  setIndexPattern={setIndexPattern}
+                />
+                <EuiButton fullWidth onClick={() => setIsFlyoutVisible(true)}>
+                  <EuiFlexGroup responsive={false}>
+                    <EuiFlexItem grow={1}>Fields</EuiFlexItem>
+                    <EuiFlexItem grow={false}>Selected</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="accent">5</EuiBadge>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="arrowUp">5</EuiIcon>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiButton>
+              </div>
             )}
 
             <>
@@ -246,7 +262,6 @@ export function Discover({
               {resultState === 'ready' && (
                 <div className="dscWrapper__content">
                   {size.width}px / {size.height}px
-                  <EuiButton onClick={() => setIsFlyoutVisible(true)}>Fields</EuiButton>
                   <div className="dscResultCount">
                     <EuiFlexGroup justifyContent="spaceBetween">
                       <EuiFlexItem
