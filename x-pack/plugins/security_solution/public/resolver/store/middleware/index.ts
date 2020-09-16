@@ -30,8 +30,6 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: Da
 
       resolverTreeFetcher();
 
-      // TODO each action check the `panelViewAndParameters` and fetch any data you need
-
       if (
         action.type === 'userRequestedRelatedEventData' ||
         action.type === 'appDetectedMissingEventData'
