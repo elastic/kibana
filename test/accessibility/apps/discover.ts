@@ -24,11 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
-  const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
+  const testSubjects = getService('testSubjects');
   const TEST_COLUMN_NAMES = ['@message'];
   const TEST_FILTER_COLUMN_NAMES = [
     ['extension', 'jpg'],
@@ -93,17 +93,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.closeSidebarFieldFilter();
     });
 
-    it('a11y test on add columns to discover table view', async () => {
-      for (const columnName of TEST_COLUMN_NAMES) {
+    it('a11y test on tables with columns view', async () => {
+      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItemToggle(columnName);
       }
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test on add more fields to table view', async () => {
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemToggle(columnName);
-      }
+    it('a11y test on save queries popover', async () => {
+      await PageObjects.discover.clickSavedQueriesPopOver();
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on save queries panel', async () => {
+      await PageObjects.discover.clickCurrentSavedQuery();
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on toggle include filters option on saved queries panel', async () => {
+      await PageObjects.discover.setSaveQueryFormTitle('test');
+      await PageObjects.discover.toggleIncludeFilters();
+      await a11y.testAppSnapshot();
+      await PageObjects.discover.saveCurrentSavedQuery();
+    });
+
+    it('a11y test on saved queries list panel', async () => {
+      await PageObjects.discover.clickSavedQueriesPopOver();
+      await testSubjects.moveMouseTo(
+        'saved-query-list-item load-saved-query-test-button saved-query-list-item-selected saved-query-list-item-selected'
+      );
+      await testSubjects.find('delete-saved-query-test-button');
       await a11y.testAppSnapshot();
     });
   });

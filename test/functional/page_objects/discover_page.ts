@@ -394,6 +394,38 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async showAllFilterActions() {
       await testSubjects.click('showFilterActions');
     }
+
+    public async clickSavedQueriesPopOver() {
+      await testSubjects.click('saved-query-management-popover-button');
+    }
+
+    public async clickCurrentSavedQuery() {
+      await testSubjects.click('saved-query-management-save-button');
+    }
+
+    public async setSaveQueryFormTitle(savedQueryName: string) {
+      await testSubjects.setValue('saveQueryFormTitle', savedQueryName);
+    }
+
+    public async toggleIncludeFilters() {
+      await testSubjects.click('saveQueryFormIncludeFiltersOption');
+    }
+
+    public async saveCurrentSavedQuery() {
+      await testSubjects.click('savedQueryFormSaveButton');
+    }
+
+    public async deleteSavedQuery() {
+      await testSubjects.click('delete-saved-query-TEST-button');
+    }
+
+    public async confirmDeletionOfSavedQuery() {
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    public async clearSavedQuery() {
+      await testSubjects.click('saved-query-management-clear-button');
+    }
   }
 
   return new DiscoverPage();
