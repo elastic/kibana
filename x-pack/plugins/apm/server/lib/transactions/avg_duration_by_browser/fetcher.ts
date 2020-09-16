@@ -10,20 +10,27 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   USER_AGENT_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Options } from '.';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 
 export type ESResponse = PromiseReturnType<typeof fetcher>;
 
 export function fetcher(options: Options) {
   const { end, apmEventClient, start, uiFiltersES } = options.setup;
-  const { serviceName, transactionName } = options;
+  const {
+    serviceName,
+    searchAggregatedTransactions,
+    transactionName,
+  } = options;
   const { intervalString } = getBucketSize(start, end);
 
   const transactionNameFilter = transactionName
@@ -34,13 +41,20 @@ export function fetcher(options: Options) {
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
     { range: rangeFilter(start, end) },
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      searchAggregatedTransactions
+    ),
     ...uiFiltersES,
     ...transactionNameFilter,
   ];
 
   const params = {
     apm: {
-      events: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
     },
     body: {
       size: 0,
@@ -69,7 +83,9 @@ export function fetcher(options: Options) {
               aggs: {
                 avg_duration: {
                   avg: {
-                    field: TRANSACTION_DURATION,
+                    field: getTransactionDurationFieldForAggregatedTransactions(
+                      searchAggregatedTransactions
+                    ),
                   },
                 },
               },

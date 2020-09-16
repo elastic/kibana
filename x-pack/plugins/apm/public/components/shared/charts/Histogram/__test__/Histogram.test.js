@@ -108,11 +108,6 @@ describe('Histogram', () => {
 
     it('should call onClick with bucket', () => {
       expect(onClick).toHaveBeenCalledWith({
-        samples: [
-          {
-            transactionId: '99c50a5b-44b4-4289-a3d1-a2815d128192',
-          },
-        ],
         style: { cursor: 'pointer' },
         xCenter: 869010,
         x0: 811076,
