@@ -8,6 +8,7 @@ export {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
+  UseRequestResponse,
   sendRequest,
   useRequest,
   Forms,

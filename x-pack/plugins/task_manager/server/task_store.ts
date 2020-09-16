@@ -492,6 +492,7 @@ export class TaskStore {
 
     return {
       docs: (rawDocs as SavedObjectsRawDoc[])
+        .filter((doc) => this.serializer.isRawSavedObject(doc))
         .map((doc) => this.serializer.rawToSavedObject(doc))
         .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
         .map(savedObjectToConcreteTaskInstance),

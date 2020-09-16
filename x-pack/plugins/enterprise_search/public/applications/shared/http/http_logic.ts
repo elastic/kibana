@@ -6,7 +6,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup, HttpInterceptorResponseError } from 'src/core/public';
 
 export interface IHttpValues {
   http: HttpSetup;
@@ -68,7 +68,9 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
           if (isApiResponse && hasErrorConnecting) {
             actions.setErrorConnecting(true);
           }
-          return httpResponse;
+
+          // Re-throw error so that downstream catches work as expected
+          return Promise.reject(httpResponse) as Promise<HttpInterceptorResponseError>;
         },
       });
       httpInterceptors.push(errorConnectingInterceptor);
