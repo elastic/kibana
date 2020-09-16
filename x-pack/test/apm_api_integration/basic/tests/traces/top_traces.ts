@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { sortBy, omit } from 'lodash';
+import { sortBy } from 'lodash';
 import archives_metadata from '../../../common/archives_metadata';
 import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -49,80 +49,73 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', async () => {
-        expectSnapshot(response.body.items.length).toMatchInline(`66`);
+        expectSnapshot(response.body.items.length).toMatchInline(`59`);
       });
 
       it('returns the correct buckets', async () => {
-        const responseWithoutSamples = sortBy(
-          response.body.items.map((item: any) => omit(item, 'sample')),
-          'impact'
-        );
+        const sortedItems = sortBy(response.body.items, 'impact');
 
-        const firstItem = responseWithoutSamples[0];
-        const lastItem = responseWithoutSamples[responseWithoutSamples.length - 1];
+        const firstItem = sortedItems[0];
+        const lastItem = sortedItems[sortedItems.length - 1];
 
-        const groups = responseWithoutSamples.map((item) => item.key).slice(0, 5);
+        const groups = sortedItems.map((item) => item.key).slice(0, 5);
 
-        expectSnapshot(responseWithoutSamples).toMatch();
+        expectSnapshot(sortedItems).toMatch();
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "averageResponseTime": 3853,
+            "averageResponseTime": 1137,
             "impact": 0,
             "key": Object {
-              "service.name": "opbeans-ruby",
-              "transaction.name": "Api::OrdersController#create",
+              "service.name": "opbeans-node",
+              "transaction.name": "POST /api/orders",
             },
-            "transactionsPerMinute": 0.016666666666666666,
+            "serviceName": "opbeans-node",
+            "transactionName": "POST /api/orders",
+            "transactionType": "request",
+            "transactionsPerMinute": 0.03333333333333333,
           }
         `);
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1600567.6301369863,
+            "averageResponseTime": 1724883.75,
             "impact": 100,
             "key": Object {
               "service.name": "opbeans-python",
               "transaction.name": "opbeans.tasks.sync_customers",
             },
-            "transactionsPerMinute": 1.2166666666666666,
+            "serviceName": "opbeans-python",
+            "transactionName": "opbeans.tasks.sync_customers",
+            "transactionType": "celery",
+            "transactionsPerMinute": 1.2,
           }
         `);
 
         expectSnapshot(groups).toMatchInline(`
           Array [
             Object {
-              "service.name": "opbeans-ruby",
-              "transaction.name": "Api::OrdersController#create",
+              "service.name": "opbeans-node",
+              "transaction.name": "POST /api/orders",
             },
             Object {
-              "service.name": "opbeans-java",
-              "transaction.name": "APIRestController#orders",
+              "service.name": "opbeans-python",
+              "transaction.name": "GET opbeans.views.stats",
             },
             Object {
               "service.name": "opbeans-node",
-              "transaction.name": "GET /api/types",
+              "transaction.name": "GET /api/customers/:id",
             },
             Object {
-              "service.name": "opbeans-java",
-              "transaction.name": "APIRestController#products",
+              "service.name": "opbeans-node",
+              "transaction.name": "GET /api/products/top",
             },
             Object {
-              "service.name": "opbeans-go",
-              "transaction.name": "POST /api/orders",
+              "service.name": "opbeans-ruby",
+              "transaction.name": "Api::OrdersController#show",
             },
           ]
         `);
-      });
-
-      it('returns a sample', async () => {
-        // sample should provide enough information to deeplink to a transaction detail page
-        response.body.items.forEach((item: any) => {
-          expect(item.sample.trace.id).to.be.an('string');
-          expect(item.sample.transaction.id).to.be.an('string');
-          expect(item.sample.service.name).to.be(item.key['service.name']);
-          expect(item.sample.transaction.name).to.be(item.key['transaction.name']);
-        });
       });
     });
   });

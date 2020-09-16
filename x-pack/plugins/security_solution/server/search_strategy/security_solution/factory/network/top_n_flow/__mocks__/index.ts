@@ -8,10 +8,10 @@ import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/dat
 
 import {
   Direction,
-  NetworkTopNFlowRequestOptions,
-  NetworkQueries,
-  NetworkTopTablesFields,
   FlowTargetSourceDest,
+  NetworkQueries,
+  NetworkTopNFlowRequestOptions,
+  NetworkTopTablesFields,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkTopNFlowRequestOptions = {
@@ -781,7 +781,67 @@ export const formattedSearchStrategyResponse = {
   ],
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "top_n_flow_count": {\n        "cardinality": {\n          "field": "source.ip"\n        }\n      },\n      "source": {\n        "terms": {\n          "field": "source.ip",\n          "size": 10,\n          "order": {\n            "bytes_out": "desc"\n          }\n        },\n        "aggs": {\n          "bytes_in": {\n            "sum": {\n              "field": "destination.bytes"\n            }\n          },\n          "bytes_out": {\n            "sum": {\n              "field": "source.bytes"\n            }\n          },\n          "domain": {\n            "terms": {\n              "field": "source.domain",\n              "order": {\n                "timestamp": "desc"\n              }\n            },\n            "aggs": {\n              "timestamp": {\n                "max": {\n                  "field": "@timestamp"\n                }\n              }\n            }\n          },\n          "location": {\n            "filter": {\n              "exists": {\n                "field": "source.geo"\n              }\n            },\n            "aggs": {\n              "top_geo": {\n                "top_hits": {\n                  "_source": "source.geo.*",\n                  "size": 1\n                }\n              }\n            }\n          },\n          "autonomous_system": {\n            "filter": {\n              "exists": {\n                "field": "source.as"\n              }\n            },\n            "aggs": {\n              "top_as": {\n                "top_hits": {\n                  "_source": "source.as.*",\n                  "size": 1\n                }\n              }\n            }\n          },\n          "flows": {\n            "cardinality": {\n              "field": "network.community_id"\n            }\n          },\n          "destination_ips": {\n            "cardinality": {\n              "field": "destination.ip"\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-13T10:16:46.870Z",\n                "lte": "2020-09-14T10:16:46.870Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    }\n  },\n  "size": 0,\n  "track_total_hits": false\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              top_n_flow_count: { cardinality: { field: 'source.ip' } },
+              source: {
+                terms: { field: 'source.ip', size: 10, order: { bytes_out: 'desc' } },
+                aggs: {
+                  bytes_in: { sum: { field: 'destination.bytes' } },
+                  bytes_out: { sum: { field: 'source.bytes' } },
+                  domain: {
+                    terms: { field: 'source.domain', order: { timestamp: 'desc' } },
+                    aggs: { timestamp: { max: { field: '@timestamp' } } },
+                  },
+                  location: {
+                    filter: { exists: { field: 'source.geo' } },
+                    aggs: { top_geo: { top_hits: { _source: 'source.geo.*', size: 1 } } },
+                  },
+                  autonomous_system: {
+                    filter: { exists: { field: 'source.as' } },
+                    aggs: { top_as: { top_hits: { _source: 'source.as.*', size: 1 } } },
+                  },
+                  flows: { cardinality: { field: 'network.community_id' } },
+                  destination_ips: { cardinality: { field: 'destination.ip' } },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-13T10:16:46.870Z',
+                        lte: '2020-09-14T10:16:46.870Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          size: 0,
+          track_total_hits: false,
+        },
+        null,
+        2
+      ),
     ],
   },
   pageInfo: { activePage: 0, fakeTotalCount: 50, showMorePagesIndicator: true },
@@ -828,7 +888,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
           {
             range: {
               '@timestamp': {
