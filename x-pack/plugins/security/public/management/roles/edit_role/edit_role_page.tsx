@@ -526,7 +526,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       try {
         await rolesAPIClient.saveRole({ role, spacesEnabled: spaces.enabled });
       } catch (error) {
-        notifications.toasts.addDanger(get(error, 'data.message'));
+        notifications.toasts.addDanger(get(error, 'body.message'));
         return;
       }
 
