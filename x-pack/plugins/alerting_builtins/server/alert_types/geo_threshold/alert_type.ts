@@ -79,13 +79,15 @@ export function getAlertType(
     startedAt: Date;
     services: AlertServices;
     params: {
-      index: string;
+      indexTitle: string;
+      indexId: string;
       geoField: string;
       entity: string;
       dateField: string;
       trackingEvent: TrackingEvent;
       boundaryType: BoundaryType;
-      boundaryIndex: string;
+      boundaryIndexTitle: string;
+      boundaryIndexId: string;
       boundaryGeoField: string;
     };
   }) => Promise<void>;

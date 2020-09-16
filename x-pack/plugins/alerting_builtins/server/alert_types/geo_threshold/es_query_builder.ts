@@ -9,7 +9,7 @@ import { ILegacyScopedClusterClient } from 'kibana/server';
 export const OTHER_CATEGORY = 'other';
 
 async function getShapesFilters(
-  boundaryIndex: string,
+  boundaryIndexTitle: string,
   boundaryType: string,
   boundaryGeoField: string,
   geoField: string,
@@ -21,7 +21,7 @@ async function getShapesFilters(
     case 'entireIndex':
       // Get all shapes in index
       const boundaryData = await callCluster('search', {
-        index: boundaryIndex,
+        index: boundaryIndexTitle,
         body: {},
       });
       boundaryData.hits.hits.forEach(({ _index, _id }) => {
@@ -47,27 +47,26 @@ async function getShapesFilters(
 export async function executeEsQueryFactory(
   {
     entity,
-    index,
+    indexTitle,
     dateField,
     boundaryGeoField,
     geoField,
-    boundaryIndex,
+    boundaryIndexTitle,
     boundaryType,
   }: {
     entity: string;
     indexTitle: string;
-    indexId: string;
     dateField: string;
     boundaryGeoField: string;
     geoField: string;
-    boundaryIndex: string;
+    boundaryIndexTitle: string;
     boundaryType: string;
   },
   { callCluster }: { callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] },
   log: Logger
 ) {
   const shapesFilters = await getShapesFilters(
-    boundaryIndex,
+    boundaryIndexTitle,
     boundaryType,
     boundaryGeoField,
     geoField,
@@ -80,7 +79,7 @@ export async function executeEsQueryFactory(
     topHitsQty: number = 1
   ) => {
     const esQuery: unknown = {
-      index,
+      index: indexTitle,
       body: {
         size: 0,
         aggs: {
