@@ -44,6 +44,7 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
+  setHeaderActionMenu,
 }: LensAppProps) {
   const {
     data,
@@ -460,6 +461,7 @@ export function App({
       <div className="lnsApp">
         <div className="lnsApp__header">
           <TopNavMenu
+            setMenuMountPoint={setHeaderActionMenu}
             config={topNavConfig}
             showSearchBar={true}
             showDatePicker={true}

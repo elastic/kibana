@@ -34,7 +34,7 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
-import { getLensAttributeService } from './lens_attribute_service';
+import { getLensAttributeService, LensAttributeService } from './lens_attribute_service';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;

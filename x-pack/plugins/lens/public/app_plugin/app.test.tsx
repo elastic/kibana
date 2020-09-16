@@ -164,6 +164,7 @@ describe('Lens App', () => {
       redirectTo: jest.fn(),
       redirectToOrigin: jest.fn(),
       onAppLeave: jest.fn(),
+      setHeaderActionMenu: jest.fn(),
     };
   }
 

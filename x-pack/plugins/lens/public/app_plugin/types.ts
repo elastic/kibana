@@ -62,6 +62,7 @@ export interface LensAppProps {
   history: History;
   editorFrame: EditorFrameInstance;
   onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   redirectTo: (savedObjectId?: string) => void;
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
   initialInput?: LensEmbeddableInput;
