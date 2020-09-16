@@ -62,10 +62,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct data', () => {
         expectSnapshot(response.body.apmTimeseries.overallAvgDuration).toMatchInline(
-          `578297.1431623931`
+          `600255.7079646018`
         );
-        expectSnapshot(response.body.apmTimeseries.responseTimes.avg.length).toMatchInline(`121`);
-        expectSnapshot(response.body.apmTimeseries.tpmBuckets.length).toMatchInline(`4`);
+        expectSnapshot(response.body.apmTimeseries.responseTimes.avg.length).toMatchInline(`61`);
+        expectSnapshot(response.body.apmTimeseries.tpmBuckets.length).toMatchInline(`3`);
 
         expectSnapshot(response.body).toMatch();
       });

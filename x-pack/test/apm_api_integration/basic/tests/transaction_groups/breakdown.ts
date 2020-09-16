@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const nonNullDataPoints = data.filter((y: number | null) => y !== null);
 
-        expectSnapshot(nonNullDataPoints.length).toMatchInline(`121`);
+        expectSnapshot(nonNullDataPoints.length).toMatchInline(`61`);
 
         expectSnapshot(
           data.slice(0, 5).map(({ x, y }: { x: number; y: number | null }) => {
@@ -73,24 +73,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Array [
             Object {
-              "x": "2020-09-10T06:00:00.000Z",
-              "y": 1,
-            },
-            Object {
-              "x": "2020-09-10T06:00:30.000Z",
-              "y": 1,
-            },
-            Object {
-              "x": "2020-09-10T06:01:00.000Z",
+              "x": "2020-09-15T08:53:00.000Z",
               "y": null,
             },
             Object {
-              "x": "2020-09-10T06:01:30.000Z",
-              "y": 1,
+              "x": "2020-09-15T08:53:30.000Z",
+              "y": null,
             },
             Object {
-              "x": "2020-09-10T06:02:00.000Z",
+              "x": "2020-09-15T08:54:00.000Z",
               "y": null,
+            },
+            Object {
+              "x": "2020-09-15T08:54:30.000Z",
+              "y": null,
+            },
+            Object {
+              "x": "2020-09-15T08:55:00.000Z",
+              "y": 1,
             },
           ]
         `);

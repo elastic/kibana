@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', () => {
-        expectSnapshot(response.body.items.length).toMatchInline(`13`);
+        expectSnapshot(response.body.items.length).toMatchInline(`14`);
       });
 
       it('returns the correct buckets (when ignoring samples)', async () => {
