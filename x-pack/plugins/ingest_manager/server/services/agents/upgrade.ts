@@ -9,16 +9,23 @@ import { AgentAction, AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAgentAction } from './actions';
 
-export async function sendUpgradeAgentAction(
-  soClient: SavedObjectsClientContract,
-  agentId: string
-) {
+export async function sendUpgradeAgentAction({
+  soClient,
+  agentId,
+  version,
+  sourceUri,
+}: {
+  soClient: SavedObjectsClientContract;
+  agentId: string;
+  version: string;
+  sourceUri: string;
+}) {
   const now = new Date().toISOString();
   await createAgentAction(soClient, {
     agent_id: agentId,
     created_at: now,
-    version: '8.0.0',
-    source_uri: 'https://artifacts.elastic.co/downloads/beats/',
+    version,
+    source_uri: sourceUri,
     type: 'UPGRADE',
   });
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {

@@ -176,6 +176,10 @@ export const PostAgentUpgradeRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  body: schema.object({
+    source_uri: schema.string(),
+    version: schema.string(),
+  }),
 };
 
 export const PutAgentReassignRequestSchema = {

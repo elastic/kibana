@@ -12,11 +12,18 @@ import * as AgentService from '../../services/agents';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
-  undefined
+  undefined,
+  TypeOf<typeof PostAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const { version, source_uri: sourceUri } = request.body;
   try {
-    await AgentService.sendUpgradeAgentAction(soClient, request.params.agentId);
+    await AgentService.sendUpgradeAgentAction({
+      soClient,
+      agentId: request.params.agentId,
+      version,
+      sourceUri,
+    });
 
     const body: PostAgentUpgradeResponse = {};
     return response.ok({ body });
