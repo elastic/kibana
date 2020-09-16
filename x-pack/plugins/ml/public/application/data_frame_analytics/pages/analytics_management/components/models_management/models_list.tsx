@@ -288,7 +288,7 @@ export const ModelsList: FC = () => {
           pageState: {
             jobId: item.metadata?.analytics_config.id as string,
             analysisType: getAnalysisType(
-              item.metadata?.analytics_config
+              item.metadata?.analytics_config.analysis
             ) as DataFrameAnalysisConfigType,
           },
         });
