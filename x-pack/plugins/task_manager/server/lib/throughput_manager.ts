@@ -28,6 +28,15 @@ interface DynamicConfiguration<T> {
   observable$: BehaviorSubject<T>;
 }
 
+interface ThroughputManagerOpts {
+  maxWorkers$: BehaviorSubject<number>;
+  pollInterval$: BehaviorSubject<number>;
+  startingMaxWorkers: number;
+  startingPollInterval: number;
+  storeErrors$: Observable<Error>;
+  logger: Logger;
+}
+
 export class ThroughputManager {
   private isStarted: boolean = false;
   private storeErrorsSubscription?: Subscription;
@@ -38,14 +47,7 @@ export class ThroughputManager {
   private readonly pollInterval: DynamicConfiguration<number>;
   private readonly storeErrors$: Observable<Error>;
 
-  constructor(opts: {
-    maxWorkers$: BehaviorSubject<number>;
-    pollInterval$: BehaviorSubject<number>;
-    startingMaxWorkers: number;
-    startingPollInterval: number;
-    storeErrors$: Observable<Error>;
-    logger: Logger;
-  }) {
+  constructor(opts: ThroughputManagerOpts) {
     this.logger = opts.logger;
     this.storeErrors$ = opts.storeErrors$;
     this.maxWorkers = {
@@ -83,8 +85,7 @@ export class ThroughputManager {
     }
 
     // Reset observable values
-    this.maxWorkers.observable$.next(this.maxWorkers.startingValue);
-    this.pollInterval.observable$.next(this.pollInterval.startingValue);
+    this.updateConfiguration(this.maxWorkers.startingValue, this.pollInterval.startingValue);
 
     this.isStarted = false;
   }
@@ -97,41 +98,52 @@ export class ThroughputManager {
 
   private checkThroughput() {
     if (this.errorCountSinceLastInterval > 0) {
-      // Reduce throughput
-      const newMaxWorkers = Math.max(
-        Math.floor(this.maxWorkers.currentValue * MAX_WORKERS_DECREASE_PERCENTAGE),
-        1
-      );
-      const newPollInterval = Math.ceil(
-        this.pollInterval.currentValue * POLL_INTERVAL_INCREASE_PERCENTAGE
-      );
-      this.logger.info(
-        `Throughput being reduced after seeing ${this.errorCountSinceLastInterval} errors: maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
-      );
-      this.maxWorkers.currentValue = newMaxWorkers;
-      this.pollInterval.currentValue = newPollInterval;
-      this.maxWorkers.observable$.next(newMaxWorkers);
-      this.pollInterval.observable$.next(newPollInterval);
+      this.reduceThroughput();
     } else {
-      // Bring throughput towards normal configuration
-      const newMaxWorkers = Math.min(
-        this.maxWorkers.startingValue,
-        Math.ceil(this.maxWorkers.currentValue * MAX_WORKERS_INCREASE_PERCENTAGE + 1)
-      );
-      const newPollInterval = Math.max(
-        this.pollInterval.startingValue,
-        Math.floor(this.pollInterval.currentValue * POLL_INTERVAL_DECREASE_PERCENTAGE - 1)
-      );
-      if (
-        newMaxWorkers !== this.maxWorkers.currentValue ||
-        newPollInterval !== this.pollInterval.currentValue
-      ) {
-        this.logger.info(
-          `Throughput increasing after seeing no errors: maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
-        );
-      }
+      this.increaseThroughput();
     }
 
     this.errorCountSinceLastInterval = 0;
+  }
+
+  private reduceThroughput() {
+    const newMaxWorkers = Math.max(
+      Math.floor(this.maxWorkers.currentValue * MAX_WORKERS_DECREASE_PERCENTAGE),
+      1
+    );
+    const newPollInterval = Math.ceil(
+      this.pollInterval.currentValue * POLL_INTERVAL_INCREASE_PERCENTAGE
+    );
+    this.logger.info(
+      `Throughput being reduced after seeing ${this.errorCountSinceLastInterval} errors: maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
+    );
+    this.updateConfiguration(newMaxWorkers, newPollInterval);
+  }
+
+  private increaseThroughput() {
+    const newMaxWorkers = Math.min(
+      this.maxWorkers.startingValue,
+      Math.ceil(this.maxWorkers.currentValue * MAX_WORKERS_INCREASE_PERCENTAGE + 1)
+    );
+    const newPollInterval = Math.max(
+      this.pollInterval.startingValue,
+      Math.floor(this.pollInterval.currentValue * POLL_INTERVAL_DECREASE_PERCENTAGE - 1)
+    );
+    if (
+      newMaxWorkers !== this.maxWorkers.currentValue ||
+      newPollInterval !== this.pollInterval.currentValue
+    ) {
+      this.logger.info(
+        `Throughput increasing after seeing no errors: maxWorkers: ${this.maxWorkers.currentValue}->${newMaxWorkers}, pollInterval: ${this.pollInterval.currentValue}->${newPollInterval}`
+      );
+    }
+    this.updateConfiguration(newMaxWorkers, newPollInterval);
+  }
+
+  private updateConfiguration(newMaxWorkers: number, newPollInterval: number) {
+    this.maxWorkers.currentValue = newMaxWorkers;
+    this.pollInterval.currentValue = newPollInterval;
+    this.maxWorkers.observable$.next(newMaxWorkers);
+    this.pollInterval.observable$.next(newPollInterval);
   }
 }
