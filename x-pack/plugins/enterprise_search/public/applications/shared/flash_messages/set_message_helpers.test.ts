@@ -17,7 +17,7 @@ describe('', () => {
   const message = 'I am a message';
 
   describe('setSuccessMessage()', () => {
-    it('sets a flash message', () => {
+    it('sets a success message', () => {
       FlashMessagesLogic.mount();
       setSuccessMessage(message);
 
@@ -31,7 +31,7 @@ describe('', () => {
   });
 
   describe('setErrorMessage()', () => {
-    it('sets a flash message', () => {
+    it('sets an error message', () => {
       FlashMessagesLogic.mount();
       setErrorMessage(message);
 
@@ -45,7 +45,7 @@ describe('', () => {
   });
 
   describe('setQueuedSuccessMessage()', () => {
-    it('sets a flash message', () => {
+    it('sets a queued success message', () => {
       FlashMessagesLogic.mount();
       setQueuedSuccessMessage(message);
 
