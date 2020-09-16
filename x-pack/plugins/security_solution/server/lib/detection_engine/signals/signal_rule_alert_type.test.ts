@@ -31,7 +31,6 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { SingleBulkCreateResponse } from './single_bulk_create';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');

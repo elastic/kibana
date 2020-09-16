@@ -300,7 +300,7 @@ export const errorAggregator = (
   ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
-    if (item.create.error != null && !ignoreStatusCodes.includes(item.create.status)) {
+    if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
       if (accum[item.create.error.reason] == null) {
         accum[item.create.error.reason] = {
           count: 1,

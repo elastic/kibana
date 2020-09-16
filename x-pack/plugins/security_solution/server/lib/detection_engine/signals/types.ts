@@ -58,7 +58,7 @@ export interface SignalSource {
 }
 
 export interface BulkItem {
-  create: {
+  create?: {
     _index: string;
     _type?: string;
     _id: string;
