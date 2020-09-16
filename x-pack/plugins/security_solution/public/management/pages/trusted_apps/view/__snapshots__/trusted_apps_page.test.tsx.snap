@@ -660,10 +660,8 @@ exports[`TrustedAppsPage when the Add Trusted App button is clicked should displ
               <button
                 aria-haspopup="true"
                 aria-labelledby="mockId mockId"
-                aria-selected="true"
                 class="euiSuperSelectControl euiSuperSelectControl--fullWidth"
                 data-test-subj="addTrustedAppFlyout-createForm-osSelectField"
-                role="option"
                 type="button"
               >
                 Windows
@@ -756,10 +754,8 @@ exports[`TrustedAppsPage when the Add Trusted App button is clicked should displ
                               <button
                                 aria-haspopup="true"
                                 aria-labelledby="mockId mockId"
-                                aria-selected="true"
                                 class="euiSuperSelectControl"
                                 data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-field"
-                                role="option"
                                 type="button"
                               >
                                 Hash
