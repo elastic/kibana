@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -28,6 +28,10 @@ import { CHART_TYPE } from '../explorer_constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../common/constants/app';
+import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
@@ -51,7 +55,26 @@ function getChartId(series) {
 }
 
 // Wrapper for a single explorer chart
-function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel }) {
+function ExplorerChartContainerUI({ series, severity, tooManyBuckets, wrapLabel, kibana }) {
+  const {
+    services: {
+      application: { navigateToApp },
+
+      share: {
+        urlGenerators: { getUrlGenerator },
+      },
+    },
+  } = kibana;
+  const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+  const redirectToSingleMetricViewer = useCallback(async () => {
+    const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
+    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, singleMetricViewerLink);
+
+    await navigateToApp(PLUGIN_ID, {
+      path: singleMetricViewerLink,
+    });
+  }, [mlUrlGenerator]);
+
   const { detectorLabel, entityFields } = series;
 
   const chartType = getChartType(series);
@@ -106,7 +129,8 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel })
                 iconSide="right"
                 iconType="visLine"
                 size="xs"
-                onClick={() => window.open(getExploreSeriesLink(series), '_blank')}
+                onClick={redirectToSingleMetricViewer}
+                // onClick={() => window.open(getExploreSeriesLink(mlUrlGenerator, series), '_blank')}
               >
                 <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
               </EuiButtonEmpty>
@@ -148,6 +172,8 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel })
     </React.Fragment>
   );
 }
+
+const ExplorerChartContainer = withKibana(ExplorerChartContainerUI);
 
 // Flex layout wrapper for all explorer charts
 export const ExplorerChartsContainer = ({

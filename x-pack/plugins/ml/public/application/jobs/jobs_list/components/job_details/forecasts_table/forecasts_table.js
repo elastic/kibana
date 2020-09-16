@@ -33,6 +33,7 @@ import {
   ML_APP_URL_GENERATOR,
   ML_PAGES,
 } from '../../../../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../../../../common/constants/app';
 
 const MAX_FORECASTS = 500;
 
@@ -154,7 +155,7 @@ export class ForecastsTableUI extends Component {
       this.props.job.job_id,
       singleMetricForecastLink
     );
-    await navigateToApp('ml', {
+    await navigateToApp(PLUGIN_ID, {
       path: singleMetricForecastLink,
     });
   }
