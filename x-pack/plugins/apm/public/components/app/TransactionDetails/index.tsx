@@ -18,7 +18,6 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { useLocation } from '../../../hooks/useLocation';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -32,9 +31,11 @@ import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 
 type TransactionDetailsProps = RouteComponentProps<{ serviceName: string }>;
 
-export function TransactionDetails({ match }: TransactionDetailsProps) {
+export function TransactionDetails({
+  location,
+  match,
+}: TransactionDetailsProps) {
   const { serviceName } = match.params;
-  const location = useLocation();
   const { urlParams } = useUrlParams();
   const {
     data: distributionData,

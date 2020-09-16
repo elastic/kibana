@@ -74,21 +74,24 @@ describe('HttpLogic', () => {
       describe('errorConnectingInterceptor', () => {
         it('handles errors connecting to Enterprise Search', async () => {
           const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          await responseError({ response: { url: '/api/app_search/engines', status: 502 } });
+          const httpResponse = { response: { url: '/api/app_search/engines', status: 502 } };
+          await expect(responseError(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalled();
         });
 
         it('does not handle non-502 Enterprise Search errors', async () => {
           const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          await responseError({ response: { url: '/api/workplace_search/overview', status: 404 } });
+          const httpResponse = { response: { url: '/api/workplace_search/overview', status: 404 } };
+          await expect(responseError(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
         });
 
         it('does not handle errors for unrelated calls', async () => {
           const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          await responseError({ response: { url: '/api/some_other_plugin/', status: 502 } });
+          const httpResponse = { response: { url: '/api/some_other_plugin/', status: 502 } };
+          await expect(responseError(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
         });
