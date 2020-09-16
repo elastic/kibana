@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _, { get } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -526,7 +525,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
       try {
         await rolesAPIClient.saveRole({ role, spacesEnabled: spaces.enabled });
       } catch (error) {
-        notifications.toasts.addDanger(get(error, 'data.message'));
+        notifications.toasts.addDanger(
+          error?.body?.message ??
+            i18n.translate('xpack.security.management.editRole.errorSavingRoleError', {
+              defaultMessage: 'Error saving role',
+            })
+        );
         return;
       }
 
@@ -545,7 +549,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
     try {
       await rolesAPIClient.deleteRole(role.name);
     } catch (error) {
-      notifications.toasts.addDanger(get(error, 'data.message'));
+      notifications.toasts.addDanger(
+        error?.data?.message ??
+          i18n.translate('xpack.security.management.editRole.errorDeletingRoleError', {
+            defaultMessage: 'Error deleting role',
+          })
+      );
       return;
     }
 
