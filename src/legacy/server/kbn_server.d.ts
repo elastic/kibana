@@ -26,7 +26,6 @@ import {
   LoggerFactory,
   PackageInfo,
   LegacyServiceSetupDeps,
-  LegacyServiceDiscoverPlugins,
 } from '../../core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -94,11 +93,6 @@ export interface NewPlatform {
   stop: null;
 }
 
-export type LegacyPlugins = Pick<
-  LegacyServiceDiscoverPlugins,
-  'pluginSpecs' | 'disabledPluginSpecs' | 'uiExports'
->;
-
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: NewPlatform;
@@ -107,12 +101,7 @@ export default class KbnServer {
   public pluginSpecs: any[];
   public uiBundles: any;
 
-  constructor(
-    settings: Record<string, any>,
-    config: KibanaConfig,
-    core: KibanaCore,
-    legacyPlugins: LegacyPlugins
-  );
+  constructor(settings: Record<string, any>, config: KibanaConfig, core: KibanaCore);
 
   public ready(): Promise<void>;
   public mixin(...fns: KbnMixinFunc[]): Promise<void>;

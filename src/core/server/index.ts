@@ -340,7 +340,6 @@ export {
 export {
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
-  LegacyServiceDiscoverPlugins,
   LegacyConfig,
   LegacyUiExports,
   LegacyInternals,

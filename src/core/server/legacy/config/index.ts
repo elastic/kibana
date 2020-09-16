@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { ensureValidConfiguration } from './ensure_valid_configuration';
 export { LegacyObjectToConfigAdapter } from './legacy_object_to_config_adapter';

@@ -19,7 +19,6 @@
 
 import { Server } from 'hapi';
 
-import { ChromeNavLink } from '../../public';
 import { KibanaRequest, LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from '../plugins';
@@ -100,38 +99,9 @@ export type VarsReplacer = (
  * @internal
  * @deprecated
  */
-export type LegacyNavLinkSpec = Partial<LegacyNavLink> & {
-  id: string;
-  title: string;
-  url: string;
-};
-
-/**
- * @internal
- * @deprecated
- */
-export type LegacyAppSpec = Partial<LegacyNavLink> & {
-  pluginId?: string;
-  listed?: boolean;
-};
-
-/**
- * @internal
- * @deprecated
- */
-export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order' | 'href'> & {
-  order: number;
-};
-
-/**
- * @internal
- * @deprecated
- */
 export interface LegacyUiExports {
   defaultInjectedVarProviders?: VarsProvider[];
   injectedVarsReplacers?: VarsReplacer[];
-  navLinkSpecs?: LegacyNavLinkSpec[] | null;
-  uiAppSpecs?: Array<LegacyAppSpec | undefined>;
   unknown?: [{ pluginSpec: LegacyPluginSpec; type: unknown }];
 }
 
@@ -177,24 +147,4 @@ export interface ILegacyInternals {
     request: KibanaRequest | LegacyRequest,
     injected?: LegacyVars
   ): Promise<LegacyVars>;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface LegacyPlugins {
-  disabledPluginSpecs: LegacyPluginSpec[];
-  pluginSpecs: LegacyPluginSpec[];
-  uiExports: LegacyUiExports;
-  navLinks: LegacyNavLink[];
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
-  pluginExtendedConfig: LegacyConfig;
-  settings: LegacyVars;
 }

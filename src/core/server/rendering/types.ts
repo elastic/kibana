@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
-import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
@@ -59,7 +58,6 @@ export interface RenderingMetadata {
     legacyMetadata: {
       app: { getId(): string };
       bundleId: string;
-      nav: LegacyNavLink[];
       version: string;
       branch: string;
       buildNum: number;
@@ -78,7 +76,6 @@ export interface RenderingMetadata {
 /** @internal */
 export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
-  legacyPlugins: LegacyServiceDiscoverPlugins;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
 }

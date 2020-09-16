@@ -43,7 +43,6 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
   public async setup({
     http,
     status,
-    legacyPlugins,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     return {
@@ -98,7 +97,6 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
             legacyMetadata: {
               app,
               bundleId: `app:${appId}`,
-              nav: legacyPlugins.navLinks,
               version: env.packageInfo.version,
               branch: env.packageInfo.branch,
               buildNum: env.packageInfo.buildNum,

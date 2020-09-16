@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
-
 import { KibanaRequest, LegacyRequest } from '../http';
-import { ensureRawRequest } from '../http/router';
-import { mergeVars } from './merge_vars';
-import { ILegacyInternals, LegacyVars, VarsInjector, LegacyConfig, LegacyUiExports } from './types';
+import { ILegacyInternals, LegacyVars, VarsInjector } from './types';
 
 /**
  * @internal
@@ -30,37 +26,8 @@ import { ILegacyInternals, LegacyVars, VarsInjector, LegacyConfig, LegacyUiExpor
  */
 export class LegacyInternals implements ILegacyInternals {
   private readonly injectors = new Map<string, Set<VarsInjector>>();
-  private cachedDefaultVars?: LegacyVars;
 
-  constructor(
-    private readonly uiExports: LegacyUiExports,
-    private readonly config: LegacyConfig,
-    private readonly server: Server
-  ) {}
-
-  private get defaultVars(): LegacyVars {
-    if (this.cachedDefaultVars) {
-      return this.cachedDefaultVars;
-    }
-
-    const { defaultInjectedVarProviders = [] } = this.uiExports;
-
-    return (this.cachedDefaultVars = defaultInjectedVarProviders.reduce(
-      (vars, { fn, pluginSpec }) =>
-        mergeVars(vars, fn(this.server, pluginSpec.readConfigValue(this.config, []))),
-      {}
-    ));
-  }
-
-  private replaceVars(vars: LegacyVars, request: KibanaRequest | LegacyRequest) {
-    const { injectedVarsReplacers = [] } = this.uiExports;
-
-    return injectedVarsReplacers.reduce(
-      async (injected, replacer) =>
-        replacer(await injected, ensureRawRequest(request), this.server),
-      Promise.resolve(vars)
-    );
-  }
+  constructor() {}
 
   public injectUiAppVars(id: string, injector: VarsInjector) {
     if (!this.injectors.has(id)) {
@@ -85,9 +52,6 @@ export class LegacyInternals implements ILegacyInternals {
     request: KibanaRequest | LegacyRequest,
     injected: LegacyVars = {}
   ) {
-    return this.replaceVars(
-      mergeVars(this.defaultVars, await this.getInjectedUiAppVars(id), injected),
-      request
-    );
+    return Promise.resolve(injected);
   }
 }
