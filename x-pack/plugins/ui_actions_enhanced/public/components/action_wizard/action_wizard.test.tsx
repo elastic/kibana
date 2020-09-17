@@ -89,7 +89,10 @@ test('if action is beta, beta badge is shown', () => {
       ...urlDrilldownActionFactory,
       isBeta: true,
     },
-    () => licenseMock.createLicense()
+    {
+      getLicense: () => licensingMock.createLicense(),
+      getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+    }
   );
   const screen = render(<Demo actionFactories={[dashboardFactory, betaUrl]} />);
   expect(screen.getByText(/Beta/i)).toBeVisible();

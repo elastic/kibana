@@ -19,6 +19,7 @@ import {
   EuiTextColor,
   EuiTitle,
   EuiLink,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -257,7 +258,15 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           )}
           <EuiFlexItem grow={true}>
             <EuiText>
-              <h4>{actionFactory.getDisplayName(context)}</h4>
+              <h4>
+                {actionFactory.getDisplayName(context)}{' '}
+                {actionFactory.isBeta && (
+                  <EuiBetaBadge
+                    label={txtBetaActionFactoryLabel}
+                    tooltipContent={txtBetaActionFactoryTooltip}
+                  />
+                )}
+              </h4>
             </EuiText>
           </EuiFlexItem>
           {showDeselect && (
