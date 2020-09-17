@@ -16,7 +16,7 @@ import { buildCommentUserActionItem } from '../../../../services/user_actions/he
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { getConnectorId } from '../helpers';
+import { getConnectorFromConfiguration } from '../helpers';
 
 export function initPatchCommentApi({
   caseConfigureService,
@@ -103,7 +103,7 @@ export function initPatchCommentApi({
             perPage: 1,
           },
         });
-        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+        const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
         const [comments] = await Promise.all([
           caseService.getAllCaseComments({
             client,
@@ -142,7 +142,7 @@ export function initPatchCommentApi({
                 references: myCase.references,
               },
               comments: comments.saved_objects,
-              caseConfigureConnectorId,
+              caseConfigureConnector,
             })
           ),
         });

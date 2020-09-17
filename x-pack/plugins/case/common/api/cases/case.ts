@@ -16,8 +16,15 @@ export { ActionTypeExecutorResult } from '../../../../actions/server/types';
 
 const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
 
+const CaseConnectorRt = rt.type({
+  id: rt.string,
+  name: rt.string,
+  type: rt.string,
+  fields: rt.UnknownRecord,
+});
+
 const CaseBasicRt = rt.type({
-  connector_id: rt.string,
+  connector: CaseConnectorRt,
   description: rt.string,
   status: StatusRt,
   tags: rt.array(rt.string),
@@ -60,6 +67,7 @@ export const CasePostRequestRt = rt.type({
   description: rt.string,
   tags: rt.array(rt.string),
   title: rt.string,
+  connector: rt.union([rt.null, CaseConnectorRt]),
 });
 
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
@@ -169,6 +177,7 @@ export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type Status = rt.TypeOf<typeof StatusRt>;
+export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
 export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
 export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;

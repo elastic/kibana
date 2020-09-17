@@ -19,15 +19,16 @@ import {
   ConnectorEditFlyout,
 } from '../../../../../triggers_actions_ui/public';
 
-import { ClosureType } from '../../containers/configure/types';
+import { ClosureType, ActionConnector, CaseConnector } from '../../containers/configure/types';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 
+import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import { SectionWrapper } from '../wrappers';
+import { getNoneConnector } from './utils';
 import * as i18n from './translations';
 
 const FormWrapper = styled.div`
@@ -66,12 +67,10 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   );
 
   const {
-    connectorId,
+    connector,
     closureType,
-    currentConfiguration,
     loading: loadingCaseConfigure,
     persistLoading,
-    version,
     persistCaseConfigure,
     setConnector,
     setClosureType,
@@ -84,7 +83,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
-  const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
+  const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
 
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
@@ -94,16 +93,34 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     (isVisible: boolean) => {
       setAddFlyoutVisibility(isVisible);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentConfiguration, connectorId, closureType]
+    [setAddFlyoutVisibility]
   );
 
   const handleSetEditFlyoutVisibility = useCallback(
     (isVisible: boolean) => {
       setEditFlyoutVisibility(isVisible);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentConfiguration, connectorId, closureType]
+    [setEditFlyoutVisibility]
+  );
+
+  const getConnectorById = useCallback(
+    (id: string): ActionConnector | null => connectors.find((c) => c.id === id) ?? null,
+    [connectors]
+  );
+
+  const normalizeActionConnector = useCallback(
+    (actionConnector: ActionConnector): CaseConnector => ({
+      id: actionConnector.id,
+      name: actionConnector.name,
+      type: actionConnector.actionTypeId,
+    }),
+    []
+  );
+
+  const normalizeCaseConnector = useCallback(
+    (caseConnector: CaseConnector): ActionConnector | null =>
+      connectors.find((c) => c.id === caseConnector.id) ?? null,
+    [connectors]
   );
 
   const onChangeConnector = useCallback(
@@ -113,54 +130,50 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         return;
       }
 
-      setConnector(id);
+      const actionConnector = getConnectorById(id);
+      const caseConnector =
+        actionConnector != null ? normalizeActionConnector(actionConnector) : getNoneConnector();
+
+      setConnector(caseConnector);
       persistCaseConfigure({
-        connectorId: id,
-        connectorName: connectors.find((c) => c.id === id)?.name ?? '',
+        connector: caseConnector,
         closureType,
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorId, closureType, version]
+    [closureType, getConnectorById, persistCaseConfigure, setConnector, normalizeActionConnector]
   );
 
   const onChangeClosureType = useCallback(
     (type: ClosureType) => {
       setClosureType(type);
       persistCaseConfigure({
-        connectorId,
-        connectorName: connectors.find((c) => c.id === connectorId)?.name ?? '',
+        connector,
         closureType: type,
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connectorId, closureType, version]
+    [connector, persistCaseConfigure, setClosureType]
   );
 
   useEffect(() => {
     if (
       !isLoadingConnectors &&
-      connectorId !== 'none' &&
-      !connectors.some((c) => c.id === connectorId)
+      connector.id !== 'none' &&
+      !connectors.some((c) => c.id === connector.id)
     ) {
       setConnectorIsValid(false);
     } else if (
       !isLoadingConnectors &&
-      (connectorId === 'none' || connectors.some((c) => c.id === connectorId))
+      (connector.id === 'none' || connectors.some((c) => c.id === connector.id))
     ) {
       setConnectorIsValid(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectors, connectorId]);
+  }, [connectors, connector, isLoadingConnectors]);
 
   useEffect(() => {
-    if (!isLoadingConnectors && connectorId !== 'none') {
-      setEditedConnectorItem(
-        connectors.find((c) => c.id === connectorId) as ActionConnectorTableItem
-      );
+    if (!isLoadingConnectors && connector.id !== 'none') {
+      setEditedConnectorItem(normalizeCaseConnector(connector) as ActionConnectorTableItem);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectors, connectorId]);
+  }, [connectors, connector, isLoadingConnectors, normalizeCaseConnector]);
 
   return (
     <FormWrapper>
@@ -191,7 +204,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           onChangeConnector={onChangeConnector}
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           handleShowEditFlyout={onClickUpdateConnector}
-          selectedConnector={connectorId}
+          selectedConnector={connector.id}
         />
       </SectionWrapper>
       <ActionsConnectorsContextProvider

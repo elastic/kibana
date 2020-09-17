@@ -18,7 +18,7 @@ import {
 } from '../../../../common/api';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
-import { getCaseToUpdate, getConnectorId } from './helpers';
+import { getCaseToUpdate, getConnectorFromConfiguration } from './helpers';
 import { buildCaseUserActions } from '../../../services/user_actions/helpers';
 import { CASES_URL } from '../../../../common/constants';
 
@@ -50,7 +50,7 @@ export function initPatchCasesApi({
           }),
           caseConfigureService.find({ client }),
         ]);
-        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+        const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
         let nonExistingCases: CasePatchRequest[] = [];
         const conflictedCases = query.cases.filter((q) => {
@@ -133,7 +133,7 @@ export function initPatchCasesApi({
                   references: myCase.references,
                   version: updatedCase?.version ?? myCase.version,
                 },
-                caseConfigureConnectorId,
+                caseConfigureConnector,
               });
             });
 

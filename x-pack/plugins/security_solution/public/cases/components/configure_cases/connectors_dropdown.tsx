@@ -8,12 +8,12 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { Connector } from '../../containers/configure/types';
+import { ActionConnector } from '../../containers/configure/types';
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 import * as i18n from './translations';
 
 export interface Props {
-  connectors: Connector[];
+  connectors: ActionConnector[];
   disabled: boolean;
   isLoading: boolean;
   onChange: (id: string) => void;

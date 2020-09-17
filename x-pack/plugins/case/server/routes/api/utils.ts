@@ -21,12 +21,13 @@ import {
   CommentResponse,
   CommentsResponse,
   CommentAttributes,
+  CaseConnector,
 } from '../../../common/api';
 
 import { SortFieldCase, TotalCommentByCase } from './types';
 
 export const transformNewCase = ({
-  connectorId,
+  connector,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -34,7 +35,7 @@ export const transformNewCase = ({
   newCase,
   username,
 }: {
-  connectorId: string;
+  connector: CaseConnector;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
@@ -44,7 +45,7 @@ export const transformNewCase = ({
   ...newCase,
   closed_at: null,
   closed_by: null,
-  connector_id: connectorId,
+  connector,
   created_at: createdDate,
   created_by: { email, full_name, username },
   external_service: null,
@@ -92,12 +93,12 @@ export const transformCases = (
   countOpenCases: number,
   countClosedCases: number,
   totalCommentByCase: TotalCommentByCase[],
-  caseConfigureConnectorId: string = 'none'
+  caseConfigureConnector: CaseConnector
 ): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
-  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase, caseConfigureConnectorId),
+  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase, caseConfigureConnector),
   count_open_cases: countOpenCases,
   count_closed_cases: countClosedCases,
 });
@@ -105,7 +106,7 @@ export const transformCases = (
 export const flattenCaseSavedObjects = (
   savedObjects: Array<SavedObject<CaseAttributes>>,
   totalCommentByCase: TotalCommentByCase[],
-  caseConfigureConnectorId: string = 'none'
+  caseConfigureConnector: CaseConnector
 ): CaseResponse[] =>
   savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<CaseAttributes>) => {
     return [
@@ -114,7 +115,7 @@ export const flattenCaseSavedObjects = (
         savedObject,
         totalComment:
           totalCommentByCase.find((tc) => tc.caseId === savedObject.id)?.totalComments ?? 0,
-        caseConfigureConnectorId,
+        caseConfigureConnector,
       }),
     ];
   }, []);
@@ -123,19 +124,19 @@ export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = 0,
-  caseConfigureConnectorId = 'none',
+  caseConfigureConnector,
 }: {
   savedObject: SavedObject<CaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
-  caseConfigureConnectorId?: string;
+  caseConfigureConnector: CaseConnector;
 }): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   ...savedObject.attributes,
-  connector_id: savedObject.attributes.connector_id ?? caseConfigureConnectorId,
+  connector: savedObject.attributes.connector ?? caseConfigureConnector,
 });
 
 export const transformComments = (

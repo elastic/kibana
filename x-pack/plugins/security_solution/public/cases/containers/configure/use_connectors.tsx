@@ -9,18 +9,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { useStateToaster, errorToToaster } from '../../../common/components/toasters';
 import * as i18n from '../translations';
 import { fetchConnectors } from './api';
-import { Connector } from './types';
+import { ActionConnector } from './types';
 
-export interface ReturnConnectors {
+export interface UseConnectorsResponse {
   loading: boolean;
-  connectors: Connector[];
+  connectors: ActionConnector[];
   refetchConnectors: () => void;
 }
 
-export const useConnectors = (): ReturnConnectors => {
+export const useConnectors = (): UseConnectorsResponse => {
   const [, dispatchToaster] = useStateToaster();
   const [loading, setLoading] = useState(true);
-  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
 
   const refetchConnectors = useCallback(() => {
     let didCancel = false;

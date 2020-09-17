@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
-import { Connector } from '../../containers/configure/types';
+import { ActionConnector } from '../../containers/configure/types';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
@@ -29,7 +29,7 @@ const EuiFormRowExtended = styled(EuiFormRow)`
 `;
 
 export interface Props {
-  connectors: Connector[];
+  connectors: ActionConnector[];
   disabled: boolean;
   isLoading: boolean;
   updateConnectorDisabled: boolean;

@@ -5,7 +5,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useConnectors, ReturnConnectors } from './use_connectors';
+import { useConnectors, UseConnectorsResponse } from './use_connectors';
 import { connectorsMock } from './mock';
 import * as api from './api';
 
@@ -19,7 +19,7 @@ describe('useConnectors', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnConnectors>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, UseConnectorsResponse>(() =>
         useConnectors()
       );
       await waitForNextUpdate();
@@ -33,7 +33,7 @@ describe('useConnectors', () => {
 
   test('fetch connectors', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnConnectors>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, UseConnectorsResponse>(() =>
         useConnectors()
       );
       await waitForNextUpdate();
@@ -49,7 +49,7 @@ describe('useConnectors', () => {
   test('refetch connectors', async () => {
     const spyOnfetchConnectors = jest.spyOn(api, 'fetchConnectors');
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnConnectors>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, UseConnectorsResponse>(() =>
         useConnectors()
       );
       await waitForNextUpdate();
@@ -61,7 +61,7 @@ describe('useConnectors', () => {
 
   test('set isLoading to true when refetching connectors', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnConnectors>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, UseConnectorsResponse>(() =>
         useConnectors()
       );
       await waitForNextUpdate();
@@ -79,7 +79,7 @@ describe('useConnectors', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnConnectors>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, UseConnectorsResponse>(() =>
         useConnectors()
       );
       await waitForNextUpdate();
