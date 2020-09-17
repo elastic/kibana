@@ -113,6 +113,7 @@ export const searchAfterAndBulkCreate = async ({
     if (tuple == null || tuple.to == null || tuple.from == null) {
       logger.error(buildRuleMessage(`[-] malformed date tuple`));
       toReturn.success = false;
+      toReturn.errors = [...new Set([...toReturn.errors, 'malformed date tuple'])];
       return toReturn;
     }
     signalsCreatedCount = 0;
