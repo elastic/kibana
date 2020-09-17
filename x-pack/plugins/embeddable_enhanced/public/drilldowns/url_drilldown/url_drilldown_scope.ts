@@ -105,9 +105,9 @@ export type UrlDrilldownEventScope = ValueClickTriggerEventScope | RangeSelectTr
 export type EventScopeInput = ActionContext;
 export interface ValueClickTriggerEventScope {
   key?: string;
-  value: string | number | boolean;
+  value: Primitive;
   negate: boolean;
-  points: Array<{ key?: string; value: string | number | boolean }>;
+  points: Array<{ key?: string; value: Primitive }>;
 }
 export interface RangeSelectTriggerEventScope {
   key: string;
@@ -144,7 +144,7 @@ function getEventScopeFromValueClickTriggerContext(
   const points = eventScopeInput.data.data.map(({ table, value, column: columnIndex }) => {
     const column = table.columns[columnIndex];
     return {
-      value: toPrimitiveOrUndefined(value) as string | number | boolean,
+      value: toPrimitiveOrUndefined(value) as Primitive,
       key: toPrimitiveOrUndefined(column?.meta?.aggConfigParams?.field) as string | undefined,
     };
   });
@@ -186,10 +186,12 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
   }
 }
 
-function toPrimitiveOrUndefined(v: unknown): string | number | boolean | undefined {
-  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'string') return v;
+type Primitive = string | number | boolean | null;
+function toPrimitiveOrUndefined(v: unknown): Primitive | undefined {
+  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'string' || v === null)
+    return v;
   if (typeof v === 'object' && v instanceof Date) return v.toISOString();
-  if (typeof v === 'undefined' || v === null) return undefined;
+  if (typeof v === 'undefined') return undefined;
   return String(v);
 }
 

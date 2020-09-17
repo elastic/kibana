@@ -10,7 +10,13 @@ import {
   ValueClickTriggerEventScope,
 } from './url_drilldown_scope';
 
-const createPoint = ({ field, value }: { field: string; value: string }) => ({
+const createPoint = ({
+  field,
+  value,
+}: {
+  field: string;
+  value: string | null | number | boolean;
+}) => ({
   table: {
     columns: [
       {
@@ -97,6 +103,27 @@ describe('VALUE_CLICK_TRIGGER', () => {
         },
       ]
     `);
+    });
+  });
+
+  describe('handles undefined, null or missing values', () => {
+    test('undefined or missing values are removed from the result scope', () => {
+      const point = createPoint({ field: undefined } as any);
+      const eventScope = getEventScope({
+        data: { data: [point] },
+      }) as ValueClickTriggerEventScope;
+
+      expect('key' in eventScope).toBeFalsy();
+      expect('value' in eventScope).toBeFalsy();
+    });
+
+    test('null value stays in the result scope', () => {
+      const point = createPoint({ field: 'field', value: null });
+      const eventScope = getEventScope({
+        data: { data: [point] },
+      }) as ValueClickTriggerEventScope;
+
+      expect(eventScope.value).toBeNull();
     });
   });
 });
