@@ -6,14 +6,14 @@
 
 import { CaseSettingsRegistry } from './types';
 import { createCaseSettingsRegistry } from './settings_registry';
-import { getCaseSetting as getJiraCaseSetting } from './jira';
+import { getCaseSetting as getJiraCaseSetting, JiraSettingFields } from './jira';
 
 interface UseCaseSettingReturn {
   caseSettingsRegistry: CaseSettingsRegistry;
 }
 
 function registerCaseSettings(caseSettingsRegistry: CaseSettingsRegistry) {
-  caseSettingsRegistry.register(getJiraCaseSetting());
+  caseSettingsRegistry.register<JiraSettingFields>(getJiraCaseSetting());
 }
 
 const caseSettingsRegistry = createCaseSettingsRegistry();
