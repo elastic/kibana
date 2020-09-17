@@ -54,39 +54,4 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       }
     }
   );
-
-  framework.registerRoute(
-    {
-      method: 'post',
-      path: '/api/metrics/inventory_timeline',
-      validate: {
-        body: escapeHatch,
-      },
-    },
-    async (requestContext, request, response) => {
-      try {
-        const snapshotRequest = pipe(
-          SnapshotRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-
-        const source = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          snapshotRequest.sourceId
-        );
-
-        UsageCollector.countNode(snapshotRequest.nodeType);
-        const client = createSearchClient(requestContext, framework);
-        const snapshotResponse = await getNodes(client, snapshotRequest, source);
-
-        return response.ok({
-          body: SnapshotNodeResponseRT.encode(snapshotResponse),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
-    }
-  );
 };
