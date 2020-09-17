@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { FC, useState, useEffect, useLayoutEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { Observable } from 'rxjs';
 import {
   EuiButton,
@@ -37,7 +37,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FetchResult } from 'src/plugins/newsfeed/public';
+import { FetchResult, NewsfeedItem } from 'src/plugins/newsfeed/public';
 import { PLUGIN_ID } from '../../../common';
 import { createAppNavigationHandler } from '../../app_navigation_handler';
 import { getServices } from '../../kibana_services';
@@ -100,6 +100,8 @@ const apps = {
     path: '/app/graph',
   },
 };
+
+type AppId = keyof typeof apps;
 
 const solutions = {
   enterpriseSearch: {
@@ -238,12 +240,12 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
     );
   };
 
-  const renderFeedItem = ({ title, description, link, publishOn }) => (
+  const renderFeedItem = ({ title, description, linkUrl, publishOn }: NewsfeedItem) => (
     <article key={title}>
       <header>
         <EuiTitle size="xxs">
           <h3>
-            <EuiLink href={link} target="_blank">
+            <EuiLink href={linkUrl} target="_blank">
               {title}
             </EuiLink>
           </h3>
@@ -264,7 +266,7 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
     </article>
   );
 
-  const renderAppCard = (appId: string) => {
+  const renderAppCard = (appId: AppId) => {
     const app = apps[appId];
 
     return capabilities.navLinks[appId] ? (
@@ -288,8 +290,10 @@ export const Overview: FC<Props> = ({ newsfeed$ }) => {
   };
 
   const renderNormal = () => {
-    const mainApps = ['dashboards', 'discover'];
-    const remainingApps = Object.keys(apps).filter((appId) => !mainApps.includes(appId));
+    const mainApps = [apps.dashboards.id, apps.discover.id] as AppId[];
+    const remainingApps = Object.keys(apps).filter(
+      (appId) => !mainApps.includes(appId as AppId)
+    ) as AppId[];
 
     return (
       <>

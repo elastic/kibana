@@ -19,13 +19,7 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiScreenReaderOnly,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SolutionPanel } from './solution_panel';
 import { FeatureCatalogueSolution } from '../../../';

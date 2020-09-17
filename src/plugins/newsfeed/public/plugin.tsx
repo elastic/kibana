@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { catchError, takeUntil, share } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import moment from 'moment';
@@ -53,7 +53,7 @@ export class NewsfeedPublicPlugin
   }
 
   public start(core: CoreStart) {
-    const api$ = this.fetchNewsfeed(core);
+    const api$ = this.fetchNewsfeed(core).pipe(share());
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) => this.mount(api$, target),
