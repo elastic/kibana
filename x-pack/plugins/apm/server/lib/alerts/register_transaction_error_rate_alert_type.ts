@@ -8,13 +8,14 @@ import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { EventOutcome } from '../../../common/event_outcome';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  TRANSACTION_DURATION,
+  EVENT_OUTCOME,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -28,27 +29,22 @@ interface RegisterAlertParams {
 }
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
-  transactionType: schema.string(),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
-  aggregationType: schema.oneOf([
-    schema.literal('avg'),
-    schema.literal('95th'),
-    schema.literal('99th'),
-  ]),
+  transactionType: schema.string(),
+  serviceName: schema.string(),
   environment: schema.string(),
 });
 
-const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
+const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate];
 
-export function registerTransactionDurationAlertType({
+export function registerTransactionErrorRateAlertType({
   alerts,
   config$,
 }: RegisterAlertParams) {
   alerts.registerType({
-    id: AlertType.TransactionDuration,
+    id: AlertType.TransactionErrorRate,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
@@ -57,17 +53,16 @@ export function registerTransactionDurationAlertType({
     },
     actionVariables: {
       context: [
-        apmActionVariables.serviceName,
         apmActionVariables.transactionType,
+        apmActionVariables.serviceName,
         apmActionVariables.environment,
         apmActionVariables.threshold,
         apmActionVariables.triggerValue,
       ],
     },
     producer: 'apm',
-    executor: async ({ services, params }) => {
+    executor: async ({ services, params: alertParams }) => {
       const config = await config$.pipe(take(1)).toPromise();
-      const alertParams = params;
       const indices = await getApmIndices({
         config,
         savedObjectsClient: services.savedObjectsClient,
@@ -77,6 +72,7 @@ export function registerTransactionDurationAlertType({
         index: indices['apm_oss.transactionIndices'],
         size: 0,
         body: {
+          track_total_hits: true,
           query: {
             bool: {
               filter: [
@@ -95,17 +91,9 @@ export function registerTransactionDurationAlertType({
             },
           },
           aggs: {
-            agg:
-              alertParams.aggregationType === 'avg'
-                ? { avg: { field: TRANSACTION_DURATION } }
-                : {
-                    percentiles: {
-                      field: TRANSACTION_DURATION,
-                      percents: [
-                        alertParams.aggregationType === '95th' ? 95 : 99,
-                      ],
-                    },
-                  },
+            erroneous_transactions: {
+              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+            },
           },
         },
       };
@@ -119,23 +107,23 @@ export function registerTransactionDurationAlertType({
         return;
       }
 
-      const { agg } = response.aggregations;
+      const errornousTransactionsCount =
+        response.aggregations.erroneous_transactions.doc_count;
+      const totalTransactionCount = response.hits.total.value;
+      const transactionErrorRate =
+        (errornousTransactionsCount / totalTransactionCount) * 100;
 
-      const transactionDuration =
-        'values' in agg ? Object.values(agg.values)[0] : agg?.value;
-
-      const threshold = alertParams.threshold * 1000;
-
-      if (transactionDuration && transactionDuration > threshold) {
+      if (transactionErrorRate > alertParams.threshold) {
         const alertInstance = services.alertInstanceFactory(
-          AlertType.TransactionDuration
+          AlertType.TransactionErrorRate
         );
+
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          transactionType: alertParams.transactionType,
           serviceName: alertParams.serviceName,
+          transactionType: alertParams.transactionType,
           environment: alertParams.environment,
-          threshold,
-          triggerValue: transactionDuration,
+          threshold: alertParams.threshold,
+          triggerValue: transactionErrorRate,
         });
       }
     },
