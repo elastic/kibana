@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -19,15 +17,22 @@ import {
 } from '../../helpers/setup_request';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+  getDocumentTypeFilterForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 
 export async function getTransactionAvgDurationByCountry({
   setup,
   serviceName,
   transactionName,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   transactionName?: string;
+  searchAggregatedTransactions: boolean;
 }) {
   const { uiFiltersES, apmEventClient, start, end } = setup;
   const transactionNameFilter = transactionName
@@ -35,7 +40,11 @@ export async function getTransactionAvgDurationByCountry({
     : [];
   const params = {
     apm: {
-      events: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
     },
     body: {
       size: 0,
@@ -48,6 +57,9 @@ export async function getTransactionAvgDurationByCountry({
             { exists: { field: CLIENT_GEO_COUNTRY_ISO_CODE } },
             { range: rangeFilter(start, end) },
             ...uiFiltersES,
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
           ],
         },
       },
@@ -58,8 +70,19 @@ export async function getTransactionAvgDurationByCountry({
             size: 500,
           },
           aggs: {
+            count: {
+              value_count: {
+                field: getTransactionDurationFieldForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+              },
+            },
             avg_duration: {
-              avg: { field: TRANSACTION_DURATION },
+              avg: {
+                field: getTransactionDurationFieldForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+              },
             },
           },
         },
@@ -75,10 +98,9 @@ export async function getTransactionAvgDurationByCountry({
 
   const buckets = resp.aggregations.country_code.buckets;
   const avgDurationsByCountry = buckets.map(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    ({ key, doc_count, avg_duration: { value } }) => ({
+    ({ key, count, avg_duration: { value } }) => ({
       key: key as string,
-      docCount: doc_count,
+      docCount: count.value,
       value: value === null ? 0 : value,
     })
   );
