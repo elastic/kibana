@@ -3,20 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  LegacyEndpointEvent,
-  ResolverEvent,
-  SafeResolverEvent,
-  SafeLegacyEndpointEvent,
-} from '../types';
+import { LegacyEndpointEvent, ResolverEvent, SafeResolverEvent, ECSField } from '../types';
 import { firstNonNullValue, hasValue, values } from './ecs_safety_helpers';
 
-/*
- * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`.
+/**
+ * Legacy events will define the `endgame` object. This is used to narrow a ResolverEvent.
  */
-export function isLegacyEventSafeVersion(
-  event: SafeResolverEvent
-): event is SafeLegacyEndpointEvent {
+interface LegacyEvent {
+  endgame?: object;
+}
+
+/*
+ * Determine if a higher level event type is the legacy variety. Can be used to narrow an event type.
+ * T optionally defines an `endgame` object field used for determining the type of event. If T doesn't contain the
+ * `endgame` field it will serve as the narrowed type.
+ */
+export function isLegacyEventSafeVersion<T extends LegacyEvent>(
+  event: LegacyEvent | {}
+): event is T {
   return 'endgame' in event && event.endgame !== undefined;
 }
 
@@ -27,7 +31,30 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function isProcessRunning(event: SafeResolverEvent): boolean {
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
+type ProcessRunningFields = Partial<
+  | {
+      endgame: object;
+      event: Partial<{
+        type: ECSField<string>;
+        action: ECSField<string>;
+      }>;
+    }
+  | {
+      event: Partial<{
+        type: ECSField<string>;
+      }>;
+    }
+>;
+
+/**
+ * Checks if an event describes a process as running (whether it was started, already running, or changed)
+ *
+ * @param event a document to check for running fields
+ */
+export function isProcessRunning(event: ProcessRunningFields): boolean {
   if (isLegacyEventSafeVersion(event)) {
     return (
       hasValue(event.event?.type, 'process_start') ||
@@ -43,7 +70,18 @@ export function isProcessRunning(event: SafeResolverEvent): boolean {
   );
 }
 
-export function timestampSafeVersion(event: SafeResolverEvent): undefined | number {
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
+type TimestampFields = Pick<SafeResolverEvent, '@timestamp'>;
+
+/**
+ * Extracts the first non null value from the `@timestamp` field in the document. Returns undefined if the field doesn't
+ * exist in the document.
+ *
+ * @param event a document from ES
+ */
+export function timestampSafeVersion(event: TimestampFields): undefined | number {
   return firstNonNullValue(event?.['@timestamp']);
 }
 
@@ -51,7 +89,7 @@ export function timestampSafeVersion(event: SafeResolverEvent): undefined | numb
  * The `@timestamp` for the event, as a `Date` object.
  * If `@timestamp` couldn't be parsed as a `Date`, returns `undefined`.
  */
-export function timestampAsDateSafeVersion(event: SafeResolverEvent): Date | undefined {
+export function timestampAsDateSafeVersion(event: TimestampFields): Date | undefined {
   const value = timestampSafeVersion(event);
   if (value === undefined) {
     return undefined;
@@ -93,9 +131,30 @@ export function eventId(event: ResolverEvent): number | undefined | string {
   return event.event.id;
 }
 
-export function eventSequence(event: SafeResolverEvent): number | undefined {
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
+type EventSequenceFields = Partial<
+  | {
+      endgame: Partial<{
+        serial_event_id: ECSField<number>;
+      }>;
+    }
+  | {
+      event: Partial<{
+        sequence: ECSField<number>;
+      }>;
+    }
+>;
+
+/**
+ * Extract the first non null event sequence value from a document. Returns undefined if the field doesn't exist in the document.
+ *
+ * @param event a document from ES
+ */
+export function eventSequence(event: EventSequenceFields): number | undefined {
   if (isLegacyEventSafeVersion(event)) {
-    return firstNonNullValue(event.endgame.serial_event_id);
+    return firstNonNullValue(event.endgame?.serial_event_id);
   }
   return firstNonNullValue(event.event?.sequence);
 }
@@ -113,7 +172,29 @@ export function entityId(event: ResolverEvent): string {
   return event.process.entity_id;
 }
 
-export function entityIDSafeVersion(event: SafeResolverEvent): string | undefined {
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
+type EntityIDFields = Partial<
+  | {
+      endgame: Partial<{
+        unique_pid: ECSField<number>;
+      }>;
+    }
+  | {
+      process: Partial<{
+        entity_id: ECSField<string>;
+      }>;
+    }
+>;
+
+/**
+ * Extract the first non null value from either the `entity_id` or `unique_pid` depending on the document type. Returns
+ * undefined if the field doesn't exist in the document.
+ *
+ * @param event a document from ES
+ */
+export function entityIDSafeVersion(event: EntityIDFields): string | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return event.endgame?.unique_pid === undefined
       ? undefined
@@ -130,14 +211,59 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
   return event.process.parent?.entity_id;
 }
 
-export function parentEntityIDSafeVersion(event: SafeResolverEvent): string | undefined {
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
+type ParentEntityIDFields = Partial<
+  | {
+      endgame: Partial<{
+        unique_ppid: ECSField<number>;
+      }>;
+    }
+  | {
+      process: Partial<{
+        parent: Partial<{
+          entity_id: ECSField<string>;
+        }>;
+      }>;
+    }
+>;
+
+/**
+ * Extract the first non null value from either the `parent.entity_id` or `unique_ppid` depending on the document type. Returns
+ * undefined if the field doesn't exist in the document.
+ *
+ * @param event a document from ES
+ */
+export function parentEntityIDSafeVersion(event: ParentEntityIDFields): string | undefined {
   if (isLegacyEventSafeVersion(event)) {
-    return String(firstNonNullValue(event.endgame.unique_ppid));
+    return String(firstNonNullValue(event.endgame?.unique_ppid));
   }
   return firstNonNullValue(event.process?.parent?.entity_id);
 }
 
-export function ancestryArray(event: SafeResolverEvent): string[] | undefined {
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
+type AncestryArrayFields = Partial<
+  | {
+      endgame: object;
+    }
+  | {
+      process: Partial<{
+        Ext: Partial<{
+          ancestry: ECSField<string>;
+        }>;
+      }>;
+    }
+>;
+
+/**
+ * Extracts all ancestry array from a document if it exists.
+ *
+ * @param event an ES document
+ */
+export function ancestryArray(event: AncestryArrayFields): string[] | undefined {
   if (isLegacyEventSafeVersion(event)) {
     return undefined;
   }
@@ -146,7 +272,17 @@ export function ancestryArray(event: SafeResolverEvent): string[] | undefined {
   return values(event.process?.Ext?.ancestry);
 }
 
-export function getAncestryAsArray(event: SafeResolverEvent | undefined): string[] {
+/**
+ * Minimum fields needed from the `SafeResolverEvent` type for the function below to operate correctly.
+ */
+type GetAncestryArrayFields = AncestryArrayFields & ParentEntityIDFields;
+
+/**
+ * Returns an array of strings representing the ancestry for a process.
+ *
+ * @param event an ES document
+ */
+export function getAncestryAsArray(event: GetAncestryArrayFields | undefined): string[] {
   if (!event) {
     return [];
   }

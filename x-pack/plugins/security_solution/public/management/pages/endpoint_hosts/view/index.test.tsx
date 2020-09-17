@@ -20,6 +20,7 @@ import {
   HostPolicyResponseActionStatus,
   HostPolicyResponseAppliedAction,
   HostStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
@@ -131,6 +132,7 @@ describe('when on the list page', () => {
               hostListData[index] = {
                 metadata: hostListData[index].metadata,
                 host_status: status,
+                query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
               };
             }
           );
@@ -301,6 +303,8 @@ describe('when on the list page', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
         metadata: { host, ...details },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        query_strategy_version,
       } = mockEndpointDetailsApiResult();
 
       hostDetails = {
@@ -312,6 +316,7 @@ describe('when on the list page', () => {
             id: '1',
           },
         },
+        query_strategy_version,
       };
 
       agentId = hostDetails.metadata.elastic.agent.id;
@@ -510,7 +515,7 @@ describe('when on the list page', () => {
       const renderResult = await renderAndWaitForData();
       const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
-      expect(linkToReassign.textContent).toEqual('Reassign Configuration');
+      expect(linkToReassign.textContent).toEqual('Reassign Policy');
       expect(linkToReassign.getAttribute('href')).toEqual(
         `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
       );
@@ -572,7 +577,7 @@ describe('when on the list page', () => {
       it('should include the sub-panel title', async () => {
         expect(
           (await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutTitle')).textContent
-        ).toBe('Configuration Response');
+        ).toBe('Policy Response');
       });
 
       it('should show a configuration section for each protection', async () => {
@@ -681,6 +686,7 @@ describe('when on the list page', () => {
       hostInfo = {
         host_status: hosts[0].host_status,
         metadata: hosts[0].metadata,
+        query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
       };
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;

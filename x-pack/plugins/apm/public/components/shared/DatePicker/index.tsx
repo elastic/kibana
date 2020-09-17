@@ -7,10 +7,9 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { isEmpty, isEqual, pickBy } from 'lodash';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { clearCache } from '../../../services/rest/callApi';
 import { fromQuery, toQuery } from '../Links/url_helpers';
