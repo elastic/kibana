@@ -1253,25 +1253,23 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@28.2.0":
-  version "28.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-28.2.0.tgz#0c89c7adc27d4ac918191af8237a2634a26d0637"
-  integrity sha512-ovVkwbwcJLs87ycaof5pyTGjpuPH2sN38k2e+c3IiZjoeGAqWZJouptQguoKYglCyayxoBUV3TAE82m+qyxCnA==
+"@elastic/eui@28.4.0":
+  version "28.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-28.4.0.tgz#6b3b6b5e8b602d009410a97c26e22093846f708a"
+  integrity sha512-4iXo5fNx4qqeI+Tj5EJ0qHRhyi8KTLaqeQJCWg9Vy7N83ap6kp6s7X6D6qYUHqdmOdJH9QZYuYIpRUi3TQEJNg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
-    "@types/lodash" "^4.14.116"
-    "@types/numeral" "^0.0.25"
-    "@types/react-beautiful-dnd" "^12.1.2"
-    "@types/react-input-autosize" "^2.0.2"
+    "@types/lodash" "^4.14.160"
+    "@types/numeral" "^0.0.28"
+    "@types/react-beautiful-dnd" "^13.0.0"
+    "@types/react-input-autosize" "^2.2.0"
     "@types/react-virtualized-auto-sizer" "^1.0.0"
-    "@types/react-window" "^1.8.1"
+    "@types/react-window" "^1.8.2"
     "@types/vfile-message" "^2.0.0"
-    chroma-js "^2.0.4"
-    classnames "^2.2.5"
+    chroma-js "^2.1.0"
+    classnames "^2.2.6"
     highlight.js "^9.12.0"
-    html "^1.0.0"
-    keymirror "^0.1.1"
-    lodash "^4.17.11"
+    lodash "^4.17.20"
     numeral "^2.0.6"
     prop-types "^15.6.0"
     react-ace "^7.0.5"
@@ -1289,12 +1287,11 @@
     remark-highlight.js "^5.2.0"
     remark-parse "^7.0.2"
     remark-rehype "^7.0.0"
-    resize-observer-polyfill "^1.5.0"
     tabbable "^3.0.0"
     text-diff "^1.0.1"
     unified "^8.4.2"
-    uuid "^3.1.0"
-    vfile "^4.1.1"
+    uuid "^8.3.0"
+    vfile "^4.2.0"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
@@ -4157,10 +4154,15 @@
     "@types/node" "*"
     "@types/webpack" "*"
 
-"@types/lodash@^4.14.116", "@types/lodash@^4.14.159":
+"@types/lodash@^4.14.159":
   version "4.14.159"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.159.tgz#61089719dc6fdd9c5cb46efc827f2571d1517065"
   integrity sha512-gF7A72f7WQN33DpqOWw9geApQPh4M3PxluMtaHxWHXEGSN12/WbcEk/eNSqWNQcQhF66VSZ06vCF94CrHwXJDg==
+
+"@types/lodash@^4.14.160":
+  version "4.14.161"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.161.tgz#a21ca0777dabc6e4f44f3d07f37b765f54188b18"
+  integrity sha512-EP6O3Jkr7bXvZZSZYlsgt5DIjiGr0dXP1/jVEwVLTFgg0d+3lWVQkRavYVQszV7dYUwvg0B8R0MBDpcmXg7XIA==
 
 "@types/log-symbols@^2.0.0":
   version "2.0.0"
@@ -4335,10 +4337,10 @@
   resolved "https://registry.yarnpkg.com/@types/npmlog/-/npmlog-4.1.2.tgz#d070fe6a6b78755d1092a3dc492d34c3d8f871c4"
   integrity sha512-4QQmOF5KlwfxJ5IGXFIudkeLCdMABz03RcUXu+LCb24zmln8QW6aDjuGl4d4XPVLf2j+FnjelHTP7dvceAFbhA==
 
-"@types/numeral@^0.0.25":
-  version "0.0.25"
-  resolved "https://registry.yarnpkg.com/@types/numeral/-/numeral-0.0.25.tgz#b6f55062827a4787fe4ab151cf3412a468e65271"
-  integrity sha512-ShHzHkYD+Ldw3eyttptCpUhF1/mkInWwasQkCNXZHOsJMJ/UMa8wXrxSrTJaVk0r4pLK/VnESVM0wFsfQzNEKQ==
+"@types/numeral@^0.0.28":
+  version "0.0.28"
+  resolved "https://registry.yarnpkg.com/@types/numeral/-/numeral-0.0.28.tgz#e43928f0bda10b169b6f7ecf99e3ddf836b8ebe4"
+  integrity sha512-Sjsy10w6XFHDktJJdXzBJmoondAKW+LcGpRFH+9+zXEDj0cOH8BxJuZA9vUDSMAzU1YRJlsPKmZEEiTYDlICLw==
 
 "@types/object-hash@^1.3.0":
   version "1.3.0"
@@ -4469,10 +4471,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-beautiful-dnd@^12.1.2":
-  version "12.1.2"
-  resolved "https://registry.yarnpkg.com/@types/react-beautiful-dnd/-/react-beautiful-dnd-12.1.2.tgz#dfd1bdb072e92c1363e5f7a4c1842eaf95f77b21"
-  integrity sha512-h+0mA4cHmzL4BhyCniB6ZSSZhfO9LpXXbnhdAfa2k7klS03woiOT+Dh5AchY6eoQXk3vQVtqn40YY3u+MwFs8A==
+"@types/react-beautiful-dnd@^13.0.0":
+  version "13.0.0"
+  resolved "https://registry.yarnpkg.com/@types/react-beautiful-dnd/-/react-beautiful-dnd-13.0.0.tgz#e60d3d965312fcf1516894af92dc3e9249587db4"
+  integrity sha512-by80tJ8aTTDXT256Gl+RfLRtFjYbUWOnZuEigJgNsJrSEGxvFe5eY6k3g4VIvf0M/6+xoLgfYWoWonlOo6Wqdg==
   dependencies:
     "@types/react" "*"
 
@@ -4497,10 +4499,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-input-autosize@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/react-input-autosize/-/react-input-autosize-2.0.2.tgz#6ccdfb100c21b6096c1a04c3c3fac196b0ce61c1"
-  integrity sha512-QzewaD5kog7c6w5e3dretb+50oM8RDdDvVumQKCtPjI6VHyR8lA/HxCiTrv5l9Vgbi4NCitYuix/NorOevlrng==
+"@types/react-input-autosize@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@types/react-input-autosize/-/react-input-autosize-2.2.0.tgz#d62b07567088e547500f4693ae25dce0639c1b4e"
+  integrity sha512-8NO64XLmdRKUHeteXnweVnXuuSQr5HMSa4vRyNBUKOeZlimvgHPMtRchFHVHO9k7VpDoufCFYMJ6XHJ44qMTBQ==
   dependencies:
     "@types/react" "*"
 
@@ -4594,7 +4596,7 @@
     "@types/prop-types" "*"
     "@types/react" "*"
 
-"@types/react-window@^1.8.1":
+"@types/react-window@^1.8.2":
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/@types/react-window/-/react-window-1.8.2.tgz#a5a6b2762ce73ffaab7911ee1397cf645f2459fe"
   integrity sha512-gP1xam68Wc4ZTAee++zx6pTdDAH08rAkQrWm4B4F/y6hhmlT9Mgx2q8lTCXnrPHXsr15XjRN9+K2DLKcz44qEQ==
@@ -8520,7 +8522,7 @@ chroma-js@^1.4.1:
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-1.4.1.tgz#eb2d9c4d1ff24616be84b35119f4d26f8205f134"
   integrity sha512-jTwQiT859RTFN/vIf7s+Vl/Z2LcMrvMv3WUFmd/4u76AdlFC0NTNgqEEFPcRiHmAswPsMiQEDZLM8vX8qXpZNQ==
 
-chroma-js@^2.0.4, chroma-js@^2.1.0:
+chroma-js@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.1.0.tgz#c0be48a21fe797ef8965608c1c4f911ef2da49d5"
   integrity sha512-uiRdh4ZZy+UTPSrAdp8hqEdVb1EllLtTHOt5TMaOjJUvi+O54/83Fc5K2ld1P+TJX+dw5B+8/sCgzI6eaur/lg==
@@ -29204,6 +29206,11 @@ uuid@^3.0.0, uuid@^3.1.0, uuid@^3.3.2, uuid@^3.4.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
+uuid@^8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.0.tgz#ab738085ca22dc9a8c92725e459b1d507df5d6ea"
+  integrity sha512-fX6Z5o4m6XsXBdli9g7DtWgAx+osMsRRZFKma1mIUsLCz6vRvv+pz5VNbyu9UEDzpMWulZfvpgb/cmDXVulYFQ==
+
 v8-compile-cache@2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/v8-compile-cache/-/v8-compile-cache-2.0.3.tgz#00f7494d2ae2b688cfe2899df6ed2c54bef91dbe"
@@ -29709,7 +29716,7 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-vfile@^4.1.1:
+vfile@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/vfile/-/vfile-4.2.0.tgz#26c78ac92eb70816b01d4565e003b7e65a2a0e01"
   integrity sha512-a/alcwCvtuc8OX92rqqo7PflxiCgXRFjdyoGVuYV+qbgCb0GgZJRvIgCD4+U/Kl1yhaRsaTwksF88xbPyGsgpw==
