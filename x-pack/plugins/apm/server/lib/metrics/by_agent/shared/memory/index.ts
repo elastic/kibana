@@ -45,12 +45,6 @@ const chartBase: ChartBase = {
   series,
 };
 
-/*
-  When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
-  This number represents the max possible value for the limit field.
-*/
-const CGROUP_LIMIT_MAX_VALUE = '9223372036854771712';
-
 export const percentSystemMemoryUsedScript = {
   lang: 'expression',
   source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`,
@@ -59,37 +53,22 @@ export const percentSystemMemoryUsedScript = {
 export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
   source: `
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_USAGE_BYTES}')) {
-    return null;
-  }
+    String limitKey = '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}')){
-    total = doc['${METRIC_CGROUP_MEMORY_LIMIT_BYTES}'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, '${METRIC_SYSTEM_TOTAL_MEMORY}')){
-    total = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == ${CGROUP_LIMIT_MAX_VALUE}L){
-    total = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
-  }
+    double used = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
 
-  double used = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
-  
-  return used / total;
+    return used / total;
     `,
 };
 
@@ -123,16 +102,8 @@ export async function getMemoryChartData(
         memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
       },
       additionalFilters: [
-        {
-          exists: {
-            field: METRIC_SYSTEM_FREE_MEMORY,
-          },
-        },
-        {
-          exists: {
-            field: METRIC_SYSTEM_TOTAL_MEMORY,
-          },
-        },
+        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
       ],
     });
   }

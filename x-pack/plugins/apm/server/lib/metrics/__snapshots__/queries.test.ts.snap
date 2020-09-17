@@ -205,37 +205,22 @@ Object {
           "script": Object {
             "lang": "painless",
             "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
           },
         },
@@ -245,37 +230,22 @@ Object {
           "script": Object {
             "lang": "painless",
             "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
           },
         },
@@ -287,37 +257,22 @@ Object {
               "script": Object {
                 "lang": "painless",
                 "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
               },
             },
@@ -327,37 +282,22 @@ Object {
               "script": Object {
                 "lang": "painless",
                 "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
               },
             },
@@ -807,37 +747,22 @@ Object {
           "script": Object {
             "lang": "painless",
             "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
           },
         },
@@ -847,37 +772,22 @@ Object {
           "script": Object {
             "lang": "painless",
             "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
           },
         },
@@ -889,37 +799,22 @@ Object {
               "script": Object {
                 "lang": "painless",
                 "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
               },
             },
@@ -929,37 +824,22 @@ Object {
               "script": Object {
                 "lang": "painless",
                 "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
               },
             },
@@ -1405,37 +1285,22 @@ Object {
           "script": Object {
             "lang": "painless",
             "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
           },
         },
@@ -1445,37 +1310,22 @@ Object {
           "script": Object {
             "lang": "painless",
             "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
           },
         },
@@ -1487,37 +1337,22 @@ Object {
               "script": Object {
                 "lang": "painless",
                 "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
               },
             },
@@ -1527,37 +1362,22 @@ Object {
               "script": Object {
                 "lang": "painless",
                 "source": "
-  boolean isFieldAvailable(def doc, def x) {
-    return doc.containsKey(x) 
-      && !doc[x].empty
-  }
+    /*
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      This number represents the max possible value for the limit field.
+    */
+    double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-  if(!isFieldAvailable(doc, 'system.process.cgroup.memory.mem.usage.bytes')) {
-    return null;
-  }
+    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
 
-  double total = -1;
-  // uses cgroup.memory.mem.limit as total when it is available and not empty
-  if(isFieldAvailable(doc, 'system.process.cgroup.memory.mem.limit.bytes')){
-    total = doc['system.process.cgroup.memory.mem.limit.bytes'].value;
+    //Should use cgropLimit when value is not empty and not equals to the max limit value.
+    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
 
-  //Otherwise uses system.memory.total as total
-  }else if (isFieldAvailable(doc, 'system.memory.total')){
-    total = doc['system.memory.total'].value;
-  }
-  
-  // If both cgroup.memory.mem.limit and system.memory.total are not defined, does not calculate the percent and return null
-  if(total == -1) {
-    return null;
+    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
 
-  //When the cgroup limit is equal to CGROUP_LIMIT_MAX_VALUE, uses the system total to calculate
-  } else if(total == 9223372036854771712L){
-    total = doc['system.memory.total'].value;
-  }
+    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
 
-  double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-  
-  return used / total;
+    return used / total;
     ",
               },
             },
