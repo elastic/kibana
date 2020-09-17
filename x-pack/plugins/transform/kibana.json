@@ -16,7 +16,6 @@
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [
-    "ml",
     "esUiShared",
     "discover",
     "kibanaUtils",
