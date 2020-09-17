@@ -494,6 +494,10 @@ in their infrastructure.
 |This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/xpack_legacy/README.md[xpackLegacy]
+|Contains HTTP endpoints and UiSettings that are slated for removal.
+
+
 |===
 
 include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]

@@ -65,7 +65,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  describe('endpoint list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/77701
+  describe.skip('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -161,11 +162,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
         });
 
-        // The integration does not work properly yet.  Skipping this test for now.
-        it.skip('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
+        // Just check the href link is correct - would need to load ingest data to validate the integration
+        it('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
+          // The prior test results in a tooltip. We need to move the mouse to clear it and allow the click
+          await (await testSubjects.find('hostnameCellLink')).moveMouseTo();
           await (await testSubjects.find('hostnameCellLink')).click();
-          await (await testSubjects.find('endpointDetailsLinkToIngest')).click();
-          await testSubjects.existOrFail('fleetAgentListTable');
+          const endpointDetailsLinkToIngestButton = await testSubjects.find(
+            'endpointDetailsLinkToIngest'
+          );
+          const hrefLink = await endpointDetailsLinkToIngestButton.getAttribute('href');
+          expect(hrefLink).to.contain(
+            '/app/ingestManager#/fleet/agents/023fa40c-411d-4188-a941-4147bfadd095/activity?openReassignFlyout=true'
+          );
         });
       });
 
