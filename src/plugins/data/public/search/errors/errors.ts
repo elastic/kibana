@@ -22,7 +22,7 @@
 import { get } from 'lodash';
 import { HttpFetchError } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { KbnError } from '../../../kibana_utils/common';
+import { KbnError } from '../../../../kibana_utils/common';
 import { IEsSearchRequest } from '.';
 
 /**
@@ -37,13 +37,21 @@ export class RequestTimeoutError extends Error {
   }
 }
 
+export enum TimeoutErrorMode {
+  UPGRADE,
+  CONTACT,
+  CHANGE,
+}
+
 /**
  * Request Failure - When an entire multi request fails
  * @param {Error} err - the Error that came back
  */
 export class SearchTimeoutError extends KbnError {
-  constructor(err: HttpFetchError | null = null, customMessage: string) {
-    super(customMessage || `Request timeout: ${JSON.stringify(err?.message)}`);
+  public mode: TimeoutErrorMode;
+  constructor(err: HttpFetchError | null = null, mode: TimeoutErrorMode) {
+    super(`Request timeout: ${JSON.stringify(err?.message)}`);
+    this.mode = mode;
   }
 }
 

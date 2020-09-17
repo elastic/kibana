@@ -372,6 +372,7 @@ export {
   RequestTimeoutError,
   SearchError,
   SearchTimeoutError,
+  TimeoutErrorMode,
   PainlessError,
 } from './search';
 

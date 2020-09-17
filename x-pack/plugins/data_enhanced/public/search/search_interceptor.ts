@@ -5,7 +5,7 @@
  */
 
 import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
-import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
+import { mergeMap, expand, takeUntil, finalize, tap, catchError } from 'rxjs/operators';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,6 +14,7 @@ import {
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
+import { TimeoutErrorMode } from '../../../../../src/plugins/data/public';
 import { IAsyncSearchOptions } from '.';
 import { IAsyncSearchRequest, ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
@@ -54,7 +55,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   ) {
     let { id } = request;
 
-    const { combinedSignal, cleanup } = this.setupAbortSignal({
+    const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
@@ -85,21 +86,26 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         );
       }),
       takeUntil(aborted$),
-      tap({
-        error: () => {
-          // If we haven't received the response to the initial request, including the ID, then
-          // we don't need to send a follow-up request to delete this search. Otherwise, we
-          // send the follow-up request to delete this search, then throw an abort error.
-          if (id !== undefined) {
-            this.deps.http.delete(`/internal/search/${strategy}/${id}`);
-          }
-        },
+      catchError((e: any) => {
+        // If we haven't received the response to the initial request, including the ID, then
+        // we don't need to send a follow-up request to delete this search. Otherwise, we
+        // send the follow-up request to delete this search, then throw an abort error.
+        if (id !== undefined) {
+          this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+        }
+        return throwError(this.getSearchError(e, request, timeoutSignal, options?.abortSignal));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
       })
     );
+  }
+
+  protected getTimeoutMode() {
+    return this.application.capabilities.advancedSettings?.save
+      ? TimeoutErrorMode.CHANGE
+      : TimeoutErrorMode.CONTACT;
   }
 
   // Right now we are debouncing but we will hook this up with background sessions to show only one
