@@ -31,6 +31,8 @@ import { applyFiltersToKeys } from './utils';
 import { isLogEvent, getLogEventData } from './metadata';
 import { LegacyLoggingConfig } from './schema';
 
+export type LogFormatConfig = Pick<LegacyLoggingConfig, 'json' | 'dest' | 'timezone' | 'filter'>;
+
 function serializeError(err: any = {}) {
   return {
     message: err.message,
@@ -49,7 +51,7 @@ const levelColor = function (code: number) {
 };
 
 export abstract class BaseLogFormat extends Stream.Transform {
-  constructor(private readonly config: LegacyLoggingConfig) {
+  constructor(private readonly config: LogFormatConfig) {
     super({
       readableObjectMode: false,
       writableObjectMode: true,

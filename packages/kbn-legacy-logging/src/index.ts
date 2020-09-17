@@ -27,3 +27,4 @@ export {
   isLogEvent,
 } from './metadata';
 export { setupLoggingRotate } from './rotate';
+export { setupLogging } from './setup_logging';

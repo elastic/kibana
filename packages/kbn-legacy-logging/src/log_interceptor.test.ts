@@ -19,7 +19,7 @@
 
 import { LogInterceptor } from './log_interceptor';
 
-function stubClientErrorEvent(errorMeta) {
+function stubClientErrorEvent(errorMeta: Record<string, any>) {
   const error = new Error();
   Object.assign(error, errorMeta);
   return {
@@ -35,7 +35,7 @@ const stubEconnresetEvent = () => stubClientErrorEvent({ code: 'ECONNRESET' });
 const stubEpipeEvent = () => stubClientErrorEvent({ errno: 'EPIPE' });
 const stubEcanceledEvent = () => stubClientErrorEvent({ errno: 'ECANCELED' });
 
-function assertDowngraded(transformed) {
+function assertDowngraded(transformed: Record<string, any>) {
   expect(!!transformed).toBe(true);
   expect(transformed).toHaveProperty('event', 'log');
   expect(transformed).toHaveProperty('tags');
@@ -47,7 +47,7 @@ describe('server logging LogInterceptor', () => {
     it('transforms ECONNRESET events', () => {
       const interceptor = new LogInterceptor();
       const event = stubEconnresetEvent();
-      assertDowngraded(interceptor.downgradeIfEconnreset(event));
+      assertDowngraded(interceptor.downgradeIfEconnreset(event)!);
     });
 
     it('does not match if the tags are not in order', () => {
@@ -75,7 +75,7 @@ describe('server logging LogInterceptor', () => {
     it('transforms EPIPE events', () => {
       const interceptor = new LogInterceptor();
       const event = stubEpipeEvent();
-      assertDowngraded(interceptor.downgradeIfEpipe(event));
+      assertDowngraded(interceptor.downgradeIfEpipe(event)!);
     });
 
     it('does not match if the tags are not in order', () => {
@@ -103,7 +103,7 @@ describe('server logging LogInterceptor', () => {
     it('transforms ECANCELED events', () => {
       const interceptor = new LogInterceptor();
       const event = stubEcanceledEvent();
-      assertDowngraded(interceptor.downgradeIfEcanceled(event));
+      assertDowngraded(interceptor.downgradeIfEcanceled(event)!);
     });
 
     it('does not match if the tags are not in order', () => {
@@ -131,7 +131,7 @@ describe('server logging LogInterceptor', () => {
     it('transforms https requests when serving http errors', () => {
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message: 'Parse Error', code: 'HPE_INVALID_METHOD' });
-      assertDowngraded(interceptor.downgradeIfHTTPSWhenHTTP(event));
+      assertDowngraded(interceptor.downgradeIfHTTPSWhenHTTP(event)!);
     });
 
     it('ignores non events', () => {
@@ -150,7 +150,7 @@ describe('server logging LogInterceptor', () => {
         '4584650176:error:1408F09C:SSL routines:ssl3_get_record:http request:../deps/openssl/openssl/ssl/record/ssl3_record.c:322:\n';
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message });
-      assertDowngraded(interceptor.downgradeIfHTTPWhenHTTPS(event));
+      assertDowngraded(interceptor.downgradeIfHTTPWhenHTTPS(event)!);
     });
 
     it('ignores non events', () => {

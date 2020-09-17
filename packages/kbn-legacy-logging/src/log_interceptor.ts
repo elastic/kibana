@@ -26,25 +26,32 @@ import { get, isEqual } from 'lodash';
  */
 const OPENSSL_GET_RECORD_REGEX = /ssl3_get_record:http/;
 
-function doTagsMatch(event, tags) {
+function doTagsMatch(event: Record<string, any>, tags: string[]) {
   return isEqual(get(event, 'tags'), tags);
 }
 
-function doesMessageMatch(errorMessage, match) {
-  if (!errorMessage) return false;
-  const isRegExp = match instanceof RegExp;
-  if (isRegExp) return match.test(errorMessage);
+function doesMessageMatch(errorMessage: string, match: RegExp | string) {
+  if (!errorMessage) {
+    return false;
+  }
+  if (match instanceof RegExp) {
+    return match.test(errorMessage);
+  }
   return errorMessage === match;
 }
 
 // converts the given event into a debug log if it's an error of the given type
-function downgradeIfErrorType(errorType, event) {
+function downgradeIfErrorType(errorType: string, event: Record<string, any>) {
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-  if (!isClientError) return null;
+  if (!isClientError) {
+    return null;
+  }
 
   const matchesErrorType =
     get(event, 'error.code') === errorType || get(event, 'error.errno') === errorType;
-  if (!matchesErrorType) return null;
+  if (!matchesErrorType) {
+    return null;
+  }
 
   const errorTypeTag = errorType.toLowerCase();
 
@@ -57,7 +64,7 @@ function downgradeIfErrorType(errorType, event) {
   };
 }
 
-function downgradeIfErrorMessage(match, event) {
+function downgradeIfErrorMessage(match: RegExp | string, event: Record<string, any>) {
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
   const errorMessage = get(event, 'error.message');
   const matchesErrorMessage = isClientError && doesMessageMatch(errorMessage, match);
@@ -91,7 +98,7 @@ export class LogInterceptor extends Stream.Transform {
    *
    *  @param {object} - log event
    */
-  downgradeIfEconnreset(event) {
+  downgradeIfEconnreset(event: any) {
     return downgradeIfErrorType('ECONNRESET', event);
   }
 
@@ -105,7 +112,7 @@ export class LogInterceptor extends Stream.Transform {
    *
    *  @param {object} - log event
    */
-  downgradeIfEpipe(event) {
+  downgradeIfEpipe(event: any) {
     return downgradeIfErrorType('EPIPE', event);
   }
 
@@ -119,19 +126,19 @@ export class LogInterceptor extends Stream.Transform {
    *
    *  @param {object} - log event
    */
-  downgradeIfEcanceled(event) {
+  downgradeIfEcanceled(event: any) {
     return downgradeIfErrorType('ECANCELED', event);
   }
 
-  downgradeIfHTTPSWhenHTTP(event) {
+  downgradeIfHTTPSWhenHTTP(event: any) {
     return downgradeIfErrorType('HPE_INVALID_METHOD', event);
   }
 
-  downgradeIfHTTPWhenHTTPS(event) {
+  downgradeIfHTTPWhenHTTPS(event: any) {
     return downgradeIfErrorMessage(OPENSSL_GET_RECORD_REGEX, event);
   }
 
-  _transform(event, enc, next) {
+  _transform(event: any, enc: string, next: Stream.TransformCallback) {
     const downgraded =
       this.downgradeIfEconnreset(event) ||
       this.downgradeIfEpipe(event) ||
