@@ -15,17 +15,17 @@ interface ErrorCause {
   reason: string;
 }
 
-export type ParsingError = ResponseError<{
+export type ValidationError = ResponseError<{
   error: ErrorCause & { root_cause: ErrorCause[] };
 }>;
 
-export const isParsingErrorType = (type: unknown): boolean =>
+export const isValidationErrorType = (type: unknown): boolean =>
   type === PARSING_ERROR_TYPE || type === VERIFICATION_ERROR_TYPE;
 
-export const isParsingError = (error: unknown): error is ParsingError =>
-  error instanceof ResponseError && isParsingErrorType(get(error, 'meta.body.error.type'));
+export const isValidationError = (error: unknown): error is ValidationError =>
+  error instanceof ResponseError && isValidationErrorType(get(error, 'meta.body.error.type'));
 
-export const getParsingErrors = (error: ParsingError): string[] =>
+export const getValidationErrors = (error: ValidationError): string[] =>
   error.body.error.root_cause
-    .filter((cause) => isParsingErrorType(cause.type))
+    .filter((cause) => isValidationErrorType(cause.type))
     .map((cause) => cause.reason);

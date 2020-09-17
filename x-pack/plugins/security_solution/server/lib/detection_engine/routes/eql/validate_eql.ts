@@ -5,7 +5,7 @@
  */
 
 import { ElasticsearchClient } from '../../../../../../../../src/core/server';
-import { getParsingErrors, isParsingError } from './helpers';
+import { getValidationErrors, isValidationError } from './helpers';
 
 export interface Validation {
   isValid: boolean;
@@ -36,8 +36,8 @@ export const validateEql = async ({
 
     return { isValid: true, errors: [] };
   } catch (error) {
-    if (isParsingError(error)) {
-      return { isValid: false, errors: getParsingErrors(error) };
+    if (isValidationError(error)) {
+      return { isValid: false, errors: getValidationErrors(error) };
     }
     throw error;
   }
