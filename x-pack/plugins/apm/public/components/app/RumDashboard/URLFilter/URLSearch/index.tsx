@@ -102,7 +102,6 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
   }, [uiFilters]);
 
   const onChange = (updatedOptions: EuiSelectableTemplateSitewideOption[]) => {
-    // @ts-expect-error
     const clickedItems = updatedOptions.filter(
       (option) => option.checked === 'on'
     );
@@ -141,7 +140,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
       <EuiFlexGroup>
         <EuiFlexItem>
           {searchValue
-            ? data.total + ' ' + I18LABELS.searchResults
+            ? (data?.total ?? 0) + ' ' + I18LABELS.searchResults
             : I18LABELS.topPages}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
