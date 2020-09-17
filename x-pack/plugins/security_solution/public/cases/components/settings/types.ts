@@ -6,16 +6,21 @@
 
 import React from 'react';
 import { Connector } from '../../../../../case/common/api';
+import { JiraSettingFields } from './jira';
 
 export interface CaseSetting<UIProps = unknown> {
   id: string;
-  caseSettingFieldsComponent: React.LazyExoticComponent<React.ComponentType<UIProps>> | null;
+  caseSettingFieldsComponent: React.LazyExoticComponent<
+    React.ComponentType<SettingFieldsProps<UIProps>>
+  > | null;
 }
+
+export type AllSettingFields = JiraSettingFields;
 
 export interface CaseSettingsRegistry {
   has: (id: string) => boolean;
-  register: (setting: CaseSetting) => void;
-  get: (id: string) => CaseSetting;
+  register: <UIProps extends AllSettingFields>(setting: CaseSetting<UIProps>) => void;
+  get: <UIProps>(id: string) => CaseSetting<UIProps>;
   list: () => CaseSetting[];
 }
 
