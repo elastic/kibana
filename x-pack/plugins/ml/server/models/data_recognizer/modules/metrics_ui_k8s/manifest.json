@@ -1,23 +1,10 @@
 {
-    "id": "metrics_k8s",
+    "id": "metrics_ui_k8s",
     "title": "Metrics Kubernetes",
-    "description": "",
+    "description": "Detect anomalous memory and network behavior on Kubernetes pods.",
     "type": "Metricbeat Data",
     "logoFile": "logo.json",
-    "defaultIndexPattern": "metricbeat-*",
-    "query": {
-      "bool": {
-        "filter": [
-          {"exists": {"field": "kubernetes"}},
-          {"term": {"event.module": "kubernetes"}}
-        ]
-      }
-    },
     "jobs": [
-      {
-        "id": "k8s_cpu_usage",
-        "file": "k8s_cpu_usage.json"
-      },
       {
         "id": "k8s_memory_usage",
         "file": "k8s_memory_usage.json"
@@ -32,11 +19,6 @@
       }
     ],
     "datafeeds": [
-      {
-        "id": "datafeed-k8s_cpu_usage",
-        "file": "datafeed_k8s_cpu_usage.json",
-        "job_id": "k8s_cpu_usage"
-      },
       {
         "id": "datafeed-k8s_memory_usage",
         "file": "datafeed_k8s_memory_usage.json",

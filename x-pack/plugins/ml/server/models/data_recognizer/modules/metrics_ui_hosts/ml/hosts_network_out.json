@@ -1,6 +1,10 @@
 {
     "job_type": "anomaly_detector",
+<<<<<<< HEAD
     "description": "",
+=======
+    "description": "Metrics: Hosts - Identify unusual spikes in outbound traffic across hosts.",
+>>>>>>> 03e3c852288644d961aee7b4f976275b95c83885
     "groups": [
       "hosts",
       "metrics"
@@ -26,6 +30,16 @@
       "model_memory_limit": "32mb"
     },
     "custom_settings": {
+<<<<<<< HEAD
       "created_by": "ml-module-metrics-hosts"
+=======
+      "created_by": "ml-module-metrics-ui-hosts",
+      "custom_urls": [
+        {
+          "url_name": "Host Metrics",
+          "url_value": "metrics/detail/host/$host.name$?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))"
+        }
+      ]
+>>>>>>> 03e3c852288644d961aee7b4f976275b95c83885
     }
   }

@@ -15,12 +15,12 @@
     },
     "chunking_config": {
         "mode": "manual",
-        "time_span": "1000s"
+        "time_span": "900s"
     },
     "aggregations": {
-        "kubernetes.namespace": {"terms": {"field": "kubernetes.namespace"},
+        "kubernetes.namespace": {"terms": {"field": "kubernetes.namespace", "size": 25},
             "aggregations": {
-                "kubernetes.pod.name": {"terms": {"field": "kubernetes.pod.name"},
+                "kubernetes.pod.uid": {"terms": {"field": "kubernetes.pod.uid", "size": 100},
                     "aggregations": {
                         "buckets": {
                             "date_histogram": {"field": "@timestamp","fixed_interval": "5m"},
