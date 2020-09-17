@@ -21,7 +21,7 @@ import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
 import { ModelPlotOutput } from '../services/results_service/result_service_rx';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { EntityField } from '../..';
+import { EntityField } from '../../../common/util/anomaly_utils';
 
 function getMetricData(
   job: Job,
