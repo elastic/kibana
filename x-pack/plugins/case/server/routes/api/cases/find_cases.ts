@@ -16,7 +16,7 @@ import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
 import { RouteDeps, TotalCommentByCase } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 import { CASES_URL } from '../../../../common/constants';
-import { getConnectorId } from './helpers';
+import { getConnectorFromConfiguration } from './helpers';
 
 const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
   filters?.filter((i) => i !== '').join(` ${operator} `);
@@ -137,7 +137,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
               openCases.total ?? 0,
               closesCases.total ?? 0,
               totalCommentsByCases,
-              getConnectorId(myCaseConfigure)
+              getConnectorFromConfiguration(myCaseConfigure)
             )
           ),
         });
