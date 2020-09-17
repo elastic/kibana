@@ -38,6 +38,7 @@ export interface LegacyLoggingConfig {
     keepFiles: number;
     pollingInterval: number;
     usePolling: boolean;
+    pollingPolicyTestTimeout?: number;
   };
 }
 
