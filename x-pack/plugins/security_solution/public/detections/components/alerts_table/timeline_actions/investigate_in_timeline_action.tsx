@@ -8,7 +8,8 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineNonEcsData, Ecs } from '../../../../../public/graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { useApolloClient } from '../../../../common/utils/apollo_context';
 import { sendAlertToTimelineAction } from '../actions';
