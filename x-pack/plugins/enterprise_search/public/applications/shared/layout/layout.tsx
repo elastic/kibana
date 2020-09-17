@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import classNames from 'classnames';
 
-import { EuiPage, EuiPageSideBar, EuiPageBody, EuiButton } from '@elastic/eui';
+import { EuiPage, EuiPageSideBar, EuiPageBody, EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import './layout.scss';
@@ -15,6 +15,7 @@ import './layout.scss';
 interface ILayoutProps {
   navigation: React.ReactNode;
   restrictWidth?: boolean;
+  readOnlyMode?: boolean;
 }
 
 export interface INavContext {
@@ -22,7 +23,12 @@ export interface INavContext {
 }
 export const NavContext = React.createContext({});
 
-export const Layout: React.FC<ILayoutProps> = ({ children, navigation, restrictWidth }) => {
+export const Layout: React.FC<ILayoutProps> = ({
+  children,
+  navigation,
+  restrictWidth,
+  readOnlyMode,
+}) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const toggleNavigation = () => setIsNavOpen(!isNavOpen);
   const closeNavigation = () => setIsNavOpen(false);
@@ -56,6 +62,17 @@ export const Layout: React.FC<ILayoutProps> = ({ children, navigation, restrictW
         <NavContext.Provider value={{ closeNavigation }}>{navigation}</NavContext.Provider>
       </EuiPageSideBar>
       <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
+        {readOnlyMode && (
+          <EuiCallOut
+            className="enterpriseSearchLayout__readOnlyMode"
+            color="warning"
+            iconType="lock"
+            title={i18n.translate('xpack.enterpriseSearch.readOnlyMode.warning', {
+              defaultMessage:
+                'Enterprise Search is in read-only mode. You will be unable to make changes such as creating, editing, or deleting.',
+            })}
+          />
+        )}
         {children}
       </EuiPageBody>
     </EuiPage>
