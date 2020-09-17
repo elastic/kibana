@@ -64,6 +64,16 @@ export const createMockedIndexPattern = (): IndexPattern => ({
       searchable: true,
       esTypes: ['keyword'],
     },
+    {
+      name: 'scripted',
+      displayName: 'Scripted',
+      type: 'string',
+      searchable: true,
+      aggregatable: true,
+      scripted: true,
+      lang: 'painless',
+      script: '1234',
+    },
   ],
 });
 
@@ -95,6 +105,8 @@ export const createMockedRestrictedIndexPattern = () => ({
       searchable: true,
       scripted: true,
       esTypes: ['keyword'],
+      lang: 'painless',
+      script: '1234',
     },
   ],
   typeMeta: {

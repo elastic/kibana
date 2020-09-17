@@ -41,8 +41,8 @@ import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { IndexPatternsService } from '..';
 
-const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
 interface IndexPatternDeps {
@@ -50,6 +50,7 @@ interface IndexPatternDeps {
   apiClient: IIndexPatternsApiClient;
   patternCache: PatternCache;
   fieldFormats: FieldFormatsStartCommon;
+  indexPatternsService: IndexPatternsService;
   onNotification: OnNotification;
   onError: OnError;
   shortDotsEnable: boolean;
@@ -71,17 +72,18 @@ export class IndexPattern implements IIndexPattern {
   public flattenHit: any;
   public metaFields: string[];
 
-  private version: string | undefined;
+  public version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   private patternCache: PatternCache;
   public sourceFilters?: SourceFilter[];
-  private originalBody: { [key: string]: any } = {};
+  // todo make read  only, update via  method or factor out
+  public originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
+  private indexPatternsService: IndexPatternsService;
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
-  private apiClient: IIndexPatternsApiClient;
 
   private mapping: MappingObject = expandShorthand({
     attributes: ES_FIELD_TYPES.OBJECT,
@@ -113,6 +115,7 @@ export class IndexPattern implements IIndexPattern {
       apiClient,
       patternCache,
       fieldFormats,
+      indexPatternsService,
       onNotification,
       onError,
       shortDotsEnable = false,
@@ -123,6 +126,7 @@ export class IndexPattern implements IIndexPattern {
     this.savedObjectsClient = savedObjectsClient;
     this.patternCache = patternCache;
     this.fieldFormats = fieldFormats;
+    this.indexPatternsService = indexPatternsService;
     this.onNotification = onNotification;
     this.onError = onError;
 
@@ -131,7 +135,6 @@ export class IndexPattern implements IIndexPattern {
 
     this.fields = fieldList([], this.shortDotsEnable);
 
-    this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, metaFields);
     this.flattenHit = flattenHitWrapper(this, metaFields);
     this.formatHit = formatHitProvider(
@@ -419,8 +422,6 @@ export class IndexPattern implements IIndexPattern {
       } else {
         throw err;
       }
-
-      await this.save();
     }
   }
 
@@ -429,7 +430,6 @@ export class IndexPattern implements IIndexPattern {
     if (field) {
       this.fields.remove(field);
     }
-    return this.save();
   }
 
   async popularizeField(fieldName: string, unit = 1) {
@@ -559,92 +559,6 @@ export class IndexPattern implements IIndexPattern {
     return await _create(potentialDuplicateByTitle.id);
   }
 
-  async save(saveAttempts: number = 0): Promise<void | Error> {
-    if (!this.id) return;
-    const body = this.prepBody();
-
-    const originalChangedKeys: string[] = [];
-    Object.entries(body).forEach(([key, value]) => {
-      if (value !== this.originalBody[key]) {
-        originalChangedKeys.push(key);
-      }
-    });
-
-    return this.savedObjectsClient
-      .update(savedObjectType, this.id, body, { version: this.version })
-      .then((resp) => {
-        this.id = resp.id;
-        this.version = resp.version;
-      })
-      .catch((err) => {
-        if (
-          _.get(err, 'res.status') === 409 &&
-          saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS
-        ) {
-          const samePattern = new IndexPattern(this.id, {
-            savedObjectsClient: this.savedObjectsClient,
-            apiClient: this.apiClient,
-            patternCache: this.patternCache,
-            fieldFormats: this.fieldFormats,
-            onNotification: this.onNotification,
-            onError: this.onError,
-            shortDotsEnable: this.shortDotsEnable,
-            metaFields: this.metaFields,
-          });
-
-          return samePattern.init().then(() => {
-            // What keys changed from now and what the server returned
-            const updatedBody = samePattern.prepBody();
-
-            // Build a list of changed keys from the server response
-            // and ensure we ignore the key if the server response
-            // is the same as the original response (since that is expected
-            // if we made a change in that key)
-
-            const serverChangedKeys: string[] = [];
-            Object.entries(updatedBody).forEach(([key, value]) => {
-              if (value !== (body as any)[key] && value !== this.originalBody[key]) {
-                serverChangedKeys.push(key);
-              }
-            });
-
-            let unresolvedCollision = false;
-            for (const originalKey of originalChangedKeys) {
-              for (const serverKey of serverChangedKeys) {
-                if (originalKey === serverKey) {
-                  unresolvedCollision = true;
-                  break;
-                }
-              }
-            }
-
-            if (unresolvedCollision) {
-              const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
-                defaultMessage:
-                  'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-              });
-
-              this.onNotification({ title, color: 'danger' });
-              throw err;
-            }
-
-            // Set the updated response on this object
-            serverChangedKeys.forEach((key) => {
-              (this as any)[key] = (samePattern as any)[key];
-            });
-            this.version = samePattern.version;
-
-            // Clear cache
-            this.patternCache.clear(this.id!);
-
-            // Try the save again
-            return this.save(saveAttempts);
-          });
-        }
-        throw err;
-      });
-  }
-
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
     const scripted = this.getScriptedFields().map((field) => field.spec);
@@ -660,30 +574,37 @@ export class IndexPattern implements IIndexPattern {
   }
 
   refreshFields() {
-    return this._fetchFields()
-      .then(() => this.save())
-      .catch((err) => {
-        // https://github.com/elastic/kibana/issues/9224
-        // This call will attempt to remap fields from the matching
-        // ES index which may not actually exist. In that scenario,
-        // we still want to notify the user that there is a problem
-        // but we do not want to potentially make any pages unusable
-        // so do not rethrow the error here
+    return (
+      this._fetchFields()
+        // todo
+        .then(() => this.indexPatternsService.save(this))
+        .catch((err) => {
+          // https://github.com/elastic/kibana/issues/9224
+          // This call will attempt to remap fields from the matching
+          // ES index which may not actually exist. In that scenario,
+          // we still want to notify the user that there is a problem
+          // but we do not want to potentially make any pages unusable
+          // so do not rethrow the error here
 
-        if (err instanceof IndexPatternMissingIndices) {
-          this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-          return [];
-        }
+          if (err instanceof IndexPatternMissingIndices) {
+            this.onNotification({
+              title: (err as any).message,
+              color: 'danger',
+              iconType: 'alert',
+            });
+            return [];
+          }
 
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-            values: {
-              id: this.id,
-              title: this.title,
-            },
-          }),
-        });
-      });
+          this.onError(err, {
+            title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+              values: {
+                id: this.id,
+                title: this.title,
+              },
+            }),
+          });
+        })
+    );
   }
 }

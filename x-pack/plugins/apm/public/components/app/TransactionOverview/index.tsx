@@ -19,11 +19,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { useLocation } from '../../../hooks/useLocation';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionList } from '../../../hooks/useTransactionList';
@@ -33,7 +33,7 @@ import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
-import { TransactionList } from './List';
+import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 
 function getRedirectLocation({
@@ -59,10 +59,14 @@ function getRedirectLocation({
   }
 }
 
-export function TransactionOverview() {
+interface TransactionOverviewProps {
+  serviceName: string;
+}
+
+export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { serviceName, transactionType } = urlParams;
+  const { transactionType } = urlParams;
 
   // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
   const serviceTransactionTypes = useServiceTransactionTypes(urlParams);

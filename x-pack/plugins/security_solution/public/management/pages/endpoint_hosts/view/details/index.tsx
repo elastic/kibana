@@ -32,6 +32,7 @@ import {
   policyResponseFailedOrWarningActionCount,
   policyResponseError,
   policyResponseLoading,
+  policyResponseTimestamp,
 } from '../../store/selectors';
 import { EndpointDetails } from './endpoint_details';
 import { PolicyResponse } from './policy_response';
@@ -41,6 +42,7 @@ import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/end
 import { getEndpointListPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
+import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
@@ -122,6 +124,7 @@ const PolicyResponseFlyoutPanel = memo<{
   const loading = useEndpointSelector(policyResponseLoading);
   const error = useEndpointSelector(policyResponseError);
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+  const responseTimestamp = useEndpointSelector(policyResponseTimestamp);
   const [detailsUri, detailsRoutePath] = useMemo(
     () => [
       formatUrl(
@@ -161,16 +164,21 @@ const PolicyResponseFlyoutPanel = memo<{
           <h4>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policyResponse.title"
-              defaultMessage="Configuration Response"
+              defaultMessage="Policy Response"
             />
           </h4>
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued" data-test-subj="endpointDetailsPolicyResponseTimestamp">
+          <PreferenceFormattedDateFromPrimitive value={responseTimestamp} />
+        </EuiText>
+        <EuiSpacer size="s" />
         {error && (
           <EuiEmptyPrompt
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.details.noPolicyResponse"
-                defaultMessage="No configuration response available"
+                defaultMessage="No policy response available"
               />
             }
           />

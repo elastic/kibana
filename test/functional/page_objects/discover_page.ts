@@ -254,7 +254,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getSidebarWidth() {
-      const sidebar = await find.byCssSelector('.sidebar-list');
+      const sidebar = await testSubjects.find('discover-sidebar');
       return await sidebar.getAttribute('clientWidth');
     }
 

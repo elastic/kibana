@@ -96,6 +96,8 @@ const field = {
   format: new Format(),
 };
 
+const services = { redirectAway: () => {}, saveIndexPattern: async () => {} };
+
 describe('FieldEditor', () => {
   let indexPattern: IndexPattern;
 
@@ -124,7 +126,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (field as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -153,7 +155,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -181,14 +183,12 @@ describe('FieldEditor', () => {
     indexPattern.fieldFormatMap = { test: field };
     indexPattern.attributes = { fields: { test: { customName: 'Test' } } };
 
-    indexPattern.save = jest.fn(() => Promise.resolve());
-
     const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services: { redirectAway: () => {}, saveIndexPattern: jest.fn(() => Promise.resolve()) },
       },
       mockContext
     );
@@ -233,7 +233,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -250,7 +250,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -275,7 +275,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );

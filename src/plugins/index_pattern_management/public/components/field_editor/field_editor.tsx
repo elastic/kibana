@@ -134,6 +134,7 @@ export interface FieldEdiorProps {
   spec: IndexPatternField['spec'];
   services: {
     redirectAway: () => void;
+    saveIndexPattern: DataPublicPluginStart['indexPatterns']['save'];
   };
 }
 
@@ -429,7 +430,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           <FormattedMessage
             id="indexPatternManagement.customNameHelpText"
-            defaultMessage="A short name is useful when the full field name is long."
+            defaultMessage="Set a custom name to use when this field is displayed in Discover and Lens. Queries and filters don't currently support a custom name and will use the original field name."
           />
         }
       >
@@ -789,23 +790,18 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   deleteField = () => {
-    const { redirectAway } = this.props.services;
+    const { redirectAway, saveIndexPattern } = this.props.services;
     const { indexPattern } = this.props;
     const { spec } = this.state;
-    const remove = indexPattern.removeScriptedField(spec.name);
-
-    if (remove) {
-      remove.then(() => {
-        const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
-          defaultMessage: "Deleted '{fieldName}'",
-          values: { fieldName: spec.name },
-        });
-        this.context.services.notifications.toasts.addSuccess(message);
-        redirectAway();
+    indexPattern.removeScriptedField(spec.name);
+    saveIndexPattern(indexPattern).then(() => {
+      const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
+        defaultMessage: "Deleted '{fieldName}'",
+        values: { fieldName: spec.name },
       });
-    } else {
+      this.context.services.notifications.toasts.addSuccess(message);
       redirectAway();
-    }
+    });
   };
 
   saveField = async () => {
@@ -820,7 +816,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
       const isValid = await isScriptValid({
         name: field.name,
-        lang: field.lang as string,
         script: field.script as string,
         indexPatternTitle: indexPattern.title,
         http: this.context.services.http,
@@ -835,7 +830,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       }
     }
 
-    const { redirectAway } = this.props.services;
+    const { redirectAway, saveIndexPattern } = this.props.services;
     const fieldExists = !!indexPattern.fields.getByName(field.name);
 
     let oldField: IndexPatternField['spec'];
@@ -858,8 +853,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fields.update(field);
     }
 
-    return indexPattern
-      .save()
+    return saveIndexPattern(indexPattern)
       .then(() => {
         const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
           defaultMessage: "Saved '{fieldName}'",

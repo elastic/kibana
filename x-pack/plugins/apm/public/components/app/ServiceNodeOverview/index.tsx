@@ -33,9 +33,13 @@ const ServiceNodeName = styled.div`
   ${truncate(px(8 * unit))}
 `;
 
-function ServiceNodeOverview() {
+interface ServiceNodeOverviewProps {
+  serviceName: string;
+}
+
+function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   const { uiFilters, urlParams } = useUrlParams();
-  const { serviceName, start, end } = urlParams;
+  const { start, end } = urlParams;
 
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
@@ -50,7 +54,7 @@ function ServiceNodeOverview() {
 
   const { data: items = [] } = useFetcher(
     (callApmApi) => {
-      if (!serviceName || !start || !end) {
+      if (!start || !end) {
         return undefined;
       }
       return callApmApi({
@@ -69,10 +73,6 @@ function ServiceNodeOverview() {
     },
     [serviceName, start, end, uiFilters]
   );
-
-  if (!serviceName) {
-    return null;
-  }
 
   const columns: Array<ITableColumn<typeof items[0]>> = [
     {

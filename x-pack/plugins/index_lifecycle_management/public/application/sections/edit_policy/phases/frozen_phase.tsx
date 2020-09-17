@@ -18,7 +18,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { FrozenPhase as FrozenPhaseInterface, Phases } from '../../../services/policies/types';
+import { FrozenPhase as FrozenPhaseInterface, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
 
 import {

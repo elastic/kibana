@@ -10,7 +10,7 @@ import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eu
 import { LearnMoreLink } from './';
 import { OptionalLabel } from './';
 import { ErrableFormRow } from './';
-import { PhaseWithIndexPriority, Phases } from '../../../services/policies/types';
+import { PhaseWithIndexPriority, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors, propertyof } from '../../../services/policies/policy_validation';
 
 interface Props<T extends PhaseWithIndexPriority> {

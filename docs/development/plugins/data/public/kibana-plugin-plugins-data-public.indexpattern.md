@@ -14,7 +14,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(id, { savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
+|  [(constructor)(id, { savedObjectsClient, apiClient, patternCache, fieldFormats, indexPatternsService, onNotification, onError, shortDotsEnable, metaFields, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
 
 ## Properties
 
@@ -30,11 +30,13 @@ export declare class IndexPattern implements IIndexPattern
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
+|  [originalBody](./kibana-plugin-plugins-data-public.indexpattern.originalbody.md) |  | <code>{</code><br/><code>        [key: string]: any;</code><br/><code>    }</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string &#124; undefined</code> |  |
 |  [typeMeta](./kibana-plugin-plugins-data-public.indexpattern.typemeta.md) |  | <code>TypeMeta</code> |  |
+|  [version](./kibana-plugin-plugins-data-public.indexpattern.version.md) |  | <code>string &#124; undefined</code> |  |
 
 ## Methods
 
@@ -61,6 +63,5 @@ export declare class IndexPattern implements IIndexPattern
 |  [prepBody()](./kibana-plugin-plugins-data-public.indexpattern.prepbody.md) |  |  |
 |  [refreshFields()](./kibana-plugin-plugins-data-public.indexpattern.refreshfields.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |
-|  [save(saveAttempts)](./kibana-plugin-plugins-data-public.indexpattern.save.md) |  |  |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
 

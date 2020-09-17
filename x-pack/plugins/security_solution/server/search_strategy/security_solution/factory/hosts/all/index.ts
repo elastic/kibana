@@ -18,7 +18,7 @@ import {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { buildHostsQuery } from './query.all_hosts.dsl';
-import { formatHostEdgesData } from './helpers';
+import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options: HostsRequestOptions) => {
@@ -38,12 +38,11 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
       'aggregations.host_data.buckets',
       response.rawResponse
     );
-    const hostsEdges = buckets.map((bucket) => formatHostEdgesData(bucket));
+    const hostsEdges = buckets.map((bucket) => formatHostEdgesData(HOSTS_FIELDS, bucket));
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = hostsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildHostsQuery(options))],
-      response: [inspectStringifyObject(response)],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
@@ -53,7 +52,7 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
       edges,
       totalCount,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

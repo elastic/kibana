@@ -53,7 +53,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="A short name is useful when the full field name is long."
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Lens. Queries and filters don't currently support a custom name and will use the original field name."
           id="indexPatternManagement.customNameHelpText"
           values={Object {}}
         />
@@ -292,7 +292,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="A short name is useful when the full field name is long."
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Lens. Queries and filters don't currently support a custom name and will use the original field name."
           id="indexPatternManagement.customNameHelpText"
           values={Object {}}
         />
@@ -583,7 +583,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="A short name is useful when the full field name is long."
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Lens. Queries and filters don't currently support a custom name and will use the original field name."
           id="indexPatternManagement.customNameHelpText"
           values={Object {}}
         />
@@ -823,7 +823,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="A short name is useful when the full field name is long."
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Lens. Queries and filters don't currently support a custom name and will use the original field name."
           id="indexPatternManagement.customNameHelpText"
           values={Object {}}
         />
@@ -1195,7 +1195,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="A short name is useful when the full field name is long."
+          defaultMessage="Set a custom name to use when this field is displayed in Discover and Lens. Queries and filters don't currently support a custom name and will use the original field name."
           id="indexPatternManagement.customNameHelpText"
           values={Object {}}
         />

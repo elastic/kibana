@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObjectsService,
@@ -26,8 +27,7 @@ import {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from './saved_objects_service';
-import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
-import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
+
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
@@ -54,11 +54,7 @@ const createStartContractMock = () => {
 };
 
 const createInternalStartContractMock = () => {
-  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
-    ...createStartContractMock(),
-    clientProvider: savedObjectsClientProviderMock.create(),
-    migrator: mockKibanaMigrator.create(),
-  };
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = createStartContractMock();
 
   return internalStartContract;
 };

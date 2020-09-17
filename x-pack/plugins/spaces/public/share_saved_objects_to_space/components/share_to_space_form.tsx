@@ -35,14 +35,14 @@ export const ShareToSpaceForm = (props: Props) => {
           title={
             <FormattedMessage
               id="xpack.spaces.management.shareToSpace.shareWarningTitle"
-              defaultMessage="Any changes made to one space will be reflected in all spaces."
+              defaultMessage="Editing a shared object applies the changes in all spaces"
             />
           }
           color="warning"
         >
           <FormattedMessage
             id="xpack.spaces.management.shareToSpace.shareWarningBody"
-            defaultMessage="To avoid changes across spaces, make a copy instead."
+            defaultMessage="To edit in only one space, make a copy instead."
           />
           <EuiSpacer size="s" />
           <EuiButton
@@ -71,7 +71,7 @@ export const ShareToSpaceForm = (props: Props) => {
         label={
           <FormattedMessage
             id="xpack.spaces.management.shareToSpace.selectSpacesLabel"
-            defaultMessage="Select spaces to share into"
+            defaultMessage="Select spaces"
           />
         }
         labelAppend={

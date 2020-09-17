@@ -59,7 +59,7 @@ export class UptimePlugin
         title: PLUGIN.TITLE,
         description: PLUGIN.DESCRIPTION,
         icon: 'uptimeApp',
-        path: '/app/uptime#/',
+        path: '/app/uptime',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
@@ -84,9 +84,8 @@ export class UptimePlugin
     });
 
     core.application.register({
-      appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
-      euiIconType: 'uptimeApp',
+      euiIconType: 'logoObservability',
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,

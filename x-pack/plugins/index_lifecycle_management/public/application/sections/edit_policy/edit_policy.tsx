@@ -5,7 +5,9 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -25,10 +27,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-
 import { toasts } from '../../services/notification';
 
-import { Phases, Policy, PolicyFromES } from '../../services/policies/types';
+import { Phases, Policy, PolicyFromES } from '../../../../common/types';
 import {
   validatePolicy,
   ValidationErrors,
@@ -54,7 +55,7 @@ interface Props {
       absolute?: boolean;
     }
   ) => string;
-  history: any;
+  history: RouteComponentProps['history'];
 }
 export const EditPolicy: React.FunctionComponent<Props> = ({
   policies,
