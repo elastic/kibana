@@ -28,6 +28,7 @@ import {
   AppMountParameters,
   AppUpdater,
   ScopedHistory,
+  AppNavLinkStatus,
 } from '../../../core/public';
 import { Panel } from './panels/panel';
 import { initAngularBootstrap, KibanaLegacyStart } from '../../kibana_legacy/public';
@@ -35,7 +36,10 @@ import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { VisualizationsStart } from '../../visualizations/public';
-import { VisTypeTimelionPluginStart } from '../../vis_type_timelion/public';
+import {
+  VisTypeTimelionPluginStart,
+  VisTypeTimelionPluginSetup,
+} from '../../vis_type_timelion/public';
 
 export interface TimelionPluginDependencies {
   data: DataPublicPluginStart;
@@ -55,7 +59,13 @@ export class TimelionPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { data }: { data: DataPublicPluginSetup }) {
+  public setup(
+    core: CoreSetup,
+    {
+      data,
+      visTypeTimelion,
+    }: { data: DataPublicPluginSetup; visTypeTimelion: VisTypeTimelionPluginSetup }
+  ) {
     const timelionPanels: Map<string, Panel> = new Map();
 
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
@@ -120,6 +130,10 @@ export class TimelionPlugin implements Plugin<void, void> {
         };
       },
     });
+
+    if (visTypeTimelion.isUiEnabled === false) {
+      this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+    }
   }
 
   public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
