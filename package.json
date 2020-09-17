@@ -83,6 +83,7 @@
     "**/isomorphic-fetch/node-fetch": "^2.6.1",
     "**/istanbul-instrumenter-loader/schema-utils": "1.0.0",
     "**/load-grunt-config/lodash": "^4.17.20",
+    "**/minimist": "^1.2.5",
     "**/node-jose/node-forge": "^0.10.0",
     "**/request": "^2.88.2",
     "**/typescript": "4.0.2"
