@@ -28,6 +28,7 @@ import {
   AppMountParameters,
   AppUpdater,
   ScopedHistory,
+  AppNavLinkStatus,
 } from '../../../core/public';
 import { Panel } from './panels/panel';
 import { initAngularBootstrap, KibanaLegacyStart } from '../../kibana_legacy/public';
@@ -36,6 +37,7 @@ import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../d
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisTypeTimelionPluginStart } from '../../vis_type_timelion/public';
+import { ConfigSchema } from '../config';
 
 export interface TimelionPluginDependencies {
   data: DataPublicPluginStart;
@@ -50,9 +52,12 @@ export class TimelionPlugin implements Plugin<void, void> {
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private uiConfig: ConfigSchema['ui'];
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
+    const { ui } = initializerContext.config.get<ConfigSchema>();
+    this.uiConfig = ui;
   }
 
   public setup(core: CoreSetup, { data }: { data: DataPublicPluginSetup }) {
@@ -124,6 +129,9 @@ export class TimelionPlugin implements Plugin<void, void> {
 
   public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
     kibanaLegacy.loadFontAwesome();
+    if (this.uiConfig.enabled === false) {
+      this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+    }
   }
 
   public stop(): void {

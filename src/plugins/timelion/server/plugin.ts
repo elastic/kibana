@@ -20,7 +20,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, Logger } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { TimelionConfigType } from './config';
+import { ConfigSchema } from '../config';
 import { timelionSheetSavedObjectType } from './saved_objects';
 
 /**
@@ -50,7 +50,7 @@ const showWarningMessageIfTimelionSheetWasFound = (core: CoreStart, logger: Logg
 export class TimelionPlugin implements Plugin {
   private logger: Logger;
 
-  constructor(context: PluginInitializerContext<TimelionConfigType>) {
+  constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
 

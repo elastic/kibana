@@ -94,9 +94,6 @@ export class TimelionVisPlugin
   public start(core: CoreStart, plugins: TimelionVisStartDependencies) {
     setIndexPatterns(plugins.data.indexPatterns);
     setSavedObjectsClient(core.savedObjects.client);
-    if (this.initializerContext.config.get().ui.enabled === false) {
-      core.chrome.navLinks.update('timelion', { hidden: true });
-    }
 
     return {
       getArgValueSuggestions,

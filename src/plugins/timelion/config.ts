@@ -19,14 +19,10 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const configSchema = {
-  schema: schema.object({
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-    enabled: schema.boolean({ defaultValue: true }),
-    ui: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-    }),
-  }),
-};
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+  graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
+});
 
-export type TimelionConfigType = TypeOf<typeof configSchema.schema>;
+export type ConfigSchema = TypeOf<typeof configSchema>;
