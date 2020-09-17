@@ -221,7 +221,7 @@ const getUpdateValue = (
 
   const configValue = getNestedProperty(config, formStateAttribute.configFieldName, fallbackValue);
 
-  // only get depending values if we're not already in a call to get dependeing values.
+  // only get depending values if we're not already in a call to get depending values.
   const dependsOnConfig: PostTransformsUpdateRequestSchema =
     enforceFormValue === false
       ? formStateAttribute.dependsOn.reduce((_dependsOnConfig, dependsOnField) => {
