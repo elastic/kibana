@@ -27,12 +27,6 @@ export function setupXPackMain(server) {
     }
   };
 
-  // trigger an xpack info refresh whenever the elasticsearch plugin status changes
-  server.plugins.elasticsearch.status.on('change', async () => {
-    await info.refreshNow();
-    setPluginStatus();
-  });
-
   // whenever the license info is updated, regardless of the elasticsearch plugin status
   // changes, reflect the change in our plugin status. See https://github.com/elastic/kibana/issues/20017
   info.onLicenseInfoChange(setPluginStatus);
