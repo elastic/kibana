@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { EuiI18nNumber, ButtonColor } from '@elastic/eui';
+import { EuiI18nNumber } from '@elastic/eui';
 import styled from 'styled-components';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
@@ -132,7 +132,7 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
     flex-flow: row wrap;
     background: transparent;
     position: absolute;
-    top: 6.5em;
+    top: 4.5em;
     contain: content;
     width: 12em;
     z-index: 2;
