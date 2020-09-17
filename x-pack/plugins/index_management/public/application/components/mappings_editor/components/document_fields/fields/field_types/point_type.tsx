@@ -14,6 +14,7 @@ import {
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
   NullValueParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
 
@@ -67,6 +68,8 @@ export const PointType: FunctionComponent<Props> = ({ field }) => {
             config={getFieldConfig('null_value_point')}
           />
         </NullValueParameter>
+
+        <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
       </AdvancedParametersSection>
     </>
   );
