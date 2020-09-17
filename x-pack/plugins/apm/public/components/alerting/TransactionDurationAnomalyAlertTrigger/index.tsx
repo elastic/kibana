@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiExpression, EuiSelect } from '@elastic/eui';
+
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -17,14 +17,16 @@ import {
   AnomalySeverity,
   SelectAnomalySeverity,
 } from './SelectAnomalySeverity';
-import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
+import {
+  EnvironmentField,
+  ServiceField,
+  TransactionTypeField,
+} from '../fields';
 
 interface Params {
   windowSize: number;
@@ -74,40 +76,13 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   };
 
   const fields = [
-    <EuiExpression
-      description={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.service',
-        {
-          defaultMessage: 'Service',
-        }
-      )}
-      value={serviceName}
+    <ServiceField value={serviceName} />,
+    <TransactionTypeField currentValue={transactionType} />,
+    <EnvironmentField
+      currentValue={params.environment}
+      options={environmentOptions}
+      onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
-    <EuiExpression
-      description={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.transactionType',
-        {
-          defaultMessage: 'Transaction Type',
-        }
-      )}
-      value={transactionType}
-    />,
-    <PopoverExpression
-      value={getEnvironmentLabel(params.environment)}
-      title={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.environment',
-        {
-          defaultMessage: 'Environment',
-        }
-      )}
-    >
-      <EuiSelect
-        value={params.environment}
-        options={environmentOptions}
-        onChange={(e) => setAlertParams('environment', e.target.value)}
-        compressed
-      />
-    </PopoverExpression>,
     <PopoverExpression
       value={<AnomalySeverity severityScore={params.anomalyScore} />}
       title={i18n.translate(

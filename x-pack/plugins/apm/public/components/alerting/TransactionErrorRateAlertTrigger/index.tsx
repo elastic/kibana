@@ -3,9 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFieldNumber, EuiSelect, EuiExpression } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
@@ -13,11 +11,14 @@ import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
-import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
+
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
+  ServiceField,
+  TransactionTypeField,
+  EnvironmentField,
+  IsAboveField,
+} from '../fields';
 
 interface AlertParams {
   windowSize: number;
@@ -60,75 +61,22 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   };
 
   const fields = [
-    <EuiExpression
-      description={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.service',
-        {
-          defaultMessage: 'Service',
-        }
-      )}
-      value={serviceName}
+    <ServiceField value={serviceName} />,
+    <EnvironmentField
+      currentValue={params.environment}
+      options={environmentOptions}
+      onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
-    <PopoverExpression
-      value={getEnvironmentLabel(params.environment)}
-      title={i18n.translate(
-        'xpack.apm.transactionErrorRateAlertTrigger.environment',
-        {
-          defaultMessage: 'Environment',
-        }
-      )}
-    >
-      <EuiSelect
-        value={params.environment}
-        options={environmentOptions}
-        onChange={(e) =>
-          setAlertParams(
-            'environment',
-            e.target.value as AlertParams['environment']
-          )
-        }
-        compressed
-      />
-    </PopoverExpression>,
-    <PopoverExpression
-      value={params.transactionType}
-      title={i18n.translate('xpack.apm.transactionErrorRateAlertTrigger.type', {
-        defaultMessage: 'Type',
-      })}
-    >
-      <EuiSelect
-        value={params.transactionType}
-        options={transactionTypes.map((key) => {
-          return {
-            text: key,
-            value: key,
-          };
-        })}
-        onChange={(e) =>
-          setAlertParams(
-            'transactionType',
-            e.target.value as AlertParams['transactionType']
-          )
-        }
-        compressed
-      />
-    </PopoverExpression>,
-    <PopoverExpression
-      value={params.threshold ? `${params.threshold}%` : ''}
-      title={i18n.translate(
-        'xpack.apm.transactionErrorRateAlertTrigger.isAbove',
-        {
-          defaultMessage: 'is above',
-        }
-      )}
-    >
-      <EuiFieldNumber
-        value={params.threshold ?? ''}
-        onChange={(e) => setAlertParams('threshold', e.target.value)}
-        append="%"
-        compressed
-      />
-    </PopoverExpression>,
+    <TransactionTypeField
+      currentValue={params.transactionType}
+      options={transactionTypes.map((key) => ({ text: key, value: key }))}
+      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+    />,
+    <IsAboveField
+      value={params.threshold}
+      unit="%"
+      onChange={(value) => setAlertParams('threshold', value)}
+    />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>
         setAlertParams('windowSize', timeWindowSize || '')

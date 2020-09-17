@@ -3,21 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiSelect, EuiExpression, EuiFieldNumber } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { isFinite } from 'lodash';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
-import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { EnvironmentField, ServiceField, IsAboveField } from '../fields';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
-import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 
 export interface AlertParams {
   windowSize: number;
@@ -52,54 +48,20 @@ export function ErrorCountAlertTrigger(props: Props) {
     ...alertParams,
   };
 
-  const threshold = isFinite(params.threshold) ? params.threshold : '';
-
   const fields = [
-    <EuiExpression
-      description={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.service',
-        {
-          defaultMessage: 'Service',
-        }
-      )}
-      value={serviceName}
+    <ServiceField value={serviceName} />,
+    <EnvironmentField
+      currentValue={params.environment}
+      options={environmentOptions}
+      onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
-    <PopoverExpression
-      value={getEnvironmentLabel(params.environment)}
-      title={i18n.translate('xpack.apm.errorRateAlertTrigger.environment', {
-        defaultMessage: 'Environment',
+    <IsAboveField
+      value={params.threshold}
+      unit={i18n.translate('xpack.apm.errorCountAlertTrigger.errors', {
+        defaultMessage: ' errors',
       })}
-    >
-      <EuiSelect
-        value={params.environment}
-        options={environmentOptions}
-        onChange={(e) =>
-          setAlertParams(
-            'environment',
-            e.target.value as AlertParams['environment']
-          )
-        }
-        compressed
-      />
-    </PopoverExpression>,
-    <PopoverExpression
-      title={i18n.translate('xpack.apm.errorRateAlertTrigger.isAbove', {
-        defaultMessage: 'is above',
-      })}
-      value={threshold.toString()}
-    >
-      <EuiFieldNumber
-        value={threshold}
-        step={0}
-        onChange={(e) =>
-          setAlertParams('threshold', parseInt(e.target.value, 10))
-        }
-        compressed
-        append={i18n.translate('xpack.apm.errorRateAlertTrigger.errors', {
-          defaultMessage: 'errors',
-        })}
-      />
-    </PopoverExpression>,
+      onChange={(value) => setAlertParams('threshold', value)}
+    />,
     <ForLastExpression
       onChangeWindowSize={(windowSize) =>
         setAlertParams('windowSize', windowSize || '')
