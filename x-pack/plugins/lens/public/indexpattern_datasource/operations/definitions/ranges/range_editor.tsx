@@ -130,7 +130,7 @@ const BaseRangeEditor = ({
                     position="right"
                     content={i18n.translate('xpack.lens.indexPattern.ranges.maxIntervalsHelp', {
                       defaultMessage:
-                        "Intervals will be selected automatically based on the available data. The maximum number of bars can never be greater than the Advanced Setting's {histogramMaxBars}",
+                        "Intervals will be selected automatically based on the available data. The maximum number of intervals can never be greater than the Advanced Setting's {histogramMaxBars}",
                       values: { histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS },
                     })}
                     type="questionInCircle"
