@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
-import { AgentStatus, Agent } from '../types';
+import { AgentStatus, Agent, EsAssetReference } from '../types';
 import * as settingsService from './settings';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
@@ -21,6 +21,17 @@ export interface ESIndexPatternService {
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined>;
+}
+
+/**
+ * Service that provides exported function that return information about EPM packages
+ */
+
+export interface PackageService {
+  getInstalledEsAssetReferences(
+    savedObjectsClient: SavedObjectsClientContract,
+    pkgName: string
+  ): Promise<EsAssetReference[]>;
 }
 
 /**
