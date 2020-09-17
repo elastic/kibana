@@ -51,11 +51,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
 
   embeddableHandler.getOutput$().subscribe((output) => {
     if (output.error) {
-      toastNotifications.addError(output.error, {
-        title: i18n.translate('visualize.error.title', {
-          defaultMessage: 'Visualization error',
-        }),
-      });
+      data.search.showError(output.error.original || ouput.error);
     }
   });
 

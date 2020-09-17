@@ -32,5 +32,6 @@ export const createError = (err: string | ErrorLike): ExpressionValueError => ({
         : undefined,
     message: typeof err === 'string' ? err : String(err.message),
     name: typeof err === 'object' ? err.name || 'Error' : 'Error',
+    original: err,
   },
 });

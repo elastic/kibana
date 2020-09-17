@@ -30,6 +30,7 @@ export type ExpressionValueError = ExpressionValueBoxed<
       message: string;
       name?: string;
       stack?: string;
+      original?: Error;
     };
     info?: unknown;
   }
