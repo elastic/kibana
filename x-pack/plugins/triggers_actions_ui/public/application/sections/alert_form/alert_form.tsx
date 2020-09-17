@@ -193,7 +193,7 @@ export const AlertForm = ({
       <EuiHorizontalRule />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xs" data-test-subj="selectedAlertTypeTitle">
+          <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
                 defaultMessage="{alertType}"
@@ -323,7 +323,7 @@ export const AlertForm = ({
   const alertTypeRenderOption = (option) => {
     return (
       <div>
-        <EuiText size="m" color="default">
+        <EuiText size="s" color="default">
           <p>{option.label}</p>
         </EuiText>
       </div>
@@ -332,7 +332,7 @@ export const AlertForm = ({
 
   return (
     <EuiForm>
-      <EuiFlexGrid columns={1}>
+      <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
