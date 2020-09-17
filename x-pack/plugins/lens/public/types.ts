@@ -419,6 +419,7 @@ export interface VisualizationType {
   id: string;
   icon: IconType;
   label: string;
+  shortLabel: string;
   sectionLabel: string;
 }
 

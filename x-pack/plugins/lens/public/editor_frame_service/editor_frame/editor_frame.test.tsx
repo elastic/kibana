@@ -78,6 +78,8 @@ describe('editor_frame', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+          shortLabel: 'TEST1',
+          sectionLabel: 'TEST',
         },
       ],
     };
@@ -89,6 +91,8 @@ describe('editor_frame', () => {
           icon: 'empty',
           id: 'testVis2',
           label: 'TEST2',
+          shortLabel: 'TEST2',
+          sectionLabel: 'TEST',
         },
       ],
     };
@@ -1317,6 +1321,8 @@ describe('editor_frame', () => {
             icon: 'empty',
             id: 'testVis3',
             label: 'TEST3',
+            shortLabel: 'TEST3',
+            sectionLabel: 'TEST',
           },
         ],
         getSuggestions: () => [

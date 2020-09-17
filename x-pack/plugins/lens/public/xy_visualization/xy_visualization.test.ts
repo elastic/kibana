@@ -44,14 +44,14 @@ describe('xy_visualization', () => {
     it('should show mixed xy chart when multilple series types', () => {
       const desc = xyVisualization.getDescription(mixedState('bar', 'line'));
 
-      expect(desc.label).toEqual('Mixed XY chart');
+      expect(desc.label).toEqual('Mixed XY');
     });
 
     it('should show the preferredSeriesType if there are no layers', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
       expect(desc.icon).toEqual(LensIconChartBar);
-      expect(desc.label).toEqual('Bar chart');
+      expect(desc.label).toEqual('Bar');
     });
 
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
@@ -59,23 +59,23 @@ describe('xy_visualization', () => {
         mixedState('bar_horizontal', 'bar_horizontal_stacked')
       );
 
-      expect(desc.label).toEqual('Mixed horizontal bar chart');
+      expect(desc.label).toEqual('Mixed H. bar');
     });
 
     it('should show bar chart when bar only', () => {
       const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
 
-      expect(desc.label).toEqual('Horizontal bar chart');
+      expect(desc.label).toEqual('H. bar');
     });
 
     it('should show the chart description if not mixed', () => {
       expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area chart');
       expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line chart');
       expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
-        'Stacked area chart'
+        'Stacked area'
       );
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
-        'Stacked horizontal bar chart'
+        'Stacked H. bar'
       );
     });
   });

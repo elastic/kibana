@@ -31,6 +31,10 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
+const sectionLabel = i18n.translate('xpack.lens.pieVisualization.sectionLabel', {
+  defaultMessage: 'Partition',
+});
+
 export const pieVisualization: Visualization<PieVisualizationState> = {
   id: 'lnsPie',
 
@@ -39,16 +43,22 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
       id: 'donut',
       icon: CHART_NAMES.donut.icon,
       label: CHART_NAMES.donut.label,
+      shortLabel: CHART_NAMES.donut.label,
+      sectionLabel,
     },
     {
       id: 'pie',
       icon: CHART_NAMES.pie.icon,
       label: CHART_NAMES.pie.label,
+      shortLabel: CHART_NAMES.pie.label,
+      sectionLabel,
     },
     {
       id: 'treemap',
       icon: CHART_NAMES.treemap.icon,
       label: CHART_NAMES.treemap.label,
+      shortLabel: CHART_NAMES.treemap.label,
+      sectionLabel,
     },
   ],
 

@@ -9729,7 +9729,6 @@
     "xpack.lens.xySuggestions.stackedChartTitle": "スタック",
     "xpack.lens.xySuggestions.unstackedChartTitle": "スタックが解除されました",
     "xpack.lens.xySuggestions.yAxixConjunctionSign": " と ",
-    "xpack.lens.xyVisualization.chartLabel": "{label} チャート",
     "xpack.lens.xyVisualization.mixedBarHorizontalLabel": "ミックスされた横棒",
     "xpack.lens.xyVisualization.mixedLabel": "ミックスされた XY",
     "xpack.lens.xyVisualization.noDataLabel": "結果が見つかりませんでした",

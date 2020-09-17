@@ -12,9 +12,14 @@ import {
   EuiPopoverTitle,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
-import { flatten } from 'lodash';
+import { flatten, groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
 import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
@@ -173,21 +178,32 @@ export function ChartSwitch(props: Props) {
     };
   }
 
-  const visualizationTypes = useMemo(
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const visualizationTypeGroups = useMemo(
     () =>
       flyoutOpen &&
-      flatten(
-        Object.values(props.visualizationMap).map((v) =>
-          v.visualizationTypes.map((t) => ({
-            visualizationId: v.id,
-            ...t,
-            icon: t.icon,
-          }))
+      groupBy(
+        flatten(
+          Object.values(props.visualizationMap).map((v) =>
+            v.visualizationTypes.map((t) => ({
+              visualizationId: v.id,
+              ...t,
+              icon: t.icon,
+            }))
+          )
         )
-      ).map((visualizationType) => ({
-        ...visualizationType,
-        selection: getSelection(visualizationType.visualizationId, visualizationType.id),
-      })),
+          .filter(
+            (visualizationType) =>
+              visualizationType.shortLabel.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              visualizationType.sectionLabel.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+          .map((visualizationType) => ({
+            ...visualizationType,
+            selection: getSelection(visualizationType.visualizationId, visualizationType.id),
+          })),
+        'sectionLabel'
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
@@ -195,6 +211,7 @@ export function ChartSwitch(props: Props) {
       props.framePublicAPI,
       props.visualizationId,
       props.visualizationState,
+      searchTerm,
     ]
   );
 
@@ -219,38 +236,76 @@ export function ChartSwitch(props: Props) {
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
-          defaultMessage: 'Select a visualization',
-        })}
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            {i18n.translate('xpack.lens.configPanel.chartType', {
+              defaultMessage: 'Chart type',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              compressed
+              value={searchTerm}
+              data-test-subj="lnsChartSwitchSearch"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverTitle>
-      <EuiKeyPadMenu>
-        {(visualizationTypes || []).map((v) => (
-          <EuiKeyPadMenuItem
-            key={`${v.visualizationId}:${v.id}`}
-            label={<span data-test-subj="visTypeTitle">{v.label}</span>}
-            role="menuitem"
-            data-test-subj={`lnsChartSwitchPopover_${v.id}`}
-            onClick={() => commitSelection(v.selection)}
-            betaBadgeLabel={
-              v.selection.dataLoss !== 'nothing'
-                ? i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
-                    defaultMessage: 'Data loss',
-                  })
-                : undefined
-            }
-            betaBadgeTooltipContent={
-              v.selection.dataLoss !== 'nothing'
-                ? i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
-                    defaultMessage: 'Switching to this chart will lose some of the configuration',
-                  })
-                : undefined
-            }
-            betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
-          >
-            <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} size="l" />
-          </EuiKeyPadMenuItem>
+      <div className="lnsChartSwitch__chartContainer">
+        {Object.entries(visualizationTypeGroups || {}).map(([section, visualizationTypes]) => (
+          <section aria-labelledby={`lnsChartSection-${section}`} key={section}>
+            <EuiText
+              size="xs"
+              id={`lnsChartSection-${section}`}
+              className="lnsChartSwitch__sectionTitle"
+            >
+              {section}
+            </EuiText>
+            <EuiKeyPadMenu>
+              {visualizationTypes.map((v) => (
+                <EuiKeyPadMenuItem
+                  key={`${v.visualizationId}:${v.id}`}
+                  label={<span data-test-subj="visTypeTitle">{v.shortLabel}</span>}
+                  role="menuitem"
+                  data-test-subj={`lnsChartSwitchPopover_${v.id}`}
+                  onClick={() => commitSelection(v.selection)}
+                  betaBadgeLabel={
+                    v.selection.dataLoss !== 'nothing'
+                      ? i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
+                          defaultMessage: 'Data loss',
+                        })
+                      : undefined
+                  }
+                  betaBadgeTooltipContent={
+                    v.selection.dataLoss !== 'nothing'
+                      ? i18n.translate('xpack.lens.chartSwitch.dataLossDescription', {
+                          defaultMessage:
+                            'Switching to this chart will lose some of the configuration',
+                        })
+                      : undefined
+                  }
+                  betaBadgeIconType={v.selection.dataLoss !== 'nothing' ? 'alert' : undefined}
+                >
+                  <EuiIcon
+                    className="lnsChartSwitch__chartIcon"
+                    type={v.icon || 'empty'}
+                    size="l"
+                  />
+                </EuiKeyPadMenuItem>
+              ))}
+            </EuiKeyPadMenu>
+          </section>
         ))}
-      </EuiKeyPadMenu>
+        {searchTerm && Object.keys(visualizationTypeGroups).length === 0 && (
+          <EuiCallOut
+            size="s"
+            title={i18n.translate('xpack.lens.chartSwitch.noResults', {
+              defaultMessage: 'No chart types found, please change search.',
+            })}
+          />
+        )}
+      </div>
     </EuiPopover>
   );
 

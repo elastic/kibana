@@ -72,6 +72,8 @@ describe('LayerPanel', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+          shortLabel: 'TEST1',
+          sectionLabel: 'TEST',
         },
       ],
     };
@@ -84,6 +86,8 @@ describe('LayerPanel', () => {
           icon: 'empty',
           id: 'testVis2',
           label: 'TEST2',
+          shortLabel: 'TEST2',
+          sectionLabel: 'TEST',
         },
       ],
     };

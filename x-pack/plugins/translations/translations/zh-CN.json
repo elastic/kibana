@@ -9735,7 +9735,6 @@
     "xpack.lens.xySuggestions.stackedChartTitle": "堆叠",
     "xpack.lens.xySuggestions.unstackedChartTitle": "非堆叠",
     "xpack.lens.xySuggestions.yAxixConjunctionSign": " &amp; ",
-    "xpack.lens.xyVisualization.chartLabel": "{label} 图表",
     "xpack.lens.xyVisualization.mixedBarHorizontalLabel": "混合水平条形图",
     "xpack.lens.xyVisualization.mixedLabel": "混合 XY",
     "xpack.lens.xyVisualization.noDataLabel": "找不到结果",

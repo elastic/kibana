@@ -35,6 +35,12 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
       }),
+      shortLabel: i18n.translate('xpack.lens.datatable.label', {
+        defaultMessage: 'Data table',
+      }),
+      sectionLabel: i18n.translate('xpack.lens.datatable.sectionLabel', {
+        defaultMessage: 'Text',
+      }),
     },
   ],
 

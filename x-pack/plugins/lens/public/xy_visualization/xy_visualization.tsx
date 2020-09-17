@@ -53,7 +53,7 @@ function getDescription(state?: State) {
     return {
       icon: LensIconChartBarHorizontal,
       label: i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-        defaultMessage: 'Mixed horizontal bar',
+        defaultMessage: 'Mixed H. bar',
       }),
     };
   }
@@ -118,14 +118,10 @@ export const xyVisualization: Visualization<State> = {
 
   getDescription(state) {
     const { icon, label } = getDescription(state);
-    const chartLabel = i18n.translate('xpack.lens.xyVisualization.chartLabel', {
-      defaultMessage: '{label} chart',
-      values: { label },
-    });
 
     return {
       icon: icon || defaultIcon,
-      label: chartLabel,
+      label,
     };
   },
 

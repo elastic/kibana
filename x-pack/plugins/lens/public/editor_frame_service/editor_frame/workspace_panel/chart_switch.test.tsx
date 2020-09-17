@@ -28,6 +28,8 @@ describe('chart_switch', () => {
           icon: 'empty',
           id,
           label: `Label ${id}`,
+          shortLabel: `Label ${id}`,
+          sectionLabel: 'My section',
         },
       ],
       initialize: jest.fn((_frame, state?: unknown) => {
@@ -68,16 +70,22 @@ describe('chart_switch', () => {
             icon: 'empty',
             id: 'subvisC1',
             label: 'C1',
+            shortLabel: 'C1',
+            sectionLabel: 'My section',
           },
           {
             icon: 'empty',
             id: 'subvisC2',
             label: 'C2',
+            shortLabel: 'C2',
+            sectionLabel: 'My section',
           },
           {
             icon: 'empty',
             id: 'subvisC3',
             label: 'C3',
+            shortLabel: 'C3',
+            sectionLabel: 'My other section',
           },
         ],
         getVisualizationTypeId: jest.fn((state) => state.type),
@@ -645,5 +653,34 @@ describe('chart_switch', () => {
     );
 
     expect(allDisplayed).toBeTruthy();
+  });
+
+  it('should show visualizations in respective sections', () => {
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visA"
+        visualizationState={{}}
+        visualizationMap={mockVisualizations()}
+        dispatch={jest.fn()}
+        framePublicAPI={mockFrame(['a', 'b'])}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    showFlyout(component);
+
+    const section1 = component.find(`[aria-labelledby="lnsChartSection-My section"]`);
+
+    const allDisplayed = ['visA', 'visB', 'subvisC1', 'subvisC2'].every(
+      (subType) => section1.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
+    );
+
+    expect(allDisplayed).toBeTruthy();
+
+    const section2 = component.find(`[aria-labelledby="lnsChartSection-My other section"]`);
+    expect(
+      section2.find('[data-test-subj="lnsChartSwitchPopover_subvisC3"]').length
+    ).toBeGreaterThan(0);
   });
 });

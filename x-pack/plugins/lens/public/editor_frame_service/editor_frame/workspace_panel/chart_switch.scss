@@ -1,3 +1,14 @@
+.lnsChartSwitch__chartContainer {
+  @include euiScrollBar;
+  max-height: 500px;
+  overflow: auto;
+}
+
+.lnsChartSwitch__sectionTitle {
+  font-weight: bold;
+  margin-top: $euiSizeM;
+}
+
 .lnsChartSwitch__header {
   > * {
     display: flex;
