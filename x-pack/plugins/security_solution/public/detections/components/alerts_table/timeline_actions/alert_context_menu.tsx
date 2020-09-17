@@ -27,7 +27,8 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/time
 import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter_group';
 import { updateAlertStatusAction } from '../actions';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
-import { Ecs, TimelineNonEcsData } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import {
   AddExceptionModal as AddExceptionModalComponent,
   AddExceptionModalBaseProps,
