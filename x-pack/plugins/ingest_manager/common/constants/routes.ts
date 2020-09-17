@@ -14,10 +14,12 @@ export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
 // EPM API routes
+const EPM_PACKAGES_BULK = `${EPM_API_ROOT}/packages_bulk`;
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
 const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgkey}`;
 const EPM_PACKAGES_FILE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
 export const EPM_API_ROUTES = {
+  BULK_UPGRADE_PATTERN: EPM_PACKAGES_BULK,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
   INFO_PATTERN: EPM_PACKAGES_ONE,

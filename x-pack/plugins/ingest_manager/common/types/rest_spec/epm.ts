@@ -71,6 +71,26 @@ export interface InstallPackageResponse {
   response: AssetReference[];
 }
 
+export interface UpgradePackageError {
+  name: string;
+  statusCode: number;
+  body: {
+    message: string;
+  };
+}
+
+export interface UpgradePackageInfo {
+  name: string;
+  newVersion: string;
+  // this will be null if no package was present before the upgrade (aka it was an install)
+  oldVersion: string | null;
+  assets: AssetReference[];
+}
+
+export interface UpgradePackagesResponse {
+  response: Array<UpgradePackageInfo | UpgradePackageError>;
+}
+
 export interface MessageResponse {
   response: string;
 }
