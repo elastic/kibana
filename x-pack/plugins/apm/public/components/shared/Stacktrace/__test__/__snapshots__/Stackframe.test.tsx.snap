@@ -177,6 +177,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
           aria-controls="test"
           aria-expanded={false}
           className="euiAccordion__button"
+          id="generated-id"
           onClick={[Function]}
           type="button"
         >
