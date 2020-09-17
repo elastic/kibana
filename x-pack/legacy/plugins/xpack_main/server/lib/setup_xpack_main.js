@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pairwise } from 'rxjs/operators';
 import { XPackInfo } from './xpack_info';
 
 /**
@@ -19,17 +20,14 @@ export function setupXPackMain(server) {
 
   server.expose('info', info);
 
-  const setPluginStatus = () => {
-    if (info.isAvailable()) {
-      server.plugins.xpack_main.status.green('Ready');
-    } else {
-      server.plugins.xpack_main.status.red(info.unavailableReason());
-    }
-  };
-
-  // whenever the license info is updated, regardless of the elasticsearch plugin status
-  // changes, reflect the change in our plugin status. See https://github.com/elastic/kibana/issues/20017
-  info.onLicenseInfoChange(setPluginStatus);
+  // trigger an xpack info refresh whenever the elasticsearch plugin status changes
+  server.newPlatform.setup.core.status.core$
+    .pipe(pairwise())
+    .subscribe(async ([coreLast, coreCurrent]) => {
+      if (coreLast.elasticsearch.level !== coreCurrent.elasticsearch.level) {
+        await info.refreshNow();
+      }
+    });
 
   return info;
 }
