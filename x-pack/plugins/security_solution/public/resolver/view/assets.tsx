@@ -37,7 +37,7 @@ interface NodeStyleConfig {
   strokeColor: string;
 }
 
-export interface NodeStyleMap {
+interface NodeStyleMap {
   runningProcessCube: NodeStyleConfig;
   runningTriggerCube: NodeStyleConfig;
   terminatedProcessCube: NodeStyleConfig;
@@ -49,7 +49,7 @@ const idGenerator = htmlIdGenerator();
 /**
  * Ids of paint servers to be referenced by fill and stroke attributes
  */
-export const PaintServerIds = {
+const PaintServerIds = {
   runningProcessCube: idGenerator('psRunningProcessCube'),
   runningTriggerCube: idGenerator('psRunningTriggerCube'),
   terminatedProcessCube: idGenerator('psTerminatedProcessCube'),
