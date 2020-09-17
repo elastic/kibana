@@ -17,7 +17,7 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects('~mlCalendarListRow').toArray()) {
+      for (const tr of $.findTestSubjects('~mlFilterListsRow').toArray()) {
         const $tr = $(tr);
 
         const inUseSubject = $tr
