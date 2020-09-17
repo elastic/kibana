@@ -74,7 +74,6 @@ export class EmbeddableEnhancedPlugin
         getGlobalScope: urlDrilldownGlobalScopeProvider({ core }),
         navigateToUrl: (url: string) =>
           core.getStartServices().then(([{ application }]) => application.navigateToUrl(url)),
-        getOpenModal: () => core.getStartServices().then(([{ overlays }]) => overlays.openModal),
         getSyntaxHelpDocsLink: () =>
           startServices().core.docLinks.links.dashboard.urlDrilldownTemplateSyntax,
         getVariablesHelpDocsLink: () =>
