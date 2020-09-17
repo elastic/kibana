@@ -106,12 +106,12 @@ const RowActions = React.memo<{
         >
           <FormattedMessage
             id="xpack.ingestManager.agentList.reassignActionText"
-            defaultMessage="Assign new agent policy"
+            defaultMessage="Assign to new policy"
           />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           disabled={!hasWriteCapabilites || !agent.active}
-          icon="cross"
+          icon="trash"
           onClick={() => {
             onUnenrollClick();
           }}
@@ -124,7 +124,7 @@ const RowActions = React.memo<{
           ) : (
             <FormattedMessage
               id="xpack.ingestManager.agentList.unenrollOneButton"
-              defaultMessage="Unenroll"
+              defaultMessage="Unenroll agent"
             />
           )}
         </EuiContextMenuItem>,
