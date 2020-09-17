@@ -117,14 +117,12 @@ describe('License & ActionFactory', () => {
 
 describe('isBeta', () => {
   test('false by default', async () => {
-    const factory = new ActionFactory(def, () => licensingMock.createLicense());
+    const factory = createActionFactory();
     expect(factory.isBeta).toBe(false);
   });
 
   test('true', async () => {
-    const factory = new ActionFactory({ ...def, isBeta: true }, () =>
-      licensingMock.createLicense()
-    );
+    const factory = createActionFactory({ isBeta: true });
     expect(factory.isBeta).toBe(true);
   });
 });
