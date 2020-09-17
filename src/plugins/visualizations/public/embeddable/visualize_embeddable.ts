@@ -435,7 +435,7 @@ export class VisualizeEmbeddable
     const input = {
       savedVis: this.vis.serialize(),
     };
-    if (this.getTitle() !== '') {
+    if (this.getTitle()) {
       input.savedVis.title = this.getTitle();
     }
     delete input.savedVis.id;
