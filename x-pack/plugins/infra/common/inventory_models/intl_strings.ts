@@ -7,35 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { toMetricOpt } from '../snapshot_metric_i18n';
 import { SnapshotMetricType, SnapshotMetricTypeKeys } from './types';
-export const CPUUsage = i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
-  defaultMessage: 'CPU usage',
-});
-
-export const MemoryUsage = i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
-  defaultMessage: 'Memory usage',
-});
-
-export const InboundTraffic = i18n.translate(
-  'xpack.infra.waffle.metricOptions.inboundTrafficText',
-  {
-    defaultMessage: 'Inbound traffic',
-  }
-);
-
-export const OutboundTraffic = i18n.translate(
-  'xpack.infra.waffle.metricOptions.outboundTrafficText',
-  {
-    defaultMessage: 'Outbound traffic',
-  }
-);
-
-export const LogRate = i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateText', {
-  defaultMessage: 'Log rate',
-});
-
-export const Load = i18n.translate('xpack.infra.waffle.metricOptions.loadText', {
-  defaultMessage: 'Load',
-});
 
 interface Lookup {
   [id: string]: string;
