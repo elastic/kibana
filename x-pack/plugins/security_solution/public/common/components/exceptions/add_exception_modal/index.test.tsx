@@ -11,15 +11,15 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { act } from 'react-dom/test-utils';
 
 import { AddExceptionModal } from './';
-import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
+import { useCurrentUser } from '../../../../common/lib/kibana';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { stubIndexPattern } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { createUseKibanaMock } from '../../../mock/kibana_react';
-import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -32,8 +32,6 @@ jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../builder');
-
-const useKibanaMock = useKibana as jest.Mock;
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -49,10 +47,6 @@ describe('When the add exception modal is opened', () => {
       .spyOn(builder, 'ExceptionBuilderComponent')
       .mockReturnValue(<></>);
 
-    const kibanaMock = createUseKibanaMock()();
-    useKibanaMock.mockImplementation(() => ({
-      ...kibanaMock,
-    }));
     (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
       { isLoading: false },
       jest.fn(),

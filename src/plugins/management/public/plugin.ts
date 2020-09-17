@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { BehaviorSubject } from 'rxjs';
 import { ManagementSetup, ManagementStart } from './types';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import {
@@ -27,6 +28,9 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   AppMountParameters,
+  AppUpdater,
+  AppStatus,
+  AppNavLinkStatus,
 } from '../../../core/public';
 
 import {
@@ -35,30 +39,34 @@ import {
 } from './management_sections_service';
 
 interface ManagementSetupDependencies {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
   private readonly managementSections = new ManagementSectionsService();
+
+  private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
 
-    home.featureCatalogue.register({
-      id: 'stack-management',
-      title: i18n.translate('management.stackManagement.managementLabel', {
-        defaultMessage: 'Stack Management',
-      }),
-      description: i18n.translate('management.stackManagement.managementDescription', {
-        defaultMessage: 'Your center console for managing the Elastic Stack.',
-      }),
-      icon: 'managementApp',
-      path: '/app/management',
-      showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
-    });
+    if (home) {
+      home.featureCatalogue.register({
+        id: 'stack-management',
+        title: i18n.translate('management.stackManagement.managementLabel', {
+          defaultMessage: 'Stack Management',
+        }),
+        description: i18n.translate('management.stackManagement.managementDescription', {
+          defaultMessage: 'Your center console for managing the Elastic Stack.',
+        }),
+        icon: 'managementApp',
+        path: '/app/management',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
 
     core.application.register({
       id: 'management',
@@ -66,8 +74,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         defaultMessage: 'Stack Management',
       }),
       order: 9040,
-      euiIconType: 'managementApp',
+      euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.management,
+      updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
@@ -87,6 +96,19 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   public start(core: CoreStart) {
     this.managementSections.start({ capabilities: core.application.capabilities });
+    const hasAnyEnabledApps = getSectionsServiceStartPrivate()
+      .getSectionsEnabled()
+      .some((section) => section.getAppsEnabled().length > 0);
+
+    if (!hasAnyEnabledApps) {
+      this.appUpdater.next(() => {
+        return {
+          status: AppStatus.inaccessible,
+          navLinkStatus: AppNavLinkStatus.hidden,
+        };
+      });
+    }
+
     return {};
   }
 }

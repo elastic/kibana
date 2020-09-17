@@ -5,11 +5,12 @@
   "ui": true,
   "requiredPlugins": [
     "data",
-    "kibanaLegacy",
+    "urlForwarding",
     "navigation",
     "savedObjects",
     "visualizations",
     "embeddable",
+    "dashboard",
     "uiActions"
   ],
   "optionalPlugins": ["home", "share"],

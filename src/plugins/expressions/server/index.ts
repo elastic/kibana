@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerPlugin } from './plugin';
 
 export { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';

@@ -79,7 +79,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       .map(([id]) => id)[0];
 
     return {
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       dataType: field.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
@@ -95,7 +95,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       },
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
+  toEsAggsConfig: (column, columnId, _indexPattern) => ({
     id: columnId,
     enabled: true,
     type: 'terms',
@@ -115,7 +115,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       sourceField: field.name,
     };
   },
@@ -177,6 +177,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             defaultMessage: 'Number of values',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <FixedEuiRange
             min={1}
@@ -209,6 +210,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             defaultMessage: 'Order by',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <EuiSelect
             compressed
@@ -236,6 +238,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             defaultMessage: 'Order direction',
           })}
           display="columnCompressed"
+          fullWidth
         >
           <EuiSelect
             compressed

@@ -23,9 +23,9 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
+import { getConfigPath } from '@kbn/utils';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { fromRoot } from '../../core/server/utils';
-import { getConfigPath } from '../../core/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
 
@@ -149,7 +149,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   );
 
   merge(extraCliOptions);
-  merge(readKeystore(get('path.data')));
+  merge(readKeystore());
 
   return rawConfig;
 }

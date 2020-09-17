@@ -5,12 +5,12 @@
  */
 
 import levenshtein from 'js-levenshtein';
-import { PublicAppInfo, PublicLegacyAppInfo } from 'src/core/public';
+import { PublicAppInfo } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../../global_search/public';
 
 export const getAppResults = (
   term: string,
-  apps: Array<PublicAppInfo | PublicLegacyAppInfo>
+  apps: PublicAppInfo[]
 ): GlobalSearchProviderResult[] => {
   return apps
     .map((app) => ({ app, score: scoreApp(term, app) }))
@@ -18,7 +18,7 @@ export const getAppResults = (
     .map(({ app, score }) => appToResult(app, score));
 };
 
-export const scoreApp = (term: string, { title }: PublicAppInfo | PublicLegacyAppInfo): number => {
+export const scoreApp = (term: string, { title }: PublicAppInfo): number => {
   term = term.toLowerCase();
   title = title.toLowerCase();
 
@@ -43,16 +43,17 @@ export const scoreApp = (term: string, { title }: PublicAppInfo | PublicLegacyAp
   return 0;
 };
 
-export const appToResult = (
-  app: PublicAppInfo | PublicLegacyAppInfo,
-  score: number
-): GlobalSearchProviderResult => {
+export const appToResult = (app: PublicAppInfo, score: number): GlobalSearchProviderResult => {
   return {
     id: app.id,
     title: app.title,
     type: 'application',
     icon: app.euiIconType,
-    url: app.legacy ? app.appUrl : app.appRoute,
+    url: app.appRoute,
+    meta: {
+      categoryId: app.category?.id ?? null,
+      categoryLabel: app.category?.label ?? null,
+    },
     score,
   };
 };

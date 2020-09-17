@@ -21,7 +21,6 @@ import React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
 import { coreMock } from '../../../core/public/mocks';
-import { bfetchPluginMock } from '../../bfetch/public/mocks';
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;
@@ -39,23 +38,6 @@ const createSetupContract = (): Setup => {
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
     run: jest.fn(),
-    __LEGACY: {
-      functions: {
-        register: () => {},
-      } as any,
-      renderers: {
-        register: () => {},
-      } as any,
-      types: {
-        register: () => {},
-      } as any,
-      getExecutor: () => ({
-        interpreter: {
-          interpretAst: (() => {}) as any,
-        },
-      }),
-      loadLegacyServerFunctionWrappers: () => Promise.resolve(),
-    },
   };
   return setupContract;
 };
@@ -84,9 +66,7 @@ const createPlugin = async () => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup, {
-    bfetch: bfetchPluginMock.createSetupContract(),
-  });
+  const setup = await plugin.setup(coreSetup);
 
   return {
     pluginInitializerContext,
@@ -94,10 +74,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () =>
-      await plugin.start(coreStart, {
-        bfetch: bfetchPluginMock.createStartContract(),
-      }),
+    doStart: async () => await plugin.start(coreStart),
   };
 };
 

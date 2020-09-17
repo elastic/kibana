@@ -12,9 +12,7 @@ import { renderFunctions } from '../../../canvas_plugin_src/renderers/core';
 
 const placeholder = {} as any;
 const expressionsPlugin = plugin(placeholder);
-const setup = expressionsPlugin.setup(placeholder, {
-  inspector: {},
-} as any);
+const setup = expressionsPlugin.setup(placeholder);
 
 export const expressionsService: ExpressionsService = setup.fork();
 

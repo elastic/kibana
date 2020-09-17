@@ -6,6 +6,8 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { PolicyFromES, SerializedPolicy } from '../../../common/types';
+
 import {
   UIM_POLICY_DELETE,
   UIM_POLICY_ATTACH_INDEX,
@@ -13,7 +15,6 @@ import {
   UIM_POLICY_DETACH_INDEX,
   UIM_INDEX_RETRY_STEP,
 } from '../constants';
-
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
 
@@ -44,7 +45,15 @@ export async function loadPolicies(withIndices: boolean) {
   return await sendGet('policies', { withIndices });
 }
 
-export async function savePolicy(policy: GenericObject) {
+export const useLoadPoliciesList = (withIndices: boolean) => {
+  return useRequest<PolicyFromES[]>({
+    path: `policies`,
+    method: 'get',
+    query: { withIndices },
+  });
+};
+
+export async function savePolicy(policy: SerializedPolicy) {
   return await sendPost(`policies`, policy);
 }
 
@@ -69,7 +78,11 @@ export const removeLifecycleForIndex = async (indexNames: string[]) => {
   return response;
 };
 
-export const addLifecyclePolicyToIndex = async (body: GenericObject) => {
+export const addLifecyclePolicyToIndex = async (body: {
+  indexName: string;
+  policyName: string;
+  alias: string;
+}) => {
   const response = await sendPost(`index/add`, body);
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX);

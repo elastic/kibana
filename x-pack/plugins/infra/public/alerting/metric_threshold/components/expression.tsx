@@ -400,7 +400,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertType={METRIC_THRESHOLD_ALERT_TYPE_ID}
-        alertParams={pick(alertParams as any, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
+        alertParams={pick(alertParams, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
         showNoDataResults={alertParams.alertOnNoData}
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}

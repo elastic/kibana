@@ -9,3 +9,4 @@ export { useNavigateToPath, NavigateToPath } from './use_navigate_to_path';
 export { useUiSettings } from './use_ui_settings_context';
 export { useTimefilter } from './use_timefilter';
 export { useNotifications } from './use_notifications_context';
+export { useMlUrlGenerator, useMlLink } from './use_create_url';

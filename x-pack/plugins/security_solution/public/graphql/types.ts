@@ -1020,6 +1020,8 @@ export interface SignalField {
   rule?: Maybe<RuleField>;
 
   original_time?: Maybe<string[]>;
+
+  status?: Maybe<string[]>;
 }
 
 export interface RuleField {
@@ -5097,6 +5099,8 @@ export namespace GetTimelineQuery {
 
   export type Signal = {
     __typename?: 'SignalField';
+
+    status: Maybe<string[]>;
 
     original_time: Maybe<string[]>;
 

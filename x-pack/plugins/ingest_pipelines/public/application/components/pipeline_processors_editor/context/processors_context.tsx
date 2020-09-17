@@ -38,11 +38,13 @@ import { OnActionHandler } from '../components/processors_tree';
 import {
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
-  ManageProcessorForm,
+  ProcessorForm,
   OnSubmitHandler,
 } from '../components';
 
 import { getValue } from '../utils';
+
+import { useTestPipelineContext } from './test_pipeline_context';
 
 const PipelineProcessorsContext = createContext<ContextValue>({} as any);
 
@@ -78,6 +80,12 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     [originalProcessors, originalOnFailureProcessors]
   );
   const [processorsState, processorsDispatch] = useProcessorsState(deserializedResult);
+
+  const { updateTestOutputPerProcessor, testPipelineData } = useTestPipelineContext();
+
+  const {
+    config: { documents },
+  } = testPipelineData;
 
   useEffect(() => {
     if (initRef.current) {
@@ -120,8 +128,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       },
       getData: () =>
         serialize({
-          onFailure: onFailureProcessors,
-          processors,
+          pipeline: {
+            onFailure: onFailureProcessors,
+            processors,
+          },
         }),
     });
   }, [processors, onFailureProcessors, onUpdate, formState, mode]);
@@ -149,12 +159,12 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
               selector: mode.arg.selector,
             },
           });
+
           break;
         default:
       }
-      setMode({ id: 'idle' });
     },
-    [processorsDispatch, mode, setMode]
+    [processorsDispatch, mode]
   );
 
   const onCloseSettingsForm = useCallback(() => {
@@ -183,7 +193,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
           break;
       }
     },
-    [processorsDispatch, setMode]
+    [processorsDispatch]
   );
 
   // Memoize the state object to ensure we do not trigger unnecessary re-renders and so
@@ -197,6 +207,12 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       processors: { state: processorsState, dispatch: processorsDispatch },
     };
   }, [mode, setMode, processorsState, processorsDispatch]);
+
+  // Make a request to the simulate API and update the processor output
+  // whenever the documents or processorsState changes (e.g., on move, update, delete)
+  useEffect(() => {
+    updateTestOutputPerProcessor(documents, processorsState);
+  }, [documents, processorsState, updateTestOutputPerProcessor]);
 
   return (
     <PipelineProcessorsContext.Provider
@@ -217,7 +233,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       )}
 
       {mode.id === 'managingProcessor' || mode.id === 'creatingProcessor' ? (
-        <ManageProcessorForm
+        <ProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
           processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
           onOpen={onFlyoutOpen}

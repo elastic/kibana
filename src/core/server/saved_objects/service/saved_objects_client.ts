@@ -20,6 +20,7 @@
 import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsBaseOptions,
@@ -47,6 +48,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
 }
 
 /**
@@ -61,6 +64,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
 }
 
 /**
@@ -75,6 +80,13 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
   type: string;
   /** {@inheritdoc SavedObjectAttributes} */
   attributes: Partial<T>;
+  /**
+   * Optional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsBulkUpdateOptions}.
+   *
+   * Note: the default namespace's string representation is `'default'`, and its ID representation is `undefined`.
+   **/
+  namespace?: string;
 }
 
 /**
@@ -115,6 +127,27 @@ export interface SavedObjectsFindResponse<T = unknown> {
  *
  * @public
  */
+export interface SavedObjectsCheckConflictsObject {
+  id: string;
+  type: string;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsCheckConflictsResponse {
+  errors: Array<{
+    id: string;
+    type: string;
+    error: SavedObjectError;
+  }>;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
@@ -139,9 +172,27 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
  *
  * @public
  */
+export interface SavedObjectsAddToNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. */
+  namespaces: string[];
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesResponse {
+  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
+  namespaces: string[];
 }
 
 /**
@@ -239,6 +290,20 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
+   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   *
+   * @param objects
+   * @param options
+   */
+  async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsCheckConflictsResponse> {
+    return await this._repository.checkConflicts(objects, options);
+  }
+
+  /**
    * Deletes a SavedObject
    *
    * @param type
@@ -320,7 +385,7 @@ export class SavedObjectsClient {
     id: string,
     namespaces: string[],
     options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsAddToNamespacesResponse> {
     return await this._repository.addToNamespaces(type, id, namespaces, options);
   }
 
@@ -337,7 +402,7 @@ export class SavedObjectsClient {
     id: string,
     namespaces: string[],
     options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<{}> {
+  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
 

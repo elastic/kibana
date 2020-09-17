@@ -221,6 +221,7 @@ export class LoginForm extends Component<Props, State> {
               id="password"
               name="password"
               data-test-subj="loginPassword"
+              type={'dual'}
               value={this.state.password}
               onChange={this.onPasswordChange}
               disabled={!this.isLoadingState(LoadingStateType.None)}
@@ -451,11 +452,15 @@ export class LoginForm extends Component<Props, State> {
 
       window.location.href = location;
     } catch (err) {
-      this.props.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.security.loginPage.loginSelectorErrorMessage', {
-          defaultMessage: 'Could not perform login.',
-        }),
-      });
+      this.props.notifications.toasts.addError(
+        err?.body?.message ? new Error(err?.body?.message) : err,
+        {
+          title: i18n.translate('xpack.security.loginPage.loginSelectorErrorMessage', {
+            defaultMessage: 'Could not perform login.',
+          }),
+          toastMessage: err?.message,
+        }
+      );
 
       this.setState({ loadingState: { type: LoadingStateType.None } });
     }

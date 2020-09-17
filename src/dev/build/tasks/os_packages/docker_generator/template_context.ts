@@ -25,7 +25,7 @@ export interface TemplateContext {
   artifactsDir: string;
   imageTag: string;
   dockerBuildDir: string;
-  dockerOutputDir: string;
+  dockerTargetFilename: string;
   baseOSImage: string;
   ubiImageFlavor: string;
   dockerBuildDate: string;

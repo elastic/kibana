@@ -4,10 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataStream, DataStreamFromEs } from '../types';
+import { DataStream, DataStreamFromEs, Health } from '../types';
 
 export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataStream {
-  const { name, timestamp_field: timeStampField, indices, generation } = dataStreamFromEs;
+  const {
+    name,
+    timestamp_field: timeStampField,
+    indices,
+    generation,
+    status,
+    template,
+    ilm_policy: ilmPolicyName,
+    store_size: storageSize,
+    maximum_timestamp: maxTimeStamp,
+  } = dataStreamFromEs;
 
   return {
     name,
@@ -20,6 +30,11 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
       })
     ),
     generation,
+    health: status.toLowerCase() as Health, // ES typically returns status in all-caps
+    indexTemplateName: template,
+    ilmPolicyName,
+    storageSize,
+    maxTimeStamp,
   };
 }
 

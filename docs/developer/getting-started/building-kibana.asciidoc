@@ -1,7 +1,7 @@
 [[building-kibana]]
 == Building a {kib} distributable
 
-The following commands will build a {kib} production distributable.
+The following command will build a {kib} production distributable:
 
 [source,bash]
 ----

@@ -9,7 +9,7 @@ Adds one or more namespaces to a given multi-namespace saved object. This method
 <b>Signature:</b>
 
 ```typescript
-addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<{}>;
+addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<SavedObjectsAddToNamespacesResponse>;
 ```
 
 ## Parameters
@@ -23,5 +23,5 @@ addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedO
 
 <b>Returns:</b>
 
-`Promise<{}>`
+`Promise<SavedObjectsAddToNamespacesResponse>`
 

@@ -59,28 +59,6 @@ export class HeadlessChromiumDriverFactory {
 
   type = BROWSER_TYPE;
 
-  test(logger: LevelLogger) {
-    const chromiumArgs = args({
-      userDataDir: this.userDataDir,
-      viewport: { width: 800, height: 600 },
-      disableSandbox: this.browserConfig.disableSandbox,
-      proxy: this.browserConfig.proxy,
-    });
-
-    return puppeteerLaunch({
-      userDataDir: this.userDataDir,
-      executablePath: this.binaryPath,
-      ignoreHTTPSErrors: true,
-      args: chromiumArgs,
-    } as LaunchOptions).catch((error: Error) => {
-      logger.error(
-        `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
-      );
-      logger.error(error);
-      return null;
-    });
-  }
-
   /*
    * Return an observable to objects which will drive screenshot capture for a page
    */

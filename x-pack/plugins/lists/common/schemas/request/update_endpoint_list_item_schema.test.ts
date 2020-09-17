@@ -27,6 +27,7 @@ describe('update_endpoint_list_item_schema', () => {
 
   test('it should not accept an undefined for "description"', () => {
     const payload = getUpdateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -39,6 +40,7 @@ describe('update_endpoint_list_item_schema', () => {
 
   test('it should not accept an undefined for "name"', () => {
     const payload = getUpdateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -51,6 +53,7 @@ describe('update_endpoint_list_item_schema', () => {
 
   test('it should not accept an undefined for "type"', () => {
     const payload = getUpdateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -100,6 +103,7 @@ describe('update_endpoint_list_item_schema', () => {
   test('it should NOT accept an undefined for "entries"', () => {
     const inputPayload = getUpdateEndpointListItemSchemaMock();
     const outputPayload = getUpdateEndpointListItemSchemaMock();
+    // @ts-expect-error
     delete inputPayload.entries;
     outputPayload.entries = [];
     const decoded = updateEndpointListItemSchema.decode(inputPayload);

@@ -14,6 +14,7 @@ import {
   MapExtent,
   MapFilters,
   MapQuery,
+  VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -35,7 +36,7 @@ export type BoundsFilters = {
 };
 
 export interface IVectorSource extends ISource {
-  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
@@ -53,17 +54,18 @@ export interface IVectorSource extends ISource {
   getApplyGlobalQuery(): boolean;
   createField({ fieldName }: { fieldName: string }): IField;
   canFormatFeatureProperties(): boolean;
+  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
   ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: MapFilters,
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta>;
 
@@ -78,7 +80,9 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
-  getUrlTemplateWithMeta(): Promise<{
+  getUrlTemplateWithMeta(
+    searchFilters: VectorSourceRequestMeta
+  ): Promise<{
     layerName: string;
     urlTemplate: string;
     minSourceZoom: number;

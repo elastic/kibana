@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PackageInfo } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
+import { handleResponse } from './fetch';
+import { getCallMsearch } from './legacy/call_msearch';
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
-import { getEsClient, LegacyApiCaller } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
@@ -33,9 +35,8 @@ import { ExpressionsSetup } from '../../../expressions/public';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  packageInfo: PackageInfo;
-  usageCollection?: UsageCollectionSetup;
   expressions: ExpressionsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 /** @internal */
@@ -45,33 +46,27 @@ export interface SearchServiceStartDependencies {
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
-  private esClient?: LegacyApiCaller;
   private readonly aggsService = new AggsService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
   public setup(
-    core: CoreSetup,
-    { packageInfo, usageCollection, expressions }: SearchServiceSetupDependencies
+    { http, getStartServices, notifications, uiSettings }: CoreSetup,
+    { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
-    this.usageCollector = createUsageCollector(core, usageCollection);
-    this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
+    this.usageCollector = createUsageCollector(getStartServices, usageCollection);
+
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
-     * TODO: Make this modular so that apps can opt in/out of search collection, or even provide
-     * their own search collector instances
      */
-    this.searchInterceptor = new SearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
-        usageCollector: this.usageCollector!,
-      },
-      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
-    );
+    this.searchInterceptor = new SearchInterceptor({
+      toasts: notifications.toasts,
+      http,
+      uiSettings,
+      startServices: getStartServices(),
+      usageCollector: this.usageCollector!,
+    });
 
     expressions.registerFunction(esdsl);
     expressions.registerType(esRawResponse);
@@ -79,7 +74,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs: this.aggsService.setup({
         registerFunction: expressions.registerFunction,
-        uiSettings: core.uiSettings,
+        uiSettings,
       }),
       usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
@@ -89,34 +84,41 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { application, http, injectedMetadata, notifications, uiSettings }: CoreStart,
+    { application, http, notifications, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
-    const search: ISearchGeneric = (request, options) => {
+    const search = ((request, options) => {
       return this.searchInterceptor.search(request, options);
-    };
+    }) as ISearchGeneric;
 
-    const legacySearch = {
-      esClient: this.esClient!,
-    };
+    const loadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(loadingCount$);
 
     const searchSourceDependencies: SearchSourceDependencies = {
-      uiSettings,
-      injectedMetadata,
+      getConfig: uiSettings.get.bind(uiSettings),
       search,
-      legacySearch,
+      onResponse: handleResponse,
+      legacy: {
+        callMsearch: getCallMsearch({ http }),
+        loadingCount$,
+      },
     };
 
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
       search,
       searchSource: {
+        /**
+         * creates searchsource based on serialized search source fields
+         */
         create: createSearchSource(indexPatterns, searchSourceDependencies),
+        /**
+         * creates an enpty search source
+         */
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },
       },
-      __LEGACY: legacySearch,
     };
   }
 

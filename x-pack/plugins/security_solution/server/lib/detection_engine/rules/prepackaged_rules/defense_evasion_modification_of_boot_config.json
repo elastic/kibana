@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies use of bcdedit.exe to delete boot configuration data. This tactic is sometimes used as by malware or an attacker as a destructive technique.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -36,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

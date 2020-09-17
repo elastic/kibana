@@ -13,11 +13,11 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
 import {
   generateId,
   parseInterval,
-  parseScheduleDates,
   getDriftTolerance,
   getGapBetweenRuns,
   getGapMaxCatchupRatio,
@@ -558,7 +558,7 @@ describe('utils', () => {
     });
 
     test('it successfully returns list and exceptions list client', async () => {
-      const { listClient, exceptionsClient } = await getListsClient({
+      const { listClient, exceptionsClient } = getListsClient({
         services: alertServices,
         savedObjectClient: alertServices.savedObjectsClient,
         updatedByUser: 'some_user',
@@ -568,18 +568,6 @@ describe('utils', () => {
 
       expect(listClient).toBeDefined();
       expect(exceptionsClient).toBeDefined();
-    });
-
-    test('it throws if "lists" is undefined', async () => {
-      await expect(() =>
-        getListsClient({
-          services: alertServices,
-          savedObjectClient: alertServices.savedObjectsClient,
-          updatedByUser: 'some_user',
-          spaceId: '',
-          lists: undefined,
-        })
-      ).rejects.toThrowError('lists plugin unavailable during rule execution');
     });
   });
 
@@ -743,24 +731,6 @@ describe('utils', () => {
       expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
-    test('it throws if "client" is undefined', async () => {
-      await expect(() =>
-        getExceptions({
-          client: undefined,
-          lists: getListArrayMock(),
-        })
-      ).rejects.toThrowError('lists plugin unavailable during rule execution');
-    });
-
-    test('it returns empty array if "lists" is undefined', async () => {
-      const exceptions = await getExceptions({
-        client: listMock.getExceptionListClient(),
-        lists: undefined,
-      });
-
-      expect(exceptions).toEqual([]);
-    });
-
     test('it throws if "getExceptionListClient" fails', async () => {
       const err = new Error('error fetching list');
       listMock.getExceptionListClient = () =>
@@ -799,7 +769,7 @@ describe('utils', () => {
 
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),
-        lists: undefined,
+        lists: [],
       });
 
       expect(exceptions).toEqual([]);

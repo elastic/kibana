@@ -25,7 +25,7 @@ export const mlForecastService: {
     entityFields: any[],
     earliestMs: number,
     latestMs: number,
-    interval: string,
+    intervalMs: number,
     aggType: any
   ) => Observable<ForecastData>;
 
