@@ -18,28 +18,41 @@
  */
 
 import moment from 'moment';
-import { ISavedObjectsRepository, SavedObjectsServiceSetup } from 'kibana/server';
+import { timer } from 'rxjs';
+import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { findAll } from '../find_all';
 import {
+  ApplicationUsageDaily,
   ApplicationUsageTotal,
   ApplicationUsageTransactional,
   registerMappings,
+  SAVED_OBJECTS_DAILY_TYPE,
+  SAVED_OBJECTS_TOTAL_TYPE,
+  SAVED_OBJECTS_TRANSACTIONAL_TYPE,
 } from './saved_objects_types';
 import { applicationUsageSchema } from './schema';
+import { rollDailyData, rollTotals } from './rollups';
 
 /**
- * Roll indices every 24h
+ * Roll total indices every 24h
  */
-export const ROLL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
+export const ROLL_TOTAL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
+
+/**
+ * Roll daily indices every 30 minutes.
+ * This means that, assuming a user can visit all the 44 apps we can possibly report
+ * in the 3 minutes interval the browser reports to the server, up to 22 users can have the same
+ * behaviour and we wouldn't need to paginate in the transactional documents (less than 10k docs).
+ *
+ * Based on a more normal expected use case, the users could visit up to 5 apps in those 3 minutes,
+ * allowing up to 200 users before reaching the limit.
+ */
+export const ROLL_DAILY_INDICES_INTERVAL = 30 * 60 * 1000;
 
 /**
  * Start rolling indices after 5 minutes up
  */
 export const ROLL_INDICES_START = 5 * 60 * 1000;
-
-export const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
-export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
 
 export interface ApplicationUsageTelemetryReport {
   [appId: string]: {
@@ -55,6 +68,7 @@ export interface ApplicationUsageTelemetryReport {
 }
 
 export function registerApplicationUsageCollector(
+  logger: Logger,
   usageCollection: UsageCollectionSetup,
   registerType: SavedObjectsServiceSetup['registerType'],
   getSavedObjectsClient: () => ISavedObjectsRepository | undefined
@@ -71,10 +85,22 @@ export function registerApplicationUsageCollector(
         if (typeof savedObjectsClient === 'undefined') {
           return;
         }
-        const [rawApplicationUsageTotals, rawApplicationUsageTransactional] = await Promise.all([
-          findAll<ApplicationUsageTotal>(savedObjectsClient, { type: SAVED_OBJECTS_TOTAL_TYPE }),
-          findAll<ApplicationUsageTransactional>(savedObjectsClient, {
+        const [
+          { saved_objects: rawApplicationUsageTotals },
+          { saved_objects: rawApplicationUsageDaily },
+          { saved_objects: rawApplicationUsageTransactional },
+        ] = await Promise.all([
+          savedObjectsClient.find<ApplicationUsageTotal>({
+            type: SAVED_OBJECTS_TOTAL_TYPE,
+            perPage: 10000, // We only have 44 apps for now. This limit is OK.
+          }),
+          savedObjectsClient.find<ApplicationUsageDaily>({
+            type: SAVED_OBJECTS_DAILY_TYPE,
+            perPage: 10000, // We can have up to 44 apps * 91 days = 4004 docs. This limit is OK
+          }),
+          savedObjectsClient.find<ApplicationUsageTransactional>({
             type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
+            perPage: 10000, // If we have more than those, we won't report the rest (they'll be rolled up to the daily soon enough to become a problem)
           }),
         ]);
 
@@ -101,51 +127,51 @@ export function registerApplicationUsageCollector(
         const nowMinus30 = moment().subtract(30, 'days');
         const nowMinus90 = moment().subtract(90, 'days');
 
-        const applicationUsage = rawApplicationUsageTransactional.reduce(
-          (acc, { attributes: { appId, minutesOnScreen, numberOfClicks, timestamp } }) => {
-            const existing = acc[appId] || {
-              clicks_total: 0,
-              clicks_7_days: 0,
-              clicks_30_days: 0,
-              clicks_90_days: 0,
-              minutes_on_screen_total: 0,
-              minutes_on_screen_7_days: 0,
-              minutes_on_screen_30_days: 0,
-              minutes_on_screen_90_days: 0,
-            };
+        const applicationUsage = [
+          ...rawApplicationUsageDaily,
+          ...rawApplicationUsageTransactional,
+        ].reduce((acc, { attributes: { appId, minutesOnScreen, numberOfClicks, timestamp } }) => {
+          const existing = acc[appId] || {
+            clicks_total: 0,
+            clicks_7_days: 0,
+            clicks_30_days: 0,
+            clicks_90_days: 0,
+            minutes_on_screen_total: 0,
+            minutes_on_screen_7_days: 0,
+            minutes_on_screen_30_days: 0,
+            minutes_on_screen_90_days: 0,
+          };
 
-            const timeOfEntry = moment(timestamp as string);
-            const isInLast7Days = timeOfEntry.isSameOrAfter(nowMinus7);
-            const isInLast30Days = timeOfEntry.isSameOrAfter(nowMinus30);
-            const isInLast90Days = timeOfEntry.isSameOrAfter(nowMinus90);
+          const timeOfEntry = moment(timestamp);
+          const isInLast7Days = timeOfEntry.isSameOrAfter(nowMinus7);
+          const isInLast30Days = timeOfEntry.isSameOrAfter(nowMinus30);
+          const isInLast90Days = timeOfEntry.isSameOrAfter(nowMinus90);
 
-            const last7Days = {
-              clicks_7_days: existing.clicks_7_days + numberOfClicks,
-              minutes_on_screen_7_days: existing.minutes_on_screen_7_days + minutesOnScreen,
-            };
-            const last30Days = {
-              clicks_30_days: existing.clicks_30_days + numberOfClicks,
-              minutes_on_screen_30_days: existing.minutes_on_screen_30_days + minutesOnScreen,
-            };
-            const last90Days = {
-              clicks_90_days: existing.clicks_90_days + numberOfClicks,
-              minutes_on_screen_90_days: existing.minutes_on_screen_90_days + minutesOnScreen,
-            };
+          const last7Days = {
+            clicks_7_days: existing.clicks_7_days + numberOfClicks,
+            minutes_on_screen_7_days: existing.minutes_on_screen_7_days + minutesOnScreen,
+          };
+          const last30Days = {
+            clicks_30_days: existing.clicks_30_days + numberOfClicks,
+            minutes_on_screen_30_days: existing.minutes_on_screen_30_days + minutesOnScreen,
+          };
+          const last90Days = {
+            clicks_90_days: existing.clicks_90_days + numberOfClicks,
+            minutes_on_screen_90_days: existing.minutes_on_screen_90_days + minutesOnScreen,
+          };
 
-            return {
-              ...acc,
-              [appId]: {
-                ...existing,
-                clicks_total: existing.clicks_total + numberOfClicks,
-                minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
-                ...(isInLast7Days ? last7Days : {}),
-                ...(isInLast30Days ? last30Days : {}),
-                ...(isInLast90Days ? last90Days : {}),
-              },
-            };
-          },
-          applicationUsageFromTotals
-        );
+          return {
+            ...acc,
+            [appId]: {
+              ...existing,
+              clicks_total: existing.clicks_total + numberOfClicks,
+              minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
+              ...(isInLast7Days ? last7Days : {}),
+              ...(isInLast30Days ? last30Days : {}),
+              ...(isInLast90Days ? last90Days : {}),
+            },
+          };
+        }, applicationUsageFromTotals);
 
         return applicationUsage;
       },
@@ -154,65 +180,10 @@ export function registerApplicationUsageCollector(
 
   usageCollection.registerCollector(collector);
 
-  setInterval(() => rollTotals(getSavedObjectsClient()), ROLL_INDICES_INTERVAL);
-  setTimeout(() => rollTotals(getSavedObjectsClient()), ROLL_INDICES_START);
-}
-
-async function rollTotals(savedObjectsClient?: ISavedObjectsRepository) {
-  if (!savedObjectsClient) {
-    return;
-  }
-
-  try {
-    const [rawApplicationUsageTotals, rawApplicationUsageTransactional] = await Promise.all([
-      findAll<ApplicationUsageTotal>(savedObjectsClient, { type: SAVED_OBJECTS_TOTAL_TYPE }),
-      findAll<ApplicationUsageTransactional>(savedObjectsClient, {
-        type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-        filter: `${SAVED_OBJECTS_TRANSACTIONAL_TYPE}.attributes.timestamp < now-90d`,
-      }),
-    ]);
-
-    const existingTotals = rawApplicationUsageTotals.reduce(
-      (acc, { attributes: { appId, numberOfClicks, minutesOnScreen } }) => {
-        return {
-          ...acc,
-          // No need to sum because there should be 1 document per appId only
-          [appId]: { appId, numberOfClicks, minutesOnScreen },
-        };
-      },
-      {} as Record<string, { appId: string; minutesOnScreen: number; numberOfClicks: number }>
-    );
-
-    const totals = rawApplicationUsageTransactional.reduce((acc, { attributes, id }) => {
-      const { appId, numberOfClicks, minutesOnScreen } = attributes;
-
-      const existing = acc[appId] || { minutesOnScreen: 0, numberOfClicks: 0 };
-
-      return {
-        ...acc,
-        [appId]: {
-          appId,
-          numberOfClicks: numberOfClicks + existing.numberOfClicks,
-          minutesOnScreen: minutesOnScreen + existing.minutesOnScreen,
-        },
-      };
-    }, existingTotals);
-
-    await Promise.all([
-      Object.entries(totals).length &&
-        savedObjectsClient.bulkCreate<ApplicationUsageTotal>(
-          Object.entries(totals).map(([id, entry]) => ({
-            type: SAVED_OBJECTS_TOTAL_TYPE,
-            id,
-            attributes: entry,
-          })),
-          { overwrite: true }
-        ),
-      ...rawApplicationUsageTransactional.map(
-        ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_TRANSACTIONAL_TYPE, id) // There is no bulkDelete :(
-      ),
-    ]);
-  } catch (err) {
-    // Silent failure
-  }
+  timer(ROLL_INDICES_START, ROLL_DAILY_INDICES_INTERVAL).subscribe(() =>
+    rollDailyData(logger, getSavedObjectsClient())
+  );
+  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL).subscribe(() =>
+    rollTotals(logger, getSavedObjectsClient())
+  );
 }

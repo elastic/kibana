@@ -5,9 +5,8 @@
  */
 
 import { resolve } from 'path';
-import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
-import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
+import { xpackInfoRoute } from './server/routes/api/v1';
 
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
@@ -23,13 +22,10 @@ export const xpackMain = (kibana) => {
     },
 
     init(server) {
-      mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
-
       setupXPackMain(server);
 
       // register routes
       xpackInfoRoute(server);
-      settingsRoute(server, this.kbnServer);
     },
   });
 };
