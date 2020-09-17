@@ -44,23 +44,27 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should complete a job of CSV saved search export in non-default space', async () => {
-      const downloadPath = await reportingAPI.postJob(
-        `/s/non_default_space/api/reporting/generate/csv?jobParams=%28browserTimezone%3AUTC%2CconflictedTypesFields%3A%21%28%29%2Cfields%3A%21%28order_date%2Ccategory%2Ccustomer_first_name%2Ccustomer_full_name%2Ctotal_quantity%2Ctotal_unique_products%2Ctaxless_total_price%2Ctaxful_total_price%2Ccurrency%29%2CindexPatternId%3A%27067dec90-e7ee-11ea-a730-d58e9ea7581b%27%2CmetaFields%3A%21%28_source%2C_id%2C_type%2C_index%2C_score%29%2CobjectType%3Asearch%2CsearchRequest%3A%28body%3A%28_source%3A%28includes%3A%21%28order_date%2Ccategory%2Ccustomer_first_name%2Ccustomer_full_name%2Ctotal_quantity%2Ctotal_unique_products%2Ctaxless_total_price%2Ctaxful_total_price%2Ccurrency%29%29%2Cdocvalue_fields%3A%21%28%28field%3Aorder_date%2Cformat%3Adate_time%29%29%2Cquery%3A%28bool%3A%28filter%3A%21%28%28match_all%3A%28%29%29%2C%28range%3A%28order_date%3A%28format%3Astrict_date_optional_time%2Cgte%3A%272019-06-11T08%3A24%3A16.425Z%27%2Clte%3A%272019-07-13T09%3A31%3A07.520Z%27%29%29%29%29%2Cmust%3A%21%28%29%2Cmust_not%3A%21%28%29%2Cshould%3A%21%28%29%29%29%2Cscript_fields%3A%28%29%2Csort%3A%21%28%28order_date%3A%28order%3Adesc%2Cunmapped_type%3Aboolean%29%29%29%2Cstored_fields%3A%21%28order_date%2Ccategory%2Ccustomer_first_name%2Ccustomer_full_name%2Ctotal_quantity%2Ctotal_unique_products%2Ctaxless_total_price%2Ctaxful_total_price%2Ccurrency%29%2Cversion%3A%21t%29%2Cindex%3A%27ecommerce%2A%27%29%2Ctitle%3A%27Ecom%20Search%27%29`
+      const downloadPath = await reportingAPI.postJobJSON(
+        `/s/non_default_space/api/reporting/generate/csv`,
+        {
+          jobParams:
+            `(browserTimezone:UTC,conflictedTypesFields:!(),fields:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency),indexPatternId:'067dec90-e7ee-11ea-a730-d58e9ea7581b',metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-11T08:24:16.425Z',lte:'2019-07-13T09:31:07.520Z')))),must:!(),must_not:!(),should:!())),script_fields:(),` +
+            `sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency),version:!t),index:'ecommerce*'),title:'Ecom Search')`,
+        }
       );
 
-      // Retry the download URL until a "completed" response status is returned
       const completed$ = getCompleted$(downloadPath);
       const reportCompleted = await completed$.toPromise();
       expect(reportCompleted).to.match(
         /^"order_date";category;"customer_first_name";"customer_full_name";"total_quantity";"total_unique_products";"taxless_total_price";"taxful_total_price";currency\n"Jul 12, 2019 @ 00:00:00.000";/
-      );
+      ); // UTC timezone, semicolon separator
     });
 
     it('uses the default space settings', async () => {
       // MUST NOT have time zone field in the params for space setting to take effect
-      const defaultSpaceJob = await reportingAPI.postJob(
-        `/api/reporting/generate/csv?jobParams=%28conflictedTypesFields%3A%21%28%29%2Cfields%3A%21%28order_date%2Corder_date%2Ccustomer_full_name%2Ctaxful_total_price%29%2CindexPatternId%3Aaac3e500-f2c7-11ea-8250-fb138aa491e7%2CmetaFields%3A%21%28_source%2C_id%2C_type%2C_index%2C_score%29%2CobjectType%3Asearch%2CsearchRequest%3A%28body%3A%28_source%3A%28includes%3A%21%28order_date%2Ccustomer_full_name%2Ctaxful_total_price%29%29%2Cdocvalue_fields%3A%21%28%28field%3Aorder_date%2Cformat%3Adate_time%29%29%2Cquery%3A%28bool%3A%28filter%3A%21%28%28match_all%3A%28%29%29%2C%28range%3A%28order_date%3A%28format%3Astrict_date_optional_time%2Cgte%3A%272019-06-11T04%3A49%3A43.495Z%27%2Clte%3A%272019-07-14T10%3A25%3A34.149Z%27%29%29%29%29%2Cmust%3A%21%28%29%2Cmust_not%3A%21%28%29%2Cshould%3A%21%28%29%29%29%2Cscript_fields%3A%28%29%2Csort%3A%21%28%28order_date%3A%28order%3Adesc%2Cunmapped_type%3Aboolean%29%29%29%2Cstored_fields%3A%21%28order_date%2Ccustomer_full_name%2Ctaxful_total_price%29%2Cversion%3A%21t%29%2Cindex%3A%27ec%2A%27%29%2Ctitle%3A%27EC%20SEARCH%27%29 `
-      );
+      const defaultSpaceJob = await reportingAPI.postJobJSON(`/api/reporting/generate/csv`, {
+        jobParams: `(conflictedTypesFields:!(),fields:!(order_date,order_date,customer_full_name,taxful_total_price),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,customer_full_name,taxful_total_price)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-11T04:49:43.495Z',lte:'2019-07-14T10:25:34.149Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,customer_full_name,taxful_total_price),version:!t),index:'ec*'),title:'EC SEARCH')`,
+      });
 
       const defaultCompleted$ = getCompleted$(defaultSpaceJob);
       const defaultReport = await defaultCompleted$.toPromise();
@@ -71,9 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`uses browserTimezone in jobParams override space setting`, async () => {
       // MUST have time zone field in the params and timezone set to `Browser` in Advanced Settings
-      const timezoneParamsJob = await reportingAPI.postJob(
-        `/api/reporting/generate/csv?jobParams=%28browserTimezone%3AAmerica%2FPhoenix%2CconflictedTypesFields%3A%21%28%29%2Cfields%3A%21%28order_date%2Ccategory%2Ccustomer_full_name%2Ctaxful_total_price%2Ccurrency%29%2CindexPatternId%3Aaac3e500-f2c7-11ea-8250-fb138aa491e7%2CmetaFields%3A%21%28_source%2C_id%2C_type%2C_index%2C_score%29%2CobjectType%3Asearch%2CsearchRequest%3A%28body%3A%28_source%3A%28includes%3A%21%28order_date%2Ccategory%2Ccustomer_full_name%2Ctaxful_total_price%2Ccurrency%29%29%2Cdocvalue_fields%3A%21%28%28field%3Aorder_date%2Cformat%3Adate_time%29%29%2Cquery%3A%28bool%3A%28filter%3A%21%28%28match_all%3A%28%29%29%2C%28range%3A%28order_date%3A%28format%3Astrict_date_optional_time%2Cgte%3A%272019-05-30T05%3A09%3A59.743Z%27%2Clte%3A%272019-07-26T08%3A47%3A09.682Z%27%29%29%29%29%2Cmust%3A%21%28%29%2Cmust_not%3A%21%28%29%2Cshould%3A%21%28%29%29%29%2Cscript_fields%3A%28%29%2Csort%3A%21%28%28order_date%3A%28order%3Adesc%2Cunmapped_type%3Aboolean%29%29%29%2Cstored_fields%3A%21%28order_date%2Ccategory%2Ccustomer_full_name%2Ctaxful_total_price%2Ccurrency%29%2Cversion%3A%21t%29%2Cindex%3A%27ec%2A%27%29%2Ctitle%3A%27EC%20SEARCH%20from%20DEFAULT%27%29`
-      );
+      const timezoneParamsJob = await reportingAPI.postJobJSON(`/api/reporting/generate/csv`, {
+        jobParams:
+          `(browserTimezone:America/Phoenix,conflictedTypesFields:!(),fields:!(order_date,category,customer_full_name,taxful_total_price,currency),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,category,customer_full_name,taxful_total_price,currency)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-05-30T05:09:59.743Z',lte:'2019-07-26T08:47:09.682Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,category,customer_full_name,taxful_total_price,currency),` +
+          `version:!t),index:'ec*'),title:'EC SEARCH from DEFAULT')`,
+      });
 
       const completed$ = getCompleted$(timezoneParamsJob);
       const report = await completed$.toPromise();
@@ -84,8 +90,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     // FLAKY: https://github.com/elastic/kibana/issues/76551
     it.skip('should complete a job of PNG export of a dashboard in non-default space', async () => {
-      const downloadPath = await reportingAPI.postJob(
-        `/s/non_default_space/api/reporting/generate/png?jobParams=%28browserTimezone%3AUTC%2Clayout%3A%28dimensions%3A%28height%3A512%2Cwidth%3A2402%29%2Cid%3Apng%29%2CobjectType%3Adashboard%2CrelativeUrl%3A%27%2Fs%2Fnon_default_space%2Fapp%2Fdashboards%23%2Fview%2F3c9ee360-e7ee-11ea-a730-d58e9ea7581b%3F_g%3D%28filters%3A%21%21%28%29%2CrefreshInterval%3A%28pause%3A%21%21t%2Cvalue%3A0%29%2Ctime%3A%28from%3A%21%272019-06-10T03%3A17%3A28.800Z%21%27%2Cto%3A%21%272019-07-14T19%3A25%3A06.385Z%21%27%29%29%26_a%3D%28description%3A%21%27%21%27%2Cfilters%3A%21%21%28%29%2CfullScreenMode%3A%21%21f%2Coptions%3A%28hidePanelTitles%3A%21%21f%2CuseMargins%3A%21%21t%29%2Cquery%3A%28language%3Akuery%2Cquery%3A%21%27%21%27%29%2CtimeRestore%3A%21%21t%2Ctitle%3A%21%27Ecom%2520Dashboard%2520Non%2520Default%2520Space%21%27%2CviewMode%3Aview%29%27%2Ctitle%3A%27Ecom%20Dashboard%20Non%20Default%20Space%27%29`
+      const downloadPath = await reportingAPI.postJobJSON(
+        `/s/non_default_space/api/reporting/generate/png`,
+        {
+          jobParams: `(browserTimezone:UTC,layout:(dimensions:(height:512,width:2402),id:png),objectType:dashboard,relativeUrl:'/s/non_default_space/app/dashboards#/view/3c9ee360-e7ee-11ea-a730-d58e9ea7581b?_g=(filters:!!(),refreshInterval:(pause:!!t,value:0),time:(from:!'2019-06-10T03:17:28.800Z!',to:!'2019-07-14T19:25:06.385Z!'))&_a=(description:!'!',filters:!!(),fullScreenMode:!!f,options:(hidePanelTitles:!!f,useMargins:!!t),query:(language:kuery,query:!'!'),timeRestore:!!t,title:!'Ecom%20Dashboard%20Non%20Default%20Space!',viewMode:view)',title:'Ecom Dashboard Non Default Space')`,
+        }
       );
 
       const completed$: Rx.Observable<string> = getCompleted$(downloadPath);
@@ -95,8 +104,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     // FLAKY: https://github.com/elastic/kibana/issues/76551
     it.skip('should complete a job of PDF export of a dashboard in non-default space', async () => {
-      const downloadPath = await reportingAPI.postJob(
-        `/s/non_default_space/api/reporting/generate/printablePdf?jobParams=%28browserTimezone%3AUTC%2Clayout%3A%28dimensions%3A%28height%3A512%2Cwidth%3A2402%29%2Cid%3Apreserve_layout%29%2CobjectType%3Adashboard%2CrelativeUrls%3A%21%28%27%2Fs%2Fnon_default_space%2Fapp%2Fdashboards%23%2Fview%2F3c9ee360-e7ee-11ea-a730-d58e9ea7581b%3F_g%3D%28filters%3A%21%21%28%29%2CrefreshInterval%3A%28pause%3A%21%21t%2Cvalue%3A0%29%2Ctime%3A%28from%3A%21%272019-06-10T03%3A17%3A28.800Z%21%27%2Cto%3A%21%272019-07-14T19%3A25%3A06.385Z%21%27%29%29%26_a%3D%28description%3A%21%27%21%27%2Cfilters%3A%21%21%28%29%2CfullScreenMode%3A%21%21f%2Coptions%3A%28hidePanelTitles%3A%21%21f%2CuseMargins%3A%21%21t%29%2Cquery%3A%28language%3Akuery%2Cquery%3A%21%27%21%27%29%2CtimeRestore%3A%21%21t%2Ctitle%3A%21%27Ecom%2520Dashboard%2520Non%2520Default%2520Space%21%27%2CviewMode%3Aview%29%27%29%2Ctitle%3A%27Ecom%20Dashboard%20Non%20Default%20Space%27%29`
+      const downloadPath = await reportingAPI.postJobJSON(
+        `/s/non_default_space/api/reporting/generate/printablePdf`,
+        {
+          jobParams: `(browserTimezone:UTC,layout:(dimensions:(height:512,width:2402),id:preserve_layout),objectType:dashboard,relativeUrls:!('/s/non_default_space/app/dashboards#/view/3c9ee360-e7ee-11ea-a730-d58e9ea7581b?_g=(filters:!!(),refreshInterval:(pause:!!t,value:0),time:(from:!'2019-06-10T03:17:28.800Z!',to:!'2019-07-14T19:25:06.385Z!'))&_a=(description:!'!',filters:!!(),fullScreenMode:!!f,options:(hidePanelTitles:!!f,useMargins:!!t),query:(language:kuery,query:!'!'),timeRestore:!!t,title:!'Ecom%20Dashboard%20Non%20Default%20Space!',viewMode:view)'),title:'Ecom Dashboard Non Default Space')`,
+        }
       );
 
       const completed$ = getCompleted$(downloadPath);
