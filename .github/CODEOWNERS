@@ -285,7 +285,6 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
 /src/legacy/core_plugins/kibana/public/home/**/*.scss @elastic/kibana-core-ui-designers
-/x-pack/legacy/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers
 
