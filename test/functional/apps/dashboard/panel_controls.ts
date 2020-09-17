@@ -24,15 +24,16 @@ import {
   AREA_CHART_VIS_NAME,
   LINE_CHART_VIS_NAME,
 } from '../../page_objects/dashboard_page';
-// import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
+import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardReplacePanel = getService('dashboardReplacePanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  // const renderable = getService('renderable');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
@@ -53,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('visualization object replace flyout', () => {
-      let intialDimensions;
+      let intialDimensions: undefined | Array<{ width: number; height: number }>;
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setHistoricalDataRange();
@@ -77,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('replaces selected visualization with old dimensions', async () => {
         const newDimensions = await PageObjects.dashboard.getPanelDimensions();
-        expect(intialDimensions[0]).to.eql(newDimensions[0]);
+        expect(intialDimensions![0]).to.eql(newDimensions[0]);
       });
 
       it('replaced panel persisted correctly when dashboard is hard refreshed', async () => {
