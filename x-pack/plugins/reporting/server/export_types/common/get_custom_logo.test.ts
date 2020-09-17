@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingCore } from '../../core';
-import { createMockReportingCore } from '../../test_helpers';
+import { ReportingConfig, ReportingCore } from '../../';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../test_helpers';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './';
 
-const mockConfigGet = jest.fn().mockImplementation((key: string) => {
-  return 'localhost';
-});
-const mockConfig = { get: mockConfigGet, kbnConfig: { get: mockConfigGet } };
-
+let mockConfig: ReportingConfig;
 let mockReportingPlugin: ReportingCore;
+
 beforeEach(async () => {
+  mockConfig = createMockConfig(createMockConfigSchema());
   mockReportingPlugin = await createMockReportingCore(mockConfig);
 });
 

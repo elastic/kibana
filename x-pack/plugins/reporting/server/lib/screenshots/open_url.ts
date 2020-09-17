@@ -5,9 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { durationToNumber } from '../../../common/schema_utils';
+import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig, ConditionalHeaders } from '../../types';
-import { LevelLogger, startTrace } from '../';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,
@@ -19,16 +20,14 @@ export const openUrl = async (
 ): Promise<void> => {
   const endTrace = startTrace('open_url', 'wait');
   try {
+    const timeout = durationToNumber(captureConfig.timeouts.openUrl);
     await browser.open(
       url,
-      {
-        conditionalHeaders,
-        waitForSelector: pageLoadSelector,
-        timeout: captureConfig.timeouts.openUrl,
-      },
+      { conditionalHeaders, waitForSelector: pageLoadSelector, timeout },
       logger
     );
   } catch (err) {
+    logger.error(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.couldntLoadKibana', {
         defaultMessage: `An error occurred when trying to open the Kibana URL. You may need to increase '{configKey}'. {error}`,

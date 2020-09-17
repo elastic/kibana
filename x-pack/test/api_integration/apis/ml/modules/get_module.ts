@@ -20,6 +20,8 @@ const moduleIds = [
   'logs_ui_analysis',
   'logs_ui_categories',
   'metricbeat_system_ecs',
+  'metrics_ui_hosts',
+  'metrics_ui_k8s',
   'nginx_ecs',
   'sample_data_ecommerce',
   'sample_data_weblogs',
