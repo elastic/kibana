@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
 import { cloneDeep } from 'lodash/fp';
-
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import {
@@ -66,7 +64,7 @@ const basicDataProvider: DataProvider = {
 };
 const basicTimeline: TimelineModel = {
   columns: [],
-  dataProviders: [basicDataProvider],
+  dataProviders: [{ ...basicDataProvider }],
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',
     end: '2020-07-08T08:20:18.966Z',
@@ -109,7 +107,7 @@ const basicTimeline: TimelineModel = {
   width: DEFAULT_TIMELINE_WIDTH,
 };
 const timelineByIdMock: TimelineById = {
-  foo: basicTimeline,
+  foo: { ...basicTimeline },
 };
 
 const timelineByIdTemplateMock: TimelineById = {
@@ -165,13 +163,13 @@ describe('Timeline', () => {
       });
       expect(update).toEqual({
         foo: basicTimeline,
-        bar: set('id', 'bar', timelineDefaults),
+        bar: { ...timelineDefaults, id: 'bar' },
       });
     });
 
     test('should add the specified columns to the timeline', () => {
-      const barWithEmptyColumns = set('id', 'bar', timelineDefaults);
-      const barWithPopulatedColumns = set('columns', defaultHeaders, barWithEmptyColumns);
+      const barWithEmptyColumns = { ...timelineDefaults, id: 'bar' };
+      const barWithPopulatedColumns = { ...barWithEmptyColumns, columns: defaultHeaders };
 
       const update = addNewTimeline({
         id: 'bar',
@@ -202,7 +200,14 @@ describe('Timeline', () => {
         show: false, // value we are changing from true to false
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.show', false, timelineByIdMock));
+
+      expect(update).toEqual({
+        ...timelineByIdMock,
+        foo: {
+          ...timelineByIdMock.foo,
+          show: false,
+        },
+      });
     });
   });
 
@@ -210,10 +215,11 @@ describe('Timeline', () => {
     let timelineById: TimelineById = {};
     let columns: ColumnHeaderOptions[] = [];
     let columnToAdd: ColumnHeaderOptions;
+    let mockWithExistingColumns: TimelineById;
 
     beforeEach(() => {
-      timelineById = cloneDeep(timelineByIdMock);
-      columns = cloneDeep(columnsMock);
+      timelineById = { ...timelineByIdMock };
+      columns = { ...columnsMock };
       columnToAdd = {
         category: 'event',
         columnHeaderType: defaultColumnHeaderType,
@@ -224,6 +230,13 @@ describe('Timeline', () => {
         type: 'keyword',
         aggregatable: true,
         width: DEFAULT_COLUMN_MIN_WIDTH,
+      };
+      mockWithExistingColumns = {
+        ...timelineById,
+        foo: {
+          ...timelineById.foo,
+          columns,
+        },
       };
     });
 
@@ -247,12 +260,11 @@ describe('Timeline', () => {
         timelineById,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, timelineById));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should add a new column to an existing collection of columns at the beginning of the collection', () => {
       const expectedColumns = [columnToAdd, ...columns];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columnToAdd,
@@ -260,13 +272,11 @@ describe('Timeline', () => {
         index: 0,
         timelineById: mockWithExistingColumns,
       });
-
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should add a new column to an existing collection of columns in the middle of the collection', () => {
       const expectedColumns = [columns[0], columnToAdd, columns[1], columns[2]];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columnToAdd,
@@ -275,12 +285,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should add a new column to an existing collection of columns at the end of the collection', () => {
       const expectedColumns = [...columns, columnToAdd];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columnToAdd,
@@ -289,13 +298,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     columns.forEach((column, i) => {
       test(`should upsert (NOT add a new column) a column when already exists at the same index (${i})`, () => {
-        const mockWithExistingColumns = set('foo.columns', columns, timelineById);
-
         const update = upsertTimelineColumn({
           column,
           id: 'foo',
@@ -303,13 +310,12 @@ describe('Timeline', () => {
           timelineById: mockWithExistingColumns,
         });
 
-        expect(update).toEqual(set('foo.columns', columns, mockWithExistingColumns));
+        expect(update.foo.columns).toEqual(columns);
       });
     });
 
     test('should allow the 1st column to be moved to the 2nd column', () => {
       const expectedColumns = [columns[1], columns[0], columns[2]];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columns[0],
@@ -318,12 +324,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should allow the 1st column to be moved to the 3rd column', () => {
       const expectedColumns = [columns[1], columns[2], columns[0]];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columns[0],
@@ -332,12 +337,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should allow the 2nd column to be moved to the 1st column', () => {
       const expectedColumns = [columns[1], columns[0], columns[2]];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columns[1],
@@ -346,12 +350,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should allow the 2nd column to be moved to the 3rd column', () => {
       const expectedColumns = [columns[0], columns[2], columns[1]];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columns[1],
@@ -360,12 +363,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should allow the 3rd column to be moved to the 1st column', () => {
       const expectedColumns = [columns[2], columns[0], columns[1]];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columns[2],
@@ -374,12 +376,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should allow the 3rd column to be moved to the 2nd column', () => {
       const expectedColumns = [columns[0], columns[2], columns[1]];
-      const mockWithExistingColumns = set('foo.columns', columns, timelineById);
 
       const update = upsertTimelineColumn({
         column: columns[2],
@@ -388,7 +389,7 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
   });
 
@@ -413,8 +414,8 @@ describe('Timeline', () => {
         provider: providerToAdd,
         timelineById: timelineByIdMock,
       });
-      const addedDataProvider = basicTimeline.dataProviders.concat(providerToAdd);
-      expect(update).toEqual(set('foo.dataProviders', addedDataProvider, timelineByIdMock));
+      const addedDataProvider = [...basicTimeline.dataProviders].concat(providerToAdd);
+      expect(update.foo.dataProviders).toEqual(addedDataProvider);
     });
 
     test('should NOT add a new timeline provider if it already exists and the attributes "and" is empty', () => {
@@ -427,7 +428,7 @@ describe('Timeline', () => {
     });
 
     test('should add a new timeline provider if it already exists and the attributes "and" is NOT empty', () => {
-      const myMockTimelineByIdMock = cloneDeep(timelineByIdMock);
+      const myMockTimelineByIdMock = { ...timelineByIdMock };
       myMockTimelineByIdMock.foo.dataProviders[0].and = [
         {
           ...basicDataProvider,
@@ -435,14 +436,13 @@ describe('Timeline', () => {
           name: 'and data provider 1',
         },
       ];
+      const provider = { ...basicDataProvider };
       const update = addTimelineProvider({
         id: 'foo',
-        provider: basicDataProvider,
+        provider,
         timelineById: myMockTimelineByIdMock,
       });
-      expect(update).toEqual(
-        set('foo.dataProviders[1]', basicDataProvider, myMockTimelineByIdMock)
-      );
+      expect(update.foo.dataProviders[1]).toEqual(provider);
     });
 
     test('should UPSERT an existing timeline provider if it already exists', () => {
@@ -454,15 +454,22 @@ describe('Timeline', () => {
         },
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.dataProviders[0].name', 'my name changed', timelineByIdMock));
+      expect(update.foo.dataProviders[0].name).toEqual('my name changed');
     });
   });
 
   describe('#removeTimelineColumn', () => {
+    let mockWithExistingColumns: TimelineById;
+    beforeEach(() => {
+      mockWithExistingColumns = {
+        ...timelineByIdMock,
+        foo: {
+          ...timelineByIdMock.foo,
+          columns: columnsMock,
+        },
+      };
+    });
     test('should return a new reference and not the same reference', () => {
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
-
       const update = removeTimelineColumn({
         id: 'foo',
         columnId: columnsMock[0].id,
@@ -475,23 +482,17 @@ describe('Timeline', () => {
     test('should remove just the first column when the id matches', () => {
       const expectedColumns = [columnsMock[1], columnsMock[2]];
 
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
-
       const update = removeTimelineColumn({
         id: 'foo',
         columnId: columnsMock[0].id,
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should remove just the last column when the id matches', () => {
       const expectedColumns = [columnsMock[0], columnsMock[1]];
-
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
 
       const update = removeTimelineColumn({
         id: 'foo',
@@ -499,14 +500,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should remove just the middle column when the id matches', () => {
       const expectedColumns = [columnsMock[0], columnsMock[2]];
-
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
 
       const update = removeTimelineColumn({
         id: 'foo',
@@ -514,14 +512,11 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should not modify the columns if the id to remove was not found', () => {
       const expectedColumns = cloneDeep(columnsMock);
-
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
 
       const update = removeTimelineColumn({
         id: 'foo',
@@ -529,16 +524,23 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
   });
 
   describe('#applyDeltaToColumnWidth', () => {
+    let mockWithExistingColumns: TimelineById;
+    beforeEach(() => {
+      mockWithExistingColumns = {
+        ...timelineByIdMock,
+        foo: {
+          ...timelineByIdMock.foo,
+          columns: columnsMock,
+        },
+      };
+    });
     test('should return a new reference and not the same reference', () => {
       const delta = 50;
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
-
       const update = applyDeltaToTimelineColumnWidth({
         id: 'foo',
         columnId: columnsMock[0].id,
@@ -558,9 +560,6 @@ describe('Timeline', () => {
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
-
       const update = applyDeltaToTimelineColumnWidth({
         id: 'foo',
         columnId: aDateColumn.id,
@@ -568,7 +567,7 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should NOT update (just) the specified column of type `date` when the id matches, because the result of applying the delta is less than the min width for a date column', () => {
@@ -580,9 +579,6 @@ describe('Timeline', () => {
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
-
       const update = applyDeltaToTimelineColumnWidth({
         id: 'foo',
         columnId: aDateColumn.id,
@@ -590,7 +586,7 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should update (just) the specified non-date column when the id matches, and the result of applying the delta is greater than the min width for the column', () => {
@@ -602,9 +598,6 @@ describe('Timeline', () => {
       };
       const expectedColumns = [columnsMock[0], expectedToHaveNewWidth, columnsMock[2]];
 
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
-
       const update = applyDeltaToTimelineColumnWidth({
         id: 'foo',
         columnId: aNonDateColumn.id,
@@ -612,7 +605,7 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
 
     test('should NOT update the specified non-date column when the id matches, because the result of applying the delta is less than the min width for the column', () => {
@@ -624,9 +617,6 @@ describe('Timeline', () => {
       };
       const expectedColumns = [columnsMock[0], expectedToHaveNewWidth, columnsMock[2]];
 
-      // pre-populate a new mock with existing columns:
-      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
-
       const update = applyDeltaToTimelineColumnWidth({
         id: 'foo',
         columnId: aNonDateColumn.id,
@@ -634,7 +624,7 @@ describe('Timeline', () => {
         timelineById: mockWithExistingColumns,
       });
 
-      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+      expect(update.foo.columns).toEqual(expectedColumns);
     });
   });
 
@@ -733,7 +723,7 @@ describe('Timeline', () => {
         timelineById: newTimeline,
       });
 
-      expect(update).toEqual(set('foo.dataProviders[1].and[1]', andProviderToAdd, newTimeline));
+      expect(update.foo.dataProviders[1].and[1]).toEqual(andProviderToAdd);
       newTimeline.foo.highlightedDropAndProviderId = '';
     });
 
@@ -805,7 +795,7 @@ describe('Timeline', () => {
         columns: columnsMock,
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.columns', [...columnsMock], timelineByIdMock));
+      expect(update.foo.columns).toEqual([...columnsMock]);
     });
   });
 
@@ -827,7 +817,7 @@ describe('Timeline', () => {
         description: newDescription,
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.description', newDescription, timelineByIdMock));
+      expect(update.foo.description).toEqual(newDescription);
     });
 
     test('should always trim all leading whitespace and allow only one trailing space', () => {
@@ -836,7 +826,7 @@ describe('Timeline', () => {
         description: '      breathing room      ',
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.description', 'breathing room ', timelineByIdMock));
+      expect(update.foo.description).toEqual('breathing room ');
     });
   });
 
@@ -858,7 +848,7 @@ describe('Timeline', () => {
         title: newTitle,
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.title', newTitle, timelineByIdMock));
+      expect(update.foo.title).toEqual(newTitle);
     });
 
     test('should always trim all leading whitespace and allow only one trailing space', () => {
@@ -867,7 +857,7 @@ describe('Timeline', () => {
         title: '      room at the back      ',
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.title', 'room at the back ', timelineByIdMock));
+      expect(update.foo.title).toEqual('room at the back ');
     });
   });
 
@@ -887,7 +877,7 @@ describe('Timeline', () => {
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should add update a timeline with new providers', () => {
+    test('should add update a timeline with new providers BBB', () => {
       const providerToAdd: DataProvider = {
         ...basicDataProvider,
         id: '567',
@@ -898,7 +888,7 @@ describe('Timeline', () => {
         providers: [providerToAdd],
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.dataProviders', [providerToAdd], timelineByIdMock));
+      expect(update.foo.dataProviders).toEqual([providerToAdd]);
     });
   });
 
@@ -917,16 +907,10 @@ describe('Timeline', () => {
     });
 
     test('should update the timeline range', () => {
-      expect(update).toEqual(
-        set(
-          'foo.dateRange',
-          {
-            start: '2020-07-07T08:20:18.966Z',
-            end: '2020-07-08T08:20:18.966Z',
-          },
-          timelineByIdMock
-        )
-      );
+      expect(update.foo.dateRange).toEqual({
+        start: '2020-07-07T08:20:18.966Z',
+        end: '2020-07-08T08:20:18.966Z',
+      });
     });
   });
 
@@ -947,32 +931,38 @@ describe('Timeline', () => {
     });
 
     test('should update the timeline range', () => {
-      expect(update).toEqual(
-        set(
-          'foo.sort',
-          { columnId: 'some column', sortDirection: Direction.desc },
-          timelineByIdMock
-        )
-      );
+      expect(update.foo.sort).toEqual({ columnId: 'some column', sortDirection: Direction.desc });
     });
   });
 
   describe('#updateTimelineProviderEnabled', () => {
-    let update: TimelineById = updateTimelineProviderEnabled({
-      id: 'foo',
-      providerId: '123',
-      enabled: false, // value we are updating from true to false
-      timelineById: timelineByIdMock,
-    });
     test('should return a new reference and not the same reference', () => {
+      const update: TimelineById = updateTimelineProviderEnabled({
+        id: 'foo',
+        providerId: '123',
+        enabled: false, // value we are updating from true to false
+        timelineById: timelineByIdMock,
+      });
       expect(update).not.toBe(timelineByIdMock);
     });
 
     test('should return a new reference for data provider and not the same reference of data provider', () => {
+      const update: TimelineById = updateTimelineProviderEnabled({
+        id: 'foo',
+        providerId: '123',
+        enabled: false, // value we are updating from true to false
+        timelineById: timelineByIdMock,
+      });
       expect(update.foo.dataProviders).not.toBe(basicTimeline.dataProviders);
     });
 
     test('should update the timeline provider enabled from true to false', () => {
+      const update: TimelineById = updateTimelineProviderEnabled({
+        id: 'foo',
+        providerId: '123',
+        enabled: false, // value we are updating from true to false
+        timelineById: timelineByIdMock,
+      });
       const expected: TimelineById = {
         foo: {
           ...basicTimeline,
@@ -988,18 +978,17 @@ describe('Timeline', () => {
     });
 
     test('should update only one data provider and not two data providers', () => {
-      const multiDataProvider = basicTimeline.dataProviders.concat({
+      const multiDataProvider = [...basicTimeline.dataProviders].concat({
         ...basicDataProvider,
         id: '456',
       });
       const multiDataProviderMock = {
-        ...timelineByIdMock,
         foo: {
           ...timelineByIdMock.foo,
           dataProviders: multiDataProvider,
         },
       };
-      update = updateTimelineProviderEnabled({
+      const update = updateTimelineProviderEnabled({
         id: 'foo',
         providerId: '123',
         enabled: false, // value we are updating from true to false
@@ -1020,7 +1009,8 @@ describe('Timeline', () => {
           ],
         },
       };
-      console.log('expected', expected.foo.dataProviders[0]);
+      // console.log('update', update.foo.dataProviders);
+      // console.log('expected', expected.foo.dataProviders);
       expect(update).toEqual(expected);
     });
   });
@@ -1069,7 +1059,7 @@ describe('Timeline', () => {
       expect(update.foo.dataProviders[indexProvider].and[0].enabled).toEqual(false);
     });
 
-    test('should update only one and data provider and not two and data providers', () => {
+    test('should update only one and data provider and not two and data providers ahhhh', () => {
       const indexProvider = timelineByIdwithAndMock.foo.dataProviders.findIndex(
         (i) => i.id === '567'
       );
@@ -1088,11 +1078,8 @@ describe('Timeline', () => {
         excluded: false,
         kqlQuery: '',
       });
-      const multiAndDataProviderMock = set(
-        `foo.dataProviders[${indexProvider}].and`,
-        multiAndDataProvider,
-        timelineByIdwithAndMock
-      );
+      const multiAndDataProviderMock = timelineByIdwithAndMock;
+      multiAndDataProviderMock.foo.dataProviders[indexProvider].and = multiAndDataProvider;
       update = updateTimelineProviderEnabled({
         id: 'foo',
         providerId: '567',
@@ -1240,48 +1227,47 @@ describe('Timeline', () => {
 
       expect(update).toEqual(expected);
     });
-
-    test('should update only one data provider and not two data providers', () => {
-      const multiDataProvider = timelineByIdTemplateMock.foo.dataProviders.concat({
-        ...basicDataProvider,
-        id: '456',
-        queryMatch: {
-          field: '',
-          value: '',
-          operator: IS_OPERATOR,
+    test('should update only one data provider and not two data providers AHH', () => {
+      const multiDataProvider = [
+        ...timelineByIdTemplateMock.foo.dataProviders,
+        {
+          ...basicDataProvider,
+          id: '456',
+          type: DataProviderType.template,
         },
-        type: DataProviderType.template,
-      });
-      const multiDataProviderMock = set(
-        'foo.dataProviders',
-        multiDataProvider,
-        timelineByIdTemplateMock
-      );
+      ];
+
+      const multiDataProviderMock = {
+        ...timelineByIdTemplateMock,
+        foo: {
+          ...timelineByIdTemplateMock.foo,
+          dataProviders: multiDataProvider,
+        },
+      };
       const update = updateTimelineProviderType({
         id: 'foo',
         providerId: '123',
         type: DataProviderType.template, // value we are updating from default to template
         timelineById: multiDataProviderMock,
       });
-      const expected: TimelineById = {
-        foo: {
-          ...basicTimeline,
-          dataProviders: [
-            {
-              ...basicDataProvider,
-              name: '',
-              type: DataProviderType.template,
-            },
-            {
-              ...basicDataProvider,
-              id: '456',
-              type: DataProviderType.template,
-            },
-          ],
-          timelineType: TimelineType.template,
+      const expected = [
+        {
+          ...basicDataProvider,
+          name: '',
+          type: DataProviderType.template,
+          queryMatch: {
+            field: '',
+            value: '{}',
+            operator: IS_OPERATOR,
+          },
         },
-      };
-      expect(update).toEqual(expected);
+        {
+          ...basicDataProvider,
+          id: '456',
+          type: DataProviderType.template,
+        },
+      ];
+      expect(update.foo.dataProviders).toEqual(expected);
     });
   });
 
@@ -1352,11 +1338,8 @@ describe('Timeline', () => {
         id: '456',
         name: 'new and data provider',
       });
-      const multiAndDataProviderMock = set(
-        `foo.dataProviders[${indexProvider}].and`,
-        multiAndDataProvider,
-        timelineByIdwithAndMock
-      );
+      const multiAndDataProviderMock = timelineByIdwithAndMock;
+      multiAndDataProviderMock.foo.dataProviders[indexProvider].and = multiAndDataProvider;
       const update = updateTimelineProviderExcluded({
         id: 'foo',
         providerId: '567',
@@ -1443,7 +1426,7 @@ describe('Timeline', () => {
         providerId: '123',
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.dataProviders', [], timelineByIdMock));
+      expect(update.foo.dataProviders).toEqual([]);
     });
 
     test('should remove only one data provider and not two data providers', () => {
@@ -1497,36 +1480,32 @@ describe('Timeline', () => {
         },
       ];
 
-      const multiDataProviderMock = set('foo.dataProviders', dataProviders, timelineByIdMock);
-
+      const multiDataProviderMock = {
+        ...timelineByIdMock,
+        foo: {
+          ...timelineByIdMock.foo,
+          dataProviders,
+        },
+      };
       const andDataProvider: DataProvidersAnd = {
         ...basicDataProvider,
         id: '211',
         name: 'And Data Provider',
       };
 
-      const nestedMultiAndDataProviderMock = set(
-        'foo.dataProviders[1].and',
-        [andDataProvider],
-        multiDataProviderMock
-      );
+      const nestedMultiAndDataProviderMock = multiDataProviderMock;
+      multiDataProviderMock.foo.dataProviders[1].and = [andDataProvider];
 
       const update = removeTimelineProvider({
         id: 'foo',
         providerId: '222',
         timelineById: nestedMultiAndDataProviderMock,
       });
-      expect(update).toEqual(
-        set(
-          'foo.dataProviders',
-          [
-            nestedMultiAndDataProviderMock.foo.dataProviders[0],
-            { ...andDataProvider, and: [] },
-            nestedMultiAndDataProviderMock.foo.dataProviders[2],
-          ],
-          timelineByIdMock
-        )
-      );
+      expect(update.foo.dataProviders).toEqual([
+        nestedMultiAndDataProviderMock.foo.dataProviders[0],
+        { ...andDataProvider, and: [] },
+        nestedMultiAndDataProviderMock.foo.dataProviders[2],
+      ]);
     });
 
     test('should remove only the first provider and keep multiple nested andProviders', () => {
@@ -1579,36 +1558,30 @@ describe('Timeline', () => {
         timelineById: multiDataProviderMock,
       });
 
-      expect(update).toEqual(
-        set(
-          'foo.dataProviders',
-          [
+      expect(update.foo.dataProviders).toEqual([
+        {
+          ...basicDataProvider,
+          id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+          name: 'root',
+          queryMatch: {
+            field: 'user.name',
+            value: 'root',
+            operator: ':',
+          },
+          and: [
             {
               ...basicDataProvider,
-              id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
-              name: 'root',
+              id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+              name: 'success',
               queryMatch: {
-                field: 'user.name',
-                value: 'root',
+                field: 'auditd.result',
+                value: 'success',
                 operator: ':',
               },
-              and: [
-                {
-                  ...basicDataProvider,
-                  id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
-                  name: 'success',
-                  queryMatch: {
-                    field: 'auditd.result',
-                    value: 'success',
-                    operator: ':',
-                  },
-                },
-              ],
             },
           ],
-          timelineByIdMock
-        )
-      );
+        },
+      ]);
     });
     test('should remove only the first AND provider when the first AND is deleted, and there are multiple andProviders', () => {
       const multiDataProvider: DataProvider[] = [
@@ -1661,36 +1634,30 @@ describe('Timeline', () => {
         timelineById: multiDataProviderMock,
       });
 
-      expect(update).toEqual(
-        set(
-          'foo.dataProviders',
-          [
+      expect(update.foo.dataProviders).toEqual([
+        {
+          ...basicDataProvider,
+          and: [
             {
               ...basicDataProvider,
-              and: [
-                {
-                  ...basicDataProvider,
-                  id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
-                  name: 'success',
-                  queryMatch: {
-                    field: 'auditd.result',
-                    value: 'success',
-                    operator: ':',
-                  },
-                },
-              ],
-              id: 'hosts-table-hostName-suricata-iowa',
-              name: 'suricata-iowa',
+              id: 'executed-yioH7GoB9v5HJNSHKnp5-auditd_result-success',
+              name: 'success',
               queryMatch: {
-                field: 'host.name',
-                value: 'suricata-iowa',
+                field: 'auditd.result',
+                value: 'success',
                 operator: ':',
               },
             },
           ],
-          timelineByIdMock
-        )
-      );
+          id: 'hosts-table-hostName-suricata-iowa',
+          name: 'suricata-iowa',
+          queryMatch: {
+            field: 'host.name',
+            value: 'suricata-iowa',
+            operator: ':',
+          },
+        },
+      ]);
     });
 
     test('should remove only the second AND provider when the second AND is deleted, and there are multiple andProviders', () => {
@@ -1744,36 +1711,30 @@ describe('Timeline', () => {
         timelineById: multiDataProviderMock,
       });
 
-      expect(update).toEqual(
-        set(
-          'foo.dataProviders',
-          [
+      expect(update.foo.dataProviders).toEqual([
+        {
+          ...basicDataProvider,
+          and: [
             {
               ...basicDataProvider,
-              and: [
-                {
-                  ...basicDataProvider,
-                  id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
-                  name: 'root',
-                  queryMatch: {
-                    field: 'user.name',
-                    value: 'root',
-                    operator: ':',
-                  },
-                },
-              ],
-              id: 'hosts-table-hostName-suricata-iowa',
-              name: 'suricata-iowa',
+              id: 'socket_closed-MSoH7GoB9v5HJNSHRYj1-user_name-root',
+              name: 'root',
               queryMatch: {
-                field: 'host.name',
-                value: 'suricata-iowa',
+                field: 'user.name',
+                value: 'root',
                 operator: ':',
               },
             },
           ],
-          timelineByIdMock
-        )
-      );
+          id: 'hosts-table-hostName-suricata-iowa',
+          name: 'suricata-iowa',
+          queryMatch: {
+            field: 'host.name',
+            value: 'suricata-iowa',
+            operator: ':',
+          },
+        },
+      ]);
     });
   });
 });
