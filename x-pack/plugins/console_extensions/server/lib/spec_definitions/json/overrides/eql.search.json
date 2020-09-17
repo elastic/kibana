@@ -10,7 +10,12 @@
     },
     "data_autocomplete_rules": {
       "case_sensitive": { "__one_of": [true, false] },
-      "fetch_size": 1000
+      "fetch_size": 1000,
+      "query": "",
+      "event_category_field": "",
+      "tiebreaker_field": "",
+      "timestamp_field": "",
+      "filter": ""
     },
     "patterns": [
       "{target}/_eql/search"
