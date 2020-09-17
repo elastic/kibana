@@ -209,7 +209,8 @@ export function App({
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     const byValueMode =
-      dashboardFeatureFlag.allowByValueEmbeddables && // Temporarily required.
+      // Temporarily required until the 'by value' paradigm is default.
+      dashboardFeatureFlag.allowByValueEmbeddables &&
       state.isLinkedToOriginatingApp &&
       !(initialInput as LensByReferenceInput)?.savedObjectId;
     const breadcrumbs: EuiBreadcrumb[] = [];
@@ -429,8 +430,9 @@ export function App({
 
   const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
   const topNavConfig = getLensTopNavConfig({
-    isLinkedToOriginatingApp: Boolean(
+    showSaveAndReturn: Boolean(
       state.isLinkedToOriginatingApp &&
+        // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
     savingPermitted,

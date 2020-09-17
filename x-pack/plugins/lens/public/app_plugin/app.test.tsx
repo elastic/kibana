@@ -655,6 +655,29 @@ describe('Lens App', () => {
         });
       });
 
+      it('Shows Save and Return and Save As buttons in edit by reference mode', async () => {
+        const props = makeDefaultProps();
+        props.initialInput = { savedObjectId: defaultSavedObjectId, id: '5678' };
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
+        };
+
+        const { component } = mountWith({ props });
+
+        await act(async () => {
+          const topNavMenuConfig = component.find(TopNavMenu).prop('config');
+          expect(topNavMenuConfig).toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAndReturnButton)
+          );
+          expect(topNavMenuConfig).toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveAsButton)
+          );
+          expect(topNavMenuConfig).not.toContainEqual(
+            expect.objectContaining(navMenuItems.expectedSaveButton)
+          );
+        });
+      });
+
       it('saves new docs', async () => {
         const { props, services } = await save({
           initialSavedObjectId: undefined,
