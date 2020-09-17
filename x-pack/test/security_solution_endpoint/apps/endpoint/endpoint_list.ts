@@ -65,7 +65,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  describe('endpoint list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/77701
+  describe.skip('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 

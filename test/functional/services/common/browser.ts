@@ -478,6 +478,12 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return this.getScrollTop();
     }
 
+    public async setScrollToById(elementId: string, xCoord: number, yCoord: number) {
+      await driver.executeScript(
+        `document.getElementById("${elementId}").scrollTo(${xCoord},${yCoord})`
+      );
+    }
+
     public async setScrollLeft(scrollSize: number | string) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
