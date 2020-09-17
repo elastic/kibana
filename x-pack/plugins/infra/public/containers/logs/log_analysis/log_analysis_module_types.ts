@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { HttpSetup } from 'src/core/public';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -24,7 +25,7 @@ export interface ModuleDescriptor<JobType extends string> {
   bucketSpan: number;
   getJobIds: (spaceId: string, sourceId: string) => Record<JobType, string>;
   getJobSummary: (spaceId: string, sourceId: string) => Promise<FetchJobStatusResponsePayload>;
-  getModuleDefinition: () => Promise<GetMlModuleResponsePayload>;
+  getModuleDefinition: (fetch: HttpSetup['fetch']) => Promise<GetMlModuleResponsePayload>;
   setUpModule: (
     start: number | undefined,
     end: number | undefined,

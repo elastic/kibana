@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { HttpSetup } from 'src/core/public';
 import {
   bucketSpan,
   DatasetFilter,
@@ -48,8 +49,8 @@ const getJobSummary = async (spaceId: string, sourceId: string) => {
   return response.filter((jobSummary) => jobIds.includes(jobSummary.id));
 };
 
-const getModuleDefinition = async () => {
-  return await callGetMlModuleAPI(moduleId);
+const getModuleDefinition = async (fetch: HttpSetup['fetch']) => {
+  return await callGetMlModuleAPI(moduleId, fetch);
 };
 
 const setUpModule = async (
