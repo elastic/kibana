@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { getRumOverviewProjection } from '../../projections/rum_overview';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -39,19 +39,24 @@ export const getBreakdownField = (breakdown: string) => {
   }
 };
 
-export const getPageLoadDistBreakdown = async (
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  minDuration: number,
-  maxDuration: number,
-  breakdown: string
-) => {
+export const getPageLoadDistBreakdown = async ({
+  setup,
+  minDuration,
+  maxDuration,
+  breakdown,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+  minDuration: number;
+  maxDuration: number;
+  breakdown: string;
+}) => {
   // convert secs to micros
   const stepValues = getPLDChartSteps({
     minDuration: minDuration * MICRO_TO_SEC,
     maxDuration: maxDuration * MICRO_TO_SEC,
   });
 
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 

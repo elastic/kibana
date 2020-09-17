@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -44,26 +45,23 @@ export async function getPageLoadDistribution({
   minPercentile?: string;
   maxPercentile?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
         minDuration: {
           min: {
-            field: 'transaction.duration.us',
+            field: TRANSACTION_DURATION,
             missing: 0,
           },
         },
         durPercentiles: {
           percentiles: {
-            field: 'transaction.duration.us',
+            field: TRANSACTION_DURATION,
             percents: [50, 75, 90, 95, 99],
             hdr: {
               number_of_significant_value_digits: 3,
@@ -95,7 +93,11 @@ export async function getPageLoadDistribution({
 
   const maxPerc = maxPercentile ? +maxPercentile * MICRO_TO_SEC : maxPercQuery;
 
-  const pageDist = await getPercentilesDistribution(setup, minPerc, maxPerc);
+  const pageDist = await getPercentilesDistribution({
+    setup,
+    minDuration: minPerc,
+    maxDuration: maxPerc,
+  });
 
   Object.entries(durPercentiles?.values ?? {}).forEach(([key, val]) => {
     if (durPercentiles?.values?.[key]) {
@@ -111,27 +113,28 @@ export async function getPageLoadDistribution({
   };
 }
 
-const getPercentilesDistribution = async (
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  minDuration: number,
-  maxDuration: number
-) => {
+const getPercentilesDistribution = async ({
+  setup,
+  minDuration,
+  maxDuration,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+  minDuration: number;
+  maxDuration: number;
+}) => {
   const stepValues = getPLDChartSteps({ maxDuration, minDuration });
 
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
         loadDistribution: {
           percentile_ranks: {
-            field: 'transaction.duration.us',
+            field: TRANSACTION_DURATION,
             values: stepValues,
             keyed: false,
             hdr: {
