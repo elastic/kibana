@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
@@ -81,7 +82,7 @@ export function registerErrorCountAlertType({
                     },
                   },
                 },
-                { term: { [PROCESSOR_EVENT]: 'error' } },
+                { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
                 ...getEnvironmentUiFilterES(alertParams.environment),
               ],

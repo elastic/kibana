@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
@@ -86,7 +87,7 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
                 { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
                 ...getEnvironmentUiFilterES(alertParams.environment),

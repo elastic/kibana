@@ -8,7 +8,6 @@ import { EuiSelect, EuiExpression, EuiFieldNumber } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectOption } from '@elastic/eui';
-import { EuiFieldNumberProps } from '@elastic/eui';
 import { getEnvironmentLabel } from '../../../common/environment_filter_values';
 import { PopoverExpression } from './ServiceAlertTrigger/PopoverExpression';
 
