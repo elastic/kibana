@@ -125,6 +125,7 @@ export const createTileMapUrlGenerator = (
   createUrl: async ({
     title,
     mapType,
+    colorSchema,
     indexPatternId,
     geoFieldName,
     metricAgg,
@@ -136,6 +137,7 @@ export const createTileMapUrlGenerator = (
   }: {
     title?: string;
     mapType: string;
+    colorSchema: string;
     indexPatternId: string;
     geoFieldName?: string;
     metricAgg: string;
@@ -149,6 +151,7 @@ export const createTileMapUrlGenerator = (
     const tileMapLayerDescriptor = createTileMapLayerDescriptor({
       title,
       mapType,
+      colorSchema,
       indexPatternId,
       geoFieldName,
       metricAgg,

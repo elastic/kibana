@@ -86,6 +86,7 @@ export function getDeprecationMessage(vis: Vis) {
             const url = await mapsTileMapUrlGenerator.createUrl({
               title: vis.title,
               mapType: vis.params.mapType,
+              colorSchema: vis.params.colorSchema,
               indexPatternId: vis.data.indexPattern.id,
               geoFieldName,
               metricAgg,

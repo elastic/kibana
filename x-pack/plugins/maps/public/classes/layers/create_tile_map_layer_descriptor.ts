@@ -31,29 +31,47 @@ import { VectorLayer } from './vector_layer/vector_layer';
 // @ts-ignore
 import { HeatmapLayer } from './heatmap_layer/heatmap_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
+import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { getSourceAggKey } from '../../../common/get_agg_key';
+import { isMetricCountable } from '../util/is_metric_countable';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
+function isHeatmap(mapType: string): boolean {
+  return mapType.toLowerCase() === 'heatmap';
+}
+
 function getGeoGridRequestType(mapType: string): RENDER_AS {
-  if (mapType === 'Heatmap') {
+  if (isHeatmap(mapType)) {
     return RENDER_AS.HEATMAP;
   }
 
-  if (mapType === 'Shaded Geohash Grid') {
+  if (mapType.toLowerCase() === 'shaded geohash grid') {
     return RENDER_AS.GRID;
   }
 
   return RENDER_AS.POINT;
 }
 
-function createAggDescriptor(metricAgg: string, metricFieldName?: string): AggDescriptor {
-  return { type: AGG_TYPE.COUNT };
+export function createAggDescriptor(
+  mapType: string,
+  metricAgg: string,
+  metricFieldName?: string
+): AggDescriptor {
+  const aggTypeKey = Object.keys(AGG_TYPE).find((key) => {
+    return AGG_TYPE[key] === metricAgg;
+  });
+  const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey] : undefined;
+
+  return aggType && metricFieldName && (!isHeatmap(mapType) || isMetricCountable(aggType))
+    ? { type: aggType, field: metricFieldName }
+    : { type: AGG_TYPE.COUNT };
 }
 
 export function createTileMapLayerDescriptor({
   title,
   mapType,
+  colorSchema,
   indexPatternId,
   geoFieldName,
   metricAgg,
@@ -61,6 +79,7 @@ export function createTileMapLayerDescriptor({
 }: {
   title?: string;
   mapType: string;
+  colorSchema: string;
   indexPatternId: string;
   geoFieldName?: string;
   metricAgg: string;
@@ -71,7 +90,7 @@ export function createTileMapLayerDescriptor({
   }
 
   const label = title ? title : 'Coordinate map';
-  const metricsDescriptor = createAggDescriptor(metricAgg, metricFieldName);
+  const metricsDescriptor = createAggDescriptor(mapType, metricAgg, metricFieldName);
   const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
     indexPatternId,
     geoField: geoFieldName,
@@ -80,7 +99,7 @@ export function createTileMapLayerDescriptor({
     resolution: GRID_RESOLUTION.MOST_FINE,
   });
 
-  if (mapType === 'Heatmap') {
+  if (isHeatmap(mapType)) {
     return HeatmapLayer.createDescriptor({
       label,
       sourceDescriptor: geoGridSourceDescriptor,
@@ -96,13 +115,16 @@ export function createTileMapLayerDescriptor({
     origin: FIELD_ORIGIN.SOURCE,
   };
 
+  const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
+    return pallette.value.toLowerCase() === colorSchema.toLowerCase();
+  });
   const styleProperties: VectorStylePropertiesDescriptor = {
     [VECTOR_STYLES.FILL_COLOR]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
         field: metricStyleField,
-        color: 'Yellow to Red',
+        color: colorPallette ? colorPallette.value : 'Yellow to Red',
         type: COLOR_MAP_TYPE.ORDINAL,
       },
     },
@@ -113,17 +135,16 @@ export function createTileMapLayerDescriptor({
       },
     },
   };
-
-  /*
-  [VECTOR_STYLES.ICON_SIZE]: {
+  if (mapType.toLowerCase() === 'scaled circle markers') {
+    styleProperties[VECTOR_STYLES.ICON_SIZE] = {
       type: STYLE_TYPE.DYNAMIC,
       options: {
         ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+        maxSize: 18,
         field: metricStyleField,
       },
-    }
-}
-*/
+    };
+  }
 
   return VectorLayer.createDescriptor({
     label,
