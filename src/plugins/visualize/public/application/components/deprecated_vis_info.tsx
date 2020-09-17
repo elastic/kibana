@@ -20,7 +20,7 @@
 import React, { ReactElement } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-export function DeprecatedVisInfo({ message }: ReactElement<any>) {
+export function DeprecatedVisInfo({ message }: { message: ReactElement<any> }) {
   return (
     <EuiCallOut
       className="hide-for-sharing"

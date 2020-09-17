@@ -22,6 +22,7 @@ import { ReactElement } from 'react';
 import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
+import { Vis } from '../vis';
 
 export interface BaseVisTypeOptions {
   name: string;

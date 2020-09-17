@@ -86,25 +86,28 @@ export const VisualizeEditorCommon = ({
       {visInstance && (
         <EuiScreenReaderOnly>
           <h1>
-            {'savedVis' in visInstance && visInstance.savedVis.id ? (
-              <FormattedMessage
-                id="visualize.pageHeading"
-                defaultMessage="{chartName} {chartType} visualization"
-                values={{
-                  chartName: (visInstance as SavedVisInstance).savedVis.title,
-                  chartType: (visInstance as SavedVisInstance).vis.type.title,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="visualize.byValue_pageHeading"
-                defaultMessage="Visualization of type {chartType} embedded into {originatingApp} app"
-                values={{
-                  chartType: visInstance.vis.type.title,
-                  originatingApp: originatingApp || 'dashboards',
-                }}
-              />
-            )}
+            {
+              // @ts-expect-error
+              'savedVis' in visInstance && visInstance.savedVis.id ? (
+                <FormattedMessage
+                  id="visualize.pageHeading"
+                  defaultMessage="{chartName} {chartType} visualization"
+                  values={{
+                    chartName: (visInstance as SavedVisInstance).savedVis.title,
+                    chartType: (visInstance as SavedVisInstance).vis.type.title,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="visualize.byValue_pageHeading"
+                  defaultMessage="Visualization of type {chartType} embedded into {originatingApp} app"
+                  values={{
+                    chartType: visInstance.vis.type.title,
+                    originatingApp: originatingApp || 'dashboards',
+                  }}
+                />
+              )
+            }
           </h1>
         </EuiScreenReaderOnly>
       )}

@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import {
   AggDescriptor,
   ColorDynamicOptions,
   LayerDescriptor,
   SizeDynamicOptions,
-  StylePropertyField,
   VectorStylePropertiesDescriptor,
 } from '../../../common/descriptor_types';
 import {
@@ -20,7 +18,6 @@ import {
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   RENDER_AS,
-  SOURCE_TYPES,
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../common/constants';
@@ -59,9 +56,9 @@ export function createAggDescriptor(
   metricFieldName?: string
 ): AggDescriptor {
   const aggTypeKey = Object.keys(AGG_TYPE).find((key) => {
-    return AGG_TYPE[key] === metricAgg;
+    return AGG_TYPE[key as keyof typeof AGG_TYPE] === metricAgg;
   });
-  const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey] : undefined;
+  const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
 
   return aggType && metricFieldName && (!isHeatmap(mapType) || isMetricCountable(aggType))
     ? { type: aggType, field: metricFieldName }
@@ -89,7 +86,11 @@ export function createTileMapLayerDescriptor({
     return null;
   }
 
-  const label = title ? title : 'Coordinate map';
+  const label = title
+    ? title
+    : i18n.translate('xpack.maps.createTileMapDescriptor.layerLabel', {
+        defaultMessage: 'Coordinate map',
+      });
   const metricsDescriptor = createAggDescriptor(mapType, metricAgg, metricFieldName);
   const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
     indexPatternId,
