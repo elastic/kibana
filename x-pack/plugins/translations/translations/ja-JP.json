@@ -12619,7 +12619,6 @@
     "xpack.monitoring.cluster.overview.esPanel.versionLabel": "バージョン",
     "xpack.monitoring.cluster.overview.esPanel.versionNotAvailableDescription": "N/A",
     "xpack.monitoring.cluster.overview.esPanel.warnLogsTooltipText": "警告ログの数です",
-    "xpack.monitoring.cluster.overview.healthStatusDescription": "ヘルス: {status}",
     "xpack.monitoring.cluster.overview.kibanaPanel.connectionsLabel": "接続",
     "xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel": "Kibana インスタンス: {instancesCount}",
     "xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkLabel": "インスタンス: {instancesCount}",
