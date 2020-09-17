@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
 import * as t from 'io-ts';
 import { pick } from 'lodash';
+import { INVALID_LICENSE } from '../../../common/custom_link';
 import { ILicense } from '../../../../licensing/common/types';
 import { FILTER_OPTIONS } from '../../../common/custom_link/custom_link_filter_options';
-import { APM_CUSTOM_LINKS_FEATURE_NAME } from '../../feature';
+import { notifyFeatureUsage } from '../../feature';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
 import {
@@ -25,14 +25,6 @@ import { createRoute } from '../create_route';
 function isActiveGoldLicense(license: ILicense) {
   return license.isActive && license.hasAtLeast('gold');
 }
-
-const INVALID_LICENSE = i18n.translate(
-  'xpack.apm.settings.customizeUI.customLink.forbidden',
-  {
-    defaultMessage:
-      "To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services.",
-  }
-);
 
 export const customLinkTransactionRoute = createRoute(() => ({
   path: '/api/apm/settings/custom_links/transaction',
@@ -82,7 +74,10 @@ export const createCustomLinkRoute = createRoute(() => ({
     const customLink = context.params.body;
     const res = await createOrUpdateCustomLink({ customLink, setup });
 
-    context.licensing.featureUsage.notifyUsage(APM_CUSTOM_LINKS_FEATURE_NAME);
+    notifyFeatureUsage({
+      licensingPlugin: context.licensing,
+      featureName: 'customLinks',
+    });
     return res;
   },
 }));
