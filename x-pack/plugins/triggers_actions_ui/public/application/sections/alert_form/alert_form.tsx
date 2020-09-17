@@ -11,16 +11,15 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
+  EuiTextColor,
   EuiForm,
   EuiSpacer,
   EuiFieldText,
   EuiFlexGrid,
   EuiFormRow,
   EuiComboBox,
-  EuiCard,
   EuiFieldNumber,
   EuiSelect,
-  EuiSearchBar,
   EuiIconTip,
   EuiButtonIcon,
   EuiHorizontalRule,
@@ -194,7 +193,7 @@ export const AlertForm = ({
       <EuiHorizontalRule />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
+          <EuiTitle size="xs" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
                 defaultMessage="{alertType}"
@@ -298,35 +297,42 @@ export const AlertForm = ({
     </>
   );
 
-  // Incorrect
-  const alertTypeOptions = alertTypeRegistryList.map((item) => ({ label: item.name, id: item.id }));
+  const alertTypeOptions = alertTypeRegistryList.map((item) => ({
+    label: typeof item.name === 'string' ? item.name : item.id,
+    id: item.id,
+  }));
 
-  // Incorrect
   const alertTypeOnChange = (alertTypeSelectedOption) => {
-    setAlertProperty('alertTypeId', alertTypeSelectedOption.id);
-    setAlertTypeModel(alertTypeSelectedOption);
+    setAlertProperty('alertTypeId', alertTypeSelectedOption[0].id);
+    setAlertTypeModel(
+      alertTypeRegistry
+        .list()
+        .filter(
+          (alertTypeRegistryItem: AlertTypeModel) =>
+            alertTypeRegistryItem.id === alertTypeSelectedOption[0].id
+        )[0]
+    );
     setAlertProperty('params', {});
-    if (alertTypesIndex && alertTypesIndex.has(alertTypeSelectedOption.id)) {
+    if (alertTypesIndex && alertTypesIndex.has(alertTypeSelectedOption[0].id)) {
       setDefaultActionGroupId(
-        alertTypesIndex.get(alertTypeSelectedOption.id)!.defaultActionGroupId
+        alertTypesIndex.get(alertTypeSelectedOption[0].id)!.defaultActionGroupId
       );
     }
   };
 
-  // Incorrect
   const alertTypeRenderOption = (option) => {
-    const { name } = option;
-    option.label = name;
     return (
-      <EuiText color="default" size="m">
-        {option.label}
-      </EuiText>
+      <div>
+        <EuiText size="m" color="default">
+          <p>{option.label}</p>
+        </EuiText>
+      </div>
     );
   };
 
   return (
     <EuiForm>
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={1}>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
@@ -344,7 +350,6 @@ export const AlertForm = ({
               fullWidth
               autoFocus={true}
               isInvalid={errors.name.length > 0 && alert.name !== undefined}
-              compressed
               name="name"
               data-test-subj="alertNameInput"
               value={alert.name || ''}
@@ -372,7 +377,6 @@ export const AlertForm = ({
             <EuiComboBox
               noSuggestions
               fullWidth
-              compressed
               data-test-subj="tagsComboBox"
               selectedOptions={tagsOptions}
               onCreateOption={(searchValue: string) => {
@@ -402,7 +406,6 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            compressed
             label={labelForAlertChecked}
             isInvalid={errors.interval.length > 0}
             error={errors.interval}
@@ -413,7 +416,6 @@ export const AlertForm = ({
                   fullWidth
                   min={1}
                   isInvalid={errors.interval.length > 0}
-                  compressed
                   value={alertInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"
@@ -428,7 +430,6 @@ export const AlertForm = ({
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   fullWidth
-                  compressed
                   value={alertIntervalUnit}
                   options={getTimeOptions(alertInterval ?? 1)}
                   onChange={(e) => {
@@ -447,7 +448,6 @@ export const AlertForm = ({
                 <EuiFieldNumber
                   fullWidth
                   min={1}
-                  compressed
                   value={alertThrottle || ''}
                   name="throttle"
                   data-test-subj="throttleInput"
@@ -474,7 +474,6 @@ export const AlertForm = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
-                  compressed
                   value={alertThrottleUnit}
                   options={getTimeOptions(alertThrottle ?? 1)}
                   onChange={(e) => {
@@ -492,34 +491,27 @@ export const AlertForm = ({
       <EuiSpacer size="m" />
       {alertTypeModel ? (
         <Fragment>{alertTypeDetails}</Fragment>
-      ) : alertTypeNodes.length ? (
+      ) : alertTypeOptions.length ? (
         <Fragment>
           <EuiHorizontalRule />
-
-          <EuiText size="s">
-            <p id="alertTypeTitle">
-              <FormattedMessage
-                defaultMessage="Select alert type"
-                id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          {/* 
-            Combobox is not getting the correct list of options (perhaps AlertTypeRegistryList not populated yet?)
-            I'm not sure if the renderOption is correct
-            The onChange call likely needs to be fixed
-            I think I need to have the selection saved to state as well?
-            */}
-          <EuiComboBox
-            noSuggestions
+          <EuiFormRow
             fullWidth
-            data-test-subj="alertTypesComboBox"
-            singleSelection={{ asPlainText: true }}
-            onChange={alertTypeOnChange}
-            options={alertTypeOptions}
-            renderOption={alertTypeRenderOption}
-          />
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle',
+              {
+                defaultMessage: 'Select alert type',
+              }
+            )}
+          >
+            <EuiComboBox
+              fullWidth
+              data-test-subj="alertTypesComboBox"
+              singleSelection={{ asPlainText: true }}
+              onChange={alertTypeOnChange}
+              options={alertTypeOptions}
+              renderOption={alertTypeRenderOption}
+            />
+          </EuiFormRow>
           <EuiSpacer size="l" />
         </Fragment>
       ) : alertTypesIndex ? (
