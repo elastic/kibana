@@ -87,11 +87,11 @@ describe('Reporting Config Schema', () => {
         "kibanaServer": Object {},
         "poll": Object {
           "jobCompletionNotifier": Object {
-            "interval": "P0D",
+            "interval": 10000,
             "intervalErrorMultiplier": 5,
           },
           "jobsRefresh": Object {
-            "interval": "P0D",
+            "interval": 5000,
             "intervalErrorMultiplier": 5,
           },
         },
@@ -191,11 +191,11 @@ describe('Reporting Config Schema', () => {
         "kibanaServer": Object {},
         "poll": Object {
           "jobCompletionNotifier": Object {
-            "interval": "P0D",
+            "interval": 10000,
             "intervalErrorMultiplier": 5,
           },
           "jobsRefresh": Object {
-            "interval": "P0D",
+            "interval": 5000,
             "intervalErrorMultiplier": 5,
           },
         },
