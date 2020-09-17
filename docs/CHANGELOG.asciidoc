@@ -69,6 +69,7 @@ like a colon, in the name would result in a 404 when viewing details or editing 
 * Fixes an issue in the snapshot and restore policy creation form that allowed a policy to be created without an index specified {kibana-pull}76855[#76855]
 * The snapshot and restore wizard now notifies users when a policy configured with a non-existing repository is being updated and requires that the user 
 select a new repository {kibana-pull}76861[#76861]
+* Fixes an issue in the grok debugger where simulation error messages are not being displayed {kibana-pull}77499[#77499]
 Maps::
 * Fixes drawing shapes in maps app broken in 7.9.1 {kibana-pull}76329[#76329]
 Monitoring::
@@ -80,6 +81,7 @@ Platform::
 * Fixes remoteAddress being duplicated in userAgent field {kibana-pull}76751[#76751]
 * Fixes an issue that caused savedObject migration errors to not being displayed in the logs {kibana-pull}77018[#77018]
 * Fixes an issue where defaultAppId redirect could fire outside home app {kibana-pull}76415[#76415]
+* Suppresses error logs when clients connect over HTTP instead of HTTPS {kibana-pull}77397[#77397]
 Reporting::
 * Adds back in custom images for reporting + tests {kibana-pull}76810[#76810]
 Security::
