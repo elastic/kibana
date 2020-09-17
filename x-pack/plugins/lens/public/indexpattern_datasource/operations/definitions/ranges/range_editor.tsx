@@ -95,7 +95,7 @@ const BaseRangeEditor = ({
         labelAppend={
           <EuiSwitch
             label={i18n.translate('xpack.lens.indexPattern.ranges.autoInterval', {
-              defaultMessage: 'Auto interval',
+              defaultMessage: 'Auto',
             })}
             checked={autoIntervalEnabled}
             onChange={(e) => toggleAutoInterval(e.target.checked)}
