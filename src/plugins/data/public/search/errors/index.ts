@@ -19,4 +19,3 @@
 
 export * from './painless_error';
 export * from './timeout_error';
-export * from './request_timeout_error';

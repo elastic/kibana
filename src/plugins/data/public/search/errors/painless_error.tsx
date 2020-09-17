@@ -24,7 +24,7 @@ import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
-import { IEsSearchRequest } from '.';
+import { IEsSearchRequest } from '..';
 
 export class PainlessError extends KbnError {
   constructor(err: Error, request: IEsSearchRequest) {

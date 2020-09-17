@@ -41,14 +41,7 @@ import {
   ES_SEARCH_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
-import {
-  SearchTimeoutError,
-  PainlessError,
-  isPainlessError,
-  getPainlessErrorMessage,
-  getTimeoutErrorMessage,
-  TimeoutErrorMode,
-} from './errors';
+import { SearchTimeoutError, PainlessError, isPainlessError, TimeoutErrorMode } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
 
 export interface SearchInterceptorDeps {
