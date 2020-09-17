@@ -292,7 +292,10 @@ export const useLogEntryAnomaliesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        return await callGetLogEntryAnomaliesDatasetsAPI(sourceId, startTime, endTime);
+        return await callGetLogEntryAnomaliesDatasetsAPI(
+          { sourceId, startTime, endTime },
+          services.http.fetch
+        );
       },
       onResolve: ({ data: { datasets } }) => {
         setLogEntryAnomaliesDatasets(datasets);
