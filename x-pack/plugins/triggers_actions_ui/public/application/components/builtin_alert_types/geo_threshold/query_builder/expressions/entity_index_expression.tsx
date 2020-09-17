@@ -77,7 +77,6 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
           onChange={(_indexPattern) => {
             // reset time field and expression fields if indices are deleted
             if (!_indexPattern) {
-              setTimeFieldOptions([firstFieldOption]);
               setToDefaultParams();
               return;
             }

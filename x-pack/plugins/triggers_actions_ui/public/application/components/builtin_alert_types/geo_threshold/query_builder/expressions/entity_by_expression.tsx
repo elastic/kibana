@@ -12,11 +12,13 @@ import { GeoThresholdAlertParams } from '../../types';
 import { AlertsContextValue } from '../../../../../context/alerts_context';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
+import { IFieldType } from '../../../../../../../../../../src/plugins/data/common/index_patterns/fields';
 
 export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
   GeoThresholdAlertParams,
   AlertsContextValue
 >> = ({ errors, entity, setAlertParamsEntity, indexFields, isInvalid }) => {
+  const ENTITY_TYPES = ['string', 'number'];
   const indexPopover = (
     <EuiFormRow id="someSelect" fullWidth error={errors.index}>
       <SingleFieldSelect
@@ -28,7 +30,9 @@ export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressi
         )}
         value={entity}
         onChange={(_entity) => setAlertParamsEntity(_entity)}
-        fields={indexFields}
+        fields={indexFields.filter(
+          (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
+        )}
         isClearable={false}
         compressed
       />

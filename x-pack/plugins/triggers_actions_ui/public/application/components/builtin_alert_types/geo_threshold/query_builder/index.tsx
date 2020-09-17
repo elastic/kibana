@@ -166,7 +166,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
                 }
                 fullWidth
                 onChange={(e) => setAlertParams('trackingEvent', e.target.value)}
-                options={conditionOptions}
+                options={[conditionOptions[0]]} // TODO: Allow all options before merge
               />
             </div>
           </EuiFormRow>
