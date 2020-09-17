@@ -110,17 +110,27 @@ const cleanUpModule = async (spaceId: string, sourceId: string) => {
   return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryRateJobTypes);
 };
 
-const validateSetupIndices = async (indices: string[], timestampField: string) => {
-  return await callValidateIndicesAPI(indices, [
+const validateSetupIndices = async (
+  indices: string[],
+  timestampField: string,
+  fetch: HttpSetup['fetch']
+) => {
+  return await callValidateIndicesAPI(
     {
-      name: timestampField,
-      validTypes: ['date'],
+      indices,
+      fields: [
+        {
+          name: timestampField,
+          validTypes: ['date'],
+        },
+        {
+          name: partitionField,
+          validTypes: ['keyword'],
+        },
+      ],
     },
-    {
-      name: partitionField,
-      validTypes: ['keyword'],
-    },
-  ]);
+    fetch
+  );
 };
 
 const validateSetupDatasets = async (

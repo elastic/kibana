@@ -35,7 +35,8 @@ export interface ModuleDescriptor<JobType extends string> {
   cleanUpModule: (spaceId: string, sourceId: string) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (
     indices: string[],
-    timestampField: string
+    timestampField: string,
+    fetch: HttpSetup['fetch']
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
     indices: string[],
