@@ -20,7 +20,7 @@
 import * as Rx from 'rxjs';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
+import { catchError, filter, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
 import {
   NEWSFEED_FALLBACK_LANGUAGE,
@@ -179,7 +179,7 @@ export function getApi(
   const userLanguage = i18n.getLocale();
   const fetchInterval = config.fetchInterval.asMilliseconds();
   const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
-  return Rx.timer(0, config.mainInterval.asMilliseconds()).pipe(
+  const newsfeed$ = Rx.timer(0, config.mainInterval.asMilliseconds()).pipe(
     filter(() => driver.shouldFetch()),
     mergeMap(() =>
       driver.fetchNewsfeedItems(http, config.service).pipe(
@@ -194,6 +194,13 @@ export function getApi(
         })
       )
     ),
-    tap(() => driver.updateLastFetch())
-  );
+    tap(() => driver.updateLastFetch()),
+    publishReplay(1)
+    // have to cast manually as pipe operator cannot return ConnectableObservable
+    // https://github.com/ReactiveX/rxjs/issues/2972
+  ) as Rx.ConnectableObservable<FetchResult | void>;
+
+  newsfeed$.connect();
+
+  return newsfeed$;
 }
