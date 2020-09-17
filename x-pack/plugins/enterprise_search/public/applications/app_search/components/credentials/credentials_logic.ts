@@ -272,7 +272,7 @@ export const CredentialsLogic = kea<
             'page[current]': page,
           },
         })
-        .then(({ meta, results }) => {
+        .then(({ meta, results }: { meta: IMeta; results: IApiToken[] }) => {
           actions.setCredentialsData(meta, results);
         });
       // TODO handle errors
@@ -280,7 +280,7 @@ export const CredentialsLogic = kea<
     fetchDetails: () => {
       HttpLogic.values.http
         .get('/api/app_search/credentials/details')
-        .then((data) => actions.setCredentialsDetails(data));
+        .then((data: ICredentialsDetails) => actions.setCredentialsDetails(data));
       // TODO handle errors - see ent-search
     },
     deleteApiKey: (tokenName) => {

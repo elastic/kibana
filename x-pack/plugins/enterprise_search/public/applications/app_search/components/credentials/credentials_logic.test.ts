@@ -45,6 +45,19 @@ const newToken: IApiToken = {
   access_all_engines: true,
 };
 
+const credentialsDetails: ICredentialsDetails = {
+  lmAccount: {
+    id: '1',
+    key: '1234',
+  },
+  apiTokens: [],
+  apiUrl: 'http://example.com',
+  engines: [
+    { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
+    { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
+  ],
+};
+
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
     activeApiToken: {
@@ -467,19 +480,6 @@ describe('CredentialsLogic', () => {
   });
 
   describe('setCredentialsDetails', () => {
-    const credentialsDetails: ICredentialsDetails = {
-      lmAccount: {
-        id: '1',
-        key: '1234',
-      },
-      apiTokens: [],
-      apiUrl: 'http://example.com',
-      engines: [
-        { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
-        { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
-      ],
-    };
-
     describe('isCredentialsDataComplete', () => {
       it('should be set to true so that we know data fetching has been completed', () => {
         mount({
@@ -950,13 +950,21 @@ describe('CredentialsLogic', () => {
   });
 
   describe('fetchCredentials', () => {
-    const meta = {};
-    const results = [];
+    const meta: IMeta = {
+      page: {
+        current: 1,
+        size: 1,
+        total_pages: 1,
+        total_results: 1,
+      },
+    };
+    const results: IApiToken[] = [];
 
     it('will call an API endpoint and set the results with the `setCredentialsData` action', async () => {
       jest.spyOn(CredentialsLogic.actions, 'setCredentialsData').mockImplementationOnce(() => {});
-      HttpLogic.values.http.get.mockReturnValue({
-        then: (fn) => fn({ meta, results }),
+      (HttpLogic.values.http.get as jest.Mock).mockReturnValue({
+        then: (fn: (response: { meta: IMeta; results: IApiToken[] }) => object) =>
+          fn({ meta, results }),
       });
       await CredentialsLogic.actions.fetchCredentials(2);
       expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
@@ -972,18 +980,18 @@ describe('CredentialsLogic', () => {
     });
   });
   describe('fetchDetails', () => {
-    const data = {};
-
     it('will call an API endpoint and set the results with the `setCredentialsDetails` action', async () => {
       jest
         .spyOn(CredentialsLogic.actions, 'setCredentialsDetails')
         .mockImplementationOnce(() => {});
-      HttpLogic.values.http.get.mockReturnValue({
-        then: (fn) => fn(data),
+      (HttpLogic.values.http.get as jest.Mock).mockReturnValue({
+        then: (fn: (response: ICredentialsDetails) => object) => fn(credentialsDetails),
       });
       await CredentialsLogic.actions.fetchDetails();
       expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/credentials/details');
-      expect(CredentialsLogic.actions.setCredentialsDetails).toHaveBeenCalledWith(data);
+      expect(CredentialsLogic.actions.setCredentialsDetails).toHaveBeenCalledWith(
+        credentialsDetails
+      );
     });
 
     it('handles errors', async () => {
@@ -995,8 +1003,8 @@ describe('CredentialsLogic', () => {
 
     it('will call an API endpoint and set the results with the `onApiKeyDelete` action', async () => {
       jest.spyOn(CredentialsLogic.actions, 'onApiKeyDelete').mockImplementationOnce(() => {});
-      HttpLogic.values.http.delete.mockReturnValue({
-        then: (fn) => fn(),
+      (HttpLogic.values.http.delete as jest.Mock).mockReturnValue({
+        then: (fn: () => object) => fn(),
       });
       await CredentialsLogic.actions.deleteApiKey(tokenName);
       expect(HttpLogic.values.http.delete).toHaveBeenCalledWith(
