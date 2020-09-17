@@ -159,7 +159,7 @@ const BaseRangeEditor = ({
                     position="right"
                     content={i18n.translate('xpack.lens.indexPattern.ranges.minIntervalsHelp', {
                       defaultMessage:
-                        "Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}",
+                        "Intervals will be automatically scaled if the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}",
                       values: { histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS },
                     })}
                     type="questionInCircle"
