@@ -19,9 +19,28 @@
 
 import { ServerExtType, Server } from 'hapi';
 import Podium from 'podium';
-import { setupLogging, attachMetaData, legacyLoggingConfigSchema } from '@kbn/legacy-logging';
-import { LogLevel, LogRecord } from '@kbn/logging';
-import { LegacyVars } from '../../types';
+import { setupLogging } from './setup_logging';
+import { attachMetaData } from './metadata';
+import { legacyLoggingConfigSchema } from './schema';
+
+// these LogXXX types are duplicated to avoid a cross dependency with the @kbn/logging package.
+// typescript will error if they diverge at some point.
+type LogLevelId = 'all' | 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'off';
+
+interface LogLevel {
+  id: LogLevelId;
+  value: number;
+}
+
+export interface LogRecord {
+  timestamp: Date;
+  level: LogLevel;
+  context: string;
+  message: string;
+  error?: Error;
+  meta?: { [name: string]: any };
+  pid: number;
+}
 
 const isEmptyObject = (obj: object) => Object.keys(obj).length === 0;
 
@@ -42,7 +61,7 @@ interface PluginRegisterParams {
       options: PluginRegisterParams['options']
     ) => Promise<void>;
   };
-  options: LegacyVars;
+  options: Record<string, any>;
 }
 
 /**
@@ -76,7 +95,7 @@ export class LegacyLoggingServer {
 
   private onPostStopCallback?: () => void;
 
-  constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
+  constructor(legacyLoggingConfig: any) {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
