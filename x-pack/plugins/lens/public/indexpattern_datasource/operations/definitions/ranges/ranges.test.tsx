@@ -320,14 +320,12 @@ describe('ranges', () => {
         act(() => {
           instance.find(EuiSwitch).prop('onChange')!({
             target: {
-              checked: true,
+              checked: false,
             },
           } as EuiSwitchEvent);
 
           expect(
-            instance
-              .find('[data-test-subj="indexPattern-ranges-section-label"]')
-              .find(EuiFieldNumber)
+            instance.find('[data-test-subj="lns-indexPattern-range-interval-field"]')
           ).toBeDefined();
         });
       });
