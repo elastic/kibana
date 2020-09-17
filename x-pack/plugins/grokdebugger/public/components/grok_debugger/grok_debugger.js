@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import isEmpty from 'lodash/isEmpty';
 
 import './brace_imports';
-
 import {
   EuiForm,
   EuiButton,
@@ -24,6 +24,17 @@ import { EventOutput } from '../event_output';
 import { GrokdebuggerRequest } from '../../models/grokdebugger_request';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+const i18nTexts = {
+  simulate: {
+    errorTitle: i18n.translate('xpack.grokDebugger.simulate.errorTitle', {
+      defaultMessage: 'Simulate error',
+    }),
+    unknownErrorTitle: i18n.translate('xpack.grokDebugger.unknownErrorTitle', {
+      defaultMessage: 'Something went wrong',
+    }),
+  },
+};
 
 export class GrokDebuggerComponent extends React.Component {
   constructor(props) {
@@ -84,12 +95,13 @@ export class GrokDebuggerComponent extends React.Component {
 
       if (!isEmpty(simulateResponse.error)) {
         notifications.toasts.addDanger({
-          body: simulateResponse.error,
+          title: i18nTexts.simulate.errorTitle,
+          text: simulateResponse.error,
         });
       }
     } catch (e) {
-      notifications.toasts.addDanger({
-        body: e,
+      notifications.toasts.addError(e, {
+        title: i18nTexts.simulate.unknownErrorTitle,
       });
     }
   };
