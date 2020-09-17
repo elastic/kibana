@@ -11,6 +11,7 @@ import {
   HostPolicyResponse,
   HostResultList,
   HostStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
@@ -49,6 +50,7 @@ export const mockEndpointResultList: (options?: {
     hosts.push({
       metadata: generator.generateHostMetadata(),
       host_status: HostStatus.ERROR,
+      query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
     });
   }
   const mock: HostResultList = {
@@ -56,6 +58,7 @@ export const mockEndpointResultList: (options?: {
     total,
     request_page_size: requestPageSize,
     request_page_index: requestPageIndex,
+    query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
   return mock;
 };
@@ -67,6 +70,7 @@ export const mockEndpointDetailsApiResult = (): HostInfo => {
   return {
     metadata: generator.generateHostMetadata(),
     host_status: HostStatus.ERROR,
+    query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
 };
 
@@ -103,6 +107,7 @@ const endpointListApiPathHandlerMocks = ({
         request_page_size: 10,
         request_page_index: 0,
         total: endpointsResults?.length || 0,
+        query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
       };
     },
 
