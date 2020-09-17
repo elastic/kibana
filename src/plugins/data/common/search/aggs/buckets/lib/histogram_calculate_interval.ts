@@ -119,6 +119,7 @@ export const calculateHistogramInterval = ({
       calculatedInterval = isAuto
         ? calculateAutoInterval(
             diff,
+            // Mind maxBucketsUserInput can be an empty string, hence we need to ensure it here
             Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings)
           )
         : calculateForGivenInterval(diff, calculatedInterval, maxBucketsUiSettings);
