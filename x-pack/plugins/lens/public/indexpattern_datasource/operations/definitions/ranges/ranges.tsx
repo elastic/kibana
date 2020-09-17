@@ -44,11 +44,10 @@ export const isValidNumber = (value: number | '') =>
 export const isRangeWithin = (range: RangeTypeLens): boolean => range.from <= range.to;
 const isFullRange = ({ from, to }: RangeType) => isValidNumber(from) && isValidNumber(to);
 export const isValidRange = (range: RangeTypeLens): boolean => {
-  const { from, to } = range;
   if (isFullRange(range)) {
     return isRangeWithin(range);
   }
-  return isValidNumber(from) || isValidNumber(to);
+  return true;
 };
 
 function getParamsForNewMode(
@@ -87,10 +86,15 @@ function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
         if (isFullRange(range)) {
           return { from: range.from, to: range.to };
         }
-        // create a copy with only the valid numeric range prop
-        const prop = isValidNumber(range.from) ? 'from' : 'to';
-        const value = isValidNumber(range.from) ? range.from : range.to;
-        return { [prop]: value };
+        const partialRange: Partial<RangeType> = {};
+        // be careful with the fields to set on partial ranges
+        if (isValidNumber(range.from)) {
+          partialRange.from = range.from;
+        }
+        if (isValidNumber(range.to)) {
+          partialRange.to = range.to;
+        }
+        return partialRange;
       }),
     };
   }

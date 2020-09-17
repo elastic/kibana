@@ -202,7 +202,7 @@ export const AdvancedRangeEditor = ({
       ...localRanges,
       {
         id: generateId(),
-        from: -Infinity,
+        from: localRanges[localRanges.length - 1].to,
         to: Infinity,
         label: '',
       },
