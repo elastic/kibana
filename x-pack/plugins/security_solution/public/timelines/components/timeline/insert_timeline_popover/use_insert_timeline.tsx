@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-import { useBasePath } from '../../../../common/lib/kibana';
+import { SecurityPageName } from '../../../../../common/constants';
+import { getTimelineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { CursorPosition } from '../../../../common/components/markdown_editor';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 
 export const useInsertTimeline = (value: string, onChange: (newValue: string) => void) => {
-  const basePath = window.location.origin + useBasePath();
   const dispatch = useDispatch();
+  const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition>({
     start: 0,
     end: 0,
@@ -24,21 +24,22 @@ export const useInsertTimeline = (value: string, onChange: (newValue: string) =>
 
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null, graphEventId?: string) => {
-      const builtLink = `${basePath}/app/security/timelines?timeline=(id:'${id}'${
-        !isEmpty(graphEventId) ? `,graphEventId:'${graphEventId}'` : ''
-      },isOpen:!t)`;
+      const url = formatUrl(getTimelineUrl(id ?? '', graphEventId), {
+        absolute: true,
+        skipSearch: true,
+      });
 
       const newValue: string = [
         value.slice(0, cursorPosition.start),
         cursorPosition.start === cursorPosition.end
-          ? `[${title}](${builtLink})`
-          : `[${value.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
+          ? `[${title}](${url})`
+          : `[${value.slice(cursorPosition.start, cursorPosition.end)}](${url})`,
         value.slice(cursorPosition.end),
       ].join('');
 
       onChange(newValue);
     },
-    [value, onChange, basePath, cursorPosition]
+    [value, onChange, cursorPosition, formatUrl]
   );
 
   const handleCursorChange = useCallback((cp: CursorPosition) => {
