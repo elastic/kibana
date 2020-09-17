@@ -28,7 +28,6 @@ export async function getLongTaskMetrics({
 }) {
   const projection = getRumLongTasksProjection({
     setup,
-    urlQuery,
   });
 
   const params = mergeProjection(projection, {
