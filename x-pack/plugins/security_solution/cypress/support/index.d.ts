@@ -6,7 +6,7 @@
 
 declare namespace Cypress {
   interface Chainable<Subject> {
-    promisify();
+    promisify(): void;
     stubSecurityApi(dataFileName: string): Chainable<Subject>;
     stubSearchStrategyApi(dataFileName: string): Chainable<Subject>;
     attachFile(fileName: string, fileType?: string): Chainable<JQuery>;
