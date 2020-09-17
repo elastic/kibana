@@ -51,30 +51,40 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           errorRateResponse = response.body;
         });
 
+        it('returns some data', () => {
+          expect(errorRateResponse.average).to.be.greaterThan(0);
+
+          expect(errorRateResponse.erroneousTransactionsRate.length).to.be.greaterThan(0);
+
+          const nonNullDataPoints = errorRateResponse.erroneousTransactionsRate.filter(
+            ({ y }) => y !== null
+          );
+
+          expect(nonNullDataPoints.length).to.be.greaterThan(0);
+        });
+
         it('has the correct start date', () => {
           expectSnapshot(
             new Date(first(errorRateResponse.erroneousTransactionsRate)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2020-09-10T06:00:00.000Z"`);
+          ).toMatchInline(`"2020-09-15T08:53:00.000Z"`);
         });
 
         it('has the correct end date', () => {
           expectSnapshot(
             new Date(last(errorRateResponse.erroneousTransactionsRate)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2020-09-10T07:00:00.000Z"`);
+          ).toMatchInline(`"2020-09-15T09:23:00.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
-          expectSnapshot(errorRateResponse.erroneousTransactionsRate.length).toMatchInline(`121`);
+          expectSnapshot(errorRateResponse.erroneousTransactionsRate.length).toMatchInline(`61`);
         });
 
         it('has the correct calculation for average', () => {
-          expectSnapshot(errorRateResponse.average).toMatchInline(`0.16097046413502106`);
+          expectSnapshot(errorRateResponse.average).toMatchInline(`0.14086309523809523`);
         });
 
         it('has the correct error rate', () => {
-          expectSnapshot(first(errorRateResponse.erroneousTransactionsRate)?.y).toMatchInline(
-            `0.6666666666666666`
-          );
+          expectSnapshot(errorRateResponse.erroneousTransactionsRate).toMatch();
         });
       });
     });

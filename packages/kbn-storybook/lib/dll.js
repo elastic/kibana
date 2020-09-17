@@ -20,7 +20,8 @@
 const { resolve } = require('path');
 const { existsSync } = require('fs');
 
-const { REPO_ROOT, DLL_DIST_DIR } = require('./constants');
+const { REPO_ROOT } = require('@kbn/utils');
+const { DLL_DIST_DIR } = require('./constants');
 
 exports.buildDll = async ({ rebuildDll, log, procRunner }) => {
   if (rebuildDll) {

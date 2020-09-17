@@ -20,6 +20,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 
+import { PathConfigType } from '@kbn/utils';
 import { CoreService } from '../../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
@@ -27,7 +28,6 @@ import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
-import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
 import {
   ILegacyInternals,
@@ -302,6 +302,10 @@ export class LegacyService implements CoreService {
       logging: {
         configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
+      metrics: {
+        collectionInterval: setupDeps.core.metrics.collectionInterval,
+        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
+      },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
@@ -309,6 +313,7 @@ export class LegacyService implements CoreService {
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
       status: {
+        isStatusPageAnonymous: setupDeps.core.status.isStatusPageAnonymous,
         core$: setupDeps.core.status.core$,
         overall$: setupDeps.core.status.overall$,
         set: () => {

@@ -21,6 +21,7 @@ type Result = { id: string; type: string } | string;
 const createResult = (result: Result): GlobalSearchResult => {
   const id = typeof result === 'string' ? result : result.id;
   const type = typeof result === 'string' ? 'application' : result.type;
+  const meta = type === 'application' ? { categoryLabel: 'Kibana' } : { categoryLabel: null };
 
   return {
     id,
@@ -28,6 +29,7 @@ const createResult = (result: Result): GlobalSearchResult => {
     title: id,
     url: `/app/test/${id}`,
     score: 42,
+    meta,
   };
 };
 
@@ -74,7 +76,7 @@ describe('SearchBar', () => {
     expect(findSpy).toHaveBeenCalledTimes(1);
     expect(findSpy).toHaveBeenCalledWith('', {});
     expect(getSelectableProps(component).options).toMatchSnapshot();
-    await wait(() => getSearchProps(component).onSearch('d'));
+    await wait(() => getSearchProps(component).onKeyUpCapture({ currentTarget: { value: 'd' } }));
     jest.runAllTimers();
     component.update();
     expect(getSelectableProps(component).options).toMatchSnapshot();

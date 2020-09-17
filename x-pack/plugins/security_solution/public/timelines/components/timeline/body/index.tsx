@@ -8,7 +8,7 @@ import React, { useMemo, useRef } from 'react';
 
 import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { Note } from '../../../../common/lib/note';
 import { ColumnHeaderOptions, EventType } from '../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
@@ -16,7 +16,6 @@ import {
   OnColumnRemoved,
   OnColumnResized,
   OnColumnSorted,
-  OnFilterChange,
   OnPinEvent,
   OnRowSelected,
   OnSelectAll,
@@ -53,7 +52,6 @@ export interface BodyProps {
   onColumnSorted: OnColumnSorted;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
-  onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
@@ -99,7 +97,6 @@ export const Body = React.memo<BodyProps>(
     onColumnSorted,
     onRowSelected,
     onSelectAll,
-    onFilterChange,
     onPinEvent,
     onUpdateColumns,
     onUnPinEvent,
@@ -157,7 +154,6 @@ export const Body = React.memo<BodyProps>(
               onColumnRemoved={onColumnRemoved}
               onColumnResized={onColumnResized}
               onColumnSorted={onColumnSorted}
-              onFilterChange={onFilterChange}
               onSelectAll={onSelectAll}
               onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}

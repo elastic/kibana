@@ -240,9 +240,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     if (addOrUpdateExceptionItems !== null) {
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(enrichExceptionItems(), undefined, bulkCloseIndex);
+      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), undefined, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
+  }, [
+    addOrUpdateExceptionItems,
+    ruleId,
+    enrichExceptionItems,
+    shouldBulkCloseAlert,
+    signalIndexName,
+  ]);
 
   return (
     <EuiOverlayMask onClick={onCancel}>

@@ -12,9 +12,8 @@ import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.
 import { htmlIdGenerator, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '../../common/lib/kibana';
-import { DEFAULT_DARK_MODE as defaultDarkMode } from '../../../common/constants';
 import { ResolverProcessType } from '../types';
+import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 
 type ResolverColorNames =
   | 'descriptionText'
@@ -38,7 +37,7 @@ interface NodeStyleConfig {
   strokeColor: string;
 }
 
-export interface NodeStyleMap {
+interface NodeStyleMap {
   runningProcessCube: NodeStyleConfig;
   runningTriggerCube: NodeStyleConfig;
   terminatedProcessCube: NodeStyleConfig;
@@ -50,7 +49,7 @@ const idGenerator = htmlIdGenerator();
 /**
  * Ids of paint servers to be referenced by fill and stroke attributes
  */
-export const PaintServerIds = {
+const PaintServerIds = {
   runningProcessCube: idGenerator('psRunningProcessCube'),
   runningTriggerCube: idGenerator('psRunningTriggerCube'),
   terminatedProcessCube: idGenerator('psTerminatedProcessCube'),
@@ -385,7 +384,7 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
  *  3. `<use>` elements can be handled by compositor (faster)
  */
 const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) => {
-  const isDarkMode = useUiSetting<boolean>(defaultDarkMode);
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   return (
     <svg className={className}>
       <defs>
@@ -421,7 +420,7 @@ export const useResolverTheme = (): {
   nodeAssets: NodeStyleMap;
   cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessTrigger: boolean) => NodeStyleConfig;
 } => {
-  const isDarkMode = useUiSetting<boolean>(defaultDarkMode);
+  const isDarkMode = useUiSetting('theme:darkMode');
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
 
   const getThemedOption = (lightOption: string, darkOption: string): string => {

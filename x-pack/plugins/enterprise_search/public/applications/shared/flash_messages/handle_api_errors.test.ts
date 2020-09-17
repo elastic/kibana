@@ -52,6 +52,20 @@ describe('flashAPIErrors', () => {
     ]);
   });
 
+  it('falls back to the basic message for http responses without an errors array', () => {
+    flashAPIErrors({
+      body: {
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      },
+    } as any);
+
+    expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
+      { type: 'error', message: 'Not Found' },
+    ]);
+  });
+
   it('displays a generic error message and re-throws non-API errors', () => {
     try {
       flashAPIErrors(Error('whatever') as any);
