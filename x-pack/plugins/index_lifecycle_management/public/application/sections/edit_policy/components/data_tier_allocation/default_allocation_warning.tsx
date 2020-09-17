@@ -33,7 +33,7 @@ const i18nTexts = {
       'xpack.indexLifecycleMgmt.coldPhase.dataTier.defaultAllocationNotAvailableBody',
       {
         defaultMessage:
-          'This policy will not complete allocation because there are no cold nodes. Assign at least one node to the cold tier.',
+          'Assign at least one node to the cold tier to use role-based allocation. The policy will fail to complete allocation if there are no cold nodes.',
       }
     ),
   },
@@ -46,7 +46,7 @@ const i18nTexts = {
       'xpack.indexLifecycleMgmt.frozenPhase.dataTier.defaultAllocationNotAvailableBody',
       {
         defaultMessage:
-          'This policy will not complete allocation because there are no frozen nodes. Assign at least one node to the frozen tier.',
+          'Assign at least one node to the frozen tier to use role-based allocation. The policy will fail to complete allocation if there are no frozen nodes.',
       }
     ),
   },

@@ -46,7 +46,7 @@ const i18nTexts = {
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.description', {
       defaultMessage:
-        'Move warm data to nodes optimized for read-only access. Warm data can be stored on less expensive hardware.',
+        'Move warm data to nodes optimized for read-only access. Store warm data on less-expensive hardware.',
     }),
   },
 };

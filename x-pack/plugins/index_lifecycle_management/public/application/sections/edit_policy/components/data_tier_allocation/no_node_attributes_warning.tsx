@@ -12,7 +12,7 @@ import { PhaseWithAllocation } from '../../../../../../common/types';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingLabel', {
-    defaultMessage: 'No node attributes configured in elasticsearch.yml',
+    defaultMessage: 'No custom node attributes configured',
   }),
   warm: {
     body: i18n.translate(

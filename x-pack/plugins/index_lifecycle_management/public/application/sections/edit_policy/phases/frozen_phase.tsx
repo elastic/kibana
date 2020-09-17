@@ -32,7 +32,7 @@ const i18nTexts = {
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.dataTier.description', {
       defaultMessage:
-        'Move data to data nodes optimized for infrequent, read-only access. Frozen data can be stored on the least expensive hardware.',
+        'Move data to data nodes optimized for infrequent, read-only access. Store frozen data on the least-expensive hardware.',
     }),
   },
 };
