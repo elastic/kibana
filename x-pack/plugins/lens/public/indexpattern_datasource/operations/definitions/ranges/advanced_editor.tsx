@@ -217,7 +217,7 @@ export const AdvancedRangeEditor = ({
       labelAppend={
         <EuiText size="xs">
           <EuiLink color="danger" onClick={onToggleEditor}>
-            <EuiIcon type="controlsHorizontal" color="danger" />
+            <EuiIcon size="s" type="cross" color="danger" />{' '}
             {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsRemoval', {
               defaultMessage: 'Remove custom intervals',
             })}
