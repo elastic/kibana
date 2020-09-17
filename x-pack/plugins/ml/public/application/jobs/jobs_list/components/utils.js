@@ -394,7 +394,7 @@ export function clearSelectedJobIdFromUrl(url) {
     url = decodeURIComponent(url);
     if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
       const urlParams = getUrlVars(url);
-      const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
+      const clearedParams = `jobs?_g=${urlParams._g}`;
       window.history.replaceState({}, document.title, clearedParams);
     }
   }

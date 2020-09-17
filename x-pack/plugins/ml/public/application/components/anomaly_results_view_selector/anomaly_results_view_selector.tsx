@@ -5,21 +5,25 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { encode } from 'rison-node';
 
 import { EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { useUrlState } from '../../util/url_state';
+import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
+import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 
 interface Props {
-  viewId: 'timeseriesexplorer' | 'explorer';
+  viewId: typeof ML_PAGES.SINGLE_METRIC_VIEWER | typeof ML_PAGES.ANOMALY_EXPLORER;
 }
 
 // Component for rendering a set of buttons for switching between the Anomaly Detection results views.
 
 export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
+  const urlGenerator = useMlUrlGenerator();
+  const navigateToPath = useNavigateToPath();
+
   const toggleButtonsIcons = useMemo(
     () => [
       {
@@ -28,7 +32,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
           defaultMessage: 'View results in the Single Metric Viewer',
         }),
         iconType: 'visLine',
-        value: 'timeseriesexplorer',
+        value: ML_PAGES.SINGLE_METRIC_VIEWER,
         'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
       },
       {
@@ -37,7 +41,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
           defaultMessage: 'View results in the Anomaly Explorer',
         }),
         iconType: 'visTable',
-        value: 'explorer',
+        value: ML_PAGES.ANOMALY_EXPLORER,
         'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
       },
     ],
@@ -46,9 +50,14 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
 
   const [globalState] = useUrlState('_g');
 
-  const onChangeView = (newViewId: string) => {
-    const fullGlobalStateString = globalState !== undefined ? `?_g=${encode(globalState)}` : '';
-    window.open(`#/${newViewId}${fullGlobalStateString}`, '_self');
+  const onChangeView = async (newViewId: Props['viewId']) => {
+    const url = await urlGenerator.createUrl({
+      page: newViewId,
+      pageState: {
+        globalState,
+      },
+    });
+    await navigateToPath(url);
   };
 
   return (
@@ -60,7 +69,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
       data-test-subj="mlAnomalyResultsViewSelector"
       options={toggleButtonsIcons}
       idSelected={viewId}
-      onChange={onChangeView}
+      onChange={(newViewId: string) => onChangeView(newViewId as Props['viewId'])}
       isIconOnly
     />
   );
