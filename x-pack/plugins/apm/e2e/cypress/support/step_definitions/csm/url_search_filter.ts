@@ -36,3 +36,30 @@ Then(`it display top pages in the suggestion popover`, () => {
       .should('have.text', actualUrlsText[1]);
   });
 });
+
+When(`a user enters a query in url search field`, () => {
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+
+  cy.get('[data-cy=csmUrlFilter]').within(() => {
+    cy.get('input.euiSelectableTemplateSitewide__search').type('cus');
+  });
+
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+});
+
+Then(`it should filter results based on query`, () => {
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+
+  cy.get('div.euiPopover__panel-isOpen', DEFAULT_TIMEOUT).within(() => {
+    const listOfUrls = cy.get('li.euiSelectableListItem');
+    listOfUrls.should('have.length', 1);
+
+    const actualUrlsText = [
+      'http://opbeans-node:3000/customersPage views: 10Page load duration: 76.3975 ms Select',
+    ];
+
+    cy.get('li.euiSelectableListItem')
+      .eq(0)
+      .should('have.text', actualUrlsText[0]);
+  });
+});
