@@ -109,7 +109,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
   const options = getOptions(
     timelineId === TimelineId.active ? activeTimelineEventType : undefined
   );
-
   return (
     <TopN
       combinedQueries={

@@ -342,32 +342,33 @@ describe('StatefulTopN', () => {
       expect(props.to).toEqual('2020-04-15T03:46:09.047Z');
     });
   });
+  describe('rendering in a NON-active timeline context', () => {
+    test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, () => {
+      const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
-  test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, () => {
-    const filterManager = new FilterManager(mockUiSettingsForFilterManager);
+      const manageTimelineForTesting = {
+        [TimelineId.active]: {
+          ...getTimelineDefaults(TimelineId.active),
+          filterManager,
+          documentType: 'alerts',
+        },
+      };
 
-    const manageTimelineForTesting = {
-      [TimelineId.active]: {
-        ...getTimelineDefaults(TimelineId.active),
-        filterManager,
-        documentType: 'alerts',
-      },
-    };
+      testProps = {
+        ...testProps,
+        timelineId: TimelineId.detectionsPage,
+      };
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
+            <StatefulTopN {...testProps} />
+          </ManageGlobalTimeline>
+        </TestProviders>
+      );
 
-    testProps = {
-      ...testProps,
-      timelineId: TimelineId.detectionsPage,
-    };
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-          <StatefulTopN {...testProps} />
-        </ManageGlobalTimeline>
-      </TestProviders>
-    );
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-    const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-    expect(props.defaultView).toEqual('alert');
+      expect(props.defaultView).toEqual('alert');
+    });
   });
 });

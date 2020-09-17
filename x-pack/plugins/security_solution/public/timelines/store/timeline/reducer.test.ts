@@ -218,8 +218,8 @@ describe('Timeline', () => {
     let mockWithExistingColumns: TimelineById;
 
     beforeEach(() => {
-      timelineById = { ...timelineByIdMock };
-      columns = { ...columnsMock };
+      timelineById = cloneDeep(timelineByIdMock);
+      columns = cloneDeep(columnsMock);
       columnToAdd = {
         category: 'event',
         columnHeaderType: defaultColumnHeaderType,
@@ -428,7 +428,7 @@ describe('Timeline', () => {
     });
 
     test('should add a new timeline provider if it already exists and the attributes "and" is NOT empty', () => {
-      const myMockTimelineByIdMock = { ...timelineByIdMock };
+      const myMockTimelineByIdMock = cloneDeep(timelineByIdMock);
       myMockTimelineByIdMock.foo.dataProviders[0].and = [
         {
           ...basicDataProvider,
@@ -1009,8 +1009,6 @@ describe('Timeline', () => {
           ],
         },
       };
-      // console.log('update', update.foo.dataProviders);
-      // console.log('expected', expected.foo.dataProviders);
       expect(update).toEqual(expected);
     });
   });
