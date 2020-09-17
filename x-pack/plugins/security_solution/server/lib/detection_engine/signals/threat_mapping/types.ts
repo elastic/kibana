@@ -36,7 +36,7 @@ export interface CreateThreatSignalsOptions {
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
-  listClient: ListClient | undefined;
+  listClient: ListClient;
   logger: Logger;
   alertId: string;
   outputIndex: string;
@@ -71,7 +71,7 @@ export interface CreateThreatSignalOptions {
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
-  listClient: ListClient | undefined;
+  listClient: ListClient;
   logger: Logger;
   alertId: string;
   outputIndex: string;
