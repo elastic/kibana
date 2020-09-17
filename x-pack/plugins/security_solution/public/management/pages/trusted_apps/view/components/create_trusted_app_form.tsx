@@ -25,6 +25,7 @@ import {
 import { LogicalConditionBuilderProps } from './logical_condition/logical_condition_builder';
 import { OS_TITLES } from '../constants';
 import {
+  isMacosLinuxTrustedAppCondition,
   isTrustedAppSupportedOs,
   isWindowsTrustedApp,
   isWindowsTrustedAppCondition,
@@ -123,7 +124,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             return {
               ...prevState,
               entries: [
-                ...prevState.entries.filter((entry) => !isWindowsTrustedAppCondition(entry)),
+                ...prevState.entries.filter((entry) => isMacosLinuxTrustedAppCondition(entry)),
                 generateNewEntry(),
               ] as MacosLinuxConditionEntry[],
             };
@@ -154,8 +155,8 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             };
             if (!isWindowsTrustedApp(updatedState)) {
               updatedState.entries.push(
-                ...(prevState.entries.filter(
-                  (entry) => !isWindowsTrustedAppCondition(entry)
+                ...(prevState.entries.filter((entry) =>
+                  isMacosLinuxTrustedAppCondition(entry)
                 ) as MacosLinuxConditionEntry[])
               );
             }
