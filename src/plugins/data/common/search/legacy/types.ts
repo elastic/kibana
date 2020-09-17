@@ -20,7 +20,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { SearchResponse } from 'elasticsearch';
 import { FetchHandlers } from '../fetch';
-import { SearchRequest } from '..';
+import { SearchRequest } from '../index';
 
 // @internal
 export interface LegacyFetchHandlers {

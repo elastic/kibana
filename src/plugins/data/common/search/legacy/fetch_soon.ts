@@ -18,10 +18,10 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { callClient } from './call_client';
+import { UI_SETTINGS } from '../../constants';
 import { FetchHandlers } from '../fetch/types';
-import { SearchRequest } from '../index';
-import { UI_SETTINGS, ISearchOptions } from '../../../common';
+import { ISearchOptions, SearchRequest } from '../index';
+import { callClient } from './call_client';
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue

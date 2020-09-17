@@ -18,10 +18,10 @@
  */
 
 import { Observable, BehaviorSubject } from 'rxjs';
-import { GetConfigFn } from 'src/plugins/data/common';
-import { SearchSource, SearchSourceDependencies } from './search_source';
-import { IndexPattern, SortDirection } from '../..';
+import { IndexPattern } from '../../index_patterns';
+import { GetConfigFn } from '../../types';
 import { fetchSoon } from '../legacy';
+import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 
 jest.mock('../legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
