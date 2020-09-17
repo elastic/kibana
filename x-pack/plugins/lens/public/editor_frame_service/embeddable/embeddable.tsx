@@ -79,6 +79,7 @@ export class Embeddable
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
+  private isInitialized = false;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -136,6 +137,7 @@ export class Embeddable
     const expression = await this.deps.documentToExpression(this.savedVis);
     this.expression = expression ? this.deps.toExpressionString(expression) : null;
     this.initializeOutput();
+    this.isInitialized = true;
     if (this.domNode) {
       this.render(this.domNode);
     }
@@ -168,7 +170,7 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
-    if (!this.savedVis) {
+    if (!this.savedVis || !this.isInitialized) {
       return;
     }
     render(
