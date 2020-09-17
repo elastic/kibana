@@ -16,10 +16,11 @@ import {
   createTrustedAppsListResourceStateChangedAction,
   createUserChangedUrlAction,
   createGlobalNoMiddlewareStore,
-  mockHtmlGenerator,
 } from '../test_utils';
 
-mockHtmlGenerator();
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => 'mockId',
+}));
 
 const now = 111111;
 

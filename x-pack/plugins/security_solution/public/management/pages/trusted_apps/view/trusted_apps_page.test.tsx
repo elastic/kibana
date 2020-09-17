@@ -7,11 +7,12 @@ import { act } from '@testing-library/react';
 import React from 'react';
 
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { mockHtmlGenerator } from '../test_utils';
 
 import { TrustedAppsPage } from './trusted_apps_page';
 
-mockHtmlGenerator();
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => 'mockId',
+}));
 
 describe('TrustedAppsPage', () => {
   test('rendering', () => {

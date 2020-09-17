@@ -156,7 +156,7 @@ exports[`TrustedAppsPage rendering 1`] = `
           </div>
           <table
             class="euiTable euiTable--responsive"
-            id="__table_bedd4681-f8d0-11ea-81a5-412bea9cb794"
+            id="mockId"
             tabindex="-1"
           >
             <caption

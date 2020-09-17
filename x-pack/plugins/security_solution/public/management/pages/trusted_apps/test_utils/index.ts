@@ -171,9 +171,3 @@ export const createGlobalNoMiddlewareStore = () => {
     })
   );
 };
-
-export const mockHtmlGenerator = () => {
-  jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-    htmlIdGenerator: () => () => 'mockId',
-  }));
-};
