@@ -153,7 +153,7 @@ export const makeMapStateToProps = () => {
     const sourcerer = getSourcererScopes(state);
     const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
     const selectedPatterns: SourcererScopePatterns = activeScopes
-      .filter((scope) => scope !== SourcererScopeName.detections)
+      .filter((scope) => scope === SourcererScopeName.default)
       .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
 
     return {

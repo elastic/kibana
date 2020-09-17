@@ -138,6 +138,8 @@ export interface TimelineInput {
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
 
+  indexNames?: Maybe<(Maybe<string>)[]>;
+
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
@@ -2018,6 +2020,8 @@ export interface TimelineResult {
 
   kqlQuery?: Maybe<SerializedFilterQueryResult>;
 
+  indexNames?: Maybe<(Maybe<string>)[]>;
+
   notes?: Maybe<NoteResult[]>;
 
   noteIds?: Maybe<string[]>;
@@ -2930,6 +2934,116 @@ export namespace GetAuthenticationsQuery {
   };
 }
 
+export namespace GetHostOverviewQuery {
+  export type Variables = {
+    sourceId: string;
+    hostName: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    HostOverview: HostOverview;
+  };
+
+  export type HostOverview = {
+    __typename?: 'HostItem';
+
+    _id: Maybe<string>;
+
+    host: Maybe<Host>;
+
+    cloud: Maybe<Cloud>;
+
+    inspect: Maybe<Inspect>;
+
+    endpoint: Maybe<Endpoint>;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    architecture: Maybe<string[]>;
+
+    id: Maybe<string[]>;
+
+    ip: Maybe<string[]>;
+
+    mac: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+
+    os: Maybe<Os>;
+
+    type: Maybe<string[]>;
+  };
+
+  export type Os = {
+    __typename?: 'OsEcsFields';
+
+    family: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+
+    platform: Maybe<string[]>;
+
+    version: Maybe<string[]>;
+  };
+
+  export type Cloud = {
+    __typename?: 'CloudFields';
+
+    instance: Maybe<Instance>;
+
+    machine: Maybe<Machine>;
+
+    provider: Maybe<(Maybe<string>)[]>;
+
+    region: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Instance = {
+    __typename?: 'CloudInstance';
+
+    id: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Machine = {
+    __typename?: 'CloudMachine';
+
+    type: Maybe<(Maybe<string>)[]>;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type Endpoint = {
+    __typename?: 'EndpointFields';
+
+    endpointPolicy: Maybe<string>;
+
+    policyStatus: Maybe<HostPolicyResponseActionStatus>;
+
+    sensorVersion: Maybe<string>;
+  };
+}
+
 export namespace GetHostFirstLastSeenQuery {
   export type Variables = {
     sourceId: string;
@@ -3057,116 +3171,6 @@ export namespace GetHostsTableQuery {
     dsl: string[];
 
     response: string[];
-  };
-}
-
-export namespace GetHostOverviewQuery {
-  export type Variables = {
-    sourceId: string;
-    hostName: string;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    HostOverview: HostOverview;
-  };
-
-  export type HostOverview = {
-    __typename?: 'HostItem';
-
-    _id: Maybe<string>;
-
-    host: Maybe<Host>;
-
-    cloud: Maybe<Cloud>;
-
-    inspect: Maybe<Inspect>;
-
-    endpoint: Maybe<Endpoint>;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture: Maybe<string[]>;
-
-    id: Maybe<string[]>;
-
-    ip: Maybe<string[]>;
-
-    mac: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-
-    os: Maybe<Os>;
-
-    type: Maybe<string[]>;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-
-    platform: Maybe<string[]>;
-
-    version: Maybe<string[]>;
-  };
-
-  export type Cloud = {
-    __typename?: 'CloudFields';
-
-    instance: Maybe<Instance>;
-
-    machine: Maybe<Machine>;
-
-    provider: Maybe<(Maybe<string>)[]>;
-
-    region: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Instance = {
-    __typename?: 'CloudInstance';
-
-    id: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Machine = {
-    __typename?: 'CloudMachine';
-
-    type: Maybe<(Maybe<string>)[]>;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-
-  export type Endpoint = {
-    __typename?: 'EndpointFields';
-
-    endpointPolicy: Maybe<string>;
-
-    policyStatus: Maybe<HostPolicyResponseActionStatus>;
-
-    sensorVersion: Maybe<string>;
   };
 }
 
@@ -5558,6 +5562,8 @@ export namespace GetOneTimeline {
 
     kqlQuery: Maybe<KqlQuery>;
 
+    indexNames: Maybe<(Maybe<string>)[]>;
+
     notes: Maybe<Notes[]>;
 
     noteIds: Maybe<string[]>;
@@ -5889,6 +5895,8 @@ export namespace PersistTimelineMutation {
     kqlMode: Maybe<string>;
 
     kqlQuery: Maybe<KqlQuery>;
+
+    indexNames: Maybe<(Maybe<string>)[]>;
 
     title: Maybe<string>;
 

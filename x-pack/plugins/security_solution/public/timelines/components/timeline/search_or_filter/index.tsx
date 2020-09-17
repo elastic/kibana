@@ -224,7 +224,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     indexNames: string[];
   }) => {
     dispatch(timelineActions.updateEventType({ id, eventType }));
-    dispatch(timelineActions.updateIndexesName({ id, indexNames }));
+    dispatch(timelineActions.updateIndexNames({ id, indexNames }));
     dispatch(
       sourcererActions.setSelectedIndexPatterns({
         id: SourcererScopeName.timeline,

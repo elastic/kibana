@@ -15,21 +15,9 @@ import { useIndexFields } from '../source';
 import { State } from '../../store';
 import { useUserInfo } from '../../../detections/components/user_info';
 
-export const dedupeIndexName = (kibanaIndex: string[], configIndex: string[]) => {
-  return [
-    ...configIndex.filter((ci) =>
-      kibanaIndex.reduce<boolean>((acc, kip) => {
-        if (kip.includes(ci) || ci.includes(kip)) {
-          return false;
-        }
-        return acc;
-      }, true)
-    ),
-    ...kibanaIndex,
-  ];
-};
-
-export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeName.default) => {
+export const useInitSourcerer = (
+  scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
+) => {
   const dispatch = useDispatch();
 
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
@@ -40,6 +28,7 @@ export const useInitSourcerer = (scopeId: SourcererScopeName = SourcererScopeNam
   const kibanaIndexPatterns = useSelector(getKibanaIndexPatternsSelector, isEqual);
 
   useIndexFields(scopeId);
+  useIndexFields(SourcererScopeName.timeline);
 
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null) {

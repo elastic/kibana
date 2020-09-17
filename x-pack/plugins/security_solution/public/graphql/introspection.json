@@ -10030,6 +10030,18 @@
             "deprecationReason": null
           },
           {
+            "name": "indexNames",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "notes",
             "description": "",
             "args": [],
@@ -11493,6 +11505,16 @@
               "kind": "INPUT_OBJECT",
               "name": "SerializedFilterQueryInput",
               "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "indexNames",
+            "description": "",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
             "defaultValue": null
           },
