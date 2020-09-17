@@ -65,7 +65,7 @@ const basicDataProvider: DataProvider = {
 };
 const basicTimeline: TimelineModel = {
   columns: [],
-  dataProviders: [basicDataProvider],
+  dataProviders: [{ ...basicDataProvider }],
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',
     end: '2020-07-08T08:20:18.966Z',
@@ -108,7 +108,7 @@ const basicTimeline: TimelineModel = {
   width: DEFAULT_TIMELINE_WIDTH,
 };
 const timelineByIdMock: TimelineById = {
-  foo: basicTimeline,
+  foo: { ...basicTimeline },
 };
 
 const timelineByIdTemplateMock: TimelineById = {
@@ -219,8 +219,8 @@ describe('Timeline', () => {
     let mockWithExistingColumns: TimelineById;
 
     beforeEach(() => {
-      timelineById = cloneDeep(timelineByIdMock);
-      columns = cloneDeep(columnsMock);
+      timelineById = { ...timelineByIdMock };
+      columns = { ...columnsMock };
       columnToAdd = {
         category: 'event',
         columnHeaderType: defaultColumnHeaderType,
@@ -429,7 +429,7 @@ describe('Timeline', () => {
     });
 
     test('should add a new timeline provider if it already exists and the attributes "and" is NOT empty', () => {
-      const myMockTimelineByIdMock = cloneDeep(timelineByIdMock);
+      const myMockTimelineByIdMock = { ...timelineByIdMock };
       myMockTimelineByIdMock.foo.dataProviders[0].and = [
         {
           ...basicDataProvider,
@@ -437,12 +437,13 @@ describe('Timeline', () => {
           name: 'and data provider 1',
         },
       ];
+      const newProvider = { ...basicDataProvider };
       const update = addTimelineProvider({
         id: 'foo',
-        provider: basicDataProvider,
+        provider: newProvider,
         timelineById: myMockTimelineByIdMock,
       });
-      expect(update.foo.dataProviders[1]).toEqual(basicDataProvider);
+      expect(update.foo.dataProviders[1]).toEqual(newProvider);
     });
 
     test('should UPSERT an existing timeline provider if it already exists', () => {
@@ -957,6 +958,10 @@ describe('Timeline', () => {
     });
 
     test('should update the timeline provider enabled from true to false', () => {
+      console.log('ATOP DOWN', timelineByIdMock.foo.dataProviders[0].id);
+      const thisOne = { ...timelineByIdMock };
+      console.log('HEREDOWN', thisOne.foo.dataProviders[0].id);
+      console.log('BELOW DOWN', timelineByIdMock.foo.dataProviders[0].id);
       const update: TimelineById = updateTimelineProviderEnabled({
         id: 'foo',
         providerId: '123',
