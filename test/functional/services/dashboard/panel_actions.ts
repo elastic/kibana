@@ -189,6 +189,9 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async expectExistsToggleExpandAction() {
       log.debug('expectExistsToggleExpandAction');
+      await this.openContextMenu();
+      if (await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ)) return;
+      await this.clickContextMenuMoreItem();
       await testSubjects.existOrFail(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
