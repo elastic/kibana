@@ -17,6 +17,7 @@ import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
 import { getHighTrafficPages } from '../lib/rum_client/get_high_traffic_pages';
+import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
@@ -68,12 +69,12 @@ export const rumPageLoadDistBreakdownRoute = createRoute(() => ({
       query: { minPercentile, maxPercentile, breakdown },
     } = context.params;
 
-    return getPageLoadDistBreakdown(
+    return getPageLoadDistBreakdown({
       setup,
-      Number(minPercentile),
-      Number(maxPercentile),
-      breakdown
-    );
+      minDuration: Number(minPercentile),
+      maxDuration: Number(maxPercentile),
+      breakdown,
+    });
   },
 }));
 
@@ -130,6 +131,18 @@ export const rumWebCoreVitals = createRoute(() => ({
     const setup = await setupRequest(context, request);
 
     return getWebCoreVitals({ setup });
+  },
+}));
+
+export const rumLongTaskMetrics = createRoute(() => ({
+  path: '/api/apm/rum-client/long-task-metrics',
+  params: {
+    query: t.intersection([uiFiltersRt, rangeRt]),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    return getLongTaskMetrics({ setup });
   },
 }));
 

@@ -27,6 +27,7 @@ import { dataPluginMock } from '../../../plugins/data/public/mocks';
 import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
+import { dashboardPluginMock } from '../../../plugins/dashboard/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -69,6 +70,8 @@ const createInstance = async () => {
       uiActions: uiActionsPluginMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
+      dashboard: dashboardPluginMock.createStartContract(),
+      getAttributeService: jest.fn(),
     });
 
   return {

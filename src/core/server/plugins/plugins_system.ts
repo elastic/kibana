@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { withTimeout } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, PluginName } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { withTimeout } from '../../utils';
 import { PluginDependencies } from '.';
 
 const Sec = 1000;

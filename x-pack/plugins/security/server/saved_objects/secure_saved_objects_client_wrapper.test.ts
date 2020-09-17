@@ -222,15 +222,17 @@ function getMockCheckPrivilegesSuccess(actions: string | string[], namespaces?: 
   return {
     hasAllRequested: true,
     username: USERNAME,
-    privileges: _namespaces
-      .map((resource) =>
-        _actions.map((action) => ({
-          resource,
-          privilege: action,
-          authorized: true,
-        }))
-      )
-      .flat(),
+    privileges: {
+      kibana: _namespaces
+        .map((resource) =>
+          _actions.map((action) => ({
+            resource,
+            privilege: action,
+            authorized: true,
+          }))
+        )
+        .flat(),
+    },
   };
 }
 
@@ -246,15 +248,17 @@ function getMockCheckPrivilegesFailure(actions: string | string[], namespaces?: 
   return {
     hasAllRequested: false,
     username: USERNAME,
-    privileges: _namespaces
-      .map((resource, idxa) =>
-        _actions.map((action, idxb) => ({
-          resource,
-          privilege: action,
-          authorized: idxa > 0 || idxb > 0,
-        }))
-      )
-      .flat(),
+    privileges: {
+      kibana: _namespaces
+        .map((resource, idxa) =>
+          _actions.map((action, idxb) => ({
+            resource,
+            privilege: action,
+            authorized: idxa > 0 || idxb > 0,
+          }))
+        )
+        .flat(),
+    },
   };
 }
 
