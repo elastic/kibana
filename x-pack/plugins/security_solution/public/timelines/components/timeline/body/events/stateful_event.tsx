@@ -9,11 +9,13 @@ import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
-import { TimelineId } from '../../../../../../common/types/timeline';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
-import { useTimelineDetails } from '../../../../containers/details';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
-import { DetailItem } from '../../../../../../common/search_strategy/timeline';
+import { useTimelineEventsDetails } from '../../../../containers/details';
+import {
+  TimelineEventsDetailsItem,
+  TimelineItem,
+  TimelineNonEcsData,
+} from '../../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -68,7 +70,7 @@ interface Props {
 
 export const getNewNoteId = (): string => uuid.v4();
 
-const emptyDetails: DetailItem[] = [];
+const emptyDetails: TimelineEventsDetailsItem[] = [];
 
 /**
  * This is the default row height whenever it is a plain row renderer and not a custom row height.
@@ -135,14 +137,14 @@ const StatefulEventComponent: React.FC<Props> = ({
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const { status: timelineStatus } = useSelector<StoreState, TimelineModel>(
-    (state) => state.timeline.timelineById[TimelineId.active]
+    (state) => state.timeline.timelineById[timelineId]
   );
   const divElement = useRef<HTMLDivElement | null>(null);
-  const [loading, detailsData] = useTimelineDetails({
+  const [loading, detailsData] = useTimelineEventsDetails({
     docValueFields,
     indexName: event._index!,
     eventId: event._id,
-    executeQuery: !!expanded[event._id],
+    skip: !expanded[event._id],
   });
 
   const onToggleShowNotes = useCallback(() => {
