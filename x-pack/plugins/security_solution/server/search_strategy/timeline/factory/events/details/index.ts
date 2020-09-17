@@ -6,26 +6,26 @@
 
 import { getOr, merge } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
-  TimelineQueries,
-  TimelineDetailsStrategyResponse,
-  TimelineDetailsRequestOptions,
-} from '../../../../../common/search_strategy/timeline';
-import { inspectStringifyObject } from '../../../../utils/build_query';
-import { SecuritySolutionTimelineFactory } from '../types';
-import { buildTimelineDetailsQuery } from './query.timeline_details.dsl';
+  TimelineEventsQueries,
+  TimelineEventsDetailsStrategyResponse,
+  TimelineEventsDetailsRequestOptions,
+} from '../../../../../../common/search_strategy/timeline';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { SecuritySolutionTimelineFactory } from '../../types';
+import { buildTimelineDetailsQuery } from './query.events_details.dsl';
 import { getDataFromHits } from './helpers';
 
-export const timelineDetails: SecuritySolutionTimelineFactory<TimelineQueries.details> = {
-  buildDsl: (options: TimelineDetailsRequestOptions) => {
+export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEventsQueries.details> = {
+  buildDsl: (options: TimelineEventsDetailsRequestOptions) => {
     const { indexName, eventId, docValueFields = [] } = options;
     return buildTimelineDetailsQuery(indexName, eventId, docValueFields);
   },
   parse: async (
-    options: TimelineDetailsRequestOptions,
+    options: TimelineEventsDetailsRequestOptions,
     response: IEsSearchResponse<unknown>
-  ): Promise<TimelineDetailsStrategyResponse> => {
+  ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, docValueFields = [] } = options;
     const sourceData = getOr({}, 'hits.hits.0._source', response.rawResponse);
     const hitsData = getOr({}, 'hits.hits.0', response.rawResponse);
