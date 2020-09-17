@@ -52,7 +52,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expectSnapshot(response.body).toMatchInline(`
           Object {
-            "cls": "0",
+            "cls": "0.00",
             "clsRanks": Array [
               100,
               0,
