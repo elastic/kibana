@@ -215,6 +215,12 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    fleet: {
+      alias: 'f',
+      describe: 'enroll fleet agents for hosts',
+      type: 'boolean',
+      default: true,
+    },
   }).argv;
   const kbnClient = new KbnClientWithApiKeySupport(new ToolingLog(), { url: argv.kibana });
 
@@ -252,6 +258,7 @@ async function main() {
     argv.eventIndex,
     argv.alertIndex,
     argv.alertsPerHost,
+    argv.fleet,
     {
       ancestors: argv.ancestors,
       generations: argv.generations,

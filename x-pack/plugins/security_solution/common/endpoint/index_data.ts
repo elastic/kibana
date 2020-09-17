@@ -46,6 +46,7 @@ export async function indexHostsAndAlerts(
   eventIndex: string,
   alertIndex: string,
   alertsPerHost: number,
+  fleet: boolean,
   options: TreeOptions = {}
 ) {
   const random = seedrandom(seed);
@@ -63,6 +64,7 @@ export async function indexHostsAndAlerts(
       epmEndpointPackage,
       metadataIndex,
       policyResponseIndex,
+      fleet,
       generator
     );
     await indexAlerts(client, eventIndex, alertIndex, generator, alertsPerHost, options);
@@ -90,6 +92,7 @@ async function indexHostDocs(
   epmEndpointPackage: GetPackagesResponse['response'][0],
   metadataIndex: string,
   policyResponseIndex: string,
+  enrollFleet: boolean,
   generator: EndpointDocGenerator
 ) {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
@@ -115,14 +118,16 @@ async function indexHostDocs(
       );
     }
 
-    // If we did not yet enroll an agent for this Host, do it now that we have good policy id
-    if (!wasAgentEnrolled) {
-      wasAgentEnrolled = true;
-      enrolledAgent = await fleetEnrollAgentForHost(
-        kbnClient,
-        hostMetadata!,
-        realPolicies[appliedPolicyId].policy_id
-      );
+    if (enrollFleet) {
+      // If we did not yet enroll an agent for this Host, do it now that we have good policy id
+      if (!wasAgentEnrolled) {
+        wasAgentEnrolled = true;
+        enrolledAgent = await fleetEnrollAgentForHost(
+          kbnClient,
+          hostMetadata!,
+          realPolicies[appliedPolicyId].policy_id
+        );
+      }
     }
 
     // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
