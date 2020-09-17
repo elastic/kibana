@@ -103,7 +103,8 @@ export class TimelionPlugin implements Plugin<void, void> {
       defaultPath: '#/',
       euiIconType: 'logoKibana',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      updater$: this.appStateUpdater.asObservable(),
+      navLinkStatus:
+        visTypeTimelion.isUiEnabled === false ? AppNavLinkStatus.hidden : AppNavLinkStatus.default,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         this.currentHistory = params.history;
@@ -130,10 +131,6 @@ export class TimelionPlugin implements Plugin<void, void> {
         };
       },
     });
-
-    if (visTypeTimelion.isUiEnabled === false) {
-      this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
-    }
   }
 
   public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
