@@ -46,8 +46,14 @@ export const CalendarsListTable = ({
       truncateText: true,
       scope: 'row',
       render: (id) => (
-        <EuiLink href={`#/settings/calendars_list/edit_calendar/${id}`}>{id}</EuiLink>
+        <EuiLink
+          href={`#/settings/calendars_list/edit_calendar/${id}`}
+          data-test-subj="mlEditCalendarLink"
+        >
+          {id}
+        </EuiLink>
       ),
+      'data-test-subj': 'mlCalendarListColumnId',
     },
     {
       field: 'job_ids_string',
@@ -68,6 +74,7 @@ export const CalendarsListTable = ({
           jobList
         );
       },
+      'data-test-subj': 'mlCalendarListColumnJobs',
     },
     {
       field: 'events_length',
@@ -80,6 +87,7 @@ export const CalendarsListTable = ({
           defaultMessage: '{eventsLength, plural, one {# event} other {# events}}',
           values: { eventsLength },
         }),
+      'data-test-subj': 'mlCalendarListColumnEvents',
     },
   ];
 
@@ -106,6 +114,7 @@ export const CalendarsListTable = ({
         isDisabled={
           canDeleteCalendar === false || mlNodesAvailable === false || itemsSelected === false
         }
+        data-test-subj="mlCalendarButtonDelete"
       >
         <FormattedMessage
           id="xpack.ml.calendarsList.table.deleteButtonLabel"
@@ -120,7 +129,7 @@ export const CalendarsListTable = ({
   };
 
   return (
-    <React.Fragment>
+    <div data-test-subj="mlCalendarTableContainer">
       <EuiInMemoryTable
         items={calendarsList}
         itemId="calendar_id"
@@ -132,8 +141,11 @@ export const CalendarsListTable = ({
         selection={tableSelection}
         isSelectable={true}
         data-test-subj="mlCalendarTable"
+        rowProps={(item) => ({
+          'data-test-subj': `mlCalendarListRow row-${item.calendar_id}`,
+        })}
       />
-    </React.Fragment>
+    </div>
   );
 };
 

@@ -28,6 +28,7 @@ export const getCountMetricAgg = () =>
       defaultMessage: 'Count',
     }),
     hasNoDsl: true,
+    json: false,
     makeLabel() {
       return i18n.translate('data.search.aggs.metrics.countLabel', {
         defaultMessage: 'Count',

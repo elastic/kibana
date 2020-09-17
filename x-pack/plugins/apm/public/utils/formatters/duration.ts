@@ -127,10 +127,10 @@ export const toMicroseconds = (value: number, timeUnit: TimeUnit) =>
   moment.duration(value, timeUnit).asMilliseconds() * 1000;
 
 function getDurationUnitKey(max: number): DurationTimeUnit {
-  if (max > toMicroseconds(1, 'hours')) {
+  if (max > toMicroseconds(10, 'hours')) {
     return 'hours';
   }
-  if (max > toMicroseconds(1, 'minutes')) {
+  if (max > toMicroseconds(10, 'minutes')) {
     return 'minutes';
   }
   if (max > toMicroseconds(10, 'seconds')) {

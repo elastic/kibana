@@ -39,6 +39,7 @@
  * @packageDocumentation
  */
 
+import { Type } from '@kbn/config-schema';
 import {
   ElasticsearchServiceSetup,
   ILegacyScopedClusterClient,
@@ -46,7 +47,6 @@ import {
   ElasticsearchServiceStart,
   IScopedClusterClient,
 } from './elasticsearch';
-
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
@@ -60,16 +60,10 @@ import {
   SavedObjectsServiceStart,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { UuidServiceSetup } from './uuid';
 import { MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
-import {
-  LoggingServiceSetup,
-  appendersSchema,
-  loggerContextConfigSchema,
-  loggerSchema,
-} from './logging';
+import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 
 export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
@@ -241,6 +235,8 @@ export {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
+  SavedObjectsCheckConflictsResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
@@ -254,11 +250,13 @@ export {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,
   SavedObjectsImportRetry,
+  SavedObjectsImportSuccess,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectMigrationContext,
@@ -268,9 +266,7 @@ export {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsSchema,
   SavedObjectsSerializer,
-  SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
@@ -297,6 +293,7 @@ export {
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  SavedObjectsUtils,
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
@@ -325,16 +322,7 @@ export {
   MetricsServiceSetup,
 } from './metrics';
 
-export {
-  DEFAULT_APP_CATEGORIES,
-  getFlattenedObject,
-  URLMeaningfulParts,
-  modifyUrl,
-  isRelativeUrl,
-  Freezable,
-  deepFreeze,
-  assertNever,
-} from '../utils';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {
   SavedObject,
@@ -432,8 +420,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
-  /** {@link UuidServiceSetup} */
-  uuid: UuidServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link AuditTrailSetup} */
@@ -483,7 +469,6 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
-  UuidServiceSetup,
   AuditTrailStart,
 };
 
@@ -497,8 +482,6 @@ export const config = {
     schema: elasticsearchConfigSchema,
   },
   logging: {
-    appenders: appendersSchema,
-    loggers: loggerSchema,
-    loggerContext: loggerContextConfigSchema,
+    appenders: appendersSchema as Type<AppenderConfigType>,
   },
 };

@@ -7,7 +7,7 @@
 import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
-import { colorTransformer, MetricsExplorerColor } from '../../../../../../common/color_palette';
+import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -91,9 +91,7 @@ const mapMetricToSeries = (chartOptions: MetricsExplorerChartOptions) => (
     label: createMetricLabel(metric),
     axis_position: 'right',
     chart_type: 'line',
-    color:
-      (metric.color && colorTransformer(metric.color)) ||
-      colorTransformer(MetricsExplorerColor.color0),
+    color: (metric.color && colorTransformer(metric.color)) || colorTransformer(Color.color0),
     fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
     formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
     value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',

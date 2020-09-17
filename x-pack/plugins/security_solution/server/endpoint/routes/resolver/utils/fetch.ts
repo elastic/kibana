@@ -6,11 +6,11 @@
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
-  ResolverChildren,
-  ResolverRelatedEvents,
-  ResolverAncestry,
+  SafeResolverChildren,
+  SafeResolverRelatedEvents,
+  SafeResolverAncestry,
   ResolverRelatedAlerts,
-  ResolverLifecycleNode,
+  SafeResolverLifecycleNode,
 } from '../../../../../common/endpoint/types';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
@@ -110,21 +110,21 @@ export class Fetcher {
       this.endpointID
     );
 
-    const eventsHandler = new RelatedEventsQueryHandler(
-      options.events,
-      this.id,
-      options.afterEvent,
-      this.eventsIndexPattern,
-      this.endpointID
-    );
+    const eventsHandler = new RelatedEventsQueryHandler({
+      limit: options.events,
+      entityID: this.id,
+      after: options.afterEvent,
+      indexPattern: this.eventsIndexPattern,
+      legacyEndpointID: this.endpointID,
+    });
 
-    const alertsHandler = new RelatedAlertsQueryHandler(
-      options.alerts,
-      this.id,
-      options.afterAlert,
-      this.alertsIndexPattern,
-      this.endpointID
-    );
+    const alertsHandler = new RelatedAlertsQueryHandler({
+      limit: options.alerts,
+      entityID: this.id,
+      after: options.afterAlert,
+      indexPattern: this.alertsIndexPattern,
+      legacyEndpointID: this.endpointID,
+    });
 
     // we need to get the start events first because the API request defines how many nodes to return and we don't want
     // to count or limit ourselves based on the other lifecycle events (end, etc)
@@ -190,7 +190,7 @@ export class Fetcher {
    *
    * @param limit upper limit of ancestors to retrieve
    */
-  public async ancestors(limit: number): Promise<ResolverAncestry> {
+  public async ancestors(limit: number): Promise<SafeResolverAncestry> {
     const originNode = await this.getNode(this.id);
     const ancestryHandler = new AncestryQueryHandler(
       limit,
@@ -207,7 +207,7 @@ export class Fetcher {
    * @param limit the number of children to retrieve for a single level
    * @param after a cursor to use as the starting point for retrieving children
    */
-  public async children(limit: number, after?: string): Promise<ResolverChildren> {
+  public async children(limit: number, after?: string): Promise<SafeResolverChildren> {
     const childrenHandler = new ChildrenStartQueryHandler(
       limit,
       this.id,
@@ -228,17 +228,24 @@ export class Fetcher {
   /**
    * Retrieves the related events for the origin node.
    *
-   * @param limit the upper bound number of related events to return
+   * @param limit the upper bound number of related events to return. The limit is applied after the cursor is used to
+   *  skip the previous results.
    * @param after a cursor to use as the starting point for retrieving related events
+   * @param filter a kql query for filtering the results
    */
-  public async events(limit: number, after?: string): Promise<ResolverRelatedEvents> {
-    const eventsHandler = new RelatedEventsQueryHandler(
+  public async events(
+    limit: number,
+    after?: string,
+    filter?: string
+  ): Promise<SafeResolverRelatedEvents> {
+    const eventsHandler = new RelatedEventsQueryHandler({
       limit,
-      this.id,
+      entityID: this.id,
       after,
-      this.eventsIndexPattern,
-      this.endpointID
-    );
+      indexPattern: this.eventsIndexPattern,
+      legacyEndpointID: this.endpointID,
+      filter,
+    });
 
     return eventsHandler.search(this.client);
   }
@@ -246,17 +253,24 @@ export class Fetcher {
   /**
    * Retrieves the alerts for the origin node.
    *
-   * @param limit the upper bound number of alerts to return
+   * @param limit the upper bound number of alerts to return. The limit is applied after the cursor is used to
+   *  skip the previous results.
    * @param after a cursor to use as the starting point for retrieving alerts
+   * @param filter a kql query string for filtering the results
    */
-  public async alerts(limit: number, after?: string): Promise<ResolverRelatedAlerts> {
-    const alertsHandler = new RelatedAlertsQueryHandler(
+  public async alerts(
+    limit: number,
+    after?: string,
+    filter?: string
+  ): Promise<ResolverRelatedAlerts> {
+    const alertsHandler = new RelatedAlertsQueryHandler({
       limit,
-      this.id,
+      entityID: this.id,
       after,
-      this.alertsIndexPattern,
-      this.endpointID
-    );
+      indexPattern: this.alertsIndexPattern,
+      legacyEndpointID: this.endpointID,
+      filter,
+    });
 
     return alertsHandler.search(this.client);
   }
@@ -271,7 +285,7 @@ export class Fetcher {
     return tree;
   }
 
-  private async getNode(entityID: string): Promise<ResolverLifecycleNode | undefined> {
+  private async getNode(entityID: string): Promise<SafeResolverLifecycleNode | undefined> {
     const query = new LifecycleQuery(this.eventsIndexPattern, this.endpointID);
     const results = await query.searchAndFormat(this.client, entityID);
     if (results.length === 0) {

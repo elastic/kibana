@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpSetup } from 'kibana/public';
-import { callApi, FetchOptions } from './callApi';
+import { FetchOptions } from '../../../common/fetch_options';
+import { callApi } from './callApi';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMAPI } from '../../../server/routes/create_apm_api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

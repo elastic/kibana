@@ -43,10 +43,17 @@ export interface DrilldownDefinition<
   readonly isBeta?: boolean;
 
   /**
-   * Minimal licence level
+   * Minimal license level
    * Empty means no restrictions
    */
   minimalLicense?: LicenseType;
+
+  /**
+   * Required when `minimalLicense` is used.
+   * Is a user-facing string. Has to be unique. Doesn't need i18n.
+   * The feature's name will be displayed to Cloud end-users when they're billed based on their feature usage.
+   */
+  licenseFeatureName?: string;
 
   /**
    * Determines the display order of the drilldowns in the flyout picker.

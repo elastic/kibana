@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiAccordion } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
@@ -14,6 +14,8 @@ import {
   LogDocumentCountAlertParams,
   Criterion as CriterionType,
 } from '../../../../../common/alerting/logs/types';
+import { AlertsContext } from './editor';
+import { CriterionPreview } from './criterion_preview_chart';
 
 interface Props {
   fields: IFieldType[];
@@ -21,6 +23,9 @@ interface Props {
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
   errors: IErrorObject;
+  alertParams: Partial<LogDocumentCountAlertParams>;
+  context: AlertsContext;
+  sourceId: string;
 }
 
 export const Criteria: React.FC<Props> = ({
@@ -29,6 +34,9 @@ export const Criteria: React.FC<Props> = ({
   updateCriterion,
   removeCriterion,
   errors,
+  alertParams,
+  context,
+  sourceId,
 }) => {
   if (!criteria) return null;
   return (
@@ -36,16 +44,29 @@ export const Criteria: React.FC<Props> = ({
       <EuiFlexItem grow>
         {criteria.map((criterion, idx) => {
           return (
-            <Criterion
+            <EuiAccordion
+              id={`criterion-${idx}`}
+              buttonContent={
+                <Criterion
+                  idx={idx}
+                  fields={fields}
+                  criterion={criterion}
+                  updateCriterion={updateCriterion}
+                  removeCriterion={removeCriterion}
+                  canDelete={criteria.length > 1}
+                  errors={errors[idx.toString()] as IErrorObject}
+                />
+              }
               key={idx}
-              idx={idx}
-              fields={fields}
-              criterion={criterion}
-              updateCriterion={updateCriterion}
-              removeCriterion={removeCriterion}
-              canDelete={criteria.length > 1}
-              errors={errors[idx.toString()] as IErrorObject}
-            />
+              arrowDisplay="right"
+            >
+              <CriterionPreview
+                alertParams={alertParams}
+                context={context}
+                chartCriterion={criterion}
+                sourceId={sourceId}
+              />
+            </EuiAccordion>
           );
         })}
       </EuiFlexItem>

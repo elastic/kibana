@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import Url from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
@@ -18,6 +19,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
+  const config = getService('config');
+  const kbnTestServer = config.get('servers.kibana');
+  const { protocol, hostname, port } = kbnTestServer;
+
+  const kibanaUrl = Url.format({
+    protocol,
+    hostname,
+    port,
+  });
 
   describe('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
@@ -108,6 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           inputs: [
             {
               id: policyInfo.packagePolicy.id,
+              revision: 2,
               data_stream: { namespace: 'default' },
               name: 'Protect East Coast',
               meta: {
@@ -141,6 +152,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                     encryption_algorithm: 'none',
                     relative_url:
                       '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                  'endpoint-trustlist-linux-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-trustlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                  'endpoint-trustlist-macos-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-trustlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                  'endpoint-trustlist-windows-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-trustlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
                   },
                 },
                 // The manifest version could have changed when the Policy was updated because the
@@ -184,6 +231,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             default: {
               hosts: ['http://localhost:9200'],
               type: 'elasticsearch',
+            },
+          },
+          fleet: {
+            kibana: {
+              hosts: [kibanaUrl],
             },
           },
           revision: 3,

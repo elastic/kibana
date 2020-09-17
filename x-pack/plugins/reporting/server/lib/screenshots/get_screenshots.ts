@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver } from '../../browsers';
-import { ElementsPositionAndAttribute, Screenshot } from '../../types';
 import { LevelLogger, startTrace } from '../';
+import { HeadlessChromiumDriver } from '../../browsers';
+import { ElementsPositionAndAttribute, Screenshot } from './';
 
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,

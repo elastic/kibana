@@ -110,6 +110,7 @@ describe('Session cookie', () => {
 
     it('returns `null` and clears session value if it is in incompatible format', async () => {
       const invalidValue = sessionCookieMock.createValue();
+      // @ts-expect-error
       delete invalidValue.sid;
 
       mockSessionStorage.get.mockResolvedValue(invalidValue);

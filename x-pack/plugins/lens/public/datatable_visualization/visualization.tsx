@@ -7,7 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
-import chartTableSVG from '../assets/chart_datatable.svg';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
 
 export interface LayerState {
   layerId: string;
@@ -31,8 +31,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   visualizationTypes: [
     {
       id: 'lnsDatatable',
-      icon: 'visTable',
-      largeIcon: chartTableSVG,
+      icon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
       }),
@@ -55,7 +54,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
 
   getDescription() {
     return {
-      icon: chartTableSVG,
+      icon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
       }),
@@ -121,7 +120,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
             },
           ],
         },
-        previewIcon: chartTableSVG,
+        previewIcon: LensIconChartDatatable,
         // tables are hidden from suggestion bar, but used for drag & drop and chart switching
         hide: true,
       },
@@ -143,14 +142,28 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       groups: [
         {
           groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.columns', {
-            defaultMessage: 'Columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdown', {
+            defaultMessage: 'Break down by',
           }),
           layerId: state.layers[0].layerId,
-          accessors: sortedColumns,
+          accessors: sortedColumns.filter((c) => datasource.getOperationForColumnId(c)?.isBucketed),
           supportsMoreColumns: true,
-          filterOperations: () => true,
+          filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
+        },
+        {
+          groupId: 'metrics',
+          groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
+            defaultMessage: 'Metrics',
+          }),
+          layerId: state.layers[0].layerId,
+          accessors: sortedColumns.filter(
+            (c) => !datasource.getOperationForColumnId(c)?.isBucketed
+          ),
+          supportsMoreColumns: true,
+          filterOperations: (op) => !op.isBucketed,
+          required: true,
+          dataTestSubj: 'lnsDatatable_metrics',
         },
       ],
     };

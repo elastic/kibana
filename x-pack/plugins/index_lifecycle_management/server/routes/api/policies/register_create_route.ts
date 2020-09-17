@@ -50,6 +50,12 @@ const allocateSchema = schema.maybe(
   })
 );
 
+const forcemergeSchema = schema.maybe(
+  schema.object({
+    max_num_segments: schema.number(),
+  })
+);
+
 const hotPhaseSchema = schema.object({
   min_age: minAgeSchema,
   actions: schema.object({
@@ -62,6 +68,7 @@ const hotPhaseSchema = schema.object({
         max_docs: schema.maybe(schema.number()),
       })
     ),
+    forcemerge: forcemergeSchema,
   }),
 });
 
@@ -78,16 +85,29 @@ const warmPhaseSchema = schema.maybe(
           number_of_shards: schema.number(),
         })
       ),
-      forcemerge: schema.maybe(
+      forcemerge: forcemergeSchema,
+    }),
+  })
+);
+
+const coldPhaseSchema = schema.maybe(
+  schema.object({
+    min_age: minAgeSchema,
+    actions: schema.object({
+      set_priority: setPrioritySchema,
+      unfollow: unfollowSchema,
+      allocate: allocateSchema,
+      freeze: schema.maybe(schema.object({})), // Freeze has no options
+      searchable_snapshot: schema.maybe(
         schema.object({
-          max_num_segments: schema.number(),
+          snapshot_repository: schema.string(),
         })
       ),
     }),
   })
 );
 
-const coldPhaseSchema = schema.maybe(
+const frozenPhaseSchema = schema.maybe(
   schema.object({
     min_age: minAgeSchema,
     actions: schema.object({
@@ -129,6 +149,7 @@ const bodySchema = schema.object({
     hot: hotPhaseSchema,
     warm: warmPhaseSchema,
     cold: coldPhaseSchema,
+    frozen: frozenPhaseSchema,
     delete: deletePhaseSchema,
   }),
 });

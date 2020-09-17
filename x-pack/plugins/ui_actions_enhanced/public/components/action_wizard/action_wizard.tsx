@@ -27,6 +27,7 @@ import {
   txtChangeButton,
   txtTriggerPickerHelpText,
   txtTriggerPickerLabel,
+  txtTriggerPickerHelpTooltip,
 } from './i18n';
 import './action_wizard.scss';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
@@ -99,7 +100,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   if (
     !currentActionFactory &&
     actionFactories.length === 1 &&
-    actionFactories[0].isCompatibleLicence()
+    actionFactories[0].isCompatibleLicense()
   ) {
     onActionFactoryChange(actionFactories[0]);
   }
@@ -163,14 +164,17 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
   const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
   return (
     <EuiFormFieldset
+      data-test-subj={`triggerPicker`}
       legend={{
         children: (
           <EuiText size="s">
             <h5>
               <span>{txtTriggerPickerLabel}</span>{' '}
-              <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
-                {txtTriggerPickerHelpText}
-              </EuiLink>
+              <EuiToolTip content={txtTriggerPickerHelpTooltip}>
+                <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
+                  {txtTriggerPickerHelpText}
+                </EuiLink>
+              </EuiToolTip>
             </h5>
           </EuiText>
         ),
@@ -277,7 +281,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           />
         </>
       )}
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <div>
         <actionFactory.ReactCollectConfig
           config={config}
@@ -320,8 +324,8 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
    * make sure not compatible factories are in the end
    */
   const ensureOrder = (factories: ActionFactory[]) => {
-    const compatibleLicense = factories.filter((f) => f.isCompatibleLicence());
-    const notCompatibleLicense = factories.filter((f) => !f.isCompatibleLicence());
+    const compatibleLicense = factories.filter((f) => f.isCompatibleLicense());
+    const notCompatibleLicense = factories.filter((f) => !f.isCompatibleLicense());
     return [
       ...compatibleLicense.sort((f1, f2) => f2.order - f1.order),
       ...notCompatibleLicense.sort((f1, f2) => f2.order - f1.order),
@@ -334,7 +338,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
         <EuiFlexItem grow={false} key={actionFactory.id}>
           <EuiToolTip
             content={
-              !actionFactory.isCompatibleLicence() && (
+              !actionFactory.isCompatibleLicense() && (
                 <FormattedMessage
                   defaultMessage="Insufficient license level"
                   id="xpack.uiActionsEnhanced.components.actionWizard.insufficientLicenseLevelTooltip"
@@ -347,7 +351,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               label={actionFactory.getDisplayName(context)}
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
-              disabled={!actionFactory.isCompatibleLicence()}
+              disabled={!actionFactory.isCompatibleLicense()}
               betaBadgeLabel={actionFactory.isBeta ? txtBetaActionFactoryLabel : undefined}
               betaBadgeTooltipContent={
                 actionFactory.isBeta ? txtBetaActionFactoryTooltip : undefined
