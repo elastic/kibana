@@ -31,6 +31,7 @@ const createGetTrustedListAppsResponse = (pagination: PaginationInfo, totalItems
 
 const createTrustedAppsServiceMock = (): jest.Mocked<TrustedAppsService> => ({
   getTrustedAppsList: jest.fn(),
+  createTrustedApp: jest.fn(),
 });
 
 const createStoreSetup = (trustedAppsService: TrustedAppsService) => {
@@ -70,6 +71,7 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         listView: createLoadingListViewWithPagination(pagination),
         active: true,
+        createView: undefined,
       });
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
@@ -77,6 +79,7 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         listView: createLoadedListViewWithPagination(pagination, pagination, 500),
         active: true,
+        createView: undefined,
       });
     });
 
@@ -99,6 +102,7 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         listView: createLoadedListViewWithPagination(pagination, pagination, 500),
         active: true,
+        createView: undefined,
       });
     });
 
@@ -118,6 +122,7 @@ describe('middleware', () => {
           createServerApiError('Internal Server Error')
         ),
         active: true,
+        createView: undefined,
       });
 
       const infiniteLoopTest = async () => {
