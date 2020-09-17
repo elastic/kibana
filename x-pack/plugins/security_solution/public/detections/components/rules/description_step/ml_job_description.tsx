@@ -10,6 +10,7 @@ import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { MlSummaryJob } from '../../../../../../ml/public';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ListItems } from './types';
 import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
@@ -69,35 +70,33 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const MlJobDescriptionComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
+const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
+  const { jobs } = useSecurityJobs(false);
   const jobUrl = useKibana().services.application.getUrlForApp(
-    `ml#/jobs?mlManagement=(jobId:${encodeURI(job.id)})`
+    `ml#/jobs?mlManagement=(jobId:${encodeURI(jobId)})`
   );
+  const job = jobs.find(({ id }) => id === jobId);
 
-  return (
+  const jobIdSpan = <span data-test-subj="machineLearningJobId">{jobId}</span>;
+
+  return job != null ? (
     <Wrapper>
       <div>
-        <JobLink data-test-subj="machineLearningJobId" href={jobUrl} target="_blank">
-          {job.id}
+        <JobLink href={jobUrl} target="_blank">
+          {jobIdSpan}
         </JobLink>
         <AuditIcon message={job.auditMessage} />
       </div>
       <JobStatusBadge job={job} />
     </Wrapper>
+  ) : (
+    jobIdSpan
   );
 };
 
 export const MlJobDescription = React.memo(MlJobDescriptionComponent);
 
-export const buildMlJobDescription = (
-  jobId: string,
-  label: string,
-  jobs: MlSummaryJob[]
-): ListItems => {
-  const job = jobs.find(({ id }) => id === jobId);
-
-  return {
-    title: label,
-    description: job ? <MlJobDescription job={job} /> : jobId,
-  };
-};
+export const buildMlJobDescription = (jobId: string, label: string): ListItems => ({
+  title: label,
+  description: <MlJobDescription jobId={jobId} />,
+});

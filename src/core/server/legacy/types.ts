@@ -24,7 +24,6 @@ import { KibanaRequest, LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from '../plugins';
 import { InternalRenderingServiceSetup } from '../rendering';
-import { SavedObjectsLegacyUiExports } from '../types';
 
 /**
  * @internal
@@ -52,36 +51,6 @@ export interface LegacyConfig {
 }
 
 /**
- * Representation of a legacy configuration deprecation factory used for
- * legacy plugin deprecations.
- *
- * @internal
- * @deprecated
- */
-export interface LegacyConfigDeprecationFactory {
-  rename(oldKey: string, newKey: string): LegacyConfigDeprecation;
-  unused(unusedKey: string): LegacyConfigDeprecation;
-}
-
-/**
- * Representation of a legacy configuration deprecation.
- *
- * @internal
- * @deprecated
- */
-export type LegacyConfigDeprecation = (settings: LegacyVars, log: (msg: string) => void) => void;
-
-/**
- * Representation of a legacy configuration deprecation provider.
- *
- * @internal
- * @deprecated
- */
-export type LegacyConfigDeprecationProvider = (
-  factory: LegacyConfigDeprecationFactory
-) => LegacyConfigDeprecation[] | Promise<LegacyConfigDeprecation[]>;
-
-/**
  * @internal
  * @deprecated
  */
@@ -97,7 +66,6 @@ export interface LegacyPluginSpec {
   getId: () => unknown;
   getExpectedKibanaVersion: () => string;
   getConfigPrefix: () => string;
-  getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
   getPack: () => LegacyPluginPack;
 }
 
@@ -159,13 +127,13 @@ export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order' |
  * @internal
  * @deprecated
  */
-export type LegacyUiExports = SavedObjectsLegacyUiExports & {
+export interface LegacyUiExports {
   defaultInjectedVarProviders?: VarsProvider[];
   injectedVarsReplacers?: VarsReplacer[];
   navLinkSpecs?: LegacyNavLinkSpec[] | null;
   uiAppSpecs?: Array<LegacyAppSpec | undefined>;
   unknown?: [{ pluginSpec: LegacyPluginSpec; type: unknown }];
-};
+}
 
 /**
  * @public

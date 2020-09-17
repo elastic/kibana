@@ -26,7 +26,7 @@ Table of Contents
 		- [`GET /api/alerts/_find`: Find alerts](#get-apialertfind-find-alerts)
 		- [`GET /api/alerts/alert/{id}`: Get alert](#get-apialertid-get-alert)
 		- [`GET /api/alerts/alert/{id}/state`: Get alert state](#get-apialertidstate-get-alert-state)
-		- [`GET /api/alerts/alert/{id}/status`: Get alert status](#get-apialertidstate-get-alert-status)
+		- [`GET /api/alerts/alert/{id}/_instance_summary`: Get alert instance summary](#get-apialertidstate-get-alert-instance-summary)
 		- [`GET /api/alerts/list_alert_types`: List alert types](#get-apialerttypes-list-alert-types)
 		- [`PUT /api/alerts/alert/{id}`: Update alert](#put-apialertid-update-alert)
 		- [`POST /api/alerts/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
@@ -306,7 +306,7 @@ In addition, when users are inside your feature you might want to grant them acc
 You can control all of these abilities by assigning privileges to the Alerting Framework from within your own feature, for example:
 
 ```typescript
-features.registerFeature({
+features.registerKibanaFeature({
 	id: 'my-application-id',
 	name: 'My Application',
 	app: [],
@@ -348,7 +348,7 @@ In this example we can see the following:
 It's important to note that any role can be granted a mix of `all` and `read` privileges accross multiple type, for example:
 
 ```typescript
-features.registerFeature({
+features.registerKibanaFeature({
 	id: 'my-application-id',
 	name: 'My Application',
 	app: [],
@@ -505,7 +505,7 @@ Params:
 |---|---|---|
 |id|The id of the alert whose state you're trying to get.|string|
 
-### `GET /api/alerts/alert/{id}/status`: Get alert status
+### `GET /api/alerts/alert/{id}/_instance_summary`: Get alert instance summary
 
 Similar to the `GET state` call, but collects additional information from
 the event log.
@@ -514,7 +514,7 @@ Params:
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the alert whose status you're trying to get.|string|
+|id|The id of the alert whose instance summary you're trying to get.|string|
 
 Query:
 

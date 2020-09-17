@@ -22,16 +22,22 @@ import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
+export interface InternalFieldConfig<T> {
+  initialValue?: T;
+  isIncludedInOutput?: boolean;
+}
+
 export const useField = <T>(
   form: FormHook,
   path: string,
-  config: FieldConfig<any, T> & { initialValue?: T } = {},
+  config: FieldConfig<any, T> & InternalFieldConfig<T> = {},
   valueChangeListener?: (value: T) => void
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
     defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
     initialValue = config.defaultValue ?? '', // The value explicitly passed
+    isIncludedInOutput = true,
     label = '',
     labelAppend = '',
     helpText = '',
@@ -201,7 +207,7 @@ export const useField = <T>(
       validationTypeToValidate,
     }: {
       formData: any;
-      value: unknown;
+      value: T;
       validationTypeToValidate?: string;
     }): ValidationError[] | Promise<ValidationError[]> => {
       if (!validations) {
@@ -234,7 +240,7 @@ export const useField = <T>(
           }
 
           inflightValidation.current = validator({
-            value: (valueToValidate as unknown) as string,
+            value: valueToValidate,
             errors: validationErrors,
             form: { getFormData, getFields },
             formData,
@@ -280,7 +286,7 @@ export const useField = <T>(
           }
 
           const validationResult = validator({
-            value: (valueToValidate as unknown) as string,
+            value: valueToValidate,
             errors: validationErrors,
             form: { getFormData, getFields },
             formData,
@@ -388,9 +394,15 @@ export const useField = <T>(
    */
   const setValue: FieldHook<T>['setValue'] = useCallback(
     (newValue) => {
-      const formattedValue = formatInputValue<T>(newValue);
-      setStateValue(formattedValue);
-      return formattedValue;
+      setStateValue((prev) => {
+        let formattedValue: T;
+        if (typeof newValue === 'function') {
+          formattedValue = formatInputValue<T>((newValue as Function)(prev));
+        } else {
+          formattedValue = formatInputValue<T>(newValue);
+        }
+        return formattedValue;
+      });
     },
     [formatInputValue]
   );
@@ -496,6 +508,7 @@ export const useField = <T>(
       clearErrors,
       validate,
       reset,
+      __isIncludedInOutput: isIncludedInOutput,
       __serializeValue: serializeValue,
     };
   }, [
@@ -511,6 +524,7 @@ export const useField = <T>(
     isValidating,
     isValidated,
     isChangingValue,
+    isIncludedInOutput,
     onChange,
     getErrorsMessages,
     setValue,

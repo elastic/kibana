@@ -109,6 +109,7 @@ export function Waterfall({
         onClickWaterfallItem={(item: IWaterfallItem) =>
           toggleFlyout({ history, item, location })
         }
+        onToggleEntryTransaction={() => setIsAccordionOpen((isOpen) => !isOpen)}
       />
     );
   }
@@ -131,7 +132,7 @@ export function Waterfall({
           <div style={{ display: 'flex' }}>
             <EuiButtonEmpty
               style={{ zIndex: 3, position: 'absolute' }}
-              iconType={isAccordionOpen ? 'arrowDown' : 'arrowRight'}
+              iconType={isAccordionOpen ? 'fold' : 'unfold'}
               onClick={() => {
                 setIsAccordionOpen((isOpen) => !isOpen);
               }}

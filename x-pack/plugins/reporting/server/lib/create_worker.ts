@@ -6,6 +6,7 @@
 
 import { CancellationToken } from '../../common';
 import { PLUGIN_ID } from '../../common/constants';
+import { durationToNumber } from '../../common/schema_utils';
 import { ReportingCore } from '../../server';
 import { LevelLogger } from '../../server/lib';
 import { ExportTypeDefinition, JobSource, RunTaskFn } from '../../server/types';
@@ -57,7 +58,7 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
     const workerOptions = {
       kibanaName,
       kibanaId,
-      interval: queueConfig.pollInterval,
+      interval: durationToNumber(queueConfig.pollInterval),
       intervalErrorMultiplier: queueConfig.pollIntervalErrorMultiplier,
     };
     const worker = queue.registerWorker(PLUGIN_ID, workerFn, workerOptions);

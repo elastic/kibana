@@ -22,7 +22,6 @@ import { GetConfigFn } from 'src/plugins/data/common';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPattern, SortDirection } from '../..';
 import { fetchSoon } from '../legacy';
-import { coreMock } from '../../../../../core/public/mocks';
 
 jest.mock('../legacy', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -68,9 +67,11 @@ describe('SearchSource', () => {
     searchSourceDependencies = {
       getConfig: jest.fn(),
       search: mockSearchMethod,
-      esShardTimeout: 30000,
-      http: coreMock.createStart().http,
-      loadingCount$: new BehaviorSubject(0),
+      onResponse: (req, res) => res,
+      legacy: {
+        callMsearch: jest.fn(),
+        loadingCount$: new BehaviorSubject(0),
+      },
     };
   });
 

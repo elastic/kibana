@@ -48,7 +48,7 @@ describe('msearch route', () => {
   });
 
   it('handler calls /_msearch with the given request', async () => {
-    const response = { id: 'yay' };
+    const response = { id: 'yay', body: { responses: [{ hits: { total: 5 } }] } };
     const mockClient = { transport: { request: jest.fn().mockResolvedValue(response) } };
     const mockContext = {
       core: {
@@ -73,7 +73,7 @@ describe('msearch route', () => {
     expect(mockClient.transport.request.mock.calls[0][0].method).toBe('GET');
     expect(mockClient.transport.request.mock.calls[0][0].path).toBe('/_msearch');
     expect(mockClient.transport.request.mock.calls[0][0].body).toEqual(
-      convertRequestBody(mockBody as any, { timeout: '0ms' })
+      convertRequestBody(mockBody as any, {})
     );
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({

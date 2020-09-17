@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { OverlayStart } from 'kibana/public';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { ChartActionContext, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
@@ -29,8 +28,8 @@ import { txtUrlDrilldownDisplayName } from './i18n';
 interface UrlDrilldownDeps {
   getGlobalScope: () => UrlDrilldownGlobalScope;
   navigateToUrl: (url: string) => Promise<void>;
-  getOpenModal: () => Promise<OverlayStart['openModal']>;
   getSyntaxHelpDocsLink: () => string;
+  getVariablesHelpDocsLink: () => string;
 }
 
 export type ActionContext = ChartActionContext;
@@ -74,6 +73,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
         onConfig={onConfig}
         scope={scope}
         syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
+        variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
       />
     );
   };
@@ -110,13 +110,10 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   public readonly getHref = async (config: Config, context: ActionContext) =>
-    urlDrilldownCompileUrl(config.url.template, await this.buildRuntimeScope(context));
+    urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    const url = await urlDrilldownCompileUrl(
-      config.url.template,
-      await this.buildRuntimeScope(context, { allowPrompts: true })
-    );
+    const url = urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');
     } else {
@@ -132,14 +129,11 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     });
   };
 
-  private buildRuntimeScope = async (
-    context: ActionContext,
-    opts: { allowPrompts: boolean } = { allowPrompts: false }
-  ) => {
+  private buildRuntimeScope = (context: ActionContext) => {
     return urlDrilldownBuildScope({
       globalScope: this.deps.getGlobalScope(),
       contextScope: getContextScope(context),
-      eventScope: await getEventScope(context, this.deps, opts),
+      eventScope: getEventScope(context),
     });
   };
 }

@@ -42,28 +42,9 @@ export default () =>
       basePathProxyTarget: Joi.number().default(5603),
     }).default(),
 
-    pid: Joi.object({
-      file: Joi.string(),
-      exclusive: Joi.boolean().default(false),
-    }).default(),
+    pid: HANDLED_IN_NEW_PLATFORM,
 
     csp: HANDLED_IN_NEW_PLATFORM,
-
-    cpu: Joi.object({
-      cgroup: Joi.object({
-        path: Joi.object({
-          override: Joi.string().default(),
-        }),
-      }),
-    }),
-
-    cpuacct: Joi.object({
-      cgroup: Joi.object({
-        path: Joi.object({
-          override: Joi.string().default(),
-        }),
-      }),
-    }),
 
     server: Joi.object({
       name: Joi.string().default(os.hostname()),
@@ -144,6 +125,10 @@ export default () =>
 
     ops: Joi.object({
       interval: Joi.number().default(5000),
+      cGroupOverrides: Joi.object().keys({
+        cpuPath: Joi.string().default(),
+        cpuAcctPath: Joi.string().default(),
+      }),
     }).default(),
 
     plugins: Joi.object({

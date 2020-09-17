@@ -21,7 +21,6 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { jiraActionType, resilientActionType } from './common/lib/connectors';
 import {
   PluginSetup,
   PluginStart,
@@ -32,7 +31,7 @@ import {
 } from './types';
 import {
   APP_ID,
-  APP_ICON,
+  APP_ICON_SOLUTION,
   APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
   APP_OVERVIEW_PATH,
@@ -96,9 +95,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
-    plugins.triggers_actions_ui.actionTypeRegistry.register(resilientActionType());
-
     const mountSecurityFactory = async () => {
       const storage = new Storage(localStorage);
       const [coreStart, startPlugins] = await core.getStartServices();
@@ -132,7 +128,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: `${APP_ID}:${SecurityPageName.overview}`,
       title: OVERVIEW,
       order: 9000,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_OVERVIEW_PATH,
       mount: async (params: AppMountParameters) => {
@@ -160,7 +156,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: `${APP_ID}:${SecurityPageName.detections}`,
       title: DETECTION_ENGINE,
       order: 9001,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
@@ -187,7 +183,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: `${APP_ID}:${SecurityPageName.hosts}`,
       title: HOSTS,
       order: 9002,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
@@ -214,7 +210,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: `${APP_ID}:${SecurityPageName.network}`,
       title: NETWORK,
       order: 9002,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
@@ -241,7 +237,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: `${APP_ID}:${SecurityPageName.timelines}`,
       title: TIMELINES,
       order: 9002,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_TIMELINES_PATH,
       mount: async (params: AppMountParameters) => {
@@ -268,7 +264,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: `${APP_ID}:${SecurityPageName.case}`,
       title: CASE,
       order: 9002,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_CASES_PATH,
       mount: async (params: AppMountParameters) => {
@@ -295,7 +291,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: `${APP_ID}:${SecurityPageName.administration}`,
       title: ADMINISTRATION,
       order: 9002,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {

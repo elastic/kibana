@@ -17,10 +17,10 @@ import {
 import { HttpService } from '../../../../../src/core/public/http';
 import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
 
+import { PolicyFromES } from '../../common/types';
 import { PolicyTable } from '../../public/application/sections/policy_table/policy_table';
 import { init as initHttp } from '../../public/application/services/http';
 import { init as initUiMetric } from '../../public/application/services/ui_metric';
-import { PolicyFromES } from '../../public/application/services/policies/types';
 
 initHttp(
   new HttpService().setup({

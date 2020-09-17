@@ -39,6 +39,7 @@
  * @packageDocumentation
  */
 
+import { Type } from '@kbn/config-schema';
 import {
   ElasticsearchServiceSetup,
   ILegacyScopedClusterClient,
@@ -46,7 +47,6 @@ import {
   ElasticsearchServiceStart,
   IScopedClusterClient,
 } from './elasticsearch';
-
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
@@ -60,15 +60,10 @@ import {
   SavedObjectsServiceStart,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { MetricsServiceStart } from './metrics';
+import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
-import {
-  LoggingServiceSetup,
-  appendersSchema,
-  loggerContextConfigSchema,
-  loggerSchema,
-} from './logging';
+import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 
 export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
 export { bootstrap } from './bootstrap';
@@ -271,9 +266,7 @@ export {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsSchema,
   SavedObjectsSerializer,
-  SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
@@ -300,6 +293,7 @@ export {
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  SavedObjectsUtils,
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
@@ -326,18 +320,10 @@ export {
   OpsServerMetrics,
   OpsProcessMetrics,
   MetricsServiceSetup,
+  MetricsServiceStart,
 } from './metrics';
 
-export {
-  DEFAULT_APP_CATEGORIES,
-  getFlattenedObject,
-  URLMeaningfulParts,
-  modifyUrl,
-  isRelativeUrl,
-  Freezable,
-  deepFreeze,
-  assertNever,
-} from '../utils';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {
   SavedObject,
@@ -429,6 +415,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link LoggingServiceSetup} */
   logging: LoggingServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */
@@ -497,8 +485,6 @@ export const config = {
     schema: elasticsearchConfigSchema,
   },
   logging: {
-    appenders: appendersSchema,
-    loggers: loggerSchema,
-    loggerContext: loggerContextConfigSchema,
+    appenders: appendersSchema as Type<AppenderConfigType>,
   },
 };
