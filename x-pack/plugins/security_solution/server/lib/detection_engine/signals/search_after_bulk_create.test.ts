@@ -813,8 +813,8 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(null);
   });
 
-  test('if returns error array when singleSearchAfter returns errors', async () => {
-    const sampleParams = sampleRuleAlertParams(10);
+  test('it returns error array when singleSearchAfter returns errors', async () => {
+    const sampleParams = sampleRuleAlertParams(30);
     const bulkItem: BulkResponse = {
       took: 100,
       errors: true,
@@ -836,39 +836,66 @@ describe('searchAfterAndBulkCreate', () => {
       ],
     };
     mockService.callCluster
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)))
-      .mockResolvedValueOnce(bulkItem);
-    listClient.getListItemByValues = jest.fn(({ value }) =>
-      Promise.resolve(
-        value.slice(0, 2).map((item) => ({
-          ...getListItemResponseMock(),
-          value: item,
-        }))
-      )
-    );
-    const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.entries = [
-      {
-        field: 'source.ip',
-        operator: 'included',
-        type: 'list',
-        list: {
-          id: 'ci-badguys.txt',
-          type: 'ip',
-        },
-      },
-    ];
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce(bulkItem)
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+
     const {
       success,
       createdSignalsCount,
       lastLookBackDate,
       errors,
     } = await searchAfterAndBulkCreate({
-      listClient,
-      exceptionsList: [],
+      ruleParams: sampleParams,
       gap: null,
       previousStartedAt: new Date(),
-      ruleParams: sampleParams,
+      listClient,
+      exceptionsList: [],
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
@@ -891,7 +918,8 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
-    expect(createdSignalsCount).toEqual(1); // can still create signals in addition to reporting errors
-    expect(lastLookBackDate?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
+    expect(mockService.callCluster).toHaveBeenCalledTimes(9);
+    expect(createdSignalsCount).toEqual(4);
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 });
