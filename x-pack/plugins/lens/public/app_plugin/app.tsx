@@ -430,7 +430,8 @@ export function App({
   const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
   const topNavConfig = getLensTopNavConfig({
     isLinkedToOriginatingApp: Boolean(
-      state.isLinkedToOriginatingApp && dashboardFeatureFlag.allowByValueEmbeddables
+      state.isLinkedToOriginatingApp &&
+        (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
     savingPermitted,
     actions: {
