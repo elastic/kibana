@@ -5,27 +5,13 @@
  */
 import expect from '@kbn/expect';
 import { first } from 'lodash';
+import { GenericMetricsChart } from '../../../../../plugins/apm/server/lib/metrics/transform_metrics_chart';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { expectSnapshot } from '../../../common/match_snapshot';
 
-interface Chart {
-  title: string;
-  key: string;
-  yUnit: string;
-  noHits: boolean;
-  series: Array<{
-    title: string;
-    key: string;
-    type: string;
-    color: string;
-    overallValue: number;
-    data: Array<{ x: number; y: number | null }>;
-  }>;
-}
-
 interface ChartResponse {
   body: {
-    charts: Chart[];
+    charts: GenericMetricsChart[];
   };
   status: number;
 }
@@ -62,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('CPU usage', () => {
-          let cpuUsageChart: Chart | undefined;
+          let cpuUsageChart: GenericMetricsChart | undefined;
           before(() => {
             cpuUsageChart = chartsResponse.body.charts.find(({ key }) => key === 'cpu_usage_chart');
           });
@@ -93,7 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe("System memory usage (using 'system.memory' fields to calculate the memory usage)", () => {
-          let systemMemoryUsageChart: Chart | undefined;
+          let systemMemoryUsageChart: GenericMetricsChart | undefined;
           before(() => {
             systemMemoryUsageChart = chartsResponse.body.charts.find(
               ({ key }) => key === 'memory_usage_chart'
@@ -154,7 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('CPU usage', () => {
-          let cpuUsageChart: Chart | undefined;
+          let cpuUsageChart: GenericMetricsChart | undefined;
           before(() => {
             cpuUsageChart = chartsResponse.body.charts.find(({ key }) => key === 'cpu_usage_chart');
           });
@@ -197,7 +183,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe("System memory usage (using 'system.process.cgroup' fields to calculate the memory usage)", () => {
-          let systemMemoryUsageChart: Chart | undefined;
+          let systemMemoryUsageChart: GenericMetricsChart | undefined;
           before(() => {
             systemMemoryUsageChart = chartsResponse.body.charts.find(
               ({ key }) => key === 'memory_usage_chart'
@@ -236,7 +222,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('Heap Memory', () => {
-          let cpuUsageChart: Chart | undefined;
+          let cpuUsageChart: GenericMetricsChart | undefined;
           before(() => {
             cpuUsageChart = chartsResponse.body.charts.find(
               ({ key }) => key === 'heap_memory_area_chart'
@@ -278,7 +264,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('Non-Heap Memory', () => {
-          let cpuUsageChart: Chart | undefined;
+          let cpuUsageChart: GenericMetricsChart | undefined;
           before(() => {
             cpuUsageChart = chartsResponse.body.charts.find(
               ({ key }) => key === 'non_heap_memory_area_chart'
@@ -317,7 +303,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('Thread Count', () => {
-          let cpuUsageChart: Chart | undefined;
+          let cpuUsageChart: GenericMetricsChart | undefined;
           before(() => {
             cpuUsageChart = chartsResponse.body.charts.find(
               ({ key }) => key === 'thread_count_line_chart'
@@ -356,7 +342,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('Garbage collection per minute', () => {
-          let cpuUsageChart: Chart | undefined;
+          let cpuUsageChart: GenericMetricsChart | undefined;
           before(() => {
             cpuUsageChart = chartsResponse.body.charts.find(
               ({ key }) => key === 'gc_rate_line_chart'
@@ -385,7 +371,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         describe('Garbage collection time spent per minute', () => {
-          let cpuUsageChart: Chart | undefined;
+          let cpuUsageChart: GenericMetricsChart | undefined;
           before(() => {
             cpuUsageChart = chartsResponse.body.charts.find(
               ({ key }) => key === 'gc_time_line_chart'
