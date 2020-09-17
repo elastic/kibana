@@ -17,11 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens reporting', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('lens/reporting');
-      await security.testUser.setRoles([
-        'test_logstash_reader',
-        'global_dashboard_read',
-        'reporting_user',
-      ]);
+      await security.testUser.setRoles(
+        ['test_logstash_reader', 'global_dashboard_read', 'reporting_user'],
+        false
+      );
     });
 
     after(async () => {
@@ -40,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.reporting.openPdfReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
       const url = await PageObjects.reporting.getReportURL(60000);
-
       expect(url).to.be.ok();
     });
   });
