@@ -5,7 +5,6 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import {
@@ -65,7 +64,7 @@ const basicDataProvider: DataProvider = {
 };
 const basicTimeline: TimelineModel = {
   columns: [],
-  dataProviders: [basicDataProvider],
+  dataProviders: [{ ...basicDataProvider }],
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',
     end: '2020-07-08T08:20:18.966Z',
@@ -108,7 +107,7 @@ const basicTimeline: TimelineModel = {
   width: DEFAULT_TIMELINE_WIDTH,
 };
 const timelineByIdMock: TimelineById = {
-  foo: basicTimeline,
+  foo: { ...basicTimeline },
 };
 
 const timelineByIdTemplateMock: TimelineById = {
@@ -415,7 +414,7 @@ describe('Timeline', () => {
         provider: providerToAdd,
         timelineById: timelineByIdMock,
       });
-      const addedDataProvider = basicTimeline.dataProviders.concat(providerToAdd);
+      const addedDataProvider = [...basicTimeline.dataProviders].concat(providerToAdd);
       expect(update.foo.dataProviders).toEqual(addedDataProvider);
     });
 
@@ -437,12 +436,13 @@ describe('Timeline', () => {
           name: 'and data provider 1',
         },
       ];
+      const provider = { ...basicDataProvider };
       const update = addTimelineProvider({
         id: 'foo',
-        provider: basicDataProvider,
+        provider,
         timelineById: myMockTimelineByIdMock,
       });
-      expect(update.foo.dataProviders[1]).toEqual(basicDataProvider);
+      expect(update.foo.dataProviders[1]).toEqual(provider);
     });
 
     test('should UPSERT an existing timeline provider if it already exists', () => {
@@ -978,19 +978,16 @@ describe('Timeline', () => {
     });
 
     test('should update only one data provider and not two data providers', () => {
-      const multiDataProvider = basicTimeline.dataProviders.concat({
+      const multiDataProvider = [...basicTimeline.dataProviders].concat({
         ...basicDataProvider,
         id: '456',
       });
       const multiDataProviderMock = {
-        ...timelineByIdMock,
         foo: {
           ...timelineByIdMock.foo,
           dataProviders: multiDataProvider,
         },
       };
-      // update = {};
-      // console.log('UPDATE HERE', update.foo.dataProviders);
       const update = updateTimelineProviderEnabled({
         id: 'foo',
         providerId: '123',
@@ -1230,18 +1227,15 @@ describe('Timeline', () => {
 
       expect(update).toEqual(expected);
     });
-
     test('should update only one data provider and not two data providers AHH', () => {
-      const multiDataProvider = timelineByIdTemplateMock.foo.dataProviders.concat({
-        ...basicDataProvider,
-        id: '456',
-        queryMatch: {
-          field: '',
-          value: '',
-          operator: IS_OPERATOR,
+      const multiDataProvider = [
+        ...timelineByIdTemplateMock.foo.dataProviders,
+        {
+          ...basicDataProvider,
+          id: '456',
+          type: DataProviderType.template,
         },
-        type: DataProviderType.template,
-      });
+      ];
 
       const multiDataProviderMock = {
         ...timelineByIdTemplateMock,
@@ -1256,25 +1250,24 @@ describe('Timeline', () => {
         type: DataProviderType.template, // value we are updating from default to template
         timelineById: multiDataProviderMock,
       });
-      const expected: TimelineById = {
-        foo: {
-          ...basicTimeline,
-          dataProviders: [
-            {
-              ...basicDataProvider,
-              name: '',
-              type: DataProviderType.template,
-            },
-            {
-              ...basicDataProvider,
-              id: '456',
-              type: DataProviderType.template,
-            },
-          ],
-          timelineType: TimelineType.template,
+      const expected = [
+        {
+          ...basicDataProvider,
+          name: '',
+          type: DataProviderType.template,
+          queryMatch: {
+            field: '',
+            value: '{}',
+            operator: IS_OPERATOR,
+          },
         },
-      };
-      expect(update).toEqual(expected);
+        {
+          ...basicDataProvider,
+          id: '456',
+          type: DataProviderType.template,
+        },
+      ];
+      expect(update.foo.dataProviders).toEqual(expected);
     });
   });
 
