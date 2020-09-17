@@ -76,7 +76,10 @@ export const useLogEntryCategoriesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        return await callGetLogEntryCategoryDatasetsAPI(sourceId, startTime, endTime);
+        return await callGetLogEntryCategoryDatasetsAPI(
+          { sourceId, startTime, endTime },
+          services.http.fetch
+        );
       },
       onResolve: ({ data: { datasets } }) => {
         setLogEntryCategoryDatasets(datasets);
