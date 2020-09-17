@@ -29,21 +29,23 @@ import { useInferenceApiService } from '../../../../../services/ml_api_service/i
 import { ModelsTableToConfigMapping } from './index';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
-import { useMlKibana, useNotifications } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
-import { getResultsUrl } from '../analytics_list/common';
 import {
   ModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
 } from '../../../../../../../common/types/inference';
 import {
+  getAnalysisType,
   REFRESH_ANALYTICS_LIST_STATE,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
 } from '../../../../common';
 import { useTableSettings } from '../analytics_list/use_table_settings';
 import { filterAnalyticsModels, AnalyticsSearchBar } from '../analytics_search_bar';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -61,6 +63,7 @@ export const ModelsList: FC = () => {
       application: { navigateToUrl, capabilities },
     },
   } = useMlKibana();
+  const urlGenerator = useMlUrlGenerator();
 
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
@@ -278,12 +281,19 @@ export const ModelsList: FC = () => {
       type: 'icon',
       available: (item) => item.metadata?.analytics_config?.id,
       onClick: async (item) => {
-        await navigateToUrl(
-          getResultsUrl(
-            item.metadata?.analytics_config.id,
-            Object.keys(item.metadata?.analytics_config.analysis)[0]
-          )
-        );
+        if (item.metadata?.analytics_config === undefined) return;
+
+        const url = await urlGenerator.createUrl({
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+          pageState: {
+            jobId: item.metadata?.analytics_config.id as string,
+            analysisType: getAnalysisType(
+              item.metadata?.analytics_config.analysis
+            ) as DataFrameAnalysisConfigType,
+          },
+        });
+
+        await navigateToUrl(url);
       },
       isPrimary: true,
     },

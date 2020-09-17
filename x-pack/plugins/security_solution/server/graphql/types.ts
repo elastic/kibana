@@ -140,6 +140,8 @@ export interface TimelineInput {
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
 
+  indexNames?: Maybe<(Maybe<string>)[]>;
+
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
@@ -2019,6 +2021,8 @@ export interface TimelineResult {
   kqlMode?: Maybe<string>;
 
   kqlQuery?: Maybe<SerializedFilterQueryResult>;
+
+  indexNames?: Maybe<(Maybe<string>)[]>;
 
   notes?: Maybe<NoteResult[]>;
 
@@ -8257,6 +8261,8 @@ export namespace TimelineResultResolvers {
 
     kqlQuery?: KqlQueryResolver<Maybe<SerializedFilterQueryResult>, TypeParent, TContext>;
 
+    indexNames?: IndexNamesResolver<Maybe<(Maybe<string>)[]>, TypeParent, TContext>;
+
     notes?: NotesResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
     noteIds?: NoteIdsResolver<Maybe<string[]>, TypeParent, TContext>;
@@ -8354,6 +8360,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type KqlQueryResolver<
     R = Maybe<SerializedFilterQueryResult>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type IndexNamesResolver<
+    R = Maybe<(Maybe<string>)[]>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

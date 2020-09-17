@@ -26,8 +26,10 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
       const indexPatternsFetcher = new IndexPatternsFetcher(
         elasticsearch.legacy.client.callAsCurrentUser
       );
+      const dedupeIndices = dedupeIndexName(request.indices);
+
       const responsesIndexFields = await Promise.all(
-        request.indices
+        dedupeIndices
           .map((index) =>
             indexPatternsFetcher.getFieldsForWildcard({
               pattern: index,
@@ -40,13 +42,13 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
       if (!request.onlyCheckIfIndicesExist) {
         indexFields = await formatIndexFields(
           responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-          request.indices
+          dedupeIndices
         );
       }
 
       return Promise.resolve({
         indexFields,
-        indicesExists: request.indices.filter((index, i) => responsesIndexFields[i] !== false),
+        indicesExists: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
         rawResponse: {
           timed_out: false,
           took: -1,
@@ -74,6 +76,14 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
     },
   };
 };
+
+export const dedupeIndexName = (indices: string[]) =>
+  indices.reduce<string[]>((acc, index) => {
+    if (!acc.includes(index)) {
+      return [...acc, index];
+    }
+    return acc;
+  }, []);
 
 const missingFields: FieldDescriptor[] = [
   {

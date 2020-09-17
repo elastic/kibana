@@ -273,7 +273,7 @@ export const setExcludedRowRendererIds = actionCreator<{
   excludedRowRendererIds: RowRendererId[];
 }>('SET_TIMELINE_EXCLUDED_ROW_RENDERER_IDS');
 
-export const updateIndexesName = actionCreator<{
+export const updateIndexNames = actionCreator<{
   id: string;
   indexNames: string[];
 }>('UPDATE_INDEXES_NAME');
