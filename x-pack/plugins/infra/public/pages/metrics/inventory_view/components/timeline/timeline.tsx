@@ -213,7 +213,7 @@ const noHistoryDataTitle = i18n.translate('xpack.infra.inventoryTimeline.noHisto
 });
 
 const errorTitle = i18n.translate('xpack.infra.inventoryTimeline.errorTitle', {
-  defaultMessage: 'An error occurred when trying to display history data.',
+  defaultMessage: 'Unable to display history data.',
 });
 
 const checkNewDataButtonLabel = i18n.translate(
