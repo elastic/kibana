@@ -60,7 +60,9 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
   const { globalHeaderPortalNode } = useGlobalHeaderPortal();
   const { globalFullScreen } = useFullScreen();
   const search = useGetUrlSearch(navTabs.overview);
-  const { navigateToApp } = useKibana().services.application;
+  const { application, http } = useKibana().services;
+  const { navigateToApp } = application;
+  const basePath = http.basePath.get();
   const goToOverview = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -111,7 +113,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
               <FlexItem grow={false}>
                 <EuiButtonEmpty
                   data-test-subj="add-data"
-                  href={ADD_DATA_PATH}
+                  href={`${basePath}${ADD_DATA_PATH}`}
                   iconType="plusInCircle"
                 >
                   {i18n.BUTTON_ADD_DATA}

@@ -14,12 +14,12 @@ export const ALL_DEFAULT = i18n.translate('xpack.securitySolution.indexPatterns.
   defaultMessage: 'All default',
 });
 
-export const CHANGE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.help', {
-  defaultMessage: 'Change index patterns',
+export const SELECT_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.help', {
+  defaultMessage: 'Select index patterns',
 });
 
-export const ADD_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.add', {
-  defaultMessage: 'Configure Kibana index patterns',
+export const SAVE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.save', {
+  defaultMessage: 'Save',
 });
 
 export const CONFIGURE_INDEX_PATTERNS = i18n.translate(
