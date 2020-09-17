@@ -274,9 +274,15 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.xyChart.leftAxisDisabledHelpText', {
-              defaultMessage: 'This setting only applies when left axis is enabled.',
-            })}
+            tooltipContent={
+              shouldRotate
+                ? i18n.translate('xpack.lens.xyChart.bottomAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when bottom axis is enabled.',
+                  })
+                : i18n.translate('xpack.lens.xyChart.leftAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when left axis is enabled.',
+                  })
+            }
             condition={
               Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
             }
@@ -310,9 +316,15 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
           />
           <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
-              defaultMessage: 'This setting only applies when right axis is enabled.',
-            })}
+            tooltipContent={
+              shouldRotate
+                ? i18n.translate('xpack.lens.xyChart.topAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when top axis is enabled.',
+                  })
+                : i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when right axis is enabled.',
+                  })
+            }
             condition={
               Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length === 0
             }
@@ -345,6 +357,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
   const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
+  const isHorizontal = isHorizontalChart(state.layers);
   const axisMode =
     (layer.yConfig &&
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
@@ -377,15 +390,23 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
             },
             {
               id: `${idPrefix}left`,
-              label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
-                defaultMessage: 'Left',
-              }),
+              label: isHorizontal
+                ? i18n.translate('xpack.lens.xyChart.axisSide.bottom', {
+                    defaultMessage: 'Bottom',
+                  })
+                : i18n.translate('xpack.lens.xyChart.axisSide.left', {
+                    defaultMessage: 'Left',
+                  }),
             },
             {
               id: `${idPrefix}right`,
-              label: i18n.translate('xpack.lens.xyChart.axisSide.right', {
-                defaultMessage: 'Right',
-              }),
+              label: isHorizontal
+                ? i18n.translate('xpack.lens.xyChart.axisSide.top', {
+                    defaultMessage: 'Top',
+                  })
+                : i18n.translate('xpack.lens.xyChart.axisSide.right', {
+                    defaultMessage: 'Right',
+                  }),
             },
           ]}
           idSelected={`${idPrefix}${axisMode}`}
