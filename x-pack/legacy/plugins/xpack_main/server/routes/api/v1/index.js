@@ -5,4 +5,3 @@
  */
 
 export { xpackInfoRoute } from './xpack_info';
-export { settingsRoute } from './settings';

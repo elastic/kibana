@@ -90,6 +90,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     size="xl"
   />
   <EuiSwitch
+    checked={false}
     data-test-subj="mlCalendarApplyToAllJobsSwitch"
     disabled={false}
     label={
@@ -101,6 +102,68 @@ exports[`CalendarForm Renders calendar form 1`] = `
     }
     name="switch"
   />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Jobs"
+        id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiComboBox
+      async={false}
+      compressed={false}
+      data-test-subj="mlCalendarJobSelection"
+      fullWidth={false}
+      isClearable={true}
+      isDisabled={false}
+      onChange={[MockFunction]}
+      options={Array []}
+      selectedOptions={Array []}
+      singleSelection={false}
+      sortMatchesBy="none"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Groups"
+        id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiComboBox
+      async={false}
+      compressed={false}
+      data-test-subj="mlCalendarJobGroupSelection"
+      fullWidth={false}
+      isClearable={true}
+      isDisabled={false}
+      onChange={[MockFunction]}
+      onCreateOption={[MockFunction]}
+      options={Array []}
+      selectedOptions={Array []}
+      singleSelection={false}
+      sortMatchesBy="none"
+    />
+  </EuiFormRow>
   <EuiSpacer
     size="xl"
   />
@@ -139,7 +202,6 @@ exports[`CalendarForm Renders calendar form 1`] = `
       grow={false}
     >
       <EuiButton
-        href="#/settings/calendars_list"
         isDisabled={false}
       >
         <FormattedMessage
