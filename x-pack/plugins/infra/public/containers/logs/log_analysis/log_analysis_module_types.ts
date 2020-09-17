@@ -42,7 +42,8 @@ export interface ModuleDescriptor<JobType extends string> {
     indices: string[],
     timestampField: string,
     startTime: number,
-    endTime: number
+    endTime: number,
+    fetch: HttpSetup['fetch']
   ) => Promise<ValidateLogEntryDatasetsResponsePayload>;
 }
 

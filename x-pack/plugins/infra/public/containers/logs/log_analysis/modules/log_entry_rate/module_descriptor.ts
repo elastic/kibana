@@ -137,9 +137,10 @@ const validateSetupDatasets = async (
   indices: string[],
   timestampField: string,
   startTime: number,
-  endTime: number
+  endTime: number,
+  fetch: HttpSetup['fetch']
 ) => {
-  return await callValidateDatasetsAPI(indices, timestampField, startTime, endTime);
+  return await callValidateDatasetsAPI({ indices, timestampField, startTime, endTime }, fetch);
 };
 
 export const logEntryRateModule: ModuleDescriptor<LogEntryRateJobType> = {

@@ -186,7 +186,8 @@ export const useAnalysisSetupState = <JobType extends string>({
           validIndexNames,
           sourceConfiguration.timestampField,
           startTime ?? 0,
-          endTime ?? Date.now()
+          endTime ?? Date.now(),
+          services.http.fetch
         );
       },
       onResolve: ({ data: { datasets } }) => {
