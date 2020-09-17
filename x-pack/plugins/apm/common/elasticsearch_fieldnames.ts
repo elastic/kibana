@@ -37,6 +37,7 @@ export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
+export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
@@ -44,6 +45,8 @@ export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
+// for transaction metrics
+export const TRANSACTION_ROOT = 'transaction.root';
 
 export const EVENT_OUTCOME = 'event.outcome';
 

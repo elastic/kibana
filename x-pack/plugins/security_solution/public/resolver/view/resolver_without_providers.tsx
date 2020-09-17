@@ -18,10 +18,11 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
+import { StyledMapContainer, GraphContainer } from './styles';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps, ResolverState } from '../types';
+import { PanelRouter } from './panels';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -126,7 +127,7 @@ export const ResolverWithoutProviders = React.memo(
             })}
           </GraphContainer>
         )}
-        <StyledPanel />
+        <PanelRouter />
         <GraphControls />
         <SymbolDefinitions />
       </StyledMapContainer>

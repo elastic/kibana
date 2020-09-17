@@ -140,6 +140,8 @@ exports[`Error TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
+exports[`Error TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
+
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
@@ -147,6 +149,8 @@ exports[`Error TRANSACTION_NAME 1`] = `undefined`;
 exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
+
+exports[`Error TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
 
@@ -308,6 +312,8 @@ exports[`Span TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
+exports[`Span TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
+
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
@@ -315,6 +321,8 @@ exports[`Span TRANSACTION_NAME 1`] = `undefined`;
 exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Span TRANSACTION_RESULT 1`] = `undefined`;
+
+exports[`Span TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_SAMPLED 1`] = `undefined`;
 
@@ -476,6 +484,8 @@ exports[`Transaction TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
+exports[`Transaction TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
+
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
@@ -483,6 +493,8 @@ exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
 exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_RESULT 1`] = `"transaction result"`;
+
+exports[`Transaction TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_SAMPLED 1`] = `true`;
 

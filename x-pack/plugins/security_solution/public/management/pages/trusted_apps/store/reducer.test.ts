@@ -26,6 +26,7 @@ describe('reducer', () => {
           currentPaginationInfo: { index: 5, size: 50 },
         },
         active: true,
+        createView: undefined,
       });
     });
 
@@ -67,7 +68,7 @@ describe('reducer', () => {
 
     it('makes page state inactive and resets list to uninitialised state when navigating away', () => {
       const result = trustedAppsPageReducer(
-        { listView: createLoadedListViewWithPagination(), active: true },
+        { listView: createLoadedListViewWithPagination(), active: true, createView: undefined },
         createUserChangedUrlAction('/endpoints')
       );
 
