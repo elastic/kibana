@@ -48,7 +48,7 @@ export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
       edges,
       inspect,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

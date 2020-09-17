@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { createChild } from './node';
 import { ChildrenPaginationBuilder } from './children_pagination';
+import { ChildEvent } from '../queries/children';
 
 /**
  * This class helps construct the children structure when building a resolver tree.
@@ -86,15 +87,12 @@ export class ChildrenNodesHelper {
    * @param queriedNodes the entity_ids of the nodes that returned these start events
    * @param startEvents an array of start events returned by ES
    */
-  addStartEvents(
-    queriedNodes: Set<string>,
-    startEvents: SafeResolverEvent[]
-  ): Set<string> | undefined {
+  addStartEvents(queriedNodes: Set<string>, startEvents: ChildEvent[]): Set<string> | undefined {
     let largestAncestryArray = 0;
     const nodesToQueryNext: Map<number, Set<string>> = new Map();
     const nonLeafNodes: Set<SafeResolverChildNode> = new Set();
 
-    const isDistantGrandchild = (event: SafeResolverEvent) => {
+    const isDistantGrandchild = (event: ChildEvent) => {
       const ancestry = getAncestryAsArray(event);
       return ancestry.length > 0 && queriedNodes.has(ancestry[ancestry.length - 1]);
     };
@@ -161,7 +159,7 @@ export class ChildrenNodesHelper {
     return nodesToQueryNext.get(largestAncestryArray);
   }
 
-  private setPaginationForNodes(nodes: Set<string>, startEvents: SafeResolverEvent[]) {
+  private setPaginationForNodes(nodes: Set<string>, startEvents: ChildEvent[]) {
     for (const nodeEntityID of nodes.values()) {
       const cachedNode = this.entityToNodeCache.get(nodeEntityID);
       if (cachedNode) {
