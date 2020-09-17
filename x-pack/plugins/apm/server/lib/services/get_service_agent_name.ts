@@ -10,11 +10,17 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
-export async function getServiceAgentName(
-  serviceName: string,
-  setup: Setup & SetupTimeRange
-) {
+export async function getServiceAgentName({
+  serviceName,
+  setup,
+  searchAggregatedTransactions,
+}: {
+  serviceName: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+}) {
   const { start, end, apmEventClient } = setup;
 
   const params = {
@@ -22,7 +28,9 @@ export async function getServiceAgentName(
     apm: {
       events: [
         ProcessorEvent.error,
-        ProcessorEvent.transaction,
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ProcessorEvent.metric,
       ],
     },
