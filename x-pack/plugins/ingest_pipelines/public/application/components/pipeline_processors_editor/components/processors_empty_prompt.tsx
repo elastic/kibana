@@ -30,31 +30,30 @@ export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) 
   return (
     <EuiEmptyPrompt
       title={<h2>{i18nTexts.emptyPromptTitle}</h2>}
+      data-test-subj="processorsEmptyPrompt"
       body={
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.ingestPipelines.pipelineEditor.emptyPrompt.description"
-              defaultMessage="Processors are used to pre-process documents before indexing. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink
-                    href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
-                    target="_blank"
-                    external
-                  >
-                    {i18n.translate(
-                      'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
-                      {
-                        defaultMessage: 'Learn more.',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </>
+        <p>
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.emptyPrompt.description"
+            defaultMessage="Processors are used to pre-process documents before indexing. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink
+                  href={services.documentation.getEsDocsBasePath() + '/ingest-processors.html'}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate(
+                    'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
+                    {
+                      defaultMessage: 'Learn more.',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
       }
       actions={
         <>
