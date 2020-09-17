@@ -71,10 +71,12 @@ function incrementSpinnerCount({ success }) {
 let iterIndex = 0;
 
 function setRumAgent(item) {
-  item.body = item.body.replace(
-    '"name":"client"',
-    '"name":"opbean-client-rum"'
-  );
+  if (item.body) {
+    item.body = item.body.replace(
+      '"name":"client"',
+      '"name":"opbean-client-rum"'
+    );
+  }
 }
 
 async function insertItem(item) {
@@ -86,12 +88,15 @@ async function insertItem(item) {
 
     if (item.url === '/intake/v2/rum/events') {
       if (iterIndex === userAgents.length) {
-        // set some event agent to opbean
-        setRumAgent(item);
         iterIndex = 0;
       }
       headers['User-Agent'] = userAgents[iterIndex];
       headers['X-Forwarded-For'] = userIps[iterIndex];
+      // set some event agent to opbean
+      if (iterIndex % 2 === 0) {
+        setRumAgent(item);
+      }
+
       iterIndex++;
     }
 

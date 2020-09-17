@@ -26,7 +26,7 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
 });
 
 Then(`should have correct client metrics`, () => {
-  const metrics = ['4 ms', '0.06 s', '55 '];
+  const metrics = ['4 ms', '0.05 s', '30 '];
 
   verifyClientMetrics(metrics, true);
 });
