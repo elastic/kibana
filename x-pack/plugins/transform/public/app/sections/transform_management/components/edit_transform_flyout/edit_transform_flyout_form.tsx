@@ -116,7 +116,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
               'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
               {
                 defaultMessage:
-                  'To enable throttling, set a limit of documents to input per second',
+                  'To enable throttling, set a limit of documents to input per second.',
               }
             )}
             label={i18n.translate(
