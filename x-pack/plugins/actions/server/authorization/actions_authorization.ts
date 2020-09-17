@@ -14,6 +14,15 @@ export interface ConstructorOptions {
   request: KibanaRequest;
   auditLogger: ActionsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
+  authentication?: SecurityPluginSetup['authc'];
+  // In order to support legacy Alerts which predate the introduction of the
+  // Actions feature in Kibana we need a way of "dialing down" the level of
+  // authorization for certain opearations.
+  // Specifically, we want to allow these old alerts and their scheduled
+  // actions to continue to execute - which requires that we exempt auth on
+  // `get` for Connectors and `execute` for Action execution when used by
+  // these legacy alerts
+  shouldUseLegacyRbac?: boolean;
 }
 
 const operationAlias: Record<
@@ -27,33 +36,57 @@ const operationAlias: Record<
   list: (authorization) => authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'find'),
 };
 
+const LEGACY_RBAC_EXEMPT_OPERATIONS = new Set(['get', 'execute']);
+
 export class ActionsAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
+  private readonly authentication?: SecurityPluginSetup['authc'];
   private readonly auditLogger: ActionsAuthorizationAuditLogger;
+  private readonly shouldUseLegacyRbac: boolean;
 
-  constructor({ request, authorization, auditLogger }: ConstructorOptions) {
+  constructor({
+    request,
+    authorization,
+    authentication,
+    auditLogger,
+    shouldUseLegacyRbac = false,
+  }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
+    this.authentication = authentication;
     this.auditLogger = auditLogger;
+    this.shouldUseLegacyRbac = shouldUseLegacyRbac;
   }
 
   public async ensureAuthorized(operation: string, actionTypeId?: string) {
     const { authorization } = this;
     if (authorization?.mode?.useRbacForRequest(this.request)) {
-      const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, username } = await checkPrivileges({
-        kibana: operationAlias[operation]
-          ? operationAlias[operation](authorization)
-          : authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation),
-      });
-      if (hasAllRequested) {
-        this.auditLogger.actionsAuthorizationSuccess(username, operation, actionTypeId);
-      } else {
-        throw Boom.forbidden(
-          this.auditLogger.actionsAuthorizationFailure(username, operation, actionTypeId)
+      if (this.isOperationExemptDueToLegacyRbac(operation)) {
+        this.auditLogger.actionsAuthorizationSuccess(
+          this.authentication?.getCurrentUser(this.request)?.username ?? '',
+          operation,
+          actionTypeId
         );
+      } else {
+        const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+        const { hasAllRequested, username } = await checkPrivileges({
+          kibana: operationAlias[operation]
+            ? operationAlias[operation](authorization)
+            : authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation),
+        });
+        if (hasAllRequested) {
+          this.auditLogger.actionsAuthorizationSuccess(username, operation, actionTypeId);
+        } else {
+          throw Boom.forbidden(
+            this.auditLogger.actionsAuthorizationFailure(username, operation, actionTypeId)
+          );
+        }
       }
     }
+  }
+
+  private isOperationExemptDueToLegacyRbac(operation: string) {
+    return this.shouldUseLegacyRbac && LEGACY_RBAC_EXEMPT_OPERATIONS.has(operation);
   }
 }
