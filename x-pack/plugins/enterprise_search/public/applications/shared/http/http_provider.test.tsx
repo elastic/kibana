@@ -17,6 +17,7 @@ describe('HttpProvider', () => {
   const props = {
     http: {} as any,
     errorConnecting: false,
+    readOnlyMode: false,
   };
   const initializeHttp = jest.fn();
   const initializeHttpInterceptors = jest.fn();

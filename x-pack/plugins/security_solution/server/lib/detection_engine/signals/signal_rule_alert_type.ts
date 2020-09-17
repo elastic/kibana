@@ -165,7 +165,7 @@ export const signalRulesAlertType = ({
         }
       }
       try {
-        const { listClient, exceptionsClient } = await getListsClient({
+        const { listClient, exceptionsClient } = getListsClient({
           services,
           updatedByUser,
           spaceId,
@@ -174,7 +174,7 @@ export const signalRulesAlertType = ({
         });
         const exceptionItems = await getExceptions({
           client: exceptionsClient,
-          lists: exceptionsList,
+          lists: exceptionsList ?? [],
         });
 
         if (isMlRule(type)) {
