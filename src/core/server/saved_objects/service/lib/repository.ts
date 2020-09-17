@@ -706,6 +706,7 @@ export class SavedObjectsRepository {
     fields,
     namespaces,
     type,
+    typesAndNamespacesMap,
     filter,
     preference,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
@@ -766,6 +767,7 @@ export class SavedObjectsRepository {
           sortField,
           sortOrder,
           namespaces,
+          typesAndNamespacesMap,
           hasReference,
           kueryNode,
         }),

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -13,6 +14,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
@@ -164,19 +166,32 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     let namespaces = options.namespaces;
     if (namespaces) {
       const spacesClient = await this.getSpacesClient;
-      const availableSpaces = await spacesClient.getAll('findSavedObjects');
-      if (namespaces.includes('*')) {
-        namespaces = availableSpaces.map((space) => space.id);
-      } else {
-        namespaces = namespaces.filter((namespace) =>
-          availableSpaces.some((space) => space.id === namespace)
-        );
-      }
-      // This forbidden error allows this scenario to be consistent
-      // with the way the SpacesClient behaves when no spaces are authorized
-      // there.
-      if (namespaces.length === 0) {
-        throw this.errors.decorateForbiddenError(new Error());
+      const emptyResult = Promise.resolve({
+        page: options.page ?? 1,
+        per_page: options.perPage ?? 20,
+        total: 0,
+        saved_objects: [],
+      } as SavedObjectsFindResponse<T>);
+
+      try {
+        const availableSpaces = await spacesClient.getAll('findSavedObjects');
+        if (namespaces.includes('*')) {
+          namespaces = availableSpaces.map((space) => space.id);
+        } else {
+          namespaces = namespaces.filter((namespace) =>
+            availableSpaces.some((space) => space.id === namespace)
+          );
+        }
+        if (namespaces.length === 0) {
+          // return empty result, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
+          return emptyResult;
+        }
+      } catch (err) {
+        if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+          // return empty result, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
+          return emptyResult;
+        }
+        throw err;
       }
     } else {
       namespaces = [this.spaceId];

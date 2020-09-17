@@ -13,6 +13,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
@@ -42,6 +43,16 @@ interface SavedObjectsNamespaces {
 interface EnsureAuthorizedOptions {
   args?: Record<string, unknown>;
   auditAction?: string;
+  requireFullAuthorization?: boolean;
+}
+
+interface EnsureAuthorizedResult {
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized';
+  typeMap: Map<string, EnsureAuthorizedTypeResult>;
+}
+interface EnsureAuthorizedTypeResult {
+  authorizedSpaces: string[];
+  isGloballyAuthorized?: boolean;
 }
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
@@ -129,9 +140,34 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       );
     }
     const args = { options };
-    await this.ensureAuthorized(options.type, 'find', options.namespaces, { args });
+    const { status, typeMap } = await this.ensureAuthorized(
+      options.type,
+      'find',
+      options.namespaces,
+      { args, requireFullAuthorization: false }
+    );
 
-    const response = await this.baseClient.find<T>(options);
+    if (status === 'unauthorized') {
+      // return empty result
+      return Promise.resolve({
+        page: options.page ?? 1,
+        per_page: options.perPage ?? 20,
+        total: 0,
+        saved_objects: [],
+      } as SavedObjectsFindResponse<T>);
+    }
+
+    const typesAndNamespacesMap =
+      status === 'partially_authorized'
+        ? Array.from(typeMap).reduce<Map<string, string[] | undefined>>(
+            (acc, [type, { authorizedSpaces, isGloballyAuthorized }]) =>
+              isGloballyAuthorized
+                ? acc.set(type, options.namespaces)
+                : acc.set(type, authorizedSpaces),
+            new Map()
+          )
+        : undefined; // if the user is fully authorized, use `undefined` as the typesAndNamespacesMap to prevent privilege escalation
+    const response = await this.baseClient.find<T>({ ...options, typesAndNamespacesMap });
     return await this.redactSavedObjectsNamespaces(response);
   }
 
@@ -248,8 +284,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     action: string,
     namespaceOrNamespaces: undefined | string | Array<undefined | string>,
     options: EnsureAuthorizedOptions = {}
-  ) {
-    const { args, auditAction = action } = options;
+  ): Promise<EnsureAuthorizedResult> {
+    const { args, auditAction = action, requireFullAuthorization = true } = options;
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(
       types.map((type) => [this.actions.savedObject.get(type, action), type])
@@ -262,16 +298,24 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       privileges.kibana.map(({ resource }) => resource).filter((x) => x !== undefined)
     ).sort() as string[];
 
-    if (hasAllRequested) {
-      this.auditLogger.savedObjectsAuthorizationSuccess(
-        username,
-        auditAction,
-        types,
-        spaceIds,
-        args
-      );
-    } else {
-      const missingPrivileges = this.getMissingPrivileges(privileges);
+    const missingPrivileges = this.getMissingPrivileges(privileges);
+    const typeMap = privileges.kibana.reduce<Map<string, EnsureAuthorizedTypeResult>>(
+      (acc, { resource, privilege, authorized }) => {
+        if (!authorized) {
+          return acc;
+        }
+        const type = actionsToTypesMap.get(privilege)!; // always defined
+        const value = acc.get(type) ?? { authorizedSpaces: [] };
+        if (resource === undefined) {
+          return acc.set(type, { ...value, isGloballyAuthorized: true });
+        }
+        const authorizedSpaces = value.authorizedSpaces.concat(resource);
+        return acc.set(type, { ...value, authorizedSpaces });
+      },
+      new Map()
+    );
+
+    const logAuthorizationFailure = () => {
       this.auditLogger.savedObjectsAuthorizationFailure(
         username,
         auditAction,
@@ -280,6 +324,34 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         missingPrivileges,
         args
       );
+    };
+    const logAuthorizationSuccess = (typeArray: string[], spaceIdArray: string[]) => {
+      this.auditLogger.savedObjectsAuthorizationSuccess(
+        username,
+        auditAction,
+        typeArray,
+        spaceIdArray,
+        args
+      );
+    };
+
+    if (hasAllRequested) {
+      logAuthorizationSuccess(types, spaceIds);
+      return { typeMap, status: 'fully_authorized' };
+    } else if (!requireFullAuthorization) {
+      const isPartiallyAuthorized = privileges.kibana.some(({ authorized }) => authorized);
+      if (isPartiallyAuthorized) {
+        for (const [type, { isGloballyAuthorized, authorizedSpaces }] of typeMap.entries()) {
+          // generate an individual audit record for each authorized type
+          logAuthorizationSuccess([type], isGloballyAuthorized ? spaceIds : authorizedSpaces);
+        }
+        return { typeMap, status: 'partially_authorized' };
+      } else {
+        logAuthorizationFailure();
+        return { typeMap, status: 'unauthorized' };
+      }
+    } else {
+      logAuthorizationFailure();
       const targetTypes = uniq(
         missingPrivileges.map(({ privilege }) => actionsToTypesMap.get(privilege)).sort()
       ).join(',');

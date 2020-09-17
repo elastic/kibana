@@ -10,7 +10,7 @@ import querystring from 'querystring';
 import { Assign } from '@kbn/utility-types';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
+import { getUrlPrefix } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
 const {
@@ -34,12 +34,8 @@ export interface FindTestCase {
     total?: number;
   };
   failure?: {
-    statusCode: 400 | 403;
-    reason:
-      | 'forbidden_types'
-      | 'forbidden_namespaces'
-      | 'cross_namespace_not_permitted'
-      | 'bad_request';
+    statusCode: 200 | 400; // if the user searches for types and/or namespaces they are not authorized for, they will get a 200 result with those types/namespaces omitted
+    reason: 'unauthorized' | 'cross_namespace_not_permitted' | 'bad_request';
   };
 }
 
@@ -203,31 +199,31 @@ export const getTestCases = (
 export const createRequest = ({ query }: FindTestCase) => ({ query });
 const getTestTitle = ({ failure, title }: FindTestCase) => {
   let description = 'success';
-  if (failure?.statusCode === 400) {
+  if (failure?.statusCode === 200) {
+    description = 'unauthorized';
+  } else if (failure?.statusCode === 400) {
     description = 'bad request';
-  } else if (failure?.statusCode === 403) {
-    description = 'forbidden';
   }
   return `${description} ["${title}"]`;
 };
 
 export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbiddenTypes = expectResponses.forbiddenTypes('find');
-  const expectForbiddeNamespaces = expectResponses.forbiddenSpaces;
   const expectResponseBody = (
     testCase: FindTestCase,
     user?: TestUser
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const { failure, successResult = {}, query } = testCase;
     const parsedQuery = querystring.parse(query);
-    if (failure?.statusCode === 403) {
-      if (failure?.reason === 'forbidden_types') {
-        const type = parsedQuery.type;
-        await expectForbiddenTypes(type)(response);
-      } else if (failure?.reason === 'forbidden_namespaces') {
-        await expectForbiddeNamespaces(response);
-      } else {
-        throw new Error(`Unexpected failure reason: ${failure?.reason}`);
+    if (failure?.statusCode === 200) {
+      if (failure?.reason === 'unauthorized') {
+        // if the user is completely unauthorized, they will receive an empty response body
+        const expected = {
+          page: parsedQuery.page || 1,
+          per_page: parsedQuery.per_page || 20,
+          total: 0,
+          saved_objects: [],
+        };
+        expect(response.body).to.eql(expected);
       }
     } else if (failure?.statusCode === 400) {
       if (failure?.reason === 'bad_request') {

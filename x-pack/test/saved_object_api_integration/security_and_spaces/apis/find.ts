@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SPACES } from '../../common/lib/spaces';
+import { AUTHENTICATION } from '../../common/lib/authentication';
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { findTestSuiteFactory, getTestCases } from '../../common/suites/find';
+
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
 
 const createTestCases = (currentSpace: string, crossSpaceSearch: string[]) => {
   const cases = getTestCases({ currentSpace, crossSpaceSearch });
@@ -39,26 +47,30 @@ export default function ({ getService }: FtrProviderContext) {
   const createTests = (spaceId: string, user: TestUser) => {
     const currentSpaceCases = createTestCases(spaceId, []);
 
-    const explicitCrossSpace = createTestCases(spaceId, ['default', 'space_1', 'space_2']);
+    const EACH_SPACE = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
+    const explicitCrossSpace = createTestCases(spaceId, EACH_SPACE);
     const wildcardCrossSpace = createTestCases(spaceId, ['*']);
 
-    if (user.username === 'elastic') {
+    if (user.username === AUTHENTICATION.SUPERUSER.username) {
       return {
         currentSpace: createTestDefinitions(currentSpaceCases.allTypes, false, { user }),
-        crossSpace: createTestDefinitions(explicitCrossSpace.allTypes, false, { user }),
+        crossSpace: [
+          createTestDefinitions(explicitCrossSpace.allTypes, false, { user }),
+          createTestDefinitions(wildcardCrossSpace.allTypes, false, { user }),
+        ].flat(),
       };
     }
 
     const authorizedAtCurrentSpace =
       user.authorizedAtSpaces.includes(spaceId) || user.authorizedAtSpaces.includes('*');
 
-    const authorizedExplicitCrossSpaces = ['default', 'space_1', 'space_2'].filter(
+    const authorizedExplicitCrossSpaces = EACH_SPACE.filter(
       (s) =>
         user.authorizedAtSpaces.includes('*') ||
         (s !== spaceId && user.authorizedAtSpaces.includes(s))
     );
 
-    const authorizedWildcardCrossSpaces = ['default', 'space_1', 'space_2'].filter(
+    const authorizedWildcardCrossSpaces = EACH_SPACE.filter(
       (s) => user.authorizedAtSpaces.includes('*') || user.authorizedAtSpaces.includes(s)
     );
 
@@ -68,19 +80,13 @@ export default function ({ getService }: FtrProviderContext) {
             createTestDefinitions(explicitCrossSpace.normalTypes, false, { user }),
             createTestDefinitions(
               explicitCrossSpace.hiddenAndUnknownTypes,
-              {
-                statusCode: 403,
-                reason: 'forbidden_types',
-              },
+              { statusCode: 200, reason: 'unauthorized' },
               { user }
             ),
           ].flat()
         : createTestDefinitions(
             explicitCrossSpace.allTypes,
-            {
-              statusCode: 403,
-              reason: 'forbidden_namespaces',
-            },
+            { statusCode: 200, reason: 'unauthorized' },
             { user }
           );
 
@@ -90,19 +96,13 @@ export default function ({ getService }: FtrProviderContext) {
             createTestDefinitions(wildcardCrossSpace.normalTypes, false, { user }),
             createTestDefinitions(
               wildcardCrossSpace.hiddenAndUnknownTypes,
-              {
-                statusCode: 403,
-                reason: 'forbidden_types',
-              },
+              { statusCode: 200, reason: 'unauthorized' },
               { user }
             ),
           ].flat()
         : createTestDefinitions(
             wildcardCrossSpace.allTypes,
-            {
-              statusCode: 403,
-              reason: 'forbidden_namespaces',
-            },
+            { statusCode: 200, reason: 'unauthorized' },
             { user }
           );
 
@@ -113,13 +113,13 @@ export default function ({ getService }: FtrProviderContext) {
               user,
             }),
             createTestDefinitions(currentSpaceCases.hiddenAndUnknownTypes, {
-              statusCode: 403,
-              reason: 'forbidden_types',
+              statusCode: 200,
+              reason: 'unauthorized',
             }),
           ].flat()
         : createTestDefinitions(currentSpaceCases.allTypes, {
-            statusCode: 403,
-            reason: 'forbidden_types',
+            statusCode: 200,
+            reason: 'unauthorized',
           }),
       crossSpace: [...explicitCrossSpaceDefinitions, ...wildcardCrossSpaceDefinitions],
     };

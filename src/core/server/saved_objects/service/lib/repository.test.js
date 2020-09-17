@@ -2586,9 +2586,10 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('search dsl', () => {
-      it(`passes mappings, registry, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl`, async () => {
+      it(`passes mappings, registry, and search options to getSearchDsl`, async () => {
         const relevantOpts = {
           namespaces: [namespace],
+          typesAndNamespacesMap: new Map(),
           search: 'foo*',
           searchFields: ['foo'],
           type: [type],

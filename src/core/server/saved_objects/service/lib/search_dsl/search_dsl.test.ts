@@ -57,10 +57,11 @@ describe('getSearchDsl', () => {
   });
 
   describe('passes control', () => {
-    it('passes (mappings, schema, namespaces, type, search, searchFields, rootSearchFields, hasReference) to getQueryParams', () => {
+    it('passes (mappings, schema, namespaces, type, typesAndNamespacesMap, search, searchFields, rootSearchFields, hasReference) to getQueryParams', () => {
       const opts = {
         namespaces: ['foo-namespace'],
         type: 'foo',
+        typesAndNamespacesMap: new Map(),
         search: 'bar',
         searchFields: ['baz'],
         rootSearchFields: ['qux'],
@@ -78,6 +79,7 @@ describe('getSearchDsl', () => {
         registry,
         namespaces: opts.namespaces,
         type: opts.type,
+        typesAndNamespacesMap: opts.typesAndNamespacesMap,
         search: opts.search,
         searchFields: opts.searchFields,
         rootSearchFields: opts.rootSearchFields,
