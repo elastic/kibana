@@ -72,6 +72,7 @@ export const ImportSettings: FC<Props> = ({
             createIndexPattern={createIndexPattern}
             onCreateIndexPatternChange={onCreateIndexPatternChange}
             indexNameError={indexNameError}
+            combinedFields={combinedFields}
           />
         </React.Fragment>
       ),

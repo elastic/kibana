@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 
 import {
-  EuiText,
   EuiFormRow,
   EuiPopover,
   EuiContextMenu,
@@ -21,6 +20,7 @@ import {
 
 import { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
+import { CombinedFieldLabel } from './combined_field_label';
 import {
   addCombinedFieldsToMappings,
   addCombinedFieldsToPipeline,
@@ -178,22 +178,17 @@ export class CombinedFieldsForm extends Component<Props, State> {
     ];
     return (
       <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.combinedFieldsLabel"
-            defaultMessage="Combined fields"
-          />
-        }
+        label={i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsLabel', {
+          defaultMessage: 'Combined fields',
+        })}
       >
         <div>
           {this.props.combinedFields.map((combinedField: CombinedField, idx: number) => (
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={null}>
-                <EuiText key={idx} size="s">
-                  {getCombinedFieldLabel(combinedField)}
-                </EuiText>
+            <EuiFlexGroup key={idx} gutterSize="s">
+              <EuiFlexItem>
+                <CombinedFieldLabel combinedField={combinedField} />
               </EuiFlexItem>
-              <EuiFlexItem grow={null}>
+              <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="trash"
                   color="danger"
@@ -231,10 +226,4 @@ export class CombinedFieldsForm extends Component<Props, State> {
       </EuiFormRow>
     );
   }
-}
-
-function getCombinedFieldLabel(combinedField: CombinedField) {
-  return `${combinedField.fieldNames.join(combinedField.delimiter)} => ${
-    combinedField.combinedFieldName
-  } (${combinedField.mappingType})`;
 }

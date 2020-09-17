@@ -178,7 +178,7 @@ export class GeoPointForm extends Component<Props, State> {
           >
             <FormattedMessage
               id="xpack.ml.fileDatavisualizer.geoPointForm.submitButtonLabel"
-              defaultMessage="Submit"
+              defaultMessage="Add"
             />
           </EuiButton>
         </EuiTextAlign>
