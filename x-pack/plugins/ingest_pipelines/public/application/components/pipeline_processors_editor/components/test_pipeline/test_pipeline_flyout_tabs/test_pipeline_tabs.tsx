@@ -13,14 +13,9 @@ export type TestPipelineFlyoutTab = 'documents' | 'output';
 interface Props {
   onTabChange: (tab: TestPipelineFlyoutTab) => void;
   selectedTab: TestPipelineFlyoutTab;
-  getIsDisabled: (tab: TestPipelineFlyoutTab) => boolean;
 }
 
-export const Tabs: React.FunctionComponent<Props> = ({
-  onTabChange,
-  selectedTab,
-  getIsDisabled,
-}) => {
+export const Tabs: React.FunctionComponent<Props> = ({ onTabChange, selectedTab }) => {
   const tabs: Array<{
     id: TestPipelineFlyoutTab;
     name: React.ReactNode;
@@ -29,8 +24,8 @@ export const Tabs: React.FunctionComponent<Props> = ({
       id: 'documents',
       name: (
         <FormattedMessage
-          id="xpack.ingestPipelines.tabs.configurationTabTitle"
-          defaultMessage="Configuration"
+          id="xpack.ingestPipelines.tabs.documentsTabTitle"
+          defaultMessage="Documents"
         />
       ),
     },
@@ -49,7 +44,6 @@ export const Tabs: React.FunctionComponent<Props> = ({
           onClick={() => onTabChange(tab.id)}
           isSelected={tab.id === selectedTab}
           key={tab.id}
-          disabled={getIsDisabled(tab.id)}
           data-test-subj={tab.id.toLowerCase() + 'Tab'}
         >
           {tab.name}
