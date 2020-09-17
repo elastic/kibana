@@ -27,7 +27,7 @@ interface IntervalValuesRange {
 export interface CalculateHistogramIntervalParams {
   interval: string;
   maxBucketsUiSettings: number;
-  maxBucketsUserInput?: number;
+  maxBucketsUserInput?: number | '';
   intervalBase?: number;
   values?: IntervalValuesRange;
 }

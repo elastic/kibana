@@ -139,6 +139,19 @@ describe('calculateHistogramInterval', () => {
           })
         ).toEqual(0.02);
       });
+
+      test('should correctly fallback to the default value for empty string', () => {
+        expect(
+          calculateHistogramInterval({
+            ...params,
+            maxBucketsUserInput: '',
+            values: {
+              min: 0.1,
+              max: 0.9,
+            },
+          })
+        ).toBe(0.01);
+      });
     });
   });
 });
