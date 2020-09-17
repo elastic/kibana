@@ -179,7 +179,7 @@ describe('Detection rules, threshold', () => {
     cy.get(NUMBER_OF_ALERTS)
       .invoke('text')
       .then((numberOfAlertsText) => {
-        cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.below', 20);
+        cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.below', 100);
       });
     cy.get(ALERT_RULE_NAME).first().should('have.text', newThresholdRule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
