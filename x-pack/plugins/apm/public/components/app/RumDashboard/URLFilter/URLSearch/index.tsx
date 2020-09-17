@@ -11,6 +11,7 @@ import {
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
@@ -135,13 +136,17 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     setDebouncedValue(e.currentTarget.value);
   };
 
+  const isLoading = status !== 'success';
+
+  const titleText = searchValue
+    ? (data?.total ?? 0) + ' ' + I18LABELS.searchResults
+    : I18LABELS.topPages;
+
   function PopOverTitle() {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          {searchValue
-            ? (data?.total ?? 0) + ' ' + I18LABELS.searchResults
-            : I18LABELS.topPages}
+          {isLoading ? <EuiLoadingSpinner /> : titleText}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -161,13 +166,13 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   return (
     <>
-      <EuiTitle size="xxxs" textTransform="uppercase">
+      <EuiTitle size="xxs" textTransform="uppercase">
         <h4>{I18LABELS.url}</h4>
       </EuiTitle>
       <EuiSelectableTemplateSitewide
         data-test-subj="csmSearchFieldSuggestion"
         singleSelection={false}
-        isLoading={status !== 'success'}
+        isLoading={isLoading}
         onChange={onChange}
         options={items}
         searchProps={{

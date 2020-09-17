@@ -21,25 +21,12 @@ export async function getUrlSearch({
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...projection.body.query.bool.filter,
-            {
-              wildcard: {
-                'url.full': {
-                  value: `*${urlQuery}*`,
-                },
-              },
-            },
-          ],
-        },
-      },
       aggs: {
         totalUrls: {
           cardinality: {
@@ -67,11 +54,11 @@ export async function getUrlSearch({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  const { urls, totalUrls } = response.aggregations!;
+  const { urls, totalUrls } = response.aggregations ?? {};
 
   return {
-    total: totalUrls.value,
-    items: urls.buckets.map((bucket) => ({
+    total: totalUrls?.value || 0,
+    items: (urls?.buckets ?? []).map((bucket) => ({
       url: bucket.key as string,
       count: bucket.doc_count,
       pld: (bucket.medianPLD.values['50.0'] ?? 0) / 1000,
