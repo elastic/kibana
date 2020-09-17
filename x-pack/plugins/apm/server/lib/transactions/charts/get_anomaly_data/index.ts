@@ -64,16 +64,10 @@ export async function getAnomalySeries({
     return;
   }
 
-  let mlJobIds: string[] = [];
-  try {
-    mlJobIds = await getMLJobIds(
-      setup.ml.anomalyDetectors,
-      uiFilters.environment
-    );
-  } catch (error) {
-    logger.error(error);
-    return;
-  }
+  const mlJobIds = await getMLJobIds(
+    setup.ml.anomalyDetectors,
+    uiFilters.environment
+  );
 
   // don't fetch anomalies if there are isn't exaclty 1 ML job match for the given environment
   if (mlJobIds.length !== 1) {
@@ -87,7 +81,7 @@ export async function getAnomalySeries({
   }
 
   const { start, end } = setup;
-  const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
+  const { intervalString, bucketSize } = getBucketSize(start, end);
 
   const esResponse = await anomalySeriesFetcher({
     serviceName,

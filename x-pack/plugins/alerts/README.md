@@ -306,7 +306,7 @@ In addition, when users are inside your feature you might want to grant them acc
 You can control all of these abilities by assigning privileges to the Alerting Framework from within your own feature, for example:
 
 ```typescript
-features.registerFeature({
+features.registerKibanaFeature({
 	id: 'my-application-id',
 	name: 'My Application',
 	app: [],
@@ -348,7 +348,7 @@ In this example we can see the following:
 It's important to note that any role can be granted a mix of `all` and `read` privileges accross multiple type, for example:
 
 ```typescript
-features.registerFeature({
+features.registerKibanaFeature({
 	id: 'my-application-id',
 	name: 'My Application',
 	app: [],

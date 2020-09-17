@@ -23,10 +23,14 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async navigateToStackManagement() {
+    async navigateToStackManagement({ expectMlLink = true }: { expectMlLink?: boolean } = {}) {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('management');
-        await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
+        if (expectMlLink) {
+          await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
+        } else {
+          await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
+        }
       });
     },
 
@@ -84,22 +88,14 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
     },
 
-    async navigateToStackManagementJobsListPage({
-      expectAccessDenied = false,
-    }: {
-      expectAccessDenied?: boolean;
-    } = {}) {
+    async navigateToStackManagementJobsListPage() {
       // clicks the jobsListLink and loads the jobs list page
       await testSubjects.click('jobsListLink');
       await retry.tryForTime(60 * 1000, async () => {
-        if (expectAccessDenied === true) {
-          await testSubjects.existOrFail('mlPageAccessDenied');
-        } else {
-          // verify that the overall page is present
-          await testSubjects.existOrFail('mlPageStackManagementJobsList');
-          // verify that the default tab with the anomaly detection jobs list got loaded
-          await testSubjects.existOrFail('ml-jobs-list');
-        }
+        // verify that the overall page is present
+        await testSubjects.existOrFail('mlPageStackManagementJobsList');
+        // verify that the default tab with the anomaly detection jobs list got loaded
+        await testSubjects.existOrFail('ml-jobs-list');
       });
     },
 
