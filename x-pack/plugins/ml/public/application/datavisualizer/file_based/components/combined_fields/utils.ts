@@ -132,15 +132,23 @@ export function getNameCollisionMsg(name: string) {
   });
 }
 
+export function getFieldNames(results: FindFileStructureResponse): string[] {
+  return results.column_names !== undefined
+    ? results.column_names
+    : Object.keys(results.field_stats);
+}
+
 function getGeoPointField(results: FindFileStructureResponse) {
-  const latField = results.column_names.find((columnName) => {
+  const fieldNames = getFieldNames(results);
+
+  const latField = fieldNames.find((columnName) => {
     return (
       COMMON_LAT_NAMES.includes(columnName.toLowerCase()) &&
       isWithinLatRange(columnName, results.field_stats)
     );
   });
 
-  const lonField = results.column_names.find((columnName) => {
+  const lonField = fieldNames.find((columnName) => {
     return (
       COMMON_LON_NAMES.includes(columnName.toLowerCase()) &&
       isWithinLonRange(columnName, results.field_stats)
@@ -159,7 +167,7 @@ function getGeoPointField(results: FindFileStructureResponse) {
   ];
   // Use first combinedFieldNames that does not have a naming collision
   const geoPointField = combinedFieldNames.find((name) => {
-    return !results.column_names.includes(name);
+    return !fieldNames.includes(name);
   });
 
   return geoPointField ? createGeoPointCombinedField(latField, lonField, geoPointField) : null;

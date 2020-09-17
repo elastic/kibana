@@ -44,7 +44,7 @@ export interface FindFileStructureResponse {
   delimiter: string;
   need_client_timezone: boolean;
   num_lines_analyzed: number;
-  column_names: string[];
+  column_names?: string[];
   explanation?: string[];
   grok_pattern?: string;
   multiline_start_pattern?: string;

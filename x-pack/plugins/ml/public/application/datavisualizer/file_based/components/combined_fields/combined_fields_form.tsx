@@ -134,7 +134,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
   }
 
   hasNameCollision = (name: string) => {
-    if (this.props.results.column_names.includes(name)) {
+    if (this.props.results.column_names?.includes(name)) {
       // collision with column name
       return true;
     }

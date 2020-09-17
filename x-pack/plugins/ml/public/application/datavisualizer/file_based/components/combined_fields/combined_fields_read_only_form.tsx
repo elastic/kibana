@@ -23,7 +23,7 @@ export function CombinedFieldsReadOnlyForm({
         defaultMessage: 'Combined fields',
       })}
       helpText={i18n.translate('xpack.ml.fileDatavisualizer.combinedFieldsReadOnlyHelpTextLabel', {
-        defaultMessage: 'Edit combined fields advanced tab',
+        defaultMessage: 'Edit combined fields in advanced tab',
       })}
     >
       <div>

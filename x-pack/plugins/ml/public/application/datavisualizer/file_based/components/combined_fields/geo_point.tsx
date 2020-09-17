@@ -25,6 +25,7 @@ import {
   createGeoPointCombinedField,
   isWithinLatRange,
   isWithinLonRange,
+  getFieldNames,
   getNameCollisionMsg,
 } from './utils';
 import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
@@ -51,7 +52,7 @@ export class GeoPointForm extends Component<Props, State> {
 
     const latFields: EuiSelectOption[] = [{ value: '', text: '' }];
     const lonFields: EuiSelectOption[] = [{ value: '', text: '' }];
-    props.results.column_names.forEach((columnName: string) => {
+    getFieldNames(props.results).forEach((columnName: string) => {
       if (isWithinLatRange(columnName, props.results.field_stats)) {
         latFields.push({ value: columnName, text: columnName });
       }
