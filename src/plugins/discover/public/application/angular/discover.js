@@ -27,6 +27,12 @@ import { i18n } from '@kbn/i18n';
 import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
+import {
+  esFilters,
+  indexPatterns as indexPatternsUtils,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+} from '../../../../data/public';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
 import { getSortArray, getSortForSearchSource } from './doc_table';
 import { createFixedScroll } from './directives/fixed_scroll';
@@ -34,7 +40,6 @@ import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
   getRequestInspectorStats,
@@ -65,12 +70,7 @@ const {
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { validateTimeRange } from '../helpers/validate_time_range';
-import {
-  esFilters,
-  indexPatterns as indexPatternsUtils,
-  connectToQueryState,
-  syncQueryStateWithUrl,
-} from '../../../../data/public';
+
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
@@ -786,18 +786,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         // If the request was aborted then no need to surface this error in the UI
         if (error instanceof Error && error.name === 'AbortError') return;
 
-        const fetchError = getPainlessError(error);
-
-        if (fetchError) {
-          $scope.fetchError = fetchError;
-        } else {
-          toastNotifications.addError(error, {
-            title: i18n.translate('discover.errorLoadingData', {
-              defaultMessage: 'Error loading data',
-            }),
-            toastMessage: error.shortMessage || error.body?.message,
-          });
-        }
+        $scope.fetchStatus = fetchStatuses.NO_RESULTS;
+        $scope.rows = [];
+        data.search.showError(error);
       });
   };
 

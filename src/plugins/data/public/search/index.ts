@@ -49,4 +49,4 @@ export {
 } from './search_source';
 
 export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
-export { RequestTimeoutError } from './request_timeout_error';
+export * from './errors';

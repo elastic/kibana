@@ -360,8 +360,6 @@ export {
   ISearchGeneric,
   ISearchSource,
   parseSearchSourceJSON,
-  RequestTimeoutError,
-  SearchError,
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
@@ -370,6 +368,11 @@ export {
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
+  // errors
+  RequestTimeoutError,
+  SearchError,
+  SearchTimeoutError,
+  PainlessError,
 } from './search';
 
 export type { SearchSource } from './search';

@@ -17,4 +17,28 @@
  * under the License.
  */
 
-import './fetch_error';
+import React from 'react';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ApplicationStart } from 'kibana/public';
+import { PainlessError } from './errors';
+
+export const getPainlessErrorMessage = (application: ApplicationStart, e: PainlessError) => {
+  function onClick() {
+    application.navigateToApp('management', {
+      path: `/kibana/indexPatterns`,
+    });
+  }
+
+  return (
+    <>
+      {e.message}
+      <EuiSpacer size="s" />
+      <div className="eui-textRight">
+        <EuiButton color="danger" onClick={onClick} size="s">
+          <FormattedMessage id="data.painlessError.buttonTxt" defaultMessage="Edit script" />
+        </EuiButton>
+      </div>
+    </>
+  );
+};

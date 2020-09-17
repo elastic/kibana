@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { trimEnd, debounce } from 'lodash';
+import { get, trimEnd, debounce } from 'lodash';
 import {
   BehaviorSubject,
   throwError,
@@ -31,6 +31,7 @@ import {
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { KbnError } from 'src/plugins/kibana_utils/common';
 import {
   getCombinedSignal,
   AbortError,
@@ -40,6 +41,9 @@ import {
   ES_SEARCH_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
+import { SearchTimeoutError, PainlessError, isPainlessError } from './errors';
+import { getPainlessErrorMessage } from './painless_error';
+import { toMountPoint } from '../../../kibana_react/public';
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
@@ -84,6 +88,30 @@ export class SearchInterceptor {
     });
   }
 
+  protected getTimeoutMessage() {
+    return i18n.translate('data.search.upgradeLicense', {
+      defaultMessage:
+        'One or more queries timed out. With our free Basic tier, your queries never time out.',
+    });
+  }
+
+  public showError(e: Error | KbnError) {
+    if (e instanceof AbortError) return;
+
+    if (e instanceof PainlessError) {
+      this.deps.toasts.addDanger({
+        title: 'Search Error',
+        text: toMountPoint(getPainlessErrorMessage(this.application, e)),
+      });
+      return;
+    }
+
+    this.deps.toasts.addDanger({
+      title: 'Search Error',
+      text: e.message,
+    });
+  }
+
   /**
    * @internal
    */
@@ -120,17 +148,24 @@ export class SearchInterceptor {
         return throwError(new AbortError());
       }
 
-      const { combinedSignal, cleanup } = this.setupAbortSignal({
+      const { timeoutSignal, combinedSignal, cleanup } = this.setupAbortSignal({
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         catchError((e: any) => {
-          if (e.body?.attributes?.error === 'Request timed out') {
-            this.showTimeoutError(e);
+          if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
+            // Handle a client or a server side timeout
+            return throwError(new SearchTimeoutError(e, this.getTimeoutMessage()));
+          } else if (options?.abortSignal?.aborted) {
+            // In the case an application initiated abort, throw the existing AbortError.
+            return throwError(e);
+          } else if (isPainlessError(e)) {
+            return throwError(new PainlessError(e, request));
+          } else {
+            return throwError(e);
           }
-          return throwError(e);
         }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);
@@ -179,6 +214,7 @@ export class SearchInterceptor {
 
     return {
       combinedSignal,
+      timeoutSignal,
       cleanup,
     };
   }
