@@ -51,12 +51,12 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
             "items": Array [
               Object {
                 "count": 5,
-                "pld": 4924,
+                "pld": 4924000,
                 "url": "http://localhost:5601/nfw/app/csm?rangeFrom=now-15m&rangeTo=now&serviceName=kibana-frontend-8_0_0",
               },
               Object {
                 "count": 1,
-                "pld": 2760,
+                "pld": 2760000,
                 "url": "http://localhost:5601/nfw/app/home",
               },
             ],
@@ -77,7 +77,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
             "items": Array [
               Object {
                 "count": 5,
-                "pld": 4924,
+                "pld": 4924000,
                 "url": "http://localhost:5601/nfw/app/csm?rangeFrom=now-15m&rangeTo=now&serviceName=kibana-frontend-8_0_0",
               },
             ],

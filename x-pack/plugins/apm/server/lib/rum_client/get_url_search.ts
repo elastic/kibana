@@ -61,7 +61,7 @@ export async function getUrlSearch({
     items: (urls?.buckets ?? []).map((bucket) => ({
       url: bucket.key as string,
       count: bucket.doc_count,
-      pld: (bucket.medianPLD.values['50.0'] ?? 0) / 1000,
+      pld: bucket.medianPLD.values['50.0'] ?? 0,
     })),
   };
 }
