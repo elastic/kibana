@@ -9,13 +9,14 @@ import { Observable } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ILicense } from '../../../licensing/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ReportListing } from './report_listing';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
     htmlIdGenerator: () => () => `generated-id`,
   };
 });
+
+import { ReportListing } from './report_listing';
 
 const reportingAPIClient = {
   list: () =>
