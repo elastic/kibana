@@ -6,10 +6,12 @@
 
 import { lazy } from 'react';
 
-import { CaseSetting, SettingFieldsProps } from '../types';
+import { CaseSetting } from '../types';
 import { JiraSettingFields } from './types';
 
-export const getCaseSetting = (): CaseSetting<SettingFieldsProps<JiraSettingFields>> => {
+export * from './types';
+
+export const getCaseSetting = (): CaseSetting<JiraSettingFields> => {
   return {
     id: '.jira',
     caseSettingFieldsComponent: lazy(() => import('./fields')),

@@ -7,12 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import { CaseSetting, CaseSettingsRegistry } from './types';
 
-export const createCaseSettingsRegistry = (): CaseSettingsRegistry => {
-  const settings: Map<string, CaseSetting> = new Map();
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-  return {
+export const createCaseSettingsRegistry = (): CaseSettingsRegistry => {
+  const settings: Map<string, CaseSetting<any>> = new Map();
+
+  const registry: CaseSettingsRegistry = {
     has: (id: string) => settings.has(id),
-    register: (setting: CaseSetting) => {
+    register: <UIProps>(setting: CaseSetting<UIProps>) => {
       if (settings.has(setting.id)) {
         throw new Error(
           i18n.translate(
@@ -29,7 +31,7 @@ export const createCaseSettingsRegistry = (): CaseSettingsRegistry => {
 
       settings.set(setting.id, setting);
     },
-    get: (id: string) => {
+    get: <UIProps>(id: string): CaseSetting<UIProps> => {
       if (!settings.has(id)) {
         throw new Error(
           i18n.translate(
@@ -49,4 +51,6 @@ export const createCaseSettingsRegistry = (): CaseSettingsRegistry => {
       return Array.from(settings).map(([id, setting]) => setting);
     },
   };
+
+  return registry;
 };
