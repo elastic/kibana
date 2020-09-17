@@ -104,64 +104,62 @@ export const RangePopover = ({
       }
       data-test-subj="indexPattern-ranges-popover"
     >
-      <EuiForm>
-        <EuiFormRow>
-          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-            <EuiFlexItem>
-              <EuiFieldNumber
-                value={isValidNumber(from) ? Number(from) : ''}
-                onChange={({ target }) => {
-                  const newRange = {
-                    ...tempRange,
-                    from: target.value !== '' ? Number(target.value) : -Infinity,
-                  };
-                  setTempRange(newRange);
-                  saveRangeAndReset(newRange);
-                }}
-                append={
-                  <EuiToolTip content={lteTooltipContent}>
-                    <EuiText size="s">{lteAppendLabel}</EuiText>
-                  </EuiToolTip>
+      <EuiFormRow>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          <EuiFlexItem>
+            <EuiFieldNumber
+              value={isValidNumber(from) ? Number(from) : ''}
+              onChange={({ target }) => {
+                const newRange = {
+                  ...tempRange,
+                  from: target.value !== '' ? Number(target.value) : -Infinity,
+                };
+                setTempRange(newRange);
+                saveRangeAndReset(newRange);
+              }}
+              append={
+                <EuiToolTip content={lteTooltipContent}>
+                  <EuiText size="s">{lteAppendLabel}</EuiText>
+                </EuiToolTip>
+              }
+              fullWidth
+              compressed
+              placeholder={FROM_PLACEHOLDER}
+              isInvalid={!isValidRange(tempRange)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="sortRight" color="subdued" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldNumber
+              value={isFinite(to) ? Number(to) : ''}
+              onChange={({ target }) => {
+                const newRange = {
+                  ...tempRange,
+                  to: target.value !== '' ? Number(target.value) : -Infinity,
+                };
+                setTempRange(newRange);
+                saveRangeAndReset(newRange);
+              }}
+              prepend={
+                <EuiToolTip content={ltTooltipContent}>
+                  <EuiText size="s">{ltPrependLabel}</EuiText>
+                </EuiToolTip>
+              }
+              fullWidth
+              compressed
+              placeholder={TO_PLACEHOLDER}
+              isInvalid={!isValidRange(tempRange)}
+              onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
+                if (keys.ENTER === key && onSubmit) {
+                  onSubmit();
                 }
-                fullWidth
-                compressed
-                placeholder={FROM_PLACEHOLDER}
-                isInvalid={!isValidRange(tempRange)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="sortRight" color="subdued" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFieldNumber
-                value={isFinite(to) ? Number(to) : ''}
-                onChange={({ target }) => {
-                  const newRange = {
-                    ...tempRange,
-                    to: target.value !== '' ? Number(target.value) : -Infinity,
-                  };
-                  setTempRange(newRange);
-                  saveRangeAndReset(newRange);
-                }}
-                prepend={
-                  <EuiToolTip content={ltTooltipContent}>
-                    <EuiText size="s">{ltPrependLabel}</EuiText>
-                  </EuiToolTip>
-                }
-                fullWidth
-                compressed
-                placeholder={TO_PLACEHOLDER}
-                isInvalid={!isValidRange(tempRange)}
-                onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
-                  if (keys.ENTER === key && onSubmit) {
-                    onSubmit();
-                  }
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </EuiForm>
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
     </EuiPopover>
   );
 };
