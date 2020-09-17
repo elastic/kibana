@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { HttpSetup } from 'src/core/public';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
-import { npStart } from '../../../../legacy_singletons';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
 import {
@@ -17,8 +17,11 @@ import {
   logEntriesSummaryResponseRT,
 } from '../../../../../common/http_api';
 
-export const fetchLogSummary = async (requestArgs: LogEntriesSummaryRequest) => {
-  const response = await npStart.http.fetch(LOG_ENTRIES_SUMMARY_PATH, {
+export const fetchLogSummary = async (
+  requestArgs: LogEntriesSummaryRequest,
+  fetch: HttpSetup['fetch']
+) => {
+  const response = await fetch(LOG_ENTRIES_SUMMARY_PATH, {
     method: 'POST',
     body: JSON.stringify(logEntriesSummaryRequestRT.encode(requestArgs)),
   });
