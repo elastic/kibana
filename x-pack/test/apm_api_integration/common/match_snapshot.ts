@@ -12,6 +12,7 @@ import prettier from 'prettier';
 // @ts-expect-error
 import babelTraverse from '@babel/traverse';
 import { Suite, Test } from 'mocha';
+import { flatten } from 'lodash';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -143,16 +144,22 @@ Error.prepareStackTrace = (error, structuredStackTrace) => {
   }
 };
 
+function recursivelyGetTestsFromSuite(suite: Suite): Test[] {
+  return suite.tests.concat(flatten(suite.suites.map((s) => recursivelyGetTestsFromSuite(s))));
+}
+
 function getSnapshotState(file: string, test: Test) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
 
-  let parent = test.parent;
-  const testsInFile: Test[] = [];
+  let parent: Suite | undefined = test.parent;
 
-  while (parent) {
-    testsInFile.push(...parent.tests);
+  while (parent && parent.parent?.file === file) {
     parent = parent.parent;
+  }
+
+  if (!parent) {
+    throw new Error('Top-level suite not found');
   }
 
   const snapshotState = new SnapshotState(
@@ -164,7 +171,7 @@ function getSnapshotState(file: string, test: Test) {
     }
   );
 
-  return { snapshotState, testsInFile };
+  return { snapshotState, testsInFile: recursivelyGetTestsFromSuite(parent) };
 }
 
 export function expectSnapshot(received: any) {

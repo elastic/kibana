@@ -23,6 +23,8 @@ import {
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
+
 export interface DatatableColumns {
   columnIds: string[];
 }
@@ -199,7 +201,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
       ));
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon="visTable" />;
+    return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
 
   return (

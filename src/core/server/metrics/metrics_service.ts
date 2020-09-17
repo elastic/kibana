@@ -37,7 +37,7 @@ export class MetricsService
   private readonly logger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
-  private metrics$ = new ReplaySubject<OpsMetrics>();
+  private metrics$ = new ReplaySubject<OpsMetrics>(1);
   private service?: InternalMetricsServiceSetup;
 
   constructor(private readonly coreContext: CoreContext) {

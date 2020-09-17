@@ -20,7 +20,11 @@ describe('fetcher', () => {
       uiFiltersES: [],
     } as unknown) as Setup & SetupTimeRange & SetupUIFilters;
 
-    await fetcher({ serviceName: 'testServiceName', setup });
+    await fetcher({
+      serviceName: 'testServiceName',
+      setup,
+      searchAggregatedTransactions: false,
+    });
 
     expect(search).toHaveBeenCalled();
   });

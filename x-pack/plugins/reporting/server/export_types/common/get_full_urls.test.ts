@@ -5,6 +5,7 @@
  */
 
 import { ReportingConfig } from '../../';
+import { createMockConfig } from '../../test_helpers';
 import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
@@ -15,12 +16,6 @@ interface FullUrlsOpts {
 }
 
 let mockConfig: ReportingConfig;
-const getMockConfig = (mockConfigGet: jest.Mock<any, any>) => {
-  return {
-    get: mockConfigGet,
-    kbnConfig: { get: mockConfigGet },
-  };
-};
 
 beforeEach(() => {
   const reportingConfig: Record<string, any> = {
@@ -29,10 +24,7 @@ beforeEach(() => {
     'kibanaServer.protocol': 'http',
     'server.basePath': '/sbp',
   };
-  const mockConfigGet = jest.fn().mockImplementation((...keys: string[]) => {
-    return reportingConfig[keys.join('.') as string];
-  });
-  mockConfig = getMockConfig(mockConfigGet);
+  mockConfig = createMockConfig(reportingConfig);
 });
 
 const getMockJob = (base: object) => base as TaskPayloadPNG & TaskPayloadPDF;

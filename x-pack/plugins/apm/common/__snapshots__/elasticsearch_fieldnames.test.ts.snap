@@ -36,11 +36,11 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Error EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Error FCP_FIELD 1`] = `undefined`;
 
 exports[`Error FID_FIELD 1`] = `undefined`;
-
-exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
@@ -51,6 +51,10 @@ exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
 exports[`Error LCP_FIELD 1`] = `undefined`;
+
+exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
+
+exports[`Error METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 
@@ -136,6 +140,8 @@ exports[`Error TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
+exports[`Error TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
+
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
@@ -143,6 +149,8 @@ exports[`Error TRANSACTION_NAME 1`] = `undefined`;
 exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
+
+exports[`Error TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
 
@@ -200,11 +208,11 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Span EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Span FCP_FIELD 1`] = `undefined`;
 
 exports[`Span FID_FIELD 1`] = `undefined`;
-
-exports[`Span EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Span HOST_NAME 1`] = `undefined`;
 
@@ -215,6 +223,10 @@ exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
 exports[`Span LCP_FIELD 1`] = `undefined`;
+
+exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
+
+exports[`Span METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 
@@ -300,6 +312,8 @@ exports[`Span TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
+exports[`Span TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
+
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
@@ -307,6 +321,8 @@ exports[`Span TRANSACTION_NAME 1`] = `undefined`;
 exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Span TRANSACTION_RESULT 1`] = `undefined`;
+
+exports[`Span TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_SAMPLED 1`] = `undefined`;
 
@@ -364,11 +380,11 @@ exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Transaction EVENT_OUTCOME 1`] = `undefined`;
+
 exports[`Transaction FCP_FIELD 1`] = `undefined`;
 
 exports[`Transaction FID_FIELD 1`] = `undefined`;
-
-exports[`Transaction EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
@@ -379,6 +395,10 @@ exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
 exports[`Transaction LCP_FIELD 1`] = `undefined`;
+
+exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
+
+exports[`Transaction METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 
@@ -464,6 +484,8 @@ exports[`Transaction TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
+exports[`Transaction TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
+
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
@@ -471,6 +493,8 @@ exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
 exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_RESULT 1`] = `"transaction result"`;
+
+exports[`Transaction TRANSACTION_ROOT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_SAMPLED 1`] = `true`;
 
