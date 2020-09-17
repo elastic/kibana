@@ -26,12 +26,20 @@ export const percentileRangeRt = t.partial({
 export const rumClientMetricsRoute = createRoute(() => ({
   path: '/api/apm/rum/client-metrics',
   params: {
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.partial({ urlQuery: t.string }),
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    return getClientMetrics({ setup });
+    const {
+      query: { urlQuery },
+    } = context.params;
+
+    return getClientMetrics({ setup, urlQuery });
   },
 }));
 

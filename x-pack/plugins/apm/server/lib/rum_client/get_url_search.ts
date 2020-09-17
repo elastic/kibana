@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../projections/rum_overview';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 
 export async function getUrlSearch({
   setup,
@@ -19,7 +19,7 @@ export async function getUrlSearch({
   setup: Setup & SetupTimeRange & SetupUIFilters;
   urlQuery?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
@@ -28,8 +28,8 @@ export async function getUrlSearch({
       size: 0,
       query: {
         bool: {
-          filter: [...projection.body.query.bool.filter],
-          must: [
+          filter: [
+            ...projection.body.query.bool.filter,
             {
               wildcard: {
                 'url.full': {
@@ -41,6 +41,11 @@ export async function getUrlSearch({
         },
       },
       aggs: {
+        totalUrls: {
+          cardinality: {
+            field: 'url.full',
+          },
+        },
         urls: {
           terms: {
             field: 'url.full',
@@ -62,11 +67,14 @@ export async function getUrlSearch({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  const { urls } = response.aggregations!;
+  const { urls, totalUrls } = response.aggregations!;
 
-  return urls.buckets.map((bucket) => ({
-    url: bucket.key as string,
-    count: bucket.doc_count,
-    pld: (bucket.medianPLD.values['50.0'] ?? 0) / 1000,
-  }));
+  return {
+    total: totalUrls.value,
+    items: urls.buckets.map((bucket) => ({
+      url: bucket.key as string,
+      count: bucket.doc_count,
+      pld: (bucket.medianPLD.values['50.0'] ?? 0) / 1000,
+    })),
+  };
 }
