@@ -5,7 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Translations } from '../snapshot_metric_i18n';
+import { toMetricOpt } from '../snapshot_metric_i18n';
+import { SnapshotMetricType, SnapshotMetricTypeKeys } from './types';
 export const CPUUsage = i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
   defaultMessage: 'CPU usage',
 });
@@ -70,4 +71,9 @@ export const fieldToName = (field: string) => {
   return LOOKUP[field] || field;
 };
 
-export const SNAPSHOT_METRIC_TRANSLATIONS = Translations;
+const snapshotTypeKeys = Object.keys(SnapshotMetricTypeKeys) as SnapshotMetricType[];
+export const SNAPSHOT_METRIC_TRANSLATIONS = snapshotTypeKeys.reduce((result, metric) => {
+  const text = toMetricOpt(metric)?.text;
+  if (text) return { ...result, [metric]: text };
+  return result;
+}, {}) as Record<SnapshotMetricType, string>;

@@ -4,177 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { mapValues } from 'lodash';
 import { SnapshotMetricType } from './inventory_models/types';
 
-export const Translations = {
+// Lowercase versions of all metrics, for when they need to be used in the middle of a sentence;
+// these may need to be translated differently depending on language, e.g. still capitalizing "CPU"
+const TranslationsLowercase = {
   CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
     defaultMessage: 'CPU usage',
   }),
 
   MemoryUsage: i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
-    defaultMessage: 'Memory usage',
-  }),
-
-  InboundTraffic: i18n.translate('xpack.infra.waffle.metricOptions.inboundTrafficText', {
-    defaultMessage: 'Inbound traffic',
-  }),
-
-  OutboundTraffic: i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficText', {
-    defaultMessage: 'Outbound traffic',
-  }),
-
-  LogRate: i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateText', {
-    defaultMessage: 'Log rate',
-  }),
-
-  Load: i18n.translate('xpack.infra.waffle.metricOptions.loadText', {
-    defaultMessage: 'Load',
-  }),
-
-  Count: i18n.translate('xpack.infra.waffle.metricOptions.countText', {
-    defaultMessage: 'Count',
-  }),
-  DiskIOReadBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOReadBytes', {
-    defaultMessage: 'Disk reads',
-  }),
-  DiskIOWriteBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOWriteBytes', {
-    defaultMessage: 'Disk writes',
-  }),
-  s3BucketSize: i18n.translate('xpack.infra.waffle.metricOptions.s3BucketSize', {
-    defaultMessage: 'Bucket size',
-  }),
-  s3TotalRequests: i18n.translate('xpack.infra.waffle.metricOptions.s3TotalRequests', {
-    defaultMessage: 'Total requests',
-  }),
-  s3NumberOfObjects: i18n.translate('xpack.infra.waffle.metricOptions.s3NumberOfObjects', {
-    defaultMessage: 'Number of objects',
-  }),
-  s3DownloadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3DownloadBytes', {
-    defaultMessage: 'Downloads (bytes)',
-  }),
-  s3UploadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3UploadBytes', {
-    defaultMessage: 'Uploads (bytes)',
-  }),
-  rdsConnections: i18n.translate('xpack.infra.waffle.metricOptions.rdsConnections', {
-    defaultMessage: 'Connections',
-  }),
-  rdsQueriesExecuted: i18n.translate('xpack.infra.waffle.metricOptions.rdsQueriesExecuted', {
-    defaultMessage: 'Queries executed',
-  }),
-  rdsActiveTransactions: i18n.translate('xpack.infra.waffle.metricOptions.rdsActiveTransactions', {
-    defaultMessage: 'Active transactions',
-  }),
-  rdsLatency: i18n.translate('xpack.infra.waffle.metricOptions.rdsLatency', {
-    defaultMessage: 'Latency',
-  }),
-  sqsMessagesVisible: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesVisible', {
-    defaultMessage: 'Messages available',
-  }),
-  sqsMessagesDelayed: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesDelayed', {
-    defaultMessage: 'Messages delayed',
-  }),
-  sqsMessagesSent: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesSent', {
-    defaultMessage: 'Messages added',
-  }),
-  sqsMessagesEmpty: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesEmpty', {
-    defaultMessage: 'Messages returned empty',
-  }),
-  sqsOldestMessage: i18n.translate('xpack.infra.waffle.metricOptions.sqsOldestMessage', {
-    defaultMessage: 'Oldest message',
-  }),
-};
-
-// Lowercase versions of all metrics, for when they need to be used in the middle of a sentence;
-// these may need to be translated differently depending on language, e.g. still capitalizing "CPU"
-const TranslationsLowercase = {
-  CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageTextLowercase', {
-    defaultMessage: 'CPU usage',
-  }),
-
-  MemoryUsage: i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageTextLowercase', {
     defaultMessage: 'memory usage',
   }),
 
-  InboundTraffic: i18n.translate('xpack.infra.waffle.metricOptions.inboundTrafficTextLowercase', {
+  InboundTraffic: i18n.translate('xpack.infra.waffle.metricOptions.inboundTrafficText', {
     defaultMessage: 'inbound traffic',
   }),
 
-  OutboundTraffic: i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficTextLowercase', {
+  OutboundTraffic: i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficText', {
     defaultMessage: 'outbound traffic',
   }),
 
-  LogRate: i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateTextLowercase', {
+  LogRate: i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateText', {
     defaultMessage: 'log rate',
   }),
 
-  Load: i18n.translate('xpack.infra.waffle.metricOptions.loadTextLowercase', {
+  Load: i18n.translate('xpack.infra.waffle.metricOptions.loadText', {
     defaultMessage: 'load',
   }),
 
-  Count: i18n.translate('xpack.infra.waffle.metricOptions.countTextLowercase', {
+  Count: i18n.translate('xpack.infra.waffle.metricOptions.countText', {
     defaultMessage: 'count',
   }),
-  DiskIOReadBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOReadBytesLowercase', {
+  DiskIOReadBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOReadBytes', {
     defaultMessage: 'disk reads',
   }),
-  DiskIOWriteBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOWriteBytesLowercase', {
+  DiskIOWriteBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOWriteBytes', {
     defaultMessage: 'disk writes',
   }),
-  s3BucketSize: i18n.translate('xpack.infra.waffle.metricOptions.s3BucketSizeLowercase', {
+  s3BucketSize: i18n.translate('xpack.infra.waffle.metricOptions.s3BucketSize', {
     defaultMessage: 'bucket size',
   }),
-  s3TotalRequests: i18n.translate('xpack.infra.waffle.metricOptions.s3TotalRequestsLowercase', {
+  s3TotalRequests: i18n.translate('xpack.infra.waffle.metricOptions.s3TotalRequests', {
     defaultMessage: 'total requests',
   }),
-  s3NumberOfObjects: i18n.translate('xpack.infra.waffle.metricOptions.s3NumberOfObjectsLowercase', {
+  s3NumberOfObjects: i18n.translate('xpack.infra.waffle.metricOptions.s3NumberOfObjects', {
     defaultMessage: 'number of objects',
   }),
-  s3DownloadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3DownloadBytesLowercase', {
+  s3DownloadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3DownloadBytes', {
     defaultMessage: 'downloads (bytes)',
   }),
-  s3UploadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3UploadBytesLowercase', {
+  s3UploadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3UploadBytes', {
     defaultMessage: 'uploads (bytes)',
   }),
-  rdsConnections: i18n.translate('xpack.infra.waffle.metricOptions.rdsConnectionsLowercase', {
+  rdsConnections: i18n.translate('xpack.infra.waffle.metricOptions.rdsConnections', {
     defaultMessage: 'connections',
   }),
-  rdsQueriesExecuted: i18n.translate(
-    'xpack.infra.waffle.metricOptions.rdsQueriesExecutedLowercase',
-    {
-      defaultMessage: 'queries executed',
-    }
-  ),
-  rdsActiveTransactions: i18n.translate(
-    'xpack.infra.waffle.metricOptions.rdsActiveTransactionsLowercase',
-    {
-      defaultMessage: 'active transactions',
-    }
-  ),
-  rdsLatency: i18n.translate('xpack.infra.waffle.metricOptions.rdsLatencyLowercase', {
+  rdsQueriesExecuted: i18n.translate('xpack.infra.waffle.metricOptions.rdsQueriesExecuted', {
+    defaultMessage: 'queries executed',
+  }),
+  rdsActiveTransactions: i18n.translate('xpack.infra.waffle.metricOptions.rdsActiveTransactions', {
+    defaultMessage: 'active transactions',
+  }),
+  rdsLatency: i18n.translate('xpack.infra.waffle.metricOptions.rdsLatency', {
     defaultMessage: 'latency',
   }),
-  sqsMessagesVisible: i18n.translate(
-    'xpack.infra.waffle.metricOptions.sqsMessagesVisibleLowercase',
-    {
-      defaultMessage: 'messages available',
-    }
-  ),
-  sqsMessagesDelayed: i18n.translate(
-    'xpack.infra.waffle.metricOptions.sqsMessagesDelayedLowercase',
-    {
-      defaultMessage: 'messages delayed',
-    }
-  ),
-  sqsMessagesSent: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesSentLowercase', {
+  sqsMessagesVisible: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesVisible', {
+    defaultMessage: 'messages available',
+  }),
+  sqsMessagesDelayed: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesDelayed', {
+    defaultMessage: 'messages delayed',
+  }),
+  sqsMessagesSent: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesSent', {
     defaultMessage: 'messages added',
   }),
-  sqsMessagesEmpty: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesEmptyLowercase', {
+  sqsMessagesEmpty: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesEmpty', {
     defaultMessage: 'messages returned empty',
   }),
-  sqsOldestMessage: i18n.translate('xpack.infra.waffle.metricOptions.sqsOldestMessageLowercase', {
+  sqsOldestMessage: i18n.translate('xpack.infra.waffle.metricOptions.sqsOldestMessage', {
     defaultMessage: 'oldest message',
   }),
 };
+
+const Translations = mapValues(
+  TranslationsLowercase,
+  (translation) => `${translation[0].toUpperCase()}${translation.slice(1)}`
+);
 
 export const toMetricOpt = (
   metric: SnapshotMetricType
