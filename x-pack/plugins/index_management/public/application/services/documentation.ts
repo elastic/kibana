@@ -75,10 +75,6 @@ class DocumentationService {
     return `${this.esDocsBase}/query-dsl-percolate-query.html`;
   }
 
-  public getMetaLink() {
-    return `${this.esDocsBase}/mapping-field-meta.html`;
-  }
-
   public getRankFeatureQueryLink() {
     return `${this.esDocsBase}/rank-feature.html`;
   }
@@ -125,6 +121,10 @@ class DocumentationService {
 
   public getIgnoreMalformedLink() {
     return `${this.esDocsBase}/ignore-malformed.html`;
+  }
+
+  public getMetaLink() {
+    return `${this.esDocsBase}/mapping-field-meta.html`;
   }
 
   public getFormatLink() {
