@@ -39,7 +39,7 @@
     "@kbn/storybook": "1.0.0",
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
-    "@mapbox/geojson-rewind": "^0.4.1",
+    "@mapbox/geojson-rewind": "^0.5.0",
     "@mapbox/mapbox-gl-draw": "^1.2.0",
     "@mapbox/mapbox-gl-rtl-text": "^0.2.3",
     "@scant/router": "^0.1.0",
