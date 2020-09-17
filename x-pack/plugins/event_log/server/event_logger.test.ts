@@ -12,6 +12,7 @@ import { contextMock } from './es/context.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { delay } from './lib/delay';
 import { EVENT_LOGGED_PREFIX } from './event_logger';
+import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
 
 const KIBANA_SERVER_UUID = '424-24-2424';
 const WRITE_LOG_WAIT_MILLIS = 3000;
@@ -31,6 +32,7 @@ describe('EventLogger', () => {
       systemLogger,
       config: { enabled: true, logEntries: true, indexEntries: true },
       kibanaUUID: KIBANA_SERVER_UUID,
+      savedObjectProviderRegistry: savedObjectProviderRegistryMock.create(),
     });
     eventLogger = service.getLogger({});
   });

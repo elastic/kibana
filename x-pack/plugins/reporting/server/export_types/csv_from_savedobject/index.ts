@@ -14,16 +14,16 @@ import {
 } from '../../../common/constants';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../constants';
 import { ExportTypeDefinition } from '../../types';
-import { metadata } from './metadata';
-import { ImmediateCreateJobFn, scheduleTaskFnFactory } from './create_job';
+import { createJobFnFactory, ImmediateCreateJobFn } from './create_job';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
+import { metadata } from './metadata';
 import { JobParamsPanelCsv } from './types';
 
 /*
  * These functions are exported to share with the API route handler that
  * generates csv from saved object immediately on request.
  */
-export { scheduleTaskFnFactory } from './create_job';
+export { createJobFnFactory } from './create_job';
 export { runTaskFnFactory } from './execute_job';
 
 export const getExportType = (): ExportTypeDefinition<
@@ -35,7 +35,7 @@ export const getExportType = (): ExportTypeDefinition<
   ...metadata,
   jobType: CSV_FROM_SAVEDOBJECT_JOB_TYPE,
   jobContentExtension: 'csv',
-  scheduleTaskFnFactory,
+  createJobFnFactory,
   runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,

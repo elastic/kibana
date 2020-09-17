@@ -18,22 +18,25 @@ import { EditMenu } from './edit_menu';
 import { ElementMenu } from './element_menu';
 import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
+import { CommitFn } from '../../../types';
 
 const { WorkpadHeader: strings } = ComponentStrings;
 
 export interface Props {
   isWriteable: boolean;
-  toggleWriteable: () => void;
   canUserWrite: boolean;
-  commit: (type: string, payload: any) => any;
+  commit: CommitFn;
+  onSetWriteable?: (writeable: boolean) => void;
 }
 
 export const WorkpadHeader: FunctionComponent<Props> = ({
   isWriteable,
   canUserWrite,
-  toggleWriteable,
   commit,
+  onSetWriteable = () => {},
 }) => {
+  const toggleWriteable = () => onSetWriteable(!isWriteable);
+
   const keyHandler = (action: string) => {
     if (action === 'EDITING') {
       toggleWriteable();
@@ -145,6 +148,7 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
 
 WorkpadHeader.propTypes = {
   isWriteable: PropTypes.bool,
-  toggleWriteable: PropTypes.func,
+  commit: PropTypes.func.isRequired,
+  onSetWriteable: PropTypes.func,
   canUserWrite: PropTypes.bool,
 };

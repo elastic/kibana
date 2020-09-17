@@ -20,18 +20,20 @@ import './fetch_error.scss';
 import React, { Fragment } from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { getAngularModule, getServices } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 
-interface Props {
-  fetchError: {
-    lang: string;
-    script: string;
-    message: string;
-    error: string;
-  };
+export interface FetchError {
+  lang: string;
+  script: string;
+  message: string;
+  error: string;
 }
 
-const DiscoverFetchError = ({ fetchError }: Props) => {
+interface Props {
+  fetchError: FetchError;
+}
+
+export const DiscoverFetchError = ({ fetchError }: Props) => {
   if (!fetchError) {
     return null;
   }
@@ -92,9 +94,3 @@ const DiscoverFetchError = ({ fetchError }: Props) => {
     </I18nProvider>
   );
 };
-
-export function createFetchErrorDirective(reactDirective: any) {
-  return reactDirective(DiscoverFetchError);
-}
-
-getAngularModule().directive('discoverFetchError', createFetchErrorDirective);

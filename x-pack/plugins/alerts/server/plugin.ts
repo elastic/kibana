@@ -38,6 +38,7 @@ import {
   findAlertRoute,
   getAlertRoute,
   getAlertStateRoute,
+  getAlertInstanceSummaryRoute,
   listAlertTypesRoute,
   updateAlertRoute,
   enableAlertRoute,
@@ -57,16 +58,17 @@ import {
 import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 
-const EVENT_LOG_PROVIDER = 'alerting';
+export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeAction: 'execute-action',
   newInstance: 'new-instance',
   resolvedInstance: 'resolved-instance',
+  activeInstance: 'active-instance',
 };
 
 export interface PluginSetupContract {
@@ -92,6 +94,7 @@ export interface AlertingPluginsStart {
   taskManager: TaskManagerStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
+  eventLog: IEventLogClientService;
 }
 
 export class AlertingPlugin {
@@ -106,6 +109,8 @@ export class AlertingPlugin {
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -119,6 +124,7 @@ export class AlertingPlugin {
         map((config: SharedGlobalConfig) => config.kibana.index)
       )
       .toPromise();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public async setup(
@@ -148,12 +154,14 @@ export class AlertingPlugin {
       );
     }
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
-
-    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
+
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
+
+    this.eventLogService = plugins.eventLog;
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
     const alertTypeRegistry = new AlertTypeRegistry({
       taskManager: plugins.taskManager,
@@ -187,6 +195,7 @@ export class AlertingPlugin {
     findAlertRoute(router, this.licenseState);
     getAlertRoute(router, this.licenseState);
     getAlertStateRoute(router, this.licenseState);
+    getAlertInstanceSummaryRoute(router, this.licenseState);
     listAlertTypesRoute(router, this.licenseState);
     updateAlertRoute(router, this.licenseState);
     enableAlertRoute(router, this.licenseState);
@@ -233,6 +242,8 @@ export class AlertingPlugin {
       },
       actions: plugins.actions,
       features: plugins.features,
+      eventLog: plugins.eventLog,
+      kibanaVersion: this.kibanaVersion,
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
@@ -253,6 +264,11 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
+    });
+
+    this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
+      const client = getAlertsClientWithRequest(request);
+      return (type: string, id: string) => client.get({ id });
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);

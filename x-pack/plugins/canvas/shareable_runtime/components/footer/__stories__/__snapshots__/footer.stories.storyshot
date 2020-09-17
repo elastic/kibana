@@ -1351,7 +1351,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                   type="button"
                 >
                   <span
-                    className="euiButtonEmpty__content"
+                    className="euiButtonContent euiButtonEmpty__content"
                   >
                     <span
                       className="euiButtonEmpty__text"
@@ -1603,7 +1603,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                   type="button"
                 >
                   <span
-                    className="euiButtonEmpty__content"
+                    className="euiButtonContent euiButtonEmpty__content"
                   >
                     <span
                       className="euiButtonEmpty__text"

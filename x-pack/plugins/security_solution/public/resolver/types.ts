@@ -9,6 +9,7 @@
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
+import { Provider } from 'react-redux';
 import { ResolverAction } from './store/actions';
 import {
   ResolverRelatedEvents,
@@ -49,6 +50,16 @@ export interface ResolverUIState {
    * `nodeID` of the selected node
    */
   readonly selectedNode: string | null;
+
+  /**
+   * The `search` part of the URL.
+   */
+  readonly locationSearch?: string;
+
+  /**
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   */
+  readonly resolverComponentInstanceID?: string;
 }
 
 /**
@@ -160,11 +171,39 @@ export interface IndexedProcessNode extends BBox {
 }
 
 /**
+ * A type describing the shape of section titles and entries for description lists
+ */
+export type SectionData = Array<{
+  sectionTitle: string;
+  entries: Array<{ title: string; description: string }>;
+}>;
+
+/**
+ * The two query parameters we read/write on to control which view the table presents:
+ */
+export interface CrumbInfo {
+  crumbId: string;
+  crumbEvent: string;
+}
+
+/**
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {
   processNodePositions: ProcessPositions;
   connectingEdgeLineSegments: EdgeLineSegment[];
+}
+
+export interface TreeFetcherParameters {
+  /**
+   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   */
+  databaseDocumentID: string;
+
+  /**
+   * The indices that the backend will use to search for the document ID.
+   */
+  indices: string[];
 }
 
 /**
@@ -173,42 +212,50 @@ export interface VisibleEntites {
 export interface DataState {
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
-  /**
-   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
-   */
-  readonly databaseDocumentID?: string;
-  /**
-   * The id used for the pending request, if there is one.
-   */
-  readonly pendingRequestDatabaseDocumentID?: string;
-  readonly resolverComponentInstanceID: string | undefined;
+
+  readonly tree: {
+    /**
+     * The parameters passed from the resolver properties
+     */
+    readonly currentParameters?: TreeFetcherParameters;
+
+    /**
+     * The id used for the pending request, if there is one.
+     */
+    readonly pendingRequestParameters?: TreeFetcherParameters;
+    /**
+     * The parameters and response from the last successful request.
+     */
+    readonly lastResponse?: {
+      /**
+       * The id used in the request.
+       */
+      readonly parameters: TreeFetcherParameters;
+    } & (
+      | {
+          /**
+           * If a response with a success code was received, this is `true`.
+           */
+          readonly successful: true;
+          /**
+           * The ResolverTree parsed from the response.
+           */
+          readonly result: ResolverTree;
+        }
+      | {
+          /**
+           * If the request threw an exception or the response had a failure code, this will be false.
+           */
+          readonly successful: false;
+        }
+    );
+  };
 
   /**
-   * The parameters and response from the last successful request.
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   * Used to prevent collisions in things like query parameters.
    */
-  readonly lastResponse?: {
-    /**
-     * The id used in the request.
-     */
-    readonly databaseDocumentID: string;
-  } & (
-    | {
-        /**
-         * If a response with a success code was received, this is `true`.
-         */
-        readonly successful: true;
-        /**
-         * The ResolverTree parsed from the response.
-         */
-        readonly result: ResolverTree;
-      }
-    | {
-        /**
-         * If the request threw an exception or the response had a failure code, this will be false.
-         */
-        readonly successful: false;
-      }
-  );
+  readonly resolverComponentInstanceID?: string;
 }
 
 /**
@@ -221,7 +268,7 @@ export type Vector2 = readonly [number, number];
  */
 export interface AABB {
   /**
-   * Vector who's `x` component is the _left_ side of the `AABB` and who's `y` component is the _bottom_ side of the `AABB`.
+   * Vector whose `x` component represents the minimum side of the box and whose 'y' component represents the maximum side of the box.
    **/
   readonly minimum: Vector2;
   /**
@@ -410,7 +457,7 @@ export interface SideEffectSimulator {
   /**
    * Mocked `SideEffectors`.
    */
-  mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
+  mock: SideEffectors;
 }
 
 /**
@@ -463,11 +510,6 @@ export interface DataAccessLayer {
   resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
 
   /**
-   * Get an array of index patterns that contain events.
-   */
-  indexPatterns: () => string[];
-
-  /**
    * Get entities matching a document.
    */
   entities: (parameters: {
@@ -492,12 +534,18 @@ export interface ResolverProps {
    * The `_id` value of an event in ES.
    * Used as the origin of the Resolver graph.
    */
-  databaseDocumentID?: string;
+  databaseDocumentID: string;
+
   /**
-   * A string literal describing where in the application resolver is located.
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    * Used to prevent collisions in things like query parameters.
    */
   resolverComponentInstanceID: string;
+
+  /**
+   * Indices that the backend should use to find the originating document.
+   */
+  indices: string[];
 }
 
 /**
@@ -532,3 +580,120 @@ export interface SpyMiddleware {
    */
   debugActions: () => () => void;
 }
+
+/**
+ * values of this type are exposed by the Security Solution plugin's setup phase.
+ */
+export interface ResolverPluginSetup {
+  /**
+   * Provide access to the instance of the `react-redux` `Provider` that Resolver recognizes.
+   */
+  Provider: typeof Provider;
+  /**
+   * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
+   * All data acess (e.g. HTTP requests) are done through the store.
+   */
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
+
+  /**
+   * The Resolver component without the required Providers.
+   * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
+   * and the `Provider` component provided by this object.
+   */
+  ResolverWithoutProviders: React.MemoExoticComponent<
+    React.ForwardRefExoticComponent<ResolverProps & React.RefAttributes<unknown>>
+  >;
+
+  /**
+   * A collection of mock objects that can be used in examples or in testing.
+   */
+  mocks: {
+    /**
+     * Mock `DataAccessLayer`s. All of Resolver's HTTP access is provided by a `DataAccessLayer`.
+     */
+    dataAccessLayer: {
+      /**
+       * A mock `DataAccessLayer` that returns a tree that has no ancestor nodes but which has 2 children nodes.
+       */
+      noAncestorsTwoChildren: () => { dataAccessLayer: DataAccessLayer };
+    };
+  };
+}
+
+/**
+ * Parameters to control what panel content is shown. Can be encoded and decoded from the URL using methods in
+ * `models/location_search`
+ */
+export type PanelViewAndParameters =
+  | {
+      /**
+       * The panel will show a index view (e.g. a list) of the nodes.
+       */
+      panelView: 'nodes';
+    }
+  | {
+      /**
+       * The panel will show the details of a single node.
+       */
+      panelView: 'nodeDetail';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node that will be shown in detail
+         */
+        nodeID: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show a index view of the all events related to a specific node.
+       * This may show a summary of aggregation of the events related to the node.
+       */
+      panelView: 'nodeEvents';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node whose events will be shown.
+         */
+        nodeID: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show an index view of the events related to a specific node. Only events with a specific type will be shown.
+       */
+      panelView: 'nodeEventsOfType';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node whose events will be shown.
+         */
+        nodeID: string;
+        /**
+         * A parameter used to filter the events. For example, events that don't contain `eventType` in their `event.category` field may be hidden.
+         */
+        eventType: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show details about a particular event. This is meant as a subview of 'nodeEventsOfType'.
+       */
+      panelView: 'eventDetail';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node related to the event being shown.
+         */
+        nodeID: string;
+        /**
+         * A value used for the `nodeEventsOfType` view. Used to associate this view with a parent `nodeEventsOfType` view.
+         * e.g. The user views the `nodeEventsOfType` and follows a link to the `eventDetail` view. The `eventDetail` view can
+         * use `eventType` to populate breadcrumbs and allow the user to return to the previous filter.
+         *
+         * This cannot be inferred from the event itself, as an event may have any number of 'eventType's.
+         */
+        eventType: string;
+
+        /**
+         * `event.id` that uniquely identifies the event to show.
+         */
+        eventID: string;
+      };
+    };

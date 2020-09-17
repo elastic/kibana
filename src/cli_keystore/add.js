@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import Logger from '../cli_plugin/lib/logger';
-import { confirm, question } from '../legacy/server/utils';
-import { createPromiseFromStreams, createConcatStream } from '../legacy/utils';
+import { Logger } from '../cli_plugin/lib/logger';
+import { confirm, question } from './utils';
+import { createPromiseFromStreams, createConcatStream } from '../core/server/utils';
 
 /**
  * @param {Keystore} keystore

@@ -21,7 +21,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
-import { makeESBbox } from '../../../elasticsearch_geo_utils';
+import { makeESBbox } from '../../../../common/elasticsearch_geo_utils';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -319,10 +319,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   canFormatFeatureProperties() {
     return true;
-  }
-
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 
   async getSupportedShapeTypes() {

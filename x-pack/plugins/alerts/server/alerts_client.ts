@@ -5,14 +5,16 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, map, uniq, pick, truncate } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectReference,
   SavedObject,
+  PluginInitializerContext,
 } from 'src/core/server';
+import { esKuery } from '../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../actions/server';
 import {
   Alert,
@@ -24,6 +26,7 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
+  AlertInstanceSummary,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -36,11 +39,12 @@ import { TaskManagerStartContract } from '../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 import { RegistryAlertType } from './alert_type_registry';
-import {
-  AlertsAuthorization,
-  WriteOperations,
-  ReadOperations,
-} from './authorization/alerts_authorization';
+import { AlertsAuthorization, WriteOperations, ReadOperations, and } from './authorization';
+import { IEventLogClient } from '../../../plugins/event_log/server';
+import { parseIsoOrRelativeDate } from './lib/iso_or_relative_date';
+import { alertInstanceSummaryFromEventLog } from './lib/alert_instance_summary_from_event_log';
+import { IEvent } from '../../event_log/server';
+import { parseDuration } from '../common/parse_duration';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -67,6 +71,8 @@ export interface ConstructorOptions {
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
   getActionsClient: () => Promise<ActionsClient>;
+  getEventLogClient: () => Promise<IEventLogClient>;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
 export interface MuteOptions extends IndexType {
@@ -132,6 +138,11 @@ interface UpdateOptions {
   };
 }
 
+interface GetAlertInstanceSummaryParams {
+  id: string;
+  dateStart?: string;
+}
+
 export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
@@ -147,7 +158,9 @@ export class AlertsClient {
   ) => Promise<InvalidateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
-  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  private readonly getEventLogClient: () => Promise<IEventLogClient>;
+  private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor({
     alertTypeRegistry,
@@ -163,6 +176,8 @@ export class AlertsClient {
     encryptedSavedObjectsClient,
     getActionsClient,
     actionsAuthorization,
+    getEventLogClient,
+    kibanaVersion,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -177,6 +192,8 @@ export class AlertsClient {
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.getActionsClient = getActionsClient;
     this.actionsAuthorization = actionsAuthorization;
+    this.getEventLogClient = getEventLogClient;
+    this.kibanaVersion = kibanaVersion;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
@@ -210,10 +227,14 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
     };
-    const createdAlert = await this.unsecuredSavedObjectsClient.create('alert', rawAlert, {
-      ...options,
-      references,
-    });
+    const createdAlert = await this.unsecuredSavedObjectsClient.create(
+      'alert',
+      this.updateMeta(rawAlert),
+      {
+        ...options,
+        references,
+      }
+    );
     if (data.enabled) {
       let scheduledTask;
       try {
@@ -269,6 +290,52 @@ export class AlertsClient {
     }
   }
 
+  public async getAlertInstanceSummary({
+    id,
+    dateStart,
+  }: GetAlertInstanceSummaryParams): Promise<AlertInstanceSummary> {
+    this.logger.debug(`getAlertInstanceSummary(): getting alert ${id}`);
+    const alert = await this.get({ id });
+    await this.authorization.ensureAuthorized(
+      alert.alertTypeId,
+      alert.consumer,
+      ReadOperations.GetAlertInstanceSummary
+    );
+
+    // default duration of instance summary is 60 * alert interval
+    const dateNow = new Date();
+    const durationMillis = parseDuration(alert.schedule.interval) * 60;
+    const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
+    const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
+    let events: IEvent[];
+    try {
+      const queryResults = await eventLogClient.findEventsBySavedObject('alert', id, {
+        page: 1,
+        per_page: 10000,
+        start: parsedDateStart.toISOString(),
+        end: dateNow.toISOString(),
+        sort_order: 'desc',
+      });
+      events = queryResults.data;
+    } catch (err) {
+      this.logger.debug(
+        `alertsClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
+      );
+      events = [];
+    }
+
+    return alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart: parsedDateStart.toISOString(),
+      dateEnd: dateNow.toISOString(),
+    });
+  }
+
   public async find({
     options: { fields, ...options } = {},
   }: { options?: FindOptions } = {}): Promise<FindResult> {
@@ -278,12 +345,6 @@ export class AlertsClient {
       logSuccessfulAuthorization,
     } = await this.authorization.getFindAuthorizationFilter();
 
-    if (authorizationFilter) {
-      options.filter = options.filter
-        ? `${options.filter} and ${authorizationFilter}`
-        : authorizationFilter;
-    }
-
     const {
       page,
       per_page: perPage,
@@ -291,6 +352,10 @@ export class AlertsClient {
       saved_objects: data,
     } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
       ...options,
+      filter:
+        (authorizationFilter && options.filter
+          ? and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
+          : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
     });
@@ -317,7 +382,7 @@ export class AlertsClient {
   }
 
   public async delete({ id }: { id: string }) {
-    let taskIdToRemove: string | undefined;
+    let taskIdToRemove: string | undefined | null;
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
 
@@ -426,14 +491,14 @@ export class AlertsClient {
     const updatedObject = await this.unsecuredSavedObjectsClient.update<RawAlert>(
       'alert',
       id,
-      {
+      this.updateMeta({
         ...attributes,
         ...data,
         ...apiKeyAttributes,
         params: validatedAlertTypeParams as RawAlert['params'],
         actions,
         updatedBy: username,
-      },
+      }),
       {
         version,
         references,
@@ -491,7 +556,7 @@ export class AlertsClient {
       WriteOperations.UpdateApiKey
     );
 
-    if (attributes.actions.length) {
+    if (attributes.actions.length && !this.authorization.shouldUseLegacyAuthorization(attributes)) {
       await this.actionsAuthorization.ensureAuthorized('execute');
     }
 
@@ -499,14 +564,14 @@ export class AlertsClient {
     await this.unsecuredSavedObjectsClient.update(
       'alert',
       id,
-      {
+      this.updateMeta({
         ...attributes,
         ...this.apiKeyAsAlertAttributes(
           await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
           username
         ),
         updatedBy: username,
-      },
+      }),
       { version }
     );
 
@@ -569,7 +634,7 @@ export class AlertsClient {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
         id,
-        {
+        this.updateMeta({
           ...attributes,
           enabled: true,
           ...this.apiKeyAsAlertAttributes(
@@ -579,7 +644,7 @@ export class AlertsClient {
             username
           ),
           updatedBy: username,
-        },
+        }),
         { version }
       );
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
@@ -625,14 +690,14 @@ export class AlertsClient {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
         id,
-        {
+        this.updateMeta({
           ...attributes,
           enabled: false,
           scheduledTaskId: null,
           apiKey: null,
           apiKeyOwner: null,
           updatedBy: await this.getUserName(),
-        },
+        }),
         { version }
       );
 
@@ -657,11 +722,15 @@ export class AlertsClient {
       await this.actionsAuthorization.ensureAuthorized('execute');
     }
 
-    await this.unsecuredSavedObjectsClient.update('alert', id, {
-      muteAll: true,
-      mutedInstanceIds: [],
-      updatedBy: await this.getUserName(),
-    });
+    await this.unsecuredSavedObjectsClient.update(
+      'alert',
+      id,
+      this.updateMeta({
+        muteAll: true,
+        mutedInstanceIds: [],
+        updatedBy: await this.getUserName(),
+      })
+    );
   }
 
   public async unmuteAll({ id }: { id: string }) {
@@ -676,11 +745,15 @@ export class AlertsClient {
       await this.actionsAuthorization.ensureAuthorized('execute');
     }
 
-    await this.unsecuredSavedObjectsClient.update('alert', id, {
-      muteAll: false,
-      mutedInstanceIds: [],
-      updatedBy: await this.getUserName(),
-    });
+    await this.unsecuredSavedObjectsClient.update(
+      'alert',
+      id,
+      this.updateMeta({
+        muteAll: false,
+        mutedInstanceIds: [],
+        updatedBy: await this.getUserName(),
+      })
+    );
   }
 
   public async muteInstance({ alertId, alertInstanceId }: MuteOptions) {
@@ -705,10 +778,10 @@ export class AlertsClient {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
         alertId,
-        {
+        this.updateMeta({
           mutedInstanceIds,
           updatedBy: await this.getUserName(),
-        },
+        }),
         { version }
       );
     }
@@ -739,11 +812,10 @@ export class AlertsClient {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
         alertId,
-        {
+        this.updateMeta({
           updatedBy: await this.getUserName(),
-
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
-        },
+        }),
         { version }
       );
     }
@@ -803,7 +875,7 @@ export class AlertsClient {
 
   private getPartialAlertFromRaw(
     id: string,
-    { createdAt, ...rawAlert }: Partial<RawAlert>,
+    { createdAt, meta, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
     updatedAt: SavedObject['updated_at'] = createdAt,
     references: SavedObjectReference[] | undefined
   ): PartialAlert {
@@ -818,6 +890,7 @@ export class AlertsClient {
         : [],
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
+      ...(scheduledTaskId ? { scheduledTaskId } : {}),
     };
   }
 
@@ -883,6 +956,35 @@ export class AlertsClient {
   }
 
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
-    return truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
+    return truncate(`Alerting: ${alertTypeId}/${trim(alertName)}`, { length: 256 });
   }
+
+  private updateMeta<T extends Partial<RawAlert>>(alertAttributes: T): T {
+    if (alertAttributes.hasOwnProperty('apiKey') || alertAttributes.hasOwnProperty('apiKeyOwner')) {
+      alertAttributes.meta = alertAttributes.meta ?? {};
+      alertAttributes.meta.versionApiKeyLastmodified = this.kibanaVersion;
+    }
+    return alertAttributes;
+  }
+}
+
+function parseDate(dateString: string | undefined, propertyName: string, defaultValue: Date): Date {
+  if (dateString === undefined) {
+    return defaultValue;
+  }
+
+  const parsedDate = parseIsoOrRelativeDate(dateString);
+  if (parsedDate === undefined) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerts.alertsClient.invalidDate', {
+        defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
+        values: {
+          field: propertyName,
+          dateValue: dateString,
+        },
+      })
+    );
+  }
+
+  return parsedDate;
 }

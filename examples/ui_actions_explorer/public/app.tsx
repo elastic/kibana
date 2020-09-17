@@ -97,9 +97,9 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                   });
                   uiActionsApi.addTriggerAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
                   setConfirmationText(
-                    `You've successfully added a new action: ${dynamicAction.getDisplayName(
-                      {}
-                    )}. Refresh the page to reset state.  It's up to the user of the system to persist state like this.`
+                    `You've successfully added a new action: ${dynamicAction.getDisplayName({
+                      trigger: uiActionsApi.getTrigger(HELLO_WORLD_TRIGGER_ID),
+                    })}. Refresh the page to reset state.  It's up to the user of the system to persist state like this.`
                   );
                 }}
               >

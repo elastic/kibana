@@ -15,12 +15,15 @@ import {
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates,
-} from '../../../../elasticsearch_geo_utils';
+} from '../../../../../common/elasticsearch_geo_utils';
 import { DrawTooltip } from './draw_tooltip';
 
+const DRAW_RECTANGLE = 'draw_rectangle';
+const DRAW_CIRCLE = 'draw_circle';
+
 const mbDrawModes = MapboxDraw.modes;
-mbDrawModes.draw_rectangle = DrawRectangle;
-mbDrawModes.draw_circle = DrawCircle;
+mbDrawModes[DRAW_RECTANGLE] = DrawRectangle;
+mbDrawModes[DRAW_CIRCLE] = DrawCircle;
 
 export class DrawControl extends React.Component {
   constructor() {
@@ -45,8 +48,10 @@ export class DrawControl extends React.Component {
     this._removeDrawControl();
   }
 
+  // debounce with zero timeout needed to allow mapbox-draw finish logic to complete
+  // before _removeDrawControl is called
   _syncDrawControl = _.debounce(() => {
-    if (!this.props.mbMap) {
+    if (!this._isMounted) {
       return;
     }
 
@@ -55,13 +60,14 @@ export class DrawControl extends React.Component {
     } else {
       this._removeDrawControl();
     }
-  }, 256);
+  }, 0);
 
-  _onDraw = (e) => {
+  _onDraw = async (e) => {
     if (!e.features.length) {
       return;
     }
 
+    let filter;
     if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
       const circle = e.features[0];
       const distanceKm = _.round(
@@ -77,7 +83,7 @@ export class DrawControl extends React.Component {
       } else if (distanceKm <= 100) {
         precision = 3;
       }
-      const filter = createDistanceFilterWithMeta({
+      filter = createDistanceFilterWithMeta({
         alias: this.props.drawState.filterLabel,
         distanceKm,
         geoFieldName: this.props.drawState.geoFieldName,
@@ -87,17 +93,12 @@ export class DrawControl extends React.Component {
           _.round(circle.properties.center[1], precision),
         ],
       });
-      this.props.addFilters([filter]);
-      this.props.disableDrawState();
-      return;
-    }
+    } else {
+      const geometry = e.features[0].geometry;
+      // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
+      roundCoordinates(geometry.coordinates);
 
-    const geometry = e.features[0].geometry;
-    // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
-    roundCoordinates(geometry.coordinates);
-
-    try {
-      const filter = createSpatialFilterWithGeometry({
+      filter = createSpatialFilterWithGeometry({
         geometry:
           this.props.drawState.drawType === DRAW_TYPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)
@@ -108,7 +109,10 @@ export class DrawControl extends React.Component {
         geometryLabel: this.props.drawState.geometryLabel,
         relation: this.props.drawState.relation,
       });
-      this.props.addFilters([filter]);
+    }
+
+    try {
+      await this.props.addFilters([filter], this.props.drawState.actionId);
     } catch (error) {
       // TODO notify user why filter was not created
       console.error(error);
@@ -118,7 +122,7 @@ export class DrawControl extends React.Component {
   };
 
   _removeDrawControl() {
-    if (!this._mbDrawControlAdded) {
+    if (!this.props.mbMap || !this._mbDrawControlAdded) {
       return;
     }
 
@@ -129,6 +133,10 @@ export class DrawControl extends React.Component {
   }
 
   _updateDrawControl() {
+    if (!this.props.mbMap) {
+      return;
+    }
+
     if (!this._mbDrawControlAdded) {
       this.props.mbMap.addControl(this._mbDrawControl);
       this._mbDrawControlAdded = true;
@@ -136,11 +144,15 @@ export class DrawControl extends React.Component {
       this.props.mbMap.on('draw.create', this._onDraw);
     }
 
-    if (this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
-      this._mbDrawControl.changeMode('draw_rectangle');
-    } else if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
-      this._mbDrawControl.changeMode('draw_circle');
-    } else if (this.props.drawState.drawType === DRAW_TYPE.POLYGON) {
+    const drawMode = this._mbDrawControl.getMode();
+    if (drawMode !== DRAW_RECTANGLE && this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
+      this._mbDrawControl.changeMode(DRAW_RECTANGLE);
+    } else if (drawMode !== DRAW_CIRCLE && this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+      this._mbDrawControl.changeMode(DRAW_CIRCLE);
+    } else if (
+      drawMode !== this._mbDrawControl.modes.DRAW_POLYGON &&
+      this.props.drawState.drawType === DRAW_TYPE.POLYGON
+    ) {
       this._mbDrawControl.changeMode(this._mbDrawControl.modes.DRAW_POLYGON);
     }
   }

@@ -41,7 +41,7 @@ const getIcon = (type: IconType) => {
 
 const getColumnName = (col: DatatableColumn) => (typeof col === 'string' ? col : col.name);
 
-const getColumnType = (col: DatatableColumn) => col.type || null;
+const getColumnType = (col: DatatableColumn) => col.meta?.type || null;
 
 const getFormattedValue = (val: any, type: any) => {
   if (type === 'date') {

@@ -527,8 +527,14 @@ describe('PKIAuthenticationProvider', () => {
 
       await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
 
+      expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('redirects to logged out view if state is `null`.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
       await expect(provider.logout(request, null)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
       );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();

@@ -7,7 +7,6 @@
     "licensing",
     "features",
     "inspector",
-    "home",
     "data",
     "fileUpload",
     "uiActions",
@@ -15,14 +14,17 @@
     "visualizations",
     "embeddable",
     "mapsLegacy",
-    "usageCollection"
+    "usageCollection",
+    "share"
   ],
+  "optionalPlugins": ["home"],
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common/constants"],
   "requiredBundles": [
     "kibanaReact",
     "kibanaUtils",
-    "savedObjects"
+    "savedObjects",
+    "home"
   ]
 }

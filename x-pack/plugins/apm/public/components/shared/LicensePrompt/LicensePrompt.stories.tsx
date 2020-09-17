@@ -27,6 +27,7 @@ storiesOf('app/LicensePrompt', module).add(
   },
   {
     info: {
+      propTablesExclude: [ApmPluginContext.Provider, LicensePrompt],
       source: false,
     },
   }

@@ -211,20 +211,27 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "apiKey": "MTIzOmFiYw==",
-                      "id": "1",
-                      "params": Object {
-                        "foo": true,
-                      },
-                      "spaceId": undefined,
-                    },
-                  ]
-          `);
+      Array [
+        Object {
+          "apiKey": "MTIzOmFiYw==",
+          "id": "1",
+          "params": Object {
+            "foo": true,
+          },
+          "source": Object {
+            "source": Object {
+              "id": "1",
+              "type": "alert",
+            },
+            "type": "SAVED_OBJECT",
+          },
+          "spaceId": undefined,
+        },
+      ]
+    `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
     expect(eventLogger.logEvent).toHaveBeenCalledWith({
       event: {
         action: 'execute',
@@ -260,6 +267,25 @@ describe('Task Runner', () => {
         ],
       },
       message: "test:1: 'alert-name' created new instance: '1'",
+    });
+    expect(eventLogger.logEvent).toHaveBeenCalledWith({
+      event: {
+        action: 'active-instance',
+      },
+      kibana: {
+        alerting: {
+          instance_id: '1',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+          },
+        ],
+      },
+      message: "test:1: 'alert-name' active instance: '1'",
     });
     expect(eventLogger.logEvent).toHaveBeenCalledWith({
       event: {
@@ -332,20 +358,27 @@ describe('Task Runner', () => {
     });
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "apiKey": "MTIzOmFiYw==",
-                      "id": "1",
-                      "params": Object {
-                        "foo": true,
-                      },
-                      "spaceId": undefined,
-                    },
-                  ]
-          `);
+      Array [
+        Object {
+          "apiKey": "MTIzOmFiYw==",
+          "id": "1",
+          "params": Object {
+            "foo": true,
+          },
+          "source": Object {
+            "source": Object {
+              "id": "1",
+              "type": "alert",
+            },
+            "type": "SAVED_OBJECT",
+          },
+          "spaceId": undefined,
+        },
+      ]
+    `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -386,6 +419,27 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' created new instance: '1'",
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1'",
           },
         ],
         Array [
@@ -465,7 +519,7 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -506,6 +560,27 @@ describe('Task Runner', () => {
               ],
             },
             "message": "test:1: 'alert-name' resolved instance: '2'",
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1'",
           },
         ],
       ]

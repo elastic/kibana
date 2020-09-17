@@ -12,6 +12,9 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   const supertestRead = getService('supertestAsApmReadUser');
   const supertestWrite = getService('supertestAsApmWriteUser');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
+
+  const archiveName = 'apm_8.0.0';
 
   function searchCustomLinks(filters?: any) {
     const path = URL.format({
@@ -138,6 +141,19 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       }));
       expect(status).to.equal(200);
       expect(body).to.eql([]);
+    });
+
+    describe('transaction', () => {
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
+
+      it('fetches a transaction sample', async () => {
+        const response = await supertestRead.get(
+          '/api/apm/settings/custom_links/transaction?service.name=opbeans-java'
+        );
+        expect(response.status).to.be(200);
+        expect(response.body.service.name).to.eql('opbeans-java');
+      });
     });
   });
 }

@@ -132,7 +132,7 @@ server.port
 
 Settings that must be the same:
 --------
-xpack.security.encryptionKey //decrypting session cookies
+xpack.security.encryptionKey //decrypting session information
 xpack.reporting.encryptionKey //decrypting reports
 xpack.encryptedSavedObjects.encryptionKey // decrypting saved objects
 --------

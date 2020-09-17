@@ -31,8 +31,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/72803
-  describe.skip('update', () => {
+  describe('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -500,6 +499,57 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 type: 'alert',
                 id: createdAlert.id,
               });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle update alert request appropriately when alert name has leading and trailing whitespaces', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+
+          const updatedData = {
+            name: ' leading and trailing whitespace ',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+          };
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(updatedData);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'update',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.name).to.eql(' leading and trailing whitespace ');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

@@ -33,7 +33,7 @@ export const getServiceNowConnector = () => ({
   },
   config: {
     apiUrl: 'http://some.non.existent.com',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
@@ -52,6 +52,7 @@ export const getServiceNowConnector = () => ({
         },
       ],
     },
+    isCaseOwned: true,
   },
 });
 
@@ -65,7 +66,7 @@ export const getJiraConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     projectKey: 'pkey',
-    casesConfiguration: {
+    incidentConfiguration: {
       mapping: [
         {
           source: 'title',
@@ -84,6 +85,40 @@ export const getJiraConnector = () => ({
         },
       ],
     },
+    isCaseOwned: true,
+  },
+});
+
+export const getResilientConnector = () => ({
+  name: 'Resilient Connector',
+  actionTypeId: '.resilient',
+  secrets: {
+    apiKeyId: 'id',
+    apiKeySecret: 'secret',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    orgId: 'pkey',
+    incidentConfiguration: {
+      mapping: [
+        {
+          source: 'title',
+          target: 'summary',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'description',
+          target: 'description',
+          actionType: 'overwrite',
+        },
+        {
+          source: 'comments',
+          target: 'comments',
+          actionType: 'append',
+        },
+      ],
+    },
+    isCaseOwned: true,
   },
 });
 

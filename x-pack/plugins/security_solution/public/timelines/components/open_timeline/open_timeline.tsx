@@ -160,7 +160,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [onDeleteSelected, deleteTimelines, timelineStatus]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
-
     return (
       <>
         <EditOneTimelineAction
@@ -225,7 +224,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                       popoverContent={getBatchItemsPopoverContent}
                       data-test-subj="utility-bar-action"
                     >
-                      {i18n.BATCH_ACTIONS}
+                      <span data-test-subj="utility-bar-action-button">{i18n.BATCH_ACTIONS}</span>
                     </UtilityBarAction>
                   </>
                 )}

@@ -5,10 +5,8 @@
  */
 
 import { xpackMain } from './legacy/plugins/xpack_main';
-import { monitoring } from './legacy/plugins/monitoring';
 import { security } from './legacy/plugins/security';
-import { beats } from './legacy/plugins/beats_management';
 
 module.exports = function (kibana) {
-  return [xpackMain(kibana), monitoring(kibana), security(kibana), beats(kibana)];
+  return [xpackMain(kibana), security(kibana)];
 };

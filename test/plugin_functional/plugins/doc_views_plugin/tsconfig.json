@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./target",
     "skipLibCheck": true
@@ -10,5 +10,8 @@
     "public/**/*.tsx",
     "../../../../typings/**/*"
   ],
-  "exclude": []
+  "exclude": [],
+  "references": [
+    { "path": "../../../../src/core/tsconfig.json" }
+  ]
 }

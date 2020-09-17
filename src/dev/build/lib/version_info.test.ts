@@ -20,6 +20,8 @@
 import pkg from '../../../../package.json';
 import { getVersionInfo } from './version_info';
 
+jest.mock('./get_build_number');
+
 describe('isRelease = true', () => {
   it('returns unchanged package.version, build sha, and build number', async () => {
     const versionInfo = await getVersionInfo({

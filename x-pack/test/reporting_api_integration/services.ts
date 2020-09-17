@@ -186,6 +186,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
 
 export const services = {
   ...xpackServices,
+  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
   usageAPI: apiIntegrationServices.usageAPI,
   reportingAPI: ReportingAPIProvider,
 };

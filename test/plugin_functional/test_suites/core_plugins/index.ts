@@ -22,7 +22,6 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('core plugins', () => {
     loadTestFile(require.resolve('./applications'));
     loadTestFile(require.resolve('./elasticsearch_client'));
-    loadTestFile(require.resolve('./legacy_plugins'));
     loadTestFile(require.resolve('./server_plugins'));
     loadTestFile(require.resolve('./ui_plugins'));
     loadTestFile(require.resolve('./ui_settings'));

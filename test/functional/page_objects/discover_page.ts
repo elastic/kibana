@@ -254,7 +254,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getSidebarWidth() {
-      const sidebar = await find.byCssSelector('.sidebar-list');
+      const sidebar = await testSubjects.find('discover-sidebar');
       return await sidebar.getAttribute('clientWidth');
     }
 
@@ -332,6 +332,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async selectIndexPattern(indexPattern: string) {
       await testSubjects.click('indexPattern-switch-link');
+      await find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
       await find.clickByCssSelector(
         `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
       );

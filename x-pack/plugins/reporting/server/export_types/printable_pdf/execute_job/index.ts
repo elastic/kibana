@@ -8,18 +8,18 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
-import { ESQueueWorkerExecuteFn, RunTaskFnFactory, TaskRunResult } from '../../../types';
+import { RunTaskFn, RunTaskFnFactory, TaskRunResult } from '../../../types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
   getCustomLogo,
   getFullUrls,
-  omitBlacklistedHeaders,
+  omitBlockedHeaders,
 } from '../../common';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { ScheduledTaskParamsPDF } from '../types';
+import { TaskPayloadPDF } from '../types';
 
-type QueuedPdfExecutorFactory = RunTaskFnFactory<ESQueueWorkerExecuteFn<ScheduledTaskParamsPDF>>;
+type QueuedPdfExecutorFactory = RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>>;
 
 export const runTaskFnFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
   reporting,
@@ -40,7 +40,7 @@ export const runTaskFnFactory: QueuedPdfExecutorFactory = function executeJobFac
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
-      map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map((decryptedHeaders) => omitBlockedHeaders({ job, decryptedHeaders })),
       map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
       mergeMap((conditionalHeaders) =>
         getCustomLogo({ reporting, config, job, conditionalHeaders })

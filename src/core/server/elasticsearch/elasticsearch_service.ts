@@ -19,9 +19,9 @@
 
 import { Observable, Subject } from 'rxjs';
 import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
+import { merge } from '@kbn/std';
 
 import { CoreService } from '../../types';
-import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import {
@@ -123,6 +123,7 @@ export class ElasticsearchService
       client: this.client!,
       createClient,
       legacy: {
+        config$: this.config$,
         client: this.legacyClient,
         createClient: this.createLegacyCustomClient,
       },

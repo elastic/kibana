@@ -38,12 +38,14 @@ describe('Console Proxy Route', () => {
 
       const handler = createHandler(
         getProxyRouteHandlerDeps({
-          readLegacyESConfig: () => ({
-            requestTimeout: duration(30000),
-            customHeaders: {},
-            requestHeadersWhitelist: [],
-            hosts: ['http://localhost:9201', 'http://localhost:9202', 'http://localhost:9203'],
-          }),
+          proxy: {
+            readLegacyESConfig: async () => ({
+              requestTimeout: duration(30000),
+              customHeaders: {},
+              requestHeadersWhitelist: [],
+              hosts: ['http://localhost:9201', 'http://localhost:9202', 'http://localhost:9203'],
+            }),
+          },
         })
       );
 

@@ -19,11 +19,10 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getJobIdUrl } from '../../../../../util/get_job_id_url';
+import { getJobIdUrl, TAB_IDS } from '../../../../../util/get_selected_ids_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
-  getDataFrameAnalyticsProgress,
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
@@ -76,7 +75,6 @@ export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
     defaultMessage: 'Progress',
   }),
-  sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
   truncateText: true,
   render(item: DataFrameAnalyticsListRow) {
     const { currentPhase, progress, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
@@ -137,7 +135,7 @@ export const progressColumn = {
 };
 
 export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
-  <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
+  <EuiLink href={getJobIdUrl(TAB_IDS.DATA_FRAME_ANALYTICS, item.id)}>{item.id}</EuiLink>
 );
 
 export const useColumns = (
@@ -212,6 +210,14 @@ export const useColumns = (
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnJobDescription',
+    },
+    {
+      field: DataFrameAnalyticsListColumn.memoryStatus,
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.memoryStatus', {
+        defaultMessage: 'Memory status',
+      }),
+      truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnJobMemoryStatus',
     },
     {
       field: DataFrameAnalyticsListColumn.configSourceIndex,

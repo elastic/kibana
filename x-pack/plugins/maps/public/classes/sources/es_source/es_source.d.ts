@@ -52,4 +52,17 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void,
     searchFilters: VectorSourceRequestMeta
   ): Promise<unknown>;
+  _runEsQuery: ({
+    requestId,
+    requestName,
+    requestDescription,
+    searchSource,
+    registerCancelCallback,
+  }: {
+    requestId: string;
+    requestName: string;
+    requestDescription: string;
+    searchSource: ISearchSource;
+    registerCancelCallback: () => void;
+  }) => Promise<unknown>;
 }

@@ -15,6 +15,7 @@ import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
+import { request } from './lib/axios_utils';
 
 // config definition
 export enum WebhookMethods {
@@ -110,12 +111,12 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureWhitelistedUri(url.toString());
-  } catch (whitelistError) {
+    configurationUtilities.ensureUriAllowed(url.toString());
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }
@@ -136,13 +137,18 @@ export async function executor(
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
 
+  const axiosInstance = axios.create();
+
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
-    axios.request({
+    request({
+      axios: axiosInstance,
       method,
       url,
+      logger,
       ...basicAuth,
       headers,
       data,
+      proxySettings: execOptions.proxySettings,
     })
   );
 
@@ -159,7 +165,7 @@ export async function executor(
     if (error.response) {
       const { status, statusText, headers: responseHeaders } = error.response;
       const message = `[${status}] ${statusText}`;
-      logger.warn(`error on ${actionId} webhook event: ${message}`);
+      logger.error(`error on ${actionId} webhook event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
@@ -178,7 +184,7 @@ export async function executor(
       return errorResultInvalid(actionId, message);
     }
 
-    logger.warn(`error on ${actionId} webhook action: unexpected error`);
+    logger.error(`error on ${actionId} webhook action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
 }

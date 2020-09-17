@@ -107,7 +107,7 @@ export function getSuggestions({
  * title and preview expression.
  */
 function getVisualizationSuggestions(
-  visualization: Visualization<unknown, unknown>,
+  visualization: Visualization<unknown>,
   table: TableSuggestion,
   visualizationId: string,
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },

@@ -8,7 +8,7 @@ import { getLocalUIFilters } from './';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../../public/utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { getServicesProjection } from '../../../projections/services';
 
 describe('local ui filter queries', () => {
@@ -29,7 +29,10 @@ describe('local ui filter queries', () => {
       getLocalUIFilters({
         setup,
         localFilterNames: ['transactionResult', 'host'],
-        projection: getServicesProjection({ setup }),
+        projection: getServicesProjection({
+          setup,
+          searchAggregatedTransactions: false,
+        }),
         uiFilters: {
           transactionResult: ['2xx'],
         },

@@ -73,7 +73,7 @@ export const num: ExpressionTypeDefinition<'num', ExpressionValueNum> = {
     },
     datatable: ({ value }): Datatable => ({
       type: 'datatable',
-      columns: [{ name: 'value', type: 'number' }],
+      columns: [{ id: 'value', name: 'value', meta: { type: 'number' } }],
       rows: [{ value }],
     }),
   },

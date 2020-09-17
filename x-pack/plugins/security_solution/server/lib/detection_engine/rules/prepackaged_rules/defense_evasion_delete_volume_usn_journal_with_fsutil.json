@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies use of the fsutil.exe to delete the volume USNJRNL. This technique is used by attackers to eliminate evidence of files created during post-exploitation activities.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -36,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

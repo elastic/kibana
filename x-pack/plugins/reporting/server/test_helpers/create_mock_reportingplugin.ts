@@ -8,10 +8,9 @@ jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
 jest.mock('../lib/create_queue');
-jest.mock('../lib/enqueue_job');
-jest.mock('../lib/validate');
 
 import * as Rx from 'rxjs';
+import { featuresPluginMock } from '../../../features/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import {
   chromium,
@@ -19,10 +18,9 @@ import {
   initializeBrowserDriverFactory,
 } from '../browsers';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
-import { ReportingStartDeps } from '../types';
 import { ReportingStore } from '../lib';
+import { ReportingStartDeps } from '../types';
 import { createMockLevelLogger } from './create_mock_levellogger';
-import { Report } from '../lib/store';
 
 (initializeBrowserDriverFactory as jest.Mock<
   Promise<HeadlessChromiumDriverFactory>
@@ -30,10 +28,14 @@ import { Report } from '../lib/store';
 
 (chromium as any).createDriverFactory.mockImplementation(() => ({}));
 
-const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
+const createMockPluginSetup = (
+  mockReportingCore: ReportingCore,
+  setupMock?: any
+): ReportingInternalSetup => {
   return {
+    features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
-    basePath: setupMock.basePath,
+    basePath: setupMock.basePath || '/all-about-that-basepath',
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
@@ -48,7 +50,6 @@ const createMockPluginStart = (
   const store = new ReportingStore(mockReportingCore, logger);
   return {
     browserDriverFactory: startMock.browserDriverFactory,
-    enqueueJob: startMock.enqueueJob || jest.fn().mockResolvedValue(new Report({} as any)),
     esqueue: startMock.esqueue,
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
@@ -72,15 +73,14 @@ export const createMockReportingCore = async (
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  if (!setupDepsMock) {
-    setupDepsMock = createMockPluginSetup({});
-  }
-
   const mockReportingCore = {
     getConfig: () => config,
     getElasticsearchService: () => setupDepsMock?.elasticsearch,
   } as ReportingCore;
 
+  if (!setupDepsMock) {
+    setupDepsMock = createMockPluginSetup(mockReportingCore, {});
+  }
   if (!startDepsMock) {
     startDepsMock = createMockPluginStart(mockReportingCore, {});
   }

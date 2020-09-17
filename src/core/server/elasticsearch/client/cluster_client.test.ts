@@ -96,7 +96,7 @@ describe('ClusterClient', () => {
       expect(scopedClusterClient.asCurrentUser).toBe(scopedClient.child.mock.results[0].value);
     });
 
-    it('returns a distinct  scoped cluster client on each call', () => {
+    it('returns a distinct scoped cluster client on each call', () => {
       const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest();
 
@@ -127,7 +127,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { foo: 'bar' },
+        headers: { foo: 'bar', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -147,7 +147,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { authorization: 'auth' },
+        headers: { authorization: 'auth', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -171,7 +171,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { authorization: 'auth' },
+        headers: { authorization: 'auth', 'x-opaque-id': expect.any(String) },
       });
     });
 
@@ -195,6 +195,26 @@ describe('ClusterClient', () => {
         headers: {
           foo: 'bar',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('adds the x-opaque-id header based on the request id', () => {
+      const config = createConfig();
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        kibanaRequestState: { requestId: 'my-fake-id' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          'x-opaque-id': 'my-fake-id',
         },
       });
     });
@@ -221,6 +241,7 @@ describe('ClusterClient', () => {
         headers: {
           foo: 'auth',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
         },
       });
     });
@@ -247,6 +268,31 @@ describe('ClusterClient', () => {
         headers: {
           foo: 'request',
           hello: 'dolly',
+          'x-opaque-id': expect.any(String),
+        },
+      });
+    });
+
+    it('respect the precedence of x-opaque-id header over config headers', () => {
+      const config = createConfig({
+        customHeaders: {
+          'x-opaque-id': 'from config',
+        },
+      });
+      getAuthHeaders.mockReturnValue({});
+
+      const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
+      const request = httpServerMock.createKibanaRequest({
+        headers: { foo: 'request' },
+        kibanaRequestState: { requestId: 'from request' },
+      });
+
+      clusterClient.asScoped(request);
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child).toHaveBeenCalledWith({
+        headers: {
+          'x-opaque-id': 'from request',
         },
       });
     });

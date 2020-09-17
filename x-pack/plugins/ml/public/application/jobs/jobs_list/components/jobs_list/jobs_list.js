@@ -7,14 +7,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 
 import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { getJobIdUrl } from '../../../../util/get_job_id_url';
+import { getJobIdUrl, TAB_IDS } from '../../../../util/get_selected_ids_url';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
@@ -71,7 +71,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl('jobs', id)}>{id}</EuiLink>;
+    return <EuiLink href={getJobIdUrl(TAB_IDS.ANOMALY_DETECTION, id)}>{id}</EuiLink>;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
@@ -189,7 +189,9 @@ export class JobsList extends Component {
         sortable: true,
         field: 'description',
         'data-test-subj': 'mlJobListColumnDescription',
-        render: (description, item) => <JobDescription job={item} />,
+        render: (description, item) => (
+          <JobDescription job={item} isManagementTable={isManagementTable} />
+        ),
         textOnly: true,
         width: '20%',
       },

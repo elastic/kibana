@@ -27,7 +27,6 @@ import { copyPersistentState } from '../../../reducers/util';
 // @ts-expect-error
 import { extractReferences, injectReferences } from '../../../../common/migrations/references';
 import { getExistingMapPath, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-// @ts-expect-error
 import { getStore } from '../../store_operations';
 import { MapStoreState } from '../../../reducers/store';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
@@ -36,6 +35,7 @@ export interface ISavedGisMap extends SavedObject {
   layerListJSON?: string;
   mapStateJSON?: string;
   uiStateJSON?: string;
+  description?: string;
   getLayerList(): LayerDescriptor[];
   syncWithStore(): void;
 }

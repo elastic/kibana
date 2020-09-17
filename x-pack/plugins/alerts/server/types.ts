@@ -7,7 +7,6 @@
 import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { Alert, AlertActionParams, ActionGroup } from '../common';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
@@ -17,13 +16,16 @@ import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
+import {
+  Alert,
+  AlertActionParams,
+  ActionGroup,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceContext,
+  AlertInstanceState,
+} from '../common';
 
-// This will have to remain `any` until we can extend Alert Executors with generics
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type State = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Context = Record<string, any>;
-export type AlertParams = Record<string, unknown>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;
@@ -44,18 +46,24 @@ export interface Services {
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
-export interface AlertServices extends Services {
-  alertInstanceFactory: (id: string) => AlertInstance;
+export interface AlertServices<
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+> extends Services {
+  alertInstanceFactory: (id: string) => AlertInstance<InstanceState, InstanceContext>;
 }
 
-export interface AlertExecutorOptions {
+export interface AlertExecutorOptions<
+  Params extends AlertTypeParams = AlertTypeParams,
+  State extends AlertTypeState = AlertTypeState,
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+> {
   alertId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
-  services: AlertServices;
-  // This will have to remain `any` until we can extend Alert Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params: Record<string, any>;
+  services: AlertServices<InstanceState, InstanceContext>;
+  params: Params;
   state: State;
   spaceId: string;
   namespace?: string;
@@ -70,15 +78,24 @@ export interface ActionVariable {
   description: string;
 }
 
-export interface AlertType {
+export interface AlertType<
+  Params extends AlertTypeParams = AlertTypeParams,
+  State extends AlertTypeState = AlertTypeState,
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+> {
   id: string;
   name: string;
   validate?: {
-    params?: { validate: (object: unknown) => AlertExecutorOptions['params'] };
+    params?: { validate: (object: unknown) => Params };
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
-  executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
+  executor: ({
+    services,
+    params,
+    state,
+  }: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>) => Promise<State | void>;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
@@ -94,6 +111,10 @@ export interface RawAlertAction extends SavedObjectAttributes {
   params: AlertActionParams;
 }
 
+export interface AlertMeta extends SavedObjectAttributes {
+  versionApiKeyLastmodified?: string;
+}
+
 export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
@@ -105,7 +126,7 @@ export interface RawAlert extends SavedObjectAttributes {
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
-  scheduledTaskId?: string;
+  scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;
@@ -114,6 +135,7 @@ export interface RawAlert extends SavedObjectAttributes {
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  meta?: AlertMeta;
 }
 
 export type AlertInfoParams = Pick<

@@ -110,10 +110,23 @@ export const AreaChartBaseComponent = ({
           position={Position.Bottom}
           showOverlappingTicks={false}
           tickFormat={xTickFormatter}
-          tickSize={0}
+          style={{
+            tickLine: {
+              visible: false,
+            },
+          }}
         />
 
-        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
+        <Axis
+          id={yAxisId}
+          position={Position.Left}
+          style={{
+            tickLine: {
+              visible: false,
+            },
+          }}
+          tickFormat={yTickFormatter}
+        />
       </Chart>
     </div>
   ) : null;

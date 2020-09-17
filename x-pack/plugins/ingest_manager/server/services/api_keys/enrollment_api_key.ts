@@ -10,7 +10,7 @@ import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';
-import { agentConfigService } from '../agent_config';
+import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 
 export async function listEnrollmentApiKeys(
@@ -75,9 +75,9 @@ export async function deleteEnrollmentApiKey(soClient: SavedObjectsClientContrac
   });
 }
 
-export async function deleteEnrollmentApiKeyForConfigId(
+export async function deleteEnrollmentApiKeyForAgentPolicyId(
   soClient: SavedObjectsClientContract,
-  configId: string
+  agentPolicyId: string
 ) {
   let hasMore = true;
   let page = 1;
@@ -85,7 +85,7 @@ export async function deleteEnrollmentApiKeyForConfigId(
     const { items } = await listEnrollmentApiKeys(soClient, {
       page: page++,
       perPage: 100,
-      kuery: `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.config_id:${configId}`,
+      kuery: `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.policy_id:${agentPolicyId}`,
     });
 
     if (items.length === 0) {
@@ -103,15 +103,16 @@ export async function generateEnrollmentAPIKey(
   data: {
     name?: string;
     expiration?: string;
-    configId?: string;
+    agentPolicyId?: string;
   }
 ) {
   const id = uuid.v4();
   const { name: providedKeyName } = data;
-  if (data.configId) {
-    await validateConfigId(soClient, data.configId);
+  if (data.agentPolicyId) {
+    await validateAgentPolicyId(soClient, data.agentPolicyId);
   }
-  const configId = data.configId ?? (await agentConfigService.getDefaultAgentConfigId(soClient));
+  const agentPolicyId =
+    data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
   const key = await createAPIKey(soClient, name, {
     // Useless role to avoid to have the privilege of the user that created the key
@@ -140,7 +141,7 @@ export async function generateEnrollmentAPIKey(
       api_key_id: key.id,
       api_key: apiKey,
       name,
-      config_id: configId,
+      policy_id: agentPolicyId,
       created_at: new Date().toISOString(),
     }
   );
@@ -148,12 +149,12 @@ export async function generateEnrollmentAPIKey(
   return getEnrollmentAPIKey(soClient, so.id);
 }
 
-async function validateConfigId(soClient: SavedObjectsClientContract, configId: string) {
+async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agentPolicyId: string) {
   try {
-    await agentConfigService.get(soClient, configId);
+    await agentPolicyService.get(soClient, agentPolicyId);
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
-      throw Boom.badRequest(`Agent config ${configId} does not exist`);
+      throw Boom.badRequest(`Agent policy ${agentPolicyId} does not exist`);
     }
     throw e;
   }

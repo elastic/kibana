@@ -8,24 +8,32 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { appContextService } from '../../../';
 import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
 import { getInstallation } from '../../packages/get';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
+import { PACKAGES_SAVED_OBJECT_TYPE, EsAssetReference } from '../../../../../common';
 
-export const deletePipelines = async (
+export const deletePreviousPipelines = async (
   callCluster: CallESAsCurrentUser,
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  pkgVersion: string
+  previousPkgVersion: string
 ) => {
   const logger = appContextService.getLogger();
-  const previousPipelinesPattern = `*-${pkgName}.*-${pkgVersion}`;
-
+  const installation = await getInstallation({ savedObjectsClient, pkgName });
+  if (!installation) return;
+  const installedEsAssets = installation.installed_es;
+  const installedPipelines = installedEsAssets.filter(
+    ({ type, id }) =>
+      type === ElasticsearchAssetType.ingestPipeline && id.includes(previousPkgVersion)
+  );
+  const deletePipelinePromises = installedPipelines.map(({ type, id }) => {
+    return deletePipeline(callCluster, id);
+  });
   try {
-    await deletePipeline(callCluster, previousPipelinesPattern);
+    await Promise.all(deletePipelinePromises);
   } catch (e) {
     logger.error(e);
   }
   try {
-    await deletePipelineRefs(savedObjectsClient, pkgName, pkgVersion);
+    await deletePipelineRefs(savedObjectsClient, installedEsAssets, pkgName, previousPkgVersion);
   } catch (e) {
     logger.error(e);
   }
@@ -33,12 +41,10 @@ export const deletePipelines = async (
 
 export const deletePipelineRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
+  installedEsAssets: EsAssetReference[],
   pkgName: string,
   pkgVersion: string
 ) => {
-  const installation = await getInstallation({ savedObjectsClient, pkgName });
-  if (!installation) return;
-  const installedEsAssets = installation.installed_es;
   const filteredAssets = installedEsAssets.filter(({ type, id }) => {
     if (type !== ElasticsearchAssetType.ingestPipeline) return true;
     if (!id.includes(pkgVersion)) return true;

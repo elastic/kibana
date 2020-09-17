@@ -7,7 +7,6 @@ import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
   AlertEvent,
-  EndpointEvent,
   EndpointStatus,
   Host,
   HostMetadata,
@@ -15,21 +14,28 @@ import {
   HostPolicyResponseActionStatus,
   OSFields,
   PolicyData,
+  SafeEndpointEvent,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
-import { parentEntityId } from './models/event';
 import {
-  GetAgentConfigsResponseItem,
+  ancestryArray,
+  entityIDSafeVersion,
+  parentEntityIDSafeVersion,
+  timestampSafeVersion,
+} from './models/event';
+import {
+  GetAgentPoliciesResponseItem,
   GetPackagesResponse,
 } from '../../../ingest_manager/common/types/rest_spec';
 import {
-  AgentConfigStatus,
+  AgentPolicyStatus,
   EsAssetReference,
   InstallationStatus,
   KibanaAssetReference,
 } from '../../../ingest_manager/common/types/models';
+import { firstNonNullValue } from './models/ecs_safety_helpers';
 
-export type Event = AlertEvent | EndpointEvent;
+export type Event = AlertEvent | SafeEndpointEvent;
 /**
  * This value indicates the limit for the size of the ancestry array. The endpoint currently saves up to 20 values
  * in its messages. To simulate a limit on the array size I'm using 2 here so that we can't rely on there being a large
@@ -302,6 +308,12 @@ export interface TreeOptions {
   generations?: number;
   children?: number;
   relatedEvents?: RelatedEventInfo[] | number;
+  /**
+   * If true then the related events will be created with timestamps that preserve the
+   * generation order, meaning the first event will always have a timestamp number less
+   * than the next related event
+   */
+  relatedEventsOrdered?: boolean;
   relatedAlerts?: number;
   percentWithRelated?: number;
   percentTerminated?: number;
@@ -322,6 +334,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     generations: options?.generations ?? 2,
     children: options?.children ?? 2,
     relatedEvents: options?.relatedEvents ?? 5,
+    relatedEventsOrdered: options?.relatedEventsOrdered ?? false,
     relatedAlerts: options?.relatedAlerts ?? 3,
     percentWithRelated: options?.percentWithRelated ?? 30,
     percentTerminated: options?.percentTerminated ?? 100,
@@ -333,6 +346,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
 export class EndpointDocGenerator {
   commonInfo: HostInfo;
   random: seedrandom.prng;
+  sequence: number = 0;
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
     if (typeof seed === 'string') {
       this.random = seedrandom(seed);
@@ -418,13 +432,13 @@ export class EndpointDocGenerator {
    * @param ts - Timestamp to put in the event
    * @param entityID - entityID of the originating process
    * @param parentEntityID - optional entityID of the parent process, if it exists
-   * @param ancestryArray - an array of ancestors for the generated alert
+   * @param ancestry - an array of ancestors for the generated alert
    */
   public generateAlert(
     ts = new Date().getTime(),
     entityID = this.randomString(10),
     parentEntityID?: string,
-    ancestryArray: string[] = []
+    ancestry: string[] = []
   ): AlertEvent {
     return {
       ...this.commonInfo,
@@ -440,6 +454,7 @@ export class EndpointDocGenerator {
         dataset: 'endpoint',
         module: 'endpoint',
         type: 'creation',
+        sequence: this.sequence++,
       },
       file: {
         owner: 'SYSTEM',
@@ -484,7 +499,7 @@ export class EndpointDocGenerator {
           sha256: 'fake sha256',
         },
         Ext: {
-          ancestry: ancestryArray,
+          ancestry,
           code_signature: [
             {
               trusted: false,
@@ -546,7 +561,7 @@ export class EndpointDocGenerator {
    * Creates an event, customized by the options parameter
    * @param options - Allows event field values to be specified
    */
-  public generateEvent(options: EventOptions = {}): EndpointEvent {
+  public generateEvent(options: EventOptions = {}): Event {
     // this will default to an empty array for the ancestry field if options.ancestry isn't included
     const ancestry: string[] =
       options.ancestry?.slice(0, options?.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
@@ -586,6 +601,7 @@ export class EndpointDocGenerator {
         kind: 'event',
         type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
+        sequence: this.sequence++,
       },
       host: this.commonInfo.host,
       process: {
@@ -633,7 +649,11 @@ export class EndpointDocGenerator {
   public generateTree(options: TreeOptions = {}): Tree {
     const optionsWithDef = getTreeOptionsWithDef(options);
     const addEventToMap = (nodeMap: Map<string, TreeNode>, event: Event) => {
-      const nodeId = event.process.entity_id;
+      const nodeId = entityIDSafeVersion(event);
+      if (!nodeId) {
+        return nodeMap;
+      }
+
       // if a node already exists for the entity_id we'll use that one, otherwise let's create a new empty node
       // and add the event to the right array.
       let node = nodeMap.get(nodeId);
@@ -642,18 +662,13 @@ export class EndpointDocGenerator {
       }
 
       // place the event in the right array depending on its category
-      if (event.event.kind === 'event') {
-        if (
-          (Array.isArray(event.event.category) &&
-            event.event.category.length === 1 &&
-            event.event.category[0] === 'process') ||
-          event.event.category === 'process'
-        ) {
+      if (firstNonNullValue(event.event?.kind) === 'event') {
+        if (firstNonNullValue(event.event?.category) === 'process') {
           node.lifecycle.push(event);
         } else {
           node.relatedEvents.push(event);
         }
-      } else if (event.event.kind === 'alert') {
+      } else if (firstNonNullValue(event.event?.kind) === 'alert') {
         node.relatedAlerts.push(event);
       }
 
@@ -663,7 +678,7 @@ export class EndpointDocGenerator {
     const groupNodesByParent = (children: Map<string, TreeNode>) => {
       const nodesByParent: Map<string, Map<string, TreeNode>> = new Map();
       for (const node of children.values()) {
-        const parentID = parentEntityId(node.lifecycle[0]);
+        const parentID = parentEntityIDSafeVersion(node.lifecycle[0]);
         if (parentID) {
           let groupedNodes = nodesByParent.get(parentID);
 
@@ -705,9 +720,13 @@ export class EndpointDocGenerator {
     const ancestryNodes: Map<string, TreeNode> = ancestry.reduce(addEventToMap, new Map());
 
     const alert = ancestry[ancestry.length - 1];
-    const origin = ancestryNodes.get(alert.process.entity_id);
+    const alertEntityID = entityIDSafeVersion(alert);
+    if (!alertEntityID) {
+      throw Error("could not find the originating alert's entity id");
+    }
+    const origin = ancestryNodes.get(alertEntityID);
     if (!origin) {
-      throw Error(`could not find origin while building tree: ${alert.process.entity_id}`);
+      throw Error(`could not find origin while building tree: ${alertEntityID}`);
     }
 
     const children = Array.from(this.descendantsTreeGenerator(alert, optionsWithDef));
@@ -789,7 +808,7 @@ export class EndpointDocGenerator {
     });
     events.push(root);
     let ancestor = root;
-    let timestamp = root['@timestamp'] + 1000;
+    let timestamp = (timestampSafeVersion(root) ?? 0) + 1000;
 
     const addRelatedAlerts = (
       node: Event,
@@ -806,7 +825,8 @@ export class EndpointDocGenerator {
       for (const relatedEvent of this.relatedEventsGenerator(
         node,
         opts.relatedEvents,
-        secBeforeEvent
+        secBeforeEvent,
+        opts.relatedEventsOrdered
       )) {
         eventList.push(relatedEvent);
       }
@@ -825,8 +845,8 @@ export class EndpointDocGenerator {
       events.push(
         this.generateEvent({
           timestamp: timestamp + termProcessDuration * 1000,
-          entityID: root.process.entity_id,
-          parentEntityID: root.process.parent?.entity_id,
+          entityID: entityIDSafeVersion(root),
+          parentEntityID: parentEntityIDSafeVersion(root),
           eventCategory: ['process'],
           eventType: ['end'],
         })
@@ -834,13 +854,20 @@ export class EndpointDocGenerator {
     }
 
     for (let i = 0; i < opts.ancestors; i++) {
+      const ancestorEntityID = entityIDSafeVersion(ancestor);
+      const ancestry: string[] = [];
+      if (ancestorEntityID) {
+        ancestry.push(ancestorEntityID);
+      }
+
+      ancestry.push(...(ancestryArray(ancestor) ?? []));
       ancestor = this.generateEvent({
         timestamp,
-        parentEntityID: ancestor.process.entity_id,
+        parentEntityID: entityIDSafeVersion(ancestor),
         // add the parent to the ancestry array
-        ancestry: [ancestor.process.entity_id, ...(ancestor.process.Ext?.ancestry ?? [])],
+        ancestry,
         ancestryArrayLimit: opts.ancestryArraySize,
-        parentPid: ancestor.process.pid,
+        parentPid: firstNonNullValue(ancestor.process?.pid),
         pid: this.randomN(5000),
       });
       events.push(ancestor);
@@ -851,11 +878,11 @@ export class EndpointDocGenerator {
         events.push(
           this.generateEvent({
             timestamp: timestamp + termProcessDuration * 1000,
-            entityID: ancestor.process.entity_id,
-            parentEntityID: ancestor.process.parent?.entity_id,
+            entityID: entityIDSafeVersion(ancestor),
+            parentEntityID: parentEntityIDSafeVersion(ancestor),
             eventCategory: ['process'],
             eventType: ['end'],
-            ancestry: ancestor.process.Ext?.ancestry,
+            ancestry: ancestryArray(ancestor),
             ancestryArrayLimit: opts.ancestryArraySize,
           })
         );
@@ -874,12 +901,14 @@ export class EndpointDocGenerator {
         addRelatedAlerts(ancestor, numAlertsPerNode, processDuration, events);
       }
     }
+    timestamp = timestamp + 1000;
+
     events.push(
       this.generateAlert(
         timestamp,
-        ancestor.process.entity_id,
-        ancestor.process.parent?.entity_id,
-        ancestor.process.Ext?.ancestry
+        entityIDSafeVersion(ancestor),
+        parentEntityIDSafeVersion(ancestor),
+        ancestryArray(ancestor)
       )
     );
     return events;
@@ -909,7 +938,7 @@ export class EndpointDocGenerator {
       maxChildren,
     };
     const lineage: NodeState[] = [rootState];
-    let timestamp = root['@timestamp'];
+    let timestamp = timestampSafeVersion(root) ?? 0;
     while (lineage.length > 0) {
       const currentState = lineage[lineage.length - 1];
       // If we get to a state node and it has made all the children, move back up a level
@@ -924,13 +953,17 @@ export class EndpointDocGenerator {
       // Otherwise, add a child and any nodes associated with it
       currentState.childrenCreated++;
       timestamp = timestamp + 1000;
+      const currentStateEntityID = entityIDSafeVersion(currentState.event);
+      const ancestry: string[] = [];
+      if (currentStateEntityID) {
+        ancestry.push(currentStateEntityID);
+      }
+      ancestry.push(...(ancestryArray(currentState.event) ?? []));
+
       const child = this.generateEvent({
         timestamp,
-        parentEntityID: currentState.event.process.entity_id,
-        ancestry: [
-          currentState.event.process.entity_id,
-          ...(currentState.event.process.Ext?.ancestry ?? []),
-        ],
+        parentEntityID: currentStateEntityID,
+        ancestry,
         ancestryArrayLimit: opts.ancestryArraySize,
       });
 
@@ -949,16 +982,21 @@ export class EndpointDocGenerator {
         processDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
         yield this.generateEvent({
           timestamp: timestamp + processDuration * 1000,
-          entityID: child.process.entity_id,
-          parentEntityID: child.process.parent?.entity_id,
+          entityID: entityIDSafeVersion(child),
+          parentEntityID: parentEntityIDSafeVersion(child),
           eventCategory: ['process'],
           eventType: ['end'],
-          ancestry: child.process.Ext?.ancestry,
+          ancestry,
           ancestryArrayLimit: opts.ancestryArraySize,
         });
       }
       if (this.randomN(100) < opts.percentWithRelated) {
-        yield* this.relatedEventsGenerator(child, opts.relatedEvents, processDuration);
+        yield* this.relatedEventsGenerator(
+          child,
+          opts.relatedEvents,
+          processDuration,
+          opts.relatedEventsOrdered
+        );
         yield* this.relatedAlertsGenerator(child, opts.relatedAlerts, processDuration);
       }
     }
@@ -970,13 +1008,18 @@ export class EndpointDocGenerator {
    * @param relatedEvents - can be an array of RelatedEventInfo objects describing the related events that should be generated for each process node
    *  or a number which defines the number of related events and will default to random categories
    * @param processDuration - maximum number of seconds after process event that related event timestamp can be
+   * @param ordered - if true the events will have an increasing timestamp, otherwise their timestamp will be random but
+   *  guaranteed to be greater than or equal to the originating event
    */
   public *relatedEventsGenerator(
     node: Event,
     relatedEvents: RelatedEventInfo[] | number = 10,
-    processDuration: number = 6 * 3600
+    processDuration: number = 6 * 3600,
+    ordered: boolean = false
   ) {
     let relatedEventsInfo: RelatedEventInfo[];
+    const nodeTimestamp = timestampSafeVersion(node) ?? 0;
+    let ts = nodeTimestamp + 1;
     if (typeof relatedEvents === 'number') {
       relatedEventsInfo = [{ category: RelatedEventCategory.Random, count: relatedEvents }];
     } else {
@@ -992,14 +1035,19 @@ export class EndpointDocGenerator {
           eventInfo = OTHER_EVENT_CATEGORIES[event.category];
         }
 
-        const ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
+        if (ordered) {
+          ts += this.randomN(processDuration) * 1000;
+        } else {
+          ts = nodeTimestamp + this.randomN(processDuration) * 1000;
+        }
+
         yield this.generateEvent({
           timestamp: ts,
-          entityID: node.process.entity_id,
-          parentEntityID: node.process.parent?.entity_id,
+          entityID: entityIDSafeVersion(node),
+          parentEntityID: parentEntityIDSafeVersion(node),
           eventCategory: eventInfo.category,
           eventType: eventInfo.creationType,
-          ancestry: node.process.Ext?.ancestry,
+          ancestry: ancestryArray(node),
         });
       }
     }
@@ -1017,20 +1065,20 @@ export class EndpointDocGenerator {
     alertCreationTime: number = 6 * 3600
   ) {
     for (let i = 0; i < relatedAlerts; i++) {
-      const ts = node['@timestamp'] + this.randomN(alertCreationTime) * 1000;
+      const ts = (timestampSafeVersion(node) ?? 0) + this.randomN(alertCreationTime) * 1000;
       yield this.generateAlert(
         ts,
-        node.process.entity_id,
-        node.process.parent?.entity_id,
-        node.process.Ext?.ancestry
+        entityIDSafeVersion(node),
+        parentEntityIDSafeVersion(node),
+        ancestryArray(node)
       );
     }
   }
 
   /**
-   * Generates an Ingest `package config` that includes the Endpoint Policy data
+   * Generates an Ingest `package policy` that includes the Endpoint Policy data
    */
-  public generatePolicyPackageConfig(): PolicyData {
+  public generatePolicyPackagePolicy(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
@@ -1040,7 +1088,7 @@ export class EndpointDocGenerator {
       created_by: 'elastic',
       updated_at: new Date().toISOString(),
       updated_by: 'elastic',
-      config_id: this.seededUUIDv4(),
+      policy_id: this.seededUUIDv4(),
       enabled: true,
       output_id: '',
       inputs: [
@@ -1073,20 +1121,20 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Generate an Agent Configuration (ingest)
+   * Generate an Agent Policy (ingest)
    */
-  public generateAgentConfig(): GetAgentConfigsResponseItem {
+  public generateAgentPolicy(): GetAgentPoliciesResponseItem {
     return {
       id: this.seededUUIDv4(),
-      name: 'Agent Config',
-      status: AgentConfigStatus.Active,
+      name: 'Agent Policy',
+      status: AgentPolicyStatus.Active,
       description: 'Some description',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
-      package_configs: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
+      package_policies: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
       agents: 0,
     };
   }
@@ -1105,7 +1153,8 @@ export class EndpointDocGenerator {
       path: '/package/endpoint/0.5.0',
       icons: [
         {
-          src: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
+          path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
+          src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',
           type: 'image/svg+xml',
         },
@@ -1155,6 +1204,9 @@ export class EndpointDocGenerator {
           version: '0.5.0',
           internal: false,
           removable: false,
+          install_version: '0.5.0',
+          install_status: 'installed',
+          install_started_at: '2020-06-24T14:41:23.098Z',
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',

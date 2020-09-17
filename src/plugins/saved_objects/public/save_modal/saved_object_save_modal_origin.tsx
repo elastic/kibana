@@ -32,6 +32,7 @@ interface SaveModalDocumentInfo {
 
 interface OriginSaveModalProps {
   originatingApp?: string;
+  getAppNameFromId?: (appId: string) => string | undefined;
   documentInfo: SaveModalDocumentInfo;
   objectType: string;
   onClose: () => void;
@@ -53,16 +54,13 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
     if (!props.originatingApp) {
       return;
     }
-    let origin = props.originatingApp!;
-
-    // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
-    if (origin.startsWith('kibana:')) {
-      origin = origin.split(':')[1];
-    }
+    const origin = props.getAppNameFromId
+      ? props.getAppNameFromId(props.originatingApp) || props.originatingApp
+      : props.originatingApp;
 
     if (
       !state.copyOnSave ||
-      origin === 'dashboards' // dashboard supports adding a copied panel on save...
+      props.originatingApp === 'dashboards' // dashboard supports adding a copied panel on save...
     ) {
       const originVerb = !documentInfo.id || state.copyOnSave ? addLabel : returnLabel;
       return (

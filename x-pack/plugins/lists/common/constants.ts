@@ -50,3 +50,12 @@ export const ENDPOINT_LIST_NAME = 'Elastic Endpoint Security Exception List';
 export const ENDPOINT_LIST_DESCRIPTION = 'Elastic Endpoint Security Exception List';
 
 export const MAX_EXCEPTION_LIST_SIZE = 10000;
+
+/** ID of trusted apps agnostic list */
+export const ENDPOINT_TRUSTED_APPS_LIST_ID = 'endpoint_trusted_apps';
+
+/** Name of trusted apps agnostic list */
+export const ENDPOINT_TRUSTED_APPS_LIST_NAME = 'Elastic Endpoint Security Trusted Apps List';
+
+/** Description of trusted apps agnostic list */
+export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION = 'Elastic Endpoint Security Trusted Apps List';

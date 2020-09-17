@@ -22,9 +22,9 @@ import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';
-import { modifyUrl } from '../../../../src/core/utils';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
@@ -161,6 +161,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         return void 0;
       });
       return currentWithoutTime;
+    }
+
+    /**
+     * Gets the page/document title of the focused window/frame.
+     * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getTitle
+     */
+    public async getTitle() {
+      return await driver.getTitle();
     }
 
     /**
@@ -472,6 +480,12 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return this.getScrollTop();
     }
 
+    public async setScrollToById(elementId: string, xCoord: number, yCoord: number) {
+      await driver.executeScript(
+        `document.getElementById("${elementId}").scrollTo(${xCoord},${yCoord})`
+      );
+    }
+
     public async setScrollLeft(scrollSize: number | string) {
       await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
       return this.getScrollLeft();
@@ -480,6 +494,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async switchToFrame(idOrElement: number | WebElementWrapper) {
       const _id = idOrElement instanceof WebElementWrapper ? idOrElement._webElement : idOrElement;
       await driver.switchTo().frame(_id);
+    }
+
+    public async checkBrowserPermission(permission: string): Promise<boolean> {
+      const result: any = await driver.executeAsyncScript(
+        `navigator.permissions.query({name:'${permission}'}).then(arguments[0])`
+      );
+
+      return Boolean(result?.state === 'granted');
+    }
+
+    public getClipboardValue(): Promise<string> {
+      return driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
     }
   })();
 }

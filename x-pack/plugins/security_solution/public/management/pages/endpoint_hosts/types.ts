@@ -14,8 +14,9 @@ import {
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../ingest_manager/common';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
-export interface HostState {
+export interface EndpointState {
   /** list of host **/
   hosts: HostInfo[];
   /** number of items per page */
@@ -50,22 +51,43 @@ export interface HostState {
   selectedPolicyId?: string;
   /** Endpoint package info */
   endpointPackageInfo?: GetPackagesResponse['response'][0];
-  /** tracks the list of policies IDs used in Host metadata that may no longer exist */
-  nonExistingPolicies: Record<string, boolean>;
+  /** Tracks the list of policies IDs used in Host metadata that may no longer exist */
+  nonExistingPolicies: PolicyIds['packagePolicy'];
+  /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/
+  agentPolicies: PolicyIds['agentPolicy'];
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
-  hostsExist: boolean;
+  endpointsExist: boolean;
+  /** index patterns for query bar */
+  patterns: IIndexPattern[];
+  /** api error from retrieving index patters for query bar */
+  patternsError?: ServerApiError;
+  /** Is auto-refresh enabled */
+  isAutoRefreshEnabled: boolean;
+  /** The current auto refresh interval for data in ms */
+  autoRefreshInterval: number;
+}
+
+/**
+ * packagePolicy contains a list of Package Policy IDs (received via Endpoint metadata policy response) mapped to a boolean whether they exist or not.
+ * agentPolicy contains a list of existing Package Policy Ids mapped to an associated Fleet parent Agent Config.
+ */
+export interface PolicyIds {
+  packagePolicy: Record<string, boolean>;
+  agentPolicy: Record<string, string>;
 }
 
 /**
  * Query params on the host page parsed from the URL
  */
-export interface HostIndexUIQueryParams {
-  /** Selected host id shows host details flyout */
-  selected_host?: string;
+export interface EndpointIndexUIQueryParams {
+  /** Selected endpoint id shows host details flyout */
+  selected_endpoint?: string;
   /** How many items to show in list */
   page_size?: string;
   /** Which page to show */
   page_index?: string;
   /** show the policy response or host details */
   show?: 'policy_response' | 'details';
+  /** Query text from search bar*/
+  admin_query?: string;
 }

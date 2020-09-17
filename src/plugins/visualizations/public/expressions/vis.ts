@@ -43,6 +43,7 @@ export interface ExprVisState {
 export interface ExprVisAPIEvents {
   filter: (data: any) => void;
   brush: (data: any) => void;
+  applyFilter: (data: any) => void;
 }
 
 export interface ExprVisAPI {
@@ -82,6 +83,10 @@ export class ExprVis extends EventEmitter {
         brush: (data: any) => {
           if (!this.eventsSubject) return;
           this.eventsSubject.next({ name: 'brush', data });
+        },
+        applyFilter: (data: any) => {
+          if (!this.eventsSubject) return;
+          this.eventsSubject.next({ name: 'applyFilter', data });
         },
       },
     };

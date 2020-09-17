@@ -25,3 +25,4 @@ export * from './triggers';
 export * from './containers';
 export * from './panel';
 export * from './state_transfer';
+export * from './reference_or_value_embeddable';

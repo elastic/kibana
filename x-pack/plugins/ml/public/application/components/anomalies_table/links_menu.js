@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import moment from 'moment';
 import rison from 'rison-node';
 import PropTypes from 'prop-types';
@@ -58,7 +58,7 @@ class LinksMenuUI extends Component {
 
     // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
     // Create a copy of the record as we are adding properties into it.
-    const record = _.cloneDeep(anomaly.source);
+    const record = cloneDeep(anomaly.source);
     const timestamp = record.timestamp;
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval = parseInterval(customUrl.time_range);
@@ -99,7 +99,7 @@ class LinksMenuUI extends Component {
     if (
       (configuredUrlValue.includes('$mlcategoryterms$') ||
         configuredUrlValue.includes('$mlcategoryregex$')) &&
-      _.has(record, 'mlcategory')
+      record.mlcategory !== undefined
     ) {
       const jobId = record.job_id;
 
@@ -156,15 +156,15 @@ class LinksMenuUI extends Component {
     // Extract the by, over and partition fields for the record.
     const entityCondition = {};
 
-    if (_.has(record, 'partition_field_value')) {
+    if (record.partition_field_value !== undefined) {
       entityCondition[record.partition_field_name] = record.partition_field_value;
     }
 
-    if (_.has(record, 'over_field_value')) {
+    if (record.over_field_value !== undefined) {
       entityCondition[record.over_field_name] = record.over_field_value;
     }
 
-    if (_.has(record, 'by_field_value')) {
+    if (record.by_field_value !== undefined) {
       // Note that analyses with by and over fields, will have a top-level by_field_name,
       // but the by_field_value(s) will be in the nested causes array.
       // TODO - drilldown from cause in expanded row only?
@@ -390,6 +390,7 @@ class LinksMenuUI extends Component {
           defaultMessage: 'Select action for anomaly at {time}',
           values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
         })}
+        data-test-subj="mlAnomaliesListRowActionsButton"
       />
     );
 
@@ -404,6 +405,7 @@ class LinksMenuUI extends Component {
               this.closePopover();
               this.openCustomUrl(customUrl);
             }}
+            data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
           >
             {customUrl.url_name}
           </EuiContextMenuItem>
@@ -415,11 +417,12 @@ class LinksMenuUI extends Component {
       items.push(
         <EuiContextMenuItem
           key="view_series"
-          icon="stats"
+          icon="visLine"
           onClick={() => {
             this.closePopover();
             this.viewSeries();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
@@ -438,6 +441,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.viewExamples();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
@@ -456,6 +460,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.props.showRuleEditorFlyout(anomaly);
           }}
+          data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
@@ -473,7 +478,7 @@ class LinksMenuUI extends Component {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
       </EuiPopover>
     );
   }
