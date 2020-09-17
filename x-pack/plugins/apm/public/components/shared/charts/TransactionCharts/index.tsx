@@ -27,7 +27,6 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { asDecimal, tpmUnit } from '../../../../utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { BrowserLineChart } from './BrowserLineChart';
 import { ErroneousTransactionsRateChart } from '../ErroneousTransactionsRateChart';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
 import {
@@ -128,14 +127,6 @@ export function TransactionCharts({
 
       {transactionType === TRANSACTION_PAGE_LOAD && (
         <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <EuiPanel>
-                <BrowserLineChart />
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <CSMLinkSection>
             <ClientSideMonitoringLink external target="_blank">
