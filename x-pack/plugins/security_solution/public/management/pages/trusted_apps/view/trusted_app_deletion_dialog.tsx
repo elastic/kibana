@@ -29,6 +29,9 @@ import {
   isDeletionInProgress,
 } from '../store/selectors';
 
+const CANCEL_SUBJ = 'trustedAppDeletionCancel';
+const CONFIRM_SUBJ = 'trustedAppDeletionConfirm';
+
 const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   title: (
     <FormattedMessage
@@ -93,11 +96,11 @@ export const TrustedAppDeletionDialog = memo(() => {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancel} isDisabled={isBusy}>
+            <EuiButtonEmpty onClick={onCancel} isDisabled={isBusy} data-test-subj={CANCEL_SUBJ}>
               {translations.cancelButton}
             </EuiButtonEmpty>
 
-            <EuiButton fill onClick={onConfirm} isLoading={isBusy}>
+            <EuiButton fill onClick={onConfirm} isLoading={isBusy} data-test-subj={CONFIRM_SUBJ}>
               {translations.confirmButton}
             </EuiButton>
           </EuiModalFooter>

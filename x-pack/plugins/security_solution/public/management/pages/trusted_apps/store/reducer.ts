@@ -48,7 +48,7 @@ const trustedAppsListDataOutdated: CaseReducer<TrustedAppsListDataOutdated> = (s
     ...state,
     listView: {
       ...state.listView,
-      freshDataTimestamp: new Date().getTime(),
+      freshDataTimestamp: Date.now(),
     },
   };
 };
@@ -101,7 +101,7 @@ const trustedAppDeletionDialogClosed: CaseReducer<TrustedAppDeletionDialogClosed
   state,
   action
 ) => {
-  return { ...state, deletionDialog: initialDeletionDialogState };
+  return { ...state, deletionDialog: initialDeletionDialogState() };
 };
 
 const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
@@ -120,30 +120,30 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
       active: true,
     };
   } else {
-    return initialTrustedAppsPageState;
+    return initialTrustedAppsPageState();
   }
 };
 
-const initialDeletionDialogState: TrustedAppsListPageState['deletionDialog'] = {
+const initialDeletionDialogState = (): TrustedAppsListPageState['deletionDialog'] => ({
   confirmed: false,
   submissionResourceState: { type: 'UninitialisedResourceState' },
-};
+});
 
-export const initialTrustedAppsPageState: TrustedAppsListPageState = {
+export const initialTrustedAppsPageState = (): TrustedAppsListPageState => ({
   listView: {
     currentListResourceState: { type: 'UninitialisedResourceState' },
     currentPaginationInfo: {
       index: MANAGEMENT_DEFAULT_PAGE,
       size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     },
-    freshDataTimestamp: new Date().getTime(),
+    freshDataTimestamp: Date.now(),
   },
-  deletionDialog: initialDeletionDialogState,
+  deletionDialog: initialDeletionDialogState(),
   active: false,
-};
+});
 
 export const trustedAppsPageReducer: StateReducer = (
-  state = initialTrustedAppsPageState,
+  state = initialTrustedAppsPageState(),
   action
 ) => {
   switch (action.type) {

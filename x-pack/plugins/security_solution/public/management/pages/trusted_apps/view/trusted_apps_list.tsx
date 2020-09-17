@@ -75,6 +75,8 @@ const getActionDefinitions = (dispatch: Dispatch<Immutable<AppAction>>): Actions
         defaultMessage: 'Delete this entry',
       }
     ),
+    'data-test-subj': 'trustedAppDeleteAction',
+    isPrimary: true,
     icon: 'trash',
     color: 'danger',
     type: 'icon',
@@ -84,7 +86,6 @@ const getActionDefinitions = (dispatch: Dispatch<Immutable<AppAction>>): Actions
         payload: { entry: item },
       });
     },
-    isPrimary: true,
   },
 ];
 

@@ -75,7 +75,7 @@ const refreshListIfNeeded = async (
             items: response.data,
             totalItemsCount: response.total,
             paginationInfo: { index: pageIndex, size: pageSize },
-            timestamp: new Date().getTime(),
+            timestamp: Date.now(),
           },
         })
       );

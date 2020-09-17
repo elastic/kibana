@@ -10,21 +10,19 @@ import {
   TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_LIST_API,
 } from '../../../../../common/endpoint/constants';
+
 import {
   DeleteTrustedAppsRequestParams,
   GetTrustedListAppsResponse,
   GetTrustedAppsListRequest,
 } from '../../../../../common/endpoint/types/trusted_apps';
 
+import { resolvePathVariables } from './utils';
+
 export interface TrustedAppsService {
   getTrustedAppsList(request: GetTrustedAppsListRequest): Promise<GetTrustedListAppsResponse>;
   deleteTrustedApp(request: DeleteTrustedAppsRequestParams): Promise<void>;
 }
-
-const resolvePathVariables = (path: string, variables: { [K: string]: string | number }) =>
-  Object.keys(variables).reduce((acc, paramName) => {
-    return acc.replace(`{${paramName}}`, String(variables[paramName]));
-  }, path);
 
 export class TrustedAppsHttpService implements TrustedAppsService {
   constructor(private http: HttpStart) {}
