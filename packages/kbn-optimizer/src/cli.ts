@@ -17,6 +17,13 @@
  * under the License.
  */
 
+import { apm } from '@kbn/utils';
+
+apm.start({
+  metricsInterval: 1,
+  metricsLimit: 1,
+});
+
 import 'source-map-support/register';
 
 import Path from 'path';
@@ -25,6 +32,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { run, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
+import { apmOptimizerStats } from './apm_optimizer_stats';
 import { OptimizerConfig } from './optimizer';
 import { reportOptimizerStats } from './report_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
@@ -120,7 +128,9 @@ run(
       update$ = update$.pipe(reportOptimizerStats(reporter, config, log));
     }
 
+    update$ = update$.pipe(apmOptimizerStats(config));
     await update$.pipe(logOptimizerState(log, config)).toPromise();
+    await apm.flush();
   },
   {
     flags: {

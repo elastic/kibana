@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export * as apm from './apm';
 export * from './package_json';
 export * from './path';
 export * from './repo_root';

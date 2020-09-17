@@ -25,6 +25,12 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 export FORCE_COLOR=1
 
 ###
+### Enables APM tracking
+###
+export ELASTIC_APM_ACTIVE=true
+export ELASTIC_APM_ENVIRONMENT=ci
+
+###
 ### The @babel/register cache collects the build output from each file in
 ### a map, in memory, and then when the process exits it writes that to the
 ### babel cache file as a JSON encoded object. Stringifying that object

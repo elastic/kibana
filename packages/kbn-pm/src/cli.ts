@@ -17,9 +17,16 @@
  * under the License.
  */
 
+import { apm } from '@kbn/utils';
+
+apm.start({
+  metricsInterval: 1,
+  metricsLimit: 1,
+});
+
 import dedent from 'dedent';
 import getopts from 'getopts';
-import { resolve } from 'path';
+import path from 'path';
 import { pickLevelFromFlags } from '@kbn/dev-utils/tooling_log';
 
 import { commands } from './commands';
@@ -93,7 +100,7 @@ export async function run(argv: string[]) {
 
   // This `rootPath` is relative to `./dist/` as that's the location of the
   // built version of this tool.
-  const rootPath = resolve(__dirname, '../../../');
+  const rootPath = path.resolve(__dirname, '../../../');
 
   const commandName = args[0];
   const extraArgs = args.slice(1);
@@ -106,5 +113,13 @@ export async function run(argv: string[]) {
     process.exit(1);
   }
 
+  const trans = apm.Agent.startTransaction(
+    `@kbn/pm ${[commandName, ...extraArgs].join(' ')}`,
+    'cli'
+  );
+
   await runCommand(command, commandOptions);
+
+  if (trans) trans.end();
+  await apm.flush();
 }

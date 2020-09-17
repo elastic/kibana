@@ -14,6 +14,7 @@
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/ui-shared-deps": "1.0.0",
+    "@kbn/utils": "1.0.0",
     "autoprefixer": "^9.7.4",
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^3.0.0",

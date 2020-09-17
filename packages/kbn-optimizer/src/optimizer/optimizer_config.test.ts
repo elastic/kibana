@@ -450,7 +450,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          21,
+          27,
         ],
         "results": Array [
           Object {
@@ -476,7 +476,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          23,
+          29,
         ],
         "results": Array [
           Object {
@@ -500,7 +500,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          22,
+          28,
         ],
         "results": Array [
           Object {
