@@ -44,15 +44,19 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       );
       if (button) {
         // Click the first button under the second child element.
-        button.simulate('click');
+        button.simulate('click', { button: 0 });
       }
     });
-    const expectedSearch = urlSearch(resolverComponentInstanceID, {
-      selectedEntityID: 'secondChild',
+    const queryStringWithOriginSelected = urlSearch(resolverComponentInstanceID, {
+      panelParameters: { nodeID: 'secondChild' },
+      panelView: 'nodeDetail',
     });
-    it(`should have a url search of ${expectedSearch}`, async () => {
+    it(`should have a url search of ${queryStringWithOriginSelected}`, async () => {
       await expect(simulator.map(() => simulator.historyLocationSearch)).toYieldEqualTo(
-        urlSearch(resolverComponentInstanceID, { selectedEntityID: 'secondChild' })
+        urlSearch(resolverComponentInstanceID, {
+          panelParameters: { nodeID: 'secondChild' },
+          panelView: 'nodeDetail',
+        })
       );
     });
     describe('when the resolver component gets unmounted', () => {
@@ -78,14 +82,18 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
           );
           if (button) {
             // Click the first button under the second child element.
-            button.simulate('click');
+            button.simulate('click', { button: 0 });
           }
         });
         it(`should have a url search of ${urlSearch(newInstanceID, {
-          selectedEntityID: 'secondChild',
+          panelParameters: { nodeID: 'secondChild' },
+          panelView: 'nodeDetail',
         })}`, async () => {
           await expect(simulator.map(() => simulator.historyLocationSearch)).toYieldEqualTo(
-            urlSearch(newInstanceID, { selectedEntityID: 'secondChild' })
+            urlSearch(newInstanceID, {
+              panelParameters: { nodeID: 'secondChild' },
+              panelView: 'nodeDetail',
+            })
           );
         });
       });

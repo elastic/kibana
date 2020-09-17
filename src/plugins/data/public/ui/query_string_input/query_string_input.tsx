@@ -546,13 +546,16 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
     window.removeEventListener('resize', this.handleAutoHeight);
-    window.removeEventListener('scroll', this.handleListUpdate);
+    window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }
 
-  handleListUpdate = () =>
-    this.setState({
+  handleListUpdate = () => {
+    if (this.componentIsUnmounting) return;
+
+    return this.setState({
       queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
     });
+  };
 
   handleAutoHeight = () => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {

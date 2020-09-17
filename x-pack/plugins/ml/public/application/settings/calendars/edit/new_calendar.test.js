@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../../../contexts/kibana/use_create_url', () => ({
+  useCreateAndNavigateToMlLink: jest.fn(),
+}));
+
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));

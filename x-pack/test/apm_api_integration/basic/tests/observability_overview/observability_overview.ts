@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(response.body.serviceCount).toMatchInline(`7`);
 
-        expectSnapshot(response.body.transactionCoordinates.length).toMatchInline(`60`);
+        expectSnapshot(response.body.transactionCoordinates.length).toMatchInline(`31`);
 
         expectSnapshot(
           response.body.transactionCoordinates
@@ -59,24 +59,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`
           Array [
             Object {
-              "x": "2020-09-10T06:00:00.000Z",
-              "y": 1.2166666666666666,
+              "x": "2020-09-15T08:53:00.000Z",
+              "y": 1,
             },
             Object {
-              "x": "2020-09-10T06:01:00.000Z",
-              "y": 0.5,
+              "x": "2020-09-15T08:54:00.000Z",
+              "y": 1.8666666666666667,
             },
             Object {
-              "x": "2020-09-10T06:02:00.000Z",
-              "y": 1.0333333333333334,
+              "x": "2020-09-15T08:55:00.000Z",
+              "y": 0.9666666666666667,
             },
             Object {
-              "x": "2020-09-10T06:03:00.000Z",
-              "y": 0.55,
+              "x": "2020-09-15T08:56:00.000Z",
+              "y": 1.9333333333333333,
             },
             Object {
-              "x": "2020-09-10T06:04:00.000Z",
-              "y": 1.15,
+              "x": "2020-09-15T08:57:00.000Z",
+              "y": 1.1,
             },
           ]
         `);
