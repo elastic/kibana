@@ -206,6 +206,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
                   'strict_weekyear',
                   'weekyear_week',
                   'strict_weekyear_week',
+                  'strict_date_optional_time_nanos',
                   'weekyear_week_day',
                   'strict_weekyear_week_day',
                   'year',
@@ -214,7 +215,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
                   'epoch_millis',
                   'epoch_second',
                 ],
-              ],
+              ].sort(),
             ],
           },
 
