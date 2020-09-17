@@ -7,10 +7,10 @@ import { httpServerMock, loggingSystemMock } from '../../../../../../../src/core
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
-import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
-import { metadataQueryStrategyV2 } from './support/query_strategies';
+import { metadataIndexPattern } from '../../../../common/endpoint/constants';
+import { metadataQueryStrategyV1 } from './support/query_strategies';
 
-describe('query builder', () => {
+describe('query builder v1', () => {
   describe('MetadataListESQuery', () => {
     it('test default query params for all endpoints metadata when no params or body is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -23,16 +23,31 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        metadataQueryStrategyV2()
+        metadataQueryStrategyV1()
       );
       expect(query).toEqual({
         body: {
           query: {
             match_all: {},
           },
+          collapse: {
+            field: 'host.id',
+            inner_hits: {
+              name: 'most_recent',
+              size: 1,
+              sort: [{ 'event.created': 'desc' }],
+            },
+          },
+          aggs: {
+            total: {
+              cardinality: {
+                field: 'host.id',
+              },
+            },
+          },
           sort: [
             {
-              'HostDetails.event.created': {
+              'event.created': {
                 order: 'desc',
               },
             },
@@ -40,7 +55,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: metadataCurrentIndexPattern,
+        index: metadataIndexPattern,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as Record<string, any>);
     });
@@ -60,26 +75,40 @@ describe('query builder', () => {
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
-          metadataQueryStrategyV2(),
+          metadataQueryStrategyV1(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
         );
-
         expect(query).toEqual({
           body: {
             query: {
               bool: {
                 must_not: {
                   terms: {
-                    'HostDetails.elastic.agent.id': [unenrolledElasticAgentId],
+                    'elastic.agent.id': [unenrolledElasticAgentId],
                   },
+                },
+              },
+            },
+            collapse: {
+              field: 'host.id',
+              inner_hits: {
+                name: 'most_recent',
+                size: 1,
+                sort: [{ 'event.created': 'desc' }],
+              },
+            },
+            aggs: {
+              total: {
+                cardinality: {
+                  field: 'host.id',
                 },
               },
             },
             sort: [
               {
-                'HostDetails.event.created': {
+                'event.created': {
                   order: 'desc',
                 },
               },
@@ -87,7 +116,7 @@ describe('query builder', () => {
           },
           from: 0,
           size: 10,
-          index: metadataCurrentIndexPattern,
+          index: metadataIndexPattern,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as Record<string, any>);
       }
@@ -98,7 +127,7 @@ describe('query builder', () => {
     it('test default query params for all endpoints metadata when body filter is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          filters: { kql: 'not HostDetails.host.ip:10.140.73.246' },
+          filters: { kql: 'not host.ip:10.140.73.246' },
         },
       });
       const query = await kibanaRequestToMetadataListESQuery(
@@ -108,7 +137,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        metadataQueryStrategyV2()
+        metadataQueryStrategyV1()
       );
 
       expect(query).toEqual({
@@ -123,7 +152,7 @@ describe('query builder', () => {
                         should: [
                           {
                             match: {
-                              'HostDetails.host.ip': '10.140.73.246',
+                              'host.ip': '10.140.73.246',
                             },
                           },
                         ],
@@ -135,9 +164,24 @@ describe('query builder', () => {
               ],
             },
           },
+          collapse: {
+            field: 'host.id',
+            inner_hits: {
+              name: 'most_recent',
+              size: 1,
+              sort: [{ 'event.created': 'desc' }],
+            },
+          },
+          aggs: {
+            total: {
+              cardinality: {
+                field: 'host.id',
+              },
+            },
+          },
           sort: [
             {
-              'HostDetails.event.created': {
+              'event.created': {
                 order: 'desc',
               },
             },
@@ -145,7 +189,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: metadataCurrentIndexPattern,
+        index: metadataIndexPattern,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as Record<string, any>);
     });
@@ -157,7 +201,7 @@ describe('query builder', () => {
         const unenrolledElasticAgentId = '1fdca33f-799f-49f4-939c-ea4383c77672';
         const mockRequest = httpServerMock.createKibanaRequest({
           body: {
-            filters: { kql: 'not HostDetails.host.ip:10.140.73.246' },
+            filters: { kql: 'not host.ip:10.140.73.246' },
           },
         });
         const query = await kibanaRequestToMetadataListESQuery(
@@ -167,7 +211,7 @@ describe('query builder', () => {
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
-          metadataQueryStrategyV2(),
+          metadataQueryStrategyV1(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
@@ -182,7 +226,7 @@ describe('query builder', () => {
                     bool: {
                       must_not: {
                         terms: {
-                          'HostDetails.elastic.agent.id': [unenrolledElasticAgentId],
+                          'elastic.agent.id': [unenrolledElasticAgentId],
                         },
                       },
                     },
@@ -194,7 +238,7 @@ describe('query builder', () => {
                           should: [
                             {
                               match: {
-                                'HostDetails.host.ip': '10.140.73.246',
+                                'host.ip': '10.140.73.246',
                               },
                             },
                           ],
@@ -206,9 +250,24 @@ describe('query builder', () => {
                 ],
               },
             },
+            collapse: {
+              field: 'host.id',
+              inner_hits: {
+                name: 'most_recent',
+                size: 1,
+                sort: [{ 'event.created': 'desc' }],
+              },
+            },
+            aggs: {
+              total: {
+                cardinality: {
+                  field: 'host.id',
+                },
+              },
+            },
             sort: [
               {
-                'HostDetails.event.created': {
+                'event.created': {
                   order: 'desc',
                 },
               },
@@ -216,7 +275,7 @@ describe('query builder', () => {
           },
           from: 0,
           size: 10,
-          index: metadataCurrentIndexPattern,
+          index: metadataIndexPattern,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as Record<string, any>);
       }
@@ -226,15 +285,15 @@ describe('query builder', () => {
   describe('MetadataGetQuery', () => {
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
+      const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV1());
 
       expect(query).toEqual({
         body: {
-          query: { match: { 'HostDetails.host.id': mockID } },
-          sort: [{ 'HostDetails.event.created': { order: 'desc' } }],
+          query: { match: { 'host.id': mockID } },
+          sort: [{ 'event.created': { order: 'desc' } }],
           size: 1,
         },
-        index: metadataCurrentIndexPattern,
+        index: metadataIndexPattern,
       });
     });
   });
