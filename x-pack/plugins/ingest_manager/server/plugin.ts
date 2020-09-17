@@ -13,6 +13,7 @@ import {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
@@ -48,7 +49,7 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType, NewPackagePolicy } from '../common';
+import { EsAssetReference, IngestManagerConfigType, NewPackagePolicy } from '../common';
 import {
   appContextService,
   licenseService,
@@ -56,6 +57,7 @@ import {
   ESIndexPatternService,
   AgentService,
   packagePolicyService,
+  PackageService,
 } from './services';
 import {
   getAgentStatusById,
@@ -66,6 +68,7 @@ import {
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerIngestManagerUsageCollector } from './collectors/register';
+import { getInstallation } from './services/epm/packages';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -119,6 +122,7 @@ export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCall
  */
 export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
+  packageService: PackageService;
   agentService: AgentService;
   /**
    * Services for Ingest's package policies
@@ -275,6 +279,15 @@ export class IngestManagerPlugin
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
+      packageService: {
+        getInstalledEsAssetReferences: async (
+          savedObjectsClient: SavedObjectsClientContract,
+          pkgName: string
+        ): Promise<EsAssetReference[]> => {
+          const installation = await getInstallation({ savedObjectsClient, pkgName });
+          return installation?.installed_es || [];
+        },
+      },
       agentService: {
         getAgent,
         listAgents,

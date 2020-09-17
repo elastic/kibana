@@ -615,7 +615,58 @@ export const formattedSearchStrategyResponse = {
   ],
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "http_count": {\n        "cardinality": {\n          "field": "url.path"\n        }\n      },\n      "url": {\n        "terms": {\n          "field": "url.path",\n          "size": 10,\n          "order": {\n            "_count": "desc"\n          }\n        },\n        "aggs": {\n          "methods": {\n            "terms": {\n              "field": "http.request.method",\n              "size": 4\n            }\n          },\n          "domains": {\n            "terms": {\n              "field": "url.domain",\n              "size": 4\n            }\n          },\n          "status": {\n            "terms": {\n              "field": "http.response.status_code",\n              "size": 4\n            }\n          },\n          "source": {\n            "top_hits": {\n              "size": 1,\n              "_source": {\n                "includes": [\n                  "host.name",\n                  "source.ip"\n                ]\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-13T09:00:43.249Z",\n                "lte": "2020-09-14T09:00:43.249Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          },\n          {\n            "exists": {\n              "field": "http.request.method"\n            }\n          }\n        ]\n      }\n    }\n  },\n  "size": 0,\n  "track_total_hits": false\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              http_count: { cardinality: { field: 'url.path' } },
+              url: {
+                terms: { field: 'url.path', size: 10, order: { _count: 'desc' } },
+                aggs: {
+                  methods: { terms: { field: 'http.request.method', size: 4 } },
+                  domains: { terms: { field: 'url.domain', size: 4 } },
+                  status: { terms: { field: 'http.response.status_code', size: 4 } },
+                  source: {
+                    top_hits: { size: 1, _source: { includes: ['host.name', 'source.ip'] } },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-13T09:00:43.249Z',
+                        lte: '2020-09-14T09:00:43.249Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                  { exists: { field: 'http.request.method' } },
+                ],
+              },
+            },
+          },
+          size: 0,
+          track_total_hits: false,
+        },
+        null,
+        2
+      ),
     ],
   },
   pageInfo: { activePage: 0, fakeTotalCount: 50, showMorePagesIndicator: true },
@@ -650,7 +701,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
           {
             range: {
               '@timestamp': {
