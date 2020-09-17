@@ -9,7 +9,6 @@ import { asyncForEach } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
   const calendarId = 'test_calendar_id';
@@ -50,8 +49,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('sets calendar to apply to all jobs');
       await ml.settingsCalendar.toggleApplyToAllJobsSwitch(true);
-      await testSubjects.missingOrFail('mlCalendarJobSelection');
-      await testSubjects.missingOrFail('mlCalendarJobGroupSelection');
+      await ml.settingsCalendar.assertJobSelectionNotExists();
+      await ml.settingsCalendar.assertJobGroupSelectionNotExists();
 
       await ml.testExecution.logTestStep('sets the id and description');
       await ml.settingsCalendar.setCalendarId(calendarId);
@@ -82,11 +81,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.navigateToCalendarCreationPage();
       await ml.settingsCalendar.setCalendarId(calendarId);
 
-      await testSubjects.existOrFail('mlCalendarJobSelection');
+      await ml.settingsCalendar.assertJobSelectionExists();
       await ml.settingsCalendar.assertJobSelectionEnabled(true);
-      await testSubjects.existOrFail('mlCalendarJobGroupSelection');
+      await ml.settingsCalendar.assertJobGroupSelectionExists();
       await ml.settingsCalendar.assertJobGroupSelectionEnabled(true);
-      await testSubjects.click('mlCalendarJobSelection');
 
       await ml.testExecution.logTestStep('sets the job selection');
       await asyncForEach(jobConfigs, async (jobConfig) => {

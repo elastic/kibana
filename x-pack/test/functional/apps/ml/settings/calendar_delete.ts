@@ -9,7 +9,6 @@ import { asyncForEach } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const testSubjects = getService('testSubjects');
 
   const testDataList = [1, 2].map((n) => ({
     calendarId: `test_delete_calendar_${n}`,
@@ -52,8 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await ml.testExecution.logTestStep('calendar delete clicks the delete button');
-      await ml.settingsCalendar.assertDeleteCalendarButtonEnabled(true);
-      await testSubjects.click('mlCalendarButtonDelete');
+      await ml.settingsCalendar.deleteCalendar();
 
       await ml.testExecution.logTestStep(
         'calendar delete validates the calendars are deleted from the table'

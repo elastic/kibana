@@ -9,7 +9,6 @@ import { asyncForEach } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const testSubjects = getService('testSubjects');
 
   const testDataList = [1, 2].map((n) => ({
     filterId: `test_delete_filter_${n}`,
@@ -47,18 +46,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToFilterListsManagement();
 
-      await ml.testExecution.logTestStep('selects new filter lists');
+      await ml.testExecution.logTestStep('selects multiple filter lists to delete');
       for (const testData of testDataList) {
         const { filterId } = testData;
         await ml.settingsFilterList.selectFilterListRow(filterId);
       }
-      await testSubjects.existOrFail('mlFilterListsDeleteButton');
-      await ml.settingsFilterList.assertDeleteFilterListButtonEnabled(true);
-      await testSubjects.click('mlFilterListsDeleteButton');
-      await testSubjects.existOrFail('mlFilterListsDeleteButton');
-      await testSubjects.existOrFail('mlFilterListDeleteConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
 
+      await ml.testExecution.logTestStep('deletes the selected filter lists');
+      await ml.settingsFilterList.deleteFilterList();
+
+      await ml.testExecution.logTestStep('validates selected filter lists are deleted');
       await asyncForEach(testDataList, async ({ filterId }) => {
         await ml.settingsFilterList.assertFilterListRowMissing(filterId);
       });

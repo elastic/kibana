@@ -130,6 +130,10 @@ export function MachineLearningSettingsFilterListProvider(
       );
     },
 
+    async assertDeleteFilterListButtonExists() {
+      await testSubjects.existOrFail('mlFilterListsDeleteButton');
+    },
+
     async assertDeleteFilterListButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlFilterListsDeleteButton');
       expect(isEnabled).to.eql(
@@ -138,6 +142,16 @@ export function MachineLearningSettingsFilterListProvider(
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
+    },
+
+    async deleteFilterList() {
+      await this.assertDeleteFilterListButtonExists();
+      await this.assertDeleteFilterListButtonEnabled(true);
+      await testSubjects.click('mlFilterListsDeleteButton');
+      await testSubjects.existOrFail('mlFilterListsDeleteButton');
+      await testSubjects.existOrFail('mlFilterListDeleteConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.missingOrFail('mlFilterListDeleteConfirmation');
     },
 
     async openFilterListEditForm(filterId: string) {
@@ -165,7 +179,7 @@ export function MachineLearningSettingsFilterListProvider(
       );
     },
 
-    async assertAddItemButtonEnabled(expectedValue: boolean) {
+    async assertAddItemsButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlFilterListAddItemsButton');
       expect(isEnabled).to.eql(
         expectedValue,
@@ -283,9 +297,9 @@ export function MachineLearningSettingsFilterListProvider(
       await mlCommonUI.setValueWithChecks('mlFilterListAddItemTextArea', keywords.join('\n'), {
         clearWithKeyboard: true,
       });
-      await testSubjects.existOrFail('mlFilterListAddItemButton');
-      await this.assertAddItemButtonEnabled(true);
-      await testSubjects.click('mlFilterListAddItemButton');
+      await testSubjects.existOrFail('mlFilterListAddItemsButton');
+      await this.assertAddItemsButtonEnabled(true);
+      await testSubjects.click('mlFilterListAddItemsButton');
 
       for (let index = 0; index < keywords.length; index++) {
         await this.assertFilterItemExists(keywords[index]);
