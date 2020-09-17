@@ -270,17 +270,20 @@ export const EndpointList = () => {
           );
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <EndpointListNavLink
-              name={hostname}
-              href={toRouteUrl}
-              route={toRoutePath}
-              dataTestSubj="hostnameCellLink"
-            />
+            <EuiToolTip content={hostname} anchorClassName="eui-fullWidth">
+              <EndpointListNavLink
+                name={hostname}
+                href={toRouteUrl}
+                route={toRoutePath}
+                dataTestSubj="hostnameCellLink"
+              />
+            </EuiToolTip>
           );
         },
       },
       {
         field: 'host_status',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Agent Status',
         }),
@@ -303,27 +306,31 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.Endpoint.policy.applied',
+        width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
-          defaultMessage: 'Integration',
+          defaultMessage: 'Integration Policy',
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           return (
-            <EndpointPolicyLink
-              policyId={policy.id}
-              className="eui-textTruncate"
-              data-test-subj="policyNameCellLink"
-            >
-              {policy.name}
-            </EndpointPolicyLink>
+            <EuiToolTip content={policy.name} anchorClassName="eui-fullWidth">
+              <EndpointPolicyLink
+                policyId={policy.id}
+                className="eui-textTruncate"
+                data-test-subj="policyNameCellLink"
+              >
+                {policy.name}
+              </EndpointPolicyLink>
+            </EuiToolTip>
           );
         },
       },
       {
         field: 'metadata.Endpoint.policy.applied',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
-          defaultMessage: 'Configuration Status',
+          defaultMessage: 'Policy Status',
         }),
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           const toRoutePath = getEndpointDetailsPath({
@@ -350,6 +357,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.host.os.name',
+        width: '10%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'Operating System',
         }),
@@ -375,6 +383,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.agent.version',
+        width: '5%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
@@ -394,6 +403,7 @@ export const EndpointList = () => {
       },
       {
         field: '',
+        width: '5%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
           defaultMessage: 'Actions',
         }),

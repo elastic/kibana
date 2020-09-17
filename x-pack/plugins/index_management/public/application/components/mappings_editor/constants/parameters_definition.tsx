@@ -31,7 +31,7 @@ import { TYPE_DEFINITION } from './data_types_definition';
 import { RUNTIME_FIELD_OPTIONS } from './field_options';
 
 const { toInt } = fieldFormatters;
-const { emptyField, containsCharsField, numberGreaterThanField } = fieldValidators;
+const { emptyField, containsCharsField, numberGreaterThanField, isJsonField } = fieldValidators;
 
 const commonErrorMessages = {
   smallerThanZero: i18n.translate(
@@ -439,6 +439,88 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       ],
     },
     schema: t.string,
+  },
+  value: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.valueLabel', {
+        defaultMessage: 'Value',
+      }),
+    },
+    schema: t.string,
+  },
+  meta: {
+    fieldConfig: {
+      defaultValue: '',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.metaLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      helpText: (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.parameters.metaHelpText"
+          defaultMessage="Use JSON format: {code}"
+          values={{
+            code: <EuiCode>{JSON.stringify({ arbitrary_key: 'anything_goes' })}</EuiCode>,
+          }}
+        />
+      ),
+      validations: [
+        {
+          validator: isJsonField(
+            i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorJsonError', {
+              defaultMessage: 'Invalid JSON.',
+            }),
+            { allowEmptyString: true }
+          ),
+        },
+        {
+          validator: ({ value }: ValidationFuncArg<any, string>) => {
+            if (typeof value !== 'string' || value.trim() === '') {
+              return;
+            }
+
+            const json = JSON.parse(value);
+            const valuesAreNotString = Object.values(json).some((v) => typeof v !== 'string');
+
+            if (Array.isArray(json)) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorArraysNotAllowedError',
+                  {
+                    defaultMessage: 'Arrays are not allowed.',
+                  }
+                ),
+              };
+            } else if (valuesAreNotString) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.metaFieldEditorOnlyStringValuesAllowedError',
+                  {
+                    defaultMessage: 'Values must be a string.',
+                  }
+                ),
+              };
+            }
+          },
+        },
+      ],
+      deserializer: (value: any) => {
+        if (value === '') {
+          return value;
+        }
+        return JSON.stringify(value, null, 2);
+      },
+      serializer: (value: string) => {
+        const parsed = JSON.parse(value);
+        // If an empty object was passed, strip out this value entirely.
+        if (!Object.keys(parsed).length) {
+          return undefined;
+        }
+        return parsed;
+      },
+    },
+    schema: t.any,
   },
   max_input_length: {
     fieldConfig: {

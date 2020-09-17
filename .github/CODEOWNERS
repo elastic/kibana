@@ -64,11 +64,12 @@
 /src/apm.js @watson @vigneshshanmugam
 
 # Client Side Monitoring (lives in APM directories but owned by Uptime)
-/x-pack/plugins/apm/e2e/cypress/support/step_definitions/rum @elastic/uptime
+/x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm @elastic/uptime
 /x-pack/plugins/apm/public/application/csmApp.tsx @elastic/uptime
 /x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
+/x-pack/plugins/apm/server/projections/rum_overview.ts @elastic/uptime
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
@@ -85,6 +86,7 @@
 # Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
 /src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-core-ui
 /src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
+/x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
 
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
@@ -128,6 +130,7 @@
 /packages/kbn-test/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
+/packages/kbn-utils/ @elastic/kibana-operations
 /src/legacy/server/keystore/ @elastic/kibana-operations
 /src/legacy/server/pid/ @elastic/kibana-operations
 /src/legacy/server/sass/ @elastic/kibana-operations
@@ -152,6 +155,7 @@
 /x-pack/plugins/cloud/ @elastic/kibana-platform
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
+/packages/kbn-std/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
 /src/legacy/server/logging/ @elastic/kibana-platform
@@ -163,7 +167,6 @@
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
-/x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
@@ -283,7 +286,6 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
 /src/legacy/core_plugins/kibana/public/home/**/*.scss @elastic/kibana-core-ui-designers
-/x-pack/legacy/plugins/security/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/legacy/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers
@@ -293,6 +295,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/plugins/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/ingest_manager/**/*.scss @elastic/observability-design
 /x-pack/plugins/observability/**/*.scss @elastic/observability-design
+/x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
 
 # Ent. Search design
 /x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
