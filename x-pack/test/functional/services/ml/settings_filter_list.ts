@@ -155,11 +155,21 @@ export function MachineLearningSettingsFilterListProvider(
       );
     },
 
-    async assertAddItemButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListAddItemButton');
+    async assertOpenNewItemsPopoverButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlFilterListOpenNewItemsPopoverButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "add item" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    async assertAddItemButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlFilterListAddItemsButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "add" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );
@@ -239,16 +249,21 @@ export function MachineLearningSettingsFilterListProvider(
       await testSubjects.existOrFail('mlPageFilterListEdit');
     },
 
+    async assertFilterListIdValue(expectedValue: string) {
+      const subj = 'mlNewFilterListIdInput';
+      const actualFilterListId = await testSubjects.getAttribute(subj, 'value');
+      expect(actualFilterListId).to.eql(
+        expectedValue,
+        `Filter list id should be '${expectedValue}' (got '${actualFilterListId}')`
+      );
+    },
+
     async setFilterListId(filterId: string) {
       const subj = 'mlNewFilterListIdInput';
       await mlCommonUI.setValueWithChecks(subj, filterId, {
         clearWithKeyboard: true,
       });
-      const actualFilterListId = await testSubjects.getAttribute(subj, 'value');
-      expect(actualFilterListId).to.eql(
-        filterId,
-        `Filter list id should be '${filterId}' (got '${actualFilterListId}')`
-      );
+      await this.assertFilterListIdValue(filterId);
     },
 
     async setFilterListDescription(description: string) {
@@ -259,24 +274,25 @@ export function MachineLearningSettingsFilterListProvider(
         clearWithKeyboard: true,
       });
       await browser.pressKeys(browser.keys.ESCAPE);
-      await this.assertFilterListDescriptionEql(description);
+      await this.assertFilterListDescriptionValue(description);
     },
 
     async addFilterListKeywords(keywords: string[]) {
-      await this.assertAddItemButtonEnabled(true);
-      await testSubjects.click('mlFilterListAddItemButton');
+      await this.assertOpenNewItemsPopoverButtonEnabled(true);
+      await testSubjects.click('mlFilterListOpenNewItemsPopoverButton');
       await mlCommonUI.setValueWithChecks('mlFilterListAddItemTextArea', keywords.join('\n'), {
         clearWithKeyboard: true,
       });
-      await testSubjects.existOrFail('mlAddFilterListItemButton');
-      await testSubjects.click('mlAddFilterListItemButton');
+      await testSubjects.existOrFail('mlFilterListAddItemButton');
+      await this.assertAddItemButtonEnabled(true);
+      await testSubjects.click('mlFilterListAddItemButton');
 
       for (let index = 0; index < keywords.length; index++) {
         await this.assertFilterItemExists(keywords[index]);
       }
     },
 
-    async assertFilterListDescriptionEql(expectedDescription: string) {
+    async assertFilterListDescriptionValue(expectedDescription: string) {
       const actualFilterListDescription = await testSubjects.getVisibleText(
         'mlNewFilterListDescriptionText'
       );

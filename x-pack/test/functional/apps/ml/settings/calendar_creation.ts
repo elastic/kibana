@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.navigateToCalendarCreationPage();
 
       await ml.testExecution.logTestStep('calendar creation sets calendar to apply to all jobs');
-      await ml.settingsCalendar.activateApplyToAllJobsSwitch();
+      await ml.settingsCalendar.toggleApplyToAllJobsSwitch(true);
       await testSubjects.missingOrFail('mlCalendarJobSelection');
       await testSubjects.missingOrFail('mlCalendarJobGroupSelection');
 
@@ -58,7 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.setCalendarDescription('test calendar description');
 
       await ml.testExecution.logTestStep('calendar creation creates new calendar event');
-      await ml.settingsCalendar.createNewCalendarEvent('holiday');
+      await ml.settingsCalendar.openNewCalendarEventForm();
+      await ml.settingsCalendar.setCalendarEventDescription('holiday');
       await ml.settingsCalendar.addNewCalendarEvent();
       await ml.settingsCalendar.assertEventRowExists('holiday');
 

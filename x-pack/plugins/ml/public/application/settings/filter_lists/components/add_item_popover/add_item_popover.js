@@ -84,7 +84,7 @@ export class AddItemPopover extends Component {
         iconSide="right"
         onClick={this.onButtonClick}
         isDisabled={this.props.canCreateFilter === false}
-        data-test-subj="mlFilterListAddItemButton"
+        data-test-subj="mlFilterListOpenNewItemsPopoverButton"
       >
         <FormattedMessage
           id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
@@ -131,7 +131,7 @@ export class AddItemPopover extends Component {
               <EuiButton
                 onClick={this.onAddButtonClick}
                 disabled={this.state.itemsText.length === 0}
-                data-test-subj={'mlAddFilterListItemButton'}
+                data-test-subj={'mlFilterListAddItemsButton'}
               >
                 <FormattedMessage
                   id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"

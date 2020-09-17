@@ -74,7 +74,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await ml.testExecution.logTestStep('calendar creation creates new calendar event');
-      await ml.settingsCalendar.createNewCalendarEvent('holiday');
+      await ml.settingsCalendar.openNewCalendarEventForm();
+      await ml.settingsCalendar.setCalendarEventDescription('holiday');
       await ml.settingsCalendar.addNewCalendarEvent();
       await ml.settingsCalendar.assertEventRowExists('holiday');
 

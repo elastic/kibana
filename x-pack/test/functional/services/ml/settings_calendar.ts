@@ -124,7 +124,7 @@ export function MachineLearningSettingsCalendarProvider(
       await testSubjects.existOrFail('mlPageCalendarEdit');
     },
 
-    async assertApplyToAllJobsSwitchEnabled(expectedValue: boolean) {
+    async assertApplyToAllJobsSwitchCheckedState(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlCalendarApplyToAllJobsSwitch');
       expect(isEnabled).to.eql(
         expectedValue,
@@ -216,21 +216,50 @@ export function MachineLearningSettingsCalendarProvider(
       await testSubjects.missingOrFail(this.calendarRowSelector(calendarId));
     },
 
+    async assertCalendarIdValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute('mlCalendarIdInput', 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Calendar id should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
     async setCalendarId(calendarId: string) {
       await mlCommonUI.setValueWithChecks('mlCalendarIdInput', calendarId, {
         clearWithKeyboard: true,
       });
+      await this.assertCalendarIdValue(calendarId);
     },
+
+    async assertCalendarDescriptionValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute('mlCalendarDescriptionInput', 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Calendar description should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
     async setCalendarDescription(description: string) {
       await mlCommonUI.setValueWithChecks('mlCalendarDescriptionInput', description, {
         clearWithKeyboard: true,
       });
+      await this.assertCalendarDescriptionValue(description);
     },
-    async activateApplyToAllJobsSwitch() {
-      await retry.tryForTime(5 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlCalendarApplyToAllJobsSwitch');
-        await this.assertApplyToAllJobsSwitchEnabled(true);
-      });
+
+    async getApplyToAllJobsSwitchCheckedState(): Promise<boolean> {
+      const subj = 'mlCalendarApplyToAllJobsSwitch';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
+      return isSelected === 'true';
+    },
+
+    async toggleApplyToAllJobsSwitch(toggle: boolean) {
+      const subj = 'mlCalendarApplyToAllJobsSwitch';
+      if ((await this.getApplyToAllJobsSwitchCheckedState()) !== toggle) {
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(subj);
+          await this.assertApplyToAllJobsSwitchCheckedState(toggle);
+        });
+      }
     },
 
     async saveCalendar() {
@@ -245,14 +274,34 @@ export function MachineLearningSettingsCalendarProvider(
       await testSubjects.existOrFail('mlPageCalendarEdit');
     },
 
-    async createNewCalendarEvent(eventDescription: string) {
+    async openNewCalendarEventForm() {
       await testSubjects.existOrFail('mlCalendarNewEventButton');
       await testSubjects.click('mlCalendarNewEventButton');
       await testSubjects.existOrFail('mlPageCalendarEdit');
+    },
+
+    async assertCalendarEventDescriptionValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        'mlCalendarEventDescriptionInput,',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Calendar event description should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async setCalendarEventDescription(eventDescription: string) {
       await testSubjects.existOrFail('mlCalendarEventDescriptionInput');
       await mlCommonUI.setValueWithChecks('mlCalendarEventDescriptionInput', eventDescription, {
         clearWithKeyboard: true,
       });
+      await this.assertCalendarEventDescriptionValue(eventDescription);
+    },
+
+    async createNewCalendarEvent(eventDescription: string) {
+      await this.openNewCalendarEventForm();
+      await this.setCalendarEventDescription(eventDescription);
     },
 
     async cancelNewCalendarEvent() {

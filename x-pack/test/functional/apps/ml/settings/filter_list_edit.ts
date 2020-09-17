@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('filter list edit finds the filter list to edit');
       await ml.settingsFilterList.selectFilterListRowEditLink(filterId);
       await ml.settingsFilterList.assertFilterItemExists(keywordToDelete);
-      await ml.settingsFilterList.assertFilterListDescriptionEql(oldDescription);
+      await ml.settingsFilterList.assertFilterListDescriptionValue(oldDescription);
 
       await ml.testExecution.logTestStep('filter list edit deletes existing filter item');
       await ml.settingsFilterList.deleteFilterItem(keywordToDelete);
