@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { migrations } from './migrations';
+import { caseMigrations } from './migrations';
 
 export const CASE_SAVED_OBJECT = 'cases';
 
@@ -130,5 +130,5 @@ export const caseSavedObjectType: SavedObjectsType = {
       },
     },
   },
-  migrations,
+  migrations: caseMigrations,
 };
