@@ -710,13 +710,21 @@ export class SavedObjectsRepository {
     filter,
     preference,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
-    if (!type) {
+    if (!type && !typesAndNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.type must be a string or an array of strings'
       );
+    } else if (type && typesAndNamespacesMap) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.type must be an empty string when options.typesAndNamespacesMap is used'
+      );
     }
 
-    const types = Array.isArray(type) ? type : [type];
+    const types = type
+      ? Array.isArray(type)
+        ? type
+        : [type]
+      : Array.from(typesAndNamespacesMap!.keys());
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
       return {

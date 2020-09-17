@@ -657,6 +657,10 @@ describe('#find', () => {
           { resource: 'another-ns', privilege: 'mock-saved_object:bar/find', authorized: false },
           { resource: 'another-ns', privilege: 'mock-saved_object:baz/find', authorized: true },
           { resource: 'another-ns', privilege: 'mock-saved_object:qux/find', authorized: false },
+          { resource: 'forbidden-ns', privilege: 'mock-saved_object:foo/find', authorized: false },
+          { resource: 'forbidden-ns', privilege: 'mock-saved_object:bar/find', authorized: false },
+          { resource: 'forbidden-ns', privilege: 'mock-saved_object:baz/find', authorized: false },
+          { resource: 'forbidden-ns', privilege: 'mock-saved_object:qux/find', authorized: false },
         ],
       },
     });
@@ -666,7 +670,7 @@ describe('#find', () => {
 
     const options = Object.freeze({
       type: ['foo', 'bar', 'baz', 'qux'],
-      namespaces: ['some-ns', 'another-ns'],
+      namespaces: ['some-ns', 'another-ns', 'forbidden-ns'],
     });
     const result = await client.find(options);
     // 'expect(clientOpts.baseClient.find).toHaveBeenCalledWith' resulted in false negatives, resorting to manually comparing mock call args
@@ -677,7 +681,9 @@ describe('#find', () => {
         ['bar', ['some-ns']],
         ['baz', ['another-ns']],
         // qux is not authorized, so there is no entry for it
+        // forbidden-ns is completely forbidden, so there are no entries with this namespace
       ]),
+      type: '',
     });
     expect(result).toEqual(apiCallReturnValue);
   });

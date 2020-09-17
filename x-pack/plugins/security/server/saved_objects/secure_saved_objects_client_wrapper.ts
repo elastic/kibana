@@ -157,17 +157,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       } as SavedObjectsFindResponse<T>);
     }
 
-    const typesAndNamespacesMap =
-      status === 'partially_authorized'
-        ? Array.from(typeMap).reduce<Map<string, string[] | undefined>>(
-            (acc, [type, { authorizedSpaces, isGloballyAuthorized }]) =>
-              isGloballyAuthorized
-                ? acc.set(type, options.namespaces)
-                : acc.set(type, authorizedSpaces),
-            new Map()
-          )
-        : undefined; // if the user is fully authorized, use `undefined` as the typesAndNamespacesMap to prevent privilege escalation
-    const response = await this.baseClient.find<T>({ ...options, typesAndNamespacesMap });
+    const typesAndNamespacesMap = Array.from(typeMap).reduce<Map<string, string[] | undefined>>(
+      (acc, [type, { authorizedSpaces, isGloballyAuthorized }]) =>
+        isGloballyAuthorized ? acc.set(type, options.namespaces) : acc.set(type, authorizedSpaces),
+      new Map()
+    );
+    const response = await this.baseClient.find<T>({
+      ...options,
+      typesAndNamespacesMap: undefined, // if the user is fully authorized, use `undefined` as the typesAndNamespacesMap to prevent privilege escalation
+      ...(status === 'partially_authorized' && { typesAndNamespacesMap, type: '' }), // the repository requires that `type` must be empty if `typesAndNamespacesMap` is defined
+    });
     return await this.redactSavedObjectsNamespaces(response);
   }
 
