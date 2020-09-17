@@ -16,7 +16,7 @@ import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
 import { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY } from '../common/constants';
-import { createTileMapLayerDescriptor } from './classes/layers/create_tile_map_layer_descriptor';
+import { lazyLoadMapModules } from './lazy_load_bundle';
 
 const STATE_STORAGE_KEY = '_a';
 const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -147,8 +147,9 @@ export const createTileMapUrlGenerator = (
     query?: Query;
     hash?: boolean;
   }): Promise<string> => {
+    const mapModules = await lazyLoadMapModules();
     const initialLayers = [];
-    const tileMapLayerDescriptor = createTileMapLayerDescriptor({
+    const tileMapLayerDescriptor = mapModules.createTileMapLayerDescriptor({
       title,
       mapType,
       colorSchema,
