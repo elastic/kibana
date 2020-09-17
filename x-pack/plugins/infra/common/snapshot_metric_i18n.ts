@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { SnapshotMetricType } from './inventory_models/types';
 
-const Translations = {
+export const Translations = {
   CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
     defaultMessage: 'CPU usage',
   }),
