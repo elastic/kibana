@@ -15,7 +15,7 @@ export const METRICS_FEATURE = {
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
     defaultMessage: 'Metrics',
   }),
-  order: 700,
+  order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,
   icon: 'metricsApp',
   navLinkId: 'metrics',
@@ -66,7 +66,7 @@ export const LOGS_FEATURE = {
   name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
     defaultMessage: 'Logs',
   }),
-  order: 800,
+  order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
   icon: 'logsApp',
   navLinkId: 'logs',

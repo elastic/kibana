@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiCallOut } from '@elastic/eui';
+
 import {
   EuiAccordion,
   EuiCheckbox,
@@ -18,6 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AppCategory } from 'kibana/public';
 import _ from 'lodash';
 import React, { ChangeEvent, Component, ReactElement } from 'react';
 import { KibanaFeatureConfig } from '../../../../../../plugins/features/public';
@@ -123,6 +126,8 @@ export class FeatureTable extends Component<Props, {}> {
         </EuiText>
       );
 
+      const helpText = this.getCategoryHelpText(category);
+
       const accordion = (
         <EuiAccordion
           id={`featureCategory_${category.id}`}
@@ -135,6 +140,14 @@ export class FeatureTable extends Component<Props, {}> {
         >
           <div className="spcFeatureTableAccordionContent">
             <EuiSpacer size="s" />
+            {helpText && (
+              <>
+                <EuiCallOut iconType="iInCircle" size="s">
+                  {helpText}
+                </EuiCallOut>
+                <EuiSpacer size="s" />
+              </>
+            )}
             {featuresInCategory.map((feature) => {
               const featureChecked = !(
                 space.disabledFeatures && space.disabledFeatures.includes(feature.id)
@@ -264,5 +277,14 @@ export class FeatureTable extends Component<Props, {}> {
     }
 
     this.props.onChange(updatedSpace);
+  };
+
+  private getCategoryHelpText = (category: AppCategory) => {
+    if (category.id === 'management') {
+      return i18n.translate('xpack.spaces.management.managementCategoryHelpText', {
+        defaultMessage:
+          'Access to Stack Management is determined by your privileges, and cannot be hidden by Spaces.',
+      });
+    }
   };
 }
