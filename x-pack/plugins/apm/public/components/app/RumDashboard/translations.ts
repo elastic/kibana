@@ -64,6 +64,21 @@ export const I18LABELS = {
       defaultMessage: 'Operating system',
     }
   ),
+  userExperienceMetrics: i18n.translate('xpack.apm.rum.userExperienceMetrics', {
+    defaultMessage: 'User experience metrics',
+  }),
+  avgPageLoadDuration: i18n.translate(
+    'xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration',
+    {
+      defaultMessage: 'Average page load duration',
+    }
+  ),
+  pageLoadDurationByRegion: i18n.translate(
+    'xpack.apm.rum.visitorBreakdownMap.pageLoadDurationByRegion',
+    {
+      defaultMessage: 'Page load duration by region',
+    }
+  ),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(
