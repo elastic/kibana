@@ -126,7 +126,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         });
       });
       await act(async () => {
-        find('processorSettingsForm.submitButton').simulate('click');
+        find('addProcessorForm.submitButton').simulate('click');
       });
     },
 
@@ -166,7 +166,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         });
       });
       await act(async () => {
-        find('processorSettingsForm.submitButton').simulate('click');
+        find('addProcessorForm.submitButton').simulate('click');
       });
     },
 
@@ -202,8 +202,10 @@ type TestSubject =
   | 'pipelineEditorDoneButton'
   | 'pipelineEditorOnFailureToggle'
   | 'addProcessorsButtonLevel1'
-  | 'processorSettingsForm'
-  | 'processorSettingsForm.submitButton'
+  | 'editProcessorForm'
+  | 'editProcessorForm.submitButton'
+  | 'addProcessorForm.submitButton'
+  | 'addProcessorForm'
   | 'processorOptionsEditor'
   | 'processorSettingsFormFlyout'
   | 'processorTypeSelector'
