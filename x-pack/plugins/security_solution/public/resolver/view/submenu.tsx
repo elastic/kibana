@@ -10,7 +10,6 @@ import { EuiI18nNumber, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
-import { Matrix3 } from '../types';
 import { useResolverTheme } from './assets';
 
 /**
@@ -50,24 +49,16 @@ export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
  */
 const NodeSubMenuComponents = React.memo(
   ({
-    count,
-    buttonBorderColor,
-    menuAction,
     className,
-    projectionMatrix,
     nodeID,
     relatedEventStats,
   }: {
     className?: string;
-    menuAction?: () => unknown;
-    buttonBorderColor: ButtonColor;
     // eslint-disable-next-line react/no-unused-prop-types
     buttonFill: string;
-    count?: number;
     /**
      * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.
      */
-    projectionMatrix: Matrix3;
     nodeID: string;
     relatedEventStats: ResolverNodeStats | undefined;
   }) => {
