@@ -3,30 +3,19 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 120) {
-  githubCommitStatus.trackBuild(params.commit, 'kibana-ci-baseline') {
-    ciStats.trackBuild {
-      catchError {
-        withEnv([
-          'CI_PARALLEL_PROCESS_NUMBER=1'
-        ]) {
-          parallel([
-            'oss-baseline': {
-              workers.ci(name: 'oss-baseline', size: 's-highmem', ramDisk: true, runErrorReporter: false) {
-                kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh')()
-              }
-            },
-            'xpack-baseline': {
-              workers.ci(name: 'xpack-baseline', size: 's-highmem', ramDisk: true, runErrorReporter: false) {
-                kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh')()
-              }
-            },
-          ])
+kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
+  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
+    githubPr.withDefaultPrComments {
+      ciStats.trackBuild {
+        catchError {
+          retryable.enable()
+          kibanaPipeline.allCiTasks()
         }
       }
-
-      kibanaPipeline.sendMail()
-      slackNotifications.onFailure()
     }
+  }
+
+  if (params.NOTIFY_ON_FAILURE) {
+    kibanaPipeline.sendMail()
   }
 }
