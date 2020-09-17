@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry } from 'lodash';
+import { curry, isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { postPagerduty } from './lib/post_pagerduty';
@@ -230,26 +230,29 @@ async function executor(
 
 const AcknowledgeOrResolve = new Set([EVENT_ACTION_ACKNOWLEDGE, EVENT_ACTION_RESOLVE]);
 
-function getBodyForEventAction(actionId: string, params: ActionParamsType): unknown {
-  const eventAction = params.eventAction || EVENT_ACTION_TRIGGER;
-  const dedupKey = params.dedupKey || `action:${actionId}`;
-
-  const data: {
-    event_action: ActionParamsType['eventAction'];
-    dedup_key: string;
-    payload?: {
-      summary: string;
-      source: string;
-      severity: string;
-      timestamp?: string;
-      component?: string;
-      group?: string;
-      class?: string;
-    };
-  } = {
-    event_action: eventAction,
-    dedup_key: dedupKey,
+interface PagerDutyPayload {
+  event_action: ActionParamsType['eventAction'];
+  dedup_key?: string;
+  payload?: {
+    summary: string;
+    source: string;
+    severity: string;
+    timestamp?: string;
+    component?: string;
+    group?: string;
+    class?: string;
   };
+}
+
+function getBodyForEventAction(actionId: string, params: ActionParamsType): PagerDutyPayload {
+  const eventAction = params.eventAction ?? EVENT_ACTION_TRIGGER;
+
+  const data: PagerDutyPayload = {
+    event_action: eventAction,
+  };
+  if (params.dedupKey) {
+    data.dedup_key = params.dedupKey;
+  }
 
   // for acknowledge / resolve, just send the dedup key
   if (AcknowledgeOrResolve.has(eventAction)) {
@@ -260,12 +263,8 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): unkn
     summary: params.summary || 'No summary provided.',
     source: params.source || `Kibana Action ${actionId}`,
     severity: params.severity || 'info',
+    ...omitBy(pick(params, ['timestamp', 'component', 'group', 'class']), isUndefined),
   };
-
-  if (params.timestamp != null) data.payload.timestamp = params.timestamp;
-  if (params.component != null) data.payload.component = params.component;
-  if (params.group != null) data.payload.group = params.group;
-  if (params.class != null) data.payload.class = params.class;
 
   return data;
 }
