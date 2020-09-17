@@ -6,32 +6,32 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
+import { IHttpProviderProps } from './http_provider';
+
+import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
 export interface IHttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
   errorConnecting: boolean;
+  readOnlyMode: boolean;
 }
 export interface IHttpActions {
-  initializeHttp({
-    http,
-    errorConnecting,
-  }: {
-    http: HttpSetup;
-    errorConnecting?: boolean;
-  }): { http: HttpSetup; errorConnecting?: boolean };
+  initializeHttp({ http, errorConnecting, readOnlyMode }: IHttpProviderProps): IHttpProviderProps;
   initializeHttpInterceptors(): void;
   setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
   setErrorConnecting(errorConnecting: boolean): { errorConnecting: boolean };
+  setReadOnlyMode(readOnlyMode: boolean): { readOnlyMode: boolean };
 }
 
 export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
   actions: {
-    initializeHttp: ({ http, errorConnecting }) => ({ http, errorConnecting }),
+    initializeHttp: (props) => props,
     initializeHttpInterceptors: () => null,
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
     setErrorConnecting: (errorConnecting) => ({ errorConnecting }),
+    setReadOnlyMode: (readOnlyMode) => ({ readOnlyMode }),
   },
   reducers: {
     http: [
@@ -53,6 +53,13 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
         setErrorConnecting: (_, { errorConnecting }) => errorConnecting,
       },
     ],
+    readOnlyMode: [
+      false,
+      {
+        initializeHttp: (_, { readOnlyMode }) => !!readOnlyMode,
+        setReadOnlyMode: (_, { readOnlyMode }) => readOnlyMode,
+      },
+    ],
   },
   listeners: ({ values, actions }) => ({
     initializeHttpInterceptors: () => {
@@ -60,20 +67,38 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
 
       const errorConnectingInterceptor = values.http.intercept({
         responseError: async (httpResponse) => {
-          const { url, status } = httpResponse.response!;
-          const hasErrorConnecting = status === 502;
-          const isApiResponse =
-            url.includes('/api/app_search/') || url.includes('/api/workplace_search/');
+          if (isEnterpriseSearchApi(httpResponse)) {
+            const { status } = httpResponse.response!;
+            const hasErrorConnecting = status === 502;
 
-          if (isApiResponse && hasErrorConnecting) {
-            actions.setErrorConnecting(true);
+            if (hasErrorConnecting) {
+              actions.setErrorConnecting(true);
+            }
           }
-          return httpResponse;
+
+          // Re-throw error so that downstream catches work as expected
+          return Promise.reject(httpResponse) as Promise<HttpInterceptorResponseError>;
         },
       });
       httpInterceptors.push(errorConnectingInterceptor);
 
-      // TODO: Read only mode interceptor
+      const readOnlyModeInterceptor = values.http.intercept({
+        response: async (httpResponse) => {
+          if (isEnterpriseSearchApi(httpResponse)) {
+            const readOnlyMode = httpResponse.response!.headers.get(READ_ONLY_MODE_HEADER);
+
+            if (readOnlyMode === 'true') {
+              actions.setReadOnlyMode(true);
+            } else {
+              actions.setReadOnlyMode(false);
+            }
+          }
+
+          return Promise.resolve(httpResponse);
+        },
+      });
+      httpInterceptors.push(readOnlyModeInterceptor);
+
       actions.setHttpInterceptors(httpInterceptors);
     },
   }),
@@ -85,3 +110,11 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
     },
   }),
 });
+
+/**
+ * Small helper that checks whether or not an http call is for an Enterprise Search API
+ */
+const isEnterpriseSearchApi = (httpResponse: HttpResponse) => {
+  const { url } = httpResponse.response!;
+  return url.includes('/api/app_search/') || url.includes('/api/workplace_search/');
+};

@@ -22,16 +22,19 @@ export const useCreateADLinks = () => {
   const userTimeSettings = useUiSettings().get(ANOMALY_DETECTION_DEFAULT_TIME_RANGE);
   const createLinkWithUserDefaults = useCallback(
     (location, jobList) => {
-      const resultsPageUrl = mlJobService.createResultsUrlForJobs(
+      return mlJobService.createResultsUrlForJobs(
         jobList,
         location,
         useUserTimeSettings === true && userTimeSettings !== undefined
           ? userTimeSettings
           : undefined
       );
-      return `${basePath.get()}/app/ml${resultsPageUrl}`;
     },
     [basePath]
   );
   return { createLinkWithUserDefaults };
 };
+
+export type CreateLinkWithUserDefaults = ReturnType<
+  typeof useCreateADLinks
+>['createLinkWithUserDefaults'];

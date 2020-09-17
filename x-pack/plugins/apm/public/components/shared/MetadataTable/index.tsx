@@ -16,8 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useLocation } from '../../../hooks/useLocation';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { HeightRetainer } from '../HeightRetainer';

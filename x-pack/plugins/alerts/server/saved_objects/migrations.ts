@@ -11,54 +11,54 @@ import {
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import {
+  APP_ID as SIEM_APP_ID,
+  SERVER_APP_ID as SIEM_SERVER_APP_ID,
+} from '../../../security_solution/common/constants';
+
+export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const alertsMigration = changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts');
-
-  const infrastructureMigration = changeAlertingConsumer(
-    encryptedSavedObjects,
-    'metrics',
-    'infrastructure'
-  );
+  const migrationWhenRBACWasIntroduced = markAsLegacyAndChangeConsumer(encryptedSavedObjects);
 
   return {
-    '7.10.0': (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
-      if (doc.attributes.consumer === 'alerting') {
-        return executeMigration(doc, context, alertsMigration);
-      } else if (doc.attributes.consumer === 'metrics') {
-        return executeMigration(doc, context, infrastructureMigration);
-      }
-      return doc;
-    },
+    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
   };
 }
 
-function executeMigration(
-  doc: SavedObjectUnsanitizedDoc<RawAlert>,
-  context: SavedObjectMigrationContext,
-  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>
+function executeMigrationWithErrorHandling(
+  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>,
+  version: string
 ) {
-  try {
-    return migrationFunc(doc, context);
-  } catch (ex) {
-    context.log.error(
-      `encryptedSavedObject migration failed for alert ${doc.id} with error: ${ex.message}`,
-      { alertDocument: doc }
-    );
-  }
-  return doc;
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
+    try {
+      return migrationFunc(doc, context);
+    } catch (ex) {
+      context.log.error(
+        `encryptedSavedObject ${version} migration failed for alert ${doc.id} with error: ${ex.message}`,
+        { alertDocument: doc }
+      );
+    }
+    return doc;
+  };
 }
 
-function changeAlertingConsumer(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  from: string,
-  to: string
+const consumersToChange: Map<string, string> = new Map(
+  Object.entries({
+    alerting: 'alerts',
+    metrics: 'infrastructure',
+    [SIEM_APP_ID]: SIEM_SERVER_APP_ID,
+  })
+);
+function markAsLegacyAndChangeConsumer(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      return doc.attributes.consumer === from;
+      // migrate all documents in 7.10 in order to add the "meta" RBAC field
+      return true;
     },
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
       const {
@@ -68,7 +68,11 @@ function changeAlertingConsumer(
         ...doc,
         attributes: {
           ...doc.attributes,
-          consumer: consumer === from ? to : consumer,
+          consumer: consumersToChange.get(consumer) ?? consumer,
+          // mark any alert predating 7.10 as a legacy alert
+          meta: {
+            versionApiKeyLastmodified: LEGACY_LAST_MODIFIED_VERSION,
+          },
         },
       };
     }

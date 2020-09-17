@@ -174,7 +174,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformMessagesTab');
       await testSubjects.click('transformMessagesTab');
       await testSubjects.existOrFail('~transformMessagesTabContent');
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         const actualText = await testSubjects.getVisibleText('~transformMessagesTabContent');
         expect(actualText.includes(expectedText)).to.eql(
           true,
