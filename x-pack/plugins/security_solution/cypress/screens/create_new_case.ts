@@ -6,8 +6,7 @@
 
 export const BACK_TO_CASES_BTN = '[data-test-subj="backToCases"]';
 
-export const DESCRIPTION_INPUT =
-  '[data-test-subj="caseDescription"] [data-test-subj="textAreaInput"]';
+export const DESCRIPTION_INPUT = '[data-test-subj="textAreaInput"]';
 
 export const INSERT_TIMELINE_BTN = '[data-test-subj="insert-timeline-button"]';
 
