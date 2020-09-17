@@ -348,7 +348,7 @@ export class IndexPatternsService {
         });
       }
     }
-    // todo better way to do this
+
     indexPattern.resetOriginalBody();
     return indexPattern;
   };
