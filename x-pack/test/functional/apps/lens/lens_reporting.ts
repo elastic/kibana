@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test_logstash_reader',
         'global_dashboard_read',
         'reporting_user',
-      ]);
+      ], false);
     });
 
     after(async () => {
