@@ -18,12 +18,12 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
+import { getLoggingConfiguration } from '@kbn/legacy-logging';
 
 import { isWorker } from 'cluster';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot, pkg } from '../../core/server/utils';
 import { Config } from './config';
-import loggingConfiguration from './logging/configuration';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
@@ -177,7 +177,10 @@ export default class KbnServer {
 
   applyLoggingConfiguration(settings) {
     const config = Config.withDefaultSchema(settings);
-    const loggingOptions = loggingConfiguration(config);
+    const loggingOptions = getLoggingConfiguration(
+      config.get('logging'),
+      config.get('ops.interval')
+    );
     const subset = {
       ops: config.get('ops'),
       logging: config.get('logging'),

@@ -18,13 +18,7 @@
  */
 
 export { LegacyLoggingConfig, legacyLoggingConfigSchema } from './schema';
-export {
-  metadataSymbol,
-  EventMetadata,
-  attachMetaData,
-  EventData,
-  getLogEventData,
-  isLogEvent,
-} from './metadata';
+export { attachMetaData } from './metadata';
 export { setupLoggingRotate } from './rotate';
 export { setupLogging } from './setup_logging';
+export { getLoggingConfiguration } from './get_logging_config';

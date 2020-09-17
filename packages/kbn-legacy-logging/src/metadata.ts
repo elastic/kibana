@@ -18,7 +18,6 @@
  */
 
 import { isPlainObject } from 'lodash';
-import { LegacyVars } from '../../../src/core/server/legacy';
 
 export const metadataSymbol = Symbol('log message with metadata');
 
@@ -44,7 +43,7 @@ export const getLogEventData = (eventData: EventData) => {
   };
 };
 
-export const attachMetaData = (message: string, metadata: LegacyVars = {}) => {
+export const attachMetaData = (message: string, metadata: Record<string, any> = {}) => {
   return {
     [metadataSymbol]: {
       message,

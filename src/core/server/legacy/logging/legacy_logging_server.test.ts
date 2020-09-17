@@ -17,10 +17,19 @@
  * under the License.
  */
 
-jest.mock('../../../../legacy/server/config');
-jest.mock('../../../../legacy/server/logging');
+jest.mock('@kbn/legacy-logging', () => ({
+  ...(jest.requireActual('@kbn/legacy-logging') as any),
+  setupLogging: jest.fn(),
+}));
+jest.mock('../../../../legacy/server/config', () => ({
+  Config: {
+    withDefaultSchema: jest.fn(() => ({
+      get: jest.fn(),
+    })),
+  },
+}));
 
-import { LogLevel } from '../../logging';
+import { LogLevel } from '@kbn/logging';
 import { LegacyLoggingServer } from './legacy_logging_server';
 
 test('correctly forwards log records.', () => {

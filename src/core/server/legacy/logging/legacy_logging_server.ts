@@ -17,29 +17,23 @@
  * under the License.
  */
 
-import { ServerExtType } from 'hapi';
+import { ServerExtType, Server } from 'hapi';
 import Podium from 'podium';
+import { setupLogging, attachMetaData } from '@kbn/legacy-logging';
+import { LogLevel, LogRecord } from '@kbn/logging';
 // @ts-expect-error: implicit any for JS file
 import { Config } from '../../../../legacy/server/config';
-// @ts-expect-error: implicit any for JS file
-import { setupLogging } from '../../../../legacy/server/logging';
-import { LogLevel, LogRecord } from '../../logging';
 import { LegacyVars } from '../../types';
 
-export const metadataSymbol = Symbol('log message with metadata');
-export function attachMetaData(message: string, metadata: LegacyVars = {}) {
-  return {
-    [metadataSymbol]: {
-      message,
-      metadata,
-    },
-  };
-}
 const isEmptyObject = (obj: object) => Object.keys(obj).length === 0;
 
 function getDataToLog(error: Error | undefined, metadata: object, message: string) {
-  if (error) return error;
-  if (!isEmptyObject(metadata)) return attachMetaData(message, metadata);
+  if (error) {
+    return error;
+  }
+  if (!isEmptyObject(metadata)) {
+    return attachMetaData(message, metadata);
+  }
   return message;
 }
 
@@ -96,10 +90,10 @@ export class LegacyLoggingServer {
           ops: '__no-ops__',
         },
       },
-      ops: { interval: 2147483647 },
     };
+    const legacyConfig = Config.withDefaultSchema(config);
 
-    setupLogging(this, Config.withDefaultSchema(config));
+    setupLogging((this as unknown) as Server, legacyConfig.get('logging'), 2147483647);
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {
