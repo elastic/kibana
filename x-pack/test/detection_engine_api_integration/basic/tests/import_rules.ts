@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // import is still very slow due to the alerts client find api
+      // import is very slow in 7.10+ due to the alerts client find api
       // when importing 100 rules it takes about 30 seconds for this
       // test to complete so at 10 rules completing in about 10 seconds
       // I figured this is enough to make sure the import route is doing its job.
@@ -212,6 +212,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // uncomment the below test once we speed up the alerts client find api
+      // in another PR.
       // it('should be able to import 10000 rules', async () => {
       //   const ruleIds = new Array(10000).fill(undefined).map((_, index) => `rule-${index}`);
       //   const { body } = await supertest
