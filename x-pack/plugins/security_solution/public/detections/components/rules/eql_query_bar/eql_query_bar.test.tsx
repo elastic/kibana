@@ -13,21 +13,27 @@ import { EqlQueryBar, EqlQueryBarProps } from './eql_query_bar';
 
 describe('EqlQueryBar', () => {
   let mockField: EqlQueryBarProps['field'];
+  let mockIndex: string[];
 
   beforeEach(() => {
+    mockIndex = ['index-123*'];
     mockField = useFormFieldMock({
       value: mockQueryBar,
     });
   });
 
   it('renders correctly', () => {
-    const wrapper = shallow(<EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />);
+    const wrapper = shallow(
+      <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={mockField} />
+    );
 
     expect(wrapper.find('[data-test-subj="myQueryBar"]')).toHaveLength(1);
   });
 
   it('sets the field value on input change', () => {
-    const wrapper = mount(<EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />);
+    const wrapper = mount(
+      <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={mockField} />
+    );
 
     wrapper
       .find('[data-test-subj="eqlQueryBarTextInput"]')
