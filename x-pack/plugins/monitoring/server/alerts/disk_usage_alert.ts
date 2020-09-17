@@ -15,7 +15,6 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertInstanceState,
-  AlertMessageDocLinkToken,
 } from './types';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import { INDEX_PATTERN_ELASTICSEARCH, ALERT_DISK_USAGE } from '../../common/constants';
@@ -24,7 +23,8 @@ import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity, AlertParamType } from '../../common/enums';
 import { RawAlertInstance } from '../../../alerts/common';
 import { CommonAlertFilter, CommonAlertParams, CommonAlertParamDetail } from '../../common/types';
-import { AlertingDefaults, createDocLink } from './alerts_common';
+import { AlertingDefaults, createLink } from './alerts_common';
+import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 
 interface ParamDetails {
   [key: string]: CommonAlertParamDetail;
@@ -81,11 +81,10 @@ export class DiskUsageAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
+    let esIndexPattern = appendMetricbeatIndex(this.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-
     const { duration, threshold } = params;
     const stats = await fetchDiskUsageNodeStats(
       callCluster,
@@ -157,22 +156,28 @@ export class DiskUsageAlert extends BaseAlert {
         },
       }),
       nextSteps: [
-        createDocLink(
+        createLink(
           'xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk',
           'Tune for disk usage',
           `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html`
         ),
-        createDocLink(
+        createLink(
+          'xpack.monitoring.alerts.diskUsage.ui.nextSteps.tuneDisk',
+          'Identify large indices',
+          `elasticsearch/indices`,
+          AlertMessageTokenType.Link
+        ),
+        createLink(
           'xpack.monitoring.alerts.diskUsage.ui.nextSteps.ilmPolicies',
           'Implement ILM policies',
           `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/index-lifecycle-management.html`
         ),
-        createDocLink(
+        createLink(
           'xpack.monitoring.alerts.diskUsage.ui.nextSteps.addMoreNodes',
           'Add more data nodes',
           `{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html`
         ),
-        createDocLink(
+        createLink(
           'xpack.monitoring.alerts.diskUsage.ui.nextSteps.resizeYourDeployment',
           'Resize your deployment (ECE)',
           `{elasticWebsiteUrl}/guide/en/cloud-enterprise/{docLinkVersion}/ece-resize-deployment.html`
@@ -207,12 +212,14 @@ export class DiskUsageAlert extends BaseAlert {
     }
 
     const ccs = alertStates.find((state) => state.ccs)?.ccs;
-
-    const firingCount = alertStates.filter((alertState) => alertState.ui.isFiring).length;
+    const firingNodes = alertStates.filter(
+      (alertState) => alertState.ui.isFiring
+    ) as AlertDiskUsageState[];
+    const firingCount = firingNodes.length;
 
     if (firingCount > 0) {
       const shortActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.shortAction', {
-        defaultMessage: 'Verify disk levels across affected nodes.',
+        defaultMessage: 'Verify disk usage levels across affected nodes.',
       });
       const fullActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.fullAction', {
         defaultMessage: 'View nodes',
@@ -252,9 +259,8 @@ export class DiskUsageAlert extends BaseAlert {
         internalShortMessage,
         internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: (alertStates as AlertDiskUsageState[])
-          .filter((state: AlertDiskUsageState) => state.ui.isFiring)
-          .map((state: AlertDiskUsageState) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`)
+        nodes: firingNodes
+          .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`)
           .join(','),
         count: firingCount,
         clusterName: cluster.clusterName,
@@ -262,11 +268,11 @@ export class DiskUsageAlert extends BaseAlert {
         actionPlain: shortActionText,
       });
     } else {
-      const resolvedCount = alertStates.filter((alertState) => !alertState.ui.isFiring).length;
       const resolvedNodes = (alertStates as AlertDiskUsageState[])
         .filter((state) => !state.ui.isFiring)
-        .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`)
-        .join(',');
+        .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`);
+      const resolvedCount = resolvedNodes.length;
+
       if (resolvedCount > 0) {
         const internalMessage = i18n.translate(
           'xpack.monitoring.alerts.diskUsage.resolved.internalMessage',
@@ -283,7 +289,7 @@ export class DiskUsageAlert extends BaseAlert {
           internalShortMessage: internalMessage,
           internalFullMessage: internalMessage,
           state: AlertingDefaults.ALERT_STATE.resolved,
-          nodes: resolvedNodes,
+          nodes: resolvedNodes.join(','),
           count: resolvedCount,
           clusterName: cluster.clusterName,
         });
@@ -294,67 +300,46 @@ export class DiskUsageAlert extends BaseAlert {
   protected processData(data: AlertData[], clusters: AlertCluster[], services: AlertServices) {
     const currentUTC = +new Date();
     for (const cluster of clusters) {
-      const nodes = data.filter((_item) => _item.clusterUuid === cluster.clusterUuid);
+      const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
       if (!nodes.length) {
         continue;
       }
 
-      const firingNodeUuids = nodes.reduce((list: string[], node) => {
-        const stat = node.meta;
-        if (node.shouldFire) {
-          list.push(stat.nodeId);
-        }
-        return list;
-      }, []);
-
-      firingNodeUuids.sort();
-
-      const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids.join(',')}`;
+      const instanceId = `.monitoring:${this.type}:${cluster.clusterUuid}`;
       const instance = services.alertInstanceFactory(instanceId);
       const state = instance.getState() as AlertInstanceState;
-      const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
+      const newAlertStates: AlertInstanceState['alertStates'] = [];
+      const oldAlertStates = (state?.alertStates || []) as AlertDiskUsageState[];
 
-      let shouldExecuteActions = false;
       for (const node of nodes) {
         const stat = node.meta as AlertDiskUsageState;
-
-        const indexInState = alertInstanceState.alertStates.findIndex((alertState) => {
-          const nodeAlertState = alertState as AlertDiskUsageState;
-          return (
-            nodeAlertState.cluster.clusterUuid === cluster.clusterUuid &&
-            nodeAlertState.nodeId === node.meta.nodeId
-          );
-        });
-        const nodeState = (indexInState > -1
-          ? alertInstanceState.alertStates[indexInState]
-          : this.getDefaultAlertState(cluster, node)) as AlertDiskUsageState;
-
+        const nodeState = this.getDefaultAlertState(cluster, node) as AlertDiskUsageState;
         nodeState.diskUsage = stat.diskUsage;
         nodeState.nodeId = stat.nodeId;
         nodeState.nodeName = stat.nodeName;
-        nodeState.ui.message = this.getUiMessage(nodeState, node);
-        shouldExecuteActions = shouldExecuteActions || node.shouldFire || nodeState.ui.isFiring;
 
         if (node.shouldFire) {
           nodeState.ui.triggeredMS = currentUTC;
           nodeState.ui.isFiring = true;
           nodeState.ui.severity = node.severity;
-          nodeState.ui.resolvedMS = 0;
-        } else if (nodeState.ui.isFiring) {
-          nodeState.ui.isFiring = false;
-          nodeState.ui.resolvedMS = currentUTC;
-        }
-
-        if (indexInState < 0) {
-          alertInstanceState.alertStates.push(nodeState);
+          newAlertStates.push(nodeState);
         } else {
-          alertInstanceState.alertStates[indexInState] = nodeState;
+          const lastNodeState = oldAlertStates.find(
+            (oldNodeState) => nodeState.nodeId === oldNodeState.nodeId
+          );
+          if (lastNodeState?.ui.isFiring) {
+            nodeState.ui.resolvedMS = currentUTC;
+            newAlertStates.push(nodeState);
+          }
         }
-      }
 
-      instance.replaceState(alertInstanceState);
-      if (shouldExecuteActions) {
-        this.executeActions(instance, alertInstanceState, null, cluster);
+        nodeState.ui.message = this.getUiMessage(nodeState, node);
+
+        const alertInstanceState = { alertStates: newAlertStates };
+        instance.replaceState(alertInstanceState);
+        if (newAlertStates.length && !instance.hasScheduledActions()) {
+          this.executeActions(instance, alertInstanceState, null, cluster);
+        }
       }
     }
   }

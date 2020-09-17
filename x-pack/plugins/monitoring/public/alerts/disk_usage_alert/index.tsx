@@ -24,6 +24,6 @@ export function createDiskUsageAlertType(): AlertTypeModel {
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: false,
+    requiresAppContext: true,
   };
 }
