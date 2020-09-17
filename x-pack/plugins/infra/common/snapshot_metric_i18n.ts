@@ -172,7 +172,7 @@ const TranslationsLowercase = {
     defaultMessage: 'messages returned empty',
   }),
   sqsOldestMessage: i18n.translate('xpack.infra.waffle.metricOptions.sqsOldestMessageLowercase', {
-    defaultMessage: 'oldest Mmessage',
+    defaultMessage: 'oldest message',
   }),
 };
 
