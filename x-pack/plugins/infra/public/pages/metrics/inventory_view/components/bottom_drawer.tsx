@@ -66,7 +66,7 @@ const BottomActionContainer = euiStyled.div<{ isOpen: boolean }>`
   bottom: 0;
   right: 0;
   transition: transform ${TRANSITION_MS}ms;
-  transform: translateY(${(props) => (props.isOpen ? 0 : '264px')})
+  transform: translateY(${(props) => (props.isOpen ? 0 : '224px')})
 `;
 
 const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({

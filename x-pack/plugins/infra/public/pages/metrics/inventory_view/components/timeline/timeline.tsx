@@ -180,7 +180,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 const TimelineContainer = euiStyled.div`
   background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
   border-top: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
-  height: 260px;
+  height: 220px;
   width: 100%;
   padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
   props.theme.eui.paddingSizes.m};
