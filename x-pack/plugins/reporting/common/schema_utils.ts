@@ -19,14 +19,6 @@ export const durationToNumber = (value: number | moment.Duration): number => {
   return value.asMilliseconds();
 };
 
-export const numberToByteSizeValue = (value: number | ByteSizeValue) => {
-  if (typeof value === 'number') {
-    return new ByteSizeValue(value);
-  }
-
-  return value;
-};
-
 export const byteSizeValueToNumber = (value: number | ByteSizeValue) => {
   if (typeof value === 'number') {
     return value;

@@ -9,13 +9,20 @@ import { i18n } from '@kbn/i18n';
 import { defaults, get } from 'lodash';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { numberToByteSizeValue } from '../../../common/schema_utils';
 import { LevelLogger as Logger } from '../../lib';
 import { DiagnosticResponse } from '../../types';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
+
+const numberToByteSizeValue = (value: number | ByteSizeValue) => {
+  if (typeof value === 'number') {
+    return new ByteSizeValue(value);
+  }
+
+  return value;
+};
 
 export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
