@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ILicense } from '../../../licensing/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportListing } from './report_listing';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
     htmlIdGenerator: () => () => `generated-id`,
   };
 });
-
-import { ReportListing } from './report_listing';
 
 const reportingAPIClient = {
   list: () =>
@@ -52,14 +50,13 @@ const toasts = {
   addDanger: jest.fn(),
 } as any;
 
-const fiveSeconds = moment.duration(5, 's');
 const mockPollConfig = {
   jobCompletionNotifier: {
-    interval: fiveSeconds,
+    interval: 5000,
     intervalErrorMultiplier: 3,
   },
   jobsRefresh: {
-    interval: fiveSeconds,
+    interval: 5000,
     intervalErrorMultiplier: 3,
   },
 };
