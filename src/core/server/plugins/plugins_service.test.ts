@@ -22,11 +22,10 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
-import { rawConfigServiceMock } from '../config/raw_config_service.mock';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { environmentServiceMock } from '../environment/environment_service.mock';
@@ -116,7 +115,7 @@ describe('PluginsService', () => {
     };
 
     coreId = Symbol('core');
-    env = Env.createDefault(getEnvOptions());
+    env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
     config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
     const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });

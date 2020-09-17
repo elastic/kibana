@@ -22,8 +22,8 @@ import Fs from 'fs';
 
 import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
+import { REPO_ROOT } from '@kbn/utils';
 
-import { REPO_ROOT } from '../repo_root';
 import { simpleKibanaPlatformPluginDiscovery } from '../simple_kibana_platform_plugin_discovery';
 import { extractAsciidocInfo } from './extract_asciidoc_info';
 
