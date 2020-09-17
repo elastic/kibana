@@ -24,7 +24,6 @@ const account = {
   isAdmin: true,
   canCreatePersonalSources: true,
   groups: [],
-  supportEligible: true,
   isCurated: false,
 };
 

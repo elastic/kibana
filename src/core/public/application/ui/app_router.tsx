@@ -64,9 +64,9 @@ export const AppRouter: FunctionComponent<Props> = ({
               key={mounter.appRoute}
               path={mounter.appRoute}
               exact={mounter.exactRoute}
-              render={({ match: { url } }) => (
+              render={({ match: { path } }) => (
                 <AppContainer
-                  appPath={url}
+                  appPath={path}
                   appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                   createScopedHistory={createScopedHistory}
                   {...{ appId, mounter, setAppLeaveHandler, setIsMounting }}

@@ -75,9 +75,15 @@ import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
+import { IIndexPattern, ISearchGeneric } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
+import {
+  FetchOptions,
+  RequestFailure,
+  handleResponse,
+  getSearchParamsFromRequest,
+  SearchRequest,
+} from '../fetch';
 
 import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
@@ -268,10 +274,11 @@ export class SearchSource {
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
-      response = this.fetch$(searchRequest, options.abortSignal).toPromise();
+      response = await this.fetch$(searchRequest, options.abortSignal).toPromise();
     }
 
-    if (response.error) {
+    // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
+    if ((response as any).error) {
       throw new RequestFailure(null, response);
     }
 
@@ -403,7 +410,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index: IIndexPattern) {
+  private getIndexType(index?: IIndexPattern) {
     if (this.searchStrategyId) {
       return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
     } else {

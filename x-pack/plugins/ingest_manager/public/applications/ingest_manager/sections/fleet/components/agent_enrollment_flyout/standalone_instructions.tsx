@@ -157,7 +157,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepCheckForDataDescription"
-              defaultMessage="The agent should begin sending data. Go to Datasets to view your data."
+              defaultMessage="The agent should begin sending data. Go to data streams to view your data."
             />
           </EuiText>
         </>

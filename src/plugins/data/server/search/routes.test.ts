@@ -36,7 +36,7 @@ describe('Search service', () => {
     const response = { id: 'yay' };
     mockDataStart.search.search.mockResolvedValue(response);
     const mockContext = {};
-    const mockBody = { params: {} };
+    const mockBody = { id: undefined, params: {} };
     const mockParams = { strategy: 'foo' };
     const mockRequest = httpServerMock.createKibanaRequest({
       body: mockBody,
@@ -67,7 +67,7 @@ describe('Search service', () => {
     });
 
     const mockContext = {};
-    const mockBody = { params: {} };
+    const mockBody = { id: undefined, params: {} };
     const mockParams = { strategy: 'foo' };
     const mockRequest = httpServerMock.createKibanaRequest({
       body: mockBody,

@@ -36,7 +36,7 @@ const mockRollupResponse = {
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
   const mockLogger: any = {
-    info: () => {},
+    debug: () => {},
   };
   const mockContext = {
     core: {

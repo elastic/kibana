@@ -43,10 +43,13 @@ export type ISearch = (
   options?: ISearchOptions
 ) => Observable<IKibanaSearchResponse>;
 
-export type ISearchGeneric = (
-  request: IEsSearchRequest,
+export type ISearchGeneric = <
+  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+>(
+  request: SearchStrategyRequest,
   options?: ISearchOptions
-) => Observable<IEsSearchResponse>;
+) => Observable<SearchStrategyResponse>;
 
 export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;

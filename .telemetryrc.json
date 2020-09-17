@@ -1,14 +1,5 @@
 [
   {
-    "output": "src/plugins/telemetry/schema/legacy_oss_plugins.json",
-    "root": "src/legacy/core_plugins/",
-    "exclude": [
-      "src/legacy/core_plugins/testbed",
-      "src/legacy/core_plugins/elasticsearch",
-      "src/legacy/core_plugins/tests_bundle"
-    ]
-  },
-  {
     "output": "src/plugins/telemetry/schema/oss_plugins.json",
     "root": "src/plugins/",
     "exclude": [

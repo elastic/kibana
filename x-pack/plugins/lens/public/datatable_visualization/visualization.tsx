@@ -25,10 +25,7 @@ function newLayerState(layerId: string): LayerState {
   };
 }
 
-export const datatableVisualization: Visualization<
-  DatatableVisualizationState,
-  DatatableVisualizationState
-> = {
+export const datatableVisualization: Visualization<DatatableVisualizationState> = {
   id: 'lnsDatatable',
 
   visualizationTypes: [
@@ -74,8 +71,6 @@ export const datatableVisualization: Visualization<
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getSuggestions({
     table,
@@ -186,9 +181,9 @@ export const datatableVisualization: Visualization<
     };
   },
 
-  toExpression(state, frame): Ast {
+  toExpression(state, datasourceLayers): Ast {
     const layer = state.layers[0];
-    const datasource = frame.datasourceLayers[layer.layerId];
+    const datasource = datasourceLayers[layer.layerId];
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
     const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));

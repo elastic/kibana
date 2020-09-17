@@ -14,7 +14,7 @@ import {
   StyleMetaDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { AbstractField, IField } from '../../../../fields/field';
-import { IStyle, AbstractStyle } from '../../../style';
+import { IStyle } from '../../../style';
 
 class MockField extends AbstractField {
   async getLabel(): Promise<string> {
@@ -30,14 +30,21 @@ export const mockField: IField = new MockField({
   origin: FIELD_ORIGIN.SOURCE,
 });
 
-export class MockStyle extends AbstractStyle implements IStyle {
+export class MockStyle implements IStyle {
   private readonly _min: number;
   private readonly _max: number;
 
   constructor({ min = 0, max = 100 } = {}) {
-    super(null);
     this._min = min;
     this._max = max;
+  }
+
+  renderEditor() {
+    return null;
+  }
+
+  getType() {
+    return 'mockStyle';
   }
 
   getStyleMeta(): StyleMeta {

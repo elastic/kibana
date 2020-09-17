@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IEsSearchResponse extends IKibanaSearchResponse 
+export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse 
 ```
 
 ## Properties
@@ -16,5 +16,5 @@ export interface IEsSearchResponse extends IKibanaSearchResponse
 |  --- | --- | --- |
 |  [isPartial](./kibana-plugin-plugins-data-server.iessearchresponse.ispartial.md) | <code>boolean</code> | Indicates whether the results returned are complete or partial |
 |  [isRunning](./kibana-plugin-plugins-data-server.iessearchresponse.isrunning.md) | <code>boolean</code> | Indicates whether async search is still in flight |
-|  [rawResponse](./kibana-plugin-plugins-data-server.iessearchresponse.rawresponse.md) | <code>SearchResponse&lt;any&gt;</code> |  |
+|  [rawResponse](./kibana-plugin-plugins-data-server.iessearchresponse.rawresponse.md) | <code>SearchResponse&lt;Source&gt;</code> |  |
 

@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface ISearchStart 
+export interface ISearchStart<SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest, SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse> 
 ```
 
 ## Properties
@@ -15,6 +15,6 @@ export interface ISearchStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [aggs](./kibana-plugin-plugins-data-server.isearchstart.aggs.md) | <code>AggsStart</code> |  |
-|  [getSearchStrategy](./kibana-plugin-plugins-data-server.isearchstart.getsearchstrategy.md) | <code>(name: string) =&gt; ISearchStrategy</code> | Get other registered search strategies. For example, if a new strategy needs to use the already-registered ES search strategy, it can use this function to accomplish that. |
+|  [getSearchStrategy](./kibana-plugin-plugins-data-server.isearchstart.getsearchstrategy.md) | <code>(name: string) =&gt; ISearchStrategy&lt;SearchStrategyRequest, SearchStrategyResponse&gt;</code> | Get other registered search strategies. For example, if a new strategy needs to use the already-registered ES search strategy, it can use this function to accomplish that. |
 |  [search](./kibana-plugin-plugins-data-server.isearchstart.search.md) | <code>(context: RequestHandlerContext, request: IKibanaSearchRequest, options: ISearchOptions) =&gt; Promise&lt;IKibanaSearchResponse&gt;</code> |  |
 

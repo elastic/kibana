@@ -309,7 +309,7 @@ export class VectorLayer extends AbstractLayer {
   _getSearchFilters(dataFilters, source, style) {
     const fieldNames = [
       ...source.getFieldNames(),
-      ...style.getSourceFieldNames(),
+      ...(style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : []),
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
@@ -415,7 +415,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceStyleMeta(syncContext, source, style) {
-    if (this.getCurrentStyle().constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+    if (this.getCurrentStyle().getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 
@@ -511,7 +511,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceFormatters(syncContext, source, style) {
-    if (style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+    if (style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 

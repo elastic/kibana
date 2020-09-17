@@ -5,27 +5,68 @@
  */
 
 import '../__mocks__/shallow_usecontext.mock';
+import '../__mocks__/kea.mock';
 
 import React, { useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
+import { useValues, useActions } from 'kea';
 
+import { SetupGuide } from './components/setup_guide';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { AppSearch, AppSearchNav } from './';
+import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
-  it('renders', () => {
+  it('renders AppSearchUnconfigured when config.host is not set', () => {
+    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
     const wrapper = shallow(<AppSearch />);
+
+    expect(wrapper.find(AppSearchUnconfigured)).toHaveLength(1);
+  });
+
+  it('renders AppSearchConfigured when config.host set', () => {
+    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: 'some.url' } }));
+    const wrapper = shallow(<AppSearch />);
+
+    expect(wrapper.find(AppSearchConfigured)).toHaveLength(1);
+  });
+});
+
+describe('AppSearchUnconfigured', () => {
+  it('renders the Setup Guide and redirects to the Setup Guide', () => {
+    const wrapper = shallow(<AppSearchUnconfigured />);
+
+    expect(wrapper.find(SetupGuide)).toHaveLength(1);
+    expect(wrapper.find(Redirect)).toHaveLength(1);
+  });
+});
+
+describe('AppSearchConfigured', () => {
+  it('renders with layout', () => {
+    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData: () => {} }));
+
+    const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(Layout)).toHaveLength(1);
   });
 
-  it('redirects to Setup Guide when config.host is not set', () => {
-    (useContext as jest.Mock).mockImplementationOnce(() => ({ config: { host: '' } }));
-    const wrapper = shallow(<AppSearch />);
+  it('initializes app data with passed props', () => {
+    const initializeAppData = jest.fn();
+    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
 
-    expect(wrapper.find(Redirect)).toHaveLength(1);
-    expect(wrapper.find(Layout)).toHaveLength(0);
+    shallow(<AppSearchConfigured readOnlyMode={true} />);
+
+    expect(initializeAppData).toHaveBeenCalledWith({ readOnlyMode: true });
+  });
+
+  it('does not re-initialize app data', () => {
+    const initializeAppData = jest.fn();
+    (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
+    (useValues as jest.Mock).mockImplementationOnce(() => ({ hasInitialized: true }));
+
+    shallow(<AppSearchConfigured />);
+
+    expect(initializeAppData).not.toHaveBeenCalled();
   });
 });
 

@@ -26,7 +26,7 @@ import {
 } from '../common/constants';
 import { ConfigType } from './';
 import { checkAccess } from './lib/check_access';
-import { registerPublicUrlRoute } from './routes/enterprise_search/public_url';
+import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
@@ -105,7 +105,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     const router = http.createRouter();
     const dependencies = { router, config, log: this.logger };
 
-    registerPublicUrlRoute(dependencies);
+    registerConfigDataRoute(dependencies);
     registerEnginesRoute(dependencies);
     registerWSOverviewRoute(dependencies);
 

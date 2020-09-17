@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { SavedObjectsClientContract, HttpSetup, SavedObjectReference } from 'kibana/public';
 import { StateSetter } from '../types';
 import {
   IndexPattern,
@@ -14,6 +14,7 @@ import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternField,
+  IndexPatternLayer,
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
@@ -115,14 +116,58 @@ const setLastUsedIndexPatternId = (storage: IStorageWrapper, value: string) => {
   writeToStorage(storage, 'indexPatternId', value);
 };
 
+const CURRENT_PATTERN_REFERENCE_NAME = 'indexpattern-datasource-current-indexpattern';
+function getLayerReferenceName(layerId: string) {
+  return `indexpattern-datasource-layer-${layerId}`;
+}
+
+export function extractReferences({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
+  const savedObjectReferences: SavedObjectReference[] = [];
+  savedObjectReferences.push({
+    type: 'index-pattern',
+    id: currentIndexPatternId,
+    name: CURRENT_PATTERN_REFERENCE_NAME,
+  });
+  const persistableLayers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>> = {};
+  Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
+    savedObjectReferences.push({
+      type: 'index-pattern',
+      id: indexPatternId,
+      name: getLayerReferenceName(layerId),
+    });
+    persistableLayers[layerId] = persistableLayer;
+  });
+  return { savedObjectReferences, state: { layers: persistableLayers } };
+}
+
+export function injectReferences(
+  state: IndexPatternPersistedState,
+  references: SavedObjectReference[]
+) {
+  const layers: Record<string, IndexPatternLayer> = {};
+  Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
+    layers[layerId] = {
+      ...persistedLayer,
+      indexPatternId: references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
+    };
+  });
+  return {
+    currentIndexPatternId: references.find(({ name }) => name === CURRENT_PATTERN_REFERENCE_NAME)!
+      .id,
+    layers,
+  };
+}
+
 export async function loadInitialState({
-  state,
+  persistedState,
+  references,
   savedObjectsClient,
   defaultIndexPatternId,
   storage,
   indexPatternsService,
 }: {
-  state?: IndexPatternPersistedState;
+  persistedState?: IndexPatternPersistedState;
+  references?: SavedObjectReference[];
   savedObjectsClient: SavedObjectsClient;
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
@@ -130,6 +175,9 @@ export async function loadInitialState({
 }): Promise<IndexPatternPrivateState> {
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
+
+  const state =
+    persistedState && references ? injectReferences(persistedState, references) : undefined;
 
   const requiredPatterns = _.uniq(
     state

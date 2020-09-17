@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@elastic/charts": "19.8.1",
-    "@elastic/eui": "27.4.0",
+    "@elastic/eui": "27.4.1",
     "@elastic/numeral": "^2.5.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/monaco": "1.0.0",
