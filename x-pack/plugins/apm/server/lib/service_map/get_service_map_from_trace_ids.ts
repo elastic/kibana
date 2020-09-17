@@ -9,11 +9,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  Connection,
-  ConnectionNode,
-  ServiceConnectionNode,
-} from '../../../common/service_map';
+import { Connection, ConnectionNode } from '../../../common/service_map';
 import { Setup } from '../helpers/setup_request';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
@@ -29,21 +25,19 @@ export function getConnections(
   if (serviceName || environment) {
     paths = paths.filter((path) => {
       return path.some((node) => {
-        let matches = true;
-        if (serviceName) {
-          matches =
-            matches &&
-            SERVICE_NAME in node &&
-            (node as ServiceConnectionNode)[SERVICE_NAME] === serviceName;
+        if (serviceName && node[SERVICE_NAME] !== serviceName) {
+          return false;
         }
-        if (environment && environment !== ENVIRONMENT_NOT_DEFINED.value) {
-          matches =
-            matches &&
-            SERVICE_ENVIRONMENT in node &&
-            (node as ServiceConnectionNode)[SERVICE_ENVIRONMENT] ===
-              environment;
+
+        if (environment) {
+          if (environment === ENVIRONMENT_NOT_DEFINED.value) {
+            return node[SERVICE_ENVIRONMENT] === null;
+          }
+
+          return node[SERVICE_ENVIRONMENT] === environment;
         }
-        return matches;
+
+        return true;
       });
     });
   }
