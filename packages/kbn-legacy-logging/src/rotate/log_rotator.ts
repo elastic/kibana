@@ -130,7 +130,7 @@ export class LogRotator {
         // setup conditions that would fire the observable
         this.stalkerUsePollingPolicyTestTimeout = setTimeout(
           () => completeFn(true),
-          this.config.rotate.pollingPolicyTestTimeout ?? 15000
+          this.config.rotate.pollingPolicyTestTimeout || 15000
         );
         testWatcher.on('change', () => completeFn(false));
         testWatcher.on('error', () => completeFn(true));
