@@ -34,7 +34,7 @@ describe('attach timeline to case', () => {
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id:'${caseTimeline.id}',isOpen:!t))`
+          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id%27'${caseTimeline.id}',isOpen:!t))`
         );
       });
     });
@@ -46,7 +46,7 @@ describe('attach timeline to case', () => {
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id:'${caseTimeline.id}',isOpen:!t))`
+          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id%27'${caseTimeline.id}',isOpen:!t))`
         );
       });
     });
@@ -68,7 +68,7 @@ describe('attach timeline to case', () => {
       cy.location('origin').then((origin) => {
         cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
-          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id:'${caseTimeline.id}',isOpen:!t))`
+          `[${caseTimeline.title}](${origin}/app/security/timelines?timeline=(id%27'${caseTimeline.id}',isOpen:!t))`
         );
       });
     });
