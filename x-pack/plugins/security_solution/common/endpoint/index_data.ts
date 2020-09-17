@@ -350,7 +350,7 @@ const fleetEnrollAgentForHost = async (
 
     if (res) {
       const enrollObj: PostAgentEnrollResponse = await res.json();
-      if (!enrollObj.success) {
+      if (!res.ok) {
         // eslint-disable-next-line no-console
         console.error(enrollObj);
         return;
@@ -396,7 +396,7 @@ const fleetEnrollAgentForHost = async (
       }
 
       const checkinObj: PostAgentCheckinResponse = await checkinRes.json();
-      if (!checkinObj.success) {
+      if (!checkinRes.ok) {
         // eslint-disable-next-line no-console
         console.error(
           `failed to checkin agent [${enrollObj.item.id}] for endpoint [${endpointHost.host.id}]`
@@ -438,7 +438,7 @@ const fleetEnrollAgentForHost = async (
         );
 
         const ackActionObj: PostAgentAcksResponse = await ackActionResp.json();
-        if (!ackActionObj.success) {
+        if (!ackActionResp.ok) {
           // eslint-disable-next-line no-console
           console.error(
             `failed to ACK Actions provided to agent [${enrollObj.item.id}] for endpoint [${endpointHost.host.id}]`

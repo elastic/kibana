@@ -10,7 +10,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
 import { KibanaConfig } from '@kbn/dev-utils/target/kbn_client/kbn_client_requester';
-import fetch from 'node-fetch';
+import fetch, { RequestInit as FetchRequestInit } from 'node-fetch';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
 import { FLEET_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../ingest_manager/common/constants';
@@ -29,8 +29,11 @@ class KbnClientWithApiKeySupport extends KbnClient {
     // strip auth from url
     this.kibanaUrlNoAuth = matches && matches.length === 3 ? matches[1] + matches[3] : kibanaUrl;
   }
-  requestWithApiKey(path: string, init?: RequestInit | undefined) {
-    return fetch(`${this.kibanaUrlNoAuth}/${path}`, init);
+  requestWithApiKey(path: string, init?: RequestInit | undefined): Promise<Response> {
+    return (fetch(
+      `${this.kibanaUrlNoAuth}/${path}`,
+      init as FetchRequestInit
+    ) as unknown) as Promise<Response>;
   }
 }
 
