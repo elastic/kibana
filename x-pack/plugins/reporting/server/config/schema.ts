@@ -34,11 +34,11 @@ const QueueSchema = schema.object({
   indexInterval: schema.string({ defaultValue: 'week' }),
   pollEnabled: schema.boolean({ defaultValue: true }),
   pollInterval: schema.oneOf([schema.number(), schema.duration()], {
-    defaultValue: moment.duration('3s'),
+    defaultValue: moment.duration({ seconds: 3 }),
   }),
   pollIntervalErrorMultiplier: schema.number({ defaultValue: 10 }),
   timeout: schema.oneOf([schema.number(), schema.duration()], {
-    defaultValue: moment.duration('2m'),
+    defaultValue: moment.duration({ minutes: 2 }),
   }),
 });
 
@@ -51,13 +51,13 @@ const RulesSchema = schema.object({
 const CaptureSchema = schema.object({
   timeouts: schema.object({
     openUrl: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration('1m'),
+      defaultValue: moment.duration({ minutes: 1 }),
     }),
     waitForElements: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration('30s'),
+      defaultValue: moment.duration({ seconds: 30 }),
     }),
     renderComplete: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration('30s'),
+      defaultValue: moment.duration({ seconds: 30 }),
     }),
   }),
   networkPolicy: schema.object({
@@ -79,7 +79,7 @@ const CaptureSchema = schema.object({
     height: schema.number({ defaultValue: 1200 }),
   }),
   loadDelay: schema.oneOf([schema.number(), schema.duration()], {
-    defaultValue: moment.duration('3s'),
+    defaultValue: moment.duration({ seconds: 3 }),
   }),
   browser: schema.object({
     autoDownload: schema.conditional(

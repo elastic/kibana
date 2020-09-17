@@ -20,7 +20,7 @@ describe('Reporting Config Schema', () => {
             },
             "type": "chromium",
           },
-          "loadDelay": "P0D",
+          "loadDelay": "PT3S",
           "maxAttempts": 1,
           "networkPolicy": Object {
             "enabled": true,
@@ -58,9 +58,9 @@ describe('Reporting Config Schema', () => {
             ],
           },
           "timeouts": Object {
-            "openUrl": "P0D",
-            "renderComplete": "P0D",
-            "waitForElements": "P0D",
+            "openUrl": "PT1M",
+            "renderComplete": "PT30S",
+            "waitForElements": "PT30S",
           },
           "viewport": Object {
             "height": 1200,
@@ -98,9 +98,9 @@ describe('Reporting Config Schema', () => {
         "queue": Object {
           "indexInterval": "week",
           "pollEnabled": true,
-          "pollInterval": "P0D",
+          "pollInterval": "PT3S",
           "pollIntervalErrorMultiplier": 10,
-          "timeout": "P0D",
+          "timeout": "PT2M",
         },
         "roles": Object {
           "allow": Array [
@@ -125,7 +125,7 @@ describe('Reporting Config Schema', () => {
             },
             "type": "chromium",
           },
-          "loadDelay": "P0D",
+          "loadDelay": "PT3S",
           "maxAttempts": 3,
           "networkPolicy": Object {
             "enabled": true,
@@ -163,9 +163,9 @@ describe('Reporting Config Schema', () => {
             ],
           },
           "timeouts": Object {
-            "openUrl": "P0D",
-            "renderComplete": "P0D",
-            "waitForElements": "P0D",
+            "openUrl": "PT1M",
+            "renderComplete": "PT30S",
+            "waitForElements": "PT30S",
           },
           "viewport": Object {
             "height": 1200,
@@ -202,9 +202,9 @@ describe('Reporting Config Schema', () => {
         "queue": Object {
           "indexInterval": "week",
           "pollEnabled": true,
-          "pollInterval": "P0D",
+          "pollInterval": "PT3S",
           "pollIntervalErrorMultiplier": 10,
-          "timeout": "P0D",
+          "timeout": "PT2M",
         },
         "roles": Object {
           "allow": Array [
