@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 
 export async function getRumServices({
@@ -17,7 +18,7 @@ export async function getRumServices({
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
@@ -30,7 +31,7 @@ export async function getRumServices({
       aggs: {
         services: {
           terms: {
-            field: 'service.name',
+            field: SERVICE_NAME,
             size: 1000,
           },
         },

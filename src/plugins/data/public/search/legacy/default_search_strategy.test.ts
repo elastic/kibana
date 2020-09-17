@@ -19,8 +19,9 @@
 
 import { HttpStart } from 'src/core/public';
 import { coreMock } from '../../../../../core/public/mocks';
+import { getCallMsearch } from './call_msearch';
 import { defaultSearchStrategy } from './default_search_strategy';
-import { SearchStrategySearchParams } from './types';
+import { LegacyFetchHandlers, SearchStrategySearchParams } from './types';
 import { BehaviorSubject } from 'rxjs';
 
 const { search } = defaultSearchStrategy;
@@ -44,11 +45,12 @@ describe('defaultSearchStrategy', function () {
             index: { title: 'foo' },
           },
         ],
-        http,
-        config: {
-          get: jest.fn(),
-        },
-        loadingCount$: new BehaviorSubject(0) as any,
+        getConfig: jest.fn(),
+        onResponse: (req, res) => res,
+        legacy: {
+          callMsearch: getCallMsearch({ http }),
+          loadingCount$: new BehaviorSubject(0) as any,
+        } as jest.Mocked<LegacyFetchHandlers>,
       };
     });
 

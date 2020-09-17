@@ -75,7 +75,10 @@ describe('selectors', () => {
     });
 
     it('returns true when current loaded data timestamp is outdated', () => {
-      const listView = createLoadedListViewWithPagination(222222);
+      const listView = {
+        ...createLoadedListViewWithPagination(111111),
+        freshDataTimestamp: 222222,
+      };
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true })).toBe(true);
     });
@@ -107,6 +110,7 @@ describe('selectors', () => {
           ),
           currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
+          show: undefined,
         },
       };
 
@@ -134,6 +138,7 @@ describe('selectors', () => {
           ),
           currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
+          show: undefined,
         },
       };
 
@@ -161,6 +166,7 @@ describe('selectors', () => {
           ),
           currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
+          show: undefined,
         },
       };
 
@@ -196,6 +202,7 @@ describe('selectors', () => {
           ),
           currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
+          show: undefined,
         },
       };
 
@@ -209,6 +216,7 @@ describe('selectors', () => {
           currentListResourceState: createListFailedResourceState('Internal Server Error'),
           currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
+          show: undefined,
         },
       };
 
@@ -232,6 +240,7 @@ describe('selectors', () => {
           ),
           currentPaginationInfo: createDefaultPaginationInfo(),
           freshDataTimestamp: initialNow,
+          show: undefined,
         },
       };
 
@@ -324,26 +333,26 @@ describe('selectors', () => {
   });
 
   describe('getDeletionError()', () => {
-    it('returns null when resource state is uninitialised', () => {
-      expect(getDeletionError(initialState)).toBe(null);
+    it('returns undefined when resource state is uninitialised', () => {
+      expect(getDeletionError(initialState)).toBeUndefined();
     });
 
-    it('returns null when resource state is loading', () => {
+    it('returns undefined when resource state is loading', () => {
       const state = createStateWithDeletionSubmissionResourceState({
         type: 'LoadingResourceState',
         previousState: { type: 'UninitialisedResourceState' },
       });
 
-      expect(getDeletionError(state)).toBe(null);
+      expect(getDeletionError(state)).toBeUndefined();
     });
 
-    it('returns null when resource state is loaded', () => {
+    it('returns undefined when resource state is loaded', () => {
       const state = createStateWithDeletionSubmissionResourceState({
         type: 'LoadedResourceState',
         data: null,
       });
 
-      expect(getDeletionError(state)).toBe(null);
+      expect(getDeletionError(state)).toBeUndefined();
     });
 
     it('returns error when resource state is failed', () => {
@@ -365,15 +374,15 @@ describe('selectors', () => {
   });
 
   describe('getDeletionDialogEntry()', () => {
-    it('returns null when no entry is set', () => {
-      expect(getDeletionDialogEntry(initialState)).toBe(null);
+    it('returns undefined when no entry is set', () => {
+      expect(getDeletionDialogEntry(initialState)).toBeUndefined();
     });
 
     it('returns entry when entry is set', () => {
       const entry = createSampleTrustedApp(5);
       const state = { ...initialState, deletionDialog: { ...initialState.deletionDialog, entry } };
 
-      expect(isDeletionDialogOpen(state)).toStrictEqual(entry);
+      expect(getDeletionDialogEntry(state)).toStrictEqual(entry);
     });
   });
 });

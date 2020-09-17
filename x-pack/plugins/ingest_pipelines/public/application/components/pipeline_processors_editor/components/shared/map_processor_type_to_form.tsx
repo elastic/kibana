@@ -41,8 +41,12 @@ import {
   SetSecurityUser,
   Split,
   Sort,
+  Trim,
+  Uppercase,
+  UrlDecode,
+  UserAgent,
   FormFieldsComponent,
-} from '../manage_processor_form/processors';
+} from '../processor_form/processors';
 
 interface FieldDescriptor {
   FieldsComponent?: FormFieldsComponent;
@@ -107,7 +111,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'CSV',
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.csv', {
-      defaultMessage: 'Extracts fields values from CSV data.',
+      defaultMessage: 'Extracts field values from CSV data.',
     }),
   },
   date: {
@@ -306,7 +310,10 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     FieldsComponent: Kv,
     docLinkPath: '/kv-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.kv', {
-      defaultMessage: 'KV',
+      defaultMessage: 'Key-value (KV)',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.kv', {
+      defaultMessage: 'Extracts fields from a string containing key-value pairs.',
     }),
   },
   lowercase: {
@@ -315,12 +322,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.lowercase', {
       defaultMessage: 'Lowercase',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.lowercase', {
+      defaultMessage: 'Converts a string to lowercase.',
+    }),
   },
   pipeline: {
     FieldsComponent: Pipeline,
     docLinkPath: '/pipeline-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.pipeline', {
       defaultMessage: 'Pipeline',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.pipeline', {
+      defaultMessage: 'Runs another ingest node pipeline.',
     }),
   },
   remove: {
@@ -329,12 +342,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.remove', {
       defaultMessage: 'Remove',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.remove', {
+      defaultMessage: 'Removes one or more fields.',
+    }),
   },
   rename: {
     FieldsComponent: Rename,
     docLinkPath: '/rename-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.rename', {
       defaultMessage: 'Rename',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.rename', {
+      defaultMessage: 'Renames an existing field.',
     }),
   },
   script: {
@@ -343,12 +362,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.script', {
       defaultMessage: 'Script',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.script', {
+      defaultMessage: 'Runs a script on incoming documents.',
+    }),
   },
   set: {
     FieldsComponent: SetProcessor,
     docLinkPath: '/set-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
       defaultMessage: 'Set',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.set', {
+      defaultMessage: 'Sets the value of a field.',
     }),
   },
   set_security_user: {
@@ -357,12 +382,9 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.setSecurityUser', {
       defaultMessage: 'Set security user',
     }),
-  },
-  split: {
-    FieldsComponent: Split,
-    docLinkPath: '/split-processor.html',
-    label: i18n.translate('xpack.ingestPipelines.processors.label.split', {
-      defaultMessage: 'Split',
+    description: i18n.translate('xpack.ingestPipelines.processors.description.setSecurityUser', {
+      defaultMessage:
+        'Adds details about the current user, such user name and email address, to incoming documents. Requires an authenticated user for the indexing request.',
     }),
   },
   sort: {
@@ -371,33 +393,58 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.sort', {
       defaultMessage: 'Sort',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.sort', {
+      defaultMessage: "Sorts a field's array elements.",
+    }),
+  },
+  split: {
+    FieldsComponent: Split,
+    docLinkPath: '/split-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.split', {
+      defaultMessage: 'Split',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.split', {
+      defaultMessage: 'Splits a field value into an array.',
+    }),
   },
   trim: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Trim,
     docLinkPath: '/trim-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.trim', {
       defaultMessage: 'Trim',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.trim', {
+      defaultMessage: 'Removes leading and trailing whitespace from a string.',
+    }),
   },
   uppercase: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Uppercase,
     docLinkPath: '/uppercase-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.uppercase', {
       defaultMessage: 'Uppercase',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.uppercase', {
+      defaultMessage: 'Converts a string to uppercase.',
+    }),
   },
   urldecode: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: UrlDecode,
     docLinkPath: '/urldecode-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.urldecode', {
       defaultMessage: 'URL decode',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.urldecode', {
+      defaultMessage: 'Decodes a URL-encoded string.',
+    }),
   },
   user_agent: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: UserAgent,
     docLinkPath: '/user-agent-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
       defaultMessage: 'User agent',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.userAgent', {
+      defaultMessage: "Extracts values from a browser's user agent string.",
     }),
   },
 };

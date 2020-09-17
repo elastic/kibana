@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Immutable } from '../../../../../common/endpoint/types';
+import { Immutable, PostTrustedAppCreateRequest } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
@@ -35,6 +35,8 @@ import {
   getLastLoadedListResourceState,
   getListCurrentPageIndex,
   getListCurrentPageSize,
+  getTrustedAppCreateData,
+  isCreatePending,
   needsRefreshOfListData,
 } from './selectors';
 
@@ -140,6 +142,40 @@ const submitDeletionIfNeeded = async (
   }
 };
 
+const createTrustedApp = async (
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const { dispatch, getState } = store;
+
+  if (isCreatePending(getState())) {
+    try {
+      const newTrustedApp = getTrustedAppCreateData(getState());
+      const createdTrustedApp = (
+        await trustedAppsService.createTrustedApp(newTrustedApp as PostTrustedAppCreateRequest)
+      ).data;
+      dispatch({
+        type: 'serverReturnedCreateTrustedAppSuccess',
+        payload: {
+          type: 'success',
+          data: createdTrustedApp,
+        },
+      });
+      store.dispatch({
+        type: 'trustedAppsListDataOutdated',
+      });
+    } catch (error) {
+      dispatch({
+        type: 'serverReturnedCreateTrustedAppFailure',
+        payload: {
+          type: 'failure',
+          data: error.body || error,
+        },
+      });
+    }
+  }
+};
+
 export const createTrustedAppsPageMiddleware = (
   trustedAppsService: TrustedAppsService
 ): ImmutableMiddleware<TrustedAppsListPageState, AppAction> => {
@@ -153,6 +189,10 @@ export const createTrustedAppsPageMiddleware = (
 
     if (action.type === 'trustedAppDeletionDialogConfirmed') {
       await submitDeletionIfNeeded(store, trustedAppsService);
+    }
+
+    if (action.type === 'userClickedSaveNewTrustedAppButton') {
+      createTrustedApp(store, trustedAppsService);
     }
   };
 };

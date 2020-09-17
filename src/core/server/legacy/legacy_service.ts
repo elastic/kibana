@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 
+import { PathConfigType } from '@kbn/utils';
 import { CoreService } from '../../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
@@ -27,7 +28,6 @@ import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
-import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
 import {
   ILegacyInternals,
@@ -233,7 +233,7 @@ export class LegacyService implements CoreService {
       : EMPTY;
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { ClusterManager } = require('../../../cli/cluster/cluster_manager');
+    const { ClusterManager } = require('./cluster_manager');
     return new ClusterManager(
       this.coreContext.env.cliArgs,
       config,
@@ -264,6 +264,7 @@ export class LegacyService implements CoreService {
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
       metrics: {
+        collectionInterval: startDeps.core.metrics.collectionInterval,
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
@@ -301,6 +302,10 @@ export class LegacyService implements CoreService {
       logging: {
         configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
+      metrics: {
+        collectionInterval: setupDeps.core.metrics.collectionInterval,
+        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
+      },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
@@ -308,8 +313,20 @@ export class LegacyService implements CoreService {
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
       status: {
+        isStatusPageAnonymous: setupDeps.core.status.isStatusPageAnonymous,
         core$: setupDeps.core.status.core$,
         overall$: setupDeps.core.status.overall$,
+        set: () => {
+          throw new Error(`core.status.set is unsupported in legacy`);
+        },
+        // @ts-expect-error
+        get dependencies$() {
+          throw new Error(`core.status.dependencies$ is unsupported in legacy`);
+        },
+        // @ts-expect-error
+        get derivedStatus$() {
+          throw new Error(`core.status.derivedStatus$ is unsupported in legacy`);
+        },
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
@@ -356,7 +373,7 @@ export class LegacyService implements CoreService {
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../cli/repl').startRepl(kbnServer);
+      require('./cli').startRepl(kbnServer);
     }
 
     const { autoListen } = await this.httpConfig$.pipe(first()).toPromise();

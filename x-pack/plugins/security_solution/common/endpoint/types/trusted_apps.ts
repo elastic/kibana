@@ -29,17 +29,17 @@ export interface PostTrustedAppCreateResponse {
   data: TrustedApp;
 }
 
-interface MacosLinuxConditionEntry {
-  field: 'hash' | 'path';
+export interface MacosLinuxConditionEntry {
+  field: 'process.hash.*' | 'process.path';
   type: 'match';
   operator: 'included';
   value: string;
 }
 
-type WindowsConditionEntry =
+export type WindowsConditionEntry =
   | MacosLinuxConditionEntry
   | (Omit<MacosLinuxConditionEntry, 'field'> & {
-      field: 'signer';
+      field: 'process.code_signature';
     });
 
 /** Type for a new Trusted App Entry */

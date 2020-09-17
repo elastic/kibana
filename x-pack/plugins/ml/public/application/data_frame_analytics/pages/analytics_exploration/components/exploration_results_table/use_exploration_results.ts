@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
 
+import { i18n } from '@kbn/i18n';
+import { MlApiServices } from '../../../../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
@@ -23,21 +25,26 @@ import {
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import {
-  DEFAULT_RESULTS_FIELD,
-  FEATURE_IMPORTANCE,
-  TOP_CLASSES,
-} from '../../../../common/constants';
+  getPredictionFieldName,
+  getDefaultPredictionFieldName,
+} from '../../../../../../../common/util/analytics_utils';
+import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
+import { isRegressionAnalysis } from '../../../../common/analytics';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery,
-  toastNotifications: CoreSetup['notifications']['toasts']
+  toastNotifications: CoreSetup['notifications']['toasts'],
+  mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {
+  const [baseline, setBaseLine] = useState();
+
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
 
@@ -52,7 +59,6 @@ export const useExplorationResults = (
       )
     );
   }
-
   const dataGrid = useDataGrid(
     columns,
     25,
@@ -107,16 +113,60 @@ export const useExplorationResults = (
     jobConfig?.dest.index,
     JSON.stringify([searchQuery, dataGrid.visibleColumns]),
   ]);
+  const predictionFieldName = useMemo(() => {
+    if (jobConfig) {
+      return (
+        getPredictionFieldName(jobConfig.analysis) ??
+        getDefaultPredictionFieldName(jobConfig.analysis)
+      );
+    }
+    return undefined;
+  }, [jobConfig]);
 
+  const getAnalyticsBaseline = useCallback(async () => {
+    try {
+      if (
+        jobConfig !== undefined &&
+        jobConfig.analysis !== undefined &&
+        isRegressionAnalysis(jobConfig.analysis)
+      ) {
+        const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(jobConfig.id);
+        if (result?.baseline) {
+          setBaseLine(result.baseline);
+        }
+      }
+    } catch (e) {
+      const error = extractErrorMessage(e);
+
+      toastNotifications.addDanger({
+        title: i18n.translate(
+          'xpack.ml.dataframe.analytics.explorationResults.baselineErrorMessageToast',
+          {
+            defaultMessage: 'An error occurred getting feature importance baseline',
+          }
+        ),
+        text: error,
+      });
+    }
+  }, [mlApiServices, jobConfig]);
+
+  useEffect(() => {
+    getAnalyticsBaseline();
+  }, [jobConfig]);
+
+  const resultsField = jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD;
   const renderCellValue = useRenderCellValue(
     indexPattern,
     dataGrid.pagination,
     dataGrid.tableItems,
-    jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD
+    resultsField
   );
 
   return {
     ...dataGrid,
     renderCellValue,
+    baseline,
+    predictionFieldName,
+    resultsField,
   };
 };

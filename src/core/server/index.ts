@@ -60,7 +60,7 @@ import {
   SavedObjectsServiceStart,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { MetricsServiceStart } from './metrics';
+import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
@@ -293,6 +293,7 @@ export {
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  SavedObjectsUtils,
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
@@ -319,18 +320,10 @@ export {
   OpsServerMetrics,
   OpsProcessMetrics,
   MetricsServiceSetup,
+  MetricsServiceStart,
 } from './metrics';
 
-export {
-  DEFAULT_APP_CATEGORIES,
-  getFlattenedObject,
-  URLMeaningfulParts,
-  modifyUrl,
-  isRelativeUrl,
-  Freezable,
-  deepFreeze,
-  assertNever,
-} from '../utils';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {
   SavedObject,
@@ -422,6 +415,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   };
   /** {@link LoggingServiceSetup} */
   logging: LoggingServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */

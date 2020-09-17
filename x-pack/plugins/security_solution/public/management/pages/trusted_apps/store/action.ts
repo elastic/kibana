@@ -7,7 +7,13 @@
 import { Action } from 'redux';
 
 import { TrustedApp } from '../../../../../common/endpoint/types';
-import { AsyncResourceState, TrustedAppsListData } from '../state';
+import {
+  AsyncResourceState,
+  TrustedAppCreateFailure,
+  TrustedAppCreatePending,
+  TrustedAppCreateSuccess,
+  TrustedAppsListData,
+} from '../state';
 
 export type TrustedAppsListDataOutdated = Action<'trustedAppsListDataOutdated'>;
 
@@ -34,10 +40,28 @@ export type TrustedAppDeletionDialogConfirmed = Action<'trustedAppDeletionDialog
 
 export type TrustedAppDeletionDialogClosed = Action<'trustedAppDeletionDialogClosed'>;
 
+export interface UserClickedSaveNewTrustedAppButton {
+  type: 'userClickedSaveNewTrustedAppButton';
+  payload: TrustedAppCreatePending;
+}
+
+export interface ServerReturnedCreateTrustedAppSuccess {
+  type: 'serverReturnedCreateTrustedAppSuccess';
+  payload: TrustedAppCreateSuccess;
+}
+
+export interface ServerReturnedCreateTrustedAppFailure {
+  type: 'serverReturnedCreateTrustedAppFailure';
+  payload: TrustedAppCreateFailure;
+}
+
 export type TrustedAppsPageAction =
   | TrustedAppsListDataOutdated
   | TrustedAppsListResourceStateChanged
   | TrustedAppDeletionSubmissionResourceStateChanged
   | TrustedAppDeletionDialogStarted
   | TrustedAppDeletionDialogConfirmed
-  | TrustedAppDeletionDialogClosed;
+  | TrustedAppDeletionDialogClosed
+  | UserClickedSaveNewTrustedAppButton
+  | ServerReturnedCreateTrustedAppSuccess
+  | ServerReturnedCreateTrustedAppFailure;

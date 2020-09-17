@@ -113,6 +113,7 @@ export const createDefaultListView = (
   currentListResourceState: createUninitialisedResourceState(),
   currentPaginationInfo: createDefaultPaginationInfo(),
   freshDataTimestamp,
+  show: undefined,
 });
 
 export const createLoadingListViewWithPagination = (
@@ -123,6 +124,7 @@ export const createLoadingListViewWithPagination = (
   currentListResourceState: { type: 'LoadingResourceState', previousState },
   currentPaginationInfo,
   freshDataTimestamp,
+  show: undefined,
 });
 
 export const createLoadedListViewWithPagination = (
@@ -138,6 +140,7 @@ export const createLoadedListViewWithPagination = (
   ),
   currentPaginationInfo,
   freshDataTimestamp,
+  show: undefined,
 });
 
 export const createFailedListViewWithPagination = (
@@ -149,6 +152,7 @@ export const createFailedListViewWithPagination = (
   currentListResourceState: { type: 'FailedResourceState', error, lastLoadedState },
   currentPaginationInfo,
   freshDataTimestamp,
+  show: undefined,
 });
 
 export const createUserChangedUrlAction = (path: string, search: string = ''): RoutingAction => {

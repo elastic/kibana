@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPageSideBar, EuiButton } from '@elastic/eui';
+import { EuiPageSideBar, EuiButton, EuiPageBody } from '@elastic/eui';
 
 import { Layout, INavContext } from './layout';
 
@@ -15,6 +15,13 @@ describe('Layout', () => {
     const wrapper = shallow(<Layout navigation={null} />);
 
     expect(wrapper.find('.enterpriseSearchLayout')).toHaveLength(1);
+    expect(wrapper.find(EuiPageBody).prop('restrictWidth')).toBeFalsy();
+  });
+
+  it('passes the restrictWidth prop', () => {
+    const wrapper = shallow(<Layout navigation={null} restrictWidth />);
+
+    expect(wrapper.find(EuiPageBody).prop('restrictWidth')).toEqual(true);
   });
 
   it('renders navigation', () => {

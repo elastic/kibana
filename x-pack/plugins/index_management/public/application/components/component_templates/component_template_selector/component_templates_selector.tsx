@@ -160,6 +160,7 @@ export const ComponentTemplatesSelector = ({
           // eslint-disable-next-line @typescript-eslint/naming-convention
           'componentTemplatesSelector__selection--is-empty': !hasSelection,
         })}
+        data-test-subj="componentTemplatesSelection"
       >
         {hasSelection ? (
           <>
@@ -200,7 +201,7 @@ export const ComponentTemplatesSelector = ({
             </div>
           </>
         ) : (
-          <EuiText textAlign="center">
+          <EuiText textAlign="center" data-test-subj="emptyPrompt">
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-1"

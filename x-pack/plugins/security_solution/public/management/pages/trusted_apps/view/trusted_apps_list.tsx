@@ -29,18 +29,7 @@ import {
 import { useTrustedAppsSelector } from './hooks';
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
-
-const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
-  windows: i18n.translate('xpack.securitySolution.trustedapps.os.windows', {
-    defaultMessage: 'Windows',
-  }),
-  macos: i18n.translate('xpack.securitySolution.trustedapps.os.macos', {
-    defaultMessage: 'Mac OS',
-  }),
-  linux: i18n.translate('xpack.securitySolution.trustedapps.os.linux', {
-    defaultMessage: 'Linux',
-  }),
-};
+import { OS_TITLES } from './constants';
 
 const COLUMN_TITLES: Readonly<
   { [K in keyof Omit<TrustedApp, 'id' | 'description' | 'entries'> | 'actions']: string }

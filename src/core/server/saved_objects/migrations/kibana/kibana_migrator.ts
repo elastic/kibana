@@ -120,9 +120,17 @@ export class KibanaMigrator {
     Array<{ status: string }>
   > {
     if (this.migrationResult === undefined || rerun) {
-      this.status$.next({ status: 'running' });
+      // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
+      // unnecessarily, so we skip it in this case.
+      if (!rerun) {
+        this.status$.next({ status: 'running' });
+      }
+
       this.migrationResult = this.runMigrationsInternal().then((result) => {
-        this.status$.next({ status: 'completed', result });
+        // Similar to above, don't publish status updates when rerunning in CI.
+        if (!rerun) {
+          this.status$.next({ status: 'completed', result });
+        }
         return result;
       });
     }
