@@ -15,7 +15,7 @@ import { CasePostRequestRt, throwErrors, excess, CaseResponseRt } from '../../..
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
-import { getConnectorId } from './helpers';
+import { getConnectorFromConfiguration } from './helpers';
 
 export function initPostCaseApi({
   caseService,
@@ -42,7 +42,7 @@ export function initPostCaseApi({
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
         const myCaseConfigure = await caseConfigureService.find({ client });
-        const connectorId = getConnectorId(myCaseConfigure);
+        const connector = getConnectorFromConfiguration(myCaseConfigure);
         const newCase = await caseService.postNewCase({
           client,
           attributes: transformNewCase({
@@ -51,7 +51,7 @@ export function initPostCaseApi({
             username,
             full_name,
             email,
-            connectorId,
+            connector,
           }),
         });
 
@@ -73,6 +73,7 @@ export function initPostCaseApi({
           body: CaseResponseRt.encode(
             flattenCaseSavedObject({
               savedObject: newCase,
+              caseConfigureConnector: connector,
             })
           ),
         });

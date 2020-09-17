@@ -8,6 +8,7 @@ import {
   ActionType,
   CasesConfigurationMapping,
   ThirdPartyField,
+  CaseConnector,
 } from '../../containers/configure/types';
 
 export const setActionTypeToMapping = (
@@ -41,3 +42,5 @@ export const setThirdPartyToMapping = (
     }
     return item;
   });
+
+export const getNoneConnector = (): CaseConnector => ({ id: 'none', name: 'none', type: '.none' });

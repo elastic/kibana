@@ -62,14 +62,17 @@ export type CasesConnectorConfiguration = rt.TypeOf<typeof CasesConnectorConfigu
 
 /** ********************************************************************** */
 
-export type Connector = ActionResult;
+export type ActionConnector = ActionResult;
 
-// TO DO we will need to add this type rt.literal('close-by-thrid-party')
+// TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
 const CasesConfigureBasicRt = rt.type({
-  connector_id: rt.string,
-  connector_name: rt.string,
+  connector: rt.type({
+    id: rt.string,
+    name: rt.string,
+    type: rt.string,
+  }),
   closure_type: ClosureTypeRT,
 });
 
@@ -97,6 +100,7 @@ export const CaseConfigureResponseRt = rt.intersection([
 ]);
 
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRT>;
+export type CasesConfigure = rt.TypeOf<typeof CasesConfigureBasicRt>;
 
 export type CasesConfigureRequest = rt.TypeOf<typeof CasesConfigureRequestRt>;
 export type CasesConfigurePatch = rt.TypeOf<typeof CasesConfigurePatchRt>;
