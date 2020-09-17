@@ -8,10 +8,10 @@ import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/dat
 
 import {
   Direction,
+  FlowTargetSourceDest,
+  NetworkQueries,
   NetworkTlsFields,
   NetworkTlsRequestOptions,
-  NetworkQueries,
-  FlowTargetSourceDest,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkTlsRequestOptions = {
@@ -55,7 +55,55 @@ export const formattedSearchStrategyResponse = {
   edges: [],
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggs": {\n      "count": {\n        "cardinality": {\n          "field": "tls.server.hash.sha1"\n        }\n      },\n      "sha1": {\n        "terms": {\n          "field": "tls.server.hash.sha1",\n          "size": 10,\n          "order": {\n            "_key": "desc"\n          }\n        },\n        "aggs": {\n          "issuers": {\n            "terms": {\n              "field": "tls.server.issuer"\n            }\n          },\n          "subjects": {\n            "terms": {\n              "field": "tls.server.subject"\n            }\n          },\n          "not_after": {\n            "terms": {\n              "field": "tls.server.not_after"\n            }\n          },\n          "ja3": {\n            "terms": {\n              "field": "tls.server.ja3s"\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-13T09:58:58.637Z",\n                "lte": "2020-09-14T09:58:58.637Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggs: {
+              count: { cardinality: { field: 'tls.server.hash.sha1' } },
+              sha1: {
+                terms: { field: 'tls.server.hash.sha1', size: 10, order: { _key: 'desc' } },
+                aggs: {
+                  issuers: { terms: { field: 'tls.server.issuer' } },
+                  subjects: { terms: { field: 'tls.server.subject' } },
+                  not_after: { terms: { field: 'tls.server.not_after' } },
+                  ja3: { terms: { field: 'tls.server.ja3s' } },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-13T09:58:58.637Z',
+                        lte: '2020-09-14T09:58:58.637Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: false,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   pageInfo: { activePage: 0, fakeTotalCount: 0, showMorePagesIndicator: false },
@@ -90,7 +138,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
           {
             range: {
               '@timestamp': {
