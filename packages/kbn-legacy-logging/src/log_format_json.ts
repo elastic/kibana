@@ -17,13 +17,18 @@
  * under the License.
  */
 
-export { LegacyLoggingConfig, legacyLoggingConfigSchema } from './schema';
-export {
-  metadataSymbol,
-  EventMetadata,
-  attachMetaData,
-  EventData,
-  getLogEventData,
-  isLogEvent,
-} from './metadata';
-export { setupLoggingRotate } from './rotate';
+// @ts-expect-error missing type def
+import stringify from 'json-stringify-safe';
+import { BaseLogFormat } from './log_format';
+
+const stripColors = function (string: string) {
+  return string.replace(/\u001b[^m]+m/g, '');
+};
+
+export class KbnLoggerJsonFormat extends BaseLogFormat {
+  format(data: Record<string, any>) {
+    data.message = stripColors(data.message);
+    data['@timestamp'] = this.extractAndFormatTimestamp(data);
+    return stringify(data);
+  }
+}

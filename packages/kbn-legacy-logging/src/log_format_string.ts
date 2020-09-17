@@ -20,11 +20,11 @@
 import _ from 'lodash';
 import chalk from 'chalk';
 
-import LogFormat from './log_format';
+import { BaseLogFormat } from './log_format';
 
 const statuses = ['err', 'info', 'error', 'warning', 'fatal', 'status', 'debug'];
 
-const typeColors = {
+const typeColors: Record<string, string> = {
   log: 'white',
   req: 'green',
   res: 'green',
@@ -45,18 +45,19 @@ const typeColors = {
   scss: 'magentaBright',
 };
 
-const color = _.memoize(function (name) {
+const color = _.memoize((name: string): ((...text: string[]) => string) => {
+  // @ts-expect-error couldn't even get rid of the error with an any cast
   return chalk[typeColors[name]] || _.identity;
 });
 
-const type = _.memoize(function (t) {
+const type = _.memoize((t: string) => {
   return color(t)(_.pad(t, 7).slice(0, 7));
 });
 
 const workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
 
-export default class KbnLoggerStringFormat extends LogFormat {
-  format(data) {
+export class KbnLoggerStringFormat extends BaseLogFormat {
+  format(data: Record<string, any>) {
     const time = color('time')(this.extractAndFormatTimestamp(data, 'HH:mm:ss.SSS'));
     const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
 

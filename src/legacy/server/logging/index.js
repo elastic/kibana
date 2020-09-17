@@ -18,9 +18,8 @@
  */
 
 import good from '@elastic/good';
-import { setupLoggingRotate } from '@kbn/legacy-logging';
+import { setupLoggingRotate, attachMetaData } from '@kbn/legacy-logging';
 import loggingConfiguration from './configuration';
-import { logWithMetadata } from './log_with_metadata';
 
 export async function setupLogging(server, config) {
   return await server.register({
@@ -30,7 +29,9 @@ export async function setupLogging(server, config) {
 }
 
 export async function loggingMixin(kbnServer, server, config) {
-  logWithMetadata.decorateServer(server);
+  server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
+    server.log(tags, attachMetaData(message, metadata));
+  });
 
   await setupLogging(server, config);
   await setupLoggingRotate(server, config.get('logging'));

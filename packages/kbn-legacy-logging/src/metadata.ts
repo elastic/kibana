@@ -16,30 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { isPlainObject } from 'lodash';
+import { LegacyVars } from '../../../src/core/server/legacy';
 
-import {
-  metadataSymbol,
-  attachMetaData,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../src/core/server/legacy/logging/legacy_logging_server';
+export const metadataSymbol = Symbol('log message with metadata');
 
-export const logWithMetadata = {
-  isLogEvent(eventData) {
-    return Boolean(isPlainObject(eventData) && eventData[metadataSymbol]);
-  },
+export interface EventData {
+  [metadataSymbol]?: EventMetadata;
+  [key: string]: any;
+}
 
-  getLogEventData(eventData) {
-    const { message, metadata } = eventData[metadataSymbol];
-    return {
-      ...metadata,
+export interface EventMetadata {
+  message: string;
+  metadata: Record<string, any>;
+}
+
+export const isLogEvent = (eventData: EventData) => {
+  return Boolean(isPlainObject(eventData) && eventData[metadataSymbol]);
+};
+
+export const getLogEventData = (eventData: EventData) => {
+  const { message, metadata } = eventData[metadataSymbol]!;
+  return {
+    ...metadata,
+    message,
+  };
+};
+
+export const attachMetaData = (message: string, metadata: LegacyVars = {}) => {
+  return {
+    [metadataSymbol]: {
       message,
-    };
-  },
-
-  decorateServer(server) {
-    server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
-      server.log(tags, attachMetaData(message, metadata));
-    });
-  },
+      metadata,
+    },
+  };
 };

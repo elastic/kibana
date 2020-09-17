@@ -19,16 +19,19 @@
 
 import Stream from 'stream';
 import moment from 'moment-timezone';
-import { get, _ } from 'lodash';
+import _ from 'lodash';
 import queryString from 'query-string';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
+// @ts-expect-error missing type def
 import stringify from 'json-stringify-safe';
-import applyFiltersToKeys from './apply_filters_to_keys';
 import { inspect } from 'util';
-import { logWithMetadata } from './log_with_metadata';
 
-function serializeError(err = {}) {
+import { applyFiltersToKeys } from './utils';
+import { isLogEvent, getLogEventData } from './metadata';
+import { LegacyLoggingConfig } from './schema';
+
+function serializeError(err: any = {}) {
   return {
     message: err.message,
     name: err.name,
@@ -38,34 +41,37 @@ function serializeError(err = {}) {
   };
 }
 
-const levelColor = function (code) {
-  if (code < 299) return chalk.green(code);
-  if (code < 399) return chalk.yellow(code);
-  if (code < 499) return chalk.magentaBright(code);
-  return chalk.red(code);
+const levelColor = function (code: number) {
+  if (code < 299) return chalk.green(String(code));
+  if (code < 399) return chalk.yellow(String(code));
+  if (code < 499) return chalk.magentaBright(String(code));
+  return chalk.red(String(code));
 };
 
-export default class TransformObjStream extends Stream.Transform {
-  constructor(config) {
+export abstract class BaseLogFormat extends Stream.Transform {
+  constructor(private readonly config: LegacyLoggingConfig) {
     super({
       readableObjectMode: false,
       writableObjectMode: true,
     });
-    this.config = config;
   }
 
-  filter(data) {
-    if (!this.config.filter) return data;
+  abstract format(data: Record<string, any>): string;
+
+  filter(data: Record<string, unknown>) {
+    if (!this.config.filter) {
+      return data;
+    }
     return applyFiltersToKeys(data, this.config.filter);
   }
 
-  _transform(event, enc, next) {
+  _transform(event: any, enc: string, next: Stream.TransformCallback) {
     const data = this.filter(this.readEvent(event));
     this.push(this.format(data) + '\n');
     next();
   }
 
-  extractAndFormatTimestamp(data, format) {
+  extractAndFormatTimestamp(data: Record<string, any>, format?: string) {
     const { timezone } = this.config;
     const date = moment(data['@timestamp']);
     if (timezone) {
@@ -74,8 +80,8 @@ export default class TransformObjStream extends Stream.Transform {
     return date.format(format);
   }
 
-  readEvent(event) {
-    const data = {
+  readEvent(event: any) {
+    const data: Record<string, any> = {
       type: event.event,
       '@timestamp': event.timestamp,
       tags: [].concat(event.tags || []),
@@ -85,7 +91,7 @@ export default class TransformObjStream extends Stream.Transform {
     if (data.type === 'response') {
       _.defaults(data, _.pick(event, ['method', 'statusCode']));
 
-      const source = get(event, 'source', {});
+      const source = _.get(event, 'source', {});
       data.req = {
         url: event.path,
         method: event.method || '',
@@ -105,7 +111,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.res = {
         statusCode: event.statusCode,
         responseTime: event.responseTime,
-        contentLength: contentLength,
+        contentLength,
       };
 
       const query = queryString.stringify(event.query, { sort: false });
@@ -121,35 +127,35 @@ export default class TransformObjStream extends Stream.Transform {
     } else if (data.type === 'ops') {
       _.defaults(data, _.pick(event, ['pid', 'os', 'proc', 'load']));
       data.message = chalk.gray('memory: ');
-      data.message += numeral(get(data, 'proc.mem.heapUsed')).format('0.0b');
+      data.message += numeral(_.get(data, 'proc.mem.heapUsed')).format('0.0b');
       data.message += ' ';
       data.message += chalk.gray('uptime: ');
-      data.message += numeral(get(data, 'proc.uptime')).format('00:00:00');
+      data.message += numeral(_.get(data, 'proc.uptime')).format('00:00:00');
       data.message += ' ';
       data.message += chalk.gray('load: [');
-      data.message += get(data, 'os.load', [])
-        .map(function (val) {
+      data.message += _.get(data, 'os.load', [])
+        .map((val: number) => {
           return numeral(val).format('0.00');
         })
         .join(' ');
       data.message += chalk.gray(']');
       data.message += ' ';
       data.message += chalk.gray('delay: ');
-      data.message += numeral(get(data, 'proc.delay')).format('0.000');
+      data.message += numeral(_.get(data, 'proc.delay')).format('0.000');
     } else if (data.type === 'error') {
       data.level = 'error';
       data.error = serializeError(event.error);
       data.url = event.url;
-      const message = get(event, 'error.message');
+      const message = _.get(event, 'error.message');
       data.message = message || 'Unknown error (no message)';
     } else if (event.error instanceof Error) {
       data.type = 'error';
       data.level = _.includes(event.tags, 'fatal') ? 'fatal' : 'error';
       data.error = serializeError(event.error);
-      const message = get(event, 'error.message');
+      const message = _.get(event, 'error.message');
       data.message = message || 'Unknown error object (no message)';
-    } else if (logWithMetadata.isLogEvent(event.data)) {
-      _.assign(data, logWithMetadata.getLogEventData(event.data));
+    } else if (isLogEvent(event.data)) {
+      _.assign(data, getLogEventData(event.data));
     } else {
       data.message = _.isString(event.data) ? event.data : inspect(event.data);
     }

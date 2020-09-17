@@ -17,17 +17,30 @@
  * under the License.
  */
 
-import LogFormat from './log_format';
-import stringify from 'json-stringify-safe';
+declare module 'query-string' {
+  type ArrayFormat = 'bracket' | 'index' | 'none';
 
-const stripColors = function (string) {
-  return string.replace(/\u001b[^m]+m/g, '');
-};
-
-export default class KbnLoggerJsonFormat extends LogFormat {
-  format(data) {
-    data.message = stripColors(data.message);
-    data['@timestamp'] = this.extractAndFormatTimestamp(data);
-    return stringify(data);
+  export interface ParseOptions {
+    arrayFormat?: ArrayFormat;
+    sort: ((itemLeft: string, itemRight: string) => number) | false;
   }
+
+  export interface ParsedQuery<T = string> {
+    [key: string]: T | T[] | null | undefined;
+  }
+
+  export function parse(str: string, options?: ParseOptions): ParsedQuery;
+
+  export function parseUrl(str: string, options?: ParseOptions): { url: string; query: any };
+
+  export interface StringifyOptions {
+    strict?: boolean;
+    encode?: boolean;
+    arrayFormat?: ArrayFormat;
+    sort: ((itemLeft: string, itemRight: string) => number) | false;
+  }
+
+  export function stringify(obj: object, options?: StringifyOptions): string;
+
+  export function extract(str: string): string;
 }

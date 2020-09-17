@@ -17,13 +17,4 @@
  * under the License.
  */
 
-export { LegacyLoggingConfig, legacyLoggingConfigSchema } from './schema';
-export {
-  metadataSymbol,
-  EventMetadata,
-  attachMetaData,
-  EventData,
-  getLogEventData,
-  isLogEvent,
-} from './metadata';
-export { setupLoggingRotate } from './rotate';
+export { createListStream, createPromiseFromStreams } from './streams';
