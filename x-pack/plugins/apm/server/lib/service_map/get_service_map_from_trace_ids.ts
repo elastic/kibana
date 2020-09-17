@@ -31,7 +31,7 @@ export function getConnections(
 
         if (environment) {
           if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-            return node[SERVICE_ENVIRONMENT] === null;
+            return !node[SERVICE_ENVIRONMENT];
           }
 
           return node[SERVICE_ENVIRONMENT] === environment;
