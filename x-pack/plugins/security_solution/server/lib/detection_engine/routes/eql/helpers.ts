@@ -8,6 +8,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import get from 'lodash/get';
 
 const PARSING_ERROR_TYPE = 'parsing_exception';
+const VERIFICATION_ERROR_TYPE = 'verification_exception';
 
 interface ErrorCause {
   type: string;
@@ -18,7 +19,8 @@ export type ParsingError = ResponseError<{
   error: ErrorCause & { root_cause: ErrorCause[] };
 }>;
 
-export const isParsingErrorType = (type: unknown): boolean => type === PARSING_ERROR_TYPE;
+export const isParsingErrorType = (type: unknown): boolean =>
+  type === PARSING_ERROR_TYPE || type === VERIFICATION_ERROR_TYPE;
 
 export const isParsingError = (error: unknown): error is ParsingError =>
   error instanceof ResponseError && isParsingErrorType(get(error, 'meta.body.error.type'));
