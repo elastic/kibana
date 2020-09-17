@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './types';
+import { plugin } from './plugin';
+import { TimelineParser } from './parser';
+import { TimelineMarkDownRenderer } from './processor';
+
+export { plugin, TimelineParser as parser, TimelineMarkDownRenderer as renderer };
