@@ -16,6 +16,7 @@ import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { APM_SERVICE_MAPS_FEATURE_NAME } from '../feature';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getParsedUiFilters } from '../lib/helpers/convert_ui_filters/get_parsed_ui_filters';
 
 export const serviceMapRoute = createRoute(() => ({
@@ -43,7 +44,17 @@ export const serviceMapRoute = createRoute(() => ({
     const {
       query: { serviceName, environment },
     } = context.params;
-    return getServiceMap({ setup, serviceName, environment, logger });
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+    return getServiceMap({
+      setup,
+      serviceName,
+      environment,
+      searchAggregatedTransactions,
+      logger,
+    });
   },
 }));
 
@@ -70,11 +81,15 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
       path: { serviceName },
     } = context.params;
 
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
     const uiFilters = getParsedUiFilters({ uiFilters: uiFiltersJson, logger });
 
     return getServiceMapServiceNodeInfo({
       setup,
       serviceName,
+      searchAggregatedTransactions,
       uiFilters,
     });
   },
