@@ -6,12 +6,17 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from 'boom';
-import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
-import { CallESAsCurrentUser } from '../../../types';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import {
+  AssetReference,
+  AssetType,
+  CallESAsCurrentUser,
+  ElasticsearchAssetType,
+} from '../../../types';
 import { getInstallation, savedObjectTypes } from './index';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
+import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey, deletePackageCache, getArchiveInfo } from '../registry';
 
@@ -72,6 +77,8 @@ async function deleteAssets(
       return deletePipeline(callCluster, id);
     } else if (assetType === ElasticsearchAssetType.indexTemplate) {
       return deleteTemplate(callCluster, id);
+    } else if (assetType === ElasticsearchAssetType.transform) {
+      return deleteTransforms(callCluster, [id]);
     }
   });
   try {

@@ -8,7 +8,8 @@ import React, { useCallback, useMemo } from 'react';
 import { get, isEmpty } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 
-import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
+import { Ecs } from '../../../../../common/ecs';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { updateTimelineGraphEventId } from '../../../store/timeline/actions';
 import { EventType } from '../../../store/timeline/model';
 import { OnPinEvent, OnUnPinEvent } from '../events';

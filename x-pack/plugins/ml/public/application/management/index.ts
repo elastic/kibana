@@ -23,7 +23,7 @@ export function registerManagementSection(
   core: CoreSetup<MlStartDependencies>
 ) {
   if (management !== undefined) {
-    management.sections.section.insightsAndAlerting.registerApp({
+    return management.sections.section.insightsAndAlerting.registerApp({
       id: 'jobsListLink',
       title: i18n.translate('xpack.ml.management.jobsListTitle', {
         defaultMessage: 'Machine Learning Jobs',

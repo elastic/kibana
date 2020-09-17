@@ -8,7 +8,7 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { getErrorMessage } from '../../../../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
@@ -115,7 +115,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       refresh();
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
           {
@@ -178,7 +178,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.createIndexPatternErrorMessage',
           {
@@ -199,7 +199,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       );
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList',
           {
@@ -225,7 +225,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles',
           {
@@ -260,7 +260,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       refresh();
     } catch (e) {
       addRequestMessage({
-        error: getErrorMessage(e),
+        error: extractErrorMessage(e),
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorStartingDataFrameAnalyticsJob',
           {

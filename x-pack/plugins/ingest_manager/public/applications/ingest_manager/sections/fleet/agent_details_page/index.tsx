@@ -51,7 +51,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     isInitialRequest,
     error,
     data: agentData,
-    sendRequest: sendAgentRequest,
+    resendRequest: sendAgentRequest,
   } = useGetOneAgent(agentId, {
     pollIntervalMs: 5000,
   });
