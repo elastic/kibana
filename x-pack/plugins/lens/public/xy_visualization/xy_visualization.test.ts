@@ -69,8 +69,8 @@ describe('xy_visualization', () => {
     });
 
     it('should show the chart description if not mixed', () => {
-      expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area chart');
-      expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line chart');
+      expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area');
+      expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line');
       expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
         'Stacked area'
       );
