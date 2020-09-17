@@ -5,7 +5,8 @@
  */
 
 import React, { FC, useCallback, ChangeEvent, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiTextArea } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { useEqlValidation } from '../../../../common/hooks/eql/use_eql_validation';
@@ -13,7 +14,14 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ErrorsPopover } from './errors_popover';
+import { EqlQueryBarFooter } from './footer';
+
+const TextArea = styled(EuiTextArea)`
+  display: block;
+  border: ${({ theme }) => theme.eui.euiBorderThin};
+  border-bottom: 0;
+  box-shadow: none;
+`;
 
 export interface EqlQueryBarProps {
   dataTestSubj: string;
@@ -78,7 +86,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria,
       describedByIds={idAria ? [idAria] : undefined}
     >
       <>
-        <EuiTextArea
+        <TextArea
           data-test-subj="eqlQueryBarTextInput"
           fullWidth
           isInvalid={isInvalid}
@@ -86,16 +94,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria,
           onBlur={handleValidation}
           onChange={handleChange}
         />
-        {errorMessages.length > 0 && (
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <ErrorsPopover
-                ariaLabel={i18n.EQL_VALIDATION_ERROR_POPOVER_LABEL}
-                errors={errorMessages}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+        <EqlQueryBarFooter errors={errorMessages} />
       </>
     </EuiFormRow>
   );

@@ -5,4 +5,3 @@
  */
 
 export { EqlQueryBar } from './eql_query_bar';
-export { EqlOverviewLink } from './eql_overview_link';

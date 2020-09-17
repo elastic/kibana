@@ -47,7 +47,7 @@ import {
 import { schema } from './schema';
 import * as i18n from './translations';
 import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { EqlOverviewLink, EqlQueryBar } from '../eql_query_bar';
+import { EqlQueryBar } from '../eql_query_bar';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -245,7 +245,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   config={{
                     ...schema.queryBar,
                     label: i18n.EQL_QUERY_BAR_LABEL,
-                    labelAppend: <EqlOverviewLink />,
                   }}
                 />
               ) : (
