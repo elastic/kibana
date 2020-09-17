@@ -20,5 +20,14 @@ export const plugin: PluginInitializer<
   MlStartDependencies
 > = (initializerContext: PluginInitializerContext) => new MlPlugin(initializerContext);
 
-export { MlPluginSetup, MlPluginStart };
-export * from './shared';
+export type { MlPluginSetup, MlPluginStart };
+export type {
+  AnomaliesTableRecord,
+  DataRecognizerConfigResponse,
+  Influencer,
+  JobExistResult,
+  JobStat,
+  MlCapabilitiesResponse,
+  MlSummaryJob,
+} from './shared';
+export { ANOMALY_SEVERITY, getSeverityColor, getSeverityType } from './shared';

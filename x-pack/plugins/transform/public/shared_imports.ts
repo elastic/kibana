@@ -29,5 +29,5 @@ export {
   RenderCellValue,
   UseDataGridReturnType,
   UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '../../ml/public';
+  INDEX_STATUS, // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../ml/public/shared';

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { composeValidators, patternValidator } from '../../../../ml/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { composeValidators, patternValidator } from '../../../../ml/public/shared';
 
 import { AggName } from '../../../common/types/aggregations';
 
