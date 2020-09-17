@@ -21,6 +21,7 @@ interface StyledSVGCube {
  * Icon representing a process node.
  */
 export const CubeForProcess = memo(function ({
+  className,
   running,
   isOrigin,
   'data-test-subj': dataTestSubj,
@@ -31,12 +32,14 @@ export const CubeForProcess = memo(function ({
    */
   running: boolean;
   isOrigin?: boolean;
+  className?: string;
 }) {
   const { cubeAssetsForNode } = useResolverTheme();
   const { cubeSymbol, strokeColor } = cubeAssetsForNode(!running, false);
 
   return (
     <StyledSVG
+      className={className}
       width="2.15em"
       height="2.15em"
       viewBox="0 0 100% 100%"
@@ -59,7 +62,6 @@ export const CubeForProcess = memo(function ({
           strokeDashoffset={0}
           width="100%"
           height="100%"
-          className="origin"
         />
       )}
       <use

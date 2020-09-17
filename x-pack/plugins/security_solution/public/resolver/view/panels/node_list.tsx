@@ -47,12 +47,6 @@ const StyledLimitWarning = styled(LimitWarning)`
     display: inline;
   }
 `;
-interface ProcessTableView {
-  name?: string;
-  timestamp?: Date;
-  event: SafeResolverEvent;
-  href: string | undefined;
-}
 
 const StyledButtonTextContainer = styled.div`
   align-items: center;
@@ -60,24 +54,34 @@ const StyledButtonTextContainer = styled.div`
   flex-direction: row;
 `;
 
-const StyledProcessLabel = styled.div`
+const StyledAnalyzedEvent = styled.div`
+  color: ${(props) => props.color};
+  font-size: 10.5px;
+  font-weight: 700;
+`;
+
+const StyledLabelTitle = styled.div``;
+
+const StyledLabelContainer = styled.div`
   display: inline-block;
   flex: 3;
   min-width: 0;
 
-  & .origin-label {
-    color: ${(props) => props.color};
-    font-size: 10.5px;
-    font-weight: 700;
-  }
-
-  & > div {
+  ${StyledAnalyzedEvent},
+  ${StyledLabelTitle} {
     overflow: hidden;
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 `;
+
+interface ProcessTableView {
+  name?: string;
+  timestamp?: Date;
+  event: SafeResolverEvent;
+  href: string | undefined;
+}
 
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
@@ -225,23 +229,21 @@ function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }
             isOrigin={isOrigin}
             data-test-subj="resolver:node-list:node-link:icon"
           />
-          <StyledProcessLabel color={descriptionText}>
+          <StyledLabelContainer>
             {isOrigin && (
-              <div data-test-subj="resolver:node-list:node-link:origin" className="origin-label">
-                <span>
-                  {i18n.translate(
-                    'xpack.securitySolution.endpoint.resolver.panel.table.row.originLabel',
-                    {
-                      defaultMessage: 'Analyzed Event',
-                    }
-                  )}
-                </span>
-              </div>
+              <StyledAnalyzedEvent
+                color={descriptionText}
+                data-test-subj="resolver:node-list:node-link:origin"
+              >
+                {i18n.translate('xpack.securitySolution.resolver.panel.table.row.originLabel', {
+                  defaultMessage: 'ANALYZED EVENT',
+                })}
+              </StyledAnalyzedEvent>
             )}
-            <div data-test-subj="resolver:node-list:node-link:title">
-              <span>{name}</span>
-            </div>
-          </StyledProcessLabel>
+            <StyledLabelTitle data-test-subj="resolver:node-list:node-link:title">
+              {name}
+            </StyledLabelTitle>
+          </StyledLabelContainer>
         </StyledButtonTextContainer>
       )}
     </EuiButtonEmpty>
