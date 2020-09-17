@@ -4,12 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText } from '@elastic/eui';
-import { Axis, Chart, Settings, Position, TooltipValue, niceTimeFormatter } from '@elastic/charts';
+import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import {
+  Axis,
+  Chart,
+  Settings,
+  Position,
+  TooltipValue,
+  niceTimeFormatter,
+  ElementClickListener,
+} from '@elastic/charts';
 import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
@@ -36,9 +45,9 @@ interface Props {
 export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
   const { sourceId } = useSourceContext();
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
-  const { currentTime } = useWaffleTimeContext();
+  const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
-  const { loading, error, timeseries } = useTimeline(
+  const { loading, error, timeseries, reload } = useTimeline(
     filterQueryAsJson,
     [metric],
     nodeType,
@@ -84,7 +93,18 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
       }
     : { max: 0, min: 0 };
 
-  if (loading || !timeseries) {
+  const onClickPoint: ElementClickListener = useCallback(
+    ([[geometryValue]]) => {
+      if (!Array.isArray(geometryValue)) {
+        const { x: timestamp } = geometryValue;
+        jumpToTime(timestamp);
+        stopAutoReload();
+      }
+    },
+    [jumpToTime, stopAutoReload]
+  );
+
+  if (loading) {
     return (
       <TimelineContainer>
         <TimelineLoadingContainer>
@@ -93,13 +113,30 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
       </TimelineContainer>
     );
   }
+
+  if (!loading && (error || !timeseries)) {
+    return (
+      <TimelineContainer>
+        <EuiEmptyPrompt
+          iconType="visArea"
+          title={<h4>{error ? errorTitle : noHistoryDataTitle}</h4>}
+          actions={
+            <EuiButton color="primary" fill onClick={reload}>
+              {error ? retryButtonLabel : checkNewDataButtonLabel}
+            </EuiButton>
+          }
+        />
+      </TimelineContainer>
+    );
+  }
+
   return (
     <TimelineContainer>
       <TimelineHeader>
         <EuiText>
           <strong>
             <FormattedMessage
-              id="xpack.infra.homePage.inventoryTimelineHeader"
+              id="xpack.infra.inventoryTimeline.header"
               defaultMessage="Average {metricLabel}"
               values={{ metricLabel }}
             />
@@ -112,7 +149,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             type={MetricsExplorerChartType.area}
             metric={chartMetric}
             id="0"
-            series={timeseries}
+            series={timeseries!}
             stack={false}
           />
           <Axis
@@ -129,7 +166,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
             ticks={6}
             showGridLines
           />
-          <Settings tooltip={tooltipProps} theme={getTimelineChartTheme(isDarkMode)} />
+          <Settings
+            tooltip={tooltipProps}
+            theme={getTimelineChartTheme(isDarkMode)}
+            onElementClick={onClickPoint}
+          />
         </Chart>
       </TimelineChartContainer>
     </TimelineContainer>
@@ -166,3 +207,22 @@ const TimelineLoadingContainer = euiStyled.div`
   align-items: center;
   height: 100%;
 `;
+
+const noHistoryDataTitle = i18n.translate('xpack.infra.inventoryTimeline.noHistoryDataTitle', {
+  defaultMessage: 'There is no history data to display.',
+});
+
+const errorTitle = i18n.translate('xpack.infra.inventoryTimeline.errorTitle', {
+  defaultMessage: 'An error occurred when trying to display history data.',
+});
+
+const checkNewDataButtonLabel = i18n.translate(
+  'xpack.infra.inventoryTimeline.checkNewDataButtonLabel',
+  {
+    defaultMessage: 'Check for new data',
+  }
+);
+
+const retryButtonLabel = i18n.translate('xpack.infra.inventoryTimeline.retryButtonLabel', {
+  defaultMessage: 'Try again',
+});
