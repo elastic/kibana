@@ -5,6 +5,7 @@
  */
 
 import * as yaml from 'js-yaml';
+import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -142,4 +143,12 @@ export const loginAndWaitForPageWithoutDateRange = (url: string) => {
   cy.viewport('macbook-15');
   cy.visit(url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const loginAndWaitForTimeline = (timelineId: string) => {
+  login();
+  cy.viewport('macbook-15');
+  cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
+  cy.get('[data-test-subj="headerGlobalNav"]');
+  cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
