@@ -11,7 +11,10 @@ import {
   EuiComboBoxOptionOption,
   EuiHealth,
   EuiIcon,
+  EuiIconTip,
   EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
@@ -100,12 +103,18 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   onChangeEventTypeAndIndexesName,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
-
+  const [filterEventType, setFilterEventType] = useState<EventType>(eventType);
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
   const { configIndexPatterns, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    sourcererScope.selectedPatterns.map((indexSelected) => ({
+      label: indexSelected,
+      value: indexSelected,
+    }))
+  );
 
   const indexesPatternOptions = useMemo(
     () =>
@@ -122,13 +131,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
   );
 
-  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-    return sourcererScope.selectedPatterns.map((indexSelected) => ({
-      label: indexSelected,
-      value: indexSelected,
-    }));
-  }, [sourcererScope.selectedPatterns]);
-
   const renderOption = useCallback(
     (option) => {
       const { value } = option;
@@ -144,32 +146,45 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [kibanaIndexPatterns]
   );
 
-  const onChangeCombo = useCallback(
-    (newSelectedOptions) => {
-      onChangeEventTypeAndIndexesName(
-        'custom',
-        newSelectedOptions.map((so: { value: string }) => so.value)
-      );
-    },
-    [onChangeEventTypeAndIndexesName]
-  );
+  const onChangeCombo = useCallback((newSelectedOptions) => {
+    setFilterEventType('custom');
+    setSelectedOptions(newSelectedOptions);
+  }, []);
 
   const onChangeFilter = useCallback(
     (filter) => {
+      setFilterEventType(filter);
       if (filter === 'all') {
-        onChangeEventTypeAndIndexesName(filter, [...configIndexPatterns, signalIndexName ?? '']);
+        setSelectedOptions(
+          [...configIndexPatterns, signalIndexName ?? ''].map((indexSelected) => ({
+            label: indexSelected,
+            value: indexSelected,
+          }))
+        );
       } else if (filter === 'raw') {
-        onChangeEventTypeAndIndexesName(filter, configIndexPatterns);
+        setSelectedOptions(
+          configIndexPatterns.map((indexSelected) => ({
+            label: indexSelected,
+            value: indexSelected,
+          }))
+        );
       } else if (filter === 'alert') {
-        onChangeEventTypeAndIndexesName(filter, [signalIndexName ?? '']);
+        setSelectedOptions([
+          {
+            label: signalIndexName ?? '',
+            value: signalIndexName ?? '',
+          },
+        ]);
       } else if (filter === 'kibana') {
-        onChangeEventTypeAndIndexesName(
-          filter,
-          kibanaIndexPatterns.map((kip) => kip.title)
+        setSelectedOptions(
+          kibanaIndexPatterns.map((kip) => ({
+            label: kip.title,
+            value: kip.title,
+          }))
         );
       }
     },
-    [configIndexPatterns, kibanaIndexPatterns, signalIndexName, onChangeEventTypeAndIndexesName]
+    [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
   );
 
   const togglePopover = useCallback(
@@ -178,6 +193,14 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   );
 
   const closePopover = useCallback(() => setPopover(false), []);
+
+  const handleSaveIndices = useCallback(() => {
+    onChangeEventTypeAndIndexesName(
+      filterEventType,
+      selectedOptions.map((so) => so.label)
+    );
+    setPopover(false);
+  }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
   const comboBox = useMemo(
     () => (
@@ -200,16 +223,15 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     () => (
       <FilterGroup
         options={toggleEventType}
-        idSelected={eventType}
+        idSelected={filterEventType}
         onChange={onChangeFilter}
         buttonSize="compressed"
         isFullWidth
       />
     ),
-    [eventType, onChangeFilter]
+    [filterEventType, onChangeFilter]
   );
 
-  // TODO translation
   const button = useMemo(
     () => (
       <EuiButton
@@ -224,10 +246,22 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [sourcererScope.loading, togglePopover]
   );
 
-  // TODO find a better way to manage the old timeline
   useEffect(() => {
-    onChangeFilter(eventType);
-  }, []);
+    const newSelecteOptions = sourcererScope.selectedPatterns.map((indexSelected) => ({
+      label: indexSelected,
+      value: indexSelected,
+    }));
+    setSelectedOptions((prevSelectedOptions) => {
+      if (!deepEqual(newSelecteOptions, prevSelectedOptions)) {
+        return newSelecteOptions;
+      }
+      return prevSelectedOptions;
+    });
+  }, [sourcererScope.selectedPatterns]);
+
+  useEffect(() => {
+    setFilterEventType((prevFilter) => (prevFilter !== eventType ? eventType : prevFilter));
+  }, [eventType]);
 
   return (
     <PickEventContainer>
@@ -246,9 +280,27 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           closePopover={closePopover}
         >
           <div style={{ width: '600px' }}>
+            <EuiPopoverTitle>
+              <>
+                {i18n.SELECT_INDEX_PATTERNS}
+                <EuiIconTip position="right" content={i18n.CONFIGURE_INDEX_PATTERNS} />
+              </>
+            </EuiPopoverTitle>
             {filter}
             <EuiSpacer size="s" />
             {comboBox}
+            <EuiSpacer size="s" />
+            <EuiPopoverFooter>
+              <EuiButton
+                onClick={handleSaveIndices}
+                data-test-subj="add-index"
+                fill
+                fullWidth
+                size="s"
+              >
+                {i18n.SAVE_INDEX_PATTERNS}
+              </EuiButton>
+            </EuiPopoverFooter>
           </div>
         </EuiPopover>
       </EuiToolTip>

@@ -97,3 +97,25 @@ export const KIBANA_INDEX_PATTERNS = i18n.translate(
     defaultMessage: 'Index patterns',
   }
 );
+
+export const SELECT_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.help',
+  {
+    defaultMessage: 'Select index patterns',
+  }
+);
+
+export const CONFIGURE_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.configure',
+  {
+    defaultMessage:
+      'Configure additional Kibana index patterns to see them become available in the Security Solution',
+  }
+);
+
+export const SAVE_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.indexPatterns.save',
+  {
+    defaultMessage: 'Save',
+  }
+);

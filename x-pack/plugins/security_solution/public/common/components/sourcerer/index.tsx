@@ -20,12 +20,11 @@ import {
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import debounce from 'lodash/debounce';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as i18n from './translations';
 import { SOURCERER_FEATURE_FLAG_ON } from '../../containers/sourcerer/constants';
-import { ADD_INDEX_PATH } from '../../../../common/constants';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
@@ -59,6 +58,13 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
   const [filter, setFilter] = useState('all');
   const { selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    selectedPatterns.map((indexSelected) => ({
+      label: indexSelected,
+      value: indexSelected,
+    }))
+  );
+
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
 
   const onChangeIndexPattern = useCallback(
@@ -88,32 +94,37 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
     [kibanaIndexPatterns]
   );
 
-  const onChangeCombo = useCallback(
-    (newSelectedOptions) => {
-      setFilter('custom');
-      onChangeIndexPattern(newSelectedOptions.map((so: { value: string }) => so.value));
-    },
-    [onChangeIndexPattern]
-  );
+  const onChangeCombo = useCallback((newSelectedOptions) => {
+    setFilter('custom');
+    setSelectedOptions(newSelectedOptions);
+  }, []);
 
   const onChangeFilter = useCallback(
     (newFilter) => {
       setFilter(newFilter);
       if (newFilter === 'all') {
-        onChangeIndexPattern(configIndexPatterns);
+        setSelectedOptions(
+          configIndexPatterns.map((indexSelected) => ({
+            label: indexSelected,
+            value: indexSelected,
+          }))
+        );
       } else if (newFilter === 'kibana') {
-        onChangeIndexPattern(kibanaIndexPatterns.map((kip) => kip.title));
+        setSelectedOptions(
+          kibanaIndexPatterns.map((kip) => ({
+            label: kip.title,
+            value: kip.title,
+          }))
+        );
       }
     },
-    [configIndexPatterns, kibanaIndexPatterns, onChangeIndexPattern]
+    [configIndexPatterns, kibanaIndexPatterns]
   );
 
-  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-    return selectedPatterns.map((indexSelected) => ({
-      label: indexSelected,
-      value: indexSelected,
-    }));
-  }, [selectedPatterns]);
+  const handleSaveIndices = useCallback(() => {
+    onChangeIndexPattern(selectedOptions.map((so) => so.label));
+    setPopoverIsOpen(false);
+  }, [onChangeIndexPattern, selectedOptions]);
 
   const indexesPatternOptions = useMemo(
     () =>
@@ -177,6 +188,19 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
     [indexesPatternOptions, onChangeCombo, renderOption, selectedOptions]
   );
 
+  useEffect(() => {
+    const newSelecteOptions = selectedPatterns.map((indexSelected) => ({
+      label: indexSelected,
+      value: indexSelected,
+    }));
+    setSelectedOptions((prevSelectedOptions) => {
+      if (!deepEqual(newSelecteOptions, prevSelectedOptions)) {
+        return newSelecteOptions;
+      }
+      return prevSelectedOptions;
+    });
+  }, [selectedPatterns]);
+
   return (
     <EuiToolTip position="top" content={sourcererScope.selectedPatterns.sort().join(', ')}>
       <EuiPopover
@@ -190,16 +214,23 @@ export const SourcererComponent = React.memo<SourcererComponentProps>(({ scope: 
         <div style={{ width: 600 }}>
           <EuiPopoverTitle>
             <>
-              {i18n.CHANGE_INDEX_PATTERNS}
+              {i18n.SELECT_INDEX_PATTERNS}
               <EuiIconTip position="right" content={i18n.CONFIGURE_INDEX_PATTERNS} />
             </>
           </EuiPopoverTitle>
           {indexesfilter}
           <EuiSpacer size="s" />
           {comboBox}
+          <EuiSpacer size="s" />
           <EuiPopoverFooter>
-            <EuiButton data-test-subj="add-index" href={ADD_INDEX_PATH} fullWidth size="s">
-              {i18n.ADD_INDEX_PATTERNS}
+            <EuiButton
+              onClick={handleSaveIndices}
+              data-test-subj="add-index"
+              fill
+              fullWidth
+              size="s"
+            >
+              {i18n.SAVE_INDEX_PATTERNS}
             </EuiButton>
           </EuiPopoverFooter>
         </div>
