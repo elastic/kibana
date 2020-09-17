@@ -4,5 +4,7 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": false,
-  "requiredPlugins": []
+  "requiredPlugins": [
+    "usageCollection"
+  ]
 }
