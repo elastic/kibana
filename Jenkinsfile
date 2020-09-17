@@ -12,12 +12,12 @@ kibanaPipeline(timeoutMinutes: 120) {
         ]) {
           parallel([
             'oss-baseline': {
-              workers.ci(name: 'oss-baseline', size: 's-highmem', ramDisk: true) {
+              workers.ci(name: 'oss-baseline', size: 's-highmem', ramDisk: true, runErrorReporter: false) {
                 kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh')()
               }
             },
             'xpack-baseline': {
-              workers.ci(name: 'xpack-baseline', size: 's-highmem', ramDisk: true) {
+              workers.ci(name: 'xpack-baseline', size: 's-highmem', ramDisk: true, runErrorReporter: false) {
                 kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh')()
               }
             },
