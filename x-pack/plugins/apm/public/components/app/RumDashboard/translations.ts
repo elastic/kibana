@@ -94,6 +94,9 @@ export const I18LABELS = {
   url: i18n.translate('xpack.apm.rum.filters.url', {
     defaultMessage: 'Url',
   }),
+  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
+    defaultMessage: 'Match this query',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(

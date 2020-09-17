@@ -62,11 +62,13 @@ export async function getLongTaskMetrics({
   const response = await apmEventClient.search(params);
   const { transIds } = response.aggregations ?? {};
 
-  const validTransactions: string[] = await filterPageLoadTransactions(
+  const validTransactions: string[] = await filterPageLoadTransactions({
     setup,
     urlQuery,
-    (transIds?.buckets ?? []).map((bucket) => bucket.key as string)
-  );
+    transactionIds: (transIds?.buckets ?? []).map(
+      (bucket) => bucket.key as string
+    ),
+  });
   let noOfLongTasks = 0;
   let sumOfLongTasks = 0;
   let longestLongTask = 0;
@@ -87,11 +89,15 @@ export async function getLongTaskMetrics({
   };
 }
 
-async function filterPageLoadTransactions(
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  urlQuery?: string,
-  transactionIds: string[]
-) {
+async function filterPageLoadTransactions({
+  setup,
+  urlQuery,
+  transactionIds,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+  urlQuery?: string;
+  transactionIds: string[];
+}) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,

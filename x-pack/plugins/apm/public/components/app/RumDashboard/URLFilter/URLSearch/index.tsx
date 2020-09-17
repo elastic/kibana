@@ -20,6 +20,7 @@ import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { I18LABELS } from '../../translations';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
+import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
 
 interface Props {
   onChange: (value: string[]) => void;
@@ -122,7 +123,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
           highlightSearchString: false,
         },
         {
-          text: I18LABELS.pageLoadDuration + ': ' + item.pld + ' ms',
+          text: I18LABELS.pageLoadDuration + ': ' + formatToSec(item.pld),
           type: 'deployment',
           highlightSearchString: false,
         },
@@ -157,7 +158,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
               setForceClosePopover(true);
             }}
           >
-            Match this query
+            {I18LABELS.matchThisQuery}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
