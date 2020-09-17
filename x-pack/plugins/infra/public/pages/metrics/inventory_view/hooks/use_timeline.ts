@@ -8,7 +8,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { first } from 'lodash';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIntervalInSeconds } from '../../../../../server/utils/get_interval_in_seconds';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
@@ -57,7 +57,8 @@ export function useTimeline(
   currentTime: number,
   accountId: string,
   region: string,
-  interval: string | undefined
+  interval: string | undefined,
+  shouldReload: boolean
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
@@ -93,13 +94,18 @@ export function useTimeline(
     decodeResponse
   );
 
+  const loadData = useCallback(() => {
+    if (shouldReload) return makeRequest();
+    return Promise.resolve();
+  }, [makeRequest, shouldReload]);
+
   useEffect(() => {
     (async () => {
       if (timeLength) {
-        await makeRequest();
+        await loadData();
       }
     })();
-  }, [makeRequest, timeLength]);
+  }, [loadData, timeLength]);
 
   const timeseries = response
     ? first(response.nodes.map((node) => first(node.metrics)?.timeseries))
