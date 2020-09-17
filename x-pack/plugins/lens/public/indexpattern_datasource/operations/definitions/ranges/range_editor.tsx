@@ -219,6 +219,7 @@ export const RangeEditor = ({
   }
   return (
     <BaseRangeEditor
+      key={isAutoIntervalEnabled ? 'auto' : 'manual'}
       autoIntervalEnabled={isAutoIntervalEnabled}
       interval={numericIntervalValue}
       maxBars={params.maxBars}
