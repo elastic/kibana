@@ -159,6 +159,8 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
                   isMacosLinuxTrustedAppCondition(entry)
                 ) as MacosLinuxConditionEntry[])
               );
+            } else {
+              updatedState.entries.push(...prevState.entries);
             }
             return updatedState;
           }
