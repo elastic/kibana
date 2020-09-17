@@ -863,7 +863,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     }
 
     $scope.hits = resp.hits.total;
-    $scope.rows = resp.hits.hits;
+    $scope.rows = resp.hits.hits.map((hit) => {
+      return { ...hit, ...{ _source: hit.fields } };
+    });
 
     // if we haven't counted yet, reset the counts
     const counts = ($scope.fieldCounts = $scope.fieldCounts || {});
@@ -938,14 +940,10 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.updateDataSource = () => {
     const { indexPattern, searchSource } = $scope;
-    const { docvalueFields } = indexPattern.getComputedFields();
-    const columns = $scope.state.columns.filter(
-      (name) => !docvalueFields.find((docVal) => docVal.field === name)
-    );
     searchSource
       .setField('index', $scope.indexPattern)
-      .setField('fieldsApi', columns)
-      .setField('source', true)
+      .setField('fieldsApi', ['*'])
+      .setField('source', false)
       .setField('size', $scope.opts.sampleSize)
       .setField(
         'sort',
