@@ -350,7 +350,7 @@ export const config: {
             startupTimeout: Type<import("moment").Duration>;
             logQueries: Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
-                verificationMode: Type<"none" | "certificate" | "full">;
+                verificationMode: Type<"none" | "full" | "certificate">;
                 certificateAuthorities: Type<string | string[] | undefined>;
                 certificate: Type<string | undefined>;
                 key: Type<string | undefined>;
