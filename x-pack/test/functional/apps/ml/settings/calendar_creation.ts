@@ -38,26 +38,26 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.deleteCalendar(calendarId);
     });
 
-    it('calendar creation loads the calendars list and creates new calendar that applies to all jobs', async () => {
-      await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
+    it('creates new calendar that applies to all jobs', async () => {
+      await ml.testExecution.logTestStep('loads the calendar management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToCalendarManagement();
 
-      await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
+      await ml.testExecution.logTestStep('loads the new calendar edit page');
       await ml.settingsCalendar.assertCreateCalendarButtonEnabled(true);
       await ml.settingsCalendar.navigateToCalendarCreationPage();
 
-      await ml.testExecution.logTestStep('calendar creation sets calendar to apply to all jobs');
+      await ml.testExecution.logTestStep('sets calendar to apply to all jobs');
       await ml.settingsCalendar.toggleApplyToAllJobsSwitch(true);
       await testSubjects.missingOrFail('mlCalendarJobSelection');
       await testSubjects.missingOrFail('mlCalendarJobGroupSelection');
 
-      await ml.testExecution.logTestStep('calendar creation sets the id and description');
+      await ml.testExecution.logTestStep('sets the id and description');
       await ml.settingsCalendar.setCalendarId(calendarId);
       await ml.settingsCalendar.setCalendarDescription('test calendar description');
 
-      await ml.testExecution.logTestStep('calendar creation creates new calendar event');
+      await ml.testExecution.logTestStep('creates new calendar event');
       await ml.settingsCalendar.openNewCalendarEventForm();
       await ml.settingsCalendar.setCalendarEventDescription('holiday');
       await ml.settingsCalendar.addNewCalendarEvent();
@@ -71,13 +71,13 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.assertCalendarRowExists(calendarId);
     });
 
-    it('calendar creation loads the calendars list and creates new calendar that applies to specific jobs', async () => {
-      await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
+    it('creates new calendar that applies to specific jobs', async () => {
+      await ml.testExecution.logTestStep('loads the calendar management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToCalendarManagement();
 
-      await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
+      await ml.testExecution.logTestStep('loads the new calendar edit page');
       await ml.settingsCalendar.assertCreateCalendarButtonEnabled(true);
       await ml.settingsCalendar.navigateToCalendarCreationPage();
       await ml.settingsCalendar.setCalendarId(calendarId);
@@ -88,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.settingsCalendar.assertJobGroupSelectionEnabled(true);
       await testSubjects.click('mlCalendarJobSelection');
 
-      await ml.testExecution.logTestStep('calendar creation sets the job selection');
+      await ml.testExecution.logTestStep('sets the job selection');
       await asyncForEach(jobConfigs, async (jobConfig) => {
         await ml.settingsCalendar.selectJob(jobConfig.job_id);
       });

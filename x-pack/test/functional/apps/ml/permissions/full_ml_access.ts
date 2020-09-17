@@ -400,7 +400,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should display enabled elements of the edit calendar page'
             );
-            await ml.settingsCalendar.assertApplyToAllJobsSwitchEnabled(true);
+            await ml.settingsCalendar.assertApplyToAllJobsSwitchCheckedState(true);
             await ml.settingsCalendar.assertJobSelectionEnabled(true);
             await ml.settingsCalendar.assertJobGroupSelectionEnabled(true);
             await ml.settingsCalendar.assertNewEventButtonEnabled(true);

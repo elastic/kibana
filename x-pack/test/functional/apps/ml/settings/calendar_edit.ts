@@ -50,30 +50,30 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.deleteCalendar(calendarId);
     });
 
-    it('calendar edit loads the calendars list and finds calendar to edit', async () => {
-      await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
+    it('finds and edits existing calendar', async () => {
+      await ml.testExecution.logTestStep('loads the calendar management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToCalendarManagement();
 
-      await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
+      await ml.testExecution.logTestStep('loads the new calendar edit page');
       await ml.settingsCalendar.openCalendarEditForm(calendarId);
 
       await ml.testExecution.logTestStep(
-        'calendar creation deselects previous job selection and assigns new job groups'
+        'deselects previous job selection and assigns new job groups'
       );
       await comboBox.clear('mlCalendarJobSelection');
       await asyncForEach(newJobGroups, async (newJobGroup) => {
         await ml.settingsCalendar.selectJobGroup(newJobGroup);
       });
 
-      await ml.testExecution.logTestStep('calendar creation finds and deletes old events');
+      await ml.testExecution.logTestStep('finds and deletes old events');
 
       await asyncForEach(testEvents, async ({ description }) => {
         await ml.settingsCalendar.deleteCalendarEventRow(description);
       });
 
-      await ml.testExecution.logTestStep('calendar creation creates new calendar event');
+      await ml.testExecution.logTestStep('creates new calendar event');
       await ml.settingsCalendar.openNewCalendarEventForm();
       await ml.settingsCalendar.setCalendarEventDescription('holiday');
       await ml.settingsCalendar.addNewCalendarEvent();

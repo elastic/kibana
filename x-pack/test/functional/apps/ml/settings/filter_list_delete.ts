@@ -41,15 +41,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('filter list delete loads filter lists and deletes item', async () => {
-      await ml.testExecution.logTestStep(
-        'filter list creation loads the filter list management page'
-      );
+    it('deletes item', async () => {
+      await ml.testExecution.logTestStep('loads the filter list management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToFilterListsManagement();
 
-      await ml.testExecution.logTestStep('filter list creates new filter lists');
+      await ml.testExecution.logTestStep('selects new filter lists');
       for (const testData of testDataList) {
         const { filterId } = testData;
         await ml.settingsFilterList.selectFilterListRow(filterId);

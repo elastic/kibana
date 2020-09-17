@@ -32,21 +32,21 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.deleteFilter(filterId);
     });
 
-    it('filter list edit updates existing list', async () => {
-      await ml.testExecution.logTestStep('filter list edit loads the filter list management page');
+    it('updates existing list', async () => {
+      await ml.testExecution.logTestStep('loads the filter list management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToFilterListsManagement();
 
-      await ml.testExecution.logTestStep('filter list edit finds the filter list to edit');
+      await ml.testExecution.logTestStep('finds the filter list to edit');
       await ml.settingsFilterList.selectFilterListRowEditLink(filterId);
       await ml.settingsFilterList.assertFilterItemExists(keywordToDelete);
       await ml.settingsFilterList.assertFilterListDescriptionValue(oldDescription);
 
-      await ml.testExecution.logTestStep('filter list edit deletes existing filter item');
+      await ml.testExecution.logTestStep('deletes existing filter item');
       await ml.settingsFilterList.deleteFilterItem(keywordToDelete);
 
-      await ml.testExecution.logTestStep('filter list edit sets new keywords and description');
+      await ml.testExecution.logTestStep('sets new keywords and description');
       await ml.settingsFilterList.setFilterListDescription(newDescription);
       await ml.settingsFilterList.addFilterListKeywords(newKeywords);
       await ml.settingsFilterList.saveFilterList();

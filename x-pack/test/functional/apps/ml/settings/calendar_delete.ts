@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('calendar delete loads calendar lists and deletes calendar', async () => {
+    it('deletes multiple calendars', async () => {
       await ml.testExecution.logTestStep(
         'calendar list creation loads the calendar list management page'
       );

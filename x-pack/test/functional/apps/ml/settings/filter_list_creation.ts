@@ -29,17 +29,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('filter list creation creates new filter list', async () => {
-      await ml.testExecution.logTestStep(
-        'filter list creation loads the filter list management page'
-      );
+    it('creates new filter list', async () => {
+      await ml.testExecution.logTestStep('loads the filter list management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToFilterListsManagement();
 
       await ml.testExecution.logTestStep('filter list creates new filter lists');
       for (const testData of testDataList) {
-        await ml.testExecution.logTestStep('filter list creation loads the filter creation page');
+        await ml.testExecution.logTestStep('loads the filter creation page');
         await ml.settingsFilterList.navigateToFilterListCreationPage();
 
         await ml.testExecution.logTestStep('filter list sets the list name and description');
