@@ -20,7 +20,7 @@ import {
   EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
-import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineTypeLiteral,
   TimelineType,
