@@ -156,18 +156,16 @@ const RolesSchema = schema.object({
 
 const IndexSchema = schema.string({ defaultValue: '.reporting' });
 
+// Browser side polling: job completion notifier, management table auto-refresh
+// NOTE: can not use schema.duration, a bug prevents it being passed to the browser correctly
 const PollSchema = schema.object({
   jobCompletionNotifier: schema.object({
-    interval: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration('10s'),
-    }),
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }),
+    interval: schema.number({ defaultValue: 10000 }),
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
   }),
   jobsRefresh: schema.object({
-    interval: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration('5s'),
-    }),
-    intervalErrorMultiplier: schema.number({ defaultValue: 5 }),
+    interval: schema.number({ defaultValue: 5000 }),
+    intervalErrorMultiplier: schema.number({ defaultValue: 5 }), // unused
   }),
 });
 
