@@ -5,7 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import semver from 'semver';
+import { lt as semverLt } from 'semver';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
@@ -119,7 +119,7 @@ export async function installPackage({
   // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
   const installOutOfDateVersionOk =
     installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
-  if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
+  if (semverLt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);

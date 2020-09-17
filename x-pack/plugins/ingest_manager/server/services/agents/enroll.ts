@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import semver from 'semver';
+import { parse as semverParse, diff as semverDiff, lte as semverLte } from 'semver';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentType, Agent, AgentSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
@@ -94,17 +94,17 @@ export function validateAgentVersion(
   agentVersion: string,
   kibanaVersion = appContextService.getKibanaVersion()
 ) {
-  const agentVersionParsed = semver.parse(agentVersion);
+  const agentVersionParsed = semverParse(agentVersion);
   if (!agentVersionParsed) {
     throw Boom.badRequest('Agent version not provided');
   }
 
-  const kibanaVersionParsed = semver.parse(kibanaVersion);
+  const kibanaVersionParsed = semverParse(kibanaVersion);
   if (!kibanaVersionParsed) {
     throw Boom.badRequest('Kibana version is not set or provided');
   }
 
-  const diff = semver.diff(agentVersion, kibanaVersion);
+  const diff = semverDiff(agentVersion, kibanaVersion);
   switch (diff) {
     // section 1) very close versions, only patch release differences - all combos should work
     // Agent a.b.1 < Kibana a.b.2
@@ -130,7 +130,7 @@ export function validateAgentVersion(
     // Agent 7.10.x > Kibana 7.9.x
     // Agent 8.0.x > Kibana 7.9.x
     default:
-      if (semver.lte(agentVersionParsed, kibanaVersionParsed)) return;
+      if (semverLte(agentVersionParsed, kibanaVersionParsed)) return;
       else
         throw Boom.badRequest(
           `Agent version ${agentVersion} is not compatible with Kibana version ${kibanaVersion}`
