@@ -231,10 +231,10 @@ export class BundleRefsPlugin {
       return new BundleRefModule(ref);
     }
 
-    const bundleId = Array.from(new Set(possibleRefs.map((r) => r.bundleId))).join(', ');
-    const publicDir = possibleRefs.map((r) => r.entry).join(', ');
-    throw new Error(
-      `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
-    );
+    // const bundleId = Array.from(new Set(possibleRefs.map((r) => r.bundleId))).join(', ');
+    // const publicDir = possibleRefs.map((r) => r.entry).join(', ');
+    // throw new Error(
+    //   `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
+    // );
   }
 }
