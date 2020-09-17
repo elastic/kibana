@@ -224,7 +224,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         exceptionListType,
         ruleExceptionList.list_id,
         ruleName,
-        alertData.nonEcsData
+        alertData.ecsData
       );
     } else {
       return [];

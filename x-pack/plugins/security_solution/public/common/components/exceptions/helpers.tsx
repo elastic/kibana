@@ -38,6 +38,8 @@ import {
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
+import { Ecs } from '../../../../ common/ecs';
+import { CodeSignature } from '../../../../common/ecs/file';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
@@ -402,37 +404,23 @@ export const entryHasListType = (
  * can be an object or array of objects
  */
 export const getCodeSignatureValue = (
-  data: TimelineNonEcsData[]
+  codeSignatures: CodeSignature[]
 ): Array<{ subjectName: string; trusted: string }> => {
-  const [item] = getMappedNonEcsValue({
-    data,
-    fieldName: 'file.Ext.code_signature',
-  });
-  const parsedItem = item != null ? JSON.parse(item) : [{ subject_name: '', trusted: '' }];
-  const signatures = Array.isArray(parsedItem) ? parsedItem : [parsedItem];
-  const allResembleSignature = signatures.every(
-    (sig) =>
-      typeof sig === 'object' &&
-      sig != null &&
-      Object.prototype.hasOwnProperty.call(sig, 'subject_name') &&
-      Object.prototype.hasOwnProperty.call(sig, 'trusted')
-  );
+  const signatures = Array.isArray(codeSignatures) ? codeSignatures : [codeSignatures];
 
-  if (allResembleSignature) {
-    return signatures.map((signature) => {
-      return {
-        subjectName: signature.subject_name ?? '',
-        trusted: signature.trusted ?? '',
-      };
-    });
-  } else {
-    return [
-      {
-        subjectName: '',
-        trusted: '',
-      },
-    ];
+  if (signatures.length > 0) {
+    return signatures.map((signature) => ({
+      subjectName: signature.subject_name[0] ?? '',
+      trusted: signature.trusted[0] ?? '',
+    }));
   }
+
+  return [
+    {
+      subjectName: '',
+      trusted: '',
+    },
+  ];
 };
 
 /**
@@ -452,10 +440,10 @@ export const getPrepopulatedItem = ({
   listId: string;
   listNamespace?: NamespaceType;
   ruleName: string;
-  codeSignature: { subjectName: string; trusted: string } | undefined;
-  filePath: string | undefined;
-  sha256Hash: string | undefined;
-  eventCode: string | undefined;
+  codeSignature: { subjectName: string; trusted: string };
+  filePath: string[];
+  sha256Hash: string[];
+  eventCode: string[];
 }): ExceptionsBuilderExceptionItem => {
   return {
     ...getNewExceptionItem({ listType, listId, namespaceType: listNamespace, ruleName }),
@@ -482,19 +470,19 @@ export const getPrepopulatedItem = ({
         field: 'file.path.text',
         operator: 'included',
         type: 'match',
-        value: filePath ?? '',
+        value: filePath[0] ?? '',
       },
       {
         field: 'file.hash.sha256',
         operator: 'included',
         type: 'match',
-        value: sha256Hash ?? '',
+        value: sha256Hash[0] ?? '',
       },
       {
         field: 'event.code',
         operator: 'included',
         type: 'match',
-        value: eventCode ?? '',
+        value: eventCode[0] ?? '',
       },
     ],
   };
@@ -537,14 +525,18 @@ export const defaultEndpointExceptionItems = (
   listType: ExceptionListType,
   listId: string,
   ruleName: string,
-  alertData: TimelineNonEcsData[]
+  alertEcsData: Ecs
 ): ExceptionsBuilderExceptionItem[] => {
-  const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' });
-  const codeSignatures = getCodeSignatureValue(alertData);
-  const [sha256Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha256' });
-  const [eventCode] = getMappedNonEcsValue({ data: alertData, fieldName: 'event.code' });
+  const {
+    file: {
+      code_signature: codeSignatures,
+      hash: { sha256: sha256Hash },
+      path: filePath,
+    },
+    event: { code: eventCode },
+  } = alertEcsData;
 
-  return codeSignatures.map((codeSignature) =>
+  return getCodeSignatureValue(codeSignatures).map((codeSignature) =>
     getPrepopulatedItem({
       listType,
       listId,
