@@ -92,6 +92,7 @@
     "**/isomorphic-git/**/base64-js": "^1.2.1",
     "**/istanbul-instrumenter-loader/schema-utils": "1.0.0",
     "**/load-grunt-config/lodash": "^4.17.20",
+    "**/minimist": "^1.2.5",
     "**/node-jose/node-forge": "^0.10.0",
     "**/react": "^16.12.0",
     "**/react-dom": "^16.12.0",
