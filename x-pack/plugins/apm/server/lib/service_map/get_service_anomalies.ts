@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
+import { maybe } from '../../../common/utils/maybe';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseReturnType } from '../../../typings/common';
 import {
@@ -52,17 +53,21 @@ export async function getServiceAnomalies({
     };
   }
 
+  const lte = end;
+  // fetch data for at least 30 minutes
+  const gte = Math.min(end - 30 * 60 * 1000, start);
+
   const params = {
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            { term: { result_type: 'record' } },
+            { terms: { result_type: ['model_plot', 'record'] } },
             { terms: { job_id: mlJobIds } },
             {
               range: {
-                timestamp: { gte: start, lte: end, format: 'epoch_millis' },
+                timestamp: { gte, lte, format: 'epoch_millis' },
               },
             },
             {
@@ -81,7 +86,13 @@ export async function getServiceAnomalies({
             top_score: {
               top_hits: {
                 sort: { record_score: 'desc' },
-                _source: { includes: ['actual', 'job_id', 'by_field_value'] },
+                _source: [
+                  'actual',
+                  'job_id',
+                  'by_field_value',
+                  'result_type',
+                  'record_score',
+                ],
                 size: 1,
               },
             },
@@ -114,6 +125,8 @@ interface ServiceAnomaliesAggResponse {
                 actual: [number];
                 job_id: string;
                 by_field_value: string;
+                record_score: number | null;
+                result_type: 'model_plot' | 'record';
               };
             }>;
           };
@@ -130,13 +143,18 @@ function transformResponseToServiceAnomalies(
     response.aggregations?.services.buckets ?? []
   ).reduce(
     (statsByServiceName, { key: serviceName, top_score: topScoreAgg }) => {
+      const mlResult = maybe(topScoreAgg.hits.hits[0])?._source;
+
+      const jobId = mlResult?.job_id;
+      const transactionType = mlResult?.by_field_value;
+
       return {
         ...statsByServiceName,
         [serviceName]: {
-          transactionType: topScoreAgg.hits.hits[0]?._source?.by_field_value,
-          anomalyScore: topScoreAgg.hits.hits[0]?.sort?.[0],
-          actualValue: topScoreAgg.hits.hits[0]?._source?.actual?.[0],
-          jobId: topScoreAgg.hits.hits[0]?._source?.job_id,
+          transactionType,
+          jobId,
+          actualValue: mlResult?.actual?.[0],
+          anomalyScore: mlResult?.record_score || 0,
         },
       };
     },

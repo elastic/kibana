@@ -59,13 +59,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(severityScores).toMatchInline(`
             Array [
-              undefined,
-              undefined,
               "warning",
               "warning",
-              undefined,
-              undefined,
-              undefined,
+              "warning",
+              "warning",
+              "warning",
+              "warning",
+              "warning",
             ]
           `);
         });
