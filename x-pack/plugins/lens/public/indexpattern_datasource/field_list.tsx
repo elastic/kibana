@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './datapanel.scss';
+import './field_list.scss';
 import { throttle } from 'lodash';
 import React, { useState, Fragment, useCallback, useMemo, useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
@@ -128,7 +128,7 @@ export function FieldList({
 
   return (
     <div
-      className="lnsInnerIndexPatternDataPanel__listWrapper"
+      className="lnsIndexPatternFieldList"
       ref={(el) => {
         if (el && !el.dataset.dynamicScroll) {
           el.dataset.dynamicScroll = 'true';
@@ -137,7 +137,7 @@ export function FieldList({
       }}
       onScroll={throttle(lazyScroll, 100)}
     >
-      <div className="lnsInnerIndexPatternDataPanel__list">
+      <div className="lnsIndexPatternFieldList__accordionContainer">
         {Object.entries(fieldGroups)
           .filter(([, { showInAccordion }]) => !showInAccordion)
           .flatMap(([, { fields }]) =>
