@@ -44,11 +44,12 @@ const createMockPluginSetup = (
   };
 };
 
+const logger = createMockLevelLogger();
+
 const createMockPluginStart = (
   mockReportingCore: ReportingCore,
   startMock?: any
 ): ReportingInternalStart => {
-  const logger = createMockLevelLogger();
   const store = new ReportingStore(mockReportingCore, logger);
   return {
     browserDriverFactory: startMock.browserDriverFactory,
@@ -134,7 +135,7 @@ export const createMockReportingCore = async (
   }
 
   config = config || {};
-  const core = new ReportingCore();
+  const core = new ReportingCore(logger);
 
   core.pluginSetup(setupDepsMock);
   core.setConfig(config);

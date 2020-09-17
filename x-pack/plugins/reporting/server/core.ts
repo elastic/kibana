@@ -19,10 +19,11 @@ import {
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
+import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { checkLicense, getExportTypesRegistry } from './lib';
+import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
@@ -53,7 +54,7 @@ export class ReportingCore {
   private exportTypesRegistry = getExportTypesRegistry();
   private config?: ReportingConfig;
 
-  constructor() {}
+  constructor(private logger: LevelLogger) {}
 
   /*
    * Register setupDeps
@@ -194,8 +195,18 @@ export class ReportingCore {
     return scopedUiSettingsService;
   }
 
-  public getSpaceId(request: KibanaRequest) {
-    return this.getPluginSetupDeps().spaces?.spacesService?.getSpaceId(request);
+  public getSpaceId(request: KibanaRequest): string | undefined {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        this.logger.info(`Request uses Space ID: ` + spaceId);
+        return spaceId;
+      } else {
+        this.logger.info(`Request uses default Space`);
+      }
+    }
   }
 
   public getFakeRequest(baseRequest: object, spaceId?: string) {
@@ -207,9 +218,14 @@ export class ReportingCore {
       ...baseRequest,
     } as Hapi.Request);
 
-    if (spaceId) {
-      this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    if (spacesService) {
+      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+        this.logger.info(`Generating request for space: ` + spaceId);
+        this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
+      }
     }
+
     return fakeRequest;
   }
 
