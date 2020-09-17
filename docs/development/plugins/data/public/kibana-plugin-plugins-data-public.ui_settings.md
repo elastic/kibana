@@ -8,32 +8,34 @@
 
 ```typescript
 UI_SETTINGS: {
-    META_FIELDS: string;
-    DOC_HIGHLIGHT: string;
-    QUERY_STRING_OPTIONS: string;
-    QUERY_ALLOW_LEADING_WILDCARDS: string;
-    SEARCH_QUERY_LANGUAGE: string;
-    SORT_OPTIONS: string;
-    COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: string;
-    COURIER_SET_REQUEST_PREFERENCE: string;
-    COURIER_CUSTOM_REQUEST_PREFERENCE: string;
-    COURIER_MAX_CONCURRENT_SHARD_REQUESTS: string;
-    COURIER_BATCH_SEARCHES: string;
-    SEARCH_INCLUDE_FROZEN: string;
-    HISTOGRAM_BAR_TARGET: string;
-    HISTOGRAM_MAX_BARS: string;
-    HISTORY_LIMIT: string;
-    SHORT_DOTS_ENABLE: string;
-    FORMAT_DEFAULT_TYPE_MAP: string;
-    FORMAT_NUMBER_DEFAULT_PATTERN: string;
-    FORMAT_PERCENT_DEFAULT_PATTERN: string;
-    FORMAT_BYTES_DEFAULT_PATTERN: string;
-    FORMAT_CURRENCY_DEFAULT_PATTERN: string;
-    FORMAT_NUMBER_DEFAULT_LOCALE: string;
-    TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: string;
-    TIMEPICKER_QUICK_RANGES: string;
-    INDEXPATTERN_PLACEHOLDER: string;
-    FILTERS_PINNED_BY_DEFAULT: string;
-    FILTERS_EDITOR_SUGGEST_VALUES: string;
+    readonly META_FIELDS: "metaFields";
+    readonly DOC_HIGHLIGHT: "doc_table:highlight";
+    readonly QUERY_STRING_OPTIONS: "query:queryString:options";
+    readonly QUERY_ALLOW_LEADING_WILDCARDS: "query:allowLeadingWildcards";
+    readonly SEARCH_QUERY_LANGUAGE: "search:queryLanguage";
+    readonly SORT_OPTIONS: "sort:options";
+    readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: "courier:ignoreFilterIfFieldNotInIndex";
+    readonly COURIER_SET_REQUEST_PREFERENCE: "courier:setRequestPreference";
+    readonly COURIER_CUSTOM_REQUEST_PREFERENCE: "courier:customRequestPreference";
+    readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: "courier:maxConcurrentShardRequests";
+    readonly COURIER_BATCH_SEARCHES: "courier:batchSearches";
+    readonly SEARCH_INCLUDE_FROZEN: "search:includeFrozen";
+    readonly SEARCH_TIMEOUT: "search:timeout";
+    readonly HISTOGRAM_BAR_TARGET: "histogram:barTarget";
+    readonly HISTOGRAM_MAX_BARS: "histogram:maxBars";
+    readonly HISTORY_LIMIT: "history:limit";
+    readonly SHORT_DOTS_ENABLE: "shortDots:enable";
+    readonly FORMAT_DEFAULT_TYPE_MAP: "format:defaultTypeMap";
+    readonly FORMAT_NUMBER_DEFAULT_PATTERN: "format:number:defaultPattern";
+    readonly FORMAT_PERCENT_DEFAULT_PATTERN: "format:percent:defaultPattern";
+    readonly FORMAT_BYTES_DEFAULT_PATTERN: "format:bytes:defaultPattern";
+    readonly FORMAT_CURRENCY_DEFAULT_PATTERN: "format:currency:defaultPattern";
+    readonly FORMAT_NUMBER_DEFAULT_LOCALE: "format:number:defaultLocale";
+    readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: "timepicker:refreshIntervalDefaults";
+    readonly TIMEPICKER_QUICK_RANGES: "timepicker:quickRanges";
+    readonly TIMEPICKER_TIME_DEFAULTS: "timepicker:timeDefaults";
+    readonly INDEXPATTERN_PLACEHOLDER: "indexPattern:placeholder";
+    readonly FILTERS_PINNED_BY_DEFAULT: "filters:pinnedByDefault";
+    readonly FILTERS_EDITOR_SUGGEST_VALUES: "filterEditor:suggestValues";
 }
 ```

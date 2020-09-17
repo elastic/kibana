@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import { isActivePlatinumLicense } from '../../../common/service_map';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { APMConfig } from '../..';
@@ -13,11 +14,17 @@ import {
   ApmIndicesConfig,
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
-import { ESClient } from './es_client';
 import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { getESClient } from './es_client';
 import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  APMEventClient,
+  createApmEventClient,
+} from './create_es_client/create_apm_event_client';
+import {
+  APMInternalClient,
+  createInternalESClient,
+} from './create_es_client/create_internal_es_client';
 
 function decodeUiFilters(uiFiltersEncoded?: string) {
   if (!uiFiltersEncoded) {
@@ -30,8 +37,8 @@ function decodeUiFilters(uiFiltersEncoded?: string) {
 // https://github.com/microsoft/TypeScript/issues/34933
 
 export interface Setup {
-  client: ESClient;
-  internalClient: ESClient;
+  apmEventClient: APMEventClient;
+  internalClient: APMInternalClient;
   ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
@@ -78,24 +85,28 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
   ]);
 
-  const createClientOptions = {
-    indices,
-    includeFrozen,
-  };
-
   const uiFiltersES = decodeUiFilters(query.uiFilters);
 
   const coreSetupRequest = {
     indices,
-    client: getESClient(context, request, {
-      clientAsInternalUser: false,
-      ...createClientOptions,
+    apmEventClient: createApmEventClient({
+      context,
+      request,
+      indices,
+      options: { includeFrozen },
     }),
-    internalClient: getESClient(context, request, {
-      clientAsInternalUser: true,
-      ...createClientOptions,
+    internalClient: createInternalESClient({
+      context,
+      request,
     }),
-    ml: getMlSetup(context, request),
+    ml:
+      context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
+        ? getMlSetup(
+            context.plugins.ml,
+            context.core.savedObjects.client,
+            request
+          )
+        : undefined,
     config,
   };
 
@@ -107,15 +118,14 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   } as InferSetup<TParams>;
 }
 
-function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
-  if (!context.plugins.ml) {
-    return;
-  }
-  const ml = context.plugins.ml;
-  const mlClient = ml.mlClient.asScoped(request).callAsCurrentUser;
+function getMlSetup(
+  ml: Required<APMRequestHandlerContext['plugins']>['ml'],
+  savedObjectsClient: APMRequestHandlerContext['core']['savedObjects']['client'],
+  request: KibanaRequest
+) {
   return {
-    mlSystem: ml.mlSystemProvider(mlClient, request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient, request),
-    mlClient,
+    mlSystem: ml.mlSystemProvider(request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    modules: ml.modulesProvider(request, savedObjectsClient),
   };
 }

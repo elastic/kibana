@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import {
   mockGlobalState,
@@ -15,6 +16,7 @@ import {
   TestProviders,
   kibanaObservable,
 } from '../../../../common/mock';
+import '../../../../common/mock/match_media';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';

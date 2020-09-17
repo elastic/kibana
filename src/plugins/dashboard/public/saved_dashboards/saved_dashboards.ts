@@ -35,5 +35,5 @@ interface Services {
  */
 export function createSavedDashboardLoader(services: Services) {
   const SavedDashboard = createSavedDashboardClass(services);
-  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
+  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient);
 }

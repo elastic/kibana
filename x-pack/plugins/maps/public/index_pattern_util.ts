@@ -30,11 +30,17 @@ export function getGeoTileAggNotSupportedReason(field: IFieldType): string | nul
 export async function getIndexPatternsFromIds(
   indexPatternIds: string[] = []
 ): Promise<IndexPattern[]> {
-  const promises: Array<Promise<IndexPattern>> = [];
-  indexPatternIds.forEach((id) => {
-    promises.push(getIndexPatternService().get(id));
+  const promises: IndexPattern[] = [];
+  indexPatternIds.forEach(async (indexPatternId) => {
+    try {
+      // @ts-ignore
+      promises.push(getIndexPatternService().get(indexPatternId));
+    } catch (error) {
+      // Unable to load index pattern, better to not throw error so map can render
+      // Error will be surfaced by layer since it too will be unable to locate the index pattern
+      return null;
+    }
   });
-
   return await Promise.all(promises);
 }
 
@@ -75,6 +81,16 @@ export function supportsGeoTileAgg(field?: IFieldType): boolean {
   );
 }
 
+export function supportsMvt(indexPattern: IndexPattern, geoFieldName: string): boolean {
+  const field = indexPattern.fields.getByName(geoFieldName);
+  return !!field && field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+}
+
+export function getMvtDisabledReason() {
+  return i18n.translate('xpack.maps.mbt.disabled', {
+    defaultMessage: 'Display as vector tiles is only supported for geo_shape field-types.',
+  });
+}
 // Returns filtered fields list containing only fields that exist in _source.
 export function getSourceFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {

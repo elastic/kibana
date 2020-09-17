@@ -35,9 +35,10 @@ export const connectorsMock: Connector[] = [
     name: 'My Connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping,
       },
+      isCaseOwned: true,
     },
     isPreconfigured: false,
   },
@@ -47,7 +48,7 @@ export const connectorsMock: Connector[] = [
     name: 'My Connector 2',
     config: {
       apiUrl: 'https://instance2.service-now.com',
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping: [
           {
             source: 'title',
@@ -66,6 +67,7 @@ export const connectorsMock: Connector[] = [
           },
         ],
       },
+      isCaseOwned: true,
     },
     isPreconfigured: false,
   },
@@ -75,7 +77,7 @@ export const connectorsMock: Connector[] = [
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping: [
           {
             source: 'title',

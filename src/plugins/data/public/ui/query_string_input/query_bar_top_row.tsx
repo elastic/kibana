@@ -69,6 +69,7 @@ interface Props {
 
 export function QueryBarTopRow(props: Props) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+  const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();
   const { uiSettings, notifications, storage, appName, docLinks } = kibana.services;
@@ -93,7 +94,7 @@ export function QueryBarTopRow(props: Props) {
   }
 
   function getDateRange() {
-    const defaultTimeSetting = uiSettings!.get('timepicker:timeDefaults');
+    const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
       from: props.dateRangeFrom || defaultTimeSetting.from,
       to: props.dateRangeTo || defaultTimeSetting.to,
@@ -105,6 +106,10 @@ export function QueryBarTopRow(props: Props) {
       query,
       dateRange: getDateRange(),
     });
+  }
+
+  function onChangeQueryInputFocus(isFocused: boolean) {
+    setIsQueryInputFocused(isFocused);
   }
 
   function onTimeChange({
@@ -182,6 +187,7 @@ export function QueryBarTopRow(props: Props) {
           query={props.query!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
+          onChangeQueryInputFocus={onChangeQueryInputFocus}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
@@ -268,8 +274,13 @@ export function QueryBarTopRow(props: Props) {
         };
       });
 
+    const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper', {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      'kbnQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
+    });
+
     return (
-      <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
+      <EuiFlexItem className={wrapperClasses}>
         <EuiSuperDatePicker
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
@@ -283,6 +294,7 @@ export function QueryBarTopRow(props: Props) {
           commonlyUsedRanges={commonlyUsedRanges}
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
+          className="kbnQueryBar__datePicker"
         />
       </EuiFlexItem>
     );

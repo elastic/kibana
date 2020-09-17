@@ -31,6 +31,7 @@ import {
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
+import { filterById } from './filter_by_id';
 
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
@@ -54,6 +55,13 @@ function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
 interface Options {
   /** absolute path to root of the repo/build */
   repoRoot: string;
+  /**
+   * absolute path to the root directory where output should be written to. This
+   * defaults to the repoRoot but can be customized to write output somewhere else.
+   *
+   * This is how we write output to the build directory in the Kibana build tasks.
+   */
+  outputRoot?: string;
   /** enable to run the optimizer in watch mode */
   watch?: boolean;
   /** the maximum number of workers that will be created */
@@ -77,6 +85,18 @@ interface Options {
   pluginScanDirs?: string[];
   /** absolute paths that should be added to the default scan dirs */
   extraPluginScanDirs?: string[];
+  /**
+   * array of comma separated patterns that will be matched against bundle ids.
+   * bundles will only be built if they match one of the specified patterns.
+   * `*` can exist anywhere in each pattern and will match anything, `!` inverts the pattern
+   *
+   * examples:
+   *  --filter foo --filter bar # [foo, bar], excludes [foobar]
+   *  --filter foo,bar # [foo, bar], excludes [foobar]
+   *  --filter foo* # [foo, foobar], excludes [bar]
+   *  --filter f*r # [foobar], excludes [foo, bar]
+   */
+  filter?: string[];
 
   /** flag that causes the core bundle to be built along with plugins */
   includeCoreBundle?: boolean;
@@ -94,8 +114,9 @@ interface Options {
   themes?: ThemeTag | '*' | ThemeTag[];
 }
 
-interface ParsedOptions {
+export interface ParsedOptions {
   repoRoot: string;
+  outputRoot: string;
   watch: boolean;
   maxWorkerCount: number;
   profileWebpack: boolean;
@@ -103,6 +124,7 @@ interface ParsedOptions {
   dist: boolean;
   pluginPaths: string[];
   pluginScanDirs: string[];
+  filters: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
@@ -118,10 +140,16 @@ export class OptimizerConfig {
     const inspectWorkers = !!options.inspectWorkers;
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
+    const filters = options.filter || [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
       throw new TypeError('repoRoot must be an absolute path');
+    }
+
+    const outputRoot = options.outputRoot ?? repoRoot;
+    if (!Path.isAbsolute(outputRoot)) {
+      throw new TypeError('outputRoot must be an absolute path');
     }
 
     /**
@@ -167,11 +195,13 @@ export class OptimizerConfig {
       watch,
       dist,
       repoRoot,
+      outputRoot,
       maxWorkerCount,
       profileWebpack,
       cache,
       pluginScanDirs,
       pluginPaths,
+      filters,
       inspectWorkers,
       includeCoreBundle,
       themeTags,
@@ -190,15 +220,15 @@ export class OptimizerConfig {
               publicDirNames: ['public', 'public/utils'],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
-              outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
+              outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
             }),
           ]
         : []),
-      ...getPluginBundles(plugins, options.repoRoot),
+      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
     ];
 
     return new OptimizerConfig(
-      bundles,
+      filterById(options.filters, bundles),
       options.cache,
       options.watch,
       options.inspectWorkers,

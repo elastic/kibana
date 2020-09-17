@@ -17,9 +17,9 @@
     }
   ],
   "paths": {
-    "/agent_configs": {
+    "/agent_policies": {
       "get": {
-        "summary": "Agent Config - List",
+        "summary": "Agent policy - List",
         "tags": [],
         "responses": {
           "200": {
@@ -32,7 +32,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/AgentConfig"
+                        "$ref": "#/components/schemas/AgentPolicy"
                       }
                     },
                     "total": {
@@ -43,12 +43,9 @@
                     },
                     "perPage": {
                       "type": "number"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["items", "total", "page", "perPage", "success"]
+                  "required": ["items", "total", "page", "perPage"]
                 },
                 "examples": {
                   "success": {
@@ -56,11 +53,11 @@
                       "items": [
                         {
                           "id": "82da1fc0-8fbf-11ea-b2ce-01c4a6127154",
-                          "name": "Default config",
+                          "name": "Default policy",
                           "namespace": "default",
-                          "description": "Default agent configuration created by Kibana",
+                          "description": "Default agent policy created by Kibana",
                           "status": "active",
-                          "packageConfigs": ["8a5679b0-8fbf-11ea-b2ce-01c4a6127154"],
+                          "packagePolicies": ["8a5679b0-8fbf-11ea-b2ce-01c4a6127154"],
                           "is_default": true,
                           "monitoring_enabled": ["logs", "metrics"],
                           "revision": 2,
@@ -71,8 +68,7 @@
                       ],
                       "total": 1,
                       "page": 1,
-                      "perPage": 50,
-                      "success": true
+                      "perPage": 50
                     }
                   }
                 }
@@ -80,7 +76,7 @@
             }
           }
         },
-        "operationId": "agent-config-list",
+        "operationId": "agent-policy-list",
         "parameters": [
           {
             "$ref": "#/components/parameters/pageSizeParam"
@@ -95,7 +91,7 @@
         "description": ""
       },
       "post": {
-        "summary": "Agent Config - Create",
+        "summary": "Agent policy - Create",
         "tags": [],
         "responses": {
           "200": {
@@ -106,10 +102,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/AgentConfig"
-                    },
-                    "success": {
-                      "type": "boolean"
+                      "$ref": "#/components/schemas/AgentPolicy"
                     }
                   }
                 }
@@ -117,12 +110,12 @@
             }
           }
         },
-        "operationId": "post-agent_configs",
+        "operationId": "post-agent-policy",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewAgentConfig"
+                "$ref": "#/components/schemas/NewAgentPolicy"
               }
             }
           }
@@ -135,19 +128,19 @@
         ]
       }
     },
-    "/agent_configs/{agentConfigId}": {
+    "/agent_policies/{agentPolicyId}": {
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "agentConfigId",
+          "name": "agentPolicyId",
           "in": "path",
           "required": true
         }
       ],
       "get": {
-        "summary": "Agent Config - Info",
+        "summary": "Agent policy - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -158,24 +151,21 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/AgentConfig"
-                    },
-                    "success": {
-                      "type": "boolean"
+                      "$ref": "#/components/schemas/AgentPolicy"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 },
                 "examples": {
                   "success": {
                     "value": {
                       "item": {
                         "id": "82da1fc0-8fbf-11ea-b2ce-01c4a6127154",
-                        "name": "Default config",
+                        "name": "Default policy",
                         "namespace": "default",
-                        "description": "Default agent configuration created by Kibana",
+                        "description": "Default agent policy created by Kibana",
                         "status": "active",
-                        "packageConfigs": [
+                        "packagePolicies": [
                           {
                             "id": "8a5679b0-8fbf-11ea-b2ce-01c4a6127154",
                             "name": "system-1",
@@ -186,7 +176,7 @@
                               "version": "0.0.3"
                             },
                             "enabled": true,
-                            "config_id": "82da1fc0-8fbf-11ea-b2ce-01c4a6127154",
+                            "policy_id": "82da1fc0-8fbf-11ea-b2ce-01c4a6127154",
                             "output_id": "08adc51c-69f3-4294-80e2-24527c6ff73d",
                             "inputs": [
                               {
@@ -707,8 +697,7 @@
                         "revision": 2,
                         "updated_on": "2020-05-06T17:32:21.905Z",
                         "updated_by": "system"
-                      },
-                      "success": true
+                      }
                     }
                   }
                 }
@@ -716,12 +705,12 @@
             }
           }
         },
-        "operationId": "agent-config-info",
-        "description": "Get one agent config",
+        "operationId": "agent-policy-info",
+        "description": "Get one agent policy",
         "parameters": []
       },
       "put": {
-        "summary": "Agent Config - Update",
+        "summary": "Agent policy - Update",
         "tags": [],
         "responses": {
           "200": {
@@ -732,13 +721,10 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/AgentConfig"
-                    },
-                    "success": {
-                      "type": "boolean"
+                      "$ref": "#/components/schemas/AgentPolicy"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 },
                 "examples": {
                   "example-1": {
@@ -750,9 +736,8 @@
                         "namespace": "UPDATED namespace",
                         "updated_on": "Fri Feb 28 2020 16:22:31 GMT-0500 (Eastern Standard Time)",
                         "updated_by": "elastic",
-                        "packageConfigs": []
-                      },
-                      "success": true
+                        "packagePolicies": []
+                      }
                     }
                   }
                 }
@@ -760,12 +745,12 @@
             }
           }
         },
-        "operationId": "put-agent_configs-agentConfigId",
+        "operationId": "put-agent-policy-agentPolicyId",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewAgentConfig"
+                "$ref": "#/components/schemas/NewAgentPolicy"
               },
               "examples": {
                 "example-1": {
@@ -786,20 +771,20 @@
         ]
       }
     },
-    "/agent_configs/{agentConfigId}/copy": {
+    "/agent_policies/{agentPolicyId}/copy": {
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "agentConfigId",
+          "name": "agentPolicyId",
           "in": "path",
           "required": true
         }
       ],
       "post": {
-        "summary": "Agent config - copy one config",
-        "operationId": "agent-config-copy",
+        "summary": "Agent policy - copy one policy",
+        "operationId": "agent-policy-copy",
         "responses": {
           "200": {
             "description": "OK",
@@ -809,13 +794,10 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/AgentConfig"
-                    },
-                    "success": {
-                      "type": "boolean"
+                      "$ref": "#/components/schemas/AgentPolicy"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 }
               }
             }
@@ -841,13 +823,13 @@
           },
           "description": ""
         },
-        "description": "Copies one agent config"
+        "description": "Copies one agent policy"
       }
     },
-    "/agent_configs/delete": {
+    "/agent_policies/delete": {
       "post": {
-        "summary": "Agent Config - Delete",
-        "operationId": "post-agent_config-delete",
+        "summary": "Agent policy - Delete",
+        "operationId": "post-agent-policy-delete",
         "responses": {
           "200": {
             "description": "OK",
@@ -896,7 +878,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "agentConfigIds": {
+                  "agentPolicyIds": {
                     "type": "array",
                     "items": {
                       "type": "string"
@@ -907,7 +889,7 @@
               "examples": {
                 "example-1": {
                   "value": {
-                    "agentConfigIds": ["df7d2540-5a47-11ea-80da-89b5a66da347"]
+                    "agentPolicyIds": ["df7d2540-5a47-11ea-80da-89b5a66da347"]
                   }
                 }
               }
@@ -922,9 +904,9 @@
       },
       "parameters": []
     },
-    "/packageConfigs": {
+    "/package_policies": {
       "get": {
-        "summary": "PackageConfigs - List",
+        "summary": "PackagePolicies - List",
         "tags": [],
         "responses": {
           "200": {
@@ -937,7 +919,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/PackageConfig"
+                        "$ref": "#/components/schemas/PackagePolicy"
                       }
                     },
                     "total": {
@@ -948,12 +930,9 @@
                     },
                     "perPage": {
                       "type": "number"
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["items", "success"]
+                  "required": ["items"]
                 },
                 "examples": {
                   "example-1": {
@@ -1157,8 +1136,7 @@
                       ],
                       "total": 6,
                       "page": 1,
-                      "perPage": 20,
-                      "success": true
+                      "perPage": 20
                     }
                   }
                 }
@@ -1166,14 +1144,14 @@
             }
           }
         },
-        "operationId": "get-packageConfigs",
+        "operationId": "get-packagePolicies",
         "security": [],
         "parameters": []
       },
       "parameters": [],
       "post": {
-        "summary": "PackageConfigs - Create",
-        "operationId": "post-packageConfigs",
+        "summary": "PackagePolicies - Create",
+        "operationId": "post-packagePolicies",
         "responses": {
           "200": {
             "description": "OK"
@@ -1183,7 +1161,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPackageConfig"
+                "$ref": "#/components/schemas/NewPackagePolicy"
               },
               "examples": {
                 "example-1": {
@@ -1237,9 +1215,9 @@
         ]
       }
     },
-    "/packageConfigs/{packageConfigId}": {
+    "/package_policies/{packagePolicyId}": {
       "get": {
-        "summary": "PackageConfigs - Info",
+        "summary": "PackagePolicies - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -1250,33 +1228,30 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/PackageConfig"
-                    },
-                    "success": {
-                      "type": "boolean"
+                      "$ref": "#/components/schemas/PackagePolicy"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 }
               }
             }
           }
         },
-        "operationId": "get-packageConfigs-packageConfigId"
+        "operationId": "get-packagePolicies-packagePolicyId"
       },
       "parameters": [
         {
           "schema": {
             "type": "string"
           },
-          "name": "packageConfigId",
+          "name": "packagePolicyId",
           "in": "path",
           "required": true
         }
       ],
       "put": {
-        "summary": "PackageConfigs - Update",
-        "operationId": "put-packageConfigs-packageConfigId",
+        "summary": "PackagePolicies - Update",
+        "operationId": "put-packagePolicies-packagePolicyId",
         "responses": {
           "200": {
             "description": "OK",
@@ -1286,7 +1261,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/components/schemas/PackageConfig"
+                      "$ref": "#/components/schemas/PackagePolicy"
                     },
                     "sucess": {
                       "type": "boolean"
@@ -1415,9 +1390,6 @@
                       "properties": {
                         "response": {
                           "$ref": "#/components/schemas/PackageInfo"
-                        },
-                        "success": {
-                          "type": "boolean"
                         }
                       }
                     },
@@ -1453,11 +1425,13 @@
                         },
                         "icons": [
                           {
-                            "src": "/package/coredns-1.0.1/img/icon.png",
+                            "path": "/package/coredns-1.0.1/img/icon.png",
+                            "src": "/img/icon.png",
                             "size": "1800x1800"
                           },
                           {
-                            "src": "/package/coredns-1.0.1/img/icon.svg",
+                            "path": "/package/coredns-1.0.1/img/icon.svg",
+                            "src": "/img/icon.svg",
                             "size": "255x144",
                             "type": "image/svg+xml"
                           }
@@ -1709,8 +1683,7 @@
                           },
                           "references": []
                         }
-                      },
-                      "success": true
+                      }
                     }
                   },
                   "required-package": {
@@ -1733,7 +1706,8 @@
                         },
                         "icons": [
                           {
-                            "src": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
+                            "path": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
+                            "src": "/img/logo-endpoint-64-color.svg",
                             "size": "16x16",
                             "type": "image/svg+xml"
                           }
@@ -1824,10 +1798,10 @@
                             "path": "telemetry"
                           }
                         ],
-                        "packageConfigs": [
+                        "packagePolicies": [
                           {
                             "name": "endpoint",
-                            "title": "Endpoint package config",
+                            "title": "Endpoint package policy",
                             "description": "Interact with the endpoint.",
                             "inputs": null,
                             "multiple": false
@@ -1899,8 +1873,7 @@
                           },
                           "references": []
                         }
-                      },
-                      "success": true
+                      }
                     }
                   }
                 }
@@ -1950,12 +1923,9 @@
                         },
                         "required": ["id", "type"]
                       }
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["response", "success"]
+                  "required": ["response"]
                 }
               }
             }
@@ -1994,12 +1964,9 @@
                         },
                         "required": ["id", "type"]
                       }
-                    },
-                    "success": {
-                      "type": "boolean"
                     }
                   },
-                  "required": ["response", "success"]
+                  "required": ["response"]
                 }
               }
             }
@@ -2037,7 +2004,8 @@
                           "download": "/epr/aws/aws-0.0.3.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/aws/0.0.3/img/logo_aws.svg",
+                              "path": "/package/aws/0.0.3/img/logo_aws.svg",
+                              "src": "/img/logo_aws.svg",
                               "title": "logo aws",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2055,7 +2023,8 @@
                           "download": "/epr/endpoint/endpoint-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/endpoint/0.1.0/img/logo-endpoint-64-color.svg",
+                              "path": "/package/endpoint/0.1.0/img/logo-endpoint-64-color.svg",
+                              "src": "/img/logo-endpoint-64-color.svg",
                               "size": "16x16",
                               "type": "image/svg+xml"
                             }
@@ -2119,11 +2088,12 @@
                           }
                         },
                         {
-                          "description": "The log package should be used to create package configs for all type of logs for which an package doesn't exist yet.\n",
+                          "description": "The log package should be used to create package policies for all type of logs for which an package doesn't exist yet.\n",
                           "download": "/epr/log/log-0.9.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/log/0.9.0/img/icon.svg",
+                              "path": "/package/log/0.9.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2139,7 +2109,8 @@
                           "download": "/epr/longdocs/longdocs-1.0.4.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/longdocs/1.0.4/img/icon.svg",
+                              "path": "/package/longdocs/1.0.4/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2155,7 +2126,8 @@
                           "download": "/epr/metricsonly/metricsonly-2.0.1.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/metricsonly/2.0.1/img/icon.svg",
+                              "path": "/package/metricsonly/2.0.1/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2171,7 +2143,8 @@
                           "download": "/epr/multiversion/multiversion-1.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/multiversion/1.1.0/img/icon.svg",
+                              "path": "/package/multiversion/1.1.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "type": "image/svg+xml"
                             }
                           ],
@@ -2187,7 +2160,8 @@
                           "download": "/epr/mysql/mysql-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/mysql/0.1.0/img/logo_mysql.svg",
+                              "path": "/package/mysql/0.1.0/img/logo_mysql.svg",
+                              "src": "/img/logo_mysql.svg",
                               "title": "logo mysql",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2205,7 +2179,8 @@
                           "download": "/epr/nginx/nginx-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/nginx/0.1.0/img/logo_nginx.svg",
+                              "path": "/package/nginx/0.1.0/img/logo_nginx.svg",
+                              "src": "/img/logo_nginx.svg",
                               "title": "logo nginx",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2223,7 +2198,8 @@
                           "download": "/epr/redis/redis-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/redis/0.1.0/img/logo_redis.svg",
+                              "path": "/package/redis/0.1.0/img/logo_redis.svg",
+                              "src": "/img/logo_redis.svg",
                               "title": "logo redis",
                               "size": "32x32",
                               "type": "image/svg+xml"
@@ -2241,7 +2217,8 @@
                           "download": "/epr/reference/reference-1.0.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/reference/1.0.0/img/icon.svg",
+                              "path": "/package/reference/1.0.0/img/icon.svg",
+                              "src": "/img/icon.svg",
                               "size": "32x32",
                               "type": "image/svg+xml"
                             }
@@ -2258,7 +2235,8 @@
                           "download": "/epr/system/system-0.1.0.tar.gz",
                           "icons": [
                             {
-                              "src": "/package/system/0.1.0/img/system.svg",
+                              "path": "/package/system/0.1.0/img/system.svg",
+                              "src": "/img/system.svg",
                               "title": "system",
                               "size": "1000x1000",
                               "type": "image/svg+xml"
@@ -2678,8 +2656,7 @@
                           "version": "1.0.0",
                           "status": "not_installed"
                         }
-                      ],
-                      "success": true
+                      ]
                     }
                   }
                 }
@@ -2743,9 +2720,6 @@
                         "type": "object"
                       }
                     },
-                    "success": {
-                      "type": "boolean"
-                    },
                     "total": {
                       "type": "number"
                     },
@@ -2756,7 +2730,7 @@
                       "type": "number"
                     }
                   },
-                  "required": ["list", "success", "total", "page", "perPage"]
+                  "required": ["list", "total", "page", "perPage"]
                 },
                 "examples": {
                   "example-1": {
@@ -2765,7 +2739,7 @@
                         {
                           "id": "205661d0-5e53-11ea-ad31-4f31c06bd9a4",
                           "active": true,
-                          "config_id": "ae556400-5e39-11ea-8b49-f9747e466f7b",
+                          "policy_id": "ae556400-5e39-11ea-8b49-f9747e466f7b",
                           "type": "PERMANENT",
                           "enrolled_at": "2020-03-04T20:02:50.605Z",
                           "user_provided_metadata": {
@@ -2780,7 +2754,7 @@
                           },
                           "actions": [
                             {
-                              "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"packageConfigs\":[]}}",
+                              "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"packagePolicies\":[]}}",
                               "created_at": "2020-03-04T20:02:56.149Z",
                               "id": "6a95c00a-d76d-4931-97c3-0bf935272d7d",
                               "type": "CONFIG_CHANGE"
@@ -2793,7 +2767,6 @@
                           "status": "online"
                         }
                       ],
-                      "success": true,
                       "total": 1,
                       "page": 1,
                       "perPage": 20
@@ -2836,12 +2809,9 @@
                   "properties": {
                     "item": {
                       "type": "object"
-                    },
-                    "success": {
-                      "type": "string"
                     }
                   },
-                  "required": ["item", "success"]
+                  "required": ["item"]
                 }
               }
             }
@@ -2916,9 +2886,6 @@
                       "type": "string",
                       "enum": ["checkin"]
                     },
-                    "success": {
-                      "type": "string"
-                    },
                     "actions": {
                       "type": "array",
                       "items": {
@@ -2950,7 +2917,6 @@
                   "success": {
                     "value": {
                       "action": "checkin",
-                      "success": true,
                       "actions": [
                         {
                           "agent_id": "a6f14bd2-1a2a-481c-9212-9494d064ffdf",
@@ -2965,7 +2931,7 @@
                                   "api_key": "Z-XkgHIBvwtjzIKtSCTh:AejRqdKpQx6z-6dqSI1LHg"
                                 }
                               },
-                              "packageConfigs": [
+                              "packagePolicies": [
                                 {
                                   "id": "33d6bd70-a5e0-11ea-a587-5f886c8a849f",
                                   "name": "system-1",
@@ -3346,21 +3312,17 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
                     "action": {
                       "type": "string",
                       "enum": ["acks"]
                     }
                   },
-                  "required": ["success", "action"]
+                  "required": ["action"]
                 },
                 "examples": {
                   "success": {
                     "value": {
-                      "action": "checkin",
-                      "success": true
+                      "action": "checkin"
                     }
                   }
                 }
@@ -3417,9 +3379,6 @@
                     "action": {
                       "type": "string"
                     },
-                    "success": {
-                      "type": "boolean"
-                    },
                     "item": {
                       "$ref": "#/components/schemas/Agent"
                     }
@@ -3429,11 +3388,10 @@
                   "success": {
                     "value": {
                       "action": "created",
-                      "success": true,
                       "item": {
                         "id": "8086fb1a-72ca-4a67-8533-09300c1639fa",
                         "active": true,
-                        "config_id": "2fe89350-a5e0-11ea-a587-5f886c8a849f",
+                        "policy_id": "2fe89350-a5e0-11ea-a587-5f886c8a849f",
                         "type": "PERMANENT",
                         "enrolled_at": "2020-06-04T13:03:57.856Z",
                         "user_provided_metadata": {
@@ -3562,22 +3520,22 @@
         }
       }
     },
-    "/fleet/config/{configId}/agent-status": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "configId",
-          "in": "path",
-          "required": true
-        }
-      ],
+    "/fleet/agent-status": {
       "get": {
-        "summary": "Fleet - Agent - Status for config",
+        "summary": "Fleet - Agent - Status for policy",
         "tags": [],
         "responses": {},
-        "operationId": "get-fleet-config-configId-agent-status"
+        "operationId": "get-fleet-agent-status",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "policyId",
+            "in": "query",
+            "required": false
+          }
+        ]
       }
     },
     "/fleet/enrollment-api-keys": {
@@ -3702,10 +3660,10 @@
   },
   "components": {
     "schemas": {
-      "AgentConfig": {
+      "AgentPolicy": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/NewAgentConfig"
+            "$ref": "#/components/schemas/NewAgentPolicy"
           },
           {
             "type": "object",
@@ -3717,7 +3675,7 @@
                 "type": "string",
                 "enum": ["active", "inactive"]
               },
-              "packageConfigs": {
+              "packagePolicies": {
                 "oneOf": [
                   {
                     "items": {
@@ -3726,7 +3684,7 @@
                   },
                   {
                     "items": {
-                      "$ref": "#/components/schemas/PackageConfig"
+                      "$ref": "#/components/schemas/PackagePolicy"
                     }
                   }
                 ],
@@ -3750,8 +3708,8 @@
           }
         ]
       },
-      "PackageConfig": {
-        "title": "PackageConfig",
+      "PackagePolicy": {
+        "title": "PackagePolicy",
         "allOf": [
           {
             "type": "object",
@@ -3770,15 +3728,15 @@
             "required": ["id", "revision"]
           },
           {
-            "$ref": "#/components/schemas/NewPackageConfig"
+            "$ref": "#/components/schemas/NewPackagePolicy"
           }
         ],
         "x-examples": {
           "example-1": {}
         }
       },
-      "NewAgentConfig": {
-        "title": "NewAgentConfig",
+      "NewAgentPolicy": {
+        "title": "NewAgentPolicy",
         "type": "object",
         "properties": {
           "name": {
@@ -3792,8 +3750,8 @@
           }
         }
       },
-      "NewPackageConfig": {
-        "title": "NewPackageConfig",
+      "NewPackagePolicy": {
+        "title": "NewPackagePolicy",
         "type": "object",
         "x-examples": {
           "example-1": {
@@ -3892,7 +3850,7 @@
               "required": ["type", "enabled", "streams"]
             }
           },
-          "config_id": {
+          "policy_id": {
             "type": "string"
           },
           "name": {
@@ -3902,7 +3860,7 @@
             "type": "string"
           }
         },
-        "required": ["output_id", "inputs", "config_id", "name"]
+        "required": ["output_id", "inputs", "policy_id", "name"]
       },
       "PackageInfo": {
         "title": "PackageInfo",
@@ -3969,11 +3927,20 @@
                 "src": {
                   "type": "string"
                 },
+                "path": {
+                  "type": "string"
+                },
                 "title": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "string"
+                },
+                "type": {
                   "type": "string"
                 }
               },
-              "required": ["src"]
+              "required": ["src", "path"]
             }
           },
           "icons": {
@@ -4140,14 +4107,11 @@
           "default_api_key_id": {
             "type": "string"
           },
-          "config_id": {
+          "policy_id": {
             "type": "string"
           },
-          "config_revision": {
+          "policy_revision": {
             "type": ["number", "null"]
-          },
-          "config_newest_revision": {
-            "type": "number"
           },
           "last_checkin": {
             "type": "string"
@@ -4206,6 +4170,7 @@
               "FAILED",
               "STOPPING",
               "STOPPED",
+              "DEGRADED",
               "DATA_DUMP",
               "ACKNOWLEDGED",
               "UNKNOWN"
@@ -4223,7 +4188,7 @@
           "agent_id": {
             "type": "string"
           },
-          "config_id": {
+          "policy_id": {
             "type": "string"
           },
           "stream_id": {

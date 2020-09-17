@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { PluginDiscoveryErrorType } from './plugin_discovery_error';
-
 import { mockReadFile } from './plugin_manifest_parser.test.mocks';
+
+import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 
 import { resolve } from 'path';
@@ -114,6 +114,16 @@ test('logs warning if pluginId is not in camelCase format', async () => {
       ],
     ]
   `);
+});
+
+test('does not log pluginId format warning in dist mode', async () => {
+  mockReadFile.mockImplementation((path, cb) => {
+    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'kibana', server: true })));
+  });
+
+  expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
+  await parseManifest(pluginPath, { ...packageInfo, dist: true }, logger);
+  expect(loggingSystemMock.collect(logger).warn.length).toBe(0);
 });
 
 test('return error when plugin version is missing', async () => {
@@ -302,6 +312,7 @@ test('set defaults for all missing optional fields', async () => {
     kibanaVersion: '7.0.0',
     optionalPlugins: [],
     requiredPlugins: [],
+    requiredBundles: [],
     server: true,
     ui: false,
   });
@@ -331,6 +342,7 @@ test('return all set optional fields as they are in manifest', async () => {
     version: 'some-version',
     kibanaVersion: '7.0.0',
     optionalPlugins: ['some-optional-plugin'],
+    requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
     server: false,
     ui: true,
@@ -361,6 +373,7 @@ test('return manifest when plugin expected Kibana version matches actual version
     kibanaVersion: '7.0.0-alpha2',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
+    requiredBundles: [],
     server: true,
     ui: false,
   });
@@ -390,6 +403,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
     kibanaVersion: 'kibana',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
+    requiredBundles: [],
     server: true,
     ui: true,
   });

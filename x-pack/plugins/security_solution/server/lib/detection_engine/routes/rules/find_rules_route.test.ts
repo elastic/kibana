@@ -13,19 +13,10 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
-import { unSetFeatureFlagsForTestsOnly, setFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();

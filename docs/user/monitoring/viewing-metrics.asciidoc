@@ -1,6 +1,6 @@
 [role="xpack"]
 [[monitoring-data]]
-=== View monitoring data in {kib}
+= View monitoring data in {kib}
 ++++
 <titleabbrev>View monitoring data</titleabbrev>
 ++++

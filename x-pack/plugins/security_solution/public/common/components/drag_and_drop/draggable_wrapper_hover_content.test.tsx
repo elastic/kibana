@@ -7,18 +7,19 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { useWithSource } from '../../containers/source';
 import { mockBrowserFields } from '../../containers/source/mock';
+import '../../mock/match_media';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 import {
   ManageGlobalTimeline,
-  timelineDefaults,
+  getTimelineDefaults,
 } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 
@@ -59,7 +60,7 @@ jest.mock('../../../timelines/components/manage_timeline', () => {
   };
 });
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 const timelineId = TimelineId.active;
 const field = 'process.name';
 const value = 'nice';
@@ -152,10 +153,7 @@ describe('DraggableWrapperHoverContent', () => {
         beforeEach(() => {
           onFilterAdded = jest.fn();
           const manageTimelineForTesting = {
-            [timelineId]: {
-              ...timelineDefaults,
-              id: timelineId,
-            },
+            [timelineId]: getTimelineDefaults(timelineId),
           };
 
           wrapper = mount(
@@ -249,8 +247,7 @@ describe('DraggableWrapperHoverContent', () => {
 
           const manageTimelineForTesting = {
             [timelineId]: {
-              ...timelineDefaults,
-              id: timelineId,
+              ...getTimelineDefaults(timelineId),
               filterManager,
             },
           };
@@ -439,14 +436,14 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
-    test(`it renders the 'Show top field' button when showTopN is false and a whitelisted signal field is provided`, async () => {
-      const whitelistedField = 'signal.rule.name';
+    test(`it renders the 'Show top field' button when showTopN is false and a allowlisted signal field is provided`, async () => {
+      const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
             {...{
               ...defaultProps,
-              field: whitelistedField,
+              field: allowlistedField,
             }}
           />
         </TestProviders>
@@ -476,13 +473,13 @@ describe('DraggableWrapperHoverContent', () => {
     });
 
     test(`it should invokes goGetTimelineId when user is over the 'Show top field' button`, () => {
-      const whitelistedField = 'signal.rule.name';
+      const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
             {...{
               ...defaultProps,
-              field: whitelistedField,
+              field: allowlistedField,
               timelineId: undefined,
             }}
           />
@@ -494,13 +491,13 @@ describe('DraggableWrapperHoverContent', () => {
     });
 
     test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {
-      const whitelistedField = 'signal.rule.name';
+      const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
             {...{
               ...defaultProps,
-              field: whitelistedField,
+              field: allowlistedField,
             }}
           />
         </TestProviders>
@@ -515,13 +512,13 @@ describe('DraggableWrapperHoverContent', () => {
     });
 
     test(`it does NOT render the Top N histogram when when showTopN is false`, async () => {
-      const whitelistedField = 'signal.rule.name';
+      const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
             {...{
               ...defaultProps,
-              field: whitelistedField,
+              field: allowlistedField,
             }}
           />
         </TestProviders>
@@ -535,13 +532,13 @@ describe('DraggableWrapperHoverContent', () => {
     });
 
     test(`it does NOT render the 'Show top field' button when showTopN is true`, async () => {
-      const whitelistedField = 'signal.rule.name';
+      const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
             {...{
               ...defaultProps,
-              field: whitelistedField,
+              field: allowlistedField,
               showTopN: true,
             }}
           />
@@ -554,13 +551,13 @@ describe('DraggableWrapperHoverContent', () => {
     });
 
     test(`it renders the Top N histogram when when showTopN is true`, async () => {
-      const whitelistedField = 'signal.rule.name';
+      const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
             {...{
               ...defaultProps,
-              field: whitelistedField,
+              field: allowlistedField,
               showTopN: true,
             }}
           />

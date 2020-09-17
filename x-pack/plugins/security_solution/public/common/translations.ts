@@ -7,24 +7,71 @@
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_TITLE = i18n.translate('xpack.securitySolution.pages.common.emptyTitle', {
-  defaultMessage: 'Welcome to Security Solution. Let’s get you started.',
+  defaultMessage: 'Welcome to Elastic Security. Let’s get you started.',
 });
 
-export const EMPTY_MESSAGE = i18n.translate('xpack.securitySolution.pages.common.emptyMessage', {
-  defaultMessage:
-    'To begin using security information and event management (Security Solution), you’ll need to add security solution related data, in Elastic Common Schema (ECS) format, to the Elastic Stack. An easy way to get started is by installing and configuring our data shippers, called Beats. Let’s do that now!',
-});
+export const EMPTY_ACTION_ELASTIC_AGENT = i18n.translate(
+  'xpack.securitySolution.pages.common.emptyActionElasticAgent',
+  {
+    defaultMessage: 'Add data with Elastic Agent',
+  }
+);
 
-export const EMPTY_ACTION_PRIMARY = i18n.translate(
-  'xpack.securitySolution.pages.common.emptyActionPrimary',
+export const EMPTY_ACTION_ELASTIC_AGENT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.pages.common.emptyActionElasticAgentDescription',
+  {
+    defaultMessage:
+      'The Elastic Agent provides a simple, unified way to add monitoring to your hosts.',
+  }
+);
+
+export const EMPTY_ACTION_BEATS = i18n.translate(
+  'xpack.securitySolution.pages.common.emptyActionBeats',
   {
     defaultMessage: 'Add data with Beats',
+  }
+);
+
+export const EMPTY_ACTION_BEATS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.pages.common.emptyActionBeatsDescription',
+  {
+    defaultMessage:
+      'Lightweight Beats can send data from hundreds or thousands of machines and systems',
   }
 );
 
 export const EMPTY_ACTION_SECONDARY = i18n.translate(
   'xpack.securitySolution.pages.common.emptyActionSecondary',
   {
-    defaultMessage: 'View getting started guide',
+    defaultMessage: 'getting started guide.',
   }
 );
+
+export const EMPTY_ACTION_ENDPOINT = i18n.translate(
+  'xpack.securitySolution.pages.common.emptyActionEndpoint',
+  {
+    defaultMessage: 'Add Elastic Endpoint Security',
+  }
+);
+
+export const EMPTY_ACTION_ENDPOINT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.pages.common.emptyActionEndpointDescription',
+  {
+    defaultMessage:
+      'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+  }
+);
+
+export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
+  i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailed', {
+    values: { conflicts },
+    defaultMessage:
+      'Failed to update { conflicts } {conflicts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const UPDATE_ALERT_STATUS_FAILED_DETAILED = (updated: number, conflicts: number) =>
+  i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailedDetailed', {
+    values: { updated, conflicts },
+    defaultMessage: `{ updated } {updated, plural, =1 {alert was} other {alerts were}} updated successfully, but { conflicts } failed to update
+         because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
+  });

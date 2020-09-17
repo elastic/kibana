@@ -28,6 +28,7 @@ export const deleteListItem = async ({
     await callCluster('delete', {
       id,
       index: listItemIndex,
+      refresh: 'wait_for',
     });
   }
   return listItem;

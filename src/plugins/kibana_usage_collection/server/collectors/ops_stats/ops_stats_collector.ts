@@ -18,13 +18,13 @@
  */
 
 import { Observable } from 'rxjs';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import moment from 'moment';
 import { OpsMetrics } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
 
-interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times'> {
+interface OpsStatsMetrics extends Omit<OpsMetrics, 'response_times' | 'collected_at'> {
   timestamp: string;
   response_times: {
     average: number;
@@ -43,16 +43,18 @@ export function getOpsStatsCollector(
   metrics$.subscribe((_metrics) => {
     const metrics = cloneDeep(_metrics);
     // Ensure we only include the same data that Metricbeat collection would get
+    // @ts-expect-error
     delete metrics.process.pid;
     const responseTimes = {
       average: metrics.response_times.avg_in_millis,
       max: metrics.response_times.max_in_millis,
     };
+    // @ts-expect-error
     delete metrics.requests.statusCodes;
     lastMetrics = {
-      ...metrics,
+      ...omit(metrics, ['collected_at']),
       response_times: responseTimes,
-      timestamp: moment.utc().toISOString(),
+      timestamp: moment.utc(metrics.collected_at).toISOString(),
     };
   });
 

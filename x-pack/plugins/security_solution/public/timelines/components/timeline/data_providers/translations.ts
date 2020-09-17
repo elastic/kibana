@@ -72,6 +72,20 @@ export const FILTER_FOR_FIELD_PRESENT = i18n.translate(
   }
 );
 
+export const CONVERT_TO_FIELD = i18n.translate(
+  'xpack.securitySolution.dataProviders.convertToFieldLabel',
+  {
+    defaultMessage: 'Convert to field',
+  }
+);
+
+export const CONVERT_TO_TEMPLATE_FIELD = i18n.translate(
+  'xpack.securitySolution.dataProviders.convertToTemplateFieldLabel',
+  {
+    defaultMessage: 'Convert to template field',
+  }
+);
+
 export const HIGHLIGHTED = i18n.translate('xpack.securitySolution.dataProviders.highlighted', {
   defaultMessage: 'highlighted',
 });
@@ -146,5 +160,26 @@ export const VALUE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.dataProviders.valueAriaLabel',
   {
     defaultMessage: 'value',
+  }
+);
+
+export const ADD_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.dataProviders.addFieldPopoverButtonLabel',
+  {
+    defaultMessage: 'Add field',
+  }
+);
+
+export const ADD_TEMPLATE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.dataProviders.addTemplateFieldPopoverButtonLabel',
+  {
+    defaultMessage: 'Add template field',
+  }
+);
+
+export const TEMPLATE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.dataProviders.templateFieldLabel',
+  {
+    defaultMessage: 'Template field',
   }
 );

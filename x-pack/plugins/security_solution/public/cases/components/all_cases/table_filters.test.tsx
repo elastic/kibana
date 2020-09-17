@@ -90,7 +90,7 @@ describe('CasesTableFilters ', () => {
     wrapper
       .find(`[data-test-subj="search-cases"]`)
       .last()
-      .simulate('keyup', { keyCode: 13, target: { value: 'My search' } });
+      .simulate('keyup', { key: 'Enter', target: { value: 'My search' } });
     expect(onFilterChanged).toBeCalledWith({ search: 'My search' });
   });
   it('should call onFilterChange when status toggled', () => {

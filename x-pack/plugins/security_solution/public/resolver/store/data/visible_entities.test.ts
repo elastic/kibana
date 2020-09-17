@@ -9,9 +9,10 @@ import { ResolverAction } from '../actions';
 import { resolverReducer } from '../reducer';
 import { ResolverState } from '../../types';
 import { LegacyEndpointEvent, ResolverEvent } from '../../../../common/endpoint/types';
-import { visibleProcessNodePositionsAndEdgeLineSegments } from '../selectors';
+import { visibleNodesAndEdgeLines } from '../selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
+import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
 describe('resolver visible entities', () => {
   let processA: LegacyEndpointEvent;
@@ -112,22 +113,18 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ events })!, databaseDocumentID: '' },
+        payload: { result: mockResolverTree({ events })!, parameters: mockTreeFetcherParameters() },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
       store.dispatch(cameraAction);
     });
     it('the visibleProcessNodePositions list should only include 2 nodes', () => {
-      const { processNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
-        store.getState()
-      )(0);
+      const { processNodePositions } = visibleNodesAndEdgeLines(store.getState())(0);
       expect([...processNodePositions.keys()].length).toEqual(2);
     });
     it('the visibleEdgeLineSegments list should only include one edge line', () => {
-      const { connectingEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
-        store.getState()
-      )(0);
+      const { connectingEdgeLineSegments } = visibleNodesAndEdgeLines(store.getState())(0);
       expect(connectingEdgeLineSegments.length).toEqual(1);
     });
   });
@@ -144,22 +141,18 @@ describe('resolver visible entities', () => {
       ];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ events })!, databaseDocumentID: '' },
+        payload: { result: mockResolverTree({ events })!, parameters: mockTreeFetcherParameters() },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [2000, 2000] };
       store.dispatch(action);
       store.dispatch(cameraAction);
     });
     it('the visibleProcessNodePositions list should include all process nodes', () => {
-      const { processNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
-        store.getState()
-      )(0);
+      const { processNodePositions } = visibleNodesAndEdgeLines(store.getState())(0);
       expect([...processNodePositions.keys()].length).toEqual(5);
     });
     it('the visibleEdgeLineSegments list include all lines', () => {
-      const { connectingEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
-        store.getState()
-      )(0);
+      const { connectingEdgeLineSegments } = visibleNodesAndEdgeLines(store.getState())(0);
       expect(connectingEdgeLineSegments.length).toEqual(4);
     });
   });

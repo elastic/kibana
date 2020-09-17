@@ -4,17 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, KibanaRequest, IScopedClusterClient } from 'kibana/server';
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
+const callAs = () => Promise.resolve({ body: {} });
+
+const mlClusterClient = ({
+  asCurrentUser: callAs,
+  asInternalUser: callAs,
+} as unknown) as IScopedClusterClient;
+
 describe('ML - data recognizer', () => {
   const dr = new DataRecognizer(
-    jest.fn() as LegacyAPICaller,
+    mlClusterClient,
     ({
       find: jest.fn(),
       bulkCreate: jest.fn(),
-    } as never) as SavedObjectsClientContract
+    } as unknown) as SavedObjectsClientContract,
+    { headers: { authorization: '' } } as KibanaRequest
   );
 
   describe('jobOverrides', () => {

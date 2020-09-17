@@ -6,16 +6,17 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as api from '../api';
-import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { HttpStart } from '../../../../../../src/core/public';
-import { ApiCallByIdProps } from '../types';
+import { ApiCallByIdProps, ApiCallByListIdProps } from '../types';
 
 import { ExceptionsApi, useApi } from './use_api';
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('useApi', () => {
   const onErrorMock = jest.fn();
@@ -247,6 +248,118 @@ describe('useApi', () => {
         namespaceType,
         onError: onErrorMock,
         onSuccess: jest.fn(),
+      });
+
+      expect(onErrorMock).toHaveBeenCalledWith(mockError);
+    });
+  });
+
+  test('it invokes "fetchExceptionListsItemsByListIds" when "getExceptionItem" used', async () => {
+    const output = getFoundExceptionListItemSchemaMock();
+    const onSuccessMock = jest.fn();
+    const spyOnFetchExceptionListsItemsByListIds = jest
+      .spyOn(api, 'fetchExceptionListsItemsByListIds')
+      .mockResolvedValue(output);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+        useApi(mockKibanaHttpService)
+      );
+      await waitForNextUpdate();
+
+      await result.current.getExceptionListsItems({
+        filterOptions: [],
+        lists: [{ id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' }],
+        onError: jest.fn(),
+        onSuccess: onSuccessMock,
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
+        showDetectionsListsOnly: false,
+        showEndpointListsOnly: false,
+      });
+
+      const expected: ApiCallByListIdProps = {
+        filterOptions: [],
+        http: mockKibanaHttpService,
+        listIds: ['list_id'],
+        namespaceTypes: ['single'],
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
+        signal: new AbortController().signal,
+      };
+
+      expect(spyOnFetchExceptionListsItemsByListIds).toHaveBeenCalledWith(expected);
+      expect(onSuccessMock).toHaveBeenCalled();
+    });
+  });
+
+  test('it does not invoke "fetchExceptionListsItemsByListIds" if no listIds', async () => {
+    const output = getFoundExceptionListItemSchemaMock();
+    const onSuccessMock = jest.fn();
+    const spyOnFetchExceptionListsItemsByListIds = jest
+      .spyOn(api, 'fetchExceptionListsItemsByListIds')
+      .mockResolvedValue(output);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+        useApi(mockKibanaHttpService)
+      );
+      await waitForNextUpdate();
+
+      await result.current.getExceptionListsItems({
+        filterOptions: [],
+        lists: [{ id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' }],
+        onError: jest.fn(),
+        onSuccess: onSuccessMock,
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
+        showDetectionsListsOnly: false,
+        showEndpointListsOnly: true,
+      });
+
+      expect(spyOnFetchExceptionListsItemsByListIds).not.toHaveBeenCalled();
+      expect(onSuccessMock).toHaveBeenCalledWith({
+        exceptions: [],
+        pagination: {
+          page: 0,
+          perPage: 20,
+          total: 0,
+        },
+      });
+    });
+  });
+
+  test('invokes "onError" callback if "fetchExceptionListsItemsByListIds" fails', async () => {
+    const mockError = new Error('failed to delete item');
+    jest.spyOn(api, 'fetchExceptionListsItemsByListIds').mockRejectedValue(mockError);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+        useApi(mockKibanaHttpService)
+      );
+      await waitForNextUpdate();
+
+      await result.current.getExceptionListsItems({
+        filterOptions: [],
+        lists: [{ id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' }],
+        onError: onErrorMock,
+        onSuccess: jest.fn(),
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
+        showDetectionsListsOnly: false,
+        showEndpointListsOnly: false,
       });
 
       expect(onErrorMock).toHaveBeenCalledWith(mockError);

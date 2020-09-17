@@ -21,7 +21,7 @@ const NoCasesComponent = () => {
   const goToCreateCase = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: getCreateCaseUrl(search),
       });
     },
@@ -30,6 +30,7 @@ const NoCasesComponent = () => {
   const newCaseLink = useMemo(
     () => (
       <LinkAnchor
+        data-test-subj="no-cases-create-case"
         onClick={goToCreateCase}
         href={formatUrl(getCreateCaseUrl())}
       >{` ${i18n.START_A_NEW_CASE}`}</LinkAnchor>

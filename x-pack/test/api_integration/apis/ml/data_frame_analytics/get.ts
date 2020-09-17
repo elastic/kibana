@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 

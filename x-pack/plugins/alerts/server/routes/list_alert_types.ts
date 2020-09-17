@@ -20,9 +20,6 @@ export const listAlertTypesRoute = (router: IRouter, licenseState: LicenseState)
     {
       path: `${BASE_ALERT_API_PATH}/list_alert_types`,
       validate: {},
-      options: {
-        tags: ['access:alerting-read'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
@@ -34,7 +31,7 @@ export const listAlertTypesRoute = (router: IRouter, licenseState: LicenseState)
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       return res.ok({
-        body: context.alerting.listTypes(),
+        body: Array.from(await context.alerting.getAlertsClient().listAlertTypes()),
       });
     })
   );

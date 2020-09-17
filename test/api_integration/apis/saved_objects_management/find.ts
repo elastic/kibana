@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
                     title: 'Count of requests',
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  namespaces: ['default'],
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -67,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
                       uiCapabilitiesPath: 'visualize.show',
                     },
                     title: 'Count of requests',
+                    namespaceType: 'single',
                   },
                 },
               ],
@@ -224,6 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -242,6 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -260,6 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
+              namespaceType: 'single',
             });
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
@@ -270,6 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
+              namespaceType: 'single',
             });
           }));
 
@@ -289,6 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
                   '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
+              namespaceType: 'single',
             });
           }));
     });

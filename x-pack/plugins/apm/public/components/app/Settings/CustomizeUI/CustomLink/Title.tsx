@@ -7,34 +7,36 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export const Title = () => (
-  <EuiFlexGroup alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiTitle size="s">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <h1>
-              {i18n.translate('xpack.apm.settings.customizeUI.customLink', {
-                defaultMessage: 'Custom Links',
-              })}
-            </h1>
-          </EuiFlexItem>
+export function Title() {
+  return (
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="s">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <h1>
+                {i18n.translate('xpack.apm.settings.customizeUI.customLink', {
+                  defaultMessage: 'Custom Links',
+                })}
+              </h1>
+            </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              type="iInCircle"
-              position="top"
-              content={i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.info',
-                {
-                  defaultMessage:
-                    'These links will be shown in the Actions context menu for transactions.',
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiTitle>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="iInCircle"
+                position="top"
+                content={i18n.translate(
+                  'xpack.apm.settings.customizeUI.customLink.info',
+                  {
+                    defaultMessage:
+                      'These links will be shown in the Actions context menu for transactions.',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}

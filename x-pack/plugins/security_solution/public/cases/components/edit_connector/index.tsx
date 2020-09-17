@@ -15,6 +15,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import { noop } from 'lodash/fp';
+
 import * as i18n from '../../translations';
 import { Form, UseField, useForm } from '../../../shared_imports';
 import { schema } from './schema';
@@ -25,7 +27,7 @@ interface EditConnectorProps {
   connectors: Connector[];
   disabled?: boolean;
   isLoading: boolean;
-  onSubmit: (a: string[]) => void;
+  onSubmit: (a: string[], onSuccess: () => void, onError: () => void) => void;
   selectedConnector: string;
 }
 
@@ -46,11 +48,13 @@ export const EditConnector = React.memo(
     onSubmit,
     selectedConnector,
   }: EditConnectorProps) => {
+    const initialState = { connectors };
     const { form } = useForm({
-      defaultValue: { connectors },
+      defaultValue: initialState,
       options: { stripEmptyFields: false },
       schema,
     });
+    const { setFieldValue, submit } = form;
     const [connectorHasChanged, setConnectorHasChanged] = useState(false);
     const onChangeConnector = useCallback(
       (connectorId) => {
@@ -59,18 +63,24 @@ export const EditConnector = React.memo(
       [selectedConnector]
     );
 
-    const onCancelConnector = useCallback(() => {
-      form.setFieldValue('connector', selectedConnector);
+    const onError = useCallback(() => {
+      setFieldValue('connector', selectedConnector);
       setConnectorHasChanged(false);
-    }, [form, selectedConnector]);
+    }, [setFieldValue, selectedConnector]);
+
+    const onCancelConnector = useCallback(() => {
+      setFieldValue('connector', selectedConnector);
+      setConnectorHasChanged(false);
+    }, [selectedConnector, setFieldValue]);
 
     const onSubmitConnector = useCallback(async () => {
-      const { isValid, data: newData } = await form.submit();
+      const { isValid, data: newData } = await submit();
       if (isValid && newData.connector) {
-        onSubmit(newData.connector);
+        onSubmit(newData.connector, noop, onError);
         setConnectorHasChanged(false);
       }
-    }, [form, onSubmit]);
+    }, [submit, onSubmit, onError]);
+
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">

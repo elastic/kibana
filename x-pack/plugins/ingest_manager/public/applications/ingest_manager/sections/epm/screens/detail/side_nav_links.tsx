@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { PackageInfo, entries, DetailViewPanelName, InstallStatus } from '../../../../types';
 import { useLink } from '../../../../hooks';
 import { useGetPackageInstallStatus } from '../../hooks';
@@ -19,7 +18,7 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   overview: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.overviewLinkText', {
     defaultMessage: 'Overview',
   }),
-  usages: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.packageConfigsLinkText', {
+  usages: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.packagePoliciesLinkText', {
     defaultMessage: 'Usages',
   }),
   settings: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.settingsLinkText', {
@@ -35,14 +34,6 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
   return (
     <Fragment>
       {entries(PanelDisplayNames).map(([panel, display]) => {
-        const Link = styled(EuiButtonEmpty).attrs<EuiButtonEmptyProps>({
-          href: getHref('integration_details', { pkgkey: `${name}-${version}`, panel }),
-        })`
-          font-weight: ${(p) =>
-            active === panel
-              ? p.theme.eui.euiFontWeightSemiBold
-              : p.theme.eui.euiFontWeightRegular};
-        `;
         // Don't display usages tab as we haven't implemented this yet
         // FIXME: Restore when we implement usages page
         if (panel === 'usages' && (true || packageInstallStatus.status !== InstallStatus.installed))
@@ -50,7 +41,11 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
 
         return (
           <div key={panel}>
-            <Link>{display}</Link>
+            <EuiButtonEmpty
+              href={getHref('integration_details', { pkgkey: `${name}-${version}`, panel })}
+            >
+              {active === panel ? <strong>{display}</strong> : display}
+            </EuiButtonEmpty>
           </div>
         );
       })}

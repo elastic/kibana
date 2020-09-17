@@ -19,29 +19,10 @@ export type WrapArrayIfExitts = <T>(value: Many<T>) => T[] | undefined;
 export const asArrayIfExists: WrapArrayIfExitts = (value) =>
   !isUndefined(value) ? castArray(value) : undefined;
 
-export const wait = (delay = 0): Promise<void> => {
-  return new Promise((resolve) => {
-    return setTimeout(resolve, delay);
-  });
-};
-
 /**
  * Creates a Union Type for all the values of an object
  */
 export type ValueOf<T> = T[keyof T];
-
-/**
- * Unreachable Assertion helper for scenarios like exhaustive switches
- *
- * @param x Unreachable field
- * @param message Message of error thrown
- */
-export const assertUnreachable = (
-  x: never,
-  message = 'Unknown Field in switch statement'
-): never => {
-  throw new Error(`${message}: ${x}`);
-};
 
 /**
  * Global variables

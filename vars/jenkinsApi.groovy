@@ -10,7 +10,7 @@ def getSteps() {
 
 def getFailedSteps() {
   def steps = getSteps()
-  def failedSteps = steps?.findAll { it.iconColor == "red" && it._class == "org.jenkinsci.plugins.workflow.cps.nodes.StepAtomNode" }
+  def failedSteps = steps?.findAll { (it.iconColor == "red" || it.iconColor == "red_anime") && it._class == "org.jenkinsci.plugins.workflow.cps.nodes.StepAtomNode" }
   failedSteps.each { step ->
     step.logs = "${env.BUILD_URL}execution/node/${step.id}/log".toString()
   }

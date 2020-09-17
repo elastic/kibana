@@ -53,6 +53,8 @@ export PARENT_DIR="$parentDir"
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
+export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
+
 ###
 ### download node
 ###
@@ -126,6 +128,7 @@ export PATH="$PATH:$yarnGlobalDir"
 # use a proxy to fetch chromedriver/geckodriver asset
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
 
 export CHECKS_REPORTER_ACTIVE=false
@@ -161,7 +164,7 @@ export -f checks-reporter-with-killswitch
 
 source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
 
-ES_DIR="$PARENT_DIR/elasticsearch"
+ES_DIR="$WORKSPACE/elasticsearch"
 ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
 
 if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then

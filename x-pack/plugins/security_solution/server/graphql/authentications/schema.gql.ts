@@ -41,6 +41,7 @@ export const authenticationsSchema = gql`
       pagination: PaginationInputPaginated!
       filterQuery: String
       defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
     ): AuthenticationsData!
   }
 `;

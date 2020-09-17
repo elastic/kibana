@@ -106,11 +106,15 @@ export function generateFilters(
       // exists filter special case:  fieldname = '_exists' and value = fieldname
       const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
       const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
+
+      // Fix for #7189 - if value is empty, phrase filters become exists filters.
+      const isNullFilter = value === null || value === undefined;
+
       filter = buildFilter(
         tmpIndexPattern,
         actualFieldObj,
-        filterType,
-        negate,
+        isNullFilter ? FILTERS.EXISTS : filterType,
+        isNullFilter ? !negate : negate,
         false,
         value,
         null,

@@ -28,6 +28,6 @@ experimental[] Delete a centrally-managed Logstash pipeline.
 
 [source,sh]
 --------------------------------------------------
-$ curl -X DELETE "localhost:5601/api/logstash/pipeline/hello-world"
+$ curl -X DELETE api/logstash/pipeline/hello-world
 --------------------------------------------------
 // KIBANA

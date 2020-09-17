@@ -5,75 +5,47 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { isEmpty, isEqual, pickBy } from 'lodash';
 import React from 'react';
-import { fromQuery, toQuery } from '../Links/url_helpers';
-import { history } from '../../../utils/history';
-import { useLocation } from '../../../hooks/useLocation';
+import { useHistory, useLocation } from 'react-router-dom';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { clearCache } from '../../../services/rest/callApi';
+import { fromQuery, toQuery } from '../Links/url_helpers';
+import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
+
+function removeUndefinedAndEmptyProps<T extends object>(obj: T): Partial<T> {
+  return pickBy(obj, (value) => value !== undefined && !isEmpty(String(value)));
+}
 
 export function DatePicker() {
+  const history = useHistory();
   const location = useLocation();
+  const { core } = useApmPluginContext();
+
+  const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
+    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+  );
+
+  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
+
+  const DEFAULT_VALUES = {
+    rangeFrom: timePickerTimeDefaults.from,
+    rangeTo: timePickerTimeDefaults.to,
+  };
+
+  const commonlyUsedRanges = timePickerQuickRanges.map(
+    ({ from, to, display }) => ({
+      start: from,
+      end: to,
+      label: display,
+    })
+  );
+
   const { urlParams, refreshTimeRange } = useUrlParams();
-  const commonlyUsedRanges = [
-    {
-      start: 'now-15m',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last15MinutesLabel', {
-        defaultMessage: 'Last 15 minutes',
-      }),
-    },
-    {
-      start: 'now-30m',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last30MinutesLabel', {
-        defaultMessage: 'Last 30 minutes',
-      }),
-    },
-    {
-      start: 'now-1h',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last1HourLabel', {
-        defaultMessage: 'Last 1 hour',
-      }),
-    },
-    {
-      start: 'now-24h',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last24HoursLabel', {
-        defaultMessage: 'Last 24 hours',
-      }),
-    },
-    {
-      start: 'now-7d',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last7DaysLabel', {
-        defaultMessage: 'Last 7 days',
-      }),
-    },
-    {
-      start: 'now-30d',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last30DaysLabel', {
-        defaultMessage: 'Last 30 days',
-      }),
-    },
-    {
-      start: 'now-90d',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last90DaysLabel', {
-        defaultMessage: 'Last 90 days',
-      }),
-    },
-    {
-      start: 'now-1y',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last1YearLabel', {
-        defaultMessage: 'Last 1 year',
-      }),
-    },
-  ];
 
   function updateUrl(nextQuery: {
     rangeFrom?: string;
@@ -105,6 +77,27 @@ export function DatePicker() {
   }
 
   const { rangeFrom, rangeTo, refreshPaused, refreshInterval } = urlParams;
+  const timePickerURLParams = removeUndefinedAndEmptyProps({
+    rangeFrom,
+    rangeTo,
+    refreshPaused,
+    refreshInterval,
+  });
+
+  const nextParams = {
+    ...DEFAULT_VALUES,
+    ...timePickerURLParams,
+  };
+  if (!isEqual(nextParams, timePickerURLParams)) {
+    // When the default parameters are not availbale in the url, replace it adding the necessary parameters.
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        ...nextParams,
+      }),
+    });
+  }
 
   return (
     <EuiSuperDatePicker

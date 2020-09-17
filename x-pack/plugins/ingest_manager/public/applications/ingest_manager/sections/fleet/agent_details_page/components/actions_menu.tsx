@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
 import { useCapabilities } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
-import { AgentUnenrollProvider, AgentReassignConfigFlyout } from '../../components';
+import { AgentUnenrollProvider, AgentReassignAgentPolicyFlyout } from '../../components';
 import { useAgentRefresh } from '../hooks';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
@@ -20,6 +20,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const hasWriteCapabilites = useCapabilities().write;
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
+  const isUnenrolling = agent.status === 'unenrolling';
 
   const onClose = useMemo(() => {
     if (onCancelReassign) {
@@ -33,7 +34,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     <>
       {isReassignFlyoutOpen && (
         <EuiPortal>
-          <AgentReassignConfigFlyout agent={agent} onClose={onClose} />
+          <AgentReassignAgentPolicyFlyout agent={agent} onClose={onClose} />
         </EuiPortal>
       )}
       <ContextMenuActions
@@ -52,14 +53,15 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             onClick={() => {
               setIsReassignFlyoutOpen(true);
             }}
-            key="reassignConfig"
+            disabled={!agent.active}
+            key="reassignPolicy"
           >
             <FormattedMessage
               id="xpack.ingestManager.agentList.reassignActionText"
-              defaultMessage="Assign new agent config"
+              defaultMessage="Assign new agent policy"
             />
           </EuiContextMenuItem>,
-          <AgentUnenrollProvider key="unenrollAgent">
+          <AgentUnenrollProvider key="unenrollAgent" forceUnenroll={isUnenrolling}>
             {(unenrollAgentsPrompt) => (
               <EuiContextMenuItem
                 icon="cross"
@@ -68,10 +70,17 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
                   unenrollAgentsPrompt([agent.id], 1, refreshAgent);
                 }}
               >
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.unenrollOneButton"
-                  defaultMessage="Unenroll"
-                />
+                {isUnenrolling ? (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+                    defaultMessage="Force unenroll"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.unenrollOneButton"
+                    defaultMessage="Unenroll"
+                  />
+                )}
               </EuiContextMenuItem>
             )}
           </AgentUnenrollProvider>,

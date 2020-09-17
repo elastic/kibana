@@ -23,5 +23,5 @@ export const getTemplateParameter = (
 ) => {
   return isLegacyTemplate(template)
     ? (template as LegacyTemplateSerialized)[setting]
-    : (template as TemplateSerialized).template[setting];
+    : (template as TemplateSerialized).template?.[setting];
 };

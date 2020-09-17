@@ -13,6 +13,9 @@ export type BucketSpan = string;
 export interface CustomSettings {
   custom_urls?: UrlConfig[];
   created_by?: CREATED_BY_LABEL;
+  job_tags?: {
+    [tag: string]: string;
+  };
 }
 
 export interface Job {
@@ -62,7 +65,7 @@ export interface Detector {
   function: string;
   over_field_name?: string;
   partition_field_name?: string;
-  use_null?: string;
+  use_null?: boolean;
   custom_rules?: CustomRule[];
 }
 export interface AnalysisLimits {
@@ -77,7 +80,7 @@ export interface DataDescription {
 }
 
 export interface ModelPlotConfig {
-  enabled: boolean;
+  enabled?: boolean;
   annotations_enabled?: boolean;
   terms?: string;
 }
@@ -90,6 +93,6 @@ export interface CustomRule {
 }
 
 export interface PerPartitionCategorization {
-  enabled: boolean;
+  enabled?: boolean;
   stop_on_warn?: boolean;
 }

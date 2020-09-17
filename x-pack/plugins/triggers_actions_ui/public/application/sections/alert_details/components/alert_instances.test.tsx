@@ -7,7 +7,7 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
-import { Alert, AlertTaskState, RawAlertInstance } from '../../../../types';
+import { Alert, AlertInstanceSummary, AlertInstanceStatus } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
@@ -34,25 +34,43 @@ jest.mock('../../../app_context', () => {
 describe('alert_instances', () => {
   it('render a list of alert instances', () => {
     const alert = mockAlert();
+    const alertInstanceSummary = mockAlertInstanceSummary({
+      instances: {
+        first_instance: {
+          status: 'OK',
+          muted: false,
+        },
+        second_instance: {
+          status: 'OK',
+          muted: false,
+        },
+      },
+    });
 
-    const alertState = mockAlertState();
     const instances: AlertInstanceListItem[] = [
       alertInstanceToListItem(
         fakeNow.getTime(),
         alert,
         'first_instance',
-        alertState.alertInstances!.first_instance
+        alertInstanceSummary.instances.first_instance
       ),
       alertInstanceToListItem(
         fakeNow.getTime(),
         alert,
         'second_instance',
-        alertState.alertInstances!.second_instance
+        alertInstanceSummary.instances.second_instance
       ),
     ];
 
     expect(
-      shallow(<AlertInstances {...mockAPIs} alert={alert} alertState={alertState} />)
+      shallow(
+        <AlertInstances
+          {...mockAPIs}
+          alert={alert}
+          alertInstanceSummary={alertInstanceSummary}
+          readOnly={false}
+        />
+      )
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual(instances);
@@ -60,7 +78,7 @@ describe('alert_instances', () => {
 
   it('render a hidden field with duration epoch', () => {
     const alert = mockAlert();
-    const alertState = mockAlertState();
+    const alertInstanceSummary = mockAlertInstanceSummary();
 
     expect(
       shallow(
@@ -68,7 +86,8 @@ describe('alert_instances', () => {
           durationEpoch={fake2MinutesAgo.getTime()}
           {...mockAPIs}
           alert={alert}
-          alertState={alertState}
+          readOnly={false}
+          alertInstanceSummary={alertInstanceSummary}
         />
       )
         .find('[name="alertInstancesDurationEpoch"]')
@@ -78,25 +97,24 @@ describe('alert_instances', () => {
 
   it('render all active alert instances', () => {
     const alert = mockAlert();
-    const instances = {
+    const instances: Record<string, AlertInstanceStatus> = {
       ['us-central']: {
-        state: {},
-        meta: {
-          lastScheduledActions: {
-            group: 'warning',
-            date: fake2MinutesAgo,
-          },
-        },
+        status: 'OK',
+        muted: false,
       },
-      ['us-east']: {},
+      ['us-east']: {
+        status: 'OK',
+        muted: false,
+      },
     };
     expect(
       shallow(
         <AlertInstances
           {...mockAPIs}
           alert={alert}
-          alertState={mockAlertState({
-            alertInstances: instances,
+          readOnly={false}
+          alertInstanceSummary={mockAlertInstanceSummary({
+            instances,
           })}
         />
       )
@@ -112,22 +130,34 @@ describe('alert_instances', () => {
     const alert = mockAlert({
       mutedInstanceIds: ['us-west', 'us-east'],
     });
+    const instanceUsWest: AlertInstanceStatus = { status: 'OK', muted: false };
+    const instanceUsEast: AlertInstanceStatus = { status: 'OK', muted: false };
 
     expect(
       shallow(
         <AlertInstances
           {...mockAPIs}
           alert={alert}
-          alertState={mockAlertState({
-            alertInstances: {},
+          readOnly={false}
+          alertInstanceSummary={mockAlertInstanceSummary({
+            instances: {
+              'us-west': {
+                status: 'OK',
+                muted: false,
+              },
+              'us-east': {
+                status: 'OK',
+                muted: false,
+              },
+            },
           })}
         />
       )
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-west'),
-      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-east'),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-west', instanceUsWest),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-east', instanceUsEast),
     ]);
   });
 });
@@ -136,13 +166,10 @@ describe('alertInstanceToListItem', () => {
   it('handles active instances', () => {
     const alert = mockAlert();
     const start = fake2MinutesAgo;
-    const instance: RawAlertInstance = {
-      meta: {
-        lastScheduledActions: {
-          date: start,
-          group: 'default',
-        },
-      },
+    const instance: AlertInstanceStatus = {
+      status: 'Active',
+      muted: false,
+      activeStartDate: fake2MinutesAgo.toISOString(),
     };
 
     expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
@@ -159,13 +186,10 @@ describe('alertInstanceToListItem', () => {
       mutedInstanceIds: ['id'],
     });
     const start = fake2MinutesAgo;
-    const instance: RawAlertInstance = {
-      meta: {
-        lastScheduledActions: {
-          date: start,
-          group: 'default',
-        },
-      },
+    const instance: AlertInstanceStatus = {
+      status: 'Active',
+      muted: true,
+      activeStartDate: fake2MinutesAgo.toISOString(),
     };
 
     expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
@@ -177,23 +201,11 @@ describe('alertInstanceToListItem', () => {
     });
   });
 
-  it('handles active instances with no meta', () => {
+  it('handles active instances with start date', () => {
     const alert = mockAlert();
-    const instance: RawAlertInstance = {};
-
-    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
-      instance: 'id',
-      status: { label: 'Active', healthColor: 'primary' },
-      start: undefined,
-      duration: 0,
-      isMuted: false,
-    });
-  });
-
-  it('handles active instances with no lastScheduledActions', () => {
-    const alert = mockAlert();
-    const instance: RawAlertInstance = {
-      meta: {},
+    const instance: AlertInstanceStatus = {
+      status: 'Active',
+      muted: false,
     };
 
     expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
@@ -209,9 +221,13 @@ describe('alertInstanceToListItem', () => {
     const alert = mockAlert({
       mutedInstanceIds: ['id'],
     });
-    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id')).toEqual({
+    const instance: AlertInstanceStatus = {
+      status: 'OK',
+      muted: true,
+    };
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
-      status: { label: 'Inactive', healthColor: 'subdued' },
+      status: { label: 'OK', healthColor: 'subdued' },
       start: undefined,
       duration: 0,
       isMuted: true,
@@ -242,23 +258,28 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
   };
 }
 
-function mockAlertState(overloads: Partial<any> = {}): AlertTaskState {
-  return {
-    alertTypeState: {
-      some: 'value',
-    },
-    alertInstances: {
-      first_instance: {
-        state: {},
-        meta: {
-          lastScheduledActions: {
-            group: 'first_group',
-            date: new Date(),
-          },
-        },
+function mockAlertInstanceSummary(
+  overloads: Partial<AlertInstanceSummary> = {}
+): AlertInstanceSummary {
+  const summary: AlertInstanceSummary = {
+    id: 'alert-id',
+    name: 'alert-name',
+    tags: ['tag-1', 'tag-2'],
+    alertTypeId: 'alert-type-id',
+    consumer: 'alert-consumer',
+    status: 'OK',
+    muteAll: false,
+    throttle: '',
+    enabled: true,
+    errorMessages: [],
+    statusStartDate: fake2MinutesAgo.toISOString(),
+    statusEndDate: fakeNow.toISOString(),
+    instances: {
+      foo: {
+        status: 'OK',
+        muted: false,
       },
-      second_instance: {},
     },
-    ...overloads,
   };
+  return { ...summary, ...overloads };
 }

@@ -4,54 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchPingHistogram, fetchSnapshotCount } from '../state/api';
-import { UptimeFetchDataResponse } from '../../../observability/public';
+import { CoreStart } from 'kibana/public';
+import { UptimeFetchDataResponse, FetchDataParams } from '../../../observability/public';
+import { fetchIndexStatus, fetchPingHistogram, fetchSnapshotCount } from '../state/api';
+import { kibanaService } from '../state/kibana_service';
 
-export async function fetchUptimeOverviewData({
-  startTime,
-  endTime,
+async function fetchUptimeOverviewData({
+  absoluteTime,
+  relativeTime,
   bucketSize,
-}: {
-  startTime: string;
-  endTime: string;
-  bucketSize: string;
-}) {
+}: FetchDataParams) {
+  const start = new Date(absoluteTime.start).toISOString();
+  const end = new Date(absoluteTime.end).toISOString();
   const snapshot = await fetchSnapshotCount({
-    dateRangeStart: startTime,
-    dateRangeEnd: endTime,
+    dateRangeStart: start,
+    dateRangeEnd: end,
   });
 
-  const pings = await fetchPingHistogram({ dateStart: startTime, dateEnd: endTime, bucketSize });
+  const pings = await fetchPingHistogram({ dateStart: start, dateEnd: end, bucketSize });
 
   const response: UptimeFetchDataResponse = {
-    title: 'Uptime',
-    appLink: '/app/uptime#/',
+    appLink: `/app/uptime?dateRangeStart=${relativeTime.start}&dateRangeEnd=${relativeTime.end}`,
     stats: {
       monitors: {
         type: 'number',
-        label: 'Monitors',
         value: snapshot.total,
       },
       up: {
         type: 'number',
-        label: 'Up',
         value: snapshot.up,
       },
       down: {
         type: 'number',
-        label: 'Down',
         value: snapshot.down,
       },
     },
     series: {
       up: {
-        label: 'Up',
         coordinates: pings.histogram.map((p) => {
           return { x: p.x!, y: p.upCount || 0 };
         }),
       },
       down: {
-        label: 'Down',
         coordinates: pings.histogram.map((p) => {
           return { x: p.x!, y: p.downCount || 0 };
         }),
@@ -59,4 +53,13 @@ export async function fetchUptimeOverviewData({
     },
   };
   return response;
+}
+
+export function UptimeDataHelper(coreStart: CoreStart | null) {
+  kibanaService.core = coreStart!;
+
+  return {
+    indexStatus: fetchIndexStatus,
+    overviewData: fetchUptimeOverviewData,
+  };
 }

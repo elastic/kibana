@@ -18,7 +18,6 @@ export type MonitorError = t.TypeOf<typeof MonitorErrorType>;
 
 export const MonitorDetailsType = t.intersection([
   t.type({ monitorId: t.string }),
-  t.partial({ error: MonitorErrorType }),
-  t.partial({ timestamp: t.string }),
+  t.partial({ error: MonitorErrorType, timestamp: t.string, alerts: t.unknown }),
 ]);
 export type MonitorDetails = t.TypeOf<typeof MonitorDetailsType>;

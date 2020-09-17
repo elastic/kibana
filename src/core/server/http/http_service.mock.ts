@@ -18,9 +18,10 @@
  */
 
 import { Server } from 'hapi';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { CspConfig } from '../csp';
 import { mockRouter, RouterMock } from './router/router.mock';
-import { configMock } from '../config/config.mock';
 import {
   InternalHttpServiceSetup,
   HttpServiceSetup,
@@ -29,11 +30,13 @@ import {
 } from './types';
 import { HttpService } from './http_service';
 import { AuthStatus } from './auth_state_storage';
-import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 import { AuthToolkit } from './lifecycle/auth';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
+import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import { configMock } from '../config/mocks';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
@@ -87,6 +90,7 @@ const createInternalSetupContractMock = () => {
       config: jest.fn().mockReturnValue(configMock.create()),
     } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
+    registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
@@ -104,7 +108,7 @@ const createInternalSetupContractMock = () => {
   mock.createRouter.mockImplementation(() => mockRouter.create());
   mock.getAuthHeaders.mockReturnValue({ authorization: 'authorization-header' });
   mock.getServerInfo.mockReturnValue({
-    host: 'localhost',
+    hostname: 'localhost',
     name: 'kibana',
     port: 80,
     protocol: 'http',
@@ -117,7 +121,8 @@ const createSetupContractMock = () => {
 
   const mock: HttpServiceSetupMock = {
     createCookieSessionStorageFactory: internalMock.createCookieSessionStorageFactory,
-    registerOnPreAuth: internalMock.registerOnPreAuth,
+    registerOnPreRouting: internalMock.registerOnPreRouting,
+    registerOnPreAuth: jest.fn(),
     registerAuth: internalMock.registerAuth,
     registerOnPostAuth: internalMock.registerOnPostAuth,
     registerOnPreResponse: internalMock.registerOnPreResponse,
@@ -175,11 +180,15 @@ const createHttpServiceMock = () => {
 
 const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
   next: jest.fn(),
-  rewriteUrl: jest.fn(),
 });
 
 const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
   next: jest.fn(),
+});
+
+const createOnPreRoutingToolkitMock = (): jest.Mocked<OnPreRoutingToolkit> => ({
+  next: jest.fn(),
+  rewriteUrl: jest.fn(),
 });
 
 const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
@@ -203,6 +212,7 @@ export const httpServiceMock = {
   createOnPreAuthToolkit: createOnPreAuthToolkitMock,
   createOnPostAuthToolkit: createOnPostAuthToolkitMock,
   createOnPreResponseToolkit: createOnPreResponseToolkitMock,
+  createOnPreRoutingToolkit: createOnPreRoutingToolkitMock,
   createAuthToolkit: createAuthToolkitMock,
   createRouter: mockRouter.create,
 };

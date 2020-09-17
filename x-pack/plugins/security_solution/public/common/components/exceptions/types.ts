@@ -9,8 +9,12 @@ import { OperatorOption } from '../autocomplete/types';
 import {
   EntryNested,
   Entry,
+  EntryMatch,
+  EntryMatchAny,
+  EntryExists,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  NamespaceType,
   OperatorTypeEnum,
   OperatorEnum,
 } from '../../../lists_plugin_deps';
@@ -27,21 +31,21 @@ export interface DescriptionListItem {
   description: NonNullable<ReactNode>;
 }
 
-export enum ExceptionListType {
-  DETECTION_ENGINE = 'detection',
-  ENDPOINT = 'endpoint',
+export interface ExceptionListItemIdentifiers {
+  id: string;
+  namespaceType: NamespaceType;
 }
 
 export interface FilterOptions {
   filter: string;
-  showDetectionsList: boolean;
-  showEndpointList: boolean;
   tags: string[];
 }
 
 export interface Filter {
   filter: Partial<FilterOptions>;
   pagination: Partial<ExceptionsPagination>;
+  showDetectionsListsOnly: boolean;
+  showEndpointListsOnly: boolean;
 }
 
 export interface ExceptionsPagination {
@@ -51,15 +55,14 @@ export interface ExceptionsPagination {
   pageSizeOptions: number[];
 }
 
-export interface FormattedBuilderEntryBase {
+export interface FormattedBuilderEntry {
   field: IFieldType | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
-}
-
-export interface FormattedBuilderEntry extends FormattedBuilderEntryBase {
-  parent?: string;
-  nested?: FormattedBuilderEntryBase[];
+  nested: 'parent' | 'child' | undefined;
+  entryIndex: number;
+  parent: { parent: EntryNested; parentIndex: number } | undefined;
+  correspondingKeywordField: IFieldType | undefined;
 }
 
 export interface EmptyEntry {
@@ -76,7 +79,13 @@ export interface EmptyListEntry {
   list: { id: string | undefined; type: string | undefined };
 }
 
-export type BuilderEntry = Entry | EmptyListEntry | EmptyEntry | EntryNested;
+export interface EmptyNestedEntry {
+  field: string | undefined;
+  type: OperatorTypeEnum.NESTED;
+  entries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists>;
+}
+
+export type BuilderEntry = Entry | EmptyListEntry | EmptyEntry | EntryNested | EmptyNestedEntry;
 
 export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entries'> & {
   entries: BuilderEntry[];

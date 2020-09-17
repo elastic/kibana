@@ -12,9 +12,10 @@ import { TimelineType } from '../../../../common/types/timeline';
 
 import { HostsTableType } from '../../../hosts/store/model';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
+import { AdministrationSubTab as AdministrationType } from '../../../management/types';
 import { FlowTarget } from '../../../graphql/types';
 
-export type SiemRouteType = HostsTableType | NetworkRouteType | TimelineType;
+export type SiemRouteType = HostsTableType | NetworkRouteType | TimelineType | AdministrationType;
 export interface RouteSpyState {
   pageName: string;
   detailName: string | undefined;
@@ -36,6 +37,10 @@ export interface NetworkRouteSpyState extends RouteSpyState {
 
 export interface TimelineRouteSpyState extends RouteSpyState {
   tabName: TimelineType | undefined;
+}
+
+export interface AdministrationRouteSpyState extends RouteSpyState {
+  tabName: AdministrationType | undefined;
 }
 
 export type RouteSpyAction =

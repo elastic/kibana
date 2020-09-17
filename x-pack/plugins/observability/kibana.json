@@ -7,8 +7,14 @@
     "observability"
   ],
   "optionalPlugins": [
-    "licensing"
+    "licensing",
+    "home"
   ],
   "ui": true,
-  "server": true
+  "server": true,
+  "requiredBundles": [
+    "data",
+    "kibanaReact",
+    "kibanaUtils"
+  ]
 }

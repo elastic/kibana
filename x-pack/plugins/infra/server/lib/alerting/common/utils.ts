@@ -29,3 +29,5 @@ export const validateIsStringElasticsearchJSONFilter = (value: string) => {
     return errorMessage;
   }
 };
+
+export const UNGROUPED_FACTORY_KEY = '*';

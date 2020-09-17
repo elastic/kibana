@@ -87,6 +87,7 @@ export function initPatchCasesApi({
           return Object.keys(updateCaseAttributes).length > 0;
         });
         if (updateFilterCases.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           const { username, full_name, email } = await caseService.getUser({ request, response });
           const updatedDt = new Date().toISOString();
           const updatedCases = await caseService.patchCases({

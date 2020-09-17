@@ -6,9 +6,10 @@
 
 import { CancellationToken } from '../../common';
 import { PLUGIN_ID } from '../../common/constants';
+import { durationToNumber } from '../../common/schema_utils';
 import { ReportingCore } from '../../server';
 import { LevelLogger } from '../../server/lib';
-import { ESQueueWorkerExecuteFn, ExportTypeDefinition, JobSource } from '../../server/types';
+import { ExportTypeDefinition, JobSource, RunTaskFn } from '../../server/types';
 import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
@@ -22,18 +23,18 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
   // Once more document types are added, this will need to be passed in
   return async function createWorker(queue: ESQueueInstance) {
     // export type / execute job map
-    const jobExecutors: Map<string, ESQueueWorkerExecuteFn<unknown>> = new Map();
+    const jobExecutors: Map<string, RunTaskFn<unknown>> = new Map();
 
     for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
-      ExportTypeDefinition<JobParamsType, unknown, unknown, ESQueueWorkerExecuteFn<unknown>>
+      ExportTypeDefinition<JobParamsType, unknown, unknown, RunTaskFn<unknown>>
     >) {
       const jobExecutor = exportType.runTaskFnFactory(reporting, logger);
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
-    const workerFn = <ScheduledTaskParamsType>(
-      jobSource: JobSource<ScheduledTaskParamsType>,
-      jobParams: ScheduledTaskParamsType,
+    const workerFn = <TaskPayloadType>(
+      jobSource: JobSource<TaskPayloadType>,
+      jobParams: TaskPayloadType,
       cancellationToken: CancellationToken
     ) => {
       const {
@@ -57,7 +58,7 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
     const workerOptions = {
       kibanaName,
       kibanaId,
-      interval: queueConfig.pollInterval,
+      interval: durationToNumber(queueConfig.pollInterval),
       intervalErrorMultiplier: queueConfig.pollIntervalErrorMultiplier,
     };
     const worker = queue.registerWorker(PLUGIN_ID, workerFn, workerOptions);

@@ -31,3 +31,15 @@ export function throwIfIsntContained<T>(
     return values;
   };
 }
+
+export const isValidUrl = (urlString: string, protocol?: string) => {
+  try {
+    const urlObject = new URL(urlString);
+    if (protocol === undefined || urlObject.protocol === protocol) {
+      return true;
+    }
+    return false;
+  } catch (err) {
+    return false;
+  }
+};

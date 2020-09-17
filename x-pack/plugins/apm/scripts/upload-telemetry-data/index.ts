@@ -11,7 +11,7 @@
 // - Easier testing of the telemetry tasks
 // - Validate whether we can run the queries we want to on the telemetry data
 
-import { merge, chunk, flatten } from 'lodash';
+import { merge, chunk, flatten, omit } from 'lodash';
 import { Client } from '@elastic/elasticsearch';
 import { argv } from 'yargs';
 import { Logger } from 'kibana/server';
@@ -19,8 +19,7 @@ import { stampLogger } from '../shared/stamp-logger';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { apmTelemetry } from '../../server/saved_objects/apm_telemetry';
+import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
 import { generateSampleDocuments } from './generate-sample-documents';
 import { readKibanaConfig } from '../shared/read-kibana-config';
 import { getHttpAuth } from '../shared/get-http-auth';
@@ -40,8 +39,6 @@ async function uploadData() {
     githubToken,
   });
 
-  const kibanaMapping = apmTelemetry.mappings;
-
   const config = readKibanaConfig();
 
   const httpAuth = getHttpAuth(config);
@@ -50,19 +47,25 @@ async function uploadData() {
     nodes: [config['elasticsearch.hosts']],
     ...(httpAuth
       ? {
-          auth: httpAuth,
+          auth: { ...httpAuth, username: 'elastic' },
         }
       : {}),
   });
 
-  const newTemplate = merge(telemetryTemplate, {
-    settings: {
-      index: { mapping: { total_fields: { limit: 10000 } } },
-    },
-  });
-
-  // override apm mapping instead of merging
-  newTemplate.mappings.properties.stack_stats.properties.kibana.properties.plugins.properties.apm = kibanaMapping;
+  // The new template is the template downloaded from the telemetry repo, with
+  // our current telemetry mapping merged in, with the "index_patterns" key
+  // (which cannot be used when creating an index) removed.
+  const newTemplate = omit(
+    mergeApmTelemetryMapping(
+      merge(telemetryTemplate, {
+        index_patterns: undefined,
+        settings: {
+          index: { mapping: { total_fields: { limit: 10000 } } },
+        },
+      })
+    ),
+    'index_patterns'
+  );
 
   await createOrUpdateIndex({
     indexName: xpackTelemetryIndexName,
@@ -83,13 +86,15 @@ async function uploadData() {
         return client.search(body as any).then((res) => res.body);
       },
       indicesStats: (body) => {
-        return client.indices.stats(body as any);
+        return client.indices.stats(body as any).then((res) => res.body);
       },
       transportRequest: ((params) => {
-        return client.transport.request({
-          method: params.method,
-          path: params.path,
-        });
+        return client.transport
+          .request({
+            method: params.method,
+            path: params.path,
+          })
+          .then((res) => res.body);
       }) as CollectTelemetryParams['transportRequest'],
     },
   });

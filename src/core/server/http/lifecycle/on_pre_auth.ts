@@ -29,32 +29,20 @@ import {
 
 enum ResultType {
   next = 'next',
-  rewriteUrl = 'rewriteUrl',
 }
 
 interface Next {
   type: ResultType.next;
 }
 
-interface RewriteUrl {
-  type: ResultType.rewriteUrl;
-  url: string;
-}
-
-type OnPreAuthResult = Next | RewriteUrl;
+type OnPreAuthResult = Next;
 
 const preAuthResult = {
   next(): OnPreAuthResult {
     return { type: ResultType.next };
   },
-  rewriteUrl(url: string): OnPreAuthResult {
-    return { type: ResultType.rewriteUrl, url };
-  },
   isNext(result: OnPreAuthResult): result is Next {
     return result && result.type === ResultType.next;
-  },
-  isRewriteUrl(result: OnPreAuthResult): result is RewriteUrl {
-    return result && result.type === ResultType.rewriteUrl;
   },
 };
 
@@ -65,13 +53,10 @@ const preAuthResult = {
 export interface OnPreAuthToolkit {
   /** To pass request to the next handler */
   next: () => OnPreAuthResult;
-  /** Rewrite requested resources url before is was authenticated and routed to a handler */
-  rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
 const toolkit: OnPreAuthToolkit = {
   next: preAuthResult.next,
-  rewriteUrl: preAuthResult.rewriteUrl,
 };
 
 /**
@@ -88,9 +73,9 @@ export type OnPreAuthHandler = (
  * @public
  * Adopt custom request interceptor to Hapi lifecycle system.
  * @param fn - an extension point allowing to perform custom logic for
- * incoming HTTP requests.
+ * incoming HTTP requests before a user has been authenticated.
  */
-export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler, log: Logger) {
+export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
   return async function interceptPreAuthRequest(
     request: Request,
     responseToolkit: HapiResponseToolkit
@@ -107,13 +92,6 @@ export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler, log: Logger) {
         return responseToolkit.continue;
       }
 
-      if (preAuthResult.isRewriteUrl(result)) {
-        const { url } = result;
-        request.setUrl(url);
-        // We should update raw request as well since it can be proxied to the old platform
-        request.raw.req.url = url;
-        return responseToolkit.continue;
-      }
       throw new Error(
         `Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: ${result}.`
       );

@@ -33,6 +33,7 @@ import {
   ChromeStart,
   ToastsStart,
   ScopedHistory,
+  AppMountParameters,
 } from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import {
@@ -43,14 +44,14 @@ import {
 import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
-import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
-import { ConfigSchema } from '../../config';
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { DashboardStart } from '../../../dashboard/public';
 
 export type PureVisState = SavedVisState;
 
 export interface VisualizeAppState {
   filters: Filter[];
-  uiState: PersistedState;
+  uiState: Record<string, unknown>;
   vis: PureVisState;
   query: Query;
   savedQuery?: string;
@@ -95,7 +96,7 @@ export interface VisualizeServices extends CoreStart {
   embeddable: EmbeddableStart;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
-  kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
@@ -111,7 +112,8 @@ export interface VisualizeServices extends CoreStart {
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
-  featureFlagConfig: ConfigSchema;
+  dashboard: DashboardStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 export interface SavedVisInstance {
@@ -120,6 +122,14 @@ export interface SavedVisInstance {
   savedSearch?: SavedObject;
   embeddableHandler: VisualizeEmbeddableContract;
 }
+
+export interface ByValueVisInstance {
+  vis: Vis;
+  savedSearch?: SavedObject;
+  embeddableHandler: VisualizeEmbeddableContract;
+}
+
+export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
 
 export interface IEditorController {
   render(props: EditorRenderProps): void;

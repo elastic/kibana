@@ -8,12 +8,17 @@
   "requiredPlugins": [
     "licensing",
     "management",
-    "indexManagement"
+    "indexManagement",
+    "features"
   ],
   "optionalPlugins": [
     "usageCollection",
     "cloud"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaReact",
+    "esUiShared"
+  ]
 }

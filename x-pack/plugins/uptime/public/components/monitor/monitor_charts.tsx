@@ -15,7 +15,7 @@ interface MonitorChartsProps {
 
 export const MonitorCharts = ({ monitorId }: MonitorChartsProps) => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <MonitorDuration monitorId={monitorId} />
       </EuiFlexItem>

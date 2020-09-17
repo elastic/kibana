@@ -5,7 +5,7 @@
  */
 import { cloneDeep, orderBy } from 'lodash';
 import { UIFilters } from '../../../../typings/ui_filters';
-import { Projection } from '../../../../common/projections/typings';
+import { Projection } from '../../../projections/typings';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { getLocalFilterQuery } from './get_local_filter_query';
 import { Setup } from '../../helpers/setup_request';
@@ -26,7 +26,7 @@ export async function getLocalUIFilters({
   uiFilters: UIFilters;
   localFilterNames: LocalUIFilterName[];
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const projectionWithoutAggs = cloneDeep(projection);
 
@@ -40,9 +40,10 @@ export async function getLocalUIFilters({
         localUIFilterName: name,
       });
 
-      const response = await client.search(query);
+      const response = await apmEventClient.search(query);
 
       const filter = localUIFilters[name];
+
       const buckets = response?.aggregations?.by_terms?.buckets ?? [];
 
       return {
@@ -51,10 +52,9 @@ export async function getLocalUIFilters({
           buckets.map((bucket) => {
             return {
               name: bucket.key as string,
-              count:
-                'bucket_count' in bucket
-                  ? bucket.bucket_count.value
-                  : bucket.doc_count,
+              count: bucket.bucket_count
+                ? bucket.bucket_count.value
+                : bucket.doc_count,
             };
           }),
           'count',

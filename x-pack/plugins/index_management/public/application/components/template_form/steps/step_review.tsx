@@ -24,6 +24,7 @@ import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
 import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
+import { SimulateTemplate } from '../../index_templates';
 import { WizardSection } from '../template_form';
 
 const { stripEmptyFields } = serializers;
@@ -55,6 +56,27 @@ interface Props {
   template: TemplateDeserialized;
   navigateToStep: (stepId: WizardSection) => void;
 }
+
+const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
+  return (
+    <div data-test-subj="previewTab">
+      <EuiSpacer size="m" />
+
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.templateForm.stepReview.previewTab.descriptionText"
+            defaultMessage="This is the final template that will be applied to matching indices. Component templates are applied in the order specified. Explicit mappings, settings, and aliases override the component templates."
+          />
+        </p>
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <SimulateTemplate template={template} />
+    </div>
+  );
+};
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
   ({ template, navigateToStep }) => {
@@ -168,7 +190,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                   <EuiDescriptionListTitle>
                     <FormattedMessage
                       id="xpack.idxMgmt.templateForm.stepReview.summaryTab.componentsLabel"
-                      defaultMessage="Components"
+                      defaultMessage="Component templates"
                     />
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>
@@ -286,6 +308,33 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       );
     };
 
+    const tabs = [
+      {
+        id: 'summary',
+        name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.summaryTabTitle', {
+          defaultMessage: 'Summary',
+        }),
+        content: <SummaryTab />,
+      },
+      {
+        id: 'request',
+        name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.requestTabTitle', {
+          defaultMessage: 'Request',
+        }),
+        content: <RequestTab />,
+      },
+    ];
+
+    if (!isLegacy) {
+      tabs.splice(1, 0, {
+        id: 'preview',
+        name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.previewTabTitle', {
+          defaultMessage: 'Preview',
+        }),
+        content: <PreviewTab template={template} />,
+      });
+    }
+
     return (
       <div data-test-subj="stepSummary">
         <EuiTitle>
@@ -331,25 +380,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
           </Fragment>
         ) : null}
 
-        <EuiTabbedContent
-          data-test-subj="summaryTabContent"
-          tabs={[
-            {
-              id: 'summary',
-              name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.summaryTabTitle', {
-                defaultMessage: 'Summary',
-              }),
-              content: <SummaryTab />,
-            },
-            {
-              id: 'request',
-              name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.requestTabTitle', {
-                defaultMessage: 'Request',
-              }),
-              content: <RequestTab />,
-            },
-          ]}
-        />
+        <EuiTabbedContent data-test-subj="summaryTabContent" tabs={tabs} />
       </div>
     );
   }

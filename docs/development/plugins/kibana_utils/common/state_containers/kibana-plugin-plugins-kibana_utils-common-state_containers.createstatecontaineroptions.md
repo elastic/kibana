@@ -16,5 +16,5 @@ export interface CreateStateContainerOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [freeze](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontaineroptions.freeze.md) | <code>&lt;T&gt;(state: T) =&gt; T</code> | Function to use when freezing state. Supply identity function. If not provided, default deepFreeze is use. |
+|  [freeze](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontaineroptions.freeze.md) | <code>&lt;T&gt;(state: T) =&gt; T</code> | Function to use when freezing state. Supply identity function. If not provided, default <code>deepFreeze</code> is used. |
 

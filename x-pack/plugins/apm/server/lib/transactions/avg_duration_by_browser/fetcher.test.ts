@@ -15,12 +15,16 @@ describe('fetcher', () => {
   it('performs a search', async () => {
     const search = jest.fn();
     const setup = ({
-      client: { search },
+      apmEventClient: { search },
       indices: {},
       uiFiltersES: [],
     } as unknown) as Setup & SetupTimeRange & SetupUIFilters;
 
-    await fetcher({ serviceName: 'testServiceName', setup });
+    await fetcher({
+      serviceName: 'testServiceName',
+      setup,
+      searchAggregatedTransactions: false,
+    });
 
     expect(search).toHaveBeenCalled();
   });

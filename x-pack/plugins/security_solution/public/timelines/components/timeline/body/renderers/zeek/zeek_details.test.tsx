@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import '../../../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';

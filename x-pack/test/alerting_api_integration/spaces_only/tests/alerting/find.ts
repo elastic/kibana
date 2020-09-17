@@ -42,7 +42,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         name: 'abc',
         tags: ['foo'],
         alertTypeId: 'test.noop',
-        consumer: 'bar',
+        consumer: 'alertsFixture',
         schedule: { interval: '1m' },
         enabled: true,
         actions: [],

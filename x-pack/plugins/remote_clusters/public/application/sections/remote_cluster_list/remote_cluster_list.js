@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { extractQueryParams } from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 
 import { RemoteClusterTable } from './remote_cluster_table';

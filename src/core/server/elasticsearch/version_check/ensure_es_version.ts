@@ -29,10 +29,10 @@ import {
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
-import { LegacyAPICaller } from '..';
+import type { ElasticsearchClient } from '../client';
 
 export interface PollEsNodesVersionOptions {
-  callWithInternalUser: LegacyAPICaller;
+  internalClient: ElasticsearchClient;
   log: Logger;
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;
@@ -72,7 +72,7 @@ export function mapNodesVersionCompatibility(
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
-  if (Object.keys(nodesInfo.nodes).length === 0) {
+  if (Object.keys(nodesInfo.nodes ?? {}).length === 0) {
     return {
       isCompatible: false,
       message: 'Unable to retrieve version information from Elasticsearch nodes.',
@@ -137,7 +137,7 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
 }
 
 export const pollEsNodesVersion = ({
-  callWithInternalUser,
+  internalClient,
   log,
   kibanaVersion,
   ignoreVersionMismatch,
@@ -147,10 +147,11 @@ export const pollEsNodesVersion = ({
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
       return from(
-        callWithInternalUser('nodes.info', {
-          filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+        internalClient.nodes.info<NodesInfo>({
+          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
         })
       ).pipe(
+        map(({ body }) => body),
         catchError((_err) => {
           return of({ nodes: {} });
         })

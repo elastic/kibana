@@ -19,7 +19,7 @@ import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/
 // our current storybook setup has core-js-related problems when trying to import
 // it.
 // storiesOf('app/TransactionDurationAlertTrigger', module).add('example',
-// eslint-disable-next-line no-unused-expressions
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 () => {
   const params = {
     threshold: 1500,

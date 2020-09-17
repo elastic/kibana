@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connector as serviceNowConnectorConfig } from './servicenow/config';
-import { connector as jiraConnectorConfig } from './jira/config';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import {
+  ServiceNowConnectorConfiguration,
+  JiraConnectorConfiguration,
+  ResilientConnectorConfiguration,
+} from '../../../../../triggers_actions_ui/public/common';
 import { ConnectorConfiguration } from './types';
 
 export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
-  '.servicenow': serviceNowConnectorConfig,
-  '.jira': jiraConnectorConfig,
+  '.servicenow': ServiceNowConnectorConfiguration as ConnectorConfiguration,
+  '.jira': JiraConnectorConfiguration as ConnectorConfiguration,
+  '.resilient': ResilientConnectorConfiguration as ConnectorConfiguration,
 };

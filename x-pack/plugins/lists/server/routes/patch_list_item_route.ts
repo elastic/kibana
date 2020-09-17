@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import { listItemSchema, patchListItemSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -17,7 +17,7 @@ export const patchListItemRoute = (router: IRouter): void => {
   router.patch(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
       validate: {
@@ -27,9 +27,10 @@ export const patchListItemRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { value, id, meta } = request.body;
+        const { value, id, meta, _version } = request.body;
         const lists = getListClient(context);
         const listItem = await lists.updateListItem({
+          _version,
           id,
           meta,
           value,

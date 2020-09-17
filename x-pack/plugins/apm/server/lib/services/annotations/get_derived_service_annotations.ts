@@ -9,43 +9,51 @@ import { SetupTimeRange, Setup } from '../../helpers/setup_request';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 
 export async function getDerivedServiceAnnotations({
   setup,
   serviceName,
   environment,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, client, indices } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      searchAggregatedTransactions
+    ),
+    ...getEnvironmentUiFilterES(environment),
   ];
-
-  const environmentFilter = getEnvironmentUiFilterES(environment);
-
-  if (environmentFilter) {
-    filter.push(environmentFilter);
-  }
 
   const versions =
     (
-      await client.search({
-        index: indices['apm_oss.transactionIndices'],
+      await apmEventClient.search({
+        apm: {
+          events: [
+            getProcessorEventForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          ],
+        },
         body: {
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({ range: rangeFilter(start, end) }),
+              filter: [...filter, { range: rangeFilter(start, end) }],
             },
           },
           aggs: {
@@ -64,17 +72,19 @@ export async function getDerivedServiceAnnotations({
   }
   const annotations = await Promise.all(
     versions.map(async (version) => {
-      const response = await client.search({
-        index: indices['apm_oss.transactionIndices'],
+      const response = await apmEventClient.search({
+        apm: {
+          events: [
+            getProcessorEventForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          ],
+        },
         body: {
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({
-                term: {
-                  [SERVICE_VERSION]: version,
-                },
-              }),
+              filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
             },
           },
           aggs: {

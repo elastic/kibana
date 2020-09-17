@@ -332,16 +332,22 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
     }
 
-    async clickConfirmOnModal() {
+    async clickConfirmOnModal(ensureHidden = true) {
       log.debug('Clicking modal confirm');
       // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
       await testSubjects.exists('confirmModalTitleText');
       await testSubjects.click('confirmModalConfirmButton');
-      await this.ensureModalOverlayHidden();
+      if (ensureHidden) {
+        await this.ensureModalOverlayHidden();
+      }
     }
 
     async pressEnterKey() {
       await browser.pressKeys(browser.keys.ENTER);
+    }
+
+    async pressTabKey() {
+      await browser.pressKeys(browser.keys.TAB);
     }
 
     // Pause the browser at a certain place for debugging
@@ -407,7 +413,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async closeToastIfExists() {
       const toastShown = await find.existsByCssSelector('.euiToast');
       if (toastShown) {
-        await find.clickByCssSelector('.euiToast__closeButton');
+        try {
+          await find.clickByCssSelector('.euiToast__closeButton');
+        } catch (err) {
+          // ignore errors, toast clear themselves after timeout
+        }
       }
     }
 
@@ -485,6 +495,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       log.debug(`Setting the path '${path}' on the file input`);
       const input = await find.byCssSelector('.euiFilePicker__input');
       await input.type(path);
+    }
+
+    async scrollKibanaBodyTop() {
+      await browser.setScrollToById('kibana-body', 0, 0);
     }
   }
 

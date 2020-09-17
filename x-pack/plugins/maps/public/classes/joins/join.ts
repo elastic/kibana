@@ -11,4 +11,8 @@ export interface IJoin {
   getRightJoinSource(): IESTermSource;
 
   toDescriptor(): JoinDescriptor;
+
+  getSourceMetaDataRequestId(): string;
+
+  getSourceFormattersDataRequestId(): string;
 }

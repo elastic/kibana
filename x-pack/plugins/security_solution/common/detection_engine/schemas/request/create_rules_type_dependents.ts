@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isMlRule } from '../../../machine_learning/helpers';
+import { isThresholdRule } from '../../utils';
 import { CreateRulesSchema } from './create_rules_schema';
 
 export const validateAnomalyThreshold = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
+  if (isMlRule(rule.type)) {
     if (rule.anomaly_threshold == null) {
       return ['when "type" is "machine_learning" anomaly_threshold is required'];
     } else {
@@ -19,7 +21,7 @@ export const validateAnomalyThreshold = (rule: CreateRulesSchema): string[] => {
 };
 
 export const validateQuery = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
+  if (isMlRule(rule.type)) {
     if (rule.query != null) {
       return ['when "type" is "machine_learning", "query" cannot be set'];
     } else {
@@ -31,7 +33,7 @@ export const validateQuery = (rule: CreateRulesSchema): string[] => {
 };
 
 export const validateLanguage = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
+  if (isMlRule(rule.type)) {
     if (rule.language != null) {
       return ['when "type" is "machine_learning", "language" cannot be set'];
     } else {
@@ -55,7 +57,7 @@ export const validateSavedId = (rule: CreateRulesSchema): string[] => {
 };
 
 export const validateMachineLearningJobId = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
+  if (isMlRule(rule.type)) {
     if (rule.machine_learning_job_id == null) {
       return ['when "type" is "machine_learning", "machine_learning_job_id" is required'];
     } else {
@@ -92,6 +94,19 @@ export const validateTimelineTitle = (rule: CreateRulesSchema): string[] => {
   return [];
 };
 
+export const validateThreshold = (rule: CreateRulesSchema): string[] => {
+  if (isThresholdRule(rule.type)) {
+    if (!rule.threshold) {
+      return ['when "type" is "threshold", "threshold" is required'];
+    } else if (rule.threshold.value <= 0) {
+      return ['"threshold.value" has to be bigger than 0'];
+    } else {
+      return [];
+    }
+  }
+  return [];
+};
+
 export const createRuleValidateTypeDependents = (schema: CreateRulesSchema): string[] => {
   return [
     ...validateAnomalyThreshold(schema),
@@ -101,5 +116,6 @@ export const createRuleValidateTypeDependents = (schema: CreateRulesSchema): str
     ...validateMachineLearningJobId(schema),
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
+    ...validateThreshold(schema),
   ];
 };

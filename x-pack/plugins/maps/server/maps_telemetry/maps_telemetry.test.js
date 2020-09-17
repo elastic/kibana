@@ -22,6 +22,7 @@ describe('buildMapsTelemetry', () => {
       indexPatternsWithGeoFieldCount: 0,
       indexPatternsWithGeoPointFieldCount: 0,
       indexPatternsWithGeoShapeFieldCount: 0,
+      geoShapeAggLayersCount: 0,
       attributesPerMap: {
         dataSourcesCount: {
           avg: 0,
@@ -50,48 +51,49 @@ describe('buildMapsTelemetry', () => {
       indexPatternsWithGeoFieldCount: 3,
       indexPatternsWithGeoPointFieldCount: 2,
       indexPatternsWithGeoShapeFieldCount: 1,
+      geoShapeAggLayersCount: 2,
       attributesPerMap: {
         dataSourcesCount: {
-          avg: 2.6666666666666665,
+          avg: 2,
           max: 3,
-          min: 2,
+          min: 1,
         },
         emsVectorLayersCount: {
           canada_provinces: {
-            avg: 0.3333333333333333,
+            avg: 0.2,
             max: 1,
             min: 1,
           },
           france_departments: {
-            avg: 0.3333333333333333,
+            avg: 0.2,
             max: 1,
             min: 1,
           },
           italy_provinces: {
-            avg: 0.3333333333333333,
+            avg: 0.2,
             max: 1,
             min: 1,
           },
         },
         layerTypesCount: {
           TILE: {
-            avg: 1,
+            avg: 0.6,
             max: 1,
             min: 1,
           },
           VECTOR: {
-            avg: 1.6666666666666667,
+            avg: 1.2,
             max: 2,
             min: 1,
           },
         },
         layersCount: {
-          avg: 2.6666666666666665,
+          avg: 2,
           max: 3,
-          min: 2,
+          min: 1,
         },
       },
-      mapsTotalCount: 3,
+      mapsTotalCount: 5,
       settings: {
         showMapVisualizationTypes: false,
       },

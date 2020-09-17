@@ -5,12 +5,18 @@
  */
 import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
-import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
+import {
+  GetAllTimeline,
+  SortFieldTimeline,
+  TimelineResult,
+  Direction,
+  DetailItem,
+} from '../../graphql/types';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
-import { CreateTimelineProps } from '../../alerts/components/alerts_table/types';
+import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 export interface MockedProvidedQuery {
@@ -2091,13 +2097,14 @@ export const mockTimelineModel: TimelineModel = {
   ],
   dataProviders: [],
   dateRange: {
-    end: 1584539558929,
-    start: 1584539198929,
+    end: '2020-03-18T13:52:38.929Z',
+    start: '2020-03-18T13:46:38.929Z',
   },
   deletedEventIds: [],
   description: 'This is a sample rule description',
   eventIdToNoteIds: {},
   eventType: 'all',
+  excludedRowRendererIds: [],
   filters: [
     {
       $state: {
@@ -2137,7 +2144,6 @@ export const mockTimelineModel: TimelineModel = {
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
-  showRowRenderers: true,
   sort: {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
@@ -2154,7 +2160,7 @@ export const mockTimelineModel: TimelineModel = {
 export const mockTimelineResult: TimelineResult = {
   savedObjectId: 'ef579e40-jibber-jabber',
   columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
-  dateRange: { start: 1584539198929, end: 1584539558929 },
+  dateRange: { start: '2020-03-18T13:46:38.929Z', end: '2020-03-18T13:52:38.929Z' },
   description: 'This is a sample rule description',
   eventType: 'all',
   filters: [
@@ -2188,7 +2194,7 @@ export const mockTimelineApolloResult = {
 };
 
 export const defaultTimelineProps: CreateTimelineProps = {
-  from: 1541444305937,
+  from: '2018-11-05T18:58:25.937Z',
   timeline: {
     columns: [
       { columnHeaderType: 'not-filtered', id: '@timestamp', width: 190 },
@@ -2212,15 +2218,16 @@ export const defaultTimelineProps: CreateTimelineProps = {
         queryMatch: { field: '_id', operator: ':', value: '1' },
       },
     ],
-    dateRange: { end: 1541444605937, start: 1541444305937 },
+    dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
     eventIdToNoteIds: {},
     eventType: 'all',
+    excludedRowRendererIds: [],
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
-    id: 'timeline-1',
+    id: TimelineId.active,
     isFavorite: false,
     isLive: false,
     isLoading: false,
@@ -2241,7 +2248,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,
-    showRowRenderers: true,
     sort: { columnId: '@timestamp', sortDirection: Direction.desc },
     status: TimelineStatus.draft,
     title: '',
@@ -2251,6 +2257,33 @@ export const defaultTimelineProps: CreateTimelineProps = {
     version: null,
     width: 1100,
   },
-  to: 1541444605937,
+  to: '2018-11-05T19:03:25.937Z',
+  notes: null,
   ruleNote: '# this is some markdown documentation',
+};
+
+export const mockTimelineDetails: DetailItem[] = [
+  {
+    field: 'host.name',
+    values: ['apache'],
+    originalValue: 'apache',
+  },
+  {
+    field: 'user.id',
+    values: ['1'],
+    originalValue: 1,
+  },
+];
+
+export const mockTimelineDetailsApollo = {
+  data: {
+    source: {
+      TimelineDetails: {
+        data: mockTimelineDetails,
+      },
+    },
+  },
+  loading: false,
+  networkStatus: 7,
+  stale: false,
 };

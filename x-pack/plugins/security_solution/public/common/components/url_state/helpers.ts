@@ -12,6 +12,7 @@ import * as H from 'history';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
+import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { inputsSelectors, State } from '../../store';
 import { UrlInputsModel } from '../../store/inputs/model';
@@ -90,12 +91,14 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
-  } else if (pageName === SecurityPageName.alerts) {
-    return 'alerts';
+  } else if (pageName === SecurityPageName.detections) {
+    return 'detections';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {
     return 'case';
+  } else if (pageName === SecurityPageName.administration) {
+    return 'administration';
   }
   return 'overview';
 };
@@ -120,7 +123,7 @@ export const makeMapStateToProps = () => {
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const flyoutTimeline = getTimeline(state, 'timeline-1');
+    const flyoutTimeline = getTimeline(state, TimelineId.active);
     const timeline =
       flyoutTimeline != null
         ? {

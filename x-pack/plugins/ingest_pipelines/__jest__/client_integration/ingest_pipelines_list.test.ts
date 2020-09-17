@@ -13,11 +13,6 @@ import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
 
 const { setup } = pageHelpers.pipelinesList;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
-
 describe('<PipelinesList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: PipelineListTestBed;
@@ -72,7 +67,7 @@ describe('<PipelinesList />', () => {
       tableCellsValues.forEach((row, i) => {
         const pipeline = pipelines[i];
 
-        expect(row).toEqual(['', pipeline.name, '']);
+        expect(row).toEqual(['', pipeline.name, 'EditDelete']);
       });
     });
 

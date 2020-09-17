@@ -54,6 +54,7 @@ const VALID_TUTORIAL: TutorialSchema = {
   id: 'test',
   category: 'logging' as TutorialsCategory,
   name: 'new tutorial provider',
+  moduleName: 'test',
   isBeta: false,
   shortDescription: 'short description',
   euiIconType: 'alert',

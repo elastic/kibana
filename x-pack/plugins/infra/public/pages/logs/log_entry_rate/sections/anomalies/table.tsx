@@ -4,45 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiSpacer,
+} from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useSet } from 'react-use';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   formatAnomalyScore,
   getFriendlyNameForPartitionId,
+  formatOneDecimalPlace,
 } from '../../../../../../common/log_analysis';
+import { AnomalyType } from '../../../../../../common/http_api/log_analysis';
 import { RowExpansionButton } from '../../../../../components/basic_table';
-import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
+import {
+  Page,
+  FetchNextPage,
+  FetchPreviousPage,
+  ChangeSortOptions,
+  ChangePaginationOptions,
+  SortOptions,
+  PaginationOptions,
+  LogEntryAnomalies,
+} from '../../use_log_entry_anomalies_results';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 interface TableItem {
   id: string;
   dataset: string;
   datasetName: string;
   anomalyScore: number;
-  anomalyMessage: string;
   startTime: number;
-}
-
-interface SortingOptions {
-  sort: {
-    field: keyof TableItem;
-    direction: 'asc' | 'desc';
-  };
-}
-
-interface PaginationOptions {
-  pageIndex: number;
-  pageSize: number;
-  totalItemCount: number;
-  pageSizeOptions: number[];
-  hidePerPageOptions: boolean;
+  typical: number;
+  actual: number;
+  type: AnomalyType;
 }
 
 const anomalyScoreColumnName = i18n.translate(
@@ -73,124 +80,77 @@ const datasetColumnName = i18n.translate(
   }
 );
 
-const moreThanExpectedAnomalyMessage = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
-  {
-    defaultMessage: 'More log messages in this dataset than expected',
-  }
-);
-
-const fewerThanExpectedAnomalyMessage = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
-  {
-    defaultMessage: 'Fewer log messages in this dataset than expected',
-  }
-);
-
-const getAnomalyMessage = (actualRate: number, typicalRate: number): string => {
-  return actualRate < typicalRate
-    ? fewerThanExpectedAnomalyMessage
-    : moreThanExpectedAnomalyMessage;
-};
-
 export const AnomaliesTable: React.FunctionComponent<{
-  results: LogEntryRateResults;
+  results: LogEntryAnomalies;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
-  jobId: string;
-}> = ({ results, timeRange, setTimeRange, jobId }) => {
+  changeSortOptions: ChangeSortOptions;
+  changePaginationOptions: ChangePaginationOptions;
+  sortOptions: SortOptions;
+  paginationOptions: PaginationOptions;
+  page: Page;
+  fetchNextPage?: FetchNextPage;
+  fetchPreviousPage?: FetchPreviousPage;
+  isLoading: boolean;
+}> = ({
+  results,
+  timeRange,
+  setTimeRange,
+  changeSortOptions,
+  sortOptions,
+  changePaginationOptions,
+  paginationOptions,
+  fetchNextPage,
+  fetchPreviousPage,
+  page,
+  isLoading,
+}) => {
   const [dateFormat] = useKibanaUiSetting('dateFormat', 'Y-MM-DD HH:mm:ss');
 
+  const tableSortOptions = useMemo(() => {
+    return {
+      sort: sortOptions,
+    };
+  }, [sortOptions]);
+
   const tableItems: TableItem[] = useMemo(() => {
-    return results.anomalies.map((anomaly) => {
+    return results.map((anomaly) => {
       return {
         id: anomaly.id,
-        dataset: anomaly.partitionId,
-        datasetName: getFriendlyNameForPartitionId(anomaly.partitionId),
+        dataset: anomaly.dataset,
+        datasetName: getFriendlyNameForPartitionId(anomaly.dataset),
         anomalyScore: formatAnomalyScore(anomaly.anomalyScore),
-        anomalyMessage: getAnomalyMessage(anomaly.actualLogEntryRate, anomaly.typicalLogEntryRate),
         startTime: anomaly.startTime,
+        type: anomaly.type,
+        typical: anomaly.typical,
+        actual: anomaly.actual,
       };
     });
   }, [results]);
 
   const [expandedIds, { add: expandId, remove: collapseId }] = useSet<string>(new Set());
 
-  const expandedDatasetRowContents = useMemo(
+  const expandedIdsRowContents = useMemo(
     () =>
-      [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedDatasetRows, id) => {
-        const anomaly = results.anomalies.find((_anomaly) => _anomaly.id === id);
+      [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedRows, id) => {
+        const anomaly = results.find((_anomaly) => _anomaly.id === id);
 
         return {
-          ...aggregatedDatasetRows,
+          ...aggregatedRows,
           [id]: anomaly ? (
-            <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} jobId={jobId} />
+            <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} />
           ) : null,
         };
       }, {}),
-    [expandedIds, results, timeRange, jobId]
+    [expandedIds, results, timeRange]
   );
-
-  const [sorting, setSorting] = useState<SortingOptions>({
-    sort: {
-      field: 'anomalyScore',
-      direction: 'desc',
-    },
-  });
-
-  const [_pagination, setPagination] = useState<PaginationOptions>({
-    pageIndex: 0,
-    pageSize: 20,
-    totalItemCount: results.anomalies.length,
-    pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
-  });
-
-  const paginationOptions = useMemo(() => {
-    return {
-      ..._pagination,
-      totalItemCount: results.anomalies.length,
-    };
-  }, [_pagination, results]);
 
   const handleTableChange = useCallback(
-    ({ page = {}, sort = {} }) => {
-      const { index, size } = page;
-      setPagination((currentPagination) => {
-        return {
-          ...currentPagination,
-          pageIndex: index,
-          pageSize: size,
-        };
-      });
-      const { field, direction } = sort;
-      setSorting({
-        sort: {
-          field,
-          direction,
-        },
-      });
+    ({ sort = {} }) => {
+      changeSortOptions(sort);
     },
-    [setSorting, setPagination]
+    [changeSortOptions]
   );
-
-  const sortedTableItems = useMemo(() => {
-    let sortedItems: TableItem[] = [];
-    if (sorting.sort.field === 'datasetName') {
-      sortedItems = tableItems.sort((a, b) => (a.datasetName > b.datasetName ? 1 : -1));
-    } else if (sorting.sort.field === 'anomalyScore') {
-      sortedItems = tableItems.sort((a, b) => a.anomalyScore - b.anomalyScore);
-    } else if (sorting.sort.field === 'startTime') {
-      sortedItems = tableItems.sort((a, b) => a.startTime - b.startTime);
-    }
-
-    return sorting.sort.direction === 'asc' ? sortedItems : sortedItems.reverse();
-  }, [tableItems, sorting]);
-
-  const pageOfItems: TableItem[] = useMemo(() => {
-    const { pageIndex, pageSize } = paginationOptions;
-    return sortedTableItems.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
-  }, [paginationOptions, sortedTableItems]);
 
   const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
     () => [
@@ -204,10 +164,11 @@ export const AnomaliesTable: React.FunctionComponent<{
         render: (anomalyScore: number) => <AnomalySeverityIndicator anomalyScore={anomalyScore} />,
       },
       {
-        field: 'anomalyMessage',
         name: anomalyMessageColumnName,
-        sortable: false,
         truncateText: true,
+        render: (item: TableItem) => (
+          <AnomalyMessage actual={item.actual} typical={item.typical} type={item.type} />
+        ),
       },
       {
         field: 'startTime',
@@ -240,18 +201,116 @@ export const AnomaliesTable: React.FunctionComponent<{
     ],
     [collapseId, expandId, expandedIds, dateFormat]
   );
+  return (
+    <>
+      <LoadingOverlayWrapper isLoading={isLoading}>
+        <EuiBasicTable
+          items={tableItems}
+          itemId="id"
+          itemIdToExpandedRowMap={expandedIdsRowContents}
+          isExpandable={true}
+          hasActions={true}
+          columns={columns}
+          sorting={tableSortOptions}
+          onChange={handleTableChange}
+        />
+        <EuiSpacer size="l" />
+        <PaginationControls
+          fetchNextPage={fetchNextPage}
+          fetchPreviousPage={fetchPreviousPage}
+          page={page}
+          isLoading={isLoading}
+        />
+      </LoadingOverlayWrapper>
+    </>
+  );
+};
+
+const AnomalyMessage = ({
+  actual,
+  typical,
+  type,
+}: {
+  actual: number;
+  typical: number;
+  type: AnomalyType;
+}) => {
+  const moreThanExpectedAnomalyMessage = i18n.translate(
+    'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
+    {
+      defaultMessage:
+        'more log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+      values: { type },
+    }
+  );
+
+  const fewerThanExpectedAnomalyMessage = i18n.translate(
+    'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
+    {
+      defaultMessage:
+        'fewer log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+      values: { type },
+    }
+  );
+
+  const isMore = actual > typical;
+  const message = isMore ? moreThanExpectedAnomalyMessage : fewerThanExpectedAnomalyMessage;
+  const ratio = isMore ? actual / typical : typical / actual;
+  const icon = isMore ? 'sortUp' : 'sortDown';
+  // Edge case scenarios where actual and typical might sit at 0.
+  const useRatio = ratio !== Infinity;
+  const ratioMessage = useRatio ? `${formatOneDecimalPlace(ratio)}x` : '';
 
   return (
-    <EuiBasicTable
-      items={pageOfItems}
-      itemId="id"
-      itemIdToExpandedRowMap={expandedDatasetRowContents}
-      isExpandable={true}
-      hasActions={true}
-      columns={columns}
-      pagination={paginationOptions}
-      sorting={sorting}
-      onChange={handleTableChange}
-    />
+    <span>
+      <EuiIcon type={icon} /> {`${ratioMessage} ${message}`}
+    </span>
+  );
+};
+
+const previousPageLabel = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTablePreviousPageLabel',
+  {
+    defaultMessage: 'Previous page',
+  }
+);
+
+const nextPageLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableNextPageLabel', {
+  defaultMessage: 'Next page',
+});
+
+const PaginationControls = ({
+  fetchPreviousPage,
+  fetchNextPage,
+  page,
+  isLoading,
+}: {
+  fetchPreviousPage?: () => void;
+  fetchNextPage?: () => void;
+  page: number;
+  isLoading: boolean;
+}) => {
+  return (
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup>
+          <EuiButtonIcon
+            iconType="arrowLeft"
+            isDisabled={!fetchPreviousPage || isLoading}
+            onClick={fetchPreviousPage}
+            aria-label={previousPageLabel}
+          />
+          <span>
+            <strong>{page}</strong>
+          </span>
+          <EuiButtonIcon
+            iconType="arrowRight"
+            isDisabled={!fetchNextPage || isLoading}
+            onClick={fetchNextPage}
+            aria-label={nextPageLabel}
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

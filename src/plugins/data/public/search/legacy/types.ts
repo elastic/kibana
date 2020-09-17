@@ -17,8 +17,19 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import { SearchResponse } from 'elasticsearch';
 import { FetchHandlers } from '../fetch';
-import { SearchRequest, SearchResponse } from '..';
+import { SearchRequest } from '..';
+
+// @internal
+export interface LegacyFetchHandlers {
+  callMsearch: (params: {
+    body: SearchRequest;
+    signal: AbortSignal;
+  }) => Promise<Array<SearchResponse<any>>>;
+  loadingCount$: BehaviorSubject<number>;
+}
 
 export interface SearchStrategySearchParams extends FetchHandlers {
   searchRequests: SearchRequest[];
@@ -30,7 +41,7 @@ export interface SearchStrategyProvider {
   search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
 }
 
-export interface SearchStrategyResponse {
-  searching: Promise<SearchResponse[]>;
+export interface SearchStrategyResponse<T = any> {
+  searching: Promise<Array<SearchResponse<T>>>;
   abort: () => void;
 }

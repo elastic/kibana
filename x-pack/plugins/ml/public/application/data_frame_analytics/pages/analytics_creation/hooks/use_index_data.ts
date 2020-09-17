@@ -4,25 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+
+import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
+
 import {
-  fetchChartsData,
+  getFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   EsSorting,
-  SearchResponse7,
   UseIndexDataReturnType,
 } from '../../../../components/data_grid';
-import { getErrorMessage } from '../../../../../../common/util/errors';
+import type { SearchResponse7 } from '../../../../../../common/types/es_client';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
 
@@ -60,7 +63,6 @@ export const useIndexData = (
   useEffect(() => {
     resetPagination();
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
   const getIndexData = async function () {
@@ -92,7 +94,7 @@ export const useIndexData = (
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+      setErrorMessage(extractErrorMessage(e));
       setStatus(INDEX_STATUS.ERROR);
     }
   };
@@ -100,16 +102,22 @@ export const useIndexData = (
   useEffect(() => {
     getIndexData();
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
+
+  const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
+    indexPattern,
+  ]);
 
   const fetchColumnChartsData = async function () {
     try {
-      const columnChartsData = await fetchChartsData(
-        indexPattern.title,
-        ml.esSearch,
-        query,
-        columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+      const columnChartsData = await dataLoader.loadFieldHistograms(
+        columns
+          .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+          .map((cT) => ({
+            fieldName: cT.id,
+            type: getFieldType(cT.schema),
+          })),
+        query
       );
       dataGrid.setColumnCharts(columnChartsData);
     } catch (e) {
@@ -122,7 +130,6 @@ export const useIndexData = (
       fetchColumnChartsData();
     }
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,

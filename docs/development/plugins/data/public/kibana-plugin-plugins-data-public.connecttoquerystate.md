@@ -9,9 +9,10 @@ Helper to setup two-way syncing of global data and a state container
 <b>Signature:</b>
 
 ```typescript
-connectToQueryState: <S extends QueryState>({ timefilter: { timefilter }, filterManager, state$, }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'state$'>, stateContainer: BaseStateContainer<S>, syncConfig: {
+connectToQueryState: <S extends QueryState>({ timefilter: { timefilter }, filterManager, queryString, state$, }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>, stateContainer: BaseStateContainer<S>, syncConfig: {
     time?: boolean;
     refreshInterval?: boolean;
     filters?: FilterStateStore | boolean;
+    query?: boolean;
 }) => () => void
 ```

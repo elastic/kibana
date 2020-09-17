@@ -24,6 +24,7 @@ import { transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { PartialFilter } from '../../types';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
@@ -44,6 +45,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
+
       const {
         actions: actionsRest,
         anomaly_threshold: anomalyThreshold,
@@ -75,6 +77,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         severity_mapping: severityMapping,
         tags,
         threat,
+        threshold,
         throttle,
         timestamp_override: timestampOverride,
         to,
@@ -84,18 +87,14 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         exceptions_list: exceptionsList,
       } = request.body;
       try {
-        const query =
-          type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+        const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          type !== 'machine_learning' && languageOrUndefined == null
-            ? 'kuery'
-            : languageOrUndefined;
+          !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
@@ -125,6 +124,9 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
             });
           }
         }
+        // This will create the endpoint list if it does not exist yet
+        await context.lists?.getExceptionListClient().createEndpointList();
+
         const createdRule = await createRules({
           alertsClient,
           anomalyThreshold,
@@ -159,6 +161,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           to,
           type,
           threat,
+          threshold,
           timestampOverride,
           references,
           note,

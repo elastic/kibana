@@ -12,12 +12,10 @@ import { ThrottleOrNull, throttle } from '../common/schemas';
  * Types the DefaultThrottleNull as:
  *   - If null or undefined, then a null will be set
  */
-export const DefaultThrottleNull = new t.Type<ThrottleOrNull, ThrottleOrNull, unknown>(
+export const DefaultThrottleNull = new t.Type<ThrottleOrNull, ThrottleOrNull | undefined, unknown>(
   'DefaultThreatNull',
   throttle.is,
   (input, context): Either<t.Errors, ThrottleOrNull> =>
     input == null ? t.success(null) : throttle.validate(input, context),
   t.identity
 );
-
-export type DefaultThrottleNullC = typeof DefaultThrottleNull;

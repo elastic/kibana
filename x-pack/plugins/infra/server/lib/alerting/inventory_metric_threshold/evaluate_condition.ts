@@ -5,34 +5,39 @@
  */
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
+import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
+import {
+  isTooManyBucketsPreviewException,
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
+} from '../../../../common/alerting/metrics';
 import {
   InfraDatabaseSearchResponse,
   CallWithRequestParams,
 } from '../../adapters/framework/adapter_types';
 import { Comparator, InventoryMetricConditions } from './types';
 import { AlertServices } from '../../../../../alerts/server';
-import { InfraSnapshot } from '../../snapshot';
-import { parseFilterQuery } from '../../../utils/serialized_query';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
-import { InfraSourceConfiguration } from '../../sources';
+import { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api/snapshot_api';
+import { InfraSource } from '../../sources';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
+import { getNodes } from '../../../routes/snapshot/lib/get_nodes';
 
 type ConditionResult = InventoryMetricConditions & {
-  shouldFire: boolean | boolean[];
+  shouldFire: boolean[];
   currentValue: number;
-  isNoData: boolean;
+  isNoData: boolean[];
   isError: boolean;
 };
 
 export const evaluateCondition = async (
   condition: InventoryMetricConditions,
   nodeType: InventoryItemType,
-  sourceConfiguration: InfraSourceConfiguration,
+  source: InfraSource,
   callCluster: AlertServices['callCluster'],
   filterQuery?: string,
   lookbackSize?: number
 ): Promise<Record<string, ConditionResult>> => {
-  const { comparator, metric } = condition;
+  const { comparator, metric, customMetric } = condition;
   let { threshold } = condition;
 
   const timerange = {
@@ -49,26 +54,32 @@ export const evaluateCondition = async (
     nodeType,
     metric,
     timerange,
-    sourceConfiguration,
-    filterQuery
+    source,
+    filterQuery,
+    customMetric
   );
 
   threshold = threshold.map((n) => convertMetricValue(metric, n));
 
   const comparisonFunction = comparatorMap[comparator];
 
-  return mapValues(currentValues, (value) => ({
-    ...condition,
-    shouldFire:
-      value !== undefined &&
-      value !== null &&
-      (Array.isArray(value)
-        ? value.map((v) => comparisonFunction(Number(v), threshold))
-        : comparisonFunction(value, threshold)),
-    isNoData: value === null,
-    isError: value === undefined,
-    currentValue: getCurrentValue(value),
-  }));
+  const result = mapValues(currentValues, (value) => {
+    if (isTooManyBucketsPreviewException(value)) throw value;
+    return {
+      ...condition,
+      shouldFire:
+        value !== undefined &&
+        value !== null &&
+        (Array.isArray(value)
+          ? value.map((v) => comparisonFunction(Number(v), threshold))
+          : [comparisonFunction(value as number, threshold)]),
+      isNoData: Array.isArray(value) ? value.map((v) => v === null) : [value === null],
+      isError: value === undefined,
+      currentValue: getCurrentValue(value),
+    };
+  }) as unknown; // Typescript doesn't seem to know what `throw` is doing
+
+  return result as Record<string, ConditionResult>;
 };
 
 const getCurrentValue: (value: any) => number = (value) => {
@@ -82,38 +93,59 @@ const getData = async (
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
-  sourceConfiguration: InfraSourceConfiguration,
-  filterQuery?: string
+  source: InfraSource,
+  filterQuery?: string,
+  customMetric?: SnapshotCustomMetricInput
 ) => {
-  const snapshot = new InfraSnapshot();
-  const esClient = <Hit = {}, Aggregation = undefined>(
+  const client = <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> => callCluster('search', options);
 
-  const options = {
-    filterQuery: parseFilterQuery(filterQuery),
+  const metrics = [
+    metric === 'custom' ? (customMetric as SnapshotCustomMetricInput) : { type: metric },
+  ];
+
+  const snapshotRequest: SnapshotRequest = {
+    filterQuery,
     nodeType,
     groupBy: [],
-    sourceConfiguration,
-    metrics: [{ type: metric }],
+    sourceId: 'default',
+    metrics,
     timerange,
     includeTimeseries: Boolean(timerange.lookbackSize),
   };
+  try {
+    const { nodes } = await getNodes(client, snapshotRequest, source);
 
-  const { nodes } = await snapshot.getNodes(esClient, options);
+    if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
 
-  return nodes.reduce((acc, n) => {
-    const nodePathItem = last(n.path) as any;
-    const m = first(n.metrics);
-    if (m && m.value && m.timeseries) {
-      const { timeseries } = m;
-      const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
-      acc[nodePathItem.label] = values;
-    } else {
-      acc[nodePathItem.label] = m && m.value;
+    return nodes.reduce((acc, n) => {
+      const { name: nodeName } = n;
+      const m = first(n.metrics);
+      if (m && m.value && m.timeseries) {
+        const { timeseries } = m;
+        const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
+        acc[nodeName] = values;
+      } else {
+        acc[nodeName] = m && m.value;
+      }
+      return acc;
+    }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);
+  } catch (e) {
+    if (timerange.lookbackSize) {
+      // This code should only ever be reached when previewing the alert, not executing it
+      const causedByType = e.body?.error?.caused_by?.type;
+      if (causedByType === 'too_many_buckets_exception') {
+        return {
+          [UNGROUPED_FACTORY_KEY]: {
+            [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION]: true,
+            maxBuckets: e.body.error.caused_by.max_buckets,
+          },
+        };
+      }
     }
-    return acc;
-  }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);
+    return { [UNGROUPED_FACTORY_KEY]: undefined };
+  }
 };
 
 const comparatorMap = {

@@ -12,13 +12,14 @@ import { LogEntryCategory } from '../../../../../../common/http_api/log_analysis
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { BetaBadge } from '../../../../../components/beta_badge';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
-import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
+import { RecreateJobButton } from '../../../../../components/logging/log_analysis_setup/create_job_button';
 import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
-import { DatasetsSelector } from './datasets_selector';
+import { DatasetsSelector } from '../../../../../components/logging/log_analysis_results/datasets_selector';
 import { TopCategoriesTable } from './top_categories_table';
 
 export const TopCategoriesSection: React.FunctionComponent<{
   availableDatasets: string[];
+  hasSetupCapabilities: boolean;
   isLoadingDatasets?: boolean;
   isLoadingTopCategories?: boolean;
   jobId: string;
@@ -30,6 +31,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
   topCategories: LogEntryCategory[];
 }> = ({
   availableDatasets,
+  hasSetupCapabilities,
   isLoadingDatasets = false,
   isLoadingTopCategories = false,
   jobId,
@@ -51,7 +53,11 @@ export const TopCategoriesSection: React.FunctionComponent<{
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RecreateJobButton onClick={onRequestRecreateMlJob} size="s" />
+          <RecreateJobButton
+            hasSetupCapabilities={hasSetupCapabilities}
+            onClick={onRequestRecreateMlJob}
+            size="s"
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} />

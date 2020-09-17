@@ -14,8 +14,7 @@ export {
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
-  fetchChartsData,
-  getErrorMessage,
+  getFieldType,
   extractErrorMessage,
   formatHumanReadableDateTimeSeconds,
   getDataGridSchemaFromKibanaFieldType,
@@ -28,7 +27,6 @@ export {
   DataGrid,
   EsSorting,
   RenderCellValue,
-  SearchResponse7,
   UseDataGridReturnType,
   UseIndexDataReturnType,
   INDEX_STATUS,

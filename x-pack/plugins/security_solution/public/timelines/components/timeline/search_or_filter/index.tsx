@@ -78,8 +78,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
           },
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [indexPattern, timelineId]
+      [applyKqlFilterQuery, indexPattern, timelineId]
     );
 
     const setFilterQueryDraftFromKueryExpression = useCallback(
@@ -91,8 +90,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             expression,
           },
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+      [timelineId, setKqlFilterQueryDraft]
     );
 
     const setFiltersInTimeline = useCallback(
@@ -101,8 +99,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           filters: newFilters,
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+      [timelineId, setFilters]
     );
 
     const setSavedQueryInTimeline = useCallback(
@@ -111,8 +108,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           savedQueryId: newSavedQueryId,
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+      [timelineId, setSavedQueryId]
     );
 
     const handleUpdateEventType = useCallback(
@@ -121,8 +117,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           eventType: newEventType,
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+      [timelineId, updateEventType]
     );
 
     return (

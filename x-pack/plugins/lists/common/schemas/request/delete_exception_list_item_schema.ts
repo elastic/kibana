@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
-import { NamespaceType, id, item_id, namespace_type } from '../common/schemas';
+import { id, item_id, namespace_type } from '../common/schemas';
+import { NamespaceType } from '../types';
+import { RequiredKeepUndefined } from '../../types';
 
 export const deleteExceptionListItemSchema = t.exact(
   t.partial({
@@ -18,11 +18,11 @@ export const deleteExceptionListItemSchema = t.exact(
   })
 );
 
-export type DeleteExceptionListItemSchema = t.TypeOf<typeof deleteExceptionListItemSchema>;
+export type DeleteExceptionListItemSchema = t.OutputOf<typeof deleteExceptionListItemSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
 export type DeleteExceptionListItemSchemaDecoded = Omit<
-  DeleteExceptionListItemSchema,
+  RequiredKeepUndefined<t.TypeOf<typeof deleteExceptionListItemSchema>>,
   'namespace_type'
 > & {
   namespace_type: NamespaceType;

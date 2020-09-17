@@ -13,8 +13,8 @@ import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { createDescriptionList } from './create_description_list';
 
 interface Args {
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   narrowDateRange: NarrowDateRange;
   jobKey: string;
   index?: number;

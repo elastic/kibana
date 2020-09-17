@@ -20,7 +20,7 @@ const createContextMock = () => {
       },
       elasticsearch: {
         legacy: {
-          client: elasticsearchServiceMock.createScopedClusterClient(),
+          client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
         },
       },
       uiSettings: {

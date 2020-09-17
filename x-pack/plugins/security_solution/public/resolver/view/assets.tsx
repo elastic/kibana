@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo } from 'react';
 import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
 import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
 import { htmlIdGenerator, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '../../common/lib/kibana';
-import { DEFAULT_DARK_MODE } from '../../../common/constants';
 import { ResolverProcessType } from '../types';
+import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 
 type ResolverColorNames =
   | 'descriptionText'
@@ -21,7 +22,9 @@ type ResolverColorNames =
   | 'graphControlsBackground'
   | 'resolverBackground'
   | 'resolverEdge'
-  | 'resolverEdgeText';
+  | 'resolverEdgeText'
+  | 'resolverBreadcrumbBackground'
+  | 'pillStroke';
 
 type ColorMap = Record<ResolverColorNames, string>;
 interface NodeStyleConfig {
@@ -34,7 +37,7 @@ interface NodeStyleConfig {
   strokeColor: string;
 }
 
-export interface NodeStyleMap {
+interface NodeStyleMap {
   runningProcessCube: NodeStyleConfig;
   runningTriggerCube: NodeStyleConfig;
   terminatedProcessCube: NodeStyleConfig;
@@ -46,7 +49,7 @@ const idGenerator = htmlIdGenerator();
 /**
  * Ids of paint servers to be referenced by fill and stroke attributes
  */
-export const PaintServerIds = {
+const PaintServerIds = {
   runningProcessCube: idGenerator('psRunningProcessCube'),
   runningTriggerCube: idGenerator('psRunningTriggerCube'),
   terminatedProcessCube: idGenerator('psTerminatedProcessCube'),
@@ -139,8 +142,6 @@ const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
     )}
   </>
 ));
-
-PaintServers.displayName = 'PaintServers';
 
 /**
  * Ids of symbols to be linked by <use> elements
@@ -375,8 +376,6 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
   </>
 ));
 
-SymbolsAndShapes.displayName = 'SymbolsAndShapes';
-
 /**
  * This `<defs>` element is used to define the reusable assets for the Resolver
  * It confers several advantages, including but not limited to:
@@ -385,7 +384,7 @@ SymbolsAndShapes.displayName = 'SymbolsAndShapes';
  *  3. `<use>` elements can be handled by compositor (faster)
  */
 const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) => {
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   return (
     <svg className={className}>
       <defs>
@@ -395,8 +394,6 @@ const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) 
     </svg>
   );
 });
-
-SymbolDefinitionsComponent.displayName = 'SymbolDefinitions';
 
 export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   position: absolute;
@@ -421,9 +418,9 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
 export const useResolverTheme = (): {
   colorMap: ColorMap;
   nodeAssets: NodeStyleMap;
-  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessOrigin: boolean) => NodeStyleConfig;
+  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessTrigger: boolean) => NodeStyleConfig;
 } => {
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  const isDarkMode = useUiSetting('theme:darkMode');
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
 
   const getThemedOption = (lightOption: string, darkOption: string): string => {
@@ -438,8 +435,10 @@ export const useResolverTheme = (): {
     processBackingFill: `${theme.euiColorPrimary}${getThemedOption('0F', '1F')}`, // Add opacity 0F = 6% , 1F = 12%
     resolverBackground: theme.euiColorEmptyShade,
     resolverEdge: getThemedOption(theme.euiColorLightestShade, theme.euiColorLightShade),
+    resolverBreadcrumbBackground: theme.euiColorLightestShade,
     resolverEdgeText: getThemedOption(theme.euiColorDarkShade, theme.euiColorFullShade),
     triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
+    pillStroke: theme.euiColorLightShade,
   };
 
   const nodeAssets: NodeStyleMap = {
@@ -477,7 +476,7 @@ export const useResolverTheme = (): {
       ),
       isLabelFilled: false,
       labelButtonFill: 'primary',
-      strokeColor: `${theme.euiColorPrimary}33`, // 33 = 20% opacity
+      strokeColor: theme.euiColorPrimary,
     },
     terminatedTriggerCube: {
       backingFill: colorMap.triggerBackingFill,
@@ -491,14 +490,18 @@ export const useResolverTheme = (): {
       ),
       isLabelFilled: false,
       labelButtonFill: 'danger',
-      strokeColor: `${theme.euiColorDanger}33`,
+      strokeColor: theme.euiColorDanger,
     },
   };
 
-  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessOrigin: boolean) {
+  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessTrigger: boolean) {
     if (isProcessTerminated) {
-      return nodeAssets[processTypeToCube.processTerminated];
-    } else if (isProcessOrigin) {
+      if (isProcessTrigger) {
+        return nodeAssets.terminatedTriggerCube;
+      } else {
+        return nodeAssets[processTypeToCube.processTerminated];
+      }
+    } else if (isProcessTrigger) {
       return nodeAssets[processTypeToCube.processCausedAlert];
     } else {
       return nodeAssets[processTypeToCube.processRan];

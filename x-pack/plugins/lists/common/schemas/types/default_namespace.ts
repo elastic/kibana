@@ -8,20 +8,13 @@ import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
 export const namespaceType = t.keyof({ agnostic: null, single: null });
-
-type NamespaceType = t.TypeOf<typeof namespaceType>;
-
-export type DefaultNamespaceC = t.Type<NamespaceType, NamespaceType, unknown>;
+export type NamespaceType = t.TypeOf<typeof namespaceType>;
 
 /**
  * Types the DefaultNamespace as:
  *   - If null or undefined, then a default string/enumeration of "single" will be used.
  */
-export const DefaultNamespace: DefaultNamespaceC = new t.Type<
-  NamespaceType,
-  NamespaceType,
-  unknown
->(
+export const DefaultNamespace = new t.Type<NamespaceType, NamespaceType | undefined, unknown>(
   'DefaultNamespace',
   namespaceType.is,
   (input, context): Either<t.Errors, NamespaceType> =>

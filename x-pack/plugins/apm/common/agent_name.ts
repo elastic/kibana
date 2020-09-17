@@ -15,15 +15,14 @@ import { AgentName } from '../typings/es_schemas/ui/fields/agent';
  */
 
 export const AGENT_NAMES: AgentName[] = [
-  'java',
-  'js-base',
-  'rum-js',
   'dotnet',
   'go',
   'java',
+  'js-base',
   'nodejs',
   'python',
   'ruby',
+  'rum-js',
 ];
 
 export function isAgentName(agentName: string): agentName is AgentName {

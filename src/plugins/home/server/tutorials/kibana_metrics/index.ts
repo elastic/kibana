@@ -36,6 +36,7 @@ export function kibanaMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.kibanaMetrics.nameTitle', {
       defaultMessage: 'Kibana metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kibanaMetrics.shortDescription', {

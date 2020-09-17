@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { SavedObjectsClientContract } from 'src/core/server';
 import {
   Dataset,
   RegistryPackage,
@@ -17,13 +18,13 @@ import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
 import * as Registry from '../../registry';
+import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
 export const installTemplates = async (
   registryPackage: RegistryPackage,
   callCluster: CallESAsCurrentUser,
-  pkgName: string,
-  pkgVersion: string,
-  paths: string[]
+  paths: string[],
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<TemplateRef[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
@@ -31,8 +32,24 @@ export const installTemplates = async (
   await installPreBuiltComponentTemplates(paths, callCluster);
   await installPreBuiltTemplates(paths, callCluster);
 
+  // remove package installation's references to index templates
+  await removeAssetsFromInstalledEsByType(
+    savedObjectsClient,
+    registryPackage.name,
+    ElasticsearchAssetType.indexTemplate
+  );
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
+  if (!datasets) return [];
+  // get template refs to save
+  const installedTemplateRefs = datasets.map((dataset) => ({
+    id: generateTemplateName(dataset),
+    type: ElasticsearchAssetType.indexTemplate,
+  }));
+
+  // add package installation's references to index templates
+  await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, installedTemplateRefs);
+
   if (datasets) {
     const installTemplatePromises = datasets.reduce<Array<Promise<TemplateRef>>>((acc, dataset) => {
       acc.push(
@@ -46,7 +63,9 @@ export const installTemplates = async (
     }, []);
 
     const res = await Promise.all(installTemplatePromises);
-    return res.flat();
+    const installedTemplates = res.flat();
+
+    return installedTemplates;
   }
   return [];
 };

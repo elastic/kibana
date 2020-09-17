@@ -7,7 +7,6 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
 /src/plugins/input_control_vis/ @elastic/kibana-app
@@ -24,29 +23,20 @@
 /src/plugins/vis_type_xy/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 
-# Core UI
-# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
-/src/plugins/home/public @elastic/kibana-core-ui
-/src/plugins/home/server/*.ts @elastic/kibana-core-ui
-/src/plugins/home/server/services/ @elastic/kibana-core-ui
-# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
-/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-core-ui
-/src/legacy/core_plugins/kibana/public/home/*.scss @elastic/kibana-core-ui
-/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
-
 # App Architecture
+/examples/bfetch_explorer/ @elastic/kibana-app-arch
+/examples/dashboard_embeddable_examples/ @elastic/kibana-app-arch
+/examples/demo_search/ @elastic/kibana-app-arch
 /examples/developer_examples/ @elastic/kibana-app-arch
+/examples/embeddable_examples/ @elastic/kibana-app-arch
+/examples/embeddable_explorer/ @elastic/kibana-app-arch
+/examples/state_container_examples/ @elastic/kibana-app-arch
+/examples/ui_actions_examples/ @elastic/kibana-app-arch
+/examples/ui_actions_explorer/ @elastic/kibana-app-arch
 /examples/url_generators_examples/ @elastic/kibana-app-arch
 /examples/url_generators_explorer/ @elastic/kibana-app-arch
-/packages/kbn-interpreter/ @elastic/kibana-app-arch
 /packages/elastic-datemath/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/kibana/public/management/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/kibana/server/routes/api/management/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/visualizations/ @elastic/kibana-app-arch
-/src/legacy/server/index_patterns/ @elastic/kibana-app-arch
+/packages/kbn-interpreter/ @elastic/kibana-app-arch
 /src/plugins/advanced_settings/ @elastic/kibana-app-arch
 /src/plugins/bfetch/ @elastic/kibana-app-arch
 /src/plugins/data/ @elastic/kibana-app-arch
@@ -61,9 +51,10 @@
 /src/plugins/share/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
-/x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
+/x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-arch
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-arch
-/x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
+/x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-arch
+/x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -72,6 +63,14 @@
 /src/plugins/apm_oss/  @elastic/apm-ui
 /src/apm.js @watson @vigneshshanmugam
 
+# Client Side Monitoring (lives in APM directories but owned by Uptime)
+/x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm @elastic/uptime
+/x-pack/plugins/apm/public/application/csmApp.tsx @elastic/uptime
+/x-pack/plugins/apm/public/components/app/RumDashboard @elastic/uptime
+/x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
+/x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
+/x-pack/plugins/apm/server/projections/rum_overview.ts @elastic/uptime
+
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
 
@@ -79,13 +78,22 @@
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-canvas
 
+# Core UI
+# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
+/src/plugins/home/public @elastic/kibana-core-ui
+/src/plugins/home/server/*.ts @elastic/kibana-core-ui
+/src/plugins/home/server/services/ @elastic/kibana-core-ui
+# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
+/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-core-ui
+/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
+/x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
+
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/ingest_manager/ @elastic/ingest-management
 /x-pack/legacy/plugins/ingest_manager/ @elastic/ingest-management
 /x-pack/plugins/observability/ @elastic/observability-ui
-/x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/uptime @elastic/uptime
 
@@ -113,7 +121,6 @@
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
-/src/es_archiver/ @elastic/kibana-operations
 /packages/*eslint*/ @elastic/kibana-operations
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
@@ -122,6 +129,8 @@
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
+/packages/kbn-es-archiver/ @elastic/kibana-operations
+/packages/kbn-utils/ @elastic/kibana-operations
 /src/legacy/server/keystore/ @elastic/kibana-operations
 /src/legacy/server/pid/ @elastic/kibana-operations
 /src/legacy/server/sass/ @elastic/kibana-operations
@@ -144,7 +153,9 @@
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /x-pack/plugins/global_search/  @elastic/kibana-platform
 /x-pack/plugins/cloud/ @elastic/kibana-platform
+/x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
+/packages/kbn-std/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
 /src/legacy/server/logging/ @elastic/kibana-platform
@@ -156,12 +167,23 @@
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
-/x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
+/x-pack/test/ui_capabilities/ @elastic/kibana-security
+/x-pack/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
+/x-pack/test/functional/apps/security/ @elastic/kibana-security
+/x-pack/test/kerberos_api_integration/ @elastic/kibana-security
+/x-pack/test/login_selector_api_integration/ @elastic/kibana-security
+/x-pack/test/oidc_api_integration/ @elastic/kibana-security
+/x-pack/test/pki_api_integration/ @elastic/kibana-security
+/x-pack/test/saml_api_integration/ @elastic/kibana-security
+/x-pack/test/security_api_integration/ @elastic/kibana-security
+/x-pack/test/security_functional/ @elastic/kibana-security
+/x-pack/test/spaces_api_integration/ @elastic/kibana-security
+/x-pack/test/token_api_integration/ @elastic/kibana-security
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization
@@ -197,8 +219,20 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
 
-# Design
-**/*.scss  @elastic/kibana-design
+# Enterprise Search
+# Shared
+/x-pack/plugins/enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
+# App Search
+/x-pack/plugins/enterprise_search/public/applications/app_search @elastic/app-search-frontend
+/x-pack/plugins/enterprise_search/server/routes/app_search @elastic/app-search-frontend
+/x-pack/plugins/enterprise_search/server/collectors/app_search @elastic/app-search-frontend
+/x-pack/plugins/enterprise_search/server/saved_objects/app_search @elastic/app-search-frontend
+# Workplace Search
+/x-pack/plugins/enterprise_search/public/applications/workplace_search @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/server/routes/workplace_search @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/server/collectors/workplace_search @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/server/saved_objects/workplace_search @elastic/workplace-search-frontend
 
 # Elasticsearch UI
 /src/plugins/dev_tools/ @elastic/es-ui
@@ -237,9 +271,36 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Security Solution
 /x-pack/plugins/security_solution/ @elastic/siem @elastic/endpoint-app-team
 /x-pack/test/detection_engine_api_integration @elastic/siem @elastic/endpoint-app-team
+/x-pack/test/lists_api_integration @elastic/siem @elastic/endpoint-app-team
 /x-pack/test/api_integration/apis/security_solution @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/case @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/lists @elastic/siem @elastic/endpoint-app-team
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
+
+# Design (at the bottom for specificity of SASS files)
+**/*.scss  @elastic/kibana-design
+
+# Core design
+/src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
+/x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
+/src/legacy/core_plugins/kibana/public/home/**/*.scss @elastic/kibana-core-ui-designers
+/x-pack/legacy/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
+/x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
+/x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers
+
+# Observability design
+/x-pack/plugins/apm/**/*.scss @elastic/observability-design
+/x-pack/plugins/infra/**/*.scss @elastic/observability-design
+/x-pack/plugins/ingest_manager/**/*.scss @elastic/observability-design
+/x-pack/plugins/observability/**/*.scss @elastic/observability-design
+/x-pack/plugins/monitoring/**/*.scss @elastic/observability-design
+
+# Ent. Search design
+/x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
+
+# Security design
+/x-pack/plugins/endpoint/**/*.scss @elastic/security-design
+/x-pack/plugins/security_solution/**/*.scss @elastic/security-design
+

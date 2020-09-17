@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ComponentTemplateListItem, ComponentTemplateDeserialized, Error } from '../shared_imports';
-import { UIM_COMPONENT_TEMPLATE_DELETE_MANY, UIM_COMPONENT_TEMPLATE_DELETE } from '../constants';
+import {
+  ComponentTemplateListItem,
+  ComponentTemplateDeserialized,
+  ComponentTemplateSerialized,
+  Error,
+} from '../shared_imports';
+import {
+  UIM_COMPONENT_TEMPLATE_DELETE_MANY,
+  UIM_COMPONENT_TEMPLATE_DELETE,
+  UIM_COMPONENT_TEMPLATE_CREATE,
+  UIM_COMPONENT_TEMPLATE_UPDATE,
+} from '../constants';
 import { UseRequestHook, SendRequestHook } from './request';
 
 export const getApi = (
@@ -44,9 +54,36 @@ export const getApi = (
     });
   }
 
+  async function createComponentTemplate(componentTemplate: ComponentTemplateSerialized) {
+    const result = await sendRequest({
+      path: `${apiBasePath}/component_templates`,
+      method: 'post',
+      body: JSON.stringify(componentTemplate),
+    });
+
+    trackMetric('count', UIM_COMPONENT_TEMPLATE_CREATE);
+
+    return result;
+  }
+
+  async function updateComponentTemplate(componentTemplate: ComponentTemplateDeserialized) {
+    const { name } = componentTemplate;
+    const result = await sendRequest({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}`,
+      method: 'put',
+      body: JSON.stringify(componentTemplate),
+    });
+
+    trackMetric('count', UIM_COMPONENT_TEMPLATE_UPDATE);
+
+    return result;
+  }
+
   return {
     useLoadComponentTemplates,
     deleteComponentTemplates,
     useLoadComponentTemplate,
+    createComponentTemplate,
+    updateComponentTemplate,
   };
 };

@@ -28,6 +28,8 @@ export {
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
+  ReferenceOrValueEmbeddable,
+  isReferenceOrValueEmbeddable,
   ChartActionContext,
   Container,
   ContainerInput,

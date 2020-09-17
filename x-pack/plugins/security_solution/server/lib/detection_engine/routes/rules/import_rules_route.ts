@@ -19,8 +19,9 @@ import {
   ImportRulesSchema as ImportRulesResponseSchema,
   importRulesSchema as importRulesResponseSchema,
 } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { IRouter } from '../../../../../../../../src/core/server';
-import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
+import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils/';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
@@ -161,6 +162,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   severity_mapping: severityMapping,
                   tags,
                   threat,
+                  threshold,
                   timestamp_override: timestampOverride,
                   to,
                   type,
@@ -173,13 +175,10 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                 } = parsedRule;
 
                 try {
-                  const query =
-                    type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+                  const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
                   const language =
-                    type !== 'machine_learning' && languageOrUndefined == null
-                      ? 'kuery'
-                      : languageOrUndefined;
+                    !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
 
                   // TODO: Fix these either with an is conversion or by better typing them within io-ts
                   const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
@@ -222,6 +221,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       to,
                       type,
                       threat,
+                      threshold,
                       timestampOverride,
                       references,
                       note,
@@ -264,6 +264,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       to,
                       type,
                       threat,
+                      threshold,
                       references,
                       note,
                       version,

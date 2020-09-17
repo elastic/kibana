@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
@@ -12,33 +12,33 @@ import { FilterManager, FormFilter } from '../models/filter';
 
 // TODO - add function for returning a list of just the filter IDs.
 // TODO - add function for returning a list of filter IDs plus item count.
-function getAllFilters(context: RequestHandlerContext) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+function getAllFilters(client: IScopedClusterClient) {
+  const mgr = new FilterManager(client);
   return mgr.getAllFilters();
 }
 
-function getAllFilterStats(context: RequestHandlerContext) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+function getAllFilterStats(client: IScopedClusterClient) {
+  const mgr = new FilterManager(client);
   return mgr.getAllFilterStats();
 }
 
-function getFilter(context: RequestHandlerContext, filterId: string) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+function getFilter(client: IScopedClusterClient, filterId: string) {
+  const mgr = new FilterManager(client);
   return mgr.getFilter(filterId);
 }
 
-function newFilter(context: RequestHandlerContext, filter: FormFilter) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+function newFilter(client: IScopedClusterClient, filter: FormFilter) {
+  const mgr = new FilterManager(client);
   return mgr.newFilter(filter);
 }
 
-function updateFilter(context: RequestHandlerContext, filterId: string, filter: FormFilter) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+function updateFilter(client: IScopedClusterClient, filterId: string, filter: FormFilter) {
+  const mgr = new FilterManager(client);
   return mgr.updateFilter(filterId, filter);
 }
 
-function deleteFilter(context: RequestHandlerContext, filterId: string) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+function deleteFilter(client: IScopedClusterClient, filterId: string) {
+  const mgr = new FilterManager(client);
   return mgr.deleteFilter(filterId);
 }
 
@@ -61,9 +61,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetFilters'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const resp = await getAllFilters(context);
+        const resp = await getAllFilters(client);
 
         return response.ok({
           body: resp,
@@ -96,9 +96,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetFilters'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getFilter(context, request.params.filterId);
+        const resp = await getFilter(client, request.params.filterId);
         return response.ok({
           body: resp,
         });
@@ -130,10 +130,10 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateFilter'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const body = request.body;
-        const resp = await newFilter(context, body);
+        const resp = await newFilter(client, body);
 
         return response.ok({
           body: resp,
@@ -168,11 +168,11 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateFilter'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { filterId } = request.params;
         const body = request.body;
-        const resp = await updateFilter(context, filterId, body);
+        const resp = await updateFilter(client, filterId, body);
 
         return response.ok({
           body: resp,
@@ -202,10 +202,10 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteFilter'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { filterId } = request.params;
-        const resp = await deleteFilter(context, filterId);
+        const resp = await deleteFilter(client, filterId);
 
         return response.ok({
           body: resp,
@@ -235,9 +235,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetFilters'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const resp = await getAllFilterStats(context);
+        const resp = await getAllFilterStats(client);
 
         return response.ok({
           body: resp,

@@ -22,6 +22,7 @@ import {
   PartitionFillLabel,
   RecursivePartial,
   LayerValue,
+  Position,
 } from '@elastic/charts';
 import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
@@ -32,6 +33,7 @@ import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { LensIconChartDonut } from '../assets/chart_donut';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -55,6 +57,7 @@ export function PieComponent(
     numberDisplay,
     categoryDisplay,
     legendDisplay,
+    legendPosition,
     nestedLegend,
     percentDecimals,
     hideLabels,
@@ -159,7 +162,7 @@ export function PieComponent(
       // to account for in outer labels
       // This does not handle non-dashboard embeddables, which are allowed to
       // have different backgrounds.
-      textColor: chartTheme.axes?.axisTitleStyle?.fill,
+      textColor: chartTheme.axes?.axisTitle?.fill,
     },
     sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
     sectorLineWidth: 1.5,
@@ -184,7 +187,7 @@ export function PieComponent(
   const percentFormatter = props.formatFactory({
     id: 'percent',
     params: {
-      pattern: `0,0.${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}%`,
+      pattern: `0,0.[${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
     },
   });
 
@@ -208,7 +211,7 @@ export function PieComponent(
     );
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon="visPie" />;
+    return <EmptyPlaceholder icon={LensIconChartDonut} />;
   }
 
   if (hasNegative) {
@@ -237,6 +240,7 @@ export function PieComponent(
             (legendDisplay === 'show' ||
               (legendDisplay === 'default' && columnGroups.length > 1 && shape !== 'treemap'))
           }
+          legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={(args) => {
             const context = getFilterContext(

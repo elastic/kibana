@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, KibanaRequest, SavedObjectsClientContract } from '../../../../../src/core/server';
+import { Logger, KibanaRequest } from 'src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
   ActionTypeExecutorResult,
@@ -12,27 +12,35 @@ import {
   GetServicesFunction,
   RawAction,
   PreConfiguredAction,
+  ProxySettings,
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { ActionsClient } from '../actions_client';
+import { ActionExecutionSource } from './action_execution_source';
 
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceSetup;
   getServices: GetServicesFunction;
-  getScopedSavedObjectsClient: (req: KibanaRequest) => SavedObjectsClientContract;
+  getActionsClientWithRequest: (
+    request: KibanaRequest,
+    executionSource?: ActionExecutionSource<unknown>
+  ) => Promise<PublicMethodsOf<ActionsClient>>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
+  proxySettings?: ProxySettings;
 }
 
-export interface ExecuteOptions {
+export interface ExecuteOptions<Source = unknown> {
   actionId: string;
   request: KibanaRequest;
   params: Record<string, unknown>;
+  source?: ActionExecutionSource<Source>;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -58,7 +66,8 @@ export class ActionExecutor {
     actionId,
     params,
     request,
-  }: ExecuteOptions): Promise<ActionTypeExecutorResult> {
+    source,
+  }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
@@ -76,7 +85,8 @@ export class ActionExecutor {
       actionTypeRegistry,
       eventLogger,
       preconfiguredActions,
-      getScopedSavedObjectsClient,
+      getActionsClientWithRequest,
+      proxySettings,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
@@ -84,7 +94,7 @@ export class ActionExecutor {
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     const { actionTypeId, name, config, secrets } = await getActionInfo(
-      getScopedSavedObjectsClient(request),
+      await getActionsClientWithRequest(request, source),
       encryptedSavedObjectsClient,
       preconfiguredActions,
       actionId,
@@ -124,7 +134,7 @@ export class ActionExecutor {
     };
 
     eventLogger.startTiming(event);
-    let rawResult: ActionTypeExecutorResult | null | undefined | void;
+    let rawResult: ActionTypeExecutorResult<unknown>;
     try {
       rawResult = await actionType.executor({
         actionId,
@@ -132,6 +142,7 @@ export class ActionExecutor {
         params: validatedParams,
         config: validatedConfig,
         secrets: validatedSecrets,
+        proxySettings,
       });
     } catch (err) {
       rawResult = {
@@ -172,7 +183,7 @@ export class ActionExecutor {
   }
 }
 
-function actionErrorToMessage(result: ActionTypeExecutorResult): string {
+function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
   let message = result.message || 'unknown error running action';
 
   if (result.serviceMessage) {
@@ -196,7 +207,7 @@ interface ActionInfo {
 }
 
 async function getActionInfo(
-  savedObjectsClient: SavedObjectsClientContract,
+  actionsClient: PublicMethodsOf<ActionsClient>,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
@@ -217,9 +228,7 @@ async function getActionInfo(
 
   // if not pre-configured action, should be a saved object
   // ensure user can read the action before processing
-  const {
-    attributes: { actionTypeId, config, name },
-  } = await savedObjectsClient.get<RawAction>('action', actionId);
+  const { actionTypeId, config, name } = await actionsClient.get({ id: actionId });
 
   const {
     attributes: { secrets },

@@ -19,12 +19,12 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
   const SUBJ_TABLE_SORT_NAME_COL = `tableHeaderCell_name_0`;
-  const SUBJ_TABLE_SORT_STATUS_COL = `tableHeaderCell_isOnline_1`;
-  const SUBJ_TABLE_SORT_SHARDS_COL = `tableHeaderCell_shardCount_2`;
-  const SUBJ_TABLE_SORT_CPU_COL = `tableHeaderCell_node_cpu_utilization_3`;
-  const SUBJ_TABLE_SORT_LOAD_COL = `tableHeaderCell_node_load_average_4`;
-  const SUBJ_TABLE_SORT_MEM_COL = `tableHeaderCell_node_jvm_mem_percent_5`;
-  const SUBJ_TABLE_SORT_DISK_COL = `tableHeaderCell_node_free_space_6`;
+  const SUBJ_TABLE_SORT_STATUS_COL = `tableHeaderCell_isOnline_2`;
+  const SUBJ_TABLE_SORT_SHARDS_COL = `tableHeaderCell_shardCount_3`;
+  const SUBJ_TABLE_SORT_CPU_COL = `tableHeaderCell_node_cpu_utilization_4`;
+  const SUBJ_TABLE_SORT_LOAD_COL = `tableHeaderCell_node_load_average_5`;
+  const SUBJ_TABLE_SORT_MEM_COL = `tableHeaderCell_node_jvm_mem_percent_6`;
+  const SUBJ_TABLE_SORT_DISK_COL = `tableHeaderCell_node_free_space_7`;
 
   const SUBJ_TABLE_BODY = 'elasticsearchNodesTableContainer';
   const SUBJ_NODES_NAMES = `${SUBJ_TABLE_BODY} > name`;

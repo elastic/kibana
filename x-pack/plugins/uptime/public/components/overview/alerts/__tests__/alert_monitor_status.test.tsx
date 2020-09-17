@@ -17,10 +17,6 @@ describe('alert monitor status component', () => {
         timerangeUnit: 'h',
         timerangeCount: 21,
       },
-      autocomplete: {
-        addQuerySuggestionProvider: jest.fn(),
-        getQuerySuggestions: jest.fn(),
-      },
       enabled: true,
       hasFilters: false,
       isOldAlert: true,
@@ -45,12 +41,6 @@ describe('alert monitor status component', () => {
           />
           <KueryBar
             aria-label="Input that allows filtering criteria for the monitor status alert"
-            autocomplete={
-              Object {
-                "addQuerySuggestionProvider": [MockFunction],
-                "getQuerySuggestions": [MockFunction],
-              }
-            }
             data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
             defaultKuery="monitor.id: foo"
             shouldUpdateUrl={false}
@@ -59,21 +49,9 @@ describe('alert monitor status component', () => {
           <EuiSpacer
             size="s"
           />
-          <DownNoExpressionSelect
-            defaultNumTimes={3}
-            hasFilters={false}
-            setAlertParams={[MockFunction]}
-          />
-          <EuiSpacer
-            size="xs"
-          />
-          <TimeExpressionSelect
-            defaultTimerangeCount={21}
-            defaultTimerangeUnit="h"
-            setAlertParams={[MockFunction]}
-          />
-          <EuiSpacer
-            size="xs"
+          <AddFilterButton
+            newFilters={Array []}
+            onNewFilter={[Function]}
           />
           <FiltersExpressionSelectContainer
             alertParams={
@@ -89,15 +67,34 @@ describe('alert monitor status component', () => {
             setAlertParams={[MockFunction]}
             shouldUpdateUrl={false}
           />
-          <EuiSpacer
-            size="xs"
+          <EuiHorizontalRule />
+          <StatusExpressionSelect
+            alertParams={
+              Object {
+                "numTimes": 3,
+                "search": "monitor.id: foo",
+                "timerangeCount": 21,
+                "timerangeUnit": "h",
+              }
+            }
+            hasFilters={false}
+            setAlertParams={[MockFunction]}
           />
-          <AddFilterButton
-            newFilters={Array []}
-            onNewFilter={[Function]}
+          <EuiHorizontalRule />
+          <AvailabilityExpressionSelect
+            alertParams={
+              Object {
+                "numTimes": 3,
+                "search": "monitor.id: foo",
+                "timerangeCount": 21,
+                "timerangeUnit": "h",
+              }
+            }
+            isOldAlert={true}
+            setAlertParams={[MockFunction]}
           />
           <EuiSpacer
-            size="m"
+            size="l"
           />
           <EuiCallOut
             iconType="iInCircle"

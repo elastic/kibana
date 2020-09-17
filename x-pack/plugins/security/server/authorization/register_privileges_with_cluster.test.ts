@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import { ILegacyClusterClient, Logger } from 'kibana/server';
 import { RawKibanaPrivileges } from '../../common/model';
@@ -100,7 +101,7 @@ const registerPrivilegesWithClusterTest = (
   };
 
   test(description, async () => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
     mockClusterClient.callAsInternalUser.mockImplementation(async (api) => {
       switch (api) {
         case 'shield.getPrivilege': {

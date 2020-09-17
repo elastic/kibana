@@ -17,51 +17,34 @@
  * under the License.
  */
 
-import { IUiSettingsClient, CoreStart } from 'kibana/public';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS, ISearchRequestParams, GetConfigFn } from '../../../common';
 import { SearchRequest } from './types';
 
 const sessionId = Date.now();
 
-export function getSearchParams(config: IUiSettingsClient, esShardTimeout: number = 0) {
+export function getSearchParams(getConfig: GetConfigFn) {
   return {
-    rest_total_hits_as_int: true,
-    ignore_unavailable: true,
-    ignore_throttled: getIgnoreThrottled(config),
-    max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
-    preference: getPreference(config),
-    timeout: getTimeout(esShardTimeout),
+    preference: getPreference(getConfig),
   };
 }
 
-export function getIgnoreThrottled(config: IUiSettingsClient) {
-  return !config.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
-}
-
-export function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
-  const maxConcurrentShardRequests = config.get(UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS);
-  return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
-}
-
-export function getPreference(config: IUiSettingsClient) {
-  const setRequestPreference = config.get(UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE);
+export function getPreference(getConfig: GetConfigFn) {
+  const setRequestPreference = getConfig(UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE);
   if (setRequestPreference === 'sessionId') return sessionId;
   return setRequestPreference === 'custom'
-    ? config.get(UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE)
+    ? getConfig(UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE)
     : undefined;
 }
 
-export function getTimeout(esShardTimeout: number) {
-  return esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined;
-}
-
+/** @public */
+// TODO: Could provide this on runtime contract with dependencies
+// already wired up.
 export function getSearchParamsFromRequest(
   searchRequest: SearchRequest,
-  dependencies: { injectedMetadata: CoreStart['injectedMetadata']; uiSettings: IUiSettingsClient }
-) {
-  const { injectedMetadata, uiSettings } = dependencies;
-  const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
-  const searchParams = getSearchParams(uiSettings, esShardTimeout);
+  dependencies: { getConfig: GetConfigFn }
+): ISearchRequestParams {
+  const { getConfig } = dependencies;
+  const searchParams = getSearchParams(getConfig);
 
   return {
     index: searchRequest.index.title || searchRequest.index,

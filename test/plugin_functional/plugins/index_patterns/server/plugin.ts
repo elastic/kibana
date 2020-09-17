@@ -78,7 +78,7 @@ export class IndexPatternsTestPlugin
         const id = (req.params as Record<string, string>).id;
         const service = await data.indexPatterns.indexPatternsServiceFactory(req);
         const ip = await service.get(id);
-        await ip.save();
+        await service.save(ip);
         return res.ok();
       }
     );
@@ -96,8 +96,7 @@ export class IndexPatternsTestPlugin
         const [, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
         const service = await data.indexPatterns.indexPatternsServiceFactory(req);
-        const ip = await service.get(id);
-        await ip.destroy();
+        await service.delete(id);
         return res.ok();
       }
     );

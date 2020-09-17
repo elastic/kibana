@@ -8,7 +8,7 @@ import { AddPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
 import { addPrepackagedRuleValidateTypeDependents } from './add_prepackaged_rules_type_dependents';
 import { getAddPrepackagedRulesSchemaMock } from './add_prepackaged_rules_schema.mock';
 
-describe('create_rules_type_dependents', () => {
+describe('add_prepackaged_rules_type_dependents', () => {
   test('saved_id is required when type is saved_query and will not validate without out', () => {
     const schema: AddPrepackagedRulesSchema = {
       ...getAddPrepackagedRulesSchemaMock(),
@@ -67,5 +67,27 @@ describe('create_rules_type_dependents', () => {
     delete schema.timeline_id;
     const errors = addPrepackagedRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['when "timeline_title" exists, "timeline_id" must also exist']);
+  });
+
+  test('threshold is required when type is threshold and validates with it', () => {
+    const schema: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      type: 'threshold',
+    };
+    const errors = addPrepackagedRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['when "type" is "threshold", "threshold" is required']);
+  });
+
+  test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
+    const schema: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      type: 'threshold',
+      threshold: {
+        field: '',
+        value: -1,
+      },
+    };
+    const errors = addPrepackagedRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
   });
 });

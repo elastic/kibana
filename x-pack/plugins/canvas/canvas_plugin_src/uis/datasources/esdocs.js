@@ -107,7 +107,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
       <EuiAccordion
         id="accordionAdvancedSettings"
         buttonContent="Advanced settings"
-        className="canvasArg__accordion"
+        className="canvasSidebar__accordion"
       >
         <EuiSpacer size="s" />
         <EuiFormRow label={strings.getSortFieldTitle()} display="columnCompressed">

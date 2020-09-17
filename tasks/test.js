@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import _, { keys } from 'lodash';
-
 import { run } from '../utilities/visual_regression';
 
 module.exports = function (grunt) {
@@ -31,25 +29,6 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:karma', [
-    'checkPlugins',
-    'run:browserSCSS',
-    'run:karmaTestServer',
-    'karma:unit',
-  ]);
-
-  grunt.registerTask('test:karma-ci', () => {
-    const ciShardTasks = keys(grunt.config.get('karma'))
-      .filter((key) => key.startsWith('ciShard-'))
-      .map((key) => `karma:${key}`);
-
-    grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
-    grunt.task.run(['run:browserSCSS']);
-    grunt.task.run(['run:karmaTestServer', ...ciShardTasks]);
-  });
-
-  grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
-
   grunt.registerTask('test:quick', [
     'checkPlugins',
     'run:mocha',
@@ -57,18 +36,16 @@ module.exports = function (grunt) {
     'test:jest',
     'test:jest_integration',
     'test:projects',
-    'test:karma',
     'run:apiIntegrationTests',
   ]);
 
-  grunt.registerTask('test:karmaDebug', ['checkPlugins', 'run:karmaTestDebugServer', 'karma:dev']);
   grunt.registerTask('test:mochaCoverage', ['run:mochaCoverage']);
 
   grunt.registerTask('test', (subTask) => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
     grunt.task.run(
-      _.compact([
+      [
         !grunt.option('quick') && 'run:eslint',
         !grunt.option('quick') && 'run:sasslint',
         !grunt.option('quick') && 'run:checkTsProjects',
@@ -78,7 +55,7 @@ module.exports = function (grunt) {
         'run:checkFileCasing',
         'run:licenses',
         'test:quick',
-      ])
+      ].filter(Boolean)
     );
   });
 

@@ -4,25 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
-
+import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import {
+  BULK_ACTIONS,
   CLOSE_TIMELINE_BTN,
   CREATE_NEW_TIMELINE,
+  EXPORT_TIMELINE_ACTION,
+  TIMELINE_CHECKBOX,
+  HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
+  PIN_EVENT,
   SEARCH_OR_FILTER_CONTAINER,
   SERVER_SIDE_EVENT_COUNT,
+  TIMELINE_CHANGES_IN_PROGRESS,
   TIMELINE_DESCRIPTION,
   TIMELINE_FIELDS_BUTTON,
   TIMELINE_INSPECT_BUTTON,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE,
+  TIMELINES_TABLE,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
   REMOVE_COLUMN,
   RESET_FIELDS,
+  ATTACH_TIMELINE_TO_NEW_CASE_ICON,
+  OPEN_TIMELINE_ICON,
+  ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
+  CASE,
 } from '../screens/timeline';
 
 import { drag, drop } from '../tasks/common';
@@ -31,12 +41,26 @@ export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
   cy.get(TIMELINE_DESCRIPTION).type(`${description}{enter}`);
-  cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click().invoke('text').should('not.equal', 'Updating');
+  cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', description);
 };
 
 export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_TITLE).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE).should('have.attr', 'value', name);
+};
+
+export const addNewCase = () => {
+  cy.get(ALL_CASES_CREATE_NEW_CASE_TABLE_BTN).click();
+};
+
+export const attachTimelineToNewCase = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click({ force: true });
+};
+
+export const attachTimelineToExistingCase = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click({ force: true });
 };
 
 export const checkIdToggleField = () => {
@@ -58,11 +82,17 @@ export const createNewTimeline = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} input`).type(`${query} {enter}`);
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
 };
 
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
+};
+
+export const exportTimeline = (timelineId: string) => {
+  cy.get(TIMELINE_CHECKBOX(timelineId)).click({ force: true });
+  cy.get(BULK_ACTIONS).click({ force: true });
+  cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
 export const openTimelineFieldsBrowser = () => {
@@ -74,8 +104,17 @@ export const openTimelineInspectButton = () => {
   cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
 };
 
+export const openTimelineFromSettings = () => {
+  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(OPEN_TIMELINE_ICON).click({ force: true });
+};
+
 export const openTimelineSettings = () => {
   cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
+};
+
+export const pinFirstEvent = () => {
+  cy.get(PIN_EVENT).first().click({ force: true });
 };
 
 export const populateTimeline = () => {
@@ -86,6 +125,10 @@ export const populateTimeline = () => {
       const intCount = +strCount;
       cy.wrap(intCount).should('be.above', 0);
     });
+};
+
+export const unpinFirstEvent = () => {
+  cy.get(PIN_EVENT).first().click({ force: true });
 };
 
 export const uncheckTimestampToggleField = () => {
@@ -105,10 +148,23 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 };
 
 export const removeColumn = (column: number) => {
-  cy.get(REMOVE_COLUMN).first().should('exist');
+  cy.get(HEADER).eq(column).click();
   cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
 };
 
 export const resetFields = () => {
   cy.get(RESET_FIELDS).click({ force: true });
+};
+
+export const selectCase = (caseId: string) => {
+  cy.get(CASE(caseId)).click();
+};
+
+export const waitForTimelinesPanelToBeLoaded = () => {
+  cy.get(TIMELINES_TABLE).should('exist');
+};
+
+export const waitForTimelineChanges = () => {
+  cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('exist');
+  cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
 };

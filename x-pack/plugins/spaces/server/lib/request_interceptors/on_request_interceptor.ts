@@ -5,7 +5,7 @@
  */
 import {
   KibanaRequest,
-  OnPreAuthToolkit,
+  OnPreRoutingToolkit,
   LifecycleResponseFactory,
   CoreSetup,
 } from 'src/core/server';
@@ -18,10 +18,10 @@ export interface OnRequestInterceptorDeps {
   http: CoreSetup['http'];
 }
 export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDeps) {
-  http.registerOnPreAuth(async function spacesOnPreAuthHandler(
+  http.registerOnPreRouting(async function spacesOnPreRoutingHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,
-    toolkit: OnPreAuthToolkit
+    toolkit: OnPreRoutingToolkit
   ) {
     const serverBasePath = http.basePath.serverBasePath;
     const path = request.url.pathname;

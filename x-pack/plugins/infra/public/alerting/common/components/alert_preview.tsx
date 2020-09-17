@@ -14,13 +14,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
+  EuiAccordion,
   EuiCodeBlock,
-  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -61,9 +57,6 @@ export const AlertPreview: React.FC<Props> = (props) => {
   const [previewResult, setPreviewResult] = useState<
     (AlertPreviewSuccessResponsePayload & Record<string, any>) | null
   >(null);
-  const [isErrorModalVisible, setIsErrorModalVisible] = useState<boolean>(false);
-  const onOpenModal = useCallback(() => setIsErrorModalVisible(true), [setIsErrorModalVisible]);
-  const onCloseModal = useCallback(() => setIsErrorModalVisible(false), [setIsErrorModalVisible]);
 
   const onSelectPreviewLookbackInterval = useCallback((e) => {
     setPreviewLookbackInterval(e.target.value);
@@ -169,11 +162,10 @@ export const AlertPreview: React.FC<Props> = (props) => {
                       <strong>
                         <FormattedMessage
                           id="xpack.infra.metrics.alertFlyout.alertPreviewGroups"
-                          defaultMessage="{numberOfGroups} {groupName}{plural}"
+                          defaultMessage="{numberOfGroups, plural, one {# {groupName}} other {# {groupName}s}}"
                           values={{
                             numberOfGroups: previewResult.numberOfGroups,
                             groupName: previewResult.groupByDisplayName,
-                            plural: previewResult.numberOfGroups !== 1 ? 's' : '',
                           }}
                         />
                       </strong>{' '}
@@ -194,14 +186,25 @@ export const AlertPreview: React.FC<Props> = (props) => {
               {showNoDataResults && previewResult.resultTotals.noData ? (
                 <FormattedMessage
                   id="xpack.infra.metrics.alertFlyout.alertPreviewNoDataResult"
-                  defaultMessage="There {were} {noData} result{plural} of no data."
+                  defaultMessage="There {boldedResultsNumber} of no data."
                   values={{
-                    were: previewResult.resultTotals.noData !== 1 ? 'were' : 'was',
-                    noData: <strong>{previewResult.resultTotals.noData}</strong>,
-                    plural: previewResult.resultTotals.noData !== 1 ? 's' : '',
+                    boldedResultsNumber: (
+                      <strong>
+                        {i18n.translate(
+                          'xpack.infra.metrics.alertFlyout.alertPreviewNoDataResultNumber',
+                          {
+                            defaultMessage:
+                              '{noData, plural, one {was # result} other {were # results}}',
+                            values: {
+                              noData: previewResult.resultTotals.noData,
+                            },
+                          }
+                        )}
+                      </strong>
+                    ),
                   }}
                 />
-              ) : null}
+              ) : null}{' '}
               {previewResult.resultTotals.error ? (
                 <FormattedMessage
                   id="xpack.infra.metrics.alertFlyout.alertPreviewErrorResult"
@@ -271,32 +274,31 @@ export const AlertPreview: React.FC<Props> = (props) => {
                 iconType="alert"
               >
                 {previewError.body && (
-                  <FormattedMessage
-                    id="xpack.infra.metrics.alertFlyout.alertPreviewErrorDesc"
-                    defaultMessage="Try again later, or {viewTheError}."
-                    values={{
-                      viewTheError: <EuiLink onClick={onOpenModal}>view the error</EuiLink>,
-                    }}
-                  />
+                  <>
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.alertPreviewErrorDesc"
+                      defaultMessage="Please try again later or see details for more information."
+                    />
+                    <EuiSpacer size={'s'} />
+                    <EuiAccordion
+                      id="alertErrorDetailsAccordion"
+                      buttonContent={
+                        <>
+                          <EuiText size="s">
+                            <FormattedMessage
+                              id="xpack.infra.metrics.alertFlyout.errorDetails"
+                              defaultMessage="Details"
+                            />
+                          </EuiText>
+                        </>
+                      }
+                    >
+                      <EuiSpacer size={'s'} />
+                      <EuiCodeBlock>{previewError.body.message}</EuiCodeBlock>
+                    </EuiAccordion>
+                  </>
                 )}
               </EuiCallOut>
-            )}
-            {isErrorModalVisible && (
-              <EuiOverlayMask>
-                <EuiModal onClose={onCloseModal}>
-                  <EuiModalHeader>
-                    <EuiModalHeaderTitle>
-                      <FormattedMessage
-                        id="xpack.infra.metrics.alertFlyout.alertPreviewErrorModalTitle"
-                        defaultMessage="Alert preview error"
-                      />
-                    </EuiModalHeaderTitle>
-                  </EuiModalHeader>
-                  <EuiModalBody>
-                    <EuiCodeBlock>{previewError.body.message}</EuiCodeBlock>
-                  </EuiModalBody>
-                </EuiModal>
-              </EuiOverlayMask>
             )}
           </>
         )}

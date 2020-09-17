@@ -104,9 +104,11 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
       dashboard,
       visualization,
       search,
+      /* eslint-disable @typescript-eslint/naming-convention */
       index_pattern,
       graph_workspace,
       timelion_sheet,
+      /* eslint-enable @typescript-eslint/naming-convention */
       xpack,
       ...pluginsTop
     } = currUsage;

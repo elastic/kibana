@@ -72,10 +72,10 @@ export const buildConfig = async (
     },
     server: {
       basePath: core.http.basePath.serverBasePath,
-      host: serverInfo.host,
+      host: serverInfo.hostname,
       name: serverInfo.name,
       port: serverInfo.port,
-      uuid: core.uuid.getInstanceUuid(),
+      uuid: initContext.env.instanceUuid,
       protocol: serverInfo.protocol,
     },
   };

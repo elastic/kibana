@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { px, units } from '../../../../../../../style/variables';
 
@@ -16,13 +16,11 @@ const ToggleButtonContainer = styled.div`
 `;
 
 interface Props {
+  children: ReactNode;
   previewHeight: number;
 }
 
-export const TruncateHeightSection: React.FC<Props> = ({
-  children,
-  previewHeight,
-}) => {
+export function TruncateHeightSection({ children, previewHeight }: Props) {
   const contentContainerEl = useRef<HTMLDivElement>(null);
 
   const [showToggle, setShowToggle] = useState(true);
@@ -73,4 +71,4 @@ export const TruncateHeightSection: React.FC<Props> = ({
       ) : null}
     </Fragment>
   );
-};
+}

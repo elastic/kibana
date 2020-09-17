@@ -7,13 +7,11 @@
 import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-
 import { Dispatch } from 'redux';
-
-import { disableTemplate } from '../../../../common/constants';
 
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../graphql/types';
 import { State } from '../../../common/store';
+import { TimelineId } from '../../../../common/types/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -127,7 +125,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       defaultTimelineCount,
       templateTimelineCount,
     });
-    const { timelineStatus, templateTimelineType, templateTimelineFilter } = useTimelineStatus({
+    const {
+      timelineStatus,
+      templateTimelineFilter,
+      installPrepackagedTimelines,
+    } = useTimelineStatus({
       timelineType,
       customTemplateTimelineCount,
       elasticTemplateTimelineCount,
@@ -145,7 +147,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         },
         onlyUserFavorite: onlyFavorites,
         timelineType,
-        templateTimelineType,
         status: timelineStatus,
       });
     }, [
@@ -157,7 +158,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       sortDirection,
       timelineType,
       timelineStatus,
-      templateTimelineType,
       onlyFavorites,
     ]);
 
@@ -193,7 +193,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
         if (timelineIds.includes(timeline.savedObjectId || '')) {
-          createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
+          createNewTimeline({ id: TimelineId.active, columns: defaultHeaders, show: false });
         }
 
         await apolloClient.mutate<
@@ -267,7 +267,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     }, []);
 
     const openTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+      ({ duplicate, timelineId, timelineType: timelineTypeToOpen }) => {
         if (isModal && closeModalTimeline != null) {
           closeModalTimeline();
         }
@@ -277,6 +277,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           duplicate,
           onOpenTimeline,
           timelineId,
+          timelineType: timelineTypeToOpen,
           updateIsLoading,
           updateTimeline,
         });
@@ -289,7 +290,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       focusInput();
     }, []);
 
-    useEffect(() => refetch(), [refetch]);
+    useEffect(() => {
+      const fetchData = async () => {
+        await installPrepackagedTimelines();
+        refetch();
+      };
+      fetchData();
+    }, [refetch, installPrepackagedTimelines]);
 
     return !isModal ? (
       <OpenTimeline
@@ -318,9 +325,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        templateTimelineFilter={!disableTemplate ? templateTimelineFilter : null}
+        templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
-        timelineFilter={!disableTemplate ? timelineTabs : null}
+        timelineStatus={timelineStatus}
+        timelineFilter={timelineTabs}
         title={title}
         totalSearchResultsCount={totalCount}
       />
@@ -348,9 +356,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        templateTimelineFilter={!disableTemplate ? templateTimelineFilter : null}
+        templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
-        timelineFilter={!disableTemplate ? timelineFilters : null}
+        timelineStatus={timelineStatus}
+        timelineFilter={timelineFilters}
         title={title}
         totalSearchResultsCount={totalCount}
       />
@@ -361,7 +370,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
-    const timeline = getTimeline(state, 'timeline-1') ?? timelineDefaults;
+    const timeline = getTimeline(state, TimelineId.active) ?? timelineDefaults;
     return {
       timeline,
     };

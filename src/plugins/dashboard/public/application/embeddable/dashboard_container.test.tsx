@@ -17,8 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { isErrorEmbeddable, ViewMode } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
@@ -30,7 +28,6 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
 } from '../../embeddable_plugin_test_samples';
-// eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 const options: DashboardContainerOptions = {

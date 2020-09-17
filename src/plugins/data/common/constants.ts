@@ -32,6 +32,7 @@ export const UI_SETTINGS = {
   COURIER_MAX_CONCURRENT_SHARD_REQUESTS: 'courier:maxConcurrentShardRequests',
   COURIER_BATCH_SEARCHES: 'courier:batchSearches',
   SEARCH_INCLUDE_FROZEN: 'search:includeFrozen',
+  SEARCH_TIMEOUT: 'search:timeout',
   HISTOGRAM_BAR_TARGET: 'histogram:barTarget',
   HISTOGRAM_MAX_BARS: 'histogram:maxBars',
   HISTORY_LIMIT: 'history:limit',
@@ -44,7 +45,8 @@ export const UI_SETTINGS = {
   FORMAT_NUMBER_DEFAULT_LOCALE: 'format:number:defaultLocale',
   TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: 'timepicker:refreshIntervalDefaults',
   TIMEPICKER_QUICK_RANGES: 'timepicker:quickRanges',
+  TIMEPICKER_TIME_DEFAULTS: 'timepicker:timeDefaults',
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
-};
+} as const;

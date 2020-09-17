@@ -12,7 +12,7 @@ import {
   TestBedConfig,
   findTestSubject,
 } from '../../../../../test_utils';
-import { TemplateList } from '../../../public/application/sections/home/template_list'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { TemplateList } from '../../../public/application/sections/home/template_list';
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, TestSubjects } from '../helpers';
 
@@ -40,10 +40,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   /**
    * User Actions
    */
-  const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
-    const tabs = ['summary', 'settings', 'mappings', 'aliases'];
+  const selectDetailsTab = async (
+    tab: 'summary' | 'settings' | 'mappings' | 'aliases' | 'preview'
+  ) => {
+    const tabs = ['summary', 'settings', 'mappings', 'aliases', 'preview'];
 
-    testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+    await act(async () => {
+      testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+    });
+    testBed.component.update();
   };
 
   const clickReloadButton = () => {
@@ -51,12 +56,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     find('reloadButton').simulate('click');
   };
 
-  const clickActionMenu = async (templateName: TemplateDeserialized['name']) => {
+  const clickActionMenu = (templateName: TemplateDeserialized['name']) => {
     const { component } = testBed;
 
     // When a table has > 2 actions, EUI displays an overflow menu with an id "<template_name>-actions"
     // The template name may contain a period (.) so we use bracket syntax for selector
-    component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+    act(() => {
+      component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+    });
+    component.update();
   };
 
   const clickTemplateAction = (
@@ -68,12 +76,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     clickActionMenu(templateName);
 
-    component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    act(() => {
+      component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    });
+    component.update();
   };
 
-  const clickTemplateAt = async (index: number) => {
+  const clickTemplateAt = async (index: number, isLegacy = false) => {
     const { component, table, router } = testBed;
-    const { rows } = table.getMetaData('legacyTemplateTable');
+    const { rows } = table.getMetaData(isLegacy ? 'legacyTemplateTable' : 'templateTable');
     const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
     const { href } = templateLink.props();
@@ -89,9 +100,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     find('closeDetailsButton').simulate('click');
   };
 
-  const toggleViewItem = (view: 'composable' | 'system') => {
+  const toggleViewItem = (view: 'managed' | 'cloudManaged' | 'system') => {
     const { find, component } = testBed;
-    const views = ['composable', 'system'];
+    const views = ['managed', 'cloudManaged', 'system'];
 
     // First open the pop over
     act(() => {

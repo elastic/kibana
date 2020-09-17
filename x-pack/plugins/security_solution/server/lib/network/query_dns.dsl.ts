@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
+
+import { assertUnreachable } from '../../../common/utility_types';
 import { Direction, NetworkDnsFields, NetworkDnsSortField } from '../../graphql/types';
-import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkDnsRequestOptions } from './index';
 
@@ -57,6 +60,7 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
 
 export const buildDnsQuery = ({
   defaultIndex,
+  docValueFields,
   filterQuery,
   isPtrIncluded,
   networkDnsSortField,
@@ -74,6 +78,7 @@ export const buildDnsQuery = ({
         [timestamp]: {
           gte: from,
           lte: to,
+          format: 'strict_date_optional_time',
         },
       },
     },
@@ -84,6 +89,7 @@ export const buildDnsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {

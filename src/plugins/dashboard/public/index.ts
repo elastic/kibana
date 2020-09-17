@@ -32,10 +32,15 @@ export {
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
 export { DashboardStart, DashboardUrlGenerator } from './plugin';
-export { DASHBOARD_APP_URL_GENERATOR, createDashboardUrlGenerator } from './url_generator';
+export {
+  DASHBOARD_APP_URL_GENERATOR,
+  createDashboardUrlGenerator,
+  DashboardUrlGeneratorState,
+} from './url_generator';
 export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 export { SavedObjectDashboard } from './saved_dashboards';
 export { SavedDashboardPanel } from './types';
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute_service/attribute_service';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

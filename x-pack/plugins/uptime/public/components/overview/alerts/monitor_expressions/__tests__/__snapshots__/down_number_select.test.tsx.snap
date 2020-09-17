@@ -8,9 +8,9 @@ exports[`DownNoExpressionSelect component should renders against props 1`] = `
   <div
     class="euiPopover__anchor"
   >
-    <button
+    <span
       aria-label="Open the popover for down count input"
-      class="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--secondary"
+      class="euiExpression euiExpression-isUppercase euiExpression--secondary"
       data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesExpression"
     >
       <span
@@ -24,7 +24,7 @@ exports[`DownNoExpressionSelect component should renders against props 1`] = `
       >
         5 times
       </span>
-    </button>
+    </span>
   </div>
 </div>
 `;

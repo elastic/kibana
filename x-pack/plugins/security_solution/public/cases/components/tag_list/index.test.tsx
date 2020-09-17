@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import { TagList } from '.';
 import { getFormMock } from '../__mock__/form';
 import { TestProviders } from '../../../common/mock';
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import { useGetTags } from '../../containers/use_get_tags';
 
@@ -57,6 +58,7 @@ describe('TagList ', () => {
       fetchTags,
     }));
   });
+
   it('Renders no tags, and then edit', () => {
     const wrapper = mount(
       <TestProviders>
@@ -68,6 +70,7 @@ describe('TagList ', () => {
     expect(wrapper.find(`[data-test-subj="no-tags"]`).last().exists()).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="edit-tags"]`).last().exists()).toBeTruthy();
   });
+
   it('Edit tag on submit', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -77,10 +80,10 @@ describe('TagList ', () => {
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
     await act(async () => {
       wrapper.find(`[data-test-subj="edit-tags-submit"]`).last().simulate('click');
-      await wait();
-      expect(onSubmit).toBeCalledWith(sampleTags);
+      await waitFor(() => expect(onSubmit).toBeCalledWith(sampleTags));
     });
   });
+
   it('Tag options render with new tags added', () => {
     const wrapper = mount(
       <TestProviders>
@@ -92,6 +95,7 @@ describe('TagList ', () => {
       wrapper.find(`[data-test-subj="caseTags"] [data-test-subj="input"]`).first().prop('options')
     ).toEqual([{ label: 'coke' }, { label: 'pepsi' }, { label: 'rad' }, { label: 'dude' }]);
   });
+
   it('Cancels on cancel', async () => {
     const props = {
       ...defaultProps,
@@ -102,16 +106,19 @@ describe('TagList ', () => {
         <TagList {...props} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeTruthy();
+
+    expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
     wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().simulate('click');
     await act(async () => {
-      expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeFalsy();
       wrapper.find(`[data-test-subj="edit-tags-cancel"]`).last().simulate('click');
-      await wait();
-      wrapper.update();
-      expect(wrapper.find(`[data-test-subj="case-tag"]`).last().exists()).toBeTruthy();
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
+      });
     });
   });
+
   it('Renders disabled button', () => {
     const props = { ...defaultProps, disabled: true };
     const wrapper = mount(

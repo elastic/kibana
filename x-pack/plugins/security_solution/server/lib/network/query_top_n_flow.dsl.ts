@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { assertUnreachable } from '../../../common/utility_types';
 import {
   Direction,
   FlowTargetSourceDest,
   NetworkTopTablesSortField,
   NetworkTopTablesFields,
 } from '../../graphql/types';
-import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
 
@@ -36,7 +37,11 @@ export const buildTopNFlowQuery = ({
 }: NetworkTopNFlowRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { range: { [timestamp]: { gte: from, lte: to } } },
+    {
+      range: {
+        [timestamp]: { gte: from, lte: to, format: 'strict_date_optional_time' },
+      },
+    },
   ];
 
   const dslQuery = {

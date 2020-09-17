@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './xy_config_panel.scss';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperSelect,
   EuiFormRow,
-  EuiPopover,
   EuiText,
   htmlIdGenerator,
   EuiForm,
@@ -28,14 +28,17 @@ import {
   VisualizationDimensionEditorProps,
   VisualizationToolbarProps,
 } from '../types';
-import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
+import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
-
-import './xy_config_panel.scss';
+import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
+import { AxisSettingsPopover } from './axis_settings_popover';
+import { TooltipWrapper } from './tooltip_wrapper';
+import { getAxesConfiguration } from './axes_configuration';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
+type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
 function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
   const newLayers = [...state.layers];
@@ -46,6 +49,30 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
     layers: newLayers,
   };
 }
+
+const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+  {
+    id: `xy_legend_auto`,
+    value: 'auto',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
+      defaultMessage: 'Auto',
+    }),
+  },
+  {
+    id: `xy_legend_show`,
+    value: 'show',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
+      defaultMessage: 'Show',
+    }),
+  },
+  {
+    id: `xy_legend_hide`,
+    value: 'hide',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
+      defaultMessage: 'Hide',
+    }),
+  },
+];
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
@@ -69,13 +96,13 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
         })}
         name="chartType"
         className="eui-displayInlineBlock"
-        data-test-subj="lnsXY_seriesType"
         options={visualizationTypes
           .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
           .map((t) => ({
             id: t.id,
             label: t.label,
             iconType: t.icon || 'empty',
+            'data-test-subj': `lnsXY_seriesType-${t.id}`,
           }))}
         idSelected={layer.seriesType}
         onChange={(seriesType) => {
@@ -85,77 +112,241 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
           );
         }}
         isIconOnly
-        buttonSize="compressed"
       />
     </EuiFormRow>
   );
 }
 
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
-  const [open, setOpen] = useState(false);
-  const hasNonBarSeries = props.state?.layers.some(
-    (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
+  const { state, setState } = props;
+
+  const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
+    ['area_stacked', 'area', 'line'].includes(seriesType)
   );
+
+  const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
+  const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
+
+  const tickLabelsVisibilitySettings = {
+    x: state?.tickLabelsVisibilitySettings?.x ?? true,
+    yLeft: state?.tickLabelsVisibilitySettings?.yLeft ?? true,
+    yRight: state?.tickLabelsVisibilitySettings?.yRight ?? true,
+  };
+  const onTickLabelsVisibilitySettingsChange = (optionId: AxesSettingsConfigKeys): void => {
+    const newTickLabelsVisibilitySettings = {
+      ...tickLabelsVisibilitySettings,
+      ...{
+        [optionId]: !tickLabelsVisibilitySettings[optionId],
+      },
+    };
+    setState({
+      ...state,
+      tickLabelsVisibilitySettings: newTickLabelsVisibilitySettings,
+    });
+  };
+
+  const gridlinesVisibilitySettings = {
+    x: state?.gridlinesVisibilitySettings?.x ?? true,
+    yLeft: state?.gridlinesVisibilitySettings?.yLeft ?? true,
+    yRight: state?.gridlinesVisibilitySettings?.yRight ?? true,
+  };
+
+  const onGridlinesVisibilitySettingsChange = (optionId: AxesSettingsConfigKeys): void => {
+    const newGridlinesVisibilitySettings = {
+      ...gridlinesVisibilitySettings,
+      ...{
+        [optionId]: !gridlinesVisibilitySettings[optionId],
+      },
+    };
+    setState({
+      ...state,
+      gridlinesVisibilitySettings: newGridlinesVisibilitySettings,
+    });
+  };
+
+  const axisTitlesVisibilitySettings = {
+    x: state?.axisTitlesVisibilitySettings?.x ?? true,
+    yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
+    yRight: state?.axisTitlesVisibilitySettings?.yRight ?? true,
+  };
+  const onAxisTitlesVisibilitySettingsChange = (
+    axis: AxesSettingsConfigKeys,
+    checked: boolean
+  ): void => {
+    const newAxisTitlesVisibilitySettings = {
+      ...axisTitlesVisibilitySettings,
+      ...{
+        [axis]: checked,
+      },
+    };
+    setState({
+      ...state,
+      axisTitlesVisibilitySettings: newAxisTitlesVisibilitySettings,
+    });
+  };
+
+  const legendMode =
+    state?.legend.isVisible && !state?.legend.showSingleSeries
+      ? 'auto'
+      : !state?.legend.isVisible
+      ? 'hide'
+      : 'show';
   return (
-    <EuiFlexGroup justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          panelClassName="lnsXyToolbar__popover"
-          button={
-            <EuiButtonEmpty
-              color="text"
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={() => {
-                setOpen(!open);
-              }}
-            >
-              {i18n.translate('xpack.lens.xyChart.settingsLabel', { defaultMessage: 'Settings' })}
-            </EuiButtonEmpty>
-          }
-          isOpen={open}
-          closePopover={() => {
-            setOpen(false);
-          }}
-          anchorPosition="downRight"
-        >
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-              defaultMessage: 'Fill missing values',
+    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false}>
+          <TooltipWrapper
+            tooltipContent={i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
+              defaultMessage: 'This setting only applies to line and area charts.',
             })}
-            helpText={
-              !hasNonBarSeries &&
-              i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
-                defaultMessage:
-                  'This setting only applies to line charts and unstacked area charts.',
-              })
+            condition={!hasNonBarSeries}
+          >
+            <ToolbarPopover
+              title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
+                defaultMessage: 'Values',
+              })}
+              isDisabled={!hasNonBarSeries}
+              type="values"
+              groupPosition="left"
+            >
+              <EuiFormRow
+                display="columnCompressed"
+                label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                  defaultMessage: 'Missing values',
+                })}
+              >
+                <EuiSuperSelect
+                  compressed
+                  options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                    return {
+                      value: id,
+                      dropdownDisplay: (
+                        <>
+                          <strong>{title}</strong>
+                          <EuiText size="xs" color="subdued">
+                            <p>{description}</p>
+                          </EuiText>
+                        </>
+                      ),
+                      inputDisplay: title,
+                    };
+                  })}
+                  valueOfSelected={state?.fittingFunction || 'None'}
+                  onChange={(value) => setState({ ...state, fittingFunction: value })}
+                  itemLayoutAlign="top"
+                  hasDividers
+                />
+              </EuiFormRow>
+            </ToolbarPopover>
+          </TooltipWrapper>
+          <LegendSettingsPopover
+            legendOptions={legendOptions}
+            mode={legendMode}
+            onDisplayChange={(optionId) => {
+              const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+              if (newMode === 'auto') {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, isVisible: true, showSingleSeries: false },
+                });
+              } else if (newMode === 'show') {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, isVisible: true, showSingleSeries: true },
+                });
+              } else if (newMode === 'hide') {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, isVisible: false, showSingleSeries: false },
+                });
+              }
+            }}
+            position={state?.legend.position}
+            onPositionChange={(id) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, position: id as Position },
+              });
+            }}
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false}>
+          <TooltipWrapper
+            tooltipContent={
+              shouldRotate
+                ? i18n.translate('xpack.lens.xyChart.bottomAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when bottom axis is enabled.',
+                  })
+                : i18n.translate('xpack.lens.xyChart.leftAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when left axis is enabled.',
+                  })
+            }
+            condition={
+              Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
             }
           >
-            <EuiSuperSelect
-              compressed
-              disabled={!hasNonBarSeries}
-              options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                return {
-                  value: id,
-                  dropdownDisplay: (
-                    <>
-                      <strong>{title}</strong>
-                      <EuiText size="xs" color="subdued">
-                        <p>{description}</p>
-                      </EuiText>
-                    </>
-                  ),
-                  inputDisplay: title,
-                };
-              })}
-              valueOfSelected={props.state?.fittingFunction || 'None'}
-              onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
-              itemLayoutAlign="top"
-              hasDividers
+            <AxisSettingsPopover
+              axis="yLeft"
+              layers={state?.layers}
+              axisTitle={state?.yTitle}
+              updateTitleState={(value) => setState({ ...state, yTitle: value })}
+              areTickLabelsVisible={tickLabelsVisibilitySettings.yLeft}
+              toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
+              areGridlinesVisible={gridlinesVisibilitySettings.yLeft}
+              toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+              isDisabled={
+                Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
+              }
+              isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
+              toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             />
-          </EuiFormRow>
-        </EuiPopover>
+          </TooltipWrapper>
+          <AxisSettingsPopover
+            axis="x"
+            layers={state?.layers}
+            axisTitle={state?.xTitle}
+            updateTitleState={(value) => setState({ ...state, xTitle: value })}
+            areTickLabelsVisible={tickLabelsVisibilitySettings.x}
+            toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
+            areGridlinesVisible={gridlinesVisibilitySettings.x}
+            toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+            isAxisTitleVisible={axisTitlesVisibilitySettings.x}
+            toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+          />
+          <TooltipWrapper
+            tooltipContent={
+              shouldRotate
+                ? i18n.translate('xpack.lens.xyChart.topAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when top axis is enabled.',
+                  })
+                : i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when right axis is enabled.',
+                  })
+            }
+            condition={
+              Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length === 0
+            }
+          >
+            <AxisSettingsPopover
+              axis="yRight"
+              layers={state?.layers}
+              axisTitle={state?.yRightTitle}
+              updateTitleState={(value) => setState({ ...state, yRightTitle: value })}
+              areTickLabelsVisible={tickLabelsVisibilitySettings.yRight}
+              toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
+              areGridlinesVisible={gridlinesVisibilitySettings.yRight}
+              toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+              isDisabled={
+                Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length ===
+                0
+              }
+              isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
+              toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
+            />
+          </TooltipWrapper>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -166,6 +357,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
   const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
+  const isHorizontal = isHorizontalChart(state.layers);
   const axisMode =
     (layer.yConfig &&
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
@@ -183,12 +375,12 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
         })}
       >
         <EuiButtonGroup
+          isFullWidth
           legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
             defaultMessage: 'Axis side',
           })}
           name="axisSide"
           buttonSize="compressed"
-          className="eui-displayInlineBlock"
           options={[
             {
               id: `${idPrefix}auto`,
@@ -198,15 +390,23 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
             },
             {
               id: `${idPrefix}left`,
-              label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
-                defaultMessage: 'Left',
-              }),
+              label: isHorizontal
+                ? i18n.translate('xpack.lens.xyChart.axisSide.bottom', {
+                    defaultMessage: 'Bottom',
+                  })
+                : i18n.translate('xpack.lens.xyChart.axisSide.left', {
+                    defaultMessage: 'Left',
+                  }),
             },
             {
               id: `${idPrefix}right`,
-              label: i18n.translate('xpack.lens.xyChart.axisSide.right', {
-                defaultMessage: 'Right',
-              }),
+              label: isHorizontal
+                ? i18n.translate('xpack.lens.xyChart.axisSide.top', {
+                    defaultMessage: 'Top',
+                  })
+                : i18n.translate('xpack.lens.xyChart.axisSide.right', {
+                    defaultMessage: 'Right',
+                  }),
             },
           ]}
           idSelected={`${idPrefix}${axisMode}`}
@@ -241,7 +441,7 @@ const tooltipContent = {
   }),
   disabled: i18n.translate('xpack.lens.configPanel.color.tooltip.disabled', {
     defaultMessage:
-      'Individual series cannot be custom colored when the layer includes a “Break down by“',
+      'Individual series cannot be custom colored when the layer includes a “Break down by.“',
   }),
 };
 
@@ -283,7 +483,23 @@ const ColorPicker = ({
         }
         setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
       }, 256),
-    [state, layer, accessor, index]
+    [state, setState, layer, accessor, index]
+  );
+
+  const colorPicker = (
+    <EuiColorPicker
+      compressed
+      isClearable
+      onChange={handleColor}
+      color={disabled ? '' : color}
+      disabled={disabled}
+      placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
+        defaultMessage: 'Auto',
+      })}
+      aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+        defaultMessage: 'Series color',
+      })}
+    />
   );
 
   return (
@@ -312,25 +528,10 @@ const ColorPicker = ({
           delay="long"
           anchorClassName="eui-displayBlock"
         >
-          <EuiColorPicker
-            compressed
-            onChange={handleColor}
-            color=""
-            disabled
-            aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-              defaultMessage: 'Series color',
-            })}
-          />
+          {colorPicker}
         </EuiToolTip>
       ) : (
-        <EuiColorPicker
-          compressed
-          onChange={handleColor}
-          color={color}
-          aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-            defaultMessage: 'Series color',
-          })}
-        />
+        colorPicker
       )}
     </EuiFormRow>
   );

@@ -41,30 +41,6 @@ describe('UrlParamsContext', () => {
     moment.tz.setDefault('');
   });
 
-  it('should have default params', () => {
-    const location = {
-      pathname: '/services/opbeans-node/transactions',
-    } as Location;
-
-    jest
-      .spyOn(Date, 'now')
-      .mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
-    const wrapper = mountParams(location);
-    const params = getDataFromOutput(wrapper);
-
-    expect(params).toEqual({
-      start: '2000-06-14T12:00:00.000Z',
-      serviceName: 'opbeans-node',
-      end: '2000-06-15T12:00:00.000Z',
-      page: 0,
-      processorEvent: 'transaction',
-      rangeFrom: 'now-24h',
-      rangeTo: 'now',
-      refreshInterval: 0,
-      refreshPaused: true,
-    });
-  });
-
   it('should read values in from location', () => {
     const location = {
       pathname: '/test/pathname',

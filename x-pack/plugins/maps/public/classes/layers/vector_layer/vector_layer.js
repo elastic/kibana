@@ -15,9 +15,11 @@ import {
   SOURCE_BOUNDS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
+  KBN_TOO_MANY_FEATURES_PROPERTY,
   LAYER_TYPE,
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
+  KBN_TOO_MANY_FEATURES_IMAGE_ID,
 } from '../../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
@@ -85,7 +87,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _hasJoins() {
+  hasJoins() {
     return this.getValidJoins().length > 0;
   }
 
@@ -158,8 +160,8 @@ export class VectorLayer extends AbstractLayer {
 
   async getBounds({ startLoading, stopLoading, registerCancelCallback, dataFilters }) {
     const isStaticLayer = !this.getSource().isBoundsAware();
-    if (isStaticLayer) {
-      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this._hasJoins());
+    if (isStaticLayer || this.hasJoins()) {
+      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins());
     }
 
     const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
@@ -191,6 +193,11 @@ export class VectorLayer extends AbstractLayer {
       stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds, boundsFilters);
     }
     return bounds;
+  }
+
+  isLoadingBounds() {
+    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
+    return !!boundsDataRequest && boundsDataRequest.isLoading();
   }
 
   async getLeftJoinFields() {
@@ -304,7 +311,7 @@ export class VectorLayer extends AbstractLayer {
   _getSearchFilters(dataFilters, source, style) {
     const fieldNames = [
       ...source.getFieldNames(),
-      ...style.getSourceFieldNames(),
+      ...(style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : []),
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
@@ -410,7 +417,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceStyleMeta(syncContext, source, style) {
-    if (this.getCurrentStyle().constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+    if (this.getCurrentStyle().getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 
@@ -506,7 +513,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceFormatters(syncContext, source, style) {
-    if (style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+    if (style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
 
@@ -583,7 +590,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async syncData(syncContext) {
-    this._syncData(syncContext, this.getSource(), this.getCurrentStyle());
+    await this._syncData(syncContext, this.getSource(), this.getCurrentStyle());
   }
 
   // TLDR: Do not call getSource or getCurrentStyle in syncData flow. Use 'source' and 'style' arguments instead.
@@ -597,13 +604,16 @@ export class VectorLayer extends AbstractLayer {
   // Given 2 above, which source/style to use can not be pulled from data request state.
   // Therefore, source and style are provided as arugments and must be used instead of calling getSource or getCurrentStyle.
   async _syncData(syncContext, source, style) {
+    if (this.isLoadingBounds()) {
+      return;
+    }
     await this._syncSourceStyleMeta(syncContext, source, style);
     await this._syncSourceFormatters(syncContext, source, style);
     const sourceResult = await this._syncSource(syncContext, source, style);
     if (
       !sourceResult.featureCollection ||
       !sourceResult.featureCollection.features.length ||
-      !this._hasJoins()
+      !this.hasJoins()
     ) {
       return;
     }
@@ -711,7 +721,7 @@ export class VectorLayer extends AbstractLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getPointFilterExpression(this._hasJoins());
+    const filterExpr = getPointFilterExpression(this.hasJoins());
     if (filterExpr !== mbMap.getFilter(pointLayerId)) {
       mbMap.setFilter(pointLayerId, filterExpr);
       mbMap.setFilter(textLayerId, filterExpr);
@@ -747,7 +757,7 @@ export class VectorLayer extends AbstractLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getPointFilterExpression(this._hasJoins());
+    const filterExpr = getPointFilterExpression(this.hasJoins());
     if (filterExpr !== mbMap.getFilter(symbolLayerId)) {
       mbMap.setFilter(symbolLayerId, filterExpr);
     }
@@ -769,7 +779,9 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
-    const hasJoins = this._hasJoins();
+    const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
+
+    const hasJoins = this.hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
       const mbLayer = {
         id: fillLayerId,
@@ -794,6 +806,30 @@ export class VectorLayer extends AbstractLayer {
       }
       mbMap.addLayer(mbLayer);
     }
+    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
+      const mbLayer = {
+        id: tooManyFeaturesLayerId,
+        type: 'fill',
+        source: sourceId,
+        paint: {},
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
+      mbMap.setFilter(tooManyFeaturesLayerId, [
+        '==',
+        ['get', KBN_TOO_MANY_FEATURES_PROPERTY],
+        true,
+      ]);
+      mbMap.setPaintProperty(
+        tooManyFeaturesLayerId,
+        'fill-pattern',
+        KBN_TOO_MANY_FEATURES_IMAGE_ID
+      );
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha());
+    }
+
     this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
@@ -814,6 +850,9 @@ export class VectorLayer extends AbstractLayer {
     if (lineFilterExpr !== mbMap.getFilter(lineLayerId)) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
+
+    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
+    mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _syncStylePropertiesWithMb(mbMap) {
@@ -824,6 +863,19 @@ export class VectorLayer extends AbstractLayer {
   _syncSourceBindingWithMb(mbMap) {
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
+      mbMap.addSource(this._getMbSourceId(), {
+        type: 'geojson',
+        data: EMPTY_FEATURE_COLLECTION,
+      });
+    } else if (mbSource.type !== 'geojson') {
+      // Recreate source when existing source is not geojson. This can occur when layer changes from tile layer to vector layer.
+      this.getMbLayerIds().forEach((mbLayerId) => {
+        if (mbMap.getLayer(mbLayerId)) {
+          mbMap.removeLayer(mbLayerId);
+        }
+      });
+
+      mbMap.removeSource(this._getMbSourceId());
       mbMap.addSource(this._getMbSourceId(), {
         type: 'geojson',
         data: EMPTY_FEATURE_COLLECTION,
@@ -857,6 +909,10 @@ export class VectorLayer extends AbstractLayer {
     return this.makeMbLayerId('fill');
   }
 
+  _getMbTooManyFeaturesLayerId() {
+    return this.makeMbLayerId('toomanyfeatures');
+  }
+
   getMbLayerIds() {
     return [
       this._getMbPointLayerId(),
@@ -864,6 +920,7 @@ export class VectorLayer extends AbstractLayer {
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
+      this._getMbTooManyFeaturesLayerId(),
     ];
   }
 
@@ -892,13 +949,11 @@ export class VectorLayer extends AbstractLayer {
 
   async getPropertiesForTooltip(properties) {
     const vectorSource = this.getSource();
-    let allProperties = await vectorSource.filterAndFormatPropertiesToHtml(properties);
+    let allProperties = await vectorSource.getTooltipProperties(properties);
     this._addJoinsToSourceTooltips(allProperties);
 
     for (let i = 0; i < this.getJoins().length; i++) {
-      const propsFromJoin = await this.getJoins()[i].filterAndFormatPropertiesForTooltip(
-        properties
-      );
+      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(properties);
       allProperties = [...allProperties, ...propsFromJoin];
     }
     return allProperties;

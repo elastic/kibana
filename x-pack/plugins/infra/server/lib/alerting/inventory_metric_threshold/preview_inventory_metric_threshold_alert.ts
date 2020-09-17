@@ -6,6 +6,10 @@
 import { Unit } from '@elastic/datemath';
 import { first } from 'lodash';
 import { InventoryMetricConditions } from './types';
+import {
+  TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
+  isTooManyBucketsPreviewException,
+} from '../../../../common/alerting/metrics';
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -22,7 +26,7 @@ interface InventoryMetricThresholdParams {
 interface PreviewInventoryMetricThresholdAlertParams {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   params: InventoryMetricThresholdParams;
-  config: InfraSource['configuration'];
+  source: InfraSource;
   lookback: Unit;
   alertInterval: string;
 }
@@ -30,11 +34,13 @@ interface PreviewInventoryMetricThresholdAlertParams {
 export const previewInventoryMetricThresholdAlert = async ({
   callCluster,
   params,
-  config,
+  source,
   lookback,
   alertInterval,
 }: PreviewInventoryMetricThresholdAlertParams) => {
   const { criteria, filterQuery, nodeType } = params as InventoryMetricThresholdParams;
+
+  if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
   const { timeSize, timeUnit } = criteria[0];
   const bucketInterval = `${timeSize}${timeUnit}`;
@@ -46,38 +52,44 @@ export const previewInventoryMetricThresholdAlert = async ({
 
   const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
   const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
-
-  const results = await Promise.all(
-    criteria.map((c) =>
-      evaluateCondition(c, nodeType, config, callCluster, filterQuery, lookbackSize)
-    )
-  );
-
-  const inventoryItems = Object.keys(first(results) as any);
-  const previewResults = inventoryItems.map((item) => {
-    const isNoData = results.some((result) => result[item].isNoData);
-    if (isNoData) {
-      return null;
-    }
-    const isError = results.some((result) => result[item].isError);
-    if (isError) {
-      return undefined;
-    }
-
-    const numberOfResultBuckets = lookbackSize;
-    const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);
-    return [...Array(numberOfExecutionBuckets)].reduce(
-      (totalFired, _, i) =>
-        totalFired +
-        (results.every((result) => {
-          const shouldFire = result[item].shouldFire as boolean[];
-          return shouldFire[Math.floor(i * alertResultsPerExecution)];
-        })
-          ? 1
-          : 0),
-      0
+  try {
+    const results = await Promise.all(
+      criteria.map((c) =>
+        evaluateCondition(c, nodeType, source, callCluster, filterQuery, lookbackSize)
+      )
     );
-  });
 
-  return previewResults;
+    const inventoryItems = Object.keys(first(results)!);
+    const previewResults = inventoryItems.map((item) => {
+      const numberOfResultBuckets = lookbackSize;
+      const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);
+      let numberOfTimesFired = 0;
+      let numberOfNoDataResults = 0;
+      let numberOfErrors = 0;
+      for (let i = 0; i < numberOfExecutionBuckets; i++) {
+        const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
+        const allConditionsFiredInMappedBucket = results.every((result) => {
+          const shouldFire = result[item].shouldFire as boolean[];
+          return shouldFire[mappedBucketIndex];
+        });
+        const someConditionsNoDataInMappedBucket = results.some((result) => {
+          const hasNoData = result[item].isNoData as boolean[];
+          return hasNoData[mappedBucketIndex];
+        });
+        const someConditionsErrorInMappedBucket = results.some((result) => {
+          return result[item].isError;
+        });
+        if (allConditionsFiredInMappedBucket) numberOfTimesFired++;
+        if (someConditionsNoDataInMappedBucket) numberOfNoDataResults++;
+        if (someConditionsErrorInMappedBucket) numberOfErrors++;
+      }
+      return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors];
+    });
+
+    return previewResults;
+  } catch (e) {
+    if (!isTooManyBucketsPreviewException(e)) throw e;
+    const { maxBuckets } = e;
+    throw new Error(`${TOO_MANY_BUCKETS_PREVIEW_EXCEPTION}:${maxBuckets}`);
+  }
 };

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect } from 'react';
-import { CurveType, LineSeries, ScaleType } from '@elastic/charts';
+import { CurveType, Fit, LineSeries, ScaleType } from '@elastic/charts';
+import React, { useEffect } from 'react';
 import { PercentileRange } from './index';
 import { useBreakdowns } from './use_breakdowns';
 
@@ -16,12 +16,12 @@ interface Props {
   onLoadingChange: (loading: boolean) => void;
 }
 
-export const BreakdownSeries: FC<Props> = ({
+export function BreakdownSeries({
   field,
   value,
   percentileRange,
   onLoadingChange,
-}) => {
+}: Props) {
   const { data, status } = useBreakdowns({
     field,
     value,
@@ -41,10 +41,12 @@ export const BreakdownSeries: FC<Props> = ({
           name={name}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
+          curve={CurveType.CURVE_CATMULL_ROM}
           data={seriesData ?? []}
-          curve={CurveType.CURVE_NATURAL}
+          lineSeriesStyle={{ point: { visible: false } }}
+          fit={Fit.Linear}
         />
       ))}
     </>
   );
-};
+}

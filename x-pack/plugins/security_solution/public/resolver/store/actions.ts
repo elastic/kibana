@@ -25,17 +25,6 @@ interface UserBroughtProcessIntoView {
 }
 
 /**
- * Dispatched to notify state that a different panel needs to be displayed
- */
-interface AppDisplayedDifferentPanel {
-  readonly type: 'appDisplayedDifferentPanel';
-  /**
-   * The name of the panel to display
-   */
-  readonly payload: string;
-}
-
-/**
  * When an examination of query params in the UI indicates that state needs to
  * be updated to reflect the new selection
  */
@@ -80,12 +69,9 @@ interface AppDetectedMissingEventData {
  */
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
-  readonly payload: {
-    /**
-     * Used to identify the process node that the user focused on (in the DOM)
-     */
-    readonly nodeId: string;
-  };
+
+  /** focused nodeID */
+  readonly payload: string;
 }
 
 /**
@@ -96,39 +82,51 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  readonly payload: {
-    /**
-     * The HTML ID used to identify the process node's element that the user selected
-     */
-    readonly nodeId: string;
-    /**
-     * The process entity_id for the process the node represents
-     */
-    readonly selectedProcessId: string;
-  };
+  /**
+   * The nodeID (aka entity_id) that was select.
+   */
+  readonly payload: string;
 }
 
 /**
- * This action should dispatch to indicate that the user chose to
- * focus on examining the related events of a particular ResolverEvent.
- * Optionally, this can be bound by a category of related events (e.g. 'file' or 'dns')
+ * Used by `useStateSyncingActions` hook.
+ * This is dispatched when external sources provide new parameters for Resolver.
+ * When the component receives a new 'databaseDocumentID' prop, this is fired.
  */
-interface UserSelectedRelatedEventCategory {
-  readonly type: 'userSelectedRelatedEventCategory';
-  readonly payload: {
-    subject: ResolverEvent;
-    category?: string;
+interface AppReceivedNewExternalProperties {
+  type: 'appReceivedNewExternalProperties';
+  /**
+   * Defines the externally provided properties that Resolver acknowledges.
+   */
+  payload: {
+    /**
+     * the `_id` of an ES document. This defines the origin of the Resolver graph.
+     */
+    databaseDocumentID: string;
+    /**
+     * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
+     */
+    resolverComponentInstanceID: string;
+
+    /**
+     * The `search` part of the URL of this page.
+     */
+    locationSearch: string;
+
+    /**
+     * Indices that the backend will use to find the document.
+     */
+    indices: string[];
   };
 }
 
 export type ResolverAction =
   | CameraAction
   | DataAction
+  | AppReceivedNewExternalProperties
   | UserBroughtProcessIntoView
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData
-  | UserSelectedRelatedEventCategory
   | AppDetectedNewIdFromQueryParams
-  | AppDisplayedDifferentPanel
   | AppDetectedMissingEventData;

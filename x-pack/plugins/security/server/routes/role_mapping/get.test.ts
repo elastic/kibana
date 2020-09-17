@@ -53,7 +53,7 @@ describe('GET role mappings', () => {
   it('returns all role mappings', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
     mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(mockRoleMappingResponse);
 
@@ -128,7 +128,7 @@ describe('GET role mappings', () => {
   it('returns role mapping by name', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
     mockScopedClusterClient.callAsCurrentUser.mockResolvedValue({
       mapping1: {
@@ -216,7 +216,7 @@ describe('GET role mappings', () => {
     it('returns a 404 when the role mapping is not found', async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         Boom.notFound('role mapping not found!')

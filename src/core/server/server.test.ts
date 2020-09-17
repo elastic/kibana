@@ -31,24 +31,25 @@ import {
   mockMetricsService,
   mockStatusService,
   mockLoggingService,
+  mockAuditTrailService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
 import { Env } from './config';
 import { Server } from './server';
 
-import { getEnvOptions } from './config/__mocks__/env';
 import { loggingSystemMock } from './logging/logging_system.mock';
-import { rawConfigServiceMock } from './config/raw_config_service.mock';
 
-const env = new Env('.', getEnvOptions());
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();
 const rawConfigService = rawConfigServiceMock.create({});
 
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
   mockPluginsService.discover.mockResolvedValue({
-    pluginTree: new Map(),
+    pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 });
@@ -70,6 +71,7 @@ test('sets up services on "setup"', async () => {
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockAuditTrailService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -83,6 +85,7 @@ test('sets up services on "setup"', async () => {
   expect(mockMetricsService.setup).toHaveBeenCalledTimes(1);
   expect(mockStatusService.setup).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockAuditTrailService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -95,7 +98,7 @@ test('injects legacy dependency to context#setup()', async () => {
     [pluginB, [pluginA]],
   ]);
   mockPluginsService.discover.mockResolvedValue({
-    pluginTree: pluginDependencies,
+    pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 
@@ -123,6 +126,7 @@ test('runs services on "start"', async () => {
   expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
   expect(mockUiSettingsService.start).not.toHaveBeenCalled();
   expect(mockMetricsService.start).not.toHaveBeenCalled();
+  expect(mockAuditTrailService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -131,6 +135,7 @@ test('runs services on "start"', async () => {
   expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
+  expect(mockAuditTrailService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -155,6 +160,7 @@ test('stops services on "stop"', async () => {
   expect(mockMetricsService.stop).not.toHaveBeenCalled();
   expect(mockStatusService.stop).not.toHaveBeenCalled();
   expect(mockLoggingService.stop).not.toHaveBeenCalled();
+  expect(mockAuditTrailService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
@@ -167,6 +173,7 @@ test('stops services on "stop"', async () => {
   expect(mockMetricsService.stop).toHaveBeenCalledTimes(1);
   expect(mockStatusService.stop).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.stop).toHaveBeenCalledTimes(1);
+  expect(mockAuditTrailService.stop).toHaveBeenCalledTimes(1);
 });
 
 test(`doesn't setup core services if config validation fails`, async () => {

@@ -44,6 +44,13 @@ export const timelineTimeRangeSelector = createSelector(
   (timeline) => timeline.timerange
 );
 
+export const globalFullScreenSelector = createSelector(selectGlobal, (global) => global.fullScreen);
+
+export const timelineFullScreenSelector = createSelector(
+  selectTimeline,
+  (timeline) => timeline.fullScreen
+);
+
 export const globalTimeRangeSelector = createSelector(selectGlobal, (global) => global.timerange);
 
 export const globalPolicySelector = createSelector(selectGlobal, (global) => global.policy);

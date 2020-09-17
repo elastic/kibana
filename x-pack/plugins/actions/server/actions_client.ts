@@ -28,6 +28,9 @@ import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
 } from './create_execute_function';
+import { ActionsAuthorization } from './authorization/actions_authorization';
+import { ActionType } from '../common';
+import { shouldLegacyRbacApplyBySource } from './authorization/should_legacy_rbac_apply_by_source';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -52,11 +55,12 @@ interface ConstructorOptions {
   defaultKibanaIndex: string;
   scopedClusterClient: ILegacyScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
-  savedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
   request: KibanaRequest;
+  authorization: ActionsAuthorization;
 }
 
 interface UpdateOptions {
@@ -67,45 +71,51 @@ interface UpdateOptions {
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
   private readonly scopedClusterClient: ILegacyScopedClusterClient;
-  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
+  private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer;
 
   constructor({
     actionTypeRegistry,
     defaultKibanaIndex,
     scopedClusterClient,
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
     request,
+    authorization,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
-    this.savedObjectsClient = savedObjectsClient;
+    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
     this.defaultKibanaIndex = defaultKibanaIndex;
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
     this.request = request;
+    this.authorization = authorization;
   }
 
   /**
    * Create an action
    */
-  public async create({ action }: CreateOptions): Promise<ActionResult> {
-    const { actionTypeId, name, config, secrets } = action;
+  public async create({
+    action: { actionTypeId, name, config, secrets },
+  }: CreateOptions): Promise<ActionResult> {
+    await this.authorization.ensureAuthorized('create', actionTypeId);
+
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.savedObjectsClient.create('action', {
+    const result = await this.unsecuredSavedObjectsClient.create('action', {
       actionTypeId,
       name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
@@ -125,6 +135,8 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
+    await this.authorization.ensureAuthorized('update');
+
     if (
       this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
@@ -139,7 +151,7 @@ export class ActionsClient {
         'update'
       );
     }
-    const existingObject = await this.savedObjectsClient.get<RawAction>('action', id);
+    const existingObject = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = existingObject.attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -148,7 +160,7 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.savedObjectsClient.update('action', id, {
+    const result = await this.unsecuredSavedObjectsClient.update<RawAction>('action', id, {
       actionTypeId,
       name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
@@ -168,6 +180,8 @@ export class ActionsClient {
    * Get an action
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
+    await this.authorization.ensureAuthorized('get');
+
     const preconfiguredActionsList = this.preconfiguredActions.find(
       (preconfiguredAction) => preconfiguredAction.id === id
     );
@@ -179,7 +193,7 @@ export class ActionsClient {
         isPreconfigured: true,
       };
     }
-    const result = await this.savedObjectsClient.get<RawAction>('action', id);
+    const result = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
 
     return {
       id,
@@ -194,8 +208,10 @@ export class ActionsClient {
    * Get all actions with preconfigured list
    */
   public async getAll(): Promise<FindActionResult[]> {
+    await this.authorization.ensureAuthorized('get');
+
     const savedObjectsActions = (
-      await this.savedObjectsClient.find<RawAction>({
+      await this.unsecuredSavedObjectsClient.find<RawAction>({
         perPage: MAX_ACTIONS_RETURNED,
         type: 'action',
       })
@@ -221,6 +237,8 @@ export class ActionsClient {
    * Get bulk actions with preconfigured list
    */
   public async getBulk(ids: string[]): Promise<ActionResult[]> {
+    await this.authorization.ensureAuthorized('get');
+
     const actionResults = new Array<ActionResult>();
     for (const actionId of ids) {
       const action = this.preconfiguredActions.find(
@@ -242,7 +260,7 @@ export class ActionsClient {
     ];
 
     const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
-    const bulkGetResult = await this.savedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
+    const bulkGetResult = await this.unsecuredSavedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
 
     for (const action of bulkGetResult.saved_objects) {
       if (action.error) {
@@ -259,6 +277,8 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
+    await this.authorization.ensureAuthorized('delete');
+
     if (
       this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
@@ -273,18 +293,30 @@ export class ActionsClient {
         'delete'
       );
     }
-    return await this.savedObjectsClient.delete('action', id);
+    return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
   public async execute({
     actionId,
     params,
-  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult> {
-    return this.actionExecutor.execute({ actionId, params, request: this.request });
+    source,
+  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
+    if (!(await shouldLegacyRbacApplyBySource(this.unsecuredSavedObjectsClient, source))) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    return this.actionExecutor.execute({ actionId, params, source, request: this.request });
   }
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
-    return this.executionEnqueuer(this.savedObjectsClient, options);
+    const { source } = options;
+    if (!(await shouldLegacyRbacApplyBySource(this.unsecuredSavedObjectsClient, source))) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
+  public async listTypes(): Promise<ActionType[]> {
+    return this.actionTypeRegistry.list();
   }
 }
 

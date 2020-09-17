@@ -53,6 +53,7 @@ export function initGraphApp(angularModule, deps) {
     graphSavePolicy,
     overlays,
     savedObjects,
+    setHeaderActionMenu,
   } = deps;
 
   const app = angularModule;
@@ -465,6 +466,7 @@ export function initGraphApp(angularModule, deps) {
     };
 
     // ===== Menubar configuration =========
+    $scope.setHeaderActionMenu = setHeaderActionMenu;
     $scope.topNavMenu = [];
     $scope.topNavMenu.push({
       key: 'new',
@@ -562,8 +564,8 @@ export function initGraphApp(angularModule, deps) {
       run: () => {
         const settingsObservable = asAngularSyncedObservable(
           () => ({
-            blacklistedNodes: $scope.workspace ? [...$scope.workspace.blacklistedNodes] : undefined,
-            unblacklistNode: $scope.workspace ? $scope.workspace.unblacklist : undefined,
+            blocklistedNodes: $scope.workspace ? [...$scope.workspace.blocklistedNodes] : undefined,
+            unblocklistNode: $scope.workspace ? $scope.workspace.unblocklist : undefined,
             canEditDrillDownUrls: canEditDrillDownUrls,
           }),
           $scope.$digest.bind($scope)

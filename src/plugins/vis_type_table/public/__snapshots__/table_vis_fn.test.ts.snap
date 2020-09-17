@@ -30,6 +30,7 @@ Object {
         "columnIndex": null,
         "direction": null,
       },
+      "title": "My Chart title",
       "totalFunc": "sum",
     },
     "visData": Object {

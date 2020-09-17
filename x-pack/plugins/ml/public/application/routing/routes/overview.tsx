@@ -8,6 +8,9 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Redirect } from 'react-router-dom';
+
+import { NavigateToPath } from '../../contexts/kibana';
+
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { OverviewPage } from '../../overview';
@@ -17,28 +20,31 @@ import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capab
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { useTimefilter } from '../../contexts/kibana';
-import { ML_BREADCRUMB } from '../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.overview.overviewLabel', {
-      defaultMessage: 'Overview',
-    }),
-    href: '#/overview',
-  },
-];
-
-export const overviewRoute: MlRoute = {
+export const overviewRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/overview',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    {
+      text: i18n.translate('xpack.ml.overview.overviewLabel', {
+        defaultMessage: 'Overview',
+      }),
+      onClick: breadcrumbOnClickFactory('/overview', navigateToPath),
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { redirectToMlAccessDeniedPage } = deps;
+
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
+    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     getMlNodeCount,
     loadMlServerInfo,
   });
@@ -51,11 +57,11 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   );
 };
 
-export const appRootRoute: MlRoute = {
+export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   path: '/',
   render: () => <Page />,
   breadcrumbs: [],
-};
+});
 
 const Page: FC = () => {
   return <Redirect to="/overview" />;

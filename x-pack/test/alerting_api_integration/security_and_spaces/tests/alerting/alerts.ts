@@ -14,8 +14,13 @@ import {
   getTestAlertData,
   ObjectRemover,
   AlertUtils,
+  getConsumerUnauthorizedErrorMessage,
   TaskManagerUtils,
+  getEventLog,
 } from '../../../common/lib';
+import { IValidatedEvent } from '../../../../../plugins/event_log/server';
+
+const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -83,15 +88,28 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
 
               // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
@@ -159,6 +177,13 @@ instanceStateValue: true
               });
 
               await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+
+              await validateEventLog({
+                spaceId: space.id,
+                alertId,
+                outcome: 'success',
+                message: `alert executed: test.always-firing:${alertId}: 'abc'`,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -177,15 +202,28 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
 
               // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
@@ -364,15 +402,28 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
@@ -448,14 +499,20 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.authorization',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
@@ -562,14 +619,19 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
 
@@ -600,6 +662,14 @@ instanceStateValue: true
                     statusCode: 403,
                   },
                 },
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
@@ -646,14 +716,27 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
@@ -712,14 +795,27 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
@@ -762,14 +858,27 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               // Actions should execute twice before widning things down
@@ -804,14 +913,27 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               await alertUtils.muteAll(response.body.id);
               await alertUtils.enable(response.body.id);
@@ -849,14 +971,27 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               await alertUtils.muteInstance(response.body.id, '1');
               await alertUtils.enable(response.body.id);
@@ -894,14 +1029,27 @@ instanceStateValue: true
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
               await alertUtils.muteInstance(response.body.id, '1');
               await alertUtils.muteAll(response.body.id);
@@ -927,4 +1075,66 @@ instanceStateValue: true
       });
     }
   });
+
+  interface ValidateEventLogParams {
+    spaceId: string;
+    alertId: string;
+    outcome: string;
+    message: string;
+    errorMessage?: string;
+  }
+
+  async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
+    const { spaceId, alertId, outcome, message, errorMessage } = params;
+
+    const events: IValidatedEvent[] = await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId,
+        type: 'alert',
+        id: alertId,
+        provider: 'alerting',
+        actions: ['execute'],
+      });
+    });
+
+    expect(events.length).to.be.greaterThan(0);
+
+    const event = events[0];
+
+    const duration = event?.event?.duration;
+    const eventStart = Date.parse(event?.event?.start || 'undefined');
+    const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    const dateNow = Date.now();
+
+    expect(typeof duration).to.be('number');
+    expect(eventStart).to.be.ok();
+    expect(eventEnd).to.be.ok();
+
+    const durationDiff = Math.abs(
+      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+    );
+
+    // account for rounding errors
+    expect(durationDiff < 1).to.equal(true);
+    expect(eventStart <= eventEnd).to.equal(true);
+    expect(eventEnd <= dateNow).to.equal(true);
+
+    expect(event?.event?.outcome).to.equal(outcome);
+
+    expect(event?.kibana?.saved_objects).to.eql([
+      {
+        rel: 'primary',
+        type: 'alert',
+        id: alertId,
+        namespace: spaceId,
+      },
+    ]);
+
+    expect(event?.message).to.eql(message);
+
+    if (errorMessage) {
+      expect(event?.error?.message).to.eql(errorMessage);
+    }
+  }
 }

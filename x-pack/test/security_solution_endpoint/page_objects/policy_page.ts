@@ -27,7 +27,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async findFirstActionsButton() {
       await this.ensureIsOnPolicyPage();
-      return (await testSubjects.findAll('policyActionsButton'))[0];
+      return await testSubjects.find('policyActionsButton');
     },
 
     /**
@@ -36,8 +36,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     async launchAndFindDeleteModal() {
       const actionsButton = await this.findFirstActionsButton();
       await actionsButton.click();
-      const deleteAction = await testSubjects.find('policyDeleteButton');
-      await deleteAction.click();
+      await testSubjects.click('policyDeleteButton');
       return await testSubjects.find('policyListDeleteModal');
     },
 
@@ -70,6 +69,14 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
+     * Finds and returns the Policy Details Page Cancel Button
+     */
+    async findCancelButton() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('policyDetailsCancelButton');
+    },
+
+    /**
      * ensures that the Details Page is the currently display view
      */
     async ensureIsOnDetailsPage() {
@@ -98,12 +105,12 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
-     * Used when looking a the Ingest create/edit package config pages. Finds the endpoint
+     * Used when looking a the Ingest create/edit package policy pages. Finds the endpoint
      * custom configuaration component
      * @param onEditPage
      */
-    async findPackageConfigEndpointCustomConfiguration(onEditPage: boolean = false) {
-      return await testSubjects.find(`endpointPackageConfig_${onEditPage ? 'edit' : 'create'}`);
+    async findPackagePolicyEndpointCustomConfiguration(onEditPage: boolean = false) {
+      return await testSubjects.find(`endpointPackagePolicy_${onEditPage ? 'edit' : 'create'}`);
     },
 
     /**

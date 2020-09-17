@@ -6,18 +6,21 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import SlackParamsFields from './slack_params';
+import { DocLinksStart } from 'kibana/public';
 
 describe('SlackParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const actionParams = {
       message: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <SlackParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();

@@ -15,7 +15,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
     enabled: true,
     showMapVisualizationTypes: true,
     showMapsInspectorAdapter: true,
-    enableVectorTiles: true,
     preserveDrawingBuffer: true,
   },
   schema: configSchema,

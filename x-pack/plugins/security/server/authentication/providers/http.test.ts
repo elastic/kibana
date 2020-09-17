@@ -126,7 +126,7 @@ describe('HTTPAuthenticationProvider', () => {
       ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();
@@ -156,7 +156,7 @@ describe('HTTPAuthenticationProvider', () => {
       ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
         mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();

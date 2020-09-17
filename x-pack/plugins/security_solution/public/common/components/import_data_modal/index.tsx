@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  // @ts-ignore no-exported-member
   EuiFilePicker,
   EuiModal,
   EuiModalBody,
@@ -24,7 +23,9 @@ import React, { useCallback, useState } from 'react';
 import {
   ImportDataResponse,
   ImportDataProps,
-} from '../../../alerts/containers/detection_engine/rules';
+  ImportRulesResponseError,
+  ImportResponseError,
+} from '../../../detections/containers/detection_engine/rules';
 import {
   displayErrorToast,
   displaySuccessToast,
@@ -48,6 +49,12 @@ interface ImportDataModalProps {
   successMessage: (totalCount: number) => string;
   title: string;
 }
+
+const isImportRulesResponseError = (
+  error: ImportRulesResponseError | ImportResponseError
+): error is ImportRulesResponseError => {
+  return (error as ImportRulesResponseError).rule_id !== undefined;
+};
 
 /**
  * Modal component for importing Rules from a json file
@@ -97,7 +104,11 @@ export const ImportDataModalComponent = ({
         }
         if (importResponse.errors.length > 0) {
           const formattedErrors = importResponse.errors.map((e) =>
-            failedDetailed(e.rule_id, e.error.status_code, e.error.message)
+            failedDetailed(
+              isImportRulesResponseError(e) ? e.rule_id : e.id,
+              e.error.status_code,
+              e.error.message
+            )
           );
           displayErrorToast(errorMessage, formattedErrors, dispatchToaster);
         }

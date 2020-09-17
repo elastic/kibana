@@ -6,18 +6,22 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
+import {
+  EmbeddableSwimLaneContainer,
+  ExplorerSwimlaneContainerProps,
+} from './embeddable_swim_lane_container';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneServices,
-} from './anomaly_swimlane_embeddable';
+import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { CoreStart } from 'kibana/public';
-import { MlStartDependencies } from '../../plugin';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
+import { MlDependencies } from '../../application/app';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
+import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
+import { TriggerId } from 'src/plugins/ui_actions/public';
+import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 
 jest.mock('./swimlane_input_resolver', () => ({
   useSwimlaneInputResolver: jest.fn(() => {
@@ -37,13 +41,30 @@ const defaultOptions = { wrapper: I18nProvider };
 describe('ExplorerSwimlaneContainer', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
   let refresh: BehaviorSubject<any>;
-  let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
+  let services: jest.Mocked<[CoreStart, MlDependencies, AnomalySwimlaneServices]>;
+  let embeddableContext: AnomalySwimlaneEmbeddable;
+  let trigger: jest.Mocked<TriggerContract<TriggerId>>;
+
   const onInputChange = jest.fn();
+  const onOutputChange = jest.fn();
 
   beforeEach(() => {
+    embeddableContext = { id: 'test-id' } as AnomalySwimlaneEmbeddable;
     embeddableInput = new BehaviorSubject({
       id: 'test-swimlane-embeddable',
     } as Partial<AnomalySwimlaneEmbeddableInput>);
+
+    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract<TriggerId>>;
+
+    const uiActionsMock = uiActionsPluginMock.createStartContract();
+    uiActionsMock.getTrigger.mockReturnValue(trigger);
+
+    services = ([
+      {},
+      {
+        uiActions: uiActionsMock,
+      },
+    ] as unknown) as ExplorerSwimlaneContainerProps['services'];
   });
 
   test('should render a swimlane with a valid embeddable input', async () => {
@@ -74,12 +95,14 @@ describe('ExplorerSwimlaneContainer', () => {
     render(
       <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
+        embeddableContext={embeddableContext}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}
         refresh={refresh}
         onInputChange={onInputChange}
+        onOutputChange={onOutputChange}
       />,
       defaultOptions
     );
@@ -110,6 +133,7 @@ describe('ExplorerSwimlaneContainer', () => {
 
     const { findByText } = render(
       <EmbeddableSwimLaneContainer
+        embeddableContext={embeddableContext}
         id={'test-swimlane-embeddable'}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
@@ -117,6 +141,7 @@ describe('ExplorerSwimlaneContainer', () => {
         services={services}
         refresh={refresh}
         onInputChange={onInputChange}
+        onOutputChange={onOutputChange}
       />,
       defaultOptions
     );

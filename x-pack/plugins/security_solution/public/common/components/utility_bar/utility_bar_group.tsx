@@ -6,14 +6,14 @@
 
 import React from 'react';
 
-import { BarGroup } from './styles';
+import { BarGroup, BarGroupProps } from './styles';
 
-export interface UtilityBarGroupProps {
+export interface UtilityBarGroupProps extends BarGroupProps {
   children: React.ReactNode;
 }
 
-export const UtilityBarGroup = React.memo<UtilityBarGroupProps>(({ children }) => (
-  <BarGroup>{children}</BarGroup>
+export const UtilityBarGroup = React.memo<UtilityBarGroupProps>(({ grow, children }) => (
+  <BarGroup grow={grow}>{children}</BarGroup>
 ));
 
 UtilityBarGroup.displayName = 'UtilityBarGroup';

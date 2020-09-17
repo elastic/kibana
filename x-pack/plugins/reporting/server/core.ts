@@ -15,18 +15,18 @@ import {
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from 'src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
-import { ScreenshotsObservableFn } from '../server/types';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { screenshotsObservableFactory } from './export_types/common/lib/screenshots';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
-import { EnqueueJobFn } from './lib/enqueue_job';
+import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
 
 export interface ReportingInternalSetup {
+  features: FeaturesPluginSetup;
   elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;
   basePath: BasePath['get'];
@@ -36,7 +36,6 @@ export interface ReportingInternalSetup {
 
 export interface ReportingInternalStart {
   browserDriverFactory: HeadlessChromiumDriverFactory;
-  enqueueJob: EnqueueJobFn;
   esqueue: ESQueueInstance;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
@@ -102,6 +101,26 @@ export class ReportingCore {
     this.pluginSetup$.next(true);
   }
 
+  /**
+   * Registers reporting as an Elasticsearch feature for the purpose of toggling visibility based on roles.
+   */
+  public registerFeature() {
+    const config = this.getConfig();
+    const allowedRoles = ['superuser', ...(config.get('roles')?.allow ?? [])];
+    this.getPluginSetupDeps().features.registerElasticsearchFeature({
+      id: 'reporting',
+      catalogue: ['reporting'],
+      management: {
+        insightsAndAlerting: ['reporting'],
+      },
+      privileges: allowedRoles.map((role) => ({
+        requiredClusterPrivileges: [],
+        requiredRoles: [role],
+        ui: [],
+      })),
+    });
+  }
+
   /*
    * Gives synchronous access to the config
    */
@@ -115,7 +134,7 @@ export class ReportingCore {
   /*
    * Gives async access to the startDeps
    */
-  private async getPluginStartDeps() {
+  public async getPluginStartDeps() {
     if (this.pluginStartDeps) {
       return this.pluginStartDeps;
     }
@@ -129,10 +148,6 @@ export class ReportingCore {
 
   public async getEsqueue() {
     return (await this.getPluginStartDeps()).esqueue;
-  }
-
-  public async getEnqueueJob() {
-    return (await this.getPluginStartDeps()).enqueueJob;
   }
 
   public async getLicenseInfo() {

@@ -8,7 +8,7 @@ import { executeActionRoute } from './execute';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
+import { verifyApiAccess, ActionTypeDisabledError, asHttpRequestExecutionSource } from '../lib';
 import { actionsClientMock } from '../actions_client.mock';
 import { ActionTypeExecutorResult } from '../types';
 
@@ -53,13 +53,6 @@ describe('executeActionRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}/_execute"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
 
     expect(await handler(context, req, res)).toEqual({ body: executeResult });
 
@@ -68,6 +61,7 @@ describe('executeActionRoute', () => {
       params: {
         someData: 'data',
       },
+      source: asHttpRequestExecutionSource(req),
     });
 
     expect(res.ok).toHaveBeenCalled();
@@ -78,7 +72,9 @@ describe('executeActionRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.execute.mockResolvedValueOnce((null as unknown) as ActionTypeExecutorResult);
+    actionsClient.execute.mockResolvedValueOnce(
+      (null as unknown) as ActionTypeExecutorResult<void>
+    );
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -102,6 +98,7 @@ describe('executeActionRoute', () => {
     expect(actionsClient.execute).toHaveBeenCalledWith({
       actionId: '1',
       params: {},
+      source: asHttpRequestExecutionSource(req),
     });
 
     expect(res.ok).not.toHaveBeenCalled();

@@ -196,6 +196,15 @@ describe('extendDatemath()', () => {
           diffUnit: 'y',
         });
       });
+
+      it('Returns no difference if the next value would result in an epoch smaller than 0', () => {
+        // FIXME: Test will fail in ~551 years
+        expect(extendDatemath('now-500y', 'before')).toBeUndefined();
+
+        expect(
+          extendDatemath('1970-01-01T00:00:00.000Z', 'before', '1970-01-01T00:00:00.001Z')
+        ).toBeUndefined();
+      });
     });
 
     describe('with a positive operator', () => {
@@ -572,6 +581,13 @@ describe('extendDatemath()', () => {
           diffAmount: 1,
           diffUnit: 'y',
         });
+      });
+
+      it('Returns no difference if the next value would result in an epoch bigger than the max JS date', () => {
+        expect(extendDatemath('now+275760y', 'after')).toBeUndefined();
+        expect(
+          extendDatemath('+275760-09-13T00:00:00.000Z', 'after', '+275760-09-12T23:59:59.999Z')
+        ).toBeUndefined();
       });
     });
   });

@@ -3,25 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup, Logger } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { DeepRequired } from 'utility-types';
 import {
-  TaskManagerStartContract,
+  CoreSetup,
+  Logger,
+  SavedObjectsErrorHelpers,
+} from '../../../../../../src/core/server';
+import { APMConfig } from '../..';
+import {
   TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
+import { getApmTelemetryMapping } from '../../../common/apm_telemetry';
+import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
   CollectTelemetryParams,
 } from './collect_data_telemetry';
-import { APMConfig } from '../..';
-import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
+import { APMDataTelemetry } from './types';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
@@ -31,12 +38,14 @@ export async function createApmTelemetry({
   usageCollector,
   taskManager,
   logger,
+  kibanaVersion,
 }: {
   core: CoreSetup;
   config$: Observable<APMConfig>;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
+  kibanaVersion: string;
 }) {
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
@@ -90,25 +99,31 @@ export async function createApmTelemetry({
 
     await savedObjectsClient.create(
       APM_TELEMETRY_SAVED_OBJECT_TYPE,
-      dataTelemetry,
+      {
+        ...dataTelemetry,
+        kibanaVersion,
+      },
       { id: APM_TELEMETRY_SAVED_OBJECT_TYPE, overwrite: true }
     );
   };
 
   const collector = usageCollector.makeUsageCollector({
     type: 'apm',
+    schema: getApmTelemetryMapping(),
     fetch: async () => {
       try {
-        const data = (
+        const { kibanaVersion: storedKibanaVersion, ...data } = (
           await savedObjectsClient.get(
             APM_TELEMETRY_SAVED_OBJECT_TYPE,
             APM_TELEMETRY_SAVED_OBJECT_ID
           )
-        ).attributes;
+        ).attributes as { kibanaVersion: string } & DeepRequired<
+          APMDataTelemetry
+        >;
 
         return data;
       } catch (err) {
-        if (err.output?.statusCode === 404) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
           // task has not run yet, so no saved object to return
           return {};
         }
@@ -120,7 +135,7 @@ export async function createApmTelemetry({
 
   usageCollector.registerCollector(collector);
 
-  core.getStartServices().then(([_coreStart, pluginsStart]) => {
+  core.getStartServices().then(async ([_coreStart, pluginsStart]) => {
     const { taskManager: taskManagerStart } = pluginsStart as {
       taskManager: TaskManagerStartContract;
     };
@@ -135,5 +150,25 @@ export async function createApmTelemetry({
       params: {},
       state: {},
     });
+
+    try {
+      const currentData = (
+        await savedObjectsClient.get(
+          APM_TELEMETRY_SAVED_OBJECT_TYPE,
+          APM_TELEMETRY_SAVED_OBJECT_ID
+        )
+      ).attributes as { kibanaVersion?: string };
+
+      if (currentData.kibanaVersion !== kibanaVersion) {
+        logger.debug(
+          `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
+        );
+        taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
+      }
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        logger.warn('Failed to fetch saved telemetry data.');
+      }
+    }
   });
 }

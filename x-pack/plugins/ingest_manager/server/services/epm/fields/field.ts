@@ -126,10 +126,21 @@ function dedupFields(fields: Fields): Fields {
       if (
         // only merge if found is a group and field is object, nested, or group.
         // Or if found is object, or nested, and field is a group.
-        // This is to avoid merging two objects, or nested, or object with a nested.
+        // This is to avoid merging two objects, or two nested, or object with a nested.
+
+        // we do not need to check for group-nested in this part because `field` will never have group-nested
+        // it can only exist on `found`
         (found.type === 'group' &&
           (field.type === 'object' || field.type === 'nested' || field.type === 'group')) ||
-        ((found.type === 'object' || found.type === 'nested') && field.type === 'group')
+        // as part of the loop we will be marking found.type as group-nested so found could be group-nested if it was
+        // already processed. If we had an explicit definition of nested, and it showed up before a descendant field:
+        // - name: a
+        //   type: nested
+        // - name: a.b
+        //   type: keyword
+        // then found.type will be nested and not group-nested because it won't have any fields yet until a.b is processed
+        ((found.type === 'object' || found.type === 'nested' || found.type === 'group-nested') &&
+          field.type === 'group')
       ) {
         // if the new field has properties let's dedup and concat them with the already existing found variable in
         // the array
@@ -148,10 +159,10 @@ function dedupFields(fields: Fields): Fields {
           // supposed to be `nested` for when the template is actually generated
           if (found.type === 'nested' || field.type === 'nested') {
             found.type = 'group-nested';
-          } else {
-            // found was either `group` already or `object` so just set it to `group`
+          } else if (found.type === 'object') {
             found.type = 'group';
           }
+          // found.type could be group-nested or group, in those cases just leave it
         }
         // we need to merge in other properties (like `dynamic`) that might exist
         Object.assign(found, importantFieldProps);

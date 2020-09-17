@@ -4,25 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
 import {
-  EuiTitle,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiSelect,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 interface Props {
   serviceNames: string[];
+  loading: boolean;
 }
 
-const ServiceNameFilter = ({ serviceNames }: Props) => {
+function ServiceNameFilter({ loading, serviceNames }: Props) {
+  const history = useHistory();
   const {
-    urlParams: { serviceName },
+    urlParams: { serviceName: selectedServiceName },
   } = useUrlParams();
 
   const options = serviceNames.map((type) => ({
@@ -30,22 +32,37 @@ const ServiceNameFilter = ({ serviceNames }: Props) => {
     value: type,
   }));
 
-  const updateServiceName = (serviceN: string) => {
-    const newLocation = {
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        serviceName: serviceN,
-      }),
-    };
-    history.push(newLocation);
-  };
+  const updateServiceName = useCallback(
+    (serviceN: string) => {
+      const newLocation = {
+        ...history.location,
+        search: fromQuery({
+          ...toQuery(history.location.search),
+          serviceName: serviceN,
+        }),
+      };
+      history.push(newLocation);
+    },
+    [history]
+  );
 
   useEffect(() => {
-    if (!serviceName && serviceNames.length > 0) {
-      updateServiceName(serviceNames[0]);
+    if (serviceNames?.length > 0) {
+      // select first from the list
+      if (!selectedServiceName) {
+        updateServiceName(serviceNames[0]);
+      }
+
+      // in case serviceName is cached from url and isn't present in current list
+      if (selectedServiceName && !serviceNames.includes(selectedServiceName)) {
+        updateServiceName(serviceNames[0]);
+      }
     }
-  }, [serviceNames, serviceName]);
+
+    if (selectedServiceName && serviceNames.length === 0 && !loading) {
+      updateServiceName('');
+    }
+  }, [serviceNames, selectedServiceName, updateServiceName, loading]);
 
   return (
     <>
@@ -60,9 +77,10 @@ const ServiceNameFilter = ({ serviceNames }: Props) => {
       <EuiHorizontalRule margin="none" />
       <EuiSpacer size="s" />
       <EuiSelect
+        isLoading={loading}
         data-cy="serviceNameFilter"
         options={options}
-        value={serviceName}
+        value={selectedServiceName}
         compressed={true}
         onChange={(event) => {
           updateServiceName(event.target.value);
@@ -70,6 +88,6 @@ const ServiceNameFilter = ({ serviceNames }: Props) => {
       />
     </>
   );
-};
+}
 
 export { ServiceNameFilter };

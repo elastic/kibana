@@ -20,7 +20,7 @@
 import React, { Component } from 'react';
 
 import {
-  keyCodes,
+  keys,
   EuiBasicTableColumn,
   EuiInMemoryTable,
   EuiFieldText,
@@ -111,15 +111,15 @@ export class Table extends Component<TableProps, TableState> {
   onEditingFilterChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     this.setState({ editingFilterValue: e.target.value });
 
-  onEditFieldKeyDown = ({ keyCode }: React.KeyboardEvent<HTMLInputElement>) => {
-    if (keyCodes.ENTER === keyCode && this.state.editingFilterId && this.state.editingFilterValue) {
+  onEditFieldKeyDown = ({ key }: React.KeyboardEvent<HTMLInputElement>) => {
+    if (keys.ENTER === key && this.state.editingFilterId && this.state.editingFilterValue) {
       this.props.saveFilter({
         clientId: this.state.editingFilterId,
         value: this.state.editingFilterValue,
       });
       this.stopEditingFilter();
     }
-    if (keyCodes.ESCAPE === keyCode) {
+    if (keys.ESCAPE === key) {
       this.stopEditingFilter();
     }
   };

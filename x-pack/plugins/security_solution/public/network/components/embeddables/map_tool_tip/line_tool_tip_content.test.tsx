@@ -6,6 +6,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+
+import '../../../../common/mock/match_media';
 import { LineToolTipContentComponent } from './line_tool_tip_content';
 import {
   SUM_OF_CLIENT_BYTES,

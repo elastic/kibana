@@ -9,24 +9,28 @@ import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
+  AcknowledgeSchema,
   DeleteListSchemaEncoded,
   ExportListItemQuerySchemaEncoded,
   FindListSchemaEncoded,
   FoundListSchema,
   ImportListItemQuerySchemaEncoded,
   ImportListItemSchemaEncoded,
+  ListItemIndexExistSchema,
   ListSchema,
+  acknowledgeSchema,
   deleteListSchema,
   exportListItemQuerySchema,
   findListSchema,
   foundListSchema,
   importListItemQuerySchema,
   importListItemSchema,
+  listItemIndexExistSchema,
   listSchema,
 } from '../../common/schemas';
-import { LIST_ITEM_URL, LIST_URL } from '../../common/constants';
-import { validateEither } from '../../common/siem_common_deps';
-import { toPromise } from '../common/fp_utils';
+import { LIST_INDEX, LIST_ITEM_URL, LIST_PRIVILEGES_URL, LIST_URL } from '../../common/constants';
+import { validateEither } from '../../common/shared_imports';
+import { toError, toPromise } from '../common/fp_utils';
 
 import {
   ApiParams,
@@ -40,6 +44,7 @@ const findLists = async ({
   http,
   cursor,
   page,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListSchema> => {
@@ -55,6 +60,7 @@ const findLists = async ({
 };
 
 const findListsWithValidation = async ({
+  cursor,
   http,
   pageIndex,
   pageSize,
@@ -62,11 +68,12 @@ const findListsWithValidation = async ({
 }: FindListsParams): Promise<FoundListSchema> =>
   pipe(
     {
-      page: String(pageIndex),
-      per_page: String(pageSize),
+      cursor: cursor?.toString(),
+      page: pageIndex?.toString(),
+      per_page: pageSize?.toString(),
     },
     (payload) => fromEither(validateEither(findListSchema, payload)),
-    chain((payload) => tryCatch(() => findLists({ http, signal, ...payload }), String)),
+    chain((payload) => tryCatch(() => findLists({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(foundListSchema, response))),
     flow(toPromise)
   );
@@ -76,6 +83,7 @@ export { findListsWithValidation as findLists };
 const importList = async ({
   file,
   http,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
   type,
   signal,
@@ -113,7 +121,7 @@ const importListWithValidation = async ({
         map((body) => ({ ...body, ...query }))
       )
     ),
-    chain((payload) => tryCatch(() => importList({ http, signal, ...payload }), String)),
+    chain((payload) => tryCatch(() => importList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
     flow(toPromise)
   );
@@ -139,7 +147,7 @@ const deleteListWithValidation = async ({
   pipe(
     { id },
     (payload) => fromEither(validateEither(deleteListSchema, payload)),
-    chain((payload) => tryCatch(() => deleteList({ http, signal, ...payload }), String)),
+    chain((payload) => tryCatch(() => deleteList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
     flow(toPromise)
   );
@@ -148,6 +156,7 @@ export { deleteListWithValidation as deleteList };
 
 const exportList = async ({
   http,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
   signal,
 }: ApiParams & ExportListItemQuerySchemaEncoded): Promise<Blob> =>
@@ -165,9 +174,51 @@ const exportListWithValidation = async ({
   pipe(
     { list_id: listId },
     (payload) => fromEither(validateEither(exportListItemQuerySchema, payload)),
-    chain((payload) => tryCatch(() => exportList({ http, signal, ...payload }), String)),
-    chain((response) => fromEither(validateEither(listSchema, response))),
+    chain((payload) => tryCatch(() => exportList({ http, signal, ...payload }), toError)),
     flow(toPromise)
   );
 
 export { exportListWithValidation as exportList };
+
+const readListIndex = async ({ http, signal }: ApiParams): Promise<ListItemIndexExistSchema> =>
+  http.fetch<ListItemIndexExistSchema>(LIST_INDEX, {
+    method: 'GET',
+    signal,
+  });
+
+const readListIndexWithValidation = async ({
+  http,
+  signal,
+}: ApiParams): Promise<ListItemIndexExistSchema> =>
+  flow(
+    () => tryCatch(() => readListIndex({ http, signal }), toError),
+    chain((response) => fromEither(validateEither(listItemIndexExistSchema, response))),
+    flow(toPromise)
+  )();
+
+export { readListIndexWithValidation as readListIndex };
+
+// TODO add types and validation
+export const readListPrivileges = async ({ http, signal }: ApiParams): Promise<unknown> =>
+  http.fetch<unknown>(LIST_PRIVILEGES_URL, {
+    method: 'GET',
+    signal,
+  });
+
+const createListIndex = async ({ http, signal }: ApiParams): Promise<AcknowledgeSchema> =>
+  http.fetch<AcknowledgeSchema>(LIST_INDEX, {
+    method: 'POST',
+    signal,
+  });
+
+const createListIndexWithValidation = async ({
+  http,
+  signal,
+}: ApiParams): Promise<AcknowledgeSchema> =>
+  flow(
+    () => tryCatch(() => createListIndex({ http, signal }), toError),
+    chain((response) => fromEither(validateEither(acknowledgeSchema, response))),
+    flow(toPromise)
+  )();
+
+export { createListIndexWithValidation as createListIndex };

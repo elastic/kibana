@@ -15,7 +15,7 @@ import {
   httpServerMock,
 } from '../../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
-import { Feature } from '../../../../../features/server';
+import { KibanaFeature } from '../../../../../features/server';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 
 const application = 'kibana-.kibana';
@@ -72,7 +72,7 @@ const putRoleTest = (
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
     for (const apiResponse of apiResponses) {
       mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
@@ -83,7 +83,7 @@ const putRoleTest = (
     );
 
     mockRouteDefinitionParams.getFeatures.mockResolvedValue([
-      new Feature({
+      new KibanaFeature({
         id: 'feature_1',
         name: 'feature 1',
         app: [],

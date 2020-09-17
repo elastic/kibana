@@ -43,7 +43,7 @@ describe('BasicAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -65,7 +65,7 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
       const authenticationError = new Error('Some error');
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -147,7 +147,7 @@ describe('BasicAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const authorization = generateAuthorizationHeader('user', 'password');
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -163,7 +163,7 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader('user', 'password');
 
       const authenticationError = new Error('Forbidden');
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -181,6 +181,12 @@ describe('BasicAuthenticationProvider', () => {
     it('does not handle logout if state is not present', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest())).resolves.toEqual(
         DeauthenticationResult.notHandled()
+      );
+    });
+
+    it('redirects to login view if state is `null`.', async () => {
+      await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
     });
 

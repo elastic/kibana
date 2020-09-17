@@ -9,26 +9,17 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
-import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
-import { MlStartDependencies } from '../../plugin';
+import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
+import { MlDependencies } from '../../application/app';
+import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
-  Filter,
-  Query,
-  RefreshInterval,
-  TimeRange,
-} from '../../../../../../src/plugins/data/common';
-import { SwimlaneType } from '../../application/explorer/explorer_constants';
-
-export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneEmbeddableOutput,
+  AnomalySwimlaneServices,
+} from '..';
 
 export const getDefaultPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
@@ -36,41 +27,7 @@ export const getDefaultPanelTitle = (jobIds: JobId[]) =>
     values: { jobIds: jobIds.join(', ') },
   });
 
-export interface AnomalySwimlaneEmbeddableCustomInput {
-  jobIds: JobId[];
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-  perPage?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters: Filter[];
-  query: Query;
-  refreshConfig: RefreshInterval;
-  timeRange: TimeRange;
-}
-
-export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
-
-export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
-  AnomalySwimlaneEmbeddableCustomOutput;
-
-export interface AnomalySwimlaneEmbeddableCustomOutput {
-  jobIds: JobId[];
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-  perPage?: number;
-}
-
-export interface AnomalySwimlaneServices {
-  anomalyDetectorService: AnomalyDetectorService;
-  anomalyTimelineService: AnomalyTimelineService;
-}
-
-export type AnomalySwimlaneEmbeddableServices = [
-  CoreStart,
-  MlStartDependencies,
-  AnomalySwimlaneServices
-];
+export type IAnomalySwimlaneEmbeddable = typeof AnomalySwimlaneEmbeddable;
 
 export class AnomalySwimlaneEmbeddable extends Embeddable<
   AnomalySwimlaneEmbeddableInput,
@@ -82,16 +39,13 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
   constructor(
     initialInput: AnomalySwimlaneEmbeddableInput,
-    private services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
+    public services: [CoreStart, MlDependencies, AnomalySwimlaneServices],
     parent?: IContainer
   ) {
     super(
       initialInput,
       {
-        jobIds: initialInput.jobIds,
-        swimlaneType: initialInput.swimlaneType,
         defaultTitle: initialInput.title,
-        ...(initialInput.viewBy ? { viewBy: initialInput.viewBy } : {}),
       },
       parent
     );
@@ -107,12 +61,12 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
       <I18nContext>
         <EmbeddableSwimLaneContainer
           id={this.input.id}
+          embeddableContext={this}
           embeddableInput={this.getInput$()}
           services={this.services}
           refresh={this.reload$.asObservable()}
-          onInputChange={(input) => {
-            this.updateInput(input);
-          }}
+          onInputChange={this.updateInput.bind(this)}
+          onOutputChange={this.updateOutput.bind(this)}
         />
       </I18nContext>,
       node
@@ -128,5 +82,9 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
   public reload() {
     this.reload$.next();
+  }
+
+  public supportedTriggers() {
+    return [SWIM_LANE_SELECTION_TRIGGER as typeof SWIM_LANE_SELECTION_TRIGGER];
   }
 }

@@ -27,7 +27,6 @@ export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -56,3 +55,5 @@ export {
   IFieldFormat,
   FieldFormatsStartCommon,
 } from './types';
+
+export * from './errors';

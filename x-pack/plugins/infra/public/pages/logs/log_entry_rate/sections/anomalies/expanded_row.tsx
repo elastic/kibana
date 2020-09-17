@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useMount } from 'react-use';
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { AnomalyRecord } from '../../use_log_entry_rate_results';
-import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
-import { useLogEntryRateExamples } from '../../use_log_entry_rate_examples';
-import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
-import { LogEntryRateExampleMessage, LogEntryRateExampleMessageHeaders } from './log_entry_example';
 import { euiStyled } from '../../../../../../../observability/public';
+import { LogEntryAnomaly } from '../../../../../../common/http_api';
+import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
+import { useLogSourceContext } from '../../../../../containers/logs/log_source';
+import { useLogEntryExamples } from '../../use_log_entry_examples';
+import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
 
 const EXAMPLE_COUNT = 5;
 
@@ -24,29 +24,27 @@ const examplesTitle = i18n.translate('xpack.infra.logs.analysis.anomaliesTableEx
 });
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
-  anomaly: AnomalyRecord;
+  anomaly: LogEntryAnomaly;
   timeRange: TimeRange;
-  jobId: string;
-}> = ({ anomaly, timeRange, jobId }) => {
-  const {
-    sourceConfiguration: { sourceId },
-  } = useLogEntryRateModuleContext();
+}> = ({ anomaly, timeRange }) => {
+  const { sourceId } = useLogSourceContext();
 
   const {
-    getLogEntryRateExamples,
-    hasFailedLoadingLogEntryRateExamples,
-    isLoadingLogEntryRateExamples,
-    logEntryRateExamples,
-  } = useLogEntryRateExamples({
-    dataset: anomaly.partitionId,
+    getLogEntryExamples,
+    hasFailedLoadingLogEntryExamples,
+    isLoadingLogEntryExamples,
+    logEntryExamples,
+  } = useLogEntryExamples({
+    dataset: anomaly.dataset,
     endTime: anomaly.startTime + anomaly.duration,
     exampleCount: EXAMPLE_COUNT,
     sourceId,
     startTime: anomaly.startTime,
+    categoryId: anomaly.categoryId,
   });
 
   useMount(() => {
-    getLogEntryRateExamples();
+    getLogEntryExamples();
   });
 
   return (
@@ -57,17 +55,17 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             <h3>{examplesTitle}</h3>
           </EuiTitle>
           <LogEntryExampleMessages
-            isLoading={isLoadingLogEntryRateExamples}
-            hasFailedLoading={hasFailedLoadingLogEntryRateExamples}
-            hasResults={logEntryRateExamples.length > 0}
+            isLoading={isLoadingLogEntryExamples}
+            hasFailedLoading={hasFailedLoadingLogEntryExamples}
+            hasResults={logEntryExamples.length > 0}
             exampleCount={EXAMPLE_COUNT}
-            onReload={getLogEntryRateExamples}
+            onReload={getLogEntryExamples}
           >
-            {logEntryRateExamples.length > 0 ? (
+            {logEntryExamples.length > 0 ? (
               <>
-                <LogEntryRateExampleMessageHeaders dateTime={logEntryRateExamples[0].timestamp} />
-                {logEntryRateExamples.map((example, exampleIndex) => (
-                  <LogEntryRateExampleMessage
+                <LogEntryExampleMessageHeaders dateTime={logEntryExamples[0].timestamp} />
+                {logEntryExamples.map((example, exampleIndex) => (
+                  <LogEntryExampleMessage
                     key={exampleIndex}
                     id={example.id}
                     dataset={example.dataset}
@@ -75,7 +73,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
                     timestamp={example.timestamp}
                     tiebreaker={example.tiebreaker}
                     timeRange={timeRange}
-                    jobId={jobId}
+                    anomaly={anomaly}
                   />
                 ))}
               </>
@@ -87,11 +85,11 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiStat
                 titleSize="s"
-                title={`${numeral(anomaly.typicalLogEntryRate).format('0.00a')} ${i18n.translate(
+                title={`${numeral(anomaly.typical).format('0.00a')} ${i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateTitle',
                   {
                     defaultMessage: '{typicalCount, plural, one {message} other {messages}}',
-                    values: { typicalCount: anomaly.typicalLogEntryRate },
+                    values: { typicalCount: anomaly.typical },
                   }
                 )}`}
                 description={i18n.translate(
@@ -105,11 +103,11 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiStat
                 titleSize="s"
-                title={`${numeral(anomaly.actualLogEntryRate).format('0.00a')} ${i18n.translate(
+                title={`${numeral(anomaly.actual).format('0.00a')} ${i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateTitle',
                   {
                     defaultMessage: '{actualCount, plural, one {message} other {messages}}',
-                    values: { actualCount: anomaly.actualLogEntryRate },
+                    values: { actualCount: anomaly.actual },
                   }
                 )}`}
                 description={i18n.translate(

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-params: SearchParams;
+params?: ISearchRequestParams;
 ```

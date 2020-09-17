@@ -22,10 +22,10 @@ import { ExpressionAstExpression, ExpressionAstArgument } from './types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { parse: parseRaw } = require('@kbn/interpreter/common');
 
-export function parse(
-  expression: string,
-  startRule: 'expression' | 'argument'
-): ExpressionAstExpression | ExpressionAstArgument {
+export function parse<E extends string, S extends 'expression' | 'argument'>(
+  expression: E,
+  startRule: S
+): S extends 'expression' ? ExpressionAstExpression : ExpressionAstArgument {
   try {
     return parseRaw(String(expression), { startRule });
   } catch (e) {

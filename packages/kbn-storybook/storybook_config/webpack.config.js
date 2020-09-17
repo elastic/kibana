@@ -17,19 +17,115 @@
  * under the License.
  */
 
-const { parse, resolve } = require('path');
+const { resolve } = require('path');
 const webpack = require('webpack');
+const webpackMerge = require('webpack-merge');
 const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
+const { REPO_ROOT } = require('@kbn/utils');
+const { DLL_DIST_DIR } = require('../lib/constants');
 // eslint-disable-next-line import/no-unresolved
 const { currentConfig } = require('../../../built_assets/storybook/current.config');
 
 // Extend the Storybook Webpack config with some customizations
-module.exports = async ({ config }) => {
+module.exports = async ({ config: storybookConfig }) => {
+  let config = {
+    module: {
+      rules: [
+        // Include the React preset from Kibana for JS(X) and TS(X)
+        {
+          test: /\.(j|t)sx?$/,
+          exclude: /node_modules/,
+          loaders: 'babel-loader',
+          options: {
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+        {
+          test: /\.(html|md|txt|tmpl)$/,
+          use: {
+            loader: 'raw-loader',
+          },
+        },
+        // Parse props data for .tsx files
+        // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
+        // See: https://github.com/storybookjs/storybook/issues/7998
+        //
+        // {
+        //   test: /\.tsx$/,
+        //   // Exclude example files, as we don't display props info for them
+        //   exclude: /\.stories.tsx$/,
+        //   use: [
+        //     // Parse TS comments to create Props tables in the UI
+        //     require.resolve('react-docgen-typescript-loader'),
+        //   ],
+        // },
+        {
+          test: /\.scss$/,
+          exclude: /\.module.(s(a|c)ss)$/,
+          use: [
+            { loader: 'style-loader' },
+            { loader: 'css-loader', options: { importLoaders: 2 } },
+            {
+              loader: 'postcss-loader',
+              options: {
+                config: {
+                  path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                },
+              },
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                prependData(loaderContext) {
+                  return `@import ${stringifyRequest(
+                    loaderContext,
+                    resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
+                  )};\n`;
+                },
+                sassOptions: {
+                  includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    plugins: [
+      // Reference the built DLL file of static(ish) dependencies, which are removed
+      // during kbn:bootstrap and rebuilt if missing.
+      new webpack.DllReferencePlugin({
+        manifest: resolve(DLL_DIST_DIR, 'manifest.json'),
+        context: REPO_ROOT,
+      }),
+      // Copy the DLL files to the Webpack build for use in the Storybook UI
+
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: resolve(DLL_DIST_DIR, 'dll.js'),
+            to: 'dll.js',
+          },
+          {
+            from: resolve(DLL_DIST_DIR, 'dll.css'),
+            to: 'dll.css',
+          },
+        ],
+      }),
+    ],
+    resolve: {
+      // Tell Webpack about the ts/x extensions
+      extensions: ['.ts', '.tsx', '.scss'],
+      alias: {
+        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+      },
+    },
+  };
+
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
-  const cssRule = config.module.rules.find((rule) => rule.test.source.includes('.css$'));
+  const cssRule = storybookConfig.module.rules.find((rule) => rule.test.source.includes('.css$'));
   cssRule.use.push({
     loader: 'string-replace-loader',
     options: {
@@ -39,132 +135,12 @@ module.exports = async ({ config }) => {
     },
   });
 
-  // Include the React preset from Kibana for Storybook JS files.
-  config.module.rules.push({
-    test: /\.js$/,
-    exclude: /node_modules/,
-    loaders: 'babel-loader',
-    options: {
-      presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-    },
-  });
-
-  config.module.rules.push({
-    test: /\.(html|md|txt|tmpl)$/,
-    use: {
-      loader: 'raw-loader',
-    },
-  });
-
-  // Handle Typescript files
-  config.module.rules.push({
-    test: /\.tsx?$/,
-    use: [
-      {
-        loader: 'babel-loader',
-        options: {
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-        },
-      },
-    ],
-  });
-
-  // Parse props data for .tsx files
-  config.module.rules.push({
-    test: /\.tsx$/,
-    // Exclude example files, as we don't display props info for them
-    exclude: /\.examples.tsx$/,
-    use: [
-      // Parse TS comments to create Props tables in the UI
-      require.resolve('react-docgen-typescript-loader'),
-    ],
-  });
-
-  // Enable SASS
-  config.module.rules.push({
-    test: /\.scss$/,
-    exclude: /\.module.(s(a|c)ss)$/,
-    use: [
-      { loader: 'style-loader' },
-      { loader: 'css-loader', options: { importLoaders: 2 } },
-      {
-        loader: 'postcss-loader',
-        options: {
-          config: {
-            path: resolve(REPO_ROOT, 'src/optimize/'),
-          },
-        },
-      },
-      {
-        loader: 'resolve-url-loader',
-        options: {
-          // If you don't have arguments (_, __) to the join function, the
-          // resolve-url-loader fails with a loader misconfiguration error.
-          //
-          // eslint-disable-next-line no-unused-vars
-          join: (_, __) => (uri, base) => {
-            if (!base || !parse(base).dir.includes('legacy')) {
-              return null;
-            }
-
-            // URIs on mixins in src/legacy/public/styles need to be resolved.
-            if (uri.startsWith('ui/assets')) {
-              return resolve(REPO_ROOT, 'src/core/server/core_app/', uri.replace('ui/', ''));
-            }
-
-            return null;
-          },
-        },
-      },
-      {
-        loader: 'sass-loader',
-        options: {
-          prependData(loaderContext) {
-            return `@import ${stringifyRequest(
-              loaderContext,
-              resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
-            )};\n`;
-          },
-          sassOptions: {
-            includePaths: [resolve(REPO_ROOT, 'node_modules')],
-          },
-        },
-      },
-    ],
-  });
-
-  // Reference the built DLL file of static(ish) dependencies, which are removed
-  // during kbn:bootstrap and rebuilt if missing.
-  config.plugins.push(
-    new webpack.DllReferencePlugin({
-      manifest: resolve(DLL_DIST_DIR, 'manifest.json'),
-      context: REPO_ROOT,
-    })
-  );
-
-  // Copy the DLL files to the Webpack build for use in the Storybook UI
-  config.plugins.push(
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: resolve(DLL_DIST_DIR, 'dll.js'),
-          to: 'dll.js',
-        },
-        {
-          from: resolve(DLL_DIST_DIR, 'dll.css'),
-          to: 'dll.css',
-        },
-      ],
-    })
-  );
-
-  // Tell Webpack about the ts/x extensions
-  config.resolve.extensions.push('.ts', '.tsx', '.scss');
+  config = webpackMerge(storybookConfig, config);
 
   // Load custom Webpack config specified by a plugin.
   if (currentConfig.webpackHook) {
     // eslint-disable-next-line import/no-dynamic-require
-    config = await require(currentConfig.webpackHook)({ config });
+    return await require(currentConfig.webpackHook)({ config });
   }
 
   return config;

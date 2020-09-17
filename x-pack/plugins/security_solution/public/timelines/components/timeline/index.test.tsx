@@ -10,15 +10,16 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { act } from 'react-dom/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import '../../../common/mock/match_media';
 import {
   useSignalIndex,
   ReturnSignalIndex,
-} from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
+} from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { mocksSource } from '../../../common/containers/source/mock';
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
 import { Direction } from '../../../graphql/types';
-import { timelineQuery } from '../../containers/index.gql_query';
 import { timelineActions } from '../../store/timeline';
 
 import { Sort } from './body/sort';
@@ -26,6 +27,11 @@ import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
 import { Timeline } from './timeline';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { useTimelineEvents } from '../../containers/index';
+
+jest.mock('../../containers/index', () => ({
+  useTimelineEvents: jest.fn(),
+}));
 
 jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
@@ -35,12 +41,14 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const mockUseSignalIndex: jest.Mock = useSignalIndex as jest.Mock<ReturnSignalIndex>;
-jest.mock('../../../alerts/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -56,15 +64,13 @@ describe('StatefulTimeline', () => {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
-  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
 
-  const mocks = [
-    { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
-    ...mocksSource,
-  ];
+  const mocks = mocksSource;
 
   beforeEach(() => {
+    (useTimelineEvents as jest.Mock).mockReturnValue([false, { events: mockTimelineData }]);
     props = {
       addProvider: timelineActions.addProvider,
       columns: defaultHeaders,
@@ -76,6 +82,7 @@ describe('StatefulTimeline', () => {
       graphEventId: undefined,
       id: 'foo',
       isLive: false,
+      isSaving: false,
       isTimelineExists: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
@@ -95,6 +102,7 @@ describe('StatefulTimeline', () => {
       updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
       updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
       updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+      updateDataProviderType: timelineActions.updateDataProviderType,
       updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
       updateItemsPerPage: timelineActions.updateItemsPerPage,
       updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
@@ -119,12 +127,13 @@ describe('StatefulTimeline', () => {
         </TestProviders>
       );
       await act(async () => {
-        await wait();
-        wrapper.update();
-        const timeline = wrapper.find(Timeline);
-        expect(timeline.props().indexToAdd).toEqual([
-          'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51',
-        ]);
+        await waitFor(() => {
+          wrapper.update();
+          const timeline = wrapper.find(Timeline);
+          expect(timeline.props().indexToAdd).toEqual([
+            'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51',
+          ]);
+        });
       });
     });
 
@@ -142,10 +151,11 @@ describe('StatefulTimeline', () => {
         </TestProviders>
       );
       await act(async () => {
-        await wait();
-        wrapper.update();
-        const timeline = wrapper.find(Timeline);
-        expect(timeline.props().indexToAdd).toEqual(['mock-siem-signals-index']);
+        await waitFor(() => {
+          wrapper.update();
+          const timeline = wrapper.find(Timeline);
+          expect(timeline.props().indexToAdd).toEqual(['mock-siem-signals-index']);
+        });
       });
     });
   });

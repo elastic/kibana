@@ -7,7 +7,7 @@
 import { MlPluginSetup } from '../../../../ml/server';
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
-const createMockClient = () => elasticsearchServiceMock.createClusterClient();
+const createMockClient = () => elasticsearchServiceMock.createLegacyClusterClient();
 const createMockMlSystemProvider = () =>
   jest.fn(() => ({
     mlCapabilities: jest.fn(),
@@ -16,6 +16,8 @@ const createMockMlSystemProvider = () =>
 export const mlServicesMock = {
   create: () =>
     (({
+      modulesProvider: jest.fn(),
+      jobServiceProvider: jest.fn(),
       mlSystemProvider: createMockMlSystemProvider(),
       mlClient: createMockClient(),
     } as unknown) as jest.Mocked<MlPluginSetup>),

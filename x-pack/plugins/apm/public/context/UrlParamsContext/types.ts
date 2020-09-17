@@ -6,12 +6,10 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LocalUIFilterName } from '../../../server/lib/ui_filters/local_ui_filters/config';
-import { ProcessorEvent } from '../../../common/processor_event';
 
 export type IUrlParams = {
   detailTab?: string;
   end?: string;
-  errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
   environment?: string;
@@ -19,7 +17,6 @@ export type IUrlParams = {
   rangeTo?: string;
   refreshInterval?: number;
   refreshPaused?: boolean;
-  serviceName?: string;
   sortDirection?: string;
   sortField?: string;
   start?: string;
@@ -30,8 +27,5 @@ export type IUrlParams = {
   waterfallItemId?: string;
   page?: number;
   pageSize?: number;
-  serviceNodeName?: string;
   searchTerm?: string;
-  processorEvent?: ProcessorEvent;
-  traceIdLink?: string;
 } & Partial<Record<LocalUIFilterName, string>>;

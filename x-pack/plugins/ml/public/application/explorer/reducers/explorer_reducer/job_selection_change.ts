@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import { ActionPayload } from '../../explorer_dashboard_service';
 import { getDefaultSwimlaneData, getInfluencers } from '../../explorer_utils';
 
@@ -17,7 +18,11 @@ export const jobSelectionChange = (state: ExplorerState, payload: ActionPayload)
     noInfluencersConfigured: getInfluencers(selectedJobs).length === 0,
     overallSwimlaneData: getDefaultSwimlaneData(),
     selectedJobs,
-    viewByFromPage: 1,
+    // currently job selection set asynchronously so
+    // we want to preserve the pagination from the url state
+    // on initial load
+    viewByFromPage:
+      !state.selectedJobs || isEqual(state.selectedJobs, selectedJobs) ? state.viewByFromPage : 1,
   };
 
   // clear filter if selected jobs have no influencers

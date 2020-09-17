@@ -25,10 +25,6 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it('shows alerts panel, because there are resolved alerts in the time range', async () => {
-        expect(await overview.doesClusterAlertsExist()).to.be(true);
-      });
-
       it('elasticsearch panel has no ML line, because license is Gold', async () => {
         expect(await overview.doesEsMlJobsExist()).to.be(false);
       });
@@ -78,10 +74,6 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         await tearDown();
-      });
-
-      it('shows alerts panel, because cluster status is Yellow', async () => {
-        expect(await overview.doesClusterAlertsExist()).to.be(true);
       });
 
       it('elasticsearch panel has ML, because license is Platinum', async () => {

@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
+
 import { RiskScore } from '../types/risk_score';
 import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
+import { parseScheduleDates } from '../../parse_schedule_dates';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -76,8 +79,18 @@ export const action = t.exact(
 export const actions = t.array(action);
 export type Actions = t.TypeOf<typeof actions>;
 
-// TODO: Create a regular expression type or custom date math part type here
-export const from = t.string;
+const stringValidator = (input: unknown): input is string => typeof input === 'string';
+export const from = new t.Type<string, string, unknown>(
+  'From',
+  t.string.is,
+  (input, context): Either<t.Errors, string> => {
+    if (stringValidator(input) && parseScheduleDates(input) == null) {
+      return t.failure(input, context, 'Failed to parse "from" on rule param');
+    }
+    return t.string.validate(input, context);
+  },
+  t.identity
+);
 export type From = t.TypeOf<typeof from>;
 
 export const fromOrUndefined = t.union([from, t.undefined]);
@@ -117,7 +130,7 @@ export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 
-export const language = t.keyof({ kuery: null, lucene: null });
+export const language = t.keyof({ eql: null, kuery: null, lucene: null });
 export type Language = t.TypeOf<typeof language>;
 
 export const languageOrUndefined = t.union([language, t.undefined]);
@@ -222,8 +235,9 @@ export const risk_score_mapping_value = t.string;
 export const risk_score_mapping_item = t.exact(
   t.type({
     field: risk_score_mapping_field,
-    operator,
     value: risk_score_mapping_value,
+    operator,
+    risk_score: riskScoreOrUndefined,
   })
 );
 
@@ -255,6 +269,7 @@ export const severity_mapping_item = t.exact(
     severity,
   })
 );
+export type SeverityMappingItem = t.TypeOf<typeof severity_mapping_item>;
 
 export const severity_mapping = t.array(severity_mapping_item);
 export type SeverityMapping = t.TypeOf<typeof severity_mapping>;
@@ -268,6 +283,9 @@ export type Status = t.TypeOf<typeof status>;
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
 export type JobStatus = t.TypeOf<typeof job_status>;
 
+export const conflicts = t.keyof({ abort: null, proceed: null });
+export type Conflicts = t.TypeOf<typeof conflicts>;
+
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
 export type To = t.TypeOf<typeof to>;
@@ -275,7 +293,13 @@ export type To = t.TypeOf<typeof to>;
 export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
-export const type = t.keyof({ machine_learning: null, query: null, saved_query: null });
+export const type = t.keyof({
+  eql: null,
+  machine_learning: null,
+  query: null,
+  saved_query: null,
+  threshold: null,
+});
 export type Type = t.TypeOf<typeof type>;
 
 export const typeOrUndefined = t.union([type, t.undefined]);
@@ -318,7 +342,7 @@ export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
 export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
 
 export const sort_order = t.keyof({ asc: null, desc: null });
-export type sortOrder = t.TypeOf<typeof sort_order>;
+export type SortOrder = t.TypeOf<typeof sort_order>;
 
 export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
 export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
@@ -369,6 +393,17 @@ export type Threat = t.TypeOf<typeof threat>;
 export const threatOrUndefined = t.union([threat, t.undefined]);
 export type ThreatOrUndefined = t.TypeOf<typeof threatOrUndefined>;
 
+export const threshold = t.exact(
+  t.type({
+    field: t.string,
+    value: PositiveIntegerGreaterThanZero,
+  })
+);
+export type Threshold = t.TypeOf<typeof threshold>;
+
+export const thresholdOrUndefined = t.union([threshold, t.undefined]);
+export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
+
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
@@ -406,6 +441,11 @@ export const success_count = PositiveInteger;
 export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
+
+export const timelines_installed = PositiveInteger;
+export const timelines_updated = PositiveInteger;
+export const timelines_not_installed = PositiveInteger;
+export const timelines_not_updated = PositiveInteger;
 
 export const note = t.string;
 export type Note = t.TypeOf<typeof note>;

@@ -23,8 +23,10 @@
  */
 import * as Forms from './forms';
 import * as Monaco from './monaco';
+import * as ace from './ace';
+import * as GlobalFlyout from './global_flyout';
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './components/json_editor';
 
 export { SectionLoading } from './components/section_loading';
 
@@ -37,11 +39,9 @@ export {
   UseRequestResponse,
   sendRequest,
   useRequest,
-} from './request/np_ready_request';
+} from './request';
 
 export { indices } from './indices';
-
-export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
 
 export {
   installXJsonMode,
@@ -66,7 +66,9 @@ export {
   useAuthorizationContext,
 } from './authorization';
 
-export { Monaco, Forms };
+export { Monaco, Forms, ace, GlobalFlyout };
+
+export { extractQueryParams } from './url';
 
 /** dummy plugin, we just want esUiShared to have its own bundle */
 export function plugin() {

@@ -7,14 +7,16 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { useParams } from 'react-router-dom';
 
-import { disableTemplate } from '../../../common/constants';
-
+import { TimelineId, TimelineType } from '../../../common/types/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useApolloClient } from '../../common/utils/apollo_context';
+import { useWithSource } from '../../common/containers/source';
+import { OverviewEmpty } from '../../overview/components/overview_empty';
 
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import { NEW_TEMPLATE_TIMELINE } from '../components/timeline/properties/translations';
@@ -31,68 +33,74 @@ const TimelinesContainer = styled.div`
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
 export const TimelinesPageComponent: React.FC = () => {
+  const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
     setImportDataModalToggle(true);
   }, [setImportDataModalToggle]);
+  const { indicesExist } = useWithSource();
 
   const apolloClient = useApolloClient();
-  const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
+  const capabilitiesCanUserCRUD: boolean = !!useKibana().services.application.capabilities.siem
+    .crud;
 
   return (
     <>
-      <WrapperPage>
-        <HeaderPage border title={i18n.PAGE_TITLE}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem>
-              {capabilitiesCanUserCRUD && (
-                <EuiButton
-                  iconType="indexOpen"
-                  onClick={onImportTimelineBtnClick}
-                  data-test-subj="open-import-data-modal-btn"
-                >
-                  {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {capabilitiesCanUserCRUD && (
-                <NewTimeline
-                  timelineId="timeline-1"
-                  outline={true}
-                  data-test-subj="create-default-btn"
-                />
-              )}
-            </EuiFlexItem>
-            {/**
-             * CreateTemplateTimelineBtn
-             * Remove the comment here to enable CreateTemplateTimelineBtn
-             */}
-            {!disableTemplate && (
-              <EuiFlexItem>
-                <NewTemplateTimeline
-                  outline={true}
-                  title={NEW_TEMPLATE_TIMELINE}
-                  data-test-subj="create-template-btn"
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </HeaderPage>
+      {indicesExist ? (
+        <>
+          <WrapperPage>
+            <HeaderPage border title={i18n.PAGE_TITLE}>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  {capabilitiesCanUserCRUD && (
+                    <EuiButton
+                      iconType="indexOpen"
+                      onClick={onImportTimelineBtnClick}
+                      data-test-subj="open-import-data-modal-btn"
+                    >
+                      {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+                    </EuiButton>
+                  )}
+                </EuiFlexItem>
+                {tabName === TimelineType.default ? (
+                  <EuiFlexItem>
+                    <NewTimeline
+                      timelineId={TimelineId.active}
+                      outline={true}
+                      data-test-subj="create-default-btn"
+                    />
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem>
+                    <NewTemplateTimeline
+                      outline={true}
+                      title={NEW_TEMPLATE_TIMELINE}
+                      data-test-subj="create-template-btn"
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </HeaderPage>
 
-        <TimelinesContainer>
-          <StatefulOpenTimeline
-            apolloClient={apolloClient!}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            isModal={false}
-            importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}
-            setImportDataModalToggle={setImportDataModalToggle}
-            title={i18n.ALL_TIMELINES_PANEL_TITLE}
-            data-test-subj="stateful-open-timeline"
-          />
-        </TimelinesContainer>
-      </WrapperPage>
+            <TimelinesContainer>
+              <StatefulOpenTimeline
+                apolloClient={apolloClient!}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                isModal={false}
+                importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}
+                setImportDataModalToggle={setImportDataModalToggle}
+                title={i18n.ALL_TIMELINES_PANEL_TITLE}
+                data-test-subj="stateful-open-timeline"
+              />
+            </TimelinesContainer>
+          </WrapperPage>
+        </>
+      ) : (
+        <WrapperPage>
+          <HeaderPage border title={i18n.PAGE_TITLE} />
+          <OverviewEmpty />
+        </WrapperPage>
+      )}
 
       <SpyRoute pageName={SecurityPageName.timelines} />
     </>

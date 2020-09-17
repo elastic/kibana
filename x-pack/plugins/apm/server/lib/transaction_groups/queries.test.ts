@@ -8,7 +8,7 @@ import { transactionGroupsFetcher } from './fetcher';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 
 describe('transaction group queries', () => {
   let mock: SearchParamsMock;
@@ -25,13 +25,16 @@ describe('transaction group queries', () => {
           type: 'top_transactions',
           serviceName: 'foo',
           transactionType: 'bar',
+          searchAggregatedTransactions: false,
         },
         setup,
         bucketSize
       )
     );
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 
   it('fetches top traces', async () => {
@@ -40,12 +43,15 @@ describe('transaction group queries', () => {
       transactionGroupsFetcher(
         {
           type: 'top_traces',
+          searchAggregatedTransactions: false,
         },
         setup,
         bucketSize
       )
     );
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 });

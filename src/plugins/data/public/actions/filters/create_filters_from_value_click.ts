@@ -21,7 +21,7 @@ import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { deserializeAggConfig } from '../../search/expressions';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
-import { ValueClickContext } from '../../../../embeddable/public';
+import type { ValueClickContext } from '../../../../embeddable/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter

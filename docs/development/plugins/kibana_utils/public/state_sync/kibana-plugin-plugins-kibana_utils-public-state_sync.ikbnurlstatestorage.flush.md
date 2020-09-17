@@ -4,7 +4,7 @@
 
 ## IKbnUrlStateStorage.flush property
 
-synchronously runs any pending url updates returned boolean indicates if change occurred
+Synchronously runs any pending url updates, returned boolean indicates if change occurred.
 
 <b>Signature:</b>
 

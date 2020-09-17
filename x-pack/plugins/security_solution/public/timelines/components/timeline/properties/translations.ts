@@ -52,6 +52,13 @@ export const UNTITLED_TIMELINE = i18n.translate(
   }
 );
 
+export const UNTITLED_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.untitledTemplatePlaceholder',
+  {
+    defaultMessage: 'Untitled template',
+  }
+);
+
 export const DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.properties.descriptionPlaceholder',
   {
@@ -141,6 +148,13 @@ export const ATTACH_TO_EXISTING_CASE = i18n.translate(
   'xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel',
   {
     defaultMessage: 'Attach to existing case...',
+  }
+);
+
+export const ATTACH_TIMELINE_TO_CASE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.timeline.properties.attachTimelineToCaseTooltip',
+  {
+    defaultMessage: 'Please provide a title for your timeline in order to attach it to a case',
   }
 );
 

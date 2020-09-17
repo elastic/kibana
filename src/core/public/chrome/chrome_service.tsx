@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
+import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
@@ -37,7 +37,6 @@ import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-import { NavType } from './ui/header';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -157,16 +156,20 @@ export class ChromeService {
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
 
+    // erase chrome fields from a previous app while switching to a next app
+    application.currentAppId$.subscribe(() => {
+      helpExtension$.next(undefined);
+      breadcrumbs$.next([]);
+      badge$.next(undefined);
+      docTitle.reset();
+    });
+
     const setIsNavDrawerLocked = (isLocked: boolean) => {
       isNavDrawerLocked$.next(isLocked);
       localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
     };
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
-
-    // TODO #64541
-    // Can delete
-    const getNavType$ = uiSettings.get$('pageNavigation').pipe(takeUntil(this.stop$));
 
     const isIE = () => {
       const ua = window.navigator.userAgent;
@@ -230,14 +233,13 @@ export class ChromeService {
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
-          legacyMode={injectedMetadata.getLegacyMode()}
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}
+          navControlsCenter$={navControls.getCenter$()}
           navControlsRight$={navControls.getRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
-          navType$={getNavType$}
         />
       ),
 
@@ -297,8 +299,6 @@ export class ChromeService {
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
-
-      getNavType$: () => getNavType$,
 
       getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
 
@@ -461,13 +461,6 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
-
-  /**
-   * Get the navigation type
-   * TODO #64541
-   * Can delete
-   */
-  getNavType$(): Observable<NavType>;
 }
 
 /** @internal */

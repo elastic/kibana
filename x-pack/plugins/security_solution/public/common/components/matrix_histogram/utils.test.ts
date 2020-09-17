@@ -22,8 +22,8 @@ describe('utils', () => {
       let configs: BarchartConfigs;
       beforeAll(() => {
         configs = getBarchartConfigs({
-          from: 0,
-          to: 0,
+          from: '2020-07-07T08:20:18.966Z',
+          to: '2020-07-08T08:20:18.966Z',
           onBrushEnd: jest.fn() as UpdateDateRange,
         });
       });
@@ -53,8 +53,8 @@ describe('utils', () => {
       beforeAll(() => {
         configs = getBarchartConfigs({
           chartHeight: mockChartHeight,
-          from: 0,
-          to: 0,
+          from: '2020-07-07T08:20:18.966Z',
+          to: '2020-07-08T08:20:18.966Z',
           onBrushEnd: jest.fn() as UpdateDateRange,
           yTickFormatter: mockYTickFormatter,
           showLegend: false,

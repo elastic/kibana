@@ -36,6 +36,7 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('home.tutorials.kubernetesMetrics.nameTitle', {
       defaultMessage: 'Kubernetes metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kubernetesMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics from your Kubernetes installation.',

@@ -10,15 +10,17 @@ import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
 import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
-import { storeFactory } from '../store';
 import { Matrix3, ResolverStore, SideEffectSimulator } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
-import { sideEffectSimulator } from './side_effect_simulator';
+import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';
 import { mockProcessEvent } from '../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../models/resolver_tree';
 import { ResolverAction } from '../store/actions';
+import { createStore } from 'redux';
+import { resolverReducer } from '../store/reducer';
+import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
@@ -29,7 +31,7 @@ describe('useCamera on an unpainted element', () => {
   let simulator: SideEffectSimulator;
 
   beforeEach(async () => {
-    store = storeFactory();
+    store = createStore(resolverReducer);
 
     const Test = function Test() {
       const camera = useCamera();
@@ -38,7 +40,7 @@ describe('useCamera on an unpainted element', () => {
       return <div data-test-subj={testID} onMouseDown={onMouseDown} ref={ref} />;
     };
 
-    simulator = sideEffectSimulator();
+    simulator = sideEffectSimulatorFactory();
 
     reactRenderResult = render(
       <Provider store={store}>
@@ -180,7 +182,7 @@ describe('useCamera on an unpainted element', () => {
         if (tree !== null) {
           const serverResponseAction: ResolverAction = {
             type: 'serverReturnedResolverData',
-            payload: { result: tree, databaseDocumentID: '' },
+            payload: { result: tree, parameters: mockTreeFetcherParameters() },
           };
           act(() => {
             store.dispatch(serverResponseAction);
@@ -189,10 +191,8 @@ describe('useCamera on an unpainted element', () => {
           throw new Error('failed to create tree');
         }
         const processes: ResolverEvent[] = [
-          ...selectors
-            .processNodePositionsAndEdgeLineSegments(store.getState())
-            .processNodePositions.keys(),
-        ];
+          ...selectors.layout(store.getState()).processNodePositions.keys(),
+        ] as ResolverEvent[];
         process = processes[processes.length - 1];
         if (!process) {
           throw new Error('missing the process to bring into view');

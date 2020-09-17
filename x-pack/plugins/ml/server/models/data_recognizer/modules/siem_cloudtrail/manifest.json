@@ -1,0 +1,64 @@
+{
+  "id": "siem_cloudtrail",
+  "title": "Security: Cloudtrail",
+  "description": "Detect suspicious activity recorded in your cloudtrail logs.",
+  "type": "Filebeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "filebeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": {"event.dataset": "aws.cloudtrail"}}
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "rare_method_for_a_city",
+      "file": "rare_method_for_a_city.json"
+    },
+    {
+      "id": "rare_method_for_a_country",
+      "file": "rare_method_for_a_country.json"
+    },
+    {
+      "id": "rare_method_for_a_username",
+      "file": "rare_method_for_a_username.json"
+    },
+    {
+      "id": "high_distinct_count_error_message",
+      "file": "high_distinct_count_error_message.json"
+    },
+    {
+      "id": "rare_error_code",
+      "file": "rare_error_code.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-rare_method_for_a_city",
+      "file": "datafeed_rare_method_for_a_city.json",
+      "job_id": "rare_method_for_a_city"
+    },
+    {
+      "id": "datafeed-rare_method_for_a_country",
+      "file": "datafeed_rare_method_for_a_country.json",
+      "job_id": "rare_method_for_a_country"
+    },
+    {
+      "id": "datafeed-rare_method_for_a_username",
+      "file": "datafeed_rare_method_for_a_username.json",
+      "job_id": "rare_method_for_a_username"
+    },
+    {
+      "id": "datafeed-high_distinct_count_error_message",
+      "file": "datafeed_high_distinct_count_error_message.json",
+      "job_id": "high_distinct_count_error_message"
+    },
+    {
+      "id": "datafeed-rare_error_code",
+      "file": "datafeed_rare_error_code.json",
+      "job_id": "rare_error_code"
+    }
+  ]
+}

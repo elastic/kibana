@@ -1,10 +1,12 @@
 @import '../shared';
 
 .pipelineProcessorsEditor__item {
-  transition: border-color 1s;
+  transition: border-color $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
   min-height: 50px;
+
   &--selected {
-    border: 1px solid $euiColorPrimary;
+    border: $euiBorderThin;
+    border-color: $euiColorPrimary;
   }
 
   &--displayNone {
@@ -25,15 +27,14 @@
   }
 
   &__textContainer {
-    padding: 4px;
-    border-radius: 2px;
-
-    transition: border-color 0.3s;
-    border: 2px solid transparent;
+    cursor: text;
+    border-bottom: 1px dashed transparent;
 
     &--notEditing {
+      border-bottom: $euiBorderEditable;
+      border-width: $euiBorderWidthThin;
       &:hover {
-        border: 2px solid $euiColorLightShade;
+        border-color: $euiColorMediumShade;
       }
     }
   }
@@ -46,12 +47,22 @@
   }
 
   &__textInput {
-    height: 21px;
-    min-width: 150px;
+    height: $euiSizeL;
+    min-width: 200px;
   }
 
-  &__cancelMoveButton {
-    // Ensure that the cancel button is above the drop zones
-    z-index: $cancelButtonZIndex;
+  &__moveButton {
+    &:hover {
+      transform: none !important;
+    }
+    &--cancel {
+      // Ensure that the cancel button is above the drop zones
+      z-index: $cancelButtonZIndex;
+    }
+  }
+
+  &__statusContainer {
+    // Prevent content jump when spinner renders
+    min-width: 15px;
   }
 }

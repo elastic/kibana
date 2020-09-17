@@ -13,7 +13,9 @@ import {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
+  SavedObjectsClientContract,
 } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -24,8 +26,8 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -33,10 +35,11 @@ import {
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
+  registerLimitedConcurrencyRoutes,
   registerEPMRoutes,
-  registerPackageConfigRoutes,
+  registerPackagePolicyRoutes,
   registerDataStreamRoutes,
-  registerAgentConfigRoutes,
+  registerAgentPolicyRoutes,
   registerSetupRoutes,
   registerAgentRoutes,
   registerEnrollmentApiKeyRoutes,
@@ -45,14 +48,15 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType, NewPackageConfig } from '../common';
+import { EsAssetReference, IngestManagerConfigType, NewPackagePolicy } from '../common';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
-  packageConfigService,
+  packagePolicyService,
+  PackageService,
 } from './services';
 import {
   getAgentStatusById,
@@ -62,6 +66,8 @@ import {
 } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
+import { registerIngestManagerUsageCollector } from './collectors/register';
+import { getInstallation } from './services/epm/packages';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -69,6 +75,7 @@ export interface IngestManagerSetupDeps {
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export type IngestManagerStartDeps = object;
@@ -79,8 +86,9 @@ export interface IngestManagerAppContext {
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
-  isProductionMode: boolean;
-  kibanaVersion: string;
+  isProductionMode: PluginInitializerContext['env']['mode']['prod'];
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -90,8 +98,8 @@ export type IngestManagerSetupContract = void;
 
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -102,8 +110,8 @@ const allSavedObjectTypes = [
  * Callbacks supported by the Ingest plugin
  */
 export type ExternalCallback = [
-  'packageConfigCreate',
-  (newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>
+  'packagePolicyCreate',
+  (newPackagePolicy: NewPackagePolicy) => Promise<NewPackagePolicy>
 ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
@@ -113,11 +121,12 @@ export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCall
  */
 export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
+  packageService: PackageService;
   agentService: AgentService;
   /**
-   * Services for Ingest's package configs
+   * Services for Ingest's package policies
    */
-  packageConfigService: typeof packageConfigService;
+  packagePolicyService: typeof packagePolicyService;
   /**
    * Register callbacks for inclusion in ingest API processing
    * @param args
@@ -139,8 +148,9 @@ export class IngestManagerPlugin
   private cloud: CloudSetup | undefined;
   private logger: Logger | undefined;
 
-  private isProductionMode: boolean;
-  private kibanaVersion: string;
+  private isProductionMode: IngestManagerAppContext['isProductionMode'];
+  private kibanaVersion: IngestManagerAppContext['kibanaVersion'];
+  private kibanaBranch: IngestManagerAppContext['kibanaBranch'];
   private httpSetup: HttpServiceSetup | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
 
@@ -148,6 +158,7 @@ export class IngestManagerPlugin
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+    this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.logger = this.initializerContext.logger.get();
   }
 
@@ -166,16 +177,18 @@ export class IngestManagerPlugin
     // Register feature
     // TODO: Flesh out privileges
     if (deps.features) {
-      deps.features.registerFeature({
+      deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
         name: 'Ingest Manager',
         icon: 'savedObjectsApp',
         navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
+        catalogue: ['ingestManager'],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             app: [PLUGIN_ID, 'kibana'],
+            catalogue: ['ingestManager'],
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -185,6 +198,7 @@ export class IngestManagerPlugin
           read: {
             api: [`${PLUGIN_ID}-read`],
             app: [PLUGIN_ID, 'kibana'],
+            catalogue: ['ingestManager'], // TODO: check if this is actually available to read user
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
@@ -198,23 +212,23 @@ export class IngestManagerPlugin
     const router = core.http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
 
+    // Register usage collection
+    registerIngestManagerUsageCollector(core, config, deps.usageCollection);
+
     // Always register app routes for permissions checking
     registerAppRoutes(router);
 
     // Register rest of routes only if security is enabled
     if (this.security) {
       registerSetupRoutes(router, config);
-      registerAgentConfigRoutes(router);
-      registerPackageConfigRoutes(router);
+      registerAgentPolicyRoutes(router);
+      registerPackagePolicyRoutes(router);
       registerOutputRoutes(router);
       registerSettingsRoutes(router);
       registerDataStreamRoutes(router);
+      registerEPMRoutes(router);
 
       // Conditional config routes
-      if (config.epm.enabled) {
-        registerEPMRoutes(router);
-      }
-
       if (config.fleet.enabled) {
         const isESOUsingEphemeralEncryptionKey =
           deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
@@ -225,7 +239,10 @@ export class IngestManagerPlugin
             );
           }
         } else {
-          registerAgentRoutes(router);
+          // we currently only use this global interceptor if fleet is enabled
+          // since it would run this func on *every* req (other plugins, CSS, etc)
+          registerLimitedConcurrencyRoutes(core, config);
+          registerAgentRoutes(router, config);
           registerEnrollmentApiKeyRoutes(router);
           registerInstallScriptRoutes({
             router,
@@ -250,6 +267,7 @@ export class IngestManagerPlugin
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
+      kibanaBranch: this.kibanaBranch,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
@@ -259,13 +277,22 @@ export class IngestManagerPlugin
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
+      packageService: {
+        getInstalledEsAssetReferences: async (
+          savedObjectsClient: SavedObjectsClientContract,
+          pkgName: string
+        ): Promise<EsAssetReference[]> => {
+          const installation = await getInstallation({ savedObjectsClient, pkgName });
+          return installation?.installed_es || [];
+        },
+      },
       agentService: {
         getAgent,
         listAgents,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
-      packageConfigService,
+      packagePolicyService,
       registerExternalCallback: (...args: ExternalCallback) => {
         return appContextService.addExternalCallback(...args);
       },

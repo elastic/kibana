@@ -18,7 +18,7 @@ import {
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
-import { COLOR_GRADIENTS } from '../../styles/color_utils';
+import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
@@ -50,7 +50,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
               },
-              color: COLOR_GRADIENTS[0].value,
+              color: NUMERICAL_COLOR_PALETTES[0].value,
             },
           },
           [VECTOR_STYLES.LINE_WIDTH]: {

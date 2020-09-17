@@ -5,15 +5,19 @@
  */
 
 import { each } from 'lodash';
-import { mlMessageBarService } from '../../../components/messagebar';
+import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
-import { ml } from '../../../services/ml_api_service';
+import {
+  getToastNotificationService,
+  toastNotificationServiceProvider,
+} from '../../../services/toast_notification_service';
 import { getToastNotifications } from '../../../util/dependency_cache';
+import { ml } from '../../../services/ml_api_service';
+import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { i18n } from '@kbn/i18n';
 import { mlCalendarService } from '../../../services/calendar_service';
 
 export function loadFullJob(jobId) {
@@ -58,7 +62,6 @@ export function forceStartDatafeeds(jobs, start, end, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      mlMessageBarService.notify.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.startJobErrorMessage', {
@@ -79,7 +82,6 @@ export function stopDatafeeds(jobs, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      mlMessageBarService.notify.error(error);
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.stopJobErrorMessage', {
@@ -157,8 +159,9 @@ function showResults(resp, action) {
 
   if (failures.length > 0) {
     failures.forEach((f) => {
-      mlMessageBarService.notify.error(f.result.error);
-      toastNotifications.addDanger(
+      const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
+      toastNotificationService.displayErrorToast(
+        f.result.error,
         i18n.translate('xpack.ml.jobsList.actionFailedNotificationMessage', {
           defaultMessage: '{failureId} failed to {actionText}',
           values: {
@@ -216,9 +219,8 @@ export async function cloneJob(jobId) {
 
     window.location.href = '#/jobs/new_job';
   } catch (error) {
-    mlMessageBarService.notify.error(error);
-    const toastNotifications = getToastNotifications();
-    toastNotifications.addDanger(
+    getToastNotificationService().displayErrorToast(
+      error,
       i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
         defaultMessage: 'Could not clone {jobId}. Job could not be found',
         values: { jobId },
@@ -236,13 +238,11 @@ export function closeJobs(jobs, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      mlMessageBarService.notify.error(error);
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addDanger(
+      getToastNotificationService().displayErrorToast(
+        error,
         i18n.translate('xpack.ml.jobsList.closeJobErrorMessage', {
           defaultMessage: 'Jobs failed to close',
-        }),
-        error
+        })
       );
       finish();
     });
@@ -257,13 +257,11 @@ export function deleteJobs(jobs, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      mlMessageBarService.notify.error(error);
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addDanger(
+      getToastNotificationService().displayErrorToast(
+        error,
         i18n.translate('xpack.ml.jobsList.deleteJobErrorMessage', {
           defaultMessage: 'Jobs failed to delete',
-        }),
-        error
+        })
       );
       finish();
     });
@@ -350,14 +348,6 @@ export function checkForAutoStartDatafeed() {
   }
 }
 
-function stringMatch(str, substr) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
-}
-
 function jobProperty(job, prop) {
   const propMap = {
     job_state: 'jobState',
@@ -375,23 +365,36 @@ function getUrlVars(url) {
   return vars;
 }
 
-export function getSelectedJobIdFromUrl(url) {
+export function getSelectedIdFromUrl(url) {
+  const result = {};
   if (typeof url === 'string') {
+    const isGroup = url.includes('groupIds');
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
+
+    if (url.includes('mlManagement')) {
       const urlParams = getUrlVars(url);
       const decodedJson = rison.decode(urlParams.mlManagement);
-      return decodedJson.jobId;
+
+      if (isGroup) {
+        result.groupIds = decodedJson.groupIds;
+      } else {
+        result.jobId = decodedJson.jobId;
+      }
     }
   }
+  return result;
+}
+
+export function getGroupQueryText(groupIds) {
+  return `groups:(${groupIds.join(' or ')})`;
 }
 
 export function clearSelectedJobIdFromUrl(url) {
   if (typeof url === 'string') {
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
+    if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
       const urlParams = getUrlVars(url);
-      const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
+      const clearedParams = `jobs?_g=${urlParams._g}`;
       window.history.replaceState({}, document.title, clearedParams);
     }
   }

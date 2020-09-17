@@ -5,6 +5,7 @@
  */
 
 import { ResolverRelatedEvents, ResolverTree } from '../../../../common/endpoint/types';
+import { TreeFetcherParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -14,9 +15,9 @@ interface ServerReturnedResolverData {
      */
     result: ResolverTree;
     /**
-     * The database document ID that was used to fetch the resolver tree
+     * The database parameters that was used to fetch the resolver tree
      */
-    databaseDocumentID: string;
+    parameters: TreeFetcherParameters;
   };
 }
 
@@ -25,7 +26,7 @@ interface AppRequestedResolverData {
   /**
    * entity ID used to make the request.
    */
-  readonly payload: string;
+  readonly payload: TreeFetcherParameters;
 }
 
 interface ServerFailedToReturnResolverData {
@@ -33,7 +34,7 @@ interface ServerFailedToReturnResolverData {
   /**
    * entity ID used to make the failed request
    */
-  readonly payload: string;
+  readonly payload: TreeFetcherParameters;
 }
 
 interface AppAbortedResolverDataRequest {
@@ -41,7 +42,7 @@ interface AppAbortedResolverDataRequest {
   /**
    * entity ID used to make the aborted request
    */
-  readonly payload: string;
+  readonly payload: TreeFetcherParameters;
 }
 
 /**
@@ -60,29 +61,10 @@ interface ServerReturnedRelatedEventData {
   readonly payload: ResolverRelatedEvents;
 }
 
-/**
- * Used by `useStateSyncingActions` hook.
- * This is dispatched when external sources provide new parameters for Resolver.
- * When the component receives a new 'databaseDocumentID' prop, this is fired.
- */
-interface AppReceivedNewExternalProperties {
-  type: 'appReceivedNewExternalProperties';
-  /**
-   * Defines the externally provided properties that Resolver acknowledges.
-   */
-  payload: {
-    /**
-     * the `_id` of an ES document. This defines the origin of the Resolver graph.
-     */
-    databaseDocumentID?: string;
-  };
-}
-
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
   | ServerFailedToReturnRelatedEventData
   | ServerReturnedRelatedEventData
-  | AppReceivedNewExternalProperties
   | AppRequestedResolverData
   | AppAbortedResolverDataRequest;

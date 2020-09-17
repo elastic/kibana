@@ -6,9 +6,11 @@
     "xpack", "data_enhanced"
   ],
   "requiredPlugins": [
-    "data"
+    "data",
+    "features"
   ],
-  "optionalPlugins": ["kibanaReact", "kibanaUtils"],
+  "optionalPlugins": ["kibanaUtils", "usageCollection"],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": ["kibanaUtils"]
 }

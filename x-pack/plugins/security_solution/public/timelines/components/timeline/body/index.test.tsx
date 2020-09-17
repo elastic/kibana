@@ -3,23 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { Direction } from '../../../../graphql/types';
+import { Direction } from '../../../../../common/search_strategy';
 import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
-import { wait } from '../../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../styles';
+import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
+import { TimelineType } from '../../../../../common/types/timeline';
 
-const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
   columnId: '@timestamp',
@@ -33,7 +35,11 @@ jest.mock('react-redux', () => {
     useSelector: jest.fn(),
   };
 });
+
 jest.mock('../../../../common/components/link_to');
+
+// Prevent Resolver from rendering
+jest.mock('../../graph_overlay');
 
 jest.mock(
   'react-visibility-sensor',
@@ -56,27 +62,28 @@ describe('Body', () => {
     columnHeaders: defaultHeaders,
     columnRenderers,
     data: mockTimelineData,
+    docValueFields: [],
     eventIdToNoteIds: {},
-    height: testBodyHeight,
-    id: 'timeline-test',
     isSelectAllChecked: false,
     getNotesByIds: mockGetNotesByIds,
     loadingEventIds: [],
     onColumnRemoved: jest.fn(),
     onColumnResized: jest.fn(),
     onColumnSorted: jest.fn(),
-    onFilterChange: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
     onSelectAll: jest.fn(),
     onUnPinEvent: jest.fn(),
     onUpdateColumns: jest.fn(),
     pinnedEventIds: {},
+    refetch: jest.fn(),
     rowRenderers,
     selectedEventIds: {},
     show: true,
     sort: mockSort,
     showCheckboxes: false,
+    timelineId: 'timeline-test',
+    timelineType: TimelineType.default,
     toggleColumn: jest.fn(),
     updateNote: jest.fn(),
   };
@@ -122,16 +129,17 @@ describe('Body', () => {
         </TestProviders>
       );
       wrapper.update();
-      await wait();
-      wrapper.update();
-      headersJustTimestamp.forEach(() => {
-        expect(
-          wrapper
-            .find('[data-test-subj="data-driven-columns"]')
-            .first()
-            .find('[data-test-subj="localized-date-tool-tip"]')
-            .exists()
-        ).toEqual(true);
+      await waitFor(() => {
+        wrapper.update();
+        headersJustTimestamp.forEach(() => {
+          expect(
+            wrapper
+              .find('[data-test-subj="data-driven-columns"]')
+              .first()
+              .find('[data-test-subj="localized-date-tool-tip"]')
+              .exists()
+          ).toEqual(true);
+        });
       });
     }, 20000);
 
@@ -147,6 +155,29 @@ describe('Body', () => {
           .first()
           .exists()
       ).toEqual(true);
+    });
+    describe('when there is a graphEventId', () => {
+      beforeEach(() => {
+        props.graphEventId = 'graphEventId'; // any string w/ length > 0 works
+      });
+      it('should not render the timeline body', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <Body {...props} />
+          </TestProviders>
+        );
+
+        // The value returned if `wrapper.find` returns a `TimelineBody` instance.
+        type TimelineBodyEnzymeWrapper = ReactWrapper<React.ComponentProps<typeof TimelineBody>>;
+
+        // The first TimelineBody component
+        const timelineBody: TimelineBodyEnzymeWrapper = wrapper
+          .find('[data-test-subj="timeline-body"]')
+          .first() as TimelineBodyEnzymeWrapper;
+
+        // the timeline body still renders, but it gets a `display: none` style via `styled-components`.
+        expect(timelineBody.props().visible).toBe(false);
+      });
     });
   });
 

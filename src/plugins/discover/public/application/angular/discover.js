@@ -29,18 +29,18 @@ import { getState, splitState } from './discover_state';
 import { RequestAdapter } from '../../../../inspector/public';
 import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
 import { getSortArray, getSortForSearchSource } from './doc_table';
+import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
-
-import indexTemplate from './discover.html';
+import indexTemplateLegacy from './discover_legacy.html';
 import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
+  getHeaderActionMenuMounter,
   getUrlTracker,
   unhashUrl,
   subscribeWithScope,
@@ -70,9 +70,6 @@ import {
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
-  getDefaultQuery,
-  search,
-  UI_SETTINGS,
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
@@ -116,7 +113,7 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: indexTemplate,
+    template: indexTemplateLegacy,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
@@ -191,16 +188,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController(
-  $element,
-  $route,
-  $scope,
-  $timeout,
-  $window,
-  Promise,
-  localStorage,
-  uiCapabilities
-) {
+function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const $fetchObservable = new Subject();
@@ -231,6 +219,7 @@ function discoverController(
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
+    toasts: core.notifications.toasts,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -246,11 +235,15 @@ function discoverController(
 
   // sync initial app filters from state to filterManager
   filterManager.setAppFilters(_.cloneDeep(appStateContainer.getState().filters));
+  data.query.queryString.setQuery(appStateContainer.getState().query);
 
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
     data.query,
     appStateContainer,
-    { filters: esFilters.FilterStateStore.APP_STATE }
+    {
+      filters: esFilters.FilterStateStore.APP_STATE,
+      query: true,
+    }
   );
 
   const appStateUnsubscribe = appStateContainer.subscribe(async (newState) => {
@@ -262,7 +255,7 @@ function discoverController(
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort', 'query'].filter(
+        const changes = ['interval', 'sort'].filter(
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
 
@@ -313,17 +306,9 @@ function discoverController(
       mode: 'absolute',
     });
   };
-  $scope.intervalOptions = search.aggs.intervalOptions;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
-
-  $scope.$watch(
-    () => uiCapabilities.discover.saveQuery,
-    (newCapability) => {
-      $scope.showSaveQuery = newCapability;
-    }
-  );
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -519,8 +504,6 @@ function discoverController(
     ]);
   }
 
-  $scope.screenTitle = savedSearch.title;
-
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
@@ -593,12 +576,7 @@ function discoverController(
   };
 
   function getStateDefaults() {
-    const query =
-      $scope.searchSource.getField('query') ||
-      getDefaultQuery(
-        localStorage.get('kibana.userQueryLanguage') ||
-          config.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
-      );
+    const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
     return {
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
@@ -621,6 +599,9 @@ function discoverController(
     timefield: getTimeField(),
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
+    config: config,
+    fixedScroll: createFixedScroll($scope, $timeout),
+    setHeaderActionMenu: getHeaderActionMenuMounter(),
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -635,12 +616,7 @@ function discoverController(
 
   const init = _.once(() => {
     $scope.updateDataSource().then(async () => {
-      const searchBarChanges = merge(
-        timefilter.getAutoRefreshFetch$(),
-        timefilter.getFetch$(),
-        filterManager.getFetches$(),
-        $fetchObservable
-      ).pipe(debounceTime(100));
+      const searchBarChanges = merge(data.query.state$, $fetchObservable).pipe(debounceTime(100));
 
       subscriptions.add(
         subscribeWithScope(
@@ -785,6 +761,7 @@ function discoverController(
     if (!init.complete) return;
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
+    $scope.minimumVisibleRows = 50;
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       $scope.resultState = 'none';
       return;
@@ -824,9 +801,8 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function ({ query }, isUpdate = true) {
-    if (!_.isEqual(query, appStateContainer.getState().query) || isUpdate === false) {
-      setAppState({ query });
+  $scope.handleRefresh = function (_payload, isUpdate) {
+    if (isUpdate === false) {
       $fetchObservable.next();
     }
   };
@@ -874,7 +850,7 @@ function discoverController(
   }
 
   function onResults(resp) {
-    inspectorRequest.stats(getResponseInspectorStats($scope.searchSource, resp)).ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
     if (getTimeField()) {
       const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
@@ -883,9 +859,6 @@ function discoverController(
         tabifiedData,
         getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
       );
-      if ($scope.vis.data.aggs.aggs[1]) {
-        $scope.bucketInterval = $scope.vis.data.aggs.aggs[1].buckets.getInterval();
-      }
       $scope.updateTime();
     }
 
@@ -976,7 +949,7 @@ function discoverController(
           config.get(SORT_DEFAULT_ORDER_SETTING)
         )
       )
-      .setField('query', $scope.state.query || null)
+      .setField('query', data.query.queryString.getQuery() || null)
       .setField('filter', filterManager.getFilters());
     return Promise.resolve();
   };

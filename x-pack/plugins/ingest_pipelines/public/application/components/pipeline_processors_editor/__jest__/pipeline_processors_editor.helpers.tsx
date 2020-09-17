@@ -5,13 +5,25 @@
  */
 import { act } from 'react-dom/test-utils';
 import React from 'react';
+
+import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
+
+import { LocationDescriptorObject } from 'history';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
 import {
-  PipelineProcessorsContextProvider,
+  ProcessorsEditorContextProvider,
   Props,
   ProcessorsEditor,
   GlobalOnFailureProcessorsEditor,
 } from '../';
+
+import {
+  breadcrumbService,
+  uiMetricService,
+  documentationService,
+  apiService,
+} from '../../../services';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -60,11 +72,27 @@ jest.mock('react-virtualized', () => {
   };
 });
 
+const history = scopedHistoryMock.create();
+history.createHref.mockImplementation((location: LocationDescriptorObject) => {
+  return `${location.pathname}?${location.search}`;
+});
+
+const appServices = {
+  breadcrumbs: breadcrumbService,
+  metric: uiMetricService,
+  documentation: documentationService,
+  api: apiService,
+  notifications: notificationServiceMock.createSetupContract(),
+  history,
+};
+
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => (
-    <PipelineProcessorsContextProvider {...props}>
-      <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
-    </PipelineProcessorsContextProvider>
+    <KibanaContextProvider services={appServices}>
+      <ProcessorsEditorContextProvider {...props}>
+        <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
+      </ProcessorsEditorContextProvider>
+    </KibanaContextProvider>
   ),
   {
     doMountAsync: false,
@@ -89,7 +117,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async addProcessor(processorsSelector: string, type: string, options: Record<string, any>) {
       find(`${processorsSelector}.addProcessorButton`).simulate('click');
       await act(async () => {
-        find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
       });
       component.update();
       await act(async () => {
@@ -98,7 +126,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         });
       });
       await act(async () => {
-        find('processorSettingsForm.submitButton').simulate('click');
+        find('addProcessorForm.submitButton').simulate('click');
       });
     },
 
@@ -112,7 +140,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     moveProcessor(processorSelector: string, dropZoneSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('click');
+        find(`${processorSelector}.moveItemButton`).simulate('change');
       });
       component.update();
       act(() => {
@@ -129,7 +157,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find(`${processorSelector}.moreMenu.button`).simulate('click');
       find(`${processorSelector}.moreMenu.addOnFailureButton`).simulate('click');
       await act(async () => {
-        find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
       });
       component.update();
       await act(async () => {
@@ -138,18 +166,19 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         });
       });
       await act(async () => {
-        find('processorSettingsForm.submitButton').simulate('click');
+        find('addProcessorForm.submitButton').simulate('click');
       });
     },
 
     startAndCancelMove(processorSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('click');
+        find(`${processorSelector}.moveItemButton`).simulate('change');
       });
       component.update();
       act(() => {
-        find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
+        find(`${processorSelector}.cancelMoveItemButton`).simulate('change');
       });
+      component.update();
     },
 
     duplicateProcessor(processorSelector: string) {
@@ -173,8 +202,10 @@ type TestSubject =
   | 'pipelineEditorDoneButton'
   | 'pipelineEditorOnFailureToggle'
   | 'addProcessorsButtonLevel1'
-  | 'processorSettingsForm'
-  | 'processorSettingsForm.submitButton'
+  | 'editProcessorForm'
+  | 'editProcessorForm.submitButton'
+  | 'addProcessorForm.submitButton'
+  | 'addProcessorForm'
   | 'processorOptionsEditor'
   | 'processorSettingsFormFlyout'
   | 'processorTypeSelector'

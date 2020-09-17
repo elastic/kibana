@@ -6,18 +6,21 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import ParamsFields from './es_index_params';
+import { DocLinksStart } from 'kibana/public';
 
 describe('IndexParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const actionParams = {
       documents: [{ test: 123 }],
     };
+
     const wrapper = mountWithIntl(
       <ParamsFields
         actionParams={actionParams}
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(`{

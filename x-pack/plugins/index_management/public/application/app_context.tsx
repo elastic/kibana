@@ -6,9 +6,10 @@
 
 import React, { createContext, useContext } from 'react';
 import { ScopedHistory } from 'kibana/public';
+import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-
 import { CoreStart } from '../../../../../src/core/public';
+
 import { IngestManagerSetup } from '../../../ingest_manager/public';
 import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';
@@ -32,6 +33,7 @@ export interface AppDependencies {
     notificationService: NotificationService;
   };
   history: ScopedHistory;
+  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
 export const AppContextProvider = ({

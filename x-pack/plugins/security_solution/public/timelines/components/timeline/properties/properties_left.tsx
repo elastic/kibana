@@ -13,7 +13,6 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 
 import { Note } from '../../../../common/lib/note';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
-
 import { TimelineTypeLiteral, TimelineStatusLiteral } from '../../../../../common/types/timeline';
 
 import * as i18n from './translations';
@@ -106,7 +105,12 @@ export const PropertiesLeft = React.memo<Props>(
         />
       </EuiFlexItem>
 
-      <Name timelineId={timelineId} title={title} updateTitle={updateTitle} />
+      <Name
+        timelineId={timelineId}
+        timelineType={timelineType}
+        title={title}
+        updateTitle={updateTitle}
+      />
 
       {showDescription ? (
         <EuiFlexItem grow={2}>

@@ -29,7 +29,7 @@ import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { defaultSearchQuery, useResultsViewConfig, INDEX_STATUS } from '../../../../common';
 
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { ExplorationTitle } from '../exploration_title';
@@ -56,6 +56,12 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   const { columnsWithCharts, errorMessage, status, tableItems } = outlierData;
 
+  const colorRange = useColorRange(
+    COLOR_RANGE.BLUE,
+    COLOR_RANGE_SCALE.INFLUENCER,
+    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
+  );
+
   // if it's a searchBar syntax error leave the table visible so they can try again
   if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
     return (
@@ -73,13 +79,6 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
       </EuiPanel>
     );
   }
-
-  /* eslint-disable-next-line react-hooks/rules-of-hooks */
-  const colorRange = useColorRange(
-    COLOR_RANGE.BLUE,
-    COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, tableItems) : 1
-  );
 
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">

@@ -7,11 +7,11 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../../common/mock';
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
 import { QueryBar } from '../../../../common/components/query_bar';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
@@ -19,7 +19,7 @@ import { buildGlobalQuery } from '../helpers';
 
 import { QueryBarTimeline, QueryBarTimelineComponentProps, getDataProviderFilter } from './index';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -65,9 +65,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -107,9 +107,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -154,9 +154,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -199,9 +199,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -246,9 +246,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -291,9 +291,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}

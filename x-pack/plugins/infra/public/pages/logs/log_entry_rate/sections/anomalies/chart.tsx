@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { RectAnnotationDatum, AnnotationId } from '@elastic/charts';
 import {
   Axis,
@@ -21,6 +21,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
@@ -36,7 +37,16 @@ export const AnomaliesChart: React.FunctionComponent<{
   series: Array<{ time: number; value: number }>;
   annotations: Record<MLSeverityScoreCategories, RectAnnotationDatum[]>;
   renderAnnotationTooltip?: (details?: string) => JSX.Element;
-}> = ({ chartId, series, annotations, setTimeRange, timeRange, renderAnnotationTooltip }) => {
+  isLoading: boolean;
+}> = ({
+  chartId,
+  series,
+  annotations,
+  setTimeRange,
+  timeRange,
+  renderAnnotationTooltip,
+  isLoading,
+}) => {
   const [dateFormat] = useKibanaUiSetting('dateFormat', 'Y-MM-DD HH:mm:ss.SSS');
   const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
 
@@ -68,41 +78,56 @@ export const AnomaliesChart: React.FunctionComponent<{
     [setTimeRange]
   );
 
-  return (
-    <div style={{ height: 160, width: '100%' }}>
-      <Chart className="log-entry-rate-chart">
-        <Axis
-          id="timestamp"
-          position="bottom"
-          showOverlappingTicks
-          tickFormat={chartDateFormatter}
-        />
-        <Axis
-          id="values"
-          position="left"
-          tickFormat={(value) => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
-        />
-        <BarSeries
-          id={logEntryRateSpecId}
-          name={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionLineSeriesName', {
-            defaultMessage: 'Log entries per 15 minutes (avg)',
+  return !isLoading && !series.length ? (
+    <EuiEmptyPrompt
+      title={
+        <h2>
+          {i18n.translate('xpack.infra.logs.analysis.anomalySectionLogRateChartNoData', {
+            defaultMessage: 'There is no log rate data to display.',
           })}
-          xScaleType="time"
-          yScaleType="linear"
-          xAccessor={'time'}
-          yAccessors={['value']}
-          data={series}
-          barSeriesStyle={barSeriesStyle}
-        />
-        {renderAnnotations(annotations, chartId, renderAnnotationTooltip)}
-        <Settings
-          onBrushEnd={handleBrushEnd}
-          tooltip={tooltipProps}
-          baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
-          xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
-        />
-      </Chart>
-    </div>
+        </h2>
+      }
+      titleSize="m"
+    />
+  ) : (
+    <LoadingOverlayWrapper isLoading={isLoading}>
+      <div style={{ height: 160, width: '100%' }}>
+        {series.length ? (
+          <Chart className="log-entry-rate-chart">
+            <Axis
+              id="timestamp"
+              position="bottom"
+              showOverlappingTicks
+              tickFormat={chartDateFormatter}
+            />
+            <Axis
+              id="values"
+              position="left"
+              tickFormat={(value) => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
+            />
+            <BarSeries
+              id={logEntryRateSpecId}
+              name={i18n.translate('xpack.infra.logs.analysis.anomaliesSectionLineSeriesName', {
+                defaultMessage: 'Log entries per 15 minutes (avg)',
+              })}
+              xScaleType="time"
+              yScaleType="linear"
+              xAccessor={'time'}
+              yAccessors={['value']}
+              data={series}
+              barSeriesStyle={barSeriesStyle}
+            />
+            {renderAnnotations(annotations, chartId, renderAnnotationTooltip)}
+            <Settings
+              onBrushEnd={handleBrushEnd}
+              tooltip={tooltipProps}
+              baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
+              xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
+            />
+          </Chart>
+        ) : null}
+      </div>
+    </LoadingOverlayWrapper>
   );
 };
 

@@ -27,6 +27,8 @@ Array [
     <div>
       <table
         class="euiTable euiTable--compressed"
+        id="generated-id"
+        tabindex="-1"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"

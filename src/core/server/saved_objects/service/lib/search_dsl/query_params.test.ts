@@ -17,8 +17,9 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../../es_query';
+type KueryNode = any;
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
 import { getQueryParams } from './query_params';
@@ -196,19 +197,29 @@ describe('#getQueryParams', () => {
       });
     });
 
-    describe('`namespace` parameter', () => {
-      const createTypeClause = (type: string, namespace?: string) => {
+    describe('`namespaces` parameter', () => {
+      const createTypeClause = (type: string, namespaces?: string[]) => {
         if (registry.isMultiNamespace(type)) {
           return {
             bool: {
-              must: expect.arrayContaining([{ term: { namespaces: namespace ?? 'default' } }]),
+              must: expect.arrayContaining([{ terms: { namespaces: namespaces ?? ['default'] } }]),
               must_not: [{ exists: { field: 'namespace' } }],
             },
           };
-        } else if (namespace && registry.isSingleNamespace(type)) {
+        } else if (registry.isSingleNamespace(type)) {
+          const nonDefaultNamespaces = namespaces?.filter((n) => n !== 'default') ?? [];
+          const should: any = [];
+          if (nonDefaultNamespaces.length > 0) {
+            should.push({ terms: { namespace: nonDefaultNamespaces } });
+          }
+          if (namespaces?.includes('default')) {
+            should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
+          }
           return {
             bool: {
-              must: expect.arrayContaining([{ term: { namespace } }]),
+              must: [{ term: { type } }],
+              should: expect.arrayContaining(should),
+              minimum_should_match: 1,
               must_not: [{ exists: { field: 'namespaces' } }],
             },
           };
@@ -229,23 +240,45 @@ describe('#getQueryParams', () => {
         );
       };
 
-      const test = (namespace?: string) => {
+      const test = (namespaces?: string[]) => {
         for (const typeOrTypes of ALL_TYPE_SUBSETS) {
-          const result = getQueryParams({ mappings, registry, type: typeOrTypes, namespace });
+          const result = getQueryParams({ mappings, registry, type: typeOrTypes, namespaces });
           const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-          expectResult(result, ...types.map((x) => createTypeClause(x, namespace)));
+          expectResult(result, ...types.map((x) => createTypeClause(x, namespaces)));
         }
         // also test with no specified type/s
-        const result = getQueryParams({ mappings, registry, type: undefined, namespace });
-        expectResult(result, ...ALL_TYPES.map((x) => createTypeClause(x, namespace)));
+        const result = getQueryParams({ mappings, registry, type: undefined, namespaces });
+        expectResult(result, ...ALL_TYPES.map((x) => createTypeClause(x, namespaces)));
       };
 
-      it('filters results with "namespace" field when `namespace` is not specified', () => {
+      it('normalizes and deduplicates provided namespaces', () => {
+        const result = getQueryParams({
+          mappings,
+          registry,
+          search: '*',
+          namespaces: ['foo', '*', 'foo', 'bar', 'default'],
+        });
+
+        expectResult(
+          result,
+          ...ALL_TYPES.map((x) => createTypeClause(x, ['foo', 'default', 'bar']))
+        );
+      });
+
+      it('filters results with "namespace" field when `namespaces` is not specified', () => {
         test(undefined);
       });
 
       it('filters results for specified namespace for appropriate type/s', () => {
-        test('foo-namespace');
+        test(['foo-namespace']);
+      });
+
+      it('filters results for specified namespaces for appropriate type/s', () => {
+        test(['foo-namespace', 'default']);
+      });
+
+      it('filters results for specified `default` namespace for appropriate type/s', () => {
+        test(['default']);
       });
     });
   });
@@ -277,13 +310,19 @@ describe('#getQueryParams', () => {
       });
     });
 
-    describe('`searchFields` parameter', () => {
+    describe('`searchFields` and `rootSearchFields` parameters', () => {
       const getExpectedFields = (searchFields: string[], typeOrTypes: string | string[]) => {
         const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
         return searchFields.map((x) => types.map((y) => `${y}.${x}`)).flat();
       };
 
-      const test = (searchFields: string[]) => {
+      const test = ({
+        searchFields,
+        rootSearchFields,
+      }: {
+        searchFields?: string[];
+        rootSearchFields?: string[];
+      }) => {
         for (const typeOrTypes of ALL_TYPE_SUBSETS) {
           const result = getQueryParams({
             mappings,
@@ -291,8 +330,12 @@ describe('#getQueryParams', () => {
             type: typeOrTypes,
             search,
             searchFields,
+            rootSearchFields,
           });
-          const fields = getExpectedFields(searchFields, typeOrTypes);
+          let fields = rootSearchFields || [];
+          if (searchFields) {
+            fields = fields.concat(getExpectedFields(searchFields, typeOrTypes));
+          }
           expectResult(result, expect.objectContaining({ fields }));
         }
         // also test with no specified type/s
@@ -302,31 +345,63 @@ describe('#getQueryParams', () => {
           type: undefined,
           search,
           searchFields,
+          rootSearchFields,
         });
-        const fields = getExpectedFields(searchFields, ALL_TYPES);
+        let fields = rootSearchFields || [];
+        if (searchFields) {
+          fields = fields.concat(getExpectedFields(searchFields, ALL_TYPES));
+        }
         expectResult(result, expect.objectContaining({ fields }));
       };
 
-      it('includes lenient flag and all fields when `searchFields` is not specified', () => {
+      it('throws an error if a raw search field contains a "." character', () => {
+        expect(() =>
+          getQueryParams({
+            mappings,
+            registry,
+            type: undefined,
+            search,
+            searchFields: undefined,
+            rootSearchFields: ['foo', 'bar.baz'],
+          })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"rootSearchFields entry \\"bar.baz\\" is invalid: cannot contain \\".\\" character"`
+        );
+      });
+
+      it('includes lenient flag and all fields when `searchFields` and `rootSearchFields` are not specified', () => {
         const result = getQueryParams({
           mappings,
           registry,
           search,
           searchFields: undefined,
+          rootSearchFields: undefined,
         });
         expectResult(result, expect.objectContaining({ lenient: true, fields: ['*'] }));
       });
 
       it('includes specified search fields for appropriate type/s', () => {
-        test(['title']);
+        test({ searchFields: ['title'] });
       });
 
       it('supports boosting', () => {
-        test(['title^3']);
+        test({ searchFields: ['title^3'] });
       });
 
-      it('supports multiple fields', () => {
-        test(['title, title.raw']);
+      it('supports multiple search fields', () => {
+        test({ searchFields: ['title, title.raw'] });
+      });
+
+      it('includes specified raw search fields', () => {
+        test({ rootSearchFields: ['_id'] });
+      });
+
+      it('supports multiple raw search fields', () => {
+        test({ rootSearchFields: ['_id', 'originId'] });
+      });
+
+      it('supports search fields and raw search fields', () => {
+        test({ searchFields: ['title'], rootSearchFields: ['_id'] });
       });
     });
 
@@ -350,6 +425,20 @@ describe('#getQueryParams', () => {
           defaultSearchOperator,
         });
         expectResult(result, expect.objectContaining({ default_operator: defaultSearchOperator }));
+      });
+    });
+  });
+
+  describe('namespaces property', () => {
+    ALL_TYPES.forEach((type) => {
+      it(`throws for ${type} when namespaces is an empty array`, () => {
+        expect(() =>
+          getQueryParams({
+            mappings,
+            registry,
+            namespaces: [],
+          })
+        ).toThrowError('cannot specify empty namespaces array');
       });
     });
   });

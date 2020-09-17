@@ -5,8 +5,10 @@
  */
 
 import { createAction } from 'redux-actions';
-import { FetchMonitorStatesQueryArgs, MonitorSummaryResult } from '../../../common/runtime_types';
+import { FetchMonitorStatesQueryArgs, MonitorSummariesResult } from '../../../common/runtime_types';
 
 export const getMonitorList = createAction<FetchMonitorStatesQueryArgs>('GET_MONITOR_LIST');
-export const getMonitorListSuccess = createAction<MonitorSummaryResult>('GET_MONITOR_LIST_SUCCESS');
+export const getMonitorListSuccess = createAction<MonitorSummariesResult>(
+  'GET_MONITOR_LIST_SUCCESS'
+);
 export const getMonitorListFailure = createAction<Error>('GET_MONITOR_LIST_FAIL');

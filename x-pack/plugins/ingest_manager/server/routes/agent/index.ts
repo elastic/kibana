@@ -9,21 +9,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, AGENT_API_ROUTES } from '../../constants';
+import { IRouter, RouteValidationResultFactory } from 'src/core/server';
+import Ajv from 'ajv';
+import { PLUGIN_ID, AGENT_API_ROUTES, LIMITED_CONCURRENCY_ROUTE_TAG } from '../../constants';
 import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
-  PostAgentCheckinRequestSchema,
-  PostAgentEnrollRequestSchema,
-  PostAgentAcksRequestSchema,
+  PostAgentCheckinRequestBodyJSONSchema,
+  PostAgentCheckinRequestParamsJSONSchema,
+  PostAgentAcksRequestParamsJSONSchema,
+  PostAgentAcksRequestBodyJSONSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
   PostNewAgentActionRequestSchema,
   PutAgentReassignRequestSchema,
+  PostAgentEnrollRequestBodyJSONSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -33,7 +36,7 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  getAgentStatusForConfigHandler,
+  getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
@@ -41,8 +44,32 @@ import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
 import { postAgentsUnenrollHandler } from './unenroll_handler';
+import { IngestManagerConfigType } from '../..';
 
-export const registerRoutes = (router: IRouter) => {
+const ajv = new Ajv({
+  coerceTypes: true,
+  useDefaults: true,
+  removeAdditional: true,
+  allErrors: false,
+  nullable: true,
+});
+
+function schemaErrorsText(errors: Ajv.ErrorObject[], dataVar: any) {
+  return errors.map((e) => `${dataVar + (e.dataPath || '')} ${e.message}`).join(', ');
+}
+
+function makeValidator(jsonSchema: any) {
+  const validator = ajv.compile(jsonSchema);
+  return function validateWithAJV(data: any, r: RouteValidationResultFactory) {
+    if (validator(data)) {
+      return r.ok(data);
+    }
+
+    return r.badRequest(schemaErrorsText(validator.errors || [], data));
+  };
+}
+
+export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
   // Get one
   router.get(
     {
@@ -80,12 +107,25 @@ export const registerRoutes = (router: IRouter) => {
     getAgentsHandler
   );
 
+  const pollingRequestTimeout = config.fleet.pollingRequestTimeout;
   // Agent checkin
   router.post(
     {
       path: AGENT_API_ROUTES.CHECKIN_PATTERN,
-      validate: PostAgentCheckinRequestSchema,
-      options: { tags: [] },
+      validate: {
+        params: makeValidator(PostAgentCheckinRequestParamsJSONSchema),
+        body: makeValidator(PostAgentCheckinRequestBodyJSONSchema),
+      },
+      options: {
+        tags: [],
+        ...(pollingRequestTimeout
+          ? {
+              timeout: {
+                idleSocket: pollingRequestTimeout,
+              },
+            }
+          : {}),
+      },
     },
     postAgentCheckinHandler
   );
@@ -94,8 +134,10 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: AGENT_API_ROUTES.ENROLL_PATTERN,
-      validate: PostAgentEnrollRequestSchema,
-      options: { tags: [] },
+      validate: {
+        body: makeValidator(PostAgentEnrollRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
     },
     postAgentEnrollHandler
   );
@@ -104,8 +146,11 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: AGENT_API_ROUTES.ACKS_PATTERN,
-      validate: PostAgentAcksRequestSchema,
-      options: { tags: [] },
+      validate: {
+        params: makeValidator(PostAgentAcksRequestParamsJSONSchema),
+        body: makeValidator(PostAgentAcksRequestBodyJSONSchema),
+      },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
     },
     postAgentAcksHandlerBuilder({
       acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
@@ -158,13 +203,13 @@ export const registerRoutes = (router: IRouter) => {
     getAgentEventsHandler
   );
 
-  // Get agent status for config
+  // Get agent status for policy
   router.get(
     {
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       validate: GetAgentStatusRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentStatusForConfigHandler
+    getAgentStatusForAgentPolicyHandler
   );
 };

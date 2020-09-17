@@ -16,14 +16,23 @@ import { useInsertTimeline } from '../../../timelines/components/timeline/insert
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
 
+import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
+import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
+
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
+
 jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_case');
-import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { wait } from '../../../common/lib/helpers';
 
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
+
+jest.mock(
+  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
+);
+
 jest.mock('../../containers/use_get_tags');
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
@@ -33,7 +42,8 @@ jest.mock(
   })
 );
 
-export const useFormMock = useForm as jest.Mock;
+const useFormMock = useForm as jest.Mock;
+const useFormDataMock = useFormData as jest.Mock;
 
 const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
@@ -81,6 +91,7 @@ describe('Create case', () => {
     useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
+    useFormDataMock.mockImplementation(() => [{ description: sampleData.description }]);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     (useGetTags as jest.Mock).mockImplementation(() => ({
       tags: sampleTags,
@@ -97,8 +108,7 @@ describe('Create case', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    await wait();
-    expect(postCase).toBeCalledWith(sampleData);
+    await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
   });
 
   it('should redirect to all cases on cancel click', () => {

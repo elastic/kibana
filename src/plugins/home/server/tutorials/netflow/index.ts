@@ -25,9 +25,11 @@ import { createElasticCloudInstructions } from './elastic_cloud';
 import { createOnPremElasticCloudInstructions } from './on_prem_elastic_cloud';
 
 export function netflowSpecProvider() {
+  const moduleName = 'netflow';
   return {
     id: 'netflow',
     name: 'Netflow',
+    moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.netflow.tutorialShortDescription', {
       defaultMessage: 'Collect Netflow records sent by a Netflow exporter.',

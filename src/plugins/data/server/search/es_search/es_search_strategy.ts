@@ -17,19 +17,24 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import { RequestHandlerContext, SharedGlobalConfig } from 'kibana/server';
+import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { ES_SEARCH_STRATEGY } from '../../../common/search';
-import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { SearchUsage } from '../collectors/usage';
+import { toSnakeCase } from './to_snake_case';
+import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded, getShardTimeout } from '..';
 
 export const esSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
-): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
+  config$: Observable<SharedGlobalConfig>,
+  logger: Logger,
+  usage?: SearchUsage
+): ISearchStrategy => {
   return {
-    search: async (context: RequestHandlerContext, request, options) => {
+    search: async (context, request, options) => {
+      logger.debug(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
-      const defaultParams = getDefaultSearchParams(config);
+      const uiSettingsClient = await context.core.uiSettings.client;
 
       // Only default index pattern type is supported here.
       // See data_enhanced for other type support.
@@ -37,20 +42,36 @@ export const esSearchStrategyProvider = (
         throw new Error(`Unsupported index pattern type ${request.indexType}`);
       }
 
-      const params = {
+      // ignoreThrottled is not supported in OSS
+      const { ignoreThrottled, ...defaultParams } = await getDefaultSearchParams(uiSettingsClient);
+
+      const params = toSnakeCase({
         ...defaultParams,
+        ...getShardTimeout(config),
         ...request.params,
-      };
+      });
 
-      const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-        'search',
-        params,
-        options
-      )) as SearchResponse<any>;
+      try {
+        // Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
+        const promise = context.core.elasticsearch.client.asCurrentUser.search(params);
+        if (options?.abortSignal)
+          options.abortSignal.addEventListener('abort', () => promise.abort());
+        const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
 
-      // The above query will either complete or timeout and throw an error.
-      // There is no progress indication on this api.
-      return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+        if (usage) usage.trackSuccess(rawResponse.took);
+
+        // The above query will either complete or timeout and throw an error.
+        // There is no progress indication on this api.
+        return {
+          isPartial: false,
+          isRunning: false,
+          rawResponse,
+          ...getTotalLoaded(rawResponse._shards),
+        };
+      } catch (e) {
+        if (usage) usage.trackError();
+        throw e;
+      }
     },
   };
 };

@@ -9,7 +9,11 @@ import React from 'react';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
-import { IS_OPERATOR, EXISTS_OPERATOR } from '../timeline/data_providers/data_provider';
+import {
+  DataProviderType,
+  IS_OPERATOR,
+  EXISTS_OPERATOR,
+} from '../timeline/data_providers/data_provider';
 
 import { StatefulEditDataProvider } from '.';
 
@@ -266,6 +270,27 @@ describe('StatefulEditDataProvider', () => {
     expect(wrapper.find('[data-test-subj="value"]').exists()).toBe(false);
   });
 
+  test('it does NOT render value when is template field', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEditDataProvider
+          andProviderId={undefined}
+          browserFields={mockBrowserFields}
+          field={field}
+          isExcluded={true}
+          onDataProviderEdited={jest.fn()}
+          operator={EXISTS_OPERATOR}
+          providerId={`hosts-table-hostName-${value}`}
+          timelineId={timelineId}
+          value={value}
+          type={DataProviderType.template}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="value"]').exists()).toBe(false);
+  });
+
   test('it does NOT disable the save button when field is valid', () => {
     const wrapper = mount(
       <TestProviders>
@@ -361,6 +386,7 @@ describe('StatefulEditDataProvider', () => {
       field: 'client.address',
       id: 'test',
       operator: ':',
+      type: 'default',
       providerId: 'hosts-table-hostName-test-host',
       value: 'test-host',
     });

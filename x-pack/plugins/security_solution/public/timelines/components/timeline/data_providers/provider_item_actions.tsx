@@ -12,9 +12,11 @@ import {
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
+
 import { OnDataProviderEdited } from '../events';
-import { QueryOperator, EXISTS_OPERATOR } from './data_provider';
+import { DataProviderType, QueryOperator, EXISTS_OPERATOR } from './data_provider';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 
 import * as i18n from './translations';
@@ -23,6 +25,7 @@ export const EDIT_CLASS_NAME = 'edit-data-provider';
 export const EXCLUDE_CLASS_NAME = 'exclude-data-provider';
 export const ENABLE_CLASS_NAME = 'enable-data-provider';
 export const FILTER_FOR_FIELD_PRESENT_CLASS_NAME = 'filter-for-field-present-data-provider';
+export const CONVERT_TO_FIELD_CLASS_NAME = 'convert-to-field-data-provider';
 export const DELETE_CLASS_NAME = 'delete-data-provider';
 
 interface OwnProps {
@@ -41,9 +44,12 @@ interface OwnProps {
   operator: QueryOperator;
   providerId: string;
   timelineId?: string;
+  timelineType?: TimelineType;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
+  toggleTypeProvider: () => void;
   value: string | number;
+  type: DataProviderType;
 }
 
 const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<
@@ -56,6 +62,27 @@ const MyEuiPopover = styled((EuiPopover as unknown) as FunctionComponent)<
 `;
 
 MyEuiPopover.displayName = 'MyEuiPopover';
+
+interface GetProviderActionsProps {
+  andProviderId?: string;
+  browserFields?: BrowserFields;
+  deleteItem: () => void;
+  field: string;
+  isEnabled: boolean;
+  isExcluded: boolean;
+  isLoading: boolean;
+  onDataProviderEdited?: OnDataProviderEdited;
+  onFilterForFieldPresent: () => void;
+  operator: QueryOperator;
+  providerId: string;
+  timelineId?: string;
+  timelineType?: TimelineType;
+  toggleEnabled: () => void;
+  toggleExcluded: () => void;
+  toggleType: () => void;
+  value: string | number;
+  type: DataProviderType;
+}
 
 export const getProviderActions = ({
   andProviderId,
@@ -70,26 +97,13 @@ export const getProviderActions = ({
   onFilterForFieldPresent,
   providerId,
   timelineId,
+  timelineType,
   toggleEnabled,
   toggleExcluded,
+  toggleType,
+  type,
   value,
-}: {
-  andProviderId?: string;
-  browserFields?: BrowserFields;
-  deleteItem: () => void;
-  field: string;
-  isEnabled: boolean;
-  isExcluded: boolean;
-  isLoading: boolean;
-  onDataProviderEdited?: OnDataProviderEdited;
-  onFilterForFieldPresent: () => void;
-  operator: QueryOperator;
-  providerId: string;
-  timelineId?: string;
-  toggleEnabled: () => void;
-  toggleExcluded: () => void;
-  value: string | number;
-}): EuiContextMenuPanelDescriptor[] => [
+}: GetProviderActionsProps): EuiContextMenuPanelDescriptor[] => [
   {
     id: 0,
     items: [
@@ -121,6 +135,18 @@ export const getProviderActions = ({
         name: i18n.FILTER_FOR_FIELD_PRESENT,
         onClick: onFilterForFieldPresent,
       },
+      timelineType === TimelineType.template
+        ? {
+            className: CONVERT_TO_FIELD_CLASS_NAME,
+            disabled: isLoading,
+            icon: 'visText',
+            name:
+              type === DataProviderType.template
+                ? i18n.CONVERT_TO_FIELD
+                : i18n.CONVERT_TO_TEMPLATE_FIELD,
+            onClick: toggleType,
+          }
+        : { name: null },
       {
         className: DELETE_CLASS_NAME,
         disabled: isLoading,
@@ -128,7 +154,7 @@ export const getProviderActions = ({
         name: i18n.DELETE_DATA_PROVIDER,
         onClick: deleteItem,
       },
-    ],
+    ].filter((item) => item.name != null),
   },
   {
     content:
@@ -143,6 +169,7 @@ export const getProviderActions = ({
           providerId={providerId}
           timelineId={timelineId}
           value={value}
+          type={type}
         />
       ) : null,
     id: 1,
@@ -167,9 +194,12 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       operator,
       providerId,
       timelineId,
+      timelineType,
       toggleEnabledProvider,
       toggleExcludedProvider,
+      toggleTypeProvider,
       value,
+      type,
     } = this.props;
 
     const panelTree = getProviderActions({
@@ -185,9 +215,12 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
       operator,
       providerId,
       timelineId,
+      timelineType,
       toggleEnabled: toggleEnabledProvider,
       toggleExcluded: toggleExcludedProvider,
+      toggleType: toggleTypeProvider,
       value,
+      type,
     });
 
     return (
@@ -214,6 +247,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
     operator,
     providerId,
     value,
+    type,
   }) => {
     if (this.props.onDataProviderEdited != null) {
       this.props.onDataProviderEdited({
@@ -224,6 +258,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
         operator,
         providerId,
         value,
+        type,
       });
     }
 
@@ -231,7 +266,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
   };
 
   private onFilterForFieldPresent = () => {
-    const { andProviderId, field, timelineId, providerId, value } = this.props;
+    const { andProviderId, field, timelineId, providerId, value, type } = this.props;
 
     if (this.props.onDataProviderEdited != null) {
       this.props.onDataProviderEdited({
@@ -242,6 +277,7 @@ export class ProviderItemActions extends React.PureComponent<OwnProps> {
         operator: EXISTS_OPERATOR,
         providerId,
         value,
+        type,
       });
     }
 

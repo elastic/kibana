@@ -116,7 +116,7 @@ describe('hash unhash url', () => {
         expect(mockStorage.length).toBe(3);
       });
 
-      it('hashes only whitelisted properties', () => {
+      it('hashes only allow-listed properties', () => {
         const stateParamKey1 = '_g';
         const stateParamValue1 = '(yes:!t)';
         const stateParamKey2 = '_a';
@@ -227,7 +227,7 @@ describe('hash unhash url', () => {
         );
       });
 
-      it('unhashes only whitelisted properties', () => {
+      it('un-hashes only allow-listed properties', () => {
         const stateParamKey1 = '_g';
         const stateParamValueHashed1 = 'h@4e60e02';
         const state1 = { yes: true };

@@ -8,12 +8,13 @@
     "data",
     "expressions",
     "navigation",
-    "kibanaLegacy",
+    "urlForwarding",
     "visualizations",
     "dashboard",
     "charts"
   ],
   "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions"],
   "configPath": ["xpack", "lens"],
-  "extraPublicDirs": ["common/constants"]
+  "extraPublicDirs": ["common/constants"],
+  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable"]
 }

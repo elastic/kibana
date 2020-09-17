@@ -21,7 +21,6 @@ import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.t
 
 import path from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';
-// @ts-expect-error
 import { normalizePath } from './utils';
 
 const localePath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files', 'fr.json');

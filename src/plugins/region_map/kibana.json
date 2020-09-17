@@ -11,5 +11,10 @@
     "mapsLegacy",
     "kibanaLegacy",
     "data"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "charts"
   ]
 }

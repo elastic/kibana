@@ -24,7 +24,7 @@ describe('OldAlertCallOut', () => {
           size="s"
           title={
             <FormattedMessage
-              defaultMessage="You are editing an older alert, some fields may not auto-populate."
+              defaultMessage="You may be editing an older alert, some fields may not auto-populate."
               id="xpack.uptime.alerts.monitorStatus.oldAlertCallout.title"
               values={Object {}}
             />

@@ -17,10 +17,9 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { updateRulesRoute } from './update_rules_route';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/update_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/update_rules_notifications');
@@ -29,14 +28,6 @@ describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.create>;
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -139,7 +130,7 @@ describe('update_rules', () => {
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getCreateRulesSchemaMock(),
+          ...getUpdateRulesSchemaMock(),
           rule_id: undefined,
         },
       });
@@ -154,7 +145,7 @@ describe('update_rules', () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...getCreateRulesSchemaMock(), type: 'query' },
+        body: { ...getUpdateRulesSchemaMock(), type: 'query' },
       });
       const result = await server.validate(request);
 
@@ -165,13 +156,39 @@ describe('update_rules', () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...getCreateRulesSchemaMock(), type: 'unknown type' },
+        body: { ...getUpdateRulesSchemaMock(), type: 'unknown type' },
       });
       const result = await server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
         'Invalid value "unknown type" supplied to "type"'
       );
+    });
+
+    test('allows rule type of query and custom from and interval', async () => {
+      const request = requestMock.create({
+        method: 'put',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: { from: 'now-7m', interval: '5m', ...getUpdateRulesSchemaMock(), type: 'query' },
+      });
+      const result = server.validate(request);
+
+      expect(result.ok).toHaveBeenCalled();
+    });
+
+    test('disallows invalid "from" param on rule', async () => {
+      const request = requestMock.create({
+        method: 'put',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          from: 'now-3755555555555555.67s',
+          interval: '5m',
+          ...getUpdateRulesSchemaMock(),
+          type: 'query',
+        },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
     });
   });
 });

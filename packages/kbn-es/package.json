@@ -5,18 +5,18 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
-    "@elastic/elasticsearch": "^7.4.0",
+    "@elastic/elasticsearch": "7.9.0-rc.1",
     "@kbn/dev-utils": "1.0.0",
     "abort-controller": "^2.0.3",
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.0",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
     "execa": "^4.0.2",
     "getopts": "^2.2.4",
     "glob": "^7.1.2",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "simple-git": "^1.91.0",
-    "tar-fs": "^1.16.3",
+    "tar-fs": "^2.1.0",
     "tree-kill": "^1.2.2",
     "yauzl": "^2.10.0"
   }

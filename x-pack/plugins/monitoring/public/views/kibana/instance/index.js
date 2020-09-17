@@ -26,7 +26,8 @@ import {
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_KIBANA } from '../../../../common/constants';
+import { CODE_PATH_KIBANA, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
+import { AlertsCallout } from '../../../alerts/callout';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -70,6 +71,12 @@ uiRoutes.when('/kibana/instances/:uuid', {
         reactNodeId: 'monitoringKibanaInstanceApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH],
+          },
+        },
       });
 
       $scope.$watch(
@@ -88,6 +95,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
                   <DetailStatus stats={data.kibanaSummary} />
                 </EuiPanel>
                 <EuiSpacer size="m" />
+                <AlertsCallout alerts={this.alerts} />
                 <EuiPageContent>
                   <EuiFlexGrid columns={2} gutterSize="s">
                     <EuiFlexItem grow={true}>

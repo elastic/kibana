@@ -24,6 +24,7 @@ export const removeServerGeneratedProperties = (
   rule: Partial<RulesSchema>
 ): Partial<RulesSchema> => {
   const {
+    /* eslint-disable @typescript-eslint/naming-convention */
     created_at,
     updated_at,
     id,
@@ -33,6 +34,7 @@ export const removeServerGeneratedProperties = (
     last_success_message,
     status,
     status_date,
+    /* eslint-enable @typescript-eslint/naming-convention */
     ...removedProperties
   } = rule;
   return removedProperties;
@@ -46,6 +48,7 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
   rule: Partial<RulesSchema>
 ): Partial<RulesSchema> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
   return additionalRuledIdRemoved;
 };
@@ -153,6 +156,7 @@ export const getSignalStatusEmptyResponse = () => ({
  */
 export const getSimpleRuleWithoutRuleId = (): CreateRulesSchema => {
   const simpleRule = getSimpleRule();
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutId } = simpleRule;
   return ruleWithoutId;
 };
@@ -215,6 +219,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => 
  */
 export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
 };
@@ -235,12 +240,38 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
 
 /**
  * Remove all alerts from the .kibana index
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllAlerts = async (es: Client): Promise<void> => {
+export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void> => {
+  if (retryCount > 0) {
+    try {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:alert',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteAllAlerts, retries left are: ${retryCount - 1}`, err);
+      await deleteAllAlerts(es, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteAllAlerts, no retries are left');
+  }
+};
+
+/**
+ * Remove all timelines from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const deleteAllTimelines = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    q: 'type:alert',
+    q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -249,26 +280,57 @@ export const deleteAllAlerts = async (es: Client): Promise<void> => {
 
 /**
  * Remove all rules statuses from the .kibana index
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:siem-detection-engine-rule-status',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-  });
+export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promise<void> => {
+  if (retryCount > 0) {
+    try {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:siem-detection-engine-rule-status',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Failure trying to deleteAllRulesStatuses, retries left are: ${retryCount - 1}`,
+        err
+      );
+      await deleteAllRulesStatuses(es, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteAllRulesStatuses, no retries are left');
+  }
 };
 
 /**
  * Creates the signals index for use inside of beforeEach blocks of tests
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  retryCount = 20
 ): Promise<void> => {
-  await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
+  if (retryCount > 0) {
+    try {
+      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Failure trying to create the signals index, retries left are: ${retryCount - 1}`,
+        err
+      );
+      await createSignalsIndex(supertest, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not createSignalsIndex, no retries are left');
+  }
 };
 
 /**
@@ -276,9 +338,21 @@ export const createSignalsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  retryCount = 20
 ): Promise<void> => {
-  await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
+  if (retryCount > 0) {
+    try {
+      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteSignalsIndex, retries left are: ${retryCount - 1}`, err);
+      await deleteSignalsIndex(supertest, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteSignalsIndex, no retries are left');
+  }
 };
 
 /**
@@ -481,6 +555,49 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   version: 1,
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
+});
+
+export const getWebHookAction = () => ({
+  actionTypeId: '.webhook',
+  config: {
+    method: 'post',
+    url: 'http://localhost',
+  },
+  secrets: {
+    user: 'example',
+    password: 'example',
+  },
+  name: 'Some connector',
+});
+
+export const getRuleWithWebHookAction = (id: string): CreateRulesSchema => ({
+  ...getSimpleRule(),
+  throttle: 'rule',
+  actions: [
+    {
+      group: 'default',
+      id,
+      params: {
+        body: '{}',
+      },
+      action_type_id: '.webhook',
+    },
+  ],
+});
+
+export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
+  ...getSimpleRuleOutput(),
+  throttle: 'rule',
+  actions: [
+    {
+      action_type_id: '.webhook',
+      group: 'default',
+      id: actionId,
+      params: {
+        body: '{}',
+      },
+    },
+  ],
 });
 
 // Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor

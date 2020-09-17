@@ -18,7 +18,18 @@
  */
 
 import * as ts from 'typescript';
-import * as _ from 'lodash';
+import {
+  pick,
+  pickBy,
+  isObject,
+  forEach,
+  isArray,
+  reduce,
+  isEmpty,
+  merge,
+  transform,
+  isEqual,
+} from 'lodash';
 import * as path from 'path';
 import glob from 'glob';
 import { readFile, writeFile } from 'fs';
@@ -98,6 +109,14 @@ export function getVariableValue(node: ts.Node): string | Record<string, any> {
     return serializeObject(node);
   }
 
+  if (ts.isIdentifier(node)) {
+    const declaration = getIdentifierDeclaration(node);
+    if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
+      return getVariableValue(declaration.initializer);
+    }
+    // TODO: If this is another imported value from another file, we'll need to go fetch it like in getPropertyValue
+  }
+
   throw Error(`Unsuppored Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`);
 }
 
@@ -112,10 +131,11 @@ export function serializeObject(node: ts.Node) {
     if (typeof propertyName === 'undefined') {
       throw new Error(`Unable to get property name ${property.getText()}`);
     }
+    const cleanPropertyName = propertyName.replace(/["']/g, '');
     if (ts.isPropertyAssignment(property)) {
-      value[propertyName] = getVariableValue(property.initializer);
+      value[cleanPropertyName] = getVariableValue(property.initializer);
     } else {
-      value[propertyName] = getVariableValue(property);
+      value[cleanPropertyName] = getVariableValue(property);
     }
   }
 
@@ -177,18 +197,18 @@ export function getPropertyValue(
   }
 }
 
-export function pickDeep(collection: any, identity: any, thisArg?: any) {
-  const picked: any = _.pick(collection, identity, thisArg);
-  const collections = _.pick(collection, _.isObject, thisArg);
+export function pickDeep(collection: any, identity: any) {
+  const picked: any = pick(collection, identity);
+  const collections = pickBy(collection, isObject);
 
-  _.each(collections, function (item, key) {
+  forEach(collections, function (item, key) {
     let object;
-    if (_.isArray(item)) {
-      object = _.reduce(
+    if (isArray(item)) {
+      object = reduce(
         item,
         function (result, value) {
-          const pickedDeep = pickDeep(value, identity, thisArg);
-          if (!_.isEmpty(pickedDeep)) {
+          const pickedDeep = pickDeep(value, identity);
+          if (!isEmpty(pickedDeep)) {
             result.push(pickedDeep);
           }
           return result;
@@ -196,10 +216,10 @@ export function pickDeep(collection: any, identity: any, thisArg?: any) {
         [] as any[]
       );
     } else {
-      object = pickDeep(item, identity, thisArg);
+      object = pickDeep(item, identity);
     }
 
-    if (!_.isEmpty(object)) {
+    if (!isEmpty(object)) {
       picked[key || ''] = object;
     }
   });
@@ -208,12 +228,12 @@ export function pickDeep(collection: any, identity: any, thisArg?: any) {
 }
 
 export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
-  if (_.isObject(obj)) {
-    return _.reduce(
+  if (isObject(obj)) {
+    return reduce(
       obj,
       (cum, next, key) => {
         const keys = [...keyPath, key];
-        return _.merge(cum, flattenKeys(next, keys));
+        return merge(cum, flattenKeys(next, keys));
       },
       {}
     );
@@ -221,14 +241,38 @@ export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
   return { [keyPath.join('.')]: obj };
 };
 
+type ObjectDict = Record<string, any>;
 export function difference(actual: any, expected: any) {
-  function changes(obj: any, base: any) {
-    return _.transform(obj, function (result, value, key) {
-      if (key && !_.isEqual(value, base[key])) {
-        result[key] =
-          _.isObject(value) && _.isObject(base[key]) ? changes(value, base[key]) : value;
-      }
-    });
+  function changes(obj: ObjectDict, base: ObjectDict) {
+    return transform(
+      obj,
+      function (result, value, key) {
+        if (key && /@@INDEX@@/.test(`${key}`)) {
+          // The type definition is an Index Signature, fuzzy searching for similar keys
+          const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.+)?'));
+          const keysInBase = Object.keys(base)
+            .map((k) => {
+              const match = k.match(regexp);
+              return match && match[0];
+            })
+            .filter((s): s is string => !!s);
+
+          if (keysInBase.length === 0) {
+            // Mark this key as wrong because we couldn't find any matching keys
+            result[key] = value;
+          }
+
+          keysInBase.forEach((k) => {
+            if (!isEqual(value, base[k])) {
+              result[k] = isObject(value) && isObject(base[k]) ? changes(value, base[k]) : value;
+            }
+          });
+        } else if (key && !isEqual(value, base[key])) {
+          result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
+        }
+      },
+      {} as ObjectDict
+    );
   }
   return changes(actual, expected);
 }

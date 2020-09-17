@@ -10,6 +10,7 @@ Some APM app features are provided via a REST API:
 
 * <<agent-config-api>>
 * <<apm-annotation-api>>
+* <<kibana-api,Kibana API>>
 
 [float]
 [[apm-api-example]]
@@ -39,8 +40,8 @@ users interacting with APM APIs must have <<apm-app-api-user,sufficient privileg
   By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
 
 * The API endpoint uses the `GET` or `HEAD` operations
-* The path is whitelisted using the <<settings, `server.xsrf.whitelist`>> setting
-* XSRF protections are disabled using the `server.xsrf.disableProtection` setting
+* The path is whitelisted using the <<settings-xsrf-whitelist, `server.xsrf.whitelist`>> setting
+* XSRF protections are disabled using the <<settings-xsrf-disableProtection, `server.xsrf.disableProtection`>> setting
 
 `Content-Type: application/json`::
   Applicable only when you send a payload in the API request.
@@ -397,7 +398,7 @@ include::api.asciidoc[tag=using-the-APIs]
 [%collapsible%open]
 ======
 `version` :::
-  (required, string) Name of service.
+  (required, string) Version of service.
 
 `environment` :::
   (optional, string) Environment of service.
@@ -468,3 +469,87 @@ curl -X POST \
   }
 }
 --------------------------------------------------
+
+////
+*******************************************************
+////
+
+[[kibana-api]]
+=== Kibana API
+
+In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
+which you can use to automate certain aspects of configuring and deploying Kibana.
+An example is below.
+
+[[api-create-apm-index-pattern]]
+==== Customize the APM index pattern
+
+As an alternative to updating <<apm-settings-in-kibana,`apm_oss.indexPattern`>> in your `kibana.yml` configuration file,
+you can use Kibana's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
+
+The following example sets the default APM app index pattern to `some-other-pattern-*`:
+
+[source,sh]
+----
+curl -X PUT "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic ${YOUR_AUTH_TOKEN}' \
+-d' {
+      "attributes": {
+        "title": "some-other-pattern-*", <2>
+      }
+    }'
+----
+<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
+This value should not be changed
+<2> Your custom index pattern matcher.
+
+The API returns the following:
+
+[source,json]
+----
+{
+   "id":"apm_static_index_pattern_id",
+   "type":"index-pattern",
+   "updated_at":"2020-07-06T22:55:59.555Z",
+   "version":"WzYsMV0=",
+   "attributes":{
+      "title":"some-other-pattern-*"
+   }
+}
+----
+
+To view the new APM app index pattern, use the <<saved-objects-api-get,GET object API>>:
+
+[source,sh]
+----
+curl -X GET "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic ${YOUR_AUTH_TOKEN}'
+----
+<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
+
+The API returns the following:
+
+[source,json]
+----
+{
+  "id":"apm_static_index_pattern_id",
+  "type":"index-pattern",
+  "updated_at":"2020-07-06T22:55:59.555Z",
+  "version":"WzYsMV0=",
+  "attributes":{...}
+    "fieldFormatMap":"{...}
+    "fields":"[{...},{...},...]
+    "sourceFilters":"[{\"value\":\"sourcemap.sourcemap\"}]",
+    "timeFieldName":"@timestamp",
+    "title":"some-other-pattern-*"
+   },
+   ...
+}
+----
+
+// More examples will go here
+
+More information on Kibana's API is available in <<api,REST API>>.

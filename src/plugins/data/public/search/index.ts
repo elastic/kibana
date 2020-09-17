@@ -17,35 +17,24 @@
  * under the License.
  */
 
-export * from './aggs';
 export * from './expressions';
-export * from './tabify';
-
-export { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
 
 export {
   ISearch,
-  ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
   ISearchGeneric,
-} from './i_search';
+  ISearchSetup,
+  ISearchStart,
+  ISearchStartSearchSource,
+  SearchEnhancements,
+} from './types';
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 
-export { ISyncSearchRequest, SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
-export { esSearchStrategyProvider, getEsPreference } from './es_search';
+export { getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
-export {
-  SearchError,
-  FetchOptions,
-  SearchRequest,
-  SearchResponse,
-  getSearchErrorType,
-  getSearchParamsFromRequest,
-} from './fetch';
+export { SearchError, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 export {
   ISearchSource,
@@ -59,5 +48,5 @@ export {
   parseSearchSourceJSON,
 } from './search_source';
 
-export { SearchInterceptor } from './search_interceptor';
+export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
 export { RequestTimeoutError } from './request_timeout_error';

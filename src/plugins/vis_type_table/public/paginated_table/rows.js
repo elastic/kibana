@@ -19,6 +19,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
+import angular from 'angular';
 import tableCellFilterHtml from './table_cell_filter.html';
 
 export function KbnRows($compile) {
@@ -65,7 +66,9 @@ export function KbnRows($compile) {
 
         if (column.filterable && contentsIsDefined) {
           $cell = createFilterableCell(contents);
-          $cellContent = $cell.find('[data-cell-content]');
+          // in jest tests 'angular' is using jqLite. In jqLite the method find lookups only by tags.
+          // Because of this, we should change a way how we get cell content so that tests will pass.
+          $cellContent = angular.element($cell[0].querySelector('[data-cell-content]'));
         } else {
           $cell = $cellContent = createCell();
         }

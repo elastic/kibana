@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-search: ISearch<T>;
+search: (context: RequestHandlerContext, request: SearchStrategyRequest, options?: ISearchOptions) => Promise<SearchStrategyResponse>;
 ```

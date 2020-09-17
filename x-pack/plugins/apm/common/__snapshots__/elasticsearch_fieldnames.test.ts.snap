@@ -8,6 +8,14 @@ exports[`Error CLIENT_GEO 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Error CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Error CLOUD_REGION 1`] = `"europe-west1"`;
+
+exports[`Error CLS_FIELD 1`] = `undefined`;
+
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
@@ -28,11 +36,25 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Error EVENT_OUTCOME 1`] = `undefined`;
+
+exports[`Error FCP_FIELD 1`] = `undefined`;
+
+exports[`Error FID_FIELD 1`] = `undefined`;
+
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
+exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
 exports[`Error LABEL_NAME 1`] = `undefined`;
+
+exports[`Error LCP_FIELD 1`] = `undefined`;
+
+exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
+
+exports[`Error METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 
@@ -59,6 +81,8 @@ exports[`Error METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
@@ -106,11 +130,17 @@ exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
+exports[`Error TBT_FIELD 1`] = `undefined`;
+
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
 exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
+exports[`Error TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
+
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
+
+exports[`Error TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
 
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
@@ -120,7 +150,11 @@ exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
 
+exports[`Error TRANSACTION_ROOT 1`] = `undefined`;
+
 exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
+
+exports[`Error TRANSACTION_TIME_TO_FIRST_BYTE 1`] = `undefined`;
 
 exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
@@ -146,6 +180,14 @@ exports[`Span CLIENT_GEO 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Span CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Span CLOUD_REGION 1`] = `"europe-west1"`;
+
+exports[`Span CLS_FIELD 1`] = `undefined`;
+
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
@@ -166,11 +208,25 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Span EVENT_OUTCOME 1`] = `undefined`;
+
+exports[`Span FCP_FIELD 1`] = `undefined`;
+
+exports[`Span FID_FIELD 1`] = `undefined`;
+
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
+exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
 exports[`Span LABEL_NAME 1`] = `undefined`;
+
+exports[`Span LCP_FIELD 1`] = `undefined`;
+
+exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
+
+exports[`Span METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 
@@ -197,6 +253,8 @@ exports[`Span METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
@@ -244,11 +302,17 @@ exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
+exports[`Span TBT_FIELD 1`] = `undefined`;
+
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
 exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
+exports[`Span TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
+
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
+
+exports[`Span TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
 
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
@@ -258,7 +322,11 @@ exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Span TRANSACTION_RESULT 1`] = `undefined`;
 
+exports[`Span TRANSACTION_ROOT 1`] = `undefined`;
+
 exports[`Span TRANSACTION_SAMPLED 1`] = `undefined`;
+
+exports[`Span TRANSACTION_TIME_TO_FIRST_BYTE 1`] = `undefined`;
 
 exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 
@@ -284,6 +352,14 @@ exports[`Transaction CLIENT_GEO 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Transaction CLOUD_REGION 1`] = `"europe-west1"`;
+
+exports[`Transaction CLS_FIELD 1`] = `undefined`;
+
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
@@ -304,11 +380,25 @@ exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Transaction EVENT_OUTCOME 1`] = `undefined`;
+
+exports[`Transaction FCP_FIELD 1`] = `undefined`;
+
+exports[`Transaction FID_FIELD 1`] = `undefined`;
+
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
+exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
+
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
+
+exports[`Transaction LCP_FIELD 1`] = `undefined`;
+
+exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
+
+exports[`Transaction METRIC_CGROUP_MEMORY_USAGE_BYTES 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_GC_COUNT 1`] = `undefined`;
 
@@ -335,6 +425,8 @@ exports[`Transaction METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
@@ -382,11 +474,17 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
+exports[`Transaction TBT_FIELD 1`] = `undefined`;
+
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
 exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
+exports[`Transaction TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
+
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
+
+exports[`Transaction TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
@@ -396,11 +494,15 @@ exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_RESULT 1`] = `"transaction result"`;
 
+exports[`Transaction TRANSACTION_ROOT 1`] = `undefined`;
+
 exports[`Transaction TRANSACTION_SAMPLED 1`] = `true`;
+
+exports[`Transaction TRANSACTION_TIME_TO_FIRST_BYTE 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
-exports[`Transaction TRANSACTION_URL 1`] = `undefined`;
+exports[`Transaction TRANSACTION_URL 1`] = `"http://www.elastic.co"`;
 
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
 

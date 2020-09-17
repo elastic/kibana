@@ -7,31 +7,58 @@ import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
+  SavedObjectMigrationContext,
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import {
+  APP_ID as SIEM_APP_ID,
+  SERVER_APP_ID as SIEM_SERVER_APP_ID,
+} from '../../../security_solution/common/constants';
+
+export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
+  const migrationWhenRBACWasIntroduced = markAsLegacyAndChangeConsumer(encryptedSavedObjects);
+
   return {
-    '7.9.0': changeAlertingConsumer(encryptedSavedObjects),
+    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
   };
 }
 
-/**
- * In v7.9.0 we changed the Alerting plugin so it uses the `consumer` value of `alerts`
- * prior to that we were using `alerting` and we need to keep these in sync
- */
-function changeAlertingConsumer(
+function executeMigrationWithErrorHandling(
+  migrationFunc: SavedObjectMigrationFn<RawAlert, RawAlert>,
+  version: string
+) {
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>, context: SavedObjectMigrationContext) => {
+    try {
+      return migrationFunc(doc, context);
+    } catch (ex) {
+      context.log.error(
+        `encryptedSavedObject ${version} migration failed for alert ${doc.id} with error: ${ex.message}`,
+        { alertDocument: doc }
+      );
+    }
+    return doc;
+  };
+}
+
+const consumersToChange: Map<string, string> = new Map(
+  Object.entries({
+    alerting: 'alerts',
+    metrics: 'infrastructure',
+    [SIEM_APP_ID]: SIEM_SERVER_APP_ID,
+  })
+);
+function markAsLegacyAndChangeConsumer(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
-  const consumerMigration = new Map<string, string>();
-  consumerMigration.set('alerting', 'alerts');
-
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      return consumerMigration.has(doc.attributes.consumer);
+      // migrate all documents in 7.10 in order to add the "meta" RBAC field
+      return true;
     },
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
       const {
@@ -41,7 +68,11 @@ function changeAlertingConsumer(
         ...doc,
         attributes: {
           ...doc.attributes,
-          consumer: consumerMigration.get(consumer) ?? consumer,
+          consumer: consumersToChange.get(consumer) ?? consumer,
+          // mark any alert predating 7.10 as a legacy alert
+          meta: {
+            versionApiKeyLastmodified: LEGACY_LAST_MODIFIED_VERSION,
+          },
         },
       };
     }

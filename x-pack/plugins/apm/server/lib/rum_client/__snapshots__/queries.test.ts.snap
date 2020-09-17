@@ -2,23 +2,38 @@
 
 exports[`rum client dashboard queries fetches client metrics 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "backEnd": Object {
-        "avg": Object {
+        "percentiles": Object {
           "field": "transaction.marks.agent.timeToFirstByte",
-          "missing": 0,
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
         },
       },
       "domInteractive": Object {
-        "avg": Object {
+        "percentiles": Object {
           "field": "transaction.marks.agent.domInteractive",
-          "missing": 0,
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
+          "percents": Array [
+            50,
+          ],
         },
       },
       "pageViews": Object {
         "value_count": Object {
-          "field": "transaction.type",
+          "field": "transaction.duration.us",
         },
       },
     },
@@ -32,11 +47,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
             },
           },
           Object {
@@ -59,17 +69,82 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
+}
+`;
+
+exports[`rum client dashboard queries fetches long task metrics 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "span",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "transIds": Object {
+        "aggs": Object {
+          "longestLongTask": Object {
+            "max": Object {
+              "field": "span.duration.us",
+            },
+          },
+          "sumLongTask": Object {
+            "sum": Object {
+              "field": "span.duration.us",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "transaction.id",
+          "size": 1000,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "span.type": "longtask",
+            },
+          },
+          Object {
+            "term": Object {
+              "my.custom.ui.filter": "foo-bar",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
 }
 `;
 
 exports[`rum client dashboard queries fetches page load distribution 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "durPercentiles": Object {
         "percentiles": Object {
           "field": "transaction.duration.us",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
           "percents": Array [
             50,
             75,
@@ -100,11 +175,6 @@ Object {
           },
           Object {
             "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
               "transaction.type": "page-load",
             },
           },
@@ -123,16 +193,20 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`rum client dashboard queries fetches page view trends 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "pageViews": Object {
-        "aggs": Object {},
+        "aggs": undefined,
         "auto_date_histogram": Object {
           "buckets": 50,
           "field": "@timestamp",
@@ -153,7 +227,173 @@ Object {
           },
           Object {
             "term": Object {
-              "processor.event": "transaction",
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+          Object {
+            "term": Object {
+              "my.custom.ui.filter": "foo-bar",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
+exports[`rum client dashboard queries fetches rum core vitals 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "cls": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.cls",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "clsRanks": Object {
+        "percentile_ranks": Object {
+          "field": "transaction.experience.cls",
+          "keyed": false,
+          "values": Array [
+            0.1,
+            0.25,
+          ],
+        },
+      },
+      "fcp": Object {
+        "percentiles": Object {
+          "field": "transaction.marks.agent.firstContentfulPaint",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "fid": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.fid",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "fidRanks": Object {
+        "percentile_ranks": Object {
+          "field": "transaction.experience.fid",
+          "keyed": false,
+          "values": Array [
+            100,
+            300,
+          ],
+        },
+      },
+      "lcp": Object {
+        "percentiles": Object {
+          "field": "transaction.marks.agent.largestContentfulPaint",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+      "lcpRanks": Object {
+        "percentile_ranks": Object {
+          "field": "transaction.marks.agent.largestContentfulPaint",
+          "keyed": false,
+          "values": Array [
+            2500,
+            4000,
+          ],
+        },
+      },
+      "tbt": Object {
+        "percentiles": Object {
+          "field": "transaction.experience.tbt",
+          "percents": Array [
+            50,
+          ],
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+          Object {
+            "term": Object {
+              "my.custom.ui.filter": "foo-bar",
+            },
+          },
+          Object {
+            "term": Object {
+              "user_agent.name": "Chrome",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
+exports[`rum client dashboard queries fetches rum services 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "services": Object {
+        "terms": Object {
+          "field": "service.name",
+          "size": 1000,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
             },
           },
           Object {
@@ -176,6 +416,5 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;

@@ -7,13 +7,7 @@
 .lnsInnerIndexPatternDataPanel__header {
   display: flex;
   align-items: center;
-  height: $euiSize * 3;
-  margin-top: -$euiSizeS;
-}
-
-.lnsInnerIndexPatternDataPanel__triggerButton {
-  @include euiTitle('xs');
-  line-height: $euiSizeXXL;
+  margin-bottom: $euiSizeS;
 }
 
 /**

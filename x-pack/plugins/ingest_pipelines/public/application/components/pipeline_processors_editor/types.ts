@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OnFormUpdateArg } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { Dispatch } from 'react';
+import { OnFormUpdateArg } from '../../../shared_imports';
 import { SerializeResult } from './serialize';
-import { ProcessorInfo } from './components/processors_tree';
+import { OnActionHandler, ProcessorInfo } from './components';
+import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
 
 /**
  * An array of keys that map to a value in an object
@@ -48,6 +50,58 @@ export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
 export type EditorMode =
   | { id: 'creatingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'movingProcessor'; arg: ProcessorInfo }
-  | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
+  | { id: 'managingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'removingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'idle' };
+
+export interface ContextValueEditor {
+  mode: EditorMode;
+  setMode: Dispatch<EditorMode>;
+}
+
+export interface ContextValueProcessors {
+  state: ProcessorsReducerState;
+  dispatch: ProcessorsDispatch;
+}
+
+export interface ContextValueState {
+  processors: ContextValueProcessors;
+  editor: ContextValueEditor;
+}
+
+export interface ContextValue {
+  onTreeAction: OnActionHandler;
+  state: ContextValueState;
+}
+
+export interface Document {
+  _id: string;
+  [key: string]: any;
+}
+
+export type ProcessorStatus =
+  | 'success'
+  | 'error'
+  | 'error_ignored'
+  | 'dropped'
+  | 'skipped'
+  | 'inactive';
+
+export interface ProcessorResult {
+  processor_type: string;
+  status: ProcessorStatus;
+  doc?: Document;
+  tag: string;
+  ignored_error?: any;
+  error?: any;
+  processorInput?: Document;
+  [key: string]: any;
+}
+
+export interface ProcessorResults {
+  processor_results: ProcessorResult[];
+}
+
+export interface VerboseTestOutput {
+  docs: ProcessorResults[];
+}

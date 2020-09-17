@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import mockChartsData from './monitor_charts_mock.json';
 import { getMonitorDurationChart } from '../get_monitor_duration';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';

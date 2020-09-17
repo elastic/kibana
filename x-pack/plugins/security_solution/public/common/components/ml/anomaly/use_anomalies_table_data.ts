@@ -4,23 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import { useSiemJobs } from '../../ml_popover/hooks/use_siem_jobs';
-import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
-import { useStateToaster, errorToToaster } from '../../toasters';
 
 import * as i18n from './translations';
 import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useInstalledSecurityJobs } from '../hooks/use_installed_security_jobs';
 
 interface Args {
   influencers?: InfluencerInput[];
-  endDate: number;
-  startDate: number;
+  endDate: string;
+  startDate: string;
   threshold?: number;
   skip?: boolean;
   criteriaFields?: CriteriaFields[];
@@ -58,15 +56,15 @@ export const useAnomaliesTableData = ({
   skip = false,
 }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
-  const [, siemJobs] = useSiemJobs(true);
+  const { isMlUser, jobs } = useInstalledSecurityJobs();
   const [loading, setLoading] = useState(true);
-  const capabilities = useMlCapabilities();
-  const userPermissions = hasMlUserPermissions(capabilities);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError } = useAppToasts();
   const timeZone = useTimeZone();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
-  const siemJobIds = siemJobs.filter((job) => job.isInstalled).map((job) => job.id);
+  const jobIds = jobs.map((job) => job.id);
+  const startDateMs = useMemo(() => new Date(startDate).getTime(), [startDate]);
+  const endDateMs = useMemo(() => new Date(endDate).getTime(), [endDate]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -79,11 +77,11 @@ export const useAnomaliesTableData = ({
       earliestMs: number,
       latestMs: number
     ) {
-      if (userPermissions && !skip && siemJobIds.length > 0) {
+      if (isMlUser && !skip && jobIds.length > 0) {
         try {
           const data = await anomaliesTableData(
             {
-              jobIds: siemJobIds,
+              jobIds,
               criteriaFields: criteriaFieldsInput,
               aggregationInterval: 'auto',
               threshold: getThreshold(anomalyScore, threshold),
@@ -102,13 +100,13 @@ export const useAnomaliesTableData = ({
           }
         } catch (error) {
           if (isSubscribed) {
-            errorToToaster({ title: i18n.SIEM_TABLE_FETCH_FAILURE, error, dispatchToaster });
+            addError(error, { title: i18n.SIEM_TABLE_FETCH_FAILURE });
             setLoading(false);
           }
         }
-      } else if (!userPermissions && isSubscribed) {
+      } else if (!isMlUser && isSubscribed) {
         setLoading(false);
-      } else if (siemJobIds.length === 0 && isSubscribed) {
+      } else if (jobIds.length === 0 && isSubscribed) {
         setLoading(false);
       } else if (isSubscribed) {
         setTableData(null);
@@ -116,7 +114,7 @@ export const useAnomaliesTableData = ({
       }
     }
 
-    fetchAnomaliesTableData(influencers, criteriaFields, startDate, endDate);
+    fetchAnomaliesTableData(influencers, criteriaFields, startDateMs, endDateMs);
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
@@ -127,12 +125,12 @@ export const useAnomaliesTableData = ({
     influencersOrCriteriaToString(influencers),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     influencersOrCriteriaToString(criteriaFields),
-    startDate,
-    endDate,
+    startDateMs,
+    endDateMs,
     skip,
-    userPermissions,
+    isMlUser,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    siemJobIds.sort().join(),
+    jobIds.sort().join(),
   ]);
 
   return [loading, tableData];

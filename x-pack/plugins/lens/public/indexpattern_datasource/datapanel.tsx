@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import { FieldItem } from './field_item';
@@ -59,7 +59,7 @@ const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.Funct
 >;
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
-  return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
+  return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
 }
 
 const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);
@@ -73,6 +73,27 @@ const fieldTypeNames: Record<DataType, string> = {
   date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'date' }),
   ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP' }),
 };
+
+// Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
+// returning a query dsl object not matching anything
+function buildSafeEsQuery(
+  indexPattern: IIndexPattern,
+  query: Query,
+  filters: Filter[],
+  queryConfig: EsQueryConfig
+) {
+  try {
+    return esQuery.buildEsQuery(indexPattern, query, filters, queryConfig);
+  } catch (e) {
+    return {
+      bool: {
+        must_not: {
+          match_all: {},
+        },
+      },
+    };
+  }
+}
 
 export function IndexPatternDataPanel({
   setState,
@@ -104,9 +125,11 @@ export function IndexPatternDataPanel({
       id,
       title: indexPatterns[id].title,
       timeFieldName: indexPatterns[id].timeFieldName,
+      fields: indexPatterns[id].fields,
+      hasRestrictions: indexPatterns[id].hasRestrictions,
     }));
 
-  const dslQuery = esQuery.buildEsQuery(
+  const dslQuery = buildSafeEsQuery(
     indexPatterns[currentIndexPatternId] as IIndexPattern,
     query,
     filters,
@@ -176,6 +199,7 @@ export function IndexPatternDataPanel({
           charts={charts}
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
+          existenceFetchFailed={state.existenceFetchFailed}
         />
       )}
     </>
@@ -210,6 +234,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatternRefs,
   indexPatterns,
+  existenceFetchFailed,
   query,
   dateRange,
   filters,
@@ -228,6 +253,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   charts: ChartsPluginSetup;
+  existenceFetchFailed?: boolean;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -298,7 +324,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       fieldGroup.filter((field) => {
         if (
           localState.nameFilter.length &&
-          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
+          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
+          !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
         ) {
           return false;
         }
@@ -384,8 +411,19 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       filters,
       chartsThemeService: charts.theme,
     }),
-    [core, data, currentIndexPattern, dateRange, query, filters, localState.nameFilter]
+    [
+      core,
+      data,
+      currentIndexPattern,
+      dateRange,
+      query,
+      filters,
+      localState.nameFilter,
+      charts.theme,
+    ]
   );
+
+  const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
@@ -403,7 +441,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 label: currentIndexPattern.title,
                 title: currentIndexPattern.title,
                 'data-test-subj': 'indexPattern-switch-link',
-                className: 'lnsInnerIndexPatternDataPanel__triggerButton',
+                fontWeight: 'bold',
               }}
               indexPatternId={currentIndexPatternId}
               indexPatternRefs={indexPatternRefs}
@@ -532,10 +570,17 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               <FieldsAccordion
                 initialIsOpen={localState.isAvailableAccordionOpen}
                 id="lnsIndexPatternAvailableFields"
-                label={i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
-                  defaultMessage: 'Available fields',
-                })}
+                label={
+                  fieldInfoUnavailable
+                    ? i18n.translate('xpack.lens.indexPattern.allFieldsLabel', {
+                        defaultMessage: 'All fields',
+                      })
+                    : i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
+                        defaultMessage: 'Available fields',
+                      })
+                }
                 exists={true}
+                hideDetails={fieldInfoUnavailable}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={filteredFieldGroups.availableFields.length}
                 isFiltered={
@@ -555,6 +600,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                   );
                 }}
+                showExistenceFetchError={existenceFetchFailed}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={!!filters.length}
@@ -567,42 +613,44 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               />
               <EuiSpacer size="m" />
-              <FieldsAccordion
-                initialIsOpen={localState.isEmptyAccordionOpen}
-                isFiltered={
-                  filteredFieldGroups.emptyFields.length !== fieldGroups.emptyFields.length
-                }
-                fieldsCount={filteredFieldGroups.emptyFields.length}
-                paginatedFields={paginatedEmptyFields}
-                hasLoaded={!!hasSyncedExistingFields}
-                exists={false}
-                fieldProps={fieldProps}
-                id="lnsIndexPatternEmptyFields"
-                label={i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
-                  defaultMessage: 'Empty fields',
-                })}
-                onToggle={(open) => {
-                  setLocalState((s) => ({
-                    ...s,
-                    isEmptyAccordionOpen: open,
-                  }));
-                  const displayedFieldLength =
-                    (localState.isAvailableAccordionOpen
-                      ? filteredFieldGroups.availableFields.length
-                      : 0) + (open ? filteredFieldGroups.emptyFields.length : 0);
-                  setPageSize(
-                    Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
-                  );
-                }}
-                renderCallout={
-                  <NoFieldsCallout
-                    isAffectedByFieldFilter={
-                      !!(localState.typeFilter.length || localState.nameFilter.length)
-                    }
-                    existFieldsInIndex={!!fieldGroups.emptyFields.length}
-                  />
-                }
-              />
+              {!fieldInfoUnavailable && (
+                <FieldsAccordion
+                  initialIsOpen={localState.isEmptyAccordionOpen}
+                  isFiltered={
+                    filteredFieldGroups.emptyFields.length !== fieldGroups.emptyFields.length
+                  }
+                  fieldsCount={filteredFieldGroups.emptyFields.length}
+                  paginatedFields={paginatedEmptyFields}
+                  hasLoaded={!!hasSyncedExistingFields}
+                  exists={false}
+                  fieldProps={fieldProps}
+                  id="lnsIndexPatternEmptyFields"
+                  label={i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
+                    defaultMessage: 'Empty fields',
+                  })}
+                  onToggle={(open) => {
+                    setLocalState((s) => ({
+                      ...s,
+                      isEmptyAccordionOpen: open,
+                    }));
+                    const displayedFieldLength =
+                      (localState.isAvailableAccordionOpen
+                        ? filteredFieldGroups.availableFields.length
+                        : 0) + (open ? filteredFieldGroups.emptyFields.length : 0);
+                    setPageSize(
+                      Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
+                    );
+                  }}
+                  renderCallout={
+                    <NoFieldsCallout
+                      isAffectedByFieldFilter={
+                        !!(localState.typeFilter.length || localState.nameFilter.length)
+                      }
+                      existFieldsInIndex={!!fieldGroups.emptyFields.length}
+                    />
+                  }
+                />
+              )}
               <EuiSpacer size="m" />
             </div>
           </div>

@@ -17,6 +17,7 @@
 
   // BUG #23514: Make sure Vega doesn't display the controls in two places
   .vega-bindings {
+    // sass-lint:disable no-important
     display: none !important;
   }
 }
@@ -47,7 +48,7 @@
       width: $euiSizeM * 10 - $euiSize;
     }
 
-    input[type="range"] {
+    input[type='range'] {
       width: $euiSizeM * 10;
       display: inline-block;
       vertical-align: middle;
@@ -74,7 +75,7 @@
   top: 0;
   width: 100%;
   margin: auto;
-  opacity: 0.8;
+  opacity: .8;
   z-index: 1;
   list-style: none;
 }
@@ -106,6 +107,7 @@
 
 .vgaVis__tooltip {
   max-width: 100%;
+  position: fixed;
 
   h2 {
     margin-bottom: $euiSizeS;
@@ -115,25 +117,30 @@
     @include euiTextTruncate;
     padding-top: $euiSizeXS;
     padding-bottom: $euiSizeXS;
-  }
 
-  td.key {
-    color: $euiColorMediumShade;
-    max-width: $euiSize * 10;
-    text-align: right;
-    padding-right: $euiSizeXS;
-  }
-  td.value {
-    max-width: $euiSizeL * 10;
-    text-align: left;
-  }
-
-  @media only screen and (max-width: map-get($euiBreakpoints, 'm')){
-    td.key {
-      max-width: $euiSize * 6;
-    }
-    td.value {
+    &.key {
+      color: $euiColorMediumShade;
       max-width: $euiSize * 10;
+      text-align: right;
+      padding-right: $euiSizeXS;
+    }
+
+    &.value {
+      max-width: $euiSizeL * 10;
+      text-align: left;
+    }
+  }
+
+
+  @media only screen and (max-width: map-get($euiBreakpoints, 'm')) {
+    td {
+      &.key {
+        max-width: $euiSize * 6;
+      }
+
+      &.value {
+        max-width: $euiSize * 10;
+      }
     }
   }
 }

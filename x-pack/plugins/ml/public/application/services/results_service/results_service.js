@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import each from 'lodash/each';
+import get from 'lodash/get';
 
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIM_LANE_DEFAULT_PAGE_SIZE,
@@ -28,7 +28,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Pass an empty array or ['*'] to search over all job IDs.
     // Returned response contains a results property, with a key for job
     // which has results for the specified time range.
-    getScoresByBucket(jobIds, earliestMs, latestMs, interval, perPage = 10, fromPage = 1) {
+    getScoresByBucket(jobIds, earliestMs, latestMs, intervalMs, perPage = 10, fromPage = 1) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -51,7 +51,7 @@ export function resultsServiceProvider(mlApiServices) {
 
         if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
           let jobIdFilterStr = '';
-          _.each(jobIds, (jobId, i) => {
+          each(jobIds, (jobId, i) => {
             if (i > 0) {
               jobIdFilterStr += ' OR ';
             }
@@ -66,9 +66,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
-            index: ML_RESULTS_INDEX_PATTERN,
+        mlApiServices.results
+          .anomalySearch({
             size: 0,
             body: {
               query: {
@@ -89,6 +88,11 @@ export function resultsServiceProvider(mlApiServices) {
                 },
               },
               aggs: {
+                jobsCardinality: {
+                  cardinality: {
+                    field: 'job_id',
+                  },
+                },
                 jobId: {
                   terms: {
                     field: 'job_id',
@@ -112,7 +116,7 @@ export function resultsServiceProvider(mlApiServices) {
                     byTime: {
                       date_histogram: {
                         field: 'timestamp',
-                        interval: interval,
+                        fixed_interval: `${intervalMs}ms`,
                         min_doc_count: 1,
                         extended_bounds: {
                           min: earliestMs,
@@ -133,22 +137,23 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            const dataByJobId = _.get(resp, ['aggregations', 'jobId', 'buckets'], []);
-            _.each(dataByJobId, (dataForJob) => {
+            const dataByJobId = get(resp, ['aggregations', 'jobId', 'buckets'], []);
+            each(dataByJobId, (dataForJob) => {
               const jobId = dataForJob.key;
 
               const resultsForTime = {};
 
-              const dataByTime = _.get(dataForJob, ['byTime', 'buckets'], []);
-              _.each(dataByTime, (dataForTime) => {
-                const value = _.get(dataForTime, ['anomalyScore', 'value']);
+              const dataByTime = get(dataForJob, ['byTime', 'buckets'], []);
+              each(dataByTime, (dataForTime) => {
+                const value = get(dataForTime, ['anomalyScore', 'value']);
                 if (value !== undefined) {
                   const time = dataForTime.key;
-                  resultsForTime[time] = _.get(dataForTime, ['anomalyScore', 'value']);
+                  resultsForTime[time] = get(dataForTime, ['anomalyScore', 'value']);
                 }
               });
               obj.results[jobId] = resultsForTime;
             });
+            obj.cardinality = resp.aggregations?.jobsCardinality?.value ?? 0;
 
             resolve(obj);
           })
@@ -200,7 +205,7 @@ export function resultsServiceProvider(mlApiServices) {
 
         if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
           let jobIdFilterStr = '';
-          _.each(jobIds, (jobId, i) => {
+          each(jobIds, (jobId, i) => {
             if (i > 0) {
               jobIdFilterStr += ' OR ';
             }
@@ -238,9 +243,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
-            index: ML_RESULTS_INDEX_PATTERN,
+        mlApiServices.results
+          .anomalySearch({
             size: 0,
             body: {
               query: {
@@ -308,17 +312,17 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            const fieldNameBuckets = _.get(
+            const fieldNameBuckets = get(
               resp,
               ['aggregations', 'influencerFieldNames', 'buckets'],
               []
             );
-            _.each(fieldNameBuckets, (nameBucket) => {
+            each(fieldNameBuckets, (nameBucket) => {
               const fieldName = nameBucket.key;
               const fieldValues = [];
 
-              const fieldValueBuckets = _.get(nameBucket, ['influencerFieldValues', 'buckets'], []);
-              _.each(fieldValueBuckets, (valueBucket) => {
+              const fieldValueBuckets = get(nameBucket, ['influencerFieldValues', 'buckets'], []);
+              each(fieldValueBuckets, (valueBucket) => {
                 const fieldValueResult = {
                   influencerFieldValue: valueBucket.key,
                   maxAnomalyScore: valueBucket.maxAnomalyScore.value,
@@ -363,7 +367,7 @@ export function resultsServiceProvider(mlApiServices) {
 
         if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
           let jobIdFilterStr = '';
-          _.each(jobIds, (jobId, i) => {
+          each(jobIds, (jobId, i) => {
             if (i > 0) {
               jobIdFilterStr += ' OR ';
             }
@@ -378,9 +382,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
-            index: ML_RESULTS_INDEX_PATTERN,
+        mlApiServices.results
+          .anomalySearch({
             size: 0,
             body: {
               query: {
@@ -428,8 +431,8 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            const buckets = _.get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
-            _.each(buckets, (bucket) => {
+            const buckets = get(resp, ['aggregations', 'influencerFieldValues', 'buckets'], []);
+            each(buckets, (bucket) => {
               const result = {
                 influencerFieldValue: bucket.key,
                 maxAnomalyScore: bucket.maxAnomalyScore.value,
@@ -462,9 +465,9 @@ export function resultsServiceProvider(mlApiServices) {
             end: latestMs,
           })
           .then((resp) => {
-            const dataByTime = _.get(resp, ['overall_buckets'], []);
-            _.each(dataByTime, (dataForTime) => {
-              const value = _.get(dataForTime, ['overall_score']);
+            const dataByTime = get(resp, ['overall_buckets'], []);
+            each(dataByTime, (dataForTime) => {
+              const value = get(dataForTime, ['overall_score']);
               if (value !== undefined) {
                 obj.results[dataForTime.timestamp] = value;
               }
@@ -489,7 +492,7 @@ export function resultsServiceProvider(mlApiServices) {
       influencerFieldValues,
       earliestMs,
       latestMs,
-      interval,
+      intervalMs,
       maxResults = ANOMALY_SWIM_LANE_HARD_LIMIT,
       perPage = SWIM_LANE_DEFAULT_PAGE_SIZE,
       fromPage = 1,
@@ -521,7 +524,7 @@ export function resultsServiceProvider(mlApiServices) {
 
         if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
           let jobIdFilterStr = '';
-          _.each(jobIds, (jobId, i) => {
+          each(jobIds, (jobId, i) => {
             if (i > 0) {
               jobIdFilterStr += ' OR ';
             }
@@ -541,7 +544,7 @@ export function resultsServiceProvider(mlApiServices) {
 
         if (influencerFieldValues && influencerFieldValues.length > 0) {
           let influencerFilterStr = '';
-          _.each(influencerFieldValues, (value, i) => {
+          each(influencerFieldValues, (value, i) => {
             if (i > 0) {
               influencerFilterStr += ' OR ';
             }
@@ -560,9 +563,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
-            index: ML_RESULTS_INDEX_PATTERN,
+        mlApiServices.results
+          .anomalySearch({
             size: 0,
             body: {
               query: {
@@ -613,7 +615,7 @@ export function resultsServiceProvider(mlApiServices) {
                     byTime: {
                       date_histogram: {
                         field: 'timestamp',
-                        interval,
+                        fixed_interval: `${intervalMs}ms`,
                         min_doc_count: 1,
                       },
                       aggs: {
@@ -630,17 +632,17 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            const fieldValueBuckets = _.get(
+            const fieldValueBuckets = get(
               resp,
               ['aggregations', 'influencerFieldValues', 'buckets'],
               []
             );
-            _.each(fieldValueBuckets, (valueBucket) => {
+            each(fieldValueBuckets, (valueBucket) => {
               const fieldValue = valueBucket.key;
               const fieldValues = {};
 
-              const timeBuckets = _.get(valueBucket, ['byTime', 'buckets'], []);
-              _.each(timeBuckets, (timeBucket) => {
+              const timeBuckets = get(valueBucket, ['byTime', 'buckets'], []);
+              each(timeBuckets, (timeBucket) => {
                 const time = timeBucket.key;
                 const score = timeBucket.maxAnomalyScore.value;
                 fieldValues[time] = score;
@@ -706,7 +708,7 @@ export function resultsServiceProvider(mlApiServices) {
 
         if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
           let jobIdFilterStr = '';
-          _.each(jobIds, (jobId, i) => {
+          each(jobIds, (jobId, i) => {
             if (i > 0) {
               jobIdFilterStr += ' OR ';
             }
@@ -721,9 +723,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
-            index: ML_RESULTS_INDEX_PATTERN,
+        mlApiServices.results
+          .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
             rest_total_hits_as_int: true,
             body: {
@@ -750,7 +751,7 @@ export function resultsServiceProvider(mlApiServices) {
           })
           .then((resp) => {
             if (resp.hits.total !== 0) {
-              _.each(resp.hits.hits, (hit) => {
+              each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
             }
@@ -803,7 +804,7 @@ export function resultsServiceProvider(mlApiServices) {
 
         if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
           let jobIdFilterStr = '';
-          _.each(jobIds, (jobId, i) => {
+          each(jobIds, (jobId, i) => {
             if (i > 0) {
               jobIdFilterStr += ' OR ';
             }
@@ -854,9 +855,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
-            index: ML_RESULTS_INDEX_PATTERN,
+        mlApiServices.results
+          .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
             rest_total_hits_as_int: true,
             body: {
@@ -882,7 +882,7 @@ export function resultsServiceProvider(mlApiServices) {
           })
           .then((resp) => {
             if (resp.hits.total !== 0) {
-              _.each(resp.hits.hits, (hit) => {
+              each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
             }
@@ -980,9 +980,8 @@ export function resultsServiceProvider(mlApiServices) {
           }
         }
 
-        mlApiServices
-          .esSearch({
-            index: ML_RESULTS_INDEX_PATTERN,
+        mlApiServices.results
+          .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
             rest_total_hits_as_int: true,
             body: {
@@ -1008,7 +1007,7 @@ export function resultsServiceProvider(mlApiServices) {
           })
           .then((resp) => {
             if (resp.hits.total !== 0) {
-              _.each(resp.hits.hits, (hit) => {
+              each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
             }
@@ -1034,7 +1033,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Extra query object can be supplied, or pass null if no additional query.
     // Returned response contains a results property, which is an object
     // of document counts against time (epoch millis).
-    getEventRateData(index, query, timeFieldName, earliestMs, latestMs, interval) {
+    getEventRateData(index, query, timeFieldName, earliestMs, latestMs, intervalMs) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
@@ -1075,7 +1074,7 @@ export function resultsServiceProvider(mlApiServices) {
                 eventRate: {
                   date_histogram: {
                     field: timeFieldName,
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: 0,
                     extended_bounds: {
                       min: earliestMs,
@@ -1087,8 +1086,8 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            const dataByTimeBucket = _.get(resp, ['aggregations', 'eventRate', 'buckets'], []);
-            _.each(dataByTimeBucket, (dataForTime) => {
+            const dataByTimeBucket = get(resp, ['aggregations', 'eventRate', 'buckets'], []);
+            each(dataByTimeBucket, (dataForTime) => {
               const time = dataForTime.key;
               obj.results[time] = dataForTime.doc_count;
             });
@@ -1119,7 +1118,7 @@ export function resultsServiceProvider(mlApiServices) {
       timeFieldName,
       earliestMs,
       latestMs,
-      interval
+      intervalMs
     ) {
       return new Promise((resolve, reject) => {
         if (splitField === undefined) {
@@ -1188,7 +1187,7 @@ export function resultsServiceProvider(mlApiServices) {
                 byTime: {
                   date_histogram: {
                     field: timeFieldName,
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: AGGREGATION_MIN_DOC_COUNT,
                   },
                   aggs: {
@@ -1235,18 +1234,18 @@ export function resultsServiceProvider(mlApiServices) {
             // Because of the sampling, results of metricFunctions which use sum or count
             // can be significantly skewed. Taking into account totalHits we calculate a
             // a factor to normalize results for these metricFunctions.
-            const totalHits = _.get(resp, ['hits', 'total'], 0);
-            const successfulShards = _.get(resp, ['_shards', 'successful'], 0);
+            const totalHits = get(resp, ['hits', 'total'], 0);
+            const successfulShards = get(resp, ['_shards', 'successful'], 0);
 
             let normalizeFactor = 1;
             if (totalHits > successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE) {
               normalizeFactor = totalHits / (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE);
             }
 
-            const dataByTime = _.get(resp, ['aggregations', 'sample', 'byTime', 'buckets'], []);
+            const dataByTime = get(resp, ['aggregations', 'sample', 'byTime', 'buckets'], []);
             const data = dataByTime.reduce((d, dataForTime) => {
               const date = +dataForTime.key;
-              const entities = _.get(dataForTime, ['entities', 'buckets'], []);
+              const entities = get(dataForTime, ['entities', 'buckets'], []);
               entities.forEach((entity) => {
                 let value = metricFunction === 'count' ? entity.doc_count : entity.metric.value;
 
@@ -1278,7 +1277,7 @@ export function resultsServiceProvider(mlApiServices) {
     // criteria, time range, and aggregation interval.
     // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
     // 'fieldValue' properties.
-    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, interval) {
+    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, intervalMs) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -1299,7 +1298,7 @@ export function resultsServiceProvider(mlApiServices) {
           { term: { job_id: jobId } },
         ];
 
-        _.each(criteriaFields, (criteria) => {
+        each(criteriaFields, (criteria) => {
           mustCriteria.push({
             term: {
               [criteria.fieldName]: criteria.fieldValue,
@@ -1307,9 +1306,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         });
 
-        mlApiServices
-          .esSearch({
-            index: ML_RESULTS_INDEX_PATTERN,
+        mlApiServices.results
+          .anomalySearch({
             size: 0,
             body: {
               query: {
@@ -1333,7 +1331,7 @@ export function resultsServiceProvider(mlApiServices) {
                 times: {
                   date_histogram: {
                     field: 'timestamp',
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: 1,
                   },
                   aggs: {
@@ -1348,11 +1346,11 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-            _.each(aggregationsByTime, (dataForTime) => {
+            const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
+            each(aggregationsByTime, (dataForTime) => {
               const time = dataForTime.key;
               obj.results[time] = {
-                score: _.get(dataForTime, ['recordScore', 'value']),
+                score: get(dataForTime, ['recordScore', 'value']),
               };
             });
 

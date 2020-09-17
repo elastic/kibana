@@ -12,10 +12,16 @@ export const timelineDetailsQuery = gql`
     $eventId: String!
     $indexName: String!
     $defaultIndex: [String!]!
+    $docValueFields: [docValueFieldsInput!]!
   ) {
     source(id: $sourceId) {
       id
-      TimelineDetails(eventId: $eventId, indexName: $indexName, defaultIndex: $defaultIndex) {
+      TimelineDetails(
+        eventId: $eventId
+        indexName: $indexName
+        defaultIndex: $defaultIndex
+        docValueFields: $docValueFields
+      ) {
         data {
           field
           values

@@ -9,7 +9,7 @@ Constructs a new instance of the `LegacyClusterClient` class
 <b>Signature:</b>
 
 ```typescript
-constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
+constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
 ```
 
 ## Parameters
@@ -18,5 +18,6 @@ constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders
 |  --- | --- | --- |
 |  config | <code>LegacyElasticsearchClientConfig</code> |  |
 |  log | <code>Logger</code> |  |
+|  getAuditorFactory | <code>() =&gt; AuditorFactory</code> |  |
 |  getAuthHeaders | <code>GetAuthHeaders</code> |  |
 

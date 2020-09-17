@@ -125,8 +125,35 @@ export const schemas: Record<string, FormSchema> = {
         {
           validator: indexPatternField(i18n),
           type: VALIDATION_TYPES.ARRAY_ITEM,
+          isBlocking: false,
         },
       ],
+    },
+    dataStream: {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.datastreamLabel', {
+        defaultMessage: 'Create data stream',
+      }),
+      defaultValue: false,
+      serializer: (value) => {
+        if (value === true) {
+          // For now, ES expects an empty object when defining a data stream
+          // https://github.com/elastic/elasticsearch/pull/59317
+          return {};
+        }
+      },
+      deserializer: (value) => {
+        if (typeof value === 'boolean') {
+          return value;
+        }
+
+        /**
+         * For now, it is enough to have a "data_stream" declared on the index template
+         * to assume that the template creates a data stream. In the future, this condition
+         * might change
+         */
+        return value !== undefined;
+      },
     },
     order: {
       type: FIELD_TYPES.NUMBER,
@@ -186,6 +213,12 @@ export const schemas: Record<string, FormSchema> = {
           return value;
         }
       },
+    },
+    addMeta: {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.addMetadataLabel', {
+        defaultMessage: 'Add metadata',
+      }),
     },
   },
 };

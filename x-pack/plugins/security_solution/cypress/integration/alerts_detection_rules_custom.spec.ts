@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule, totalNumberOfPrebuiltRulesInEsArchiveCustomRule } from '../objects/rule';
+import { newRule, existingRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -16,26 +16,16 @@ import {
   SHOWING_RULES_TEXT,
 } from '../screens/alerts_detection_rules';
 import {
-  ABOUT_FALSE_POSITIVES,
   ABOUT_INVESTIGATION_NOTES,
-  ABOUT_MITRE,
-  ABOUT_RISK,
   ABOUT_RULE_DESCRIPTION,
-  ABOUT_SEVERITY,
-  ABOUT_STEP,
-  ABOUT_TAGS,
-  ABOUT_URLS,
-  DEFINITION_CUSTOM_QUERY,
-  DEFINITION_INDEX_PATTERNS,
-  DEFINITION_TIMELINE,
-  DEFINITION_STEP,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
-  SCHEDULE_LOOPBACK,
-  SCHEDULE_RUNS,
-  SCHEDULE_STEP,
+  getDescriptionForTitle,
+  ABOUT_DETAILS,
+  DEFINITION_DETAILS,
+  SCHEDULE_DETAILS,
 } from '../screens/rule_details';
 
 import {
@@ -53,28 +43,50 @@ import {
   selectNumberOfRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
+  editFirstRule,
 } from '../tasks/alerts_detection_rules';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
+  goToAboutStepTab,
+  goToScheduleStepTab,
+  goToActionsStepTab,
+  fillAboutRule,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { ALERTS_URL } from '../urls/navigation';
+import { DETECTIONS_URL } from '../urls/navigation';
+import {
+  ACTIONS_THROTTLE_INPUT,
+  CUSTOM_QUERY_INPUT,
+  DEFINE_INDEX_INPUT,
+  RULE_NAME_INPUT,
+  RULE_DESCRIPTION_INPUT,
+  TAGS_FIELD,
+  SEVERITY_DROPDOWN,
+  RISK_INPUT,
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  DEFINE_EDIT_BUTTON,
+  DEFINE_CONTINUE_BUTTON,
+  ABOUT_EDIT_BUTTON,
+  ABOUT_CONTINUE_BTN,
+} from '../screens/create_new_rule';
+import { saveEditedRule } from '../tasks/edit_rule';
 
 describe('Detection rules, custom', () => {
   before(() => {
-    esArchiverLoad('custom_rule_with_timeline');
+    esArchiverLoad('timeline');
   });
 
   after(() => {
-    esArchiverUnload('custom_rule_with_timeline');
+    esArchiverUnload('timeline');
   });
 
   it('Creates and activates a new custom rule', () => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -82,6 +94,19 @@ describe('Detection rules, custom', () => {
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
     fillAboutRuleAndContinue(newRule);
+
+    // expect define step to repopulate
+    cy.get(DEFINE_EDIT_BUTTON).click();
+    cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', newRule.customQuery);
+    cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+    cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
+
+    // expect about step to populate
+    cy.get(ABOUT_EDIT_BUTTON).click();
+    cy.get(RULE_NAME_INPUT).invoke('val').should('eq', newRule.name);
+    cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
+    cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
+
     createAndActivateRule();
 
     cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
@@ -89,7 +114,7 @@ describe('Detection rules, custom', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchiveCustomRule + 1;
+    const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
@@ -130,6 +155,7 @@ describe('Detection rules, custom', () => {
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
+      'logs-*',
       'packetbeat-*',
       'winlogbeat-*',
     ];
@@ -137,39 +163,42 @@ describe('Detection rules, custom', () => {
     cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${newRule.name} Beta`);
 
     cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', newRule.description);
-    cy.get(ABOUT_STEP).eq(ABOUT_SEVERITY).invoke('text').should('eql', newRule.severity);
-    cy.get(ABOUT_STEP).eq(ABOUT_RISK).invoke('text').should('eql', newRule.riskScore);
-    cy.get(ABOUT_STEP).eq(ABOUT_URLS).invoke('text').should('eql', expectedUrls);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_FALSE_POSITIVES)
-      .invoke('text')
-      .should('eql', expectedFalsePositives);
-    cy.get(ABOUT_STEP).eq(ABOUT_MITRE).invoke('text').should('eql', expectedMitre);
-    cy.get(ABOUT_STEP).eq(ABOUT_TAGS).invoke('text').should('eql', expectedTags);
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDescriptionForTitle('Severity').invoke('text').should('eql', newRule.severity);
+      getDescriptionForTitle('Risk score').invoke('text').should('eql', newRule.riskScore);
+      getDescriptionForTitle('Reference URLs').invoke('text').should('eql', expectedUrls);
+      getDescriptionForTitle('False positive examples')
+        .invoke('text')
+        .should('eql', expectedFalsePositives);
+      getDescriptionForTitle('MITRE ATT&CK').invoke('text').should('eql', expectedMitre);
+      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
+    });
 
     cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', INVESTIGATION_NOTES_MARKDOWN);
 
-    cy.get(DEFINITION_INDEX_PATTERNS).then((patterns) => {
-      cy.wrap(patterns).each((pattern, index) => {
-        cy.wrap(pattern).invoke('text').should('eql', expectedIndexPatterns[index]);
-      });
+    cy.get(DEFINITION_DETAILS).within(() => {
+      getDescriptionForTitle('Index patterns')
+        .invoke('text')
+        .should('eql', expectedIndexPatterns.join(''));
+      getDescriptionForTitle('Custom query')
+        .invoke('text')
+        .should('eql', `${newRule.customQuery} `);
+      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Query');
+      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
     });
-    cy.get(DEFINITION_STEP)
-      .eq(DEFINITION_CUSTOM_QUERY)
-      .invoke('text')
-      .should('eql', `${newRule.customQuery} `);
-    cy.get(DEFINITION_STEP).eq(DEFINITION_TIMELINE).invoke('text').should('eql', 'None');
 
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
+    cy.get(SCHEDULE_DETAILS).within(() => {
+      getDescriptionForTitle('Runs every').invoke('text').should('eql', '5m');
+      getDescriptionForTitle('Additional look-back time').invoke('text').should('eql', '1m');
+    });
   });
 });
 
 describe('Deletes custom rules', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -227,5 +256,95 @@ describe('Deletes custom rules', () => {
           .invoke('text')
           .should('eql', `Custom rules (${expectedNumberOfRulesAfterDeletion})`);
       });
+  });
+
+  it('Allows a rule to be edited', () => {
+    editFirstRule();
+
+    // expect define step to populate
+    cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', existingRule.customQuery);
+    if (existingRule.index && existingRule.index.length > 0) {
+      cy.get(DEFINE_INDEX_INPUT).invoke('text').should('eq', existingRule.index.join(''));
+    }
+
+    goToAboutStepTab();
+
+    // expect about step to populate
+    cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
+    cy.get(RULE_DESCRIPTION_INPUT).invoke('text').should('eql', existingRule.description);
+    cy.get(TAGS_FIELD).invoke('text').should('eql', existingRule.tags.join(''));
+
+    cy.get(SEVERITY_DROPDOWN).invoke('text').should('eql', existingRule.severity);
+    cy.get(RISK_INPUT).invoke('val').should('eql', existingRule.riskScore);
+
+    goToScheduleStepTab();
+
+    // expect schedule step to populate
+    const intervalParts = existingRule.interval && existingRule.interval.match(/[0-9]+|[a-zA-Z]+/g);
+    if (intervalParts) {
+      const [amount, unit] = intervalParts;
+      cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
+      cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
+    } else {
+      throw new Error('Cannot assert scheduling info on a rule without an interval');
+    }
+
+    goToActionsStepTab();
+
+    cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
+
+    goToAboutStepTab();
+
+    const editedRule = {
+      ...existingRule,
+      severity: 'Medium',
+      description: 'Edited Rule description',
+    };
+
+    fillAboutRule(editedRule);
+    saveEditedRule();
+
+    const expectedTags = editedRule.tags.join('');
+    const expectedIndexPatterns =
+      editedRule.index && editedRule.index.length
+        ? editedRule.index
+        : [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ];
+
+    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${editedRule.name} Beta`);
+
+    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', editedRule.description);
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDescriptionForTitle('Severity').invoke('text').should('eql', editedRule.severity);
+      getDescriptionForTitle('Risk score').invoke('text').should('eql', editedRule.riskScore);
+      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
+    });
+
+    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', editedRule.note);
+
+    cy.get(DEFINITION_DETAILS).within(() => {
+      getDescriptionForTitle('Index patterns')
+        .invoke('text')
+        .should('eql', expectedIndexPatterns.join(''));
+      getDescriptionForTitle('Custom query')
+        .invoke('text')
+        .should('eql', `${editedRule.customQuery} `);
+      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Query');
+      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
+    });
+
+    if (editedRule.interval) {
+      cy.get(SCHEDULE_DETAILS).within(() => {
+        getDescriptionForTitle('Runs every').invoke('text').should('eql', editedRule.interval);
+      });
+    }
   });
 });

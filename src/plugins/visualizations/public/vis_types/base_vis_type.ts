@@ -18,8 +18,9 @@
  */
 
 import _ from 'lodash';
-import { VisualizationControllerConstructor } from '../types';
+import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
+import { Adapters } from '../../../inspector/public';
 
 export interface BaseVisTypeOptions {
   name: string;
@@ -30,7 +31,7 @@ export interface BaseVisTypeOptions {
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
   options?: Record<string, any>;
-  visualization: VisualizationControllerConstructor;
+  visualization: VisualizationControllerConstructor | undefined;
   visConfig?: Record<string, any>;
   editor?: any;
   editorConfig?: Record<string, any>;
@@ -40,6 +41,8 @@ export interface BaseVisTypeOptions {
   hierarchicalData?: boolean | unknown;
   setup?: unknown;
   useCustomNoDataScreen?: boolean;
+  inspectorAdapters?: Adapters | (() => Adapters);
+  toExpressionAst?: VisToExpressionAst;
 }
 
 export class BaseVisType {
@@ -52,7 +55,7 @@ export class BaseVisType {
   stage: 'experimental' | 'beta' | 'production';
   isExperimental: boolean;
   options: Record<string, any>;
-  visualization: VisualizationControllerConstructor;
+  visualization: VisualizationControllerConstructor | undefined;
   visConfig: Record<string, any>;
   editor: any;
   editorConfig: Record<string, any>;
@@ -63,6 +66,8 @@ export class BaseVisType {
   hierarchicalData: boolean | unknown;
   setup?: unknown;
   useCustomNoDataScreen: boolean;
+  inspectorAdapters?: Adapters | (() => Adapters);
+  toExpressionAst?: VisToExpressionAst;
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {
@@ -98,6 +103,8 @@ export class BaseVisType {
     this.requiresSearch = this.requestHandler !== 'none';
     this.hierarchicalData = opts.hierarchicalData || false;
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
+    this.inspectorAdapters = opts.inspectorAdapters;
+    this.toExpressionAst = opts.toExpressionAst;
   }
 
   public get schemas() {

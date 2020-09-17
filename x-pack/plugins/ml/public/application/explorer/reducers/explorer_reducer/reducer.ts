@@ -113,7 +113,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       const { annotationsData, overallState, tableData } = payload;
       nextState = {
         ...state,
-        annotationsData,
+        annotations: annotationsData,
         overallSwimlaneData: overallState,
         tableData,
         viewBySwimlaneData: {

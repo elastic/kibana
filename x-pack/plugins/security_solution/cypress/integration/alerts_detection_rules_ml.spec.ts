@@ -16,24 +16,14 @@ import {
   SEVERITY,
 } from '../screens/alerts_detection_rules';
 import {
-  ABOUT_FALSE_POSITIVES,
-  ABOUT_MITRE,
-  ABOUT_RISK,
   ABOUT_RULE_DESCRIPTION,
-  ABOUT_SEVERITY,
-  ABOUT_STEP,
-  ABOUT_TAGS,
-  ABOUT_URLS,
-  ANOMALY_SCORE,
-  DEFINITION_TIMELINE,
-  DEFINITION_STEP,
   MACHINE_LEARNING_JOB_ID,
   MACHINE_LEARNING_JOB_STATUS,
   RULE_NAME_HEADER,
-  SCHEDULE_LOOPBACK,
-  SCHEDULE_RUNS,
-  SCHEDULE_STEP,
-  RULE_TYPE,
+  getDescriptionForTitle,
+  ABOUT_DETAILS,
+  DEFINITION_DETAILS,
+  SCHEDULE_DETAILS,
 } from '../screens/rule_details';
 
 import {
@@ -58,7 +48,7 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { ALERTS_URL } from '../urls/navigation';
+import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Detection rules, machine learning', () => {
   before(() => {
@@ -70,7 +60,7 @@ describe('Detection rules, machine learning', () => {
   });
 
   it('Creates and activates a new ml rule', () => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -126,36 +116,37 @@ describe('Detection rules, machine learning', () => {
     cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${machineLearningRule.name} Beta`);
 
     cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', machineLearningRule.description);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_SEVERITY)
-      .invoke('text')
-      .should('eql', machineLearningRule.severity);
-    cy.get(ABOUT_STEP).eq(ABOUT_RISK).invoke('text').should('eql', machineLearningRule.riskScore);
-    cy.get(ABOUT_STEP).eq(ABOUT_URLS).invoke('text').should('eql', expectedUrls);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_FALSE_POSITIVES)
-      .invoke('text')
-      .should('eql', expectedFalsePositives);
-    cy.get(ABOUT_STEP).eq(ABOUT_MITRE).invoke('text').should('eql', expectedMitre);
-    cy.get(ABOUT_STEP).eq(ABOUT_TAGS).invoke('text').should('eql', expectedTags);
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDescriptionForTitle('Severity').invoke('text').should('eql', machineLearningRule.severity);
+      getDescriptionForTitle('Risk score')
+        .invoke('text')
+        .should('eql', machineLearningRule.riskScore);
+      getDescriptionForTitle('Reference URLs').invoke('text').should('eql', expectedUrls);
+      getDescriptionForTitle('False positive examples')
+        .invoke('text')
+        .should('eql', expectedFalsePositives);
+      getDescriptionForTitle('MITRE ATT&CK').invoke('text').should('eql', expectedMitre);
+      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
+    });
 
-    cy.get(DEFINITION_STEP).eq(RULE_TYPE).invoke('text').should('eql', 'Machine Learning');
-    cy.get(DEFINITION_STEP)
-      .eq(ANOMALY_SCORE)
-      .invoke('text')
-      .should('eql', machineLearningRule.anomalyScoreThreshold);
-    cy.get(DEFINITION_STEP)
-      .get(MACHINE_LEARNING_JOB_STATUS)
-      .invoke('text')
-      .should('eql', 'Stopped');
-    cy.get(DEFINITION_STEP)
-      .get(MACHINE_LEARNING_JOB_ID)
-      .invoke('text')
-      .should('eql', machineLearningRule.machineLearningJob);
+    cy.get(DEFINITION_DETAILS).within(() => {
+      getDescriptionForTitle('Anomaly score')
+        .invoke('text')
+        .should('eql', machineLearningRule.anomalyScoreThreshold);
+      getDescriptionForTitle('Anomaly score')
+        .invoke('text')
+        .should('eql', machineLearningRule.anomalyScoreThreshold);
+      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Machine Learning');
+      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
+      cy.get(MACHINE_LEARNING_JOB_STATUS).invoke('text').should('eql', 'Stopped');
+      cy.get(MACHINE_LEARNING_JOB_ID)
+        .invoke('text')
+        .should('eql', machineLearningRule.machineLearningJob);
+    });
 
-    cy.get(DEFINITION_STEP).eq(DEFINITION_TIMELINE).invoke('text').should('eql', 'None');
-
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
+    cy.get(SCHEDULE_DETAILS).within(() => {
+      getDescriptionForTitle('Runs every').invoke('text').should('eql', '5m');
+      getDescriptionForTitle('Additional look-back time').invoke('text').should('eql', '1m');
+    });
   });
 });

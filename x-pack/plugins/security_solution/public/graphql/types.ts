@@ -24,9 +24,9 @@ export interface TimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
   interval: string;
   /** The end of the timerange */
-  to: number;
+  to: string;
   /** The beginning of the timerange */
-  from: number;
+  from: string;
 }
 
 export interface PaginationInputPaginated {
@@ -38,6 +38,12 @@ export interface PaginationInputPaginated {
   fakePossibleCount: number;
   /** The querySize parameter is the number of items to be returned */
   querySize: number;
+}
+
+export interface DocValueFieldsInput {
+  field: string;
+
+  format: string;
 }
 
 export interface PaginationInput {
@@ -124,6 +130,8 @@ export interface TimelineInput {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   filters?: Maybe<FilterTimelineInput[]>;
 
   kqlMode?: Maybe<string>;
@@ -185,6 +193,8 @@ export interface DataProviderInput {
   queryMatch?: Maybe<QueryMatchInput>;
 
   and?: Maybe<DataProviderInput[]>;
+
+  type?: Maybe<DataProviderType>;
 }
 
 export interface QueryMatchInput {
@@ -256,9 +266,9 @@ export interface KueryFilterQueryInput {
 }
 
 export interface DateRangePickerInput {
-  start?: Maybe<number>;
+  start?: Maybe<ToAny>;
 
-  end?: Maybe<number>;
+  end?: Maybe<ToAny>;
 }
 
 export interface SortTimelineInput {
@@ -295,6 +305,12 @@ export enum LastEventIndexKey {
 export enum HostsFields {
   hostName = 'hostName',
   lastSeen = 'lastSeen',
+}
+
+export enum HostPolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
 }
 
 export enum UsersFields {
@@ -342,6 +358,27 @@ export enum TlsFields {
   _id = '_id',
 }
 
+export enum DataProviderType {
+  default = 'default',
+  template = 'template',
+}
+
+export enum RowRendererId {
+  auditd = 'auditd',
+  auditd_file = 'auditd_file',
+  netflow = 'netflow',
+  plain = 'plain',
+  suricata = 'suricata',
+  system = 'system',
+  system_dns = 'system_dns',
+  system_endgame_process = 'system_endgame_process',
+  system_file = 'system_file',
+  system_fim = 'system_fim',
+  system_security_event = 'system_security_event',
+  system_socket = 'system_socket',
+  zeek = 'zeek',
+}
+
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
@@ -358,11 +395,6 @@ export enum SortFieldTimeline {
   description = 'description',
   updated = 'updated',
   created = 'created',
-}
-
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
 }
 
 export enum NetworkDirectionEcs {
@@ -390,6 +422,10 @@ export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
 }
+
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
 
 export type ToStringArray = string[];
 
@@ -590,6 +626,10 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 export interface AuthenticationsData {
@@ -980,6 +1020,8 @@ export interface SignalField {
   rule?: Maybe<RuleField>;
 
   original_time?: Maybe<string[]>;
+
+  status?: Maybe<string[]>;
 }
 
 export interface RuleField {
@@ -1044,6 +1086,10 @@ export interface RuleField {
   version?: Maybe<string[]>;
 
   note?: Maybe<string[]>;
+
+  threshold?: Maybe<ToAny>;
+
+  exceptions_list?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -1413,13 +1459,15 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
-  lastSeen?: Maybe<string>;
+  cloud?: Maybe<CloudFields>;
+
+  endpoint?: Maybe<EndpointFields>;
 
   host?: Maybe<HostEcsFields>;
 
-  cloud?: Maybe<CloudFields>;
-
   inspect?: Maybe<Inspect>;
+
+  lastSeen?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -1438,6 +1486,14 @@ export interface CloudInstance {
 
 export interface CloudMachine {
   type?: Maybe<(Maybe<string>)[]>;
+}
+
+export interface EndpointFields {
+  endpointPolicy?: Maybe<string>;
+
+  sensorVersion?: Maybe<string>;
+
+  policyStatus?: Maybe<HostPolicyResponseActionStatus>;
 }
 
 export interface FirstLastSeenHost {
@@ -1952,6 +2008,8 @@ export interface TimelineResult {
 
   eventType?: Maybe<string>;
 
+  excludedRowRendererIds?: Maybe<RowRendererId[]>;
+
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
   filters?: Maybe<FilterTimelineResult[]>;
@@ -2028,6 +2086,8 @@ export interface DataProviderResult {
 
   queryMatch?: Maybe<QueryMatchResult>;
 
+  type?: Maybe<DataProviderType>;
+
   and?: Maybe<DataProviderResult[]>;
 }
 
@@ -2044,9 +2104,9 @@ export interface QueryMatchResult {
 }
 
 export interface DateRangePickerResult {
-  start?: Maybe<number>;
+  start?: Maybe<ToAny>;
 
-  end?: Maybe<number>;
+  end?: Maybe<ToAny>;
 }
 
 export interface FavoriteTimelineResult {
@@ -2261,7 +2321,7 @@ export interface GetOneTimelineQueryArgs {
   id: string;
 }
 export interface GetAllTimelineQueryArgs {
-  pageInfo?: Maybe<PageInfoTimeline>;
+  pageInfo: PageInfoTimeline;
 
   search?: Maybe<string>;
 
@@ -2270,8 +2330,6 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
-
-  templateTimelineType?: Maybe<TemplateTimelineType>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -2283,6 +2341,8 @@ export interface AuthenticationsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -2296,6 +2356,8 @@ export interface TimelineSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface TimelineDetailsSourceArgs {
   eventId: string;
@@ -2303,6 +2365,8 @@ export interface TimelineDetailsSourceArgs {
   indexName: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface LastEventTimeSourceArgs {
   id?: Maybe<string>;
@@ -2312,6 +2376,8 @@ export interface LastEventTimeSourceArgs {
   details: LastTimeDetails;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface HostsSourceArgs {
   id?: Maybe<string>;
@@ -2325,6 +2391,8 @@ export interface HostsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface HostOverviewSourceArgs {
   id?: Maybe<string>;
@@ -2341,6 +2409,8 @@ export interface HostFirstLastSeenSourceArgs {
   hostName: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface IpOverviewSourceArgs {
   id?: Maybe<string>;
@@ -2350,6 +2420,8 @@ export interface IpOverviewSourceArgs {
   ip: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
@@ -2465,6 +2537,8 @@ export interface NetworkDnsHistogramSourceArgs {
   timerange: TimerangeInput;
 
   stackByField?: Maybe<string>;
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;
@@ -2583,6 +2657,7 @@ export namespace GetLastEventTimeQuery {
     indexKey: LastEventIndexKey;
     details: LastTimeDetails;
     defaultIndex: string[];
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -2708,6 +2783,10 @@ export namespace SourceQuery {
     aggregatable: boolean;
 
     format: Maybe<string>;
+
+    esTypes: Maybe<ToStringArrayNoNullable>;
+
+    subType: Maybe<ToIFieldSubTypeNonNullable>;
   };
 }
 
@@ -2719,6 +2798,7 @@ export namespace GetAuthenticationsQuery {
     filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -2855,6 +2935,7 @@ export namespace GetHostFirstLastSeenQuery {
     sourceId: string;
     hostName: string;
     defaultIndex: string[];
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -2889,6 +2970,7 @@ export namespace GetHostsTableQuery {
     filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -3011,6 +3093,8 @@ export namespace GetHostOverviewQuery {
     cloud: Maybe<Cloud>;
 
     inspect: Maybe<Inspect>;
+
+    endpoint: Maybe<Endpoint>;
   };
 
   export type Host = {
@@ -3073,6 +3157,16 @@ export namespace GetHostOverviewQuery {
     dsl: string[];
 
     response: string[];
+  };
+
+  export type Endpoint = {
+    __typename?: 'EndpointFields';
+
+    endpointPolicy: Maybe<string>;
+
+    policyStatus: Maybe<HostPolicyResponseActionStatus>;
+
+    sensorVersion: Maybe<string>;
   };
 }
 
@@ -3318,6 +3412,7 @@ export namespace GetIpOverviewQuery {
     ip: string;
     defaultIndex: string[];
     inspect: boolean;
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -4335,7 +4430,6 @@ export namespace GetAllTimeline {
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
     timelineType?: Maybe<TimelineType>;
-    templateTimelineType?: Maybe<TemplateTimelineType>;
     status?: Maybe<TimelineStatus>;
   };
 
@@ -4373,6 +4467,8 @@ export namespace GetAllTimeline {
     favorite: Maybe<Favorite[]>;
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
+
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
 
     notes: Maybe<Notes[]>;
 
@@ -4478,6 +4574,7 @@ export namespace GetTimelineDetailsQuery {
     eventId: string;
     indexName: string;
     defaultIndex: string[];
+    docValueFields: DocValueFieldsInput[];
   };
 
   export type Query = {
@@ -4552,6 +4649,8 @@ export namespace GetTimelineQuery {
     filterQuery?: Maybe<string>;
     defaultIndex: string[];
     inspect: boolean;
+    docValueFields: DocValueFieldsInput[];
+    timerange: TimerangeInput;
   };
 
   export type Query = {
@@ -5001,6 +5100,8 @@ export namespace GetTimelineQuery {
   export type Signal = {
     __typename?: 'SignalField';
 
+    status: Maybe<string[]>;
+
     original_time: Maybe<string[]>;
 
     rule: Maybe<_Rule>;
@@ -5032,6 +5133,12 @@ export namespace GetTimelineQuery {
     filters: Maybe<ToAny>;
 
     note: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+
+    threshold: Maybe<ToAny>;
+
+    exceptions_list: Maybe<ToAny>;
   };
 
   export type Suricata = {
@@ -5441,6 +5548,8 @@ export namespace GetOneTimeline {
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     favorite: Maybe<Favorite[]>;
 
     filters: Maybe<Filters[]>;
@@ -5519,6 +5628,8 @@ export namespace GetOneTimeline {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<QueryMatch>;
 
     and: Maybe<And[]>;
@@ -5551,6 +5662,8 @@ export namespace GetOneTimeline {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<_QueryMatch>;
   };
 
@@ -5571,9 +5684,9 @@ export namespace GetOneTimeline {
   export type DateRange = {
     __typename?: 'DateRangePickerResult';
 
-    start: Maybe<number>;
+    start: Maybe<ToAny>;
 
-    end: Maybe<number>;
+    end: Maybe<ToAny>;
   };
 
   export type EventIdToNoteIds = {
@@ -5767,6 +5880,8 @@ export namespace PersistTimelineMutation {
 
     eventType: Maybe<string>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     favorite: Maybe<Favorite[]>;
 
     filters: Maybe<Filters[]>;
@@ -5829,6 +5944,8 @@ export namespace PersistTimelineMutation {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<QueryMatch>;
 
     and: Maybe<And[]>;
@@ -5860,6 +5977,8 @@ export namespace PersistTimelineMutation {
     excluded: Maybe<boolean>;
 
     kqlQuery: Maybe<string>;
+
+    type: Maybe<DataProviderType>;
 
     queryMatch: Maybe<_QueryMatch>;
   };
@@ -5957,9 +6076,9 @@ export namespace PersistTimelineMutation {
   export type DateRange = {
     __typename?: 'DateRangePickerResult';
 
-    start: Maybe<number>;
+    start: Maybe<ToAny>;
 
-    end: Maybe<number>;
+    end: Maybe<ToAny>;
   };
 
   export type Sort = {

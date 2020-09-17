@@ -26,6 +26,7 @@ import { HostAlertsQueryTabBody } from './navigation/alerts_query_tab_body';
 export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
+    docValueFields,
     filterQuery,
     setAbsoluteRangeDatePicker,
     to,
@@ -62,7 +63,11 @@ export const HostsTabs = memo<HostsTabsProps>(
             return;
           }
           const [min, max] = x;
-          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+          setAbsoluteRangeDatePicker({
+            id: 'global',
+            from: new Date(min).toISOString(),
+            to: new Date(max).toISOString(),
+          });
         },
         [setAbsoluteRangeDatePicker]
       ),
@@ -71,10 +76,10 @@ export const HostsTabs = memo<HostsTabsProps>(
     return (
       <Switch>
         <Route path={`/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody {...tabProps} />
+          <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
         <Route path={`/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
         <Route path={`/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />

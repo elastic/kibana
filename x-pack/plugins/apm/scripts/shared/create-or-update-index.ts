@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { ESClient } from './get_es_client';
 
 export async function createOrUpdateIndex({
   client,
@@ -12,7 +12,7 @@ export async function createOrUpdateIndex({
   indexName,
   template,
 }: {
-  client: Client;
+  client: ESClient;
   clear: boolean;
   indexName: string;
   template: any;
@@ -30,6 +30,11 @@ export async function createOrUpdateIndex({
     }
   }
 
+  // Some settings are non-updateable and need to be removed.
+  const settings = { ...template.settings };
+  delete settings?.index?.number_of_shards;
+  delete settings?.index?.sort;
+
   const indexExists = (
     await client.indices.exists({
       index: indexName,
@@ -42,6 +47,7 @@ export async function createOrUpdateIndex({
       body: template,
     });
   } else {
+    await client.indices.close({ index: indexName });
     await Promise.all([
       template.mappings
         ? client.indices.putMapping({
@@ -49,12 +55,13 @@ export async function createOrUpdateIndex({
             body: template.mappings,
           })
         : Promise.resolve(undefined as any),
-      template.settings
+      settings
         ? client.indices.putSettings({
             index: indexName,
-            body: template.settings,
+            body: settings,
           })
         : Promise.resolve(undefined as any),
     ]);
+    await client.indices.open({ index: indexName });
   }
 }

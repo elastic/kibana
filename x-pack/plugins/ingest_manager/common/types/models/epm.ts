@@ -19,6 +19,10 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
+export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+
+export type EpmPackageInstallStatus = 'installed' | 'installing';
+
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
@@ -36,11 +40,14 @@ export enum ElasticsearchAssetType {
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
+  transform = 'transform',
 }
 
 export enum AgentAssetType {
   input = 'input',
 }
+
+export type RegistryRelease = 'ga' | 'beta' | 'experimental';
 
 // from /package/{name}
 // type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
@@ -49,6 +56,7 @@ export interface RegistryPackage {
   name: string;
   title?: string;
   version: string;
+  release?: RegistryRelease;
   readme?: string;
   description: string;
   type: string;
@@ -66,10 +74,8 @@ export interface RegistryPackage {
 }
 
 interface RegistryImage {
-  // https://github.com/elastic/package-registry/blob/master/util/package.go#L74
-  // says src is potentially missing but I couldn't find any examples
-  // it seems like src should be required. How can you have an image with no reference to the content?
   src: string;
+  path: string;
   title?: string;
   size?: string;
   type?: string;
@@ -79,6 +85,7 @@ export interface RegistryConfigTemplate {
   title: string;
   description: string;
   inputs: RegistryInput[];
+  multiple?: boolean;
 }
 
 export interface RegistryInput {
@@ -113,6 +120,7 @@ export type RegistrySearchResult = Pick<
   | 'name'
   | 'title'
   | 'version'
+  | 'release'
   | 'description'
   | 'type'
   | 'icons'
@@ -224,10 +232,14 @@ export type PackageInfo = Installable<
 >;
 
 export interface Installation extends SavedObjectAttributes {
-  installed: AssetReference[];
+  installed_kibana: KibanaAssetReference[];
+  installed_es: EsAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
+  install_status: EpmPackageInstallStatus;
+  install_version: string;
+  install_started_at: string;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
@@ -241,19 +253,14 @@ export type NotInstalled<T = {}> = T & {
   status: InstallationStatus.notInstalled;
 };
 
-export type AssetReference = Pick<SavedObjectReference, 'id'> & {
-  type: AssetType | IngestAssetType;
-};
+export type AssetReference = KibanaAssetReference | EsAssetReference;
 
-/**
- * Types of assets which can be installed/removed
- */
-export enum IngestAssetType {
-  IlmPolicy = 'ilm_policy',
-  IndexTemplate = 'index_template',
-  ComponentTemplate = 'component_template',
-  IngestPipeline = 'ingest_pipeline',
-}
+export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: KibanaAssetType;
+};
+export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: ElasticsearchAssetType;
+};
 
 export enum DefaultPackages {
   system = 'system',
@@ -275,9 +282,7 @@ export interface IndexTemplate {
     mappings: any;
     aliases: object;
   };
-  data_stream: {
-    timestamp_field: string;
-  };
+  data_stream: object;
   composed_of: string[];
   _meta: object;
 }

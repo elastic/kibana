@@ -19,9 +19,6 @@
 
 import Joi from 'joi';
 import os from 'os';
-import { join } from 'path';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getDataPath } from '../../../core/server/path'; // Still used by optimize config schema
 
 const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
   'This key is handled in the new platform ONLY'
@@ -45,28 +42,9 @@ export default () =>
       basePathProxyTarget: Joi.number().default(5603),
     }).default(),
 
-    pid: Joi.object({
-      file: Joi.string(),
-      exclusive: Joi.boolean().default(false),
-    }).default(),
+    pid: HANDLED_IN_NEW_PLATFORM,
 
     csp: HANDLED_IN_NEW_PLATFORM,
-
-    cpu: Joi.object({
-      cgroup: Joi.object({
-        path: Joi.object({
-          override: Joi.string().default(),
-        }),
-      }),
-    }),
-
-    cpuacct: Joi.object({
-      cgroup: Joi.object({
-        path: Joi.object({
-          override: Joi.string().default(),
-        }),
-      }),
-    }),
 
     server: Joi.object({
       name: Joi.string().default(os.hostname()),
@@ -147,6 +125,10 @@ export default () =>
 
     ops: Joi.object({
       interval: Joi.number().default(5000),
+      cGroupOverrides: Joi.object().keys({
+        cpuPath: Joi.string().default(),
+        cpuAcctPath: Joi.string().default(),
+      }),
     }).default(),
 
     plugins: Joi.object({
@@ -161,28 +143,6 @@ export default () =>
       maximumWaitTimeForAllCollectorsInS: Joi.number().default(60),
     }).default(),
 
-    optimize: Joi.object({
-      enabled: Joi.boolean().default(true),
-      bundleFilter: Joi.string().default('!tests'),
-      bundleDir: Joi.string().default(join(getDataPath(), 'optimize')),
-      viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-      watch: Joi.boolean().default(false),
-      watchPort: Joi.number().default(5602),
-      watchHost: Joi.string().hostname().default('localhost'),
-      watchPrebuild: Joi.boolean().default(false),
-      watchProxyTimeout: Joi.number().default(10 * 60000),
-      useBundleCache: Joi.boolean().default(!!process.env.CODE_COVERAGE ? true : Joi.ref('$prod')),
-      sourceMaps: Joi.when('$prod', {
-        is: true,
-        then: Joi.boolean().valid(false),
-        otherwise: Joi.alternatives()
-          .try(Joi.string().required(), Joi.boolean())
-          .default(!!process.env.CODE_COVERAGE ? 'true' : '#cheap-source-map'),
-      }),
-      workers: Joi.number().min(1),
-      profile: Joi.boolean().default(false),
-      validateSyntaxOfNodeModules: Joi.boolean().default(true),
-    }).default(),
     status: Joi.object({
       allowAnonymous: Joi.boolean().default(false),
     }).default(),
@@ -237,7 +197,7 @@ export default () =>
       manifestServiceUrl: Joi.string().default('').allow(''),
       emsFileApiUrl: Joi.string().default('https://vector.maps.elastic.co'),
       emsTileApiUrl: Joi.string().default('https://tiles.maps.elastic.co'),
-      emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.8'),
+      emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.9'),
       emsFontLibraryUrl: Joi.string().default(
         'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
       ),
@@ -254,6 +214,15 @@ export default () =>
 
     i18n: Joi.object({
       locale: Joi.string().default('en'),
+    }).default(),
+
+    // temporarily moved here from the (now deleted) kibana legacy plugin
+    kibana: Joi.object({
+      enabled: Joi.boolean().default(true),
+      index: Joi.string().default('.kibana'),
+      autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
+      // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
+      autocompleteTimeout: Joi.number().integer().min(1).default(1000),
     }).default(),
 
     savedObjects: Joi.object({

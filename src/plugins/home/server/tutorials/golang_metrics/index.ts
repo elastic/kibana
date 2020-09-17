@@ -36,6 +36,7 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.golangMetrics.nameTitle', {
       defaultMessage: 'Golang metrics',
     }),
+    moduleName,
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.golangMetrics.shortDescription', {
