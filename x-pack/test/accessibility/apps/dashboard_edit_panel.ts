@@ -46,19 +46,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // custom time range
-    it('dashboard embeddable custom time range', async () => {
-      await testSubjects.click('embeddablePanelAction-CUSTOM_TIME_RANGE');
-      await testSubjects.click('cancelPerPanelTimeRangeButton');
-      await a11y.testAppSnapshot();
-    });
-
-    // // clone panel
-    // it('dashboard embeddable clone panel', async () => {
-    //   await testSubjects.click('embeddablePanelToggleMenuIcon');
+    // // custom time range
+    // it('dashboard embeddable custom time range', async () => {
     //   await testSubjects.click('embeddablePanelAction-CUSTOM_TIME_RANGE');
     //   await a11y.testAppSnapshot();
+    //   await retry.waitFor(
+    //     'Ensure cancel per panel Time Range Button exists',
+    //     async () => await testSubjects.exists('cancelPerPanelTimeRangeButton')
+    //   );
+    //   // await testSubjects.moveMouseTo('cancelPerPanelTimeRangeButton');
+    //   await testSubjects.click('cancelPerPanelTimeRangeButton');
     // });
+
+    // [duplicate-id]: Ensures every id attribute value is unique
+    // clone panel
+    it('dashboard embeddable clone panel', async () => {
+      await testSubjects.click('embeddablePanelAction-clonePanel');
+      // await testSubjects.click('embeddablePanelAction-CUSTOM_TIME_RANGE');
+      await a11y.testAppSnapshot();
+    });
 
     // inspector panel
     it('dashboard embeddable open inspector', async () => {
@@ -72,7 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('dashboard embeddable open flyout and drilldown', async () => {
       await testSubjects.click('embeddablePanelToggleMenuIcon');
       await testSubjects.click('embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN');
-      await testSubjects.click('embeddablePanelAction-flyoutCloseButton');
+      // await testSubjects.moveMouseTo('flyoutCloseButton');
+      await testSubjects.click('flyoutCloseButton');
       await a11y.testAppSnapshot();
     });
 
