@@ -369,7 +369,6 @@ export {
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
   // errors
-  RequestTimeoutError,
   SearchError,
   SearchTimeoutError,
   TimeoutErrorMode,

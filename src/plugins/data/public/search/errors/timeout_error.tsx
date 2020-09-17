@@ -22,11 +22,28 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
-import { SearchTimeoutError, TimeoutErrorMode } from './errors';
+import { HttpFetchError } from 'kibana/public';
+import { KbnError } from '../../../../kibana_utils/common';
 
-export const getTimeoutErrorMessage = (application: ApplicationStart, e: SearchTimeoutError) => {
-  function getMessage() {
-    switch (e.mode) {
+export enum TimeoutErrorMode {
+  UPGRADE,
+  CONTACT,
+  CHANGE,
+}
+
+/**
+ * Request Failure - When an entire multi request fails
+ * @param {Error} err - the Error that came back
+ */
+export class SearchTimeoutError extends KbnError {
+  public mode: TimeoutErrorMode;
+  constructor(err: HttpFetchError | null = null, mode: TimeoutErrorMode) {
+    super(`Request timeout: ${JSON.stringify(err?.message)}`);
+    this.mode = mode;
+  }
+
+  private getMessage() {
+    switch (this.mode) {
       case TimeoutErrorMode.UPGRADE:
         return i18n.translate('data.search.upgradeLicense', {
           defaultMessage:
@@ -45,8 +62,8 @@ export const getTimeoutErrorMessage = (application: ApplicationStart, e: SearchT
     }
   }
 
-  function getActionText() {
-    switch (e.mode) {
+  private getActionText() {
+    switch (this.mode) {
       case TimeoutErrorMode.UPGRADE:
         return i18n.translate('data.search.upgradeLicenseActionText', {
           defaultMessage: 'Upgrade',
@@ -60,8 +77,8 @@ export const getTimeoutErrorMessage = (application: ApplicationStart, e: SearchT
     }
   }
 
-  function onClick() {
-    switch (e.mode) {
+  private onClick() {
+    switch (this.mode) {
       case TimeoutErrorMode.UPGRADE:
         application.navigateToApp('management', {
           path: `/kibana/indexPatterns`,
@@ -75,20 +92,22 @@ export const getTimeoutErrorMessage = (application: ApplicationStart, e: SearchT
     }
   }
 
-  const actionText = getActionText();
-  return (
-    <>
-      {getMessage()}
-      {actionText && (
-        <>
-          <EuiSpacer size="s" />
-          <div className="eui-textRight">
-            <EuiButton color="danger" onClick={onClick} size="s">
-              {actionText}
-            </EuiButton>
-          </div>
-        </>
-      )}
-    </>
-  );
-};
+  public getErrorMessage(application: ApplicationStart) {
+    const actionText = this.getActionText();
+    return (
+      <>
+        {this.getMessage()}
+        {actionText && (
+          <>
+            <EuiSpacer size="s" />
+            <div className="eui-textRight">
+              <EuiButton color="danger" onClick={this.onClick} size="s">
+                {actionText}
+              </EuiButton>
+            </div>
+          </>
+        )}
+      </>
+    );
+  }
+}

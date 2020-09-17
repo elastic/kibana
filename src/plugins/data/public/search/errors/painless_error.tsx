@@ -18,27 +18,52 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
-import { PainlessError } from './errors';
+import { KbnError } from '../../../../kibana_utils/common';
+import { IEsSearchRequest } from '.';
 
-export const getPainlessErrorMessage = (application: ApplicationStart, e: PainlessError) => {
-  function onClick() {
-    application.navigateToApp('management', {
-      path: `/kibana/indexPatterns`,
-    });
+export class PainlessError extends KbnError {
+  constructor(err: Error, request: IEsSearchRequest) {
+    const rootCause = get(err, 'body.attributes.error.root_cause');
+    const [{ script }] = rootCause;
+
+    super(
+      i18n.translate('discover.painlessError.painlessScriptedFieldErrorMessage', {
+        defaultMessage: "Error with Painless scripted field '{script}'.",
+        values: { script },
+      })
+    );
   }
 
-  return (
-    <>
-      {e.message}
-      <EuiSpacer size="s" />
-      <div className="eui-textRight">
-        <EuiButton color="danger" onClick={onClick} size="s">
-          <FormattedMessage id="data.painlessError.buttonTxt" defaultMessage="Edit script" />
-        </EuiButton>
-      </div>
-    </>
-  );
-};
+  public getErrorMessage(application: ApplicationStart) {
+    function onClick() {
+      application.navigateToApp('management', {
+        path: `/kibana/indexPatterns`,
+      });
+    }
+
+    return (
+      <>
+        {this.message}
+        <EuiSpacer size="s" />
+        <div className="eui-textRight">
+          <EuiButton color="danger" onClick={onClick} size="s">
+            <FormattedMessage id="data.painlessError.buttonTxt" defaultMessage="Edit script" />
+          </EuiButton>
+        </div>
+      </>
+    );
+  }
+}
+
+export function isPainlessError(error: any) {
+  const rootCause = get(error, 'body.attributes.error.root_cause');
+  if (!rootCause) return false;
+
+  const [{ lang }] = rootCause;
+  return lang === 'painless';
+}

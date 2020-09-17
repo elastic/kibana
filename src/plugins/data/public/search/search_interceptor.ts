@@ -123,7 +123,7 @@ export class SearchInterceptor {
     if (e instanceof PainlessError) {
       this.deps.toasts.addDanger({
         title: 'Search Error',
-        text: toMountPoint(getPainlessErrorMessage(this.application, e)),
+        text: toMountPoint(e.getErrorMessage(this.application)),
       });
       return;
     }
@@ -131,7 +131,7 @@ export class SearchInterceptor {
     if (e instanceof SearchTimeoutError) {
       this.deps.toasts.addDanger({
         title: 'Timeout',
-        text: toMountPoint(getTimeoutErrorMessage(this.application, e)),
+        text: toMountPoint(e.getErrorMessage(this.application)),
       });
       return;
     }
