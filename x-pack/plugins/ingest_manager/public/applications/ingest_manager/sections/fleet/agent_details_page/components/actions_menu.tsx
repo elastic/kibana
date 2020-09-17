@@ -72,7 +72,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.ingestManager.agentList.reassignActionText"
-              defaultMessage="Assign new agent policy"
+              defaultMessage="Assign to new policy"
             />
           </EuiContextMenuItem>,
           <EuiContextMenuItem
@@ -90,7 +90,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             ) : (
               <FormattedMessage
                 id="xpack.ingestManager.agentList.unenrollOneButton"
-                defaultMessage="Unenroll"
+                defaultMessage="Unenroll agent"
               />
             )}
           </EuiContextMenuItem>,
