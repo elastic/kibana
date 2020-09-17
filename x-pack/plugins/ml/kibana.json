@@ -16,7 +16,8 @@
     "embeddable",
     "uiActions",
     "kibanaLegacy",
-    "indexPatternManagement"
+    "indexPatternManagement",
+    "discover"
   ],
   "optionalPlugins": [
     "home",

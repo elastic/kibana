@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount, ReactWrapper } from 'enzyme';
 import sinon from 'sinon';
@@ -110,6 +110,13 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
         httpClient as HttpSetup,
         requestConfig
       );
+
+      // Force a re-render of the component to stress-test the useRequest hook and verify its
+      // state remains unaffected.
+      const [, setState] = useState(false);
+      useEffect(() => {
+        setState(true);
+      }, []);
 
       hookResult.isInitialRequest = isInitialRequest;
       hookResult.isLoading = isLoading;
