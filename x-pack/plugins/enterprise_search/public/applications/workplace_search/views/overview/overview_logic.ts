@@ -31,6 +31,7 @@ export interface IOverviewValues extends IOverviewServerData {
 }
 
 export const OverviewLogic = kea<MakeLogicType<IOverviewValues, IOverviewActions>>({
+  path: ['enterpriseSearch', 'workplaceSearch', 'overview'],
   actions: {
     setServerData: (serverData) => serverData,
     initializeOverview: () => null,

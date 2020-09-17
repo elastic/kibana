@@ -16,6 +16,7 @@ export interface IAppActions {
 }
 
 export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+  path: ['enterpriseSearch', 'appSearch', 'app'],
   actions: {
     initializeAppData: (props) => props,
   },

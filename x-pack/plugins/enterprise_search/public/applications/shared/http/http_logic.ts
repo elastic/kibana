@@ -27,6 +27,7 @@ export interface IHttpActions {
 }
 
 export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
+  path: ['enterpriseSearch', 'http'],
   actions: {
     initializeHttp: ({ http, errorConnecting }) => ({ http, errorConnecting }),
     initializeHttpInterceptors: () => null,

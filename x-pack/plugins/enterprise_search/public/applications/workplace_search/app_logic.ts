@@ -22,6 +22,7 @@ export interface IAppActions {
 }
 
 export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+  path: ['enterpriseSearch', 'workplaceSearch', 'app'],
   actions: {
     initializeAppData: ({ workplaceSearch, isFederatedAuth }) => ({
       workplaceSearch,
