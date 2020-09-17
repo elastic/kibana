@@ -18,7 +18,8 @@
  */
 
 import { getNodesUsage } from './get_nodes_usage';
-import { ElasticsearchClient } from 'kibana/server';
+import { TIMEOUT } from './constants';
+// import { ElasticsearchClient } from 'kibana/server';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
 const mockedNodesFetchResponse = {
@@ -46,21 +47,22 @@ const mockedNodesFetchResponse = {
   },
 };
 
-export function clearMockFetchNodesUsage(esClient: DeeplyMockedKeys<ElasticsearchClient>) {
+export function clearMockFetchNodesUsage(esClient: any) {
   esClient.nodes.usage.mockClear();
-}
-
-export function mockFetchNodesUsage(nodesUsage: any): DeeplyMockedKeys<ElasticsearchClient> {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.nodes.usage.mockResolvedValueOnce(nodesUsage);
-  return esClient;
 }
 
 describe('get_nodes_usage', () => {
   it('returns a modified array of nodes usage data', async () => {
     const response = Promise.resolve({ body: mockedNodesFetchResponse });
-    const esClient = mockFetchNodesUsage(response);
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.nodes.usage.mockImplementationOnce(
+      // @ts-ignore
+      async (_params = { metric: '_all', timeout: TIMEOUT }) => {
+        return response;
+      }
+    );
     const item = await getNodesUsage(esClient);
+    expect(esClient.nodes.usage).toHaveBeenCalledWith({ metric: '_all', timeout: TIMEOUT });
     expect(item).toStrictEqual({
       nodes: [
         {

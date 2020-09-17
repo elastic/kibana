@@ -17,7 +17,7 @@
  * under the License.
  */
 import { ApiResponse, RequestParams } from '@elastic/elasticsearch';
-import { LegacyAPICaller, ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
