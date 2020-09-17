@@ -12,7 +12,6 @@ import { useDebounce } from 'react-use';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiFormRow,
   EuiIcon,
   EuiFieldNumber,
