@@ -5,15 +5,12 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { asyncForEach } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const testDataList = [1, 2, 3].map((n) => ({
-    filterId: `test_create_filter_${n}`,
-    description: `test description ${n}`,
-    keywords: ['filter word 1', 'filter word 2', 'filter word 3'],
-  }));
+  const filterId = 'test_create_filter';
+  const description = 'test description';
+  const keywords = ['filter word 1', 'filter word 2', 'filter word 3'];
 
   describe('filter list creation', function () {
     before(async () => {
@@ -24,32 +21,30 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanMlIndices();
       // clean up created filters
-      await asyncForEach(testDataList, async ({ filterId }) => {
-        await ml.api.deleteFilter(filterId);
-      });
+      await ml.api.deleteFilter(filterId);
     });
 
     it('creates new filter list', async () => {
-      await ml.testExecution.logTestStep('loads the filter list management page');
+      await ml.testExecution.logTestStep(
+        'filter list creation loads the filter list management page'
+      );
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToFilterListsManagement();
 
-      await ml.testExecution.logTestStep('filter list creates new filter lists');
-      for (const testData of testDataList) {
-        await ml.testExecution.logTestStep('loads the filter creation page');
-        await ml.settingsFilterList.navigateToFilterListCreationPage();
+      await ml.testExecution.logTestStep('filter list creation creates new filter lists');
+      await ml.testExecution.logTestStep('filter list creation loads the filter creation page');
+      await ml.settingsFilterList.navigateToFilterListCreationPage();
 
-        await ml.testExecution.logTestStep('filter list sets the list name and description');
+      await ml.testExecution.logTestStep('filter list creation sets the list name and description');
+      await ml.settingsFilterList.setFilterListId(filterId);
+      await ml.settingsFilterList.setFilterListDescription(description);
 
-        const { filterId, description, keywords } = testData;
-        await ml.settingsFilterList.setFilterListId(filterId);
-        await ml.settingsFilterList.setFilterListDescription(description);
-        await ml.settingsFilterList.addFilterListKeywords(keywords);
-        await ml.testExecution.logTestStep('filter list saves the settings');
-        await ml.settingsFilterList.saveFilterList();
-        await ml.settingsFilterList.assertFilterListRowExists(filterId);
-      }
+      await ml.testExecution.logTestStep('filter list creation adds items to the filter list');
+      await ml.settingsFilterList.addFilterListKeywords(keywords);
+      await ml.testExecution.logTestStep('filter list creation saves the settings');
+      await ml.settingsFilterList.saveFilterList();
+      await ml.settingsFilterList.assertFilterListRowExists(filterId);
     });
   });
 }

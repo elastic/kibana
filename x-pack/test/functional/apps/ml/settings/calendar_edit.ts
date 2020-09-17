@@ -50,40 +50,55 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.deleteCalendar(calendarId);
     });
 
-    it('finds and edits existing calendar', async () => {
-      await ml.testExecution.logTestStep('loads the calendar management page');
+    it('updates jobs, groups and events', async () => {
+      await ml.testExecution.logTestStep('calendar edit loads the calendar management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToCalendarManagement();
 
-      await ml.testExecution.logTestStep('loads the new calendar edit page');
+      await ml.testExecution.logTestStep('calendar edit opens existing calendar');
       await ml.settingsCalendar.openCalendarEditForm(calendarId);
 
       await ml.testExecution.logTestStep(
-        'deselects previous job selection and assigns new job groups'
+        'calendar edit deselects previous job selection and assigns new job groups'
       );
       await comboBox.clear('mlCalendarJobSelection');
       await asyncForEach(newJobGroups, async (newJobGroup) => {
         await ml.settingsCalendar.selectJobGroup(newJobGroup);
       });
 
-      await ml.testExecution.logTestStep('finds and deletes old events');
+      await ml.testExecution.logTestStep('calendar edit deletes old events');
 
       await asyncForEach(testEvents, async ({ description }) => {
         await ml.settingsCalendar.deleteCalendarEventRow(description);
       });
 
-      await ml.testExecution.logTestStep('creates new calendar event');
+      await ml.testExecution.logTestStep('calendar edit creates new calendar event');
       await ml.settingsCalendar.openNewCalendarEventForm();
       await ml.settingsCalendar.setCalendarEventDescription('holiday');
       await ml.settingsCalendar.addNewCalendarEvent();
       await ml.settingsCalendar.assertEventRowExists('holiday');
 
       await ml.testExecution.logTestStep(
-        'saves the new calendar and displays it in the list of calendars '
+        'calendar edit saves the new calendar and displays it in the list of calendars '
       );
       await ml.settingsCalendar.saveCalendar();
       await ml.settingsCalendar.assertCalendarRowExists(calendarId);
+
+      await ml.testExecution.logTestStep('calendar edit re-opens the updated calendar');
+      await ml.settingsCalendar.openCalendarEditForm(calendarId);
+      await ml.testExecution.logTestStep('calendar edit verifies the job selection is empty');
+      await ml.settingsCalendar.assertJobSelection([]);
+      await ml.testExecution.logTestStep(
+        'calendar edit verifies the job group selection was updated'
+      );
+      await ml.settingsCalendar.assertJobGroupSelection(newJobGroups);
+
+      await ml.testExecution.logTestStep('calendar edit verifies calendar updated correctly');
+      await asyncForEach(testEvents, async ({ description }) => {
+        await ml.settingsCalendar.assertEventRowMissing(description);
+      });
+      await ml.settingsCalendar.assertEventRowExists('holiday');
     });
   });
 }

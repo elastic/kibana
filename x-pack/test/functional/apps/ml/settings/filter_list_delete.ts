@@ -40,24 +40,28 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('deletes item', async () => {
-      await ml.testExecution.logTestStep('loads the filter list management page');
+    it('deletes filter list with items', async () => {
+      await ml.testExecution.logTestStep(
+        'filter list delete loads the filter list management page'
+      );
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToFilterListsManagement();
 
-      await ml.testExecution.logTestStep('selects multiple filter lists to delete');
+      await ml.testExecution.logTestStep(
+        'filter list delete selects list entries and deletes them'
+      );
       for (const testData of testDataList) {
         const { filterId } = testData;
         await ml.settingsFilterList.selectFilterListRow(filterId);
       }
-
-      await ml.testExecution.logTestStep('deletes the selected filter lists');
       await ml.settingsFilterList.deleteFilterList();
 
-      await ml.testExecution.logTestStep('validates selected filter lists are deleted');
+      await ml.testExecution.logTestStep(
+        'filter list delete validates selected filter lists are deleted'
+      );
       await asyncForEach(testDataList, async ({ filterId }) => {
-        await ml.settingsFilterList.assertFilterListRowMissing(filterId);
+        await ml.settingsFilterList.assertFilterListRowNotExists(filterId);
       });
     });
   });

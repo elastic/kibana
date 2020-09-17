@@ -212,7 +212,7 @@ export function MachineLearningSettingsCalendarProvider(
       await testSubjects.existOrFail(this.calendarRowSelector(calendarId));
     },
 
-    async assertCalendarRowMissing(calendarId: string) {
+    async assertCalendarRowNotExists(calendarId: string) {
       await testSubjects.missingOrFail(this.calendarRowSelector(calendarId));
     },
 
@@ -357,6 +357,16 @@ export function MachineLearningSettingsCalendarProvider(
       await testSubjects.missingOrFail('mlCalendarJobGroupSelection');
     },
 
+    async assertJobGroupSelection(expectedIdentifier: string[]) {
+      const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+        'mlCalendarJobGroupSelection > comboBoxInput'
+      );
+      expect(comboBoxSelectedOptions).to.eql(
+        expectedIdentifier,
+        `Expected job group selection to be'${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+      );
+    },
+
     async assertJobGroupSelectionContain(expectedIdentifier: string) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlCalendarJobGroupSelection > comboBoxInput'
@@ -383,6 +393,10 @@ export function MachineLearningSettingsCalendarProvider(
     async deleteCalendar() {
       await this.assertDeleteCalendarButtonEnabled(true);
       await testSubjects.click('mlCalendarButtonDelete');
+      await testSubjects.existOrFail('mlCalendarDeleteConfirmation');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.missingOrFail('mlCalendarDeleteConfirmation');
     },
   };
 }

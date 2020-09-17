@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
     description: `test description ${n}`,
   }));
 
-  describe('calendar list delete', function () {
+  describe('calendar delete', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
@@ -37,9 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes multiple calendars', async () => {
-      await ml.testExecution.logTestStep(
-        'calendar list creation loads the calendar list management page'
-      );
+      await ml.testExecution.logTestStep('calendar delete loads the calendar list management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToCalendarManagement();
@@ -57,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         'calendar delete validates the calendars are deleted from the table'
       );
       await asyncForEach(testDataList, async ({ calendarId }) => {
-        await ml.settingsCalendar.assertEventRowMissing(calendarId);
+        await ml.settingsCalendar.assertCalendarRowNotExists(calendarId);
       });
     });
   });

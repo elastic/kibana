@@ -38,7 +38,7 @@ function EditHeader({ calendarId, description }) {
           />
         </h1>
       </EuiTitle>
-      <EuiText>
+      <EuiText data-test-subj={'mlCalendarDescriptionText'}>
         <p>{description}</p>
       </EuiText>
       <EuiSpacer size="l" />

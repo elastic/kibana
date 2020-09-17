@@ -108,6 +108,7 @@ export class CalendarsListUI extends Component {
       destroyModal = (
         <EuiOverlayMask>
           <EuiConfirmModal
+            data-test-subj={'mlCalendarDeleteConfirmation'}
             title={
               <FormattedMessage
                 id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"

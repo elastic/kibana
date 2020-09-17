@@ -64,7 +64,7 @@ export function MachineLearningSettingsFilterListProvider(
       return await testSubjects.existOrFail(this.rowSelector(filterId));
     },
 
-    async assertFilterListRowMissing(filterId: string) {
+    async assertFilterListRowNotExists(filterId: string) {
       return await testSubjects.missingOrFail(this.rowSelector(filterId));
     },
 
@@ -214,6 +214,10 @@ export function MachineLearningSettingsFilterListProvider(
       return !subSelector ? row : `${row} > ${subSelector}`;
     },
 
+    async assertFilterItemNotExists(filterItem: string) {
+      await testSubjects.missingOrFail(this.filterItemSelector(filterItem));
+    },
+
     async assertFilterItemExists(filterItem: string) {
       await testSubjects.existOrFail(this.filterItemSelector(filterItem));
     },
@@ -246,7 +250,7 @@ export function MachineLearningSettingsFilterListProvider(
       await testSubjects.existOrFail('mlFilterListDeleteItemButton');
       await this.selectFilterItem(filterItem);
       await testSubjects.click('mlFilterListDeleteItemButton');
-      await testSubjects.missingOrFail(this.filterItemSelector(filterItem));
+      await this.assertFilterItemNotExists(filterItem);
     },
 
     async deselectFilterItem(filterItem: string) {
