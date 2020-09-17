@@ -226,19 +226,19 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         expect(response.body).to.eql(expected);
       }
     } else if (failure?.statusCode === 400) {
-      if (failure?.reason === 'bad_request') {
+      if (failure.reason === 'bad_request') {
         const type = (parsedQuery.filter as string).split('.')[0];
         expect(response.body.error).to.eql('Bad Request');
-        expect(response.body.statusCode).to.eql(failure?.statusCode);
+        expect(response.body.statusCode).to.eql(failure.statusCode);
         expect(response.body.message).to.eql(`This type ${type} is not allowed: Bad Request`);
-      } else if (failure?.reason === 'cross_namespace_not_permitted') {
+      } else if (failure.reason === 'cross_namespace_not_permitted') {
         expect(response.body.error).to.eql('Bad Request');
-        expect(response.body.statusCode).to.eql(failure?.statusCode);
+        expect(response.body.statusCode).to.eql(failure.statusCode);
         expect(response.body.message).to.eql(
           `_find across namespaces is not permitted when the Spaces plugin is disabled.: Bad Request`
         );
       } else {
-        throw new Error(`Unexpected failure reason: ${failure?.reason}`);
+        throw new Error(`Unexpected failure reason: ${failure.reason}`);
       }
     } else {
       // 2xx
