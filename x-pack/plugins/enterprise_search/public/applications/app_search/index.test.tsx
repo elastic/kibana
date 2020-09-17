@@ -12,8 +12,10 @@ import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 import { useValues, useActions } from 'kea';
 
-import { SetupGuide } from './components/setup_guide';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
+import { SetupGuide } from './components/setup_guide';
+import { ErrorConnecting } from './components/error_connecting';
+import { EngineOverview } from './components/engine_overview';
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
@@ -42,12 +44,17 @@ describe('AppSearchUnconfigured', () => {
 });
 
 describe('AppSearchConfigured', () => {
-  it('renders with layout', () => {
+  beforeEach(() => {
+    // Mock resets
+    (useValues as jest.Mock).mockImplementation(() => ({}));
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData: () => {} }));
+  });
 
+  it('renders with layout', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(Layout)).toHaveLength(1);
+    expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 
   it('initializes app data with passed props', () => {
@@ -62,11 +69,19 @@ describe('AppSearchConfigured', () => {
   it('does not re-initialize app data', () => {
     const initializeAppData = jest.fn();
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
-    (useValues as jest.Mock).mockImplementationOnce(() => ({ hasInitialized: true }));
+    (useValues as jest.Mock).mockImplementation(() => ({ hasInitialized: true }));
 
     shallow(<AppSearchConfigured />);
 
     expect(initializeAppData).not.toHaveBeenCalled();
+  });
+
+  it('renders ErrorConnecting', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({ errorConnecting: true }));
+
+    const wrapper = shallow(<AppSearchConfigured />);
+
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
   });
 });
 

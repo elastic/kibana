@@ -21,10 +21,10 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { RuleType } from '../../../../../common/detection_engine/types';
+import { Threshold, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
@@ -33,7 +33,6 @@ import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
-import { assertUnreachable } from '../../../../common/lib/helpers';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
@@ -357,7 +356,7 @@ export const buildNoteDescription = (label: string, note: string): ListItems[] =
   return [];
 };
 
-export const buildRuleTypeDescription = (label: string, ruleType: RuleType): ListItems[] => {
+export const buildRuleTypeDescription = (label: string, ruleType: Type): ListItems[] => {
   switch (ruleType) {
     case 'machine_learning': {
       return [
@@ -381,6 +380,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: RuleType): Lis
         {
           title: label,
           description: i18n.THRESHOLD_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    case 'eql': {
+      return [
+        {
+          title: label,
+          description: i18n.EQL_TYPE_DESCRIPTION,
         },
       ];
     }

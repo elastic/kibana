@@ -9,6 +9,7 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -57,6 +58,25 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
     this.errors = baseClient.errors;
+  }
+
+  /**
+   * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
+   * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
+   *
+   * @param objects
+   * @param options
+   */
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.checkConflicts(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
   }
 
   /**

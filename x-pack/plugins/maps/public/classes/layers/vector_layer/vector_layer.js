@@ -15,9 +15,11 @@ import {
   SOURCE_BOUNDS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
+  KBN_TOO_MANY_FEATURES_PROPERTY,
   LAYER_TYPE,
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
+  KBN_TOO_MANY_FEATURES_IMAGE_ID,
 } from '../../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
@@ -777,6 +779,8 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
+    const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
+
     const hasJoins = this.hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
       const mbLayer = {
@@ -802,6 +806,30 @@ export class VectorLayer extends AbstractLayer {
       }
       mbMap.addLayer(mbLayer);
     }
+    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
+      const mbLayer = {
+        id: tooManyFeaturesLayerId,
+        type: 'fill',
+        source: sourceId,
+        paint: {},
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
+      mbMap.setFilter(tooManyFeaturesLayerId, [
+        '==',
+        ['get', KBN_TOO_MANY_FEATURES_PROPERTY],
+        true,
+      ]);
+      mbMap.setPaintProperty(
+        tooManyFeaturesLayerId,
+        'fill-pattern',
+        KBN_TOO_MANY_FEATURES_IMAGE_ID
+      );
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha());
+    }
+
     this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
@@ -822,6 +850,9 @@ export class VectorLayer extends AbstractLayer {
     if (lineFilterExpr !== mbMap.getFilter(lineLayerId)) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
+
+    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
+    mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _syncStylePropertiesWithMb(mbMap) {
@@ -832,6 +863,19 @@ export class VectorLayer extends AbstractLayer {
   _syncSourceBindingWithMb(mbMap) {
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
+      mbMap.addSource(this._getMbSourceId(), {
+        type: 'geojson',
+        data: EMPTY_FEATURE_COLLECTION,
+      });
+    } else if (mbSource.type !== 'geojson') {
+      // Recreate source when existing source is not geojson. This can occur when layer changes from tile layer to vector layer.
+      this.getMbLayerIds().forEach((mbLayerId) => {
+        if (mbMap.getLayer(mbLayerId)) {
+          mbMap.removeLayer(mbLayerId);
+        }
+      });
+
+      mbMap.removeSource(this._getMbSourceId());
       mbMap.addSource(this._getMbSourceId(), {
         type: 'geojson',
         data: EMPTY_FEATURE_COLLECTION,
@@ -865,6 +909,10 @@ export class VectorLayer extends AbstractLayer {
     return this.makeMbLayerId('fill');
   }
 
+  _getMbTooManyFeaturesLayerId() {
+    return this.makeMbLayerId('toomanyfeatures');
+  }
+
   getMbLayerIds() {
     return [
       this._getMbPointLayerId(),
@@ -872,6 +920,7 @@ export class VectorLayer extends AbstractLayer {
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
+      this._getMbTooManyFeaturesLayerId(),
     ];
   }
 
@@ -900,13 +949,11 @@ export class VectorLayer extends AbstractLayer {
 
   async getPropertiesForTooltip(properties) {
     const vectorSource = this.getSource();
-    let allProperties = await vectorSource.filterAndFormatPropertiesToHtml(properties);
+    let allProperties = await vectorSource.getTooltipProperties(properties);
     this._addJoinsToSourceTooltips(allProperties);
 
     for (let i = 0; i < this.getJoins().length; i++) {
-      const propsFromJoin = await this.getJoins()[i].filterAndFormatPropertiesForTooltip(
-        properties
-      );
+      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(properties);
       allProperties = [...allProperties, ...propsFromJoin];
     }
     return allProperties;

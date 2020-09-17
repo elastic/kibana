@@ -11,6 +11,7 @@ import {
   HostPolicyResponse,
   HostResultList,
   HostStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
@@ -20,6 +21,7 @@ import {
 } from '../../policy/store/policy_list/services/ingest';
 import {
   GetAgentPoliciesResponse,
+  GetAgentPoliciesResponseItem,
   GetPackagesResponse,
 } from '../../../../../../ingest_manager/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
@@ -43,11 +45,12 @@ export const mockEndpointResultList: (options?: {
   // total - numberToSkip is the count of non-skipped ones, but return no more than a pageSize, and no less than 0
   const actualCountToReturn = Math.max(Math.min(total - numberToSkip, requestPageSize), 0);
 
-  const hosts = [];
+  const hosts: HostInfo[] = [];
   for (let index = 0; index < actualCountToReturn; index++) {
     hosts.push({
       metadata: generator.generateHostMetadata(),
       host_status: HostStatus.ERROR,
+      query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
     });
   }
   const mock: HostResultList = {
@@ -55,6 +58,7 @@ export const mockEndpointResultList: (options?: {
     total,
     request_page_size: requestPageSize,
     request_page_index: requestPageIndex,
+    query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
   return mock;
 };
@@ -66,6 +70,7 @@ export const mockEndpointDetailsApiResult = (): HostInfo => {
   return {
     metadata: generator.generateHostMetadata(),
     host_status: HostStatus.ERROR,
+    query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
 };
 
@@ -78,19 +83,20 @@ const endpointListApiPathHandlerMocks = ({
   epmPackages = [generator.generateEpmPackage()],
   endpointPackagePolicies = [],
   policyResponse = generator.generatePolicyResponse(),
+  agentPolicy = generator.generateAgentPolicy(),
 }: {
   /** route handlers will be setup for each individual host in this array */
   endpointsResults?: HostResultList['hosts'];
   epmPackages?: GetPackagesResponse['response'];
   endpointPackagePolicies?: GetPolicyListResponse['items'];
   policyResponse?: HostPolicyResponse;
+  agentPolicy?: GetAgentPoliciesResponseItem;
 } = {}) => {
   const apiHandlers = {
     // endpoint package info
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
         response: epmPackages,
-        success: true,
       };
     },
 
@@ -101,20 +107,19 @@ const endpointListApiPathHandlerMocks = ({
         request_page_size: 10,
         request_page_index: 0,
         total: endpointsResults?.length || 0,
+        query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
       };
     },
 
     // Do policies referenced in endpoint list exist
     // just returns 1 single agent policy that includes all of the packagePolicy IDs provided
     [INGEST_API_AGENT_POLICIES]: (): GetAgentPoliciesResponse => {
-      const agentPolicy = generator.generateAgentPolicy();
       (agentPolicy.package_policies as string[]).push(
         ...endpointPackagePolicies.map((packagePolicy) => packagePolicy.id)
       );
       return {
         items: [agentPolicy],
         total: 10,
-        success: true,
         perPage: 10,
         page: 1,
       };
@@ -132,7 +137,6 @@ const endpointListApiPathHandlerMocks = ({
         page: 1,
         perPage: 10,
         total: endpointPackagePolicies?.length,
-        success: true,
       };
     },
   };

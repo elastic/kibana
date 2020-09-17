@@ -13,12 +13,10 @@ import {
 } from 'src/core/server';
 import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
-import { Server } from 'hapi';
 import { ObservabilityPluginSetup } from '../../../observability/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FetchOptions } from '../../public/services/rest/callApi';
 import { SecurityPluginSetup } from '../../../security/server';
 import { MlPluginSetup } from '../../../ml/server';
+import { FetchOptions } from '../../common/fetch_options';
 import { APMConfig } from '..';
 
 export interface Params {
@@ -57,12 +55,6 @@ export interface Route<
     request: KibanaRequest;
   }) => Promise<TReturn>;
 }
-
-export type APMLegacyServer = Pick<Server, 'savedObjects' | 'log'> & {
-  plugins: {
-    elasticsearch: Server['plugins']['elasticsearch'];
-  };
-};
 
 export type APMRequestHandlerContext<
   TDecodedParams extends { [key in keyof Params]: any } = {}

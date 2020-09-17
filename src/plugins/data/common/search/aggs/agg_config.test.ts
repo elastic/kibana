@@ -25,8 +25,7 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { IIndexPatternFieldList } from '../../index_patterns/fields';
+import { IndexPattern, IndexPatternField, IIndexPatternFieldList } from '../../index_patterns';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
@@ -67,6 +66,9 @@ describe('AggConfig', () => {
         getByName: (name: string) => fields.find((f) => f.name === name),
         filter: () => fields,
       } as unknown) as IndexPattern['fields'],
+      getFormatterForField: (field: IndexPatternField) => ({
+        toJSON: () => ({}),
+      }),
     } as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });

@@ -37,6 +37,7 @@ import {
 import { AlertType } from '../common/alert_types';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
+import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -45,7 +46,7 @@ export interface ApmPluginSetupDeps {
   alerts?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
   observability?: ObservabilityPluginSetup;
@@ -57,6 +58,7 @@ export interface ApmPluginStartDeps {
   home: void;
   licensing: void;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  embeddable: EmbeddableStart;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -69,8 +71,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
 
-    pluginSetupDeps.home.environment.update({ apmUi: true });
-    pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+    if (pluginSetupDeps.home) {
+      pluginSetupDeps.home.environment.update({ apmUi: true });
+      pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+    }
 
     if (plugins.observability) {
       const getApmDataHelper = async () => {
@@ -101,7 +105,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       id: 'apm',
       title: 'APM',
       order: 8300,
-      euiIconType: 'apmApp',
+      euiIconType: 'logoObservability',
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -121,16 +125,23 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       id: 'csm',
       title: 'Client Side Monitoring',
       order: 8500,
+      euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application/csmApp'),
           core.getStartServices(),
         ]);
 
-        return renderApp(coreStart, pluginSetupDeps, params, config);
+        return renderApp(
+          coreStart,
+          pluginSetupDeps,
+          params,
+          config,
+          corePlugins as ApmPluginStartDeps
+        );
       },
     });
   }
@@ -143,8 +154,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Error rate',
       }),
       iconClass: 'bell',
-      alertParamsExpression: lazy(() =>
-        import('./components/shared/ErrorRateAlertTrigger')
+      alertParamsExpression: lazy(
+        () => import('./components/shared/ErrorRateAlertTrigger')
       ),
       validate: () => ({
         errors: [],
@@ -158,8 +169,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         defaultMessage: 'Transaction duration',
       }),
       iconClass: 'bell',
-      alertParamsExpression: lazy(() =>
-        import('./components/shared/TransactionDurationAlertTrigger')
+      alertParamsExpression: lazy(
+        () => import('./components/shared/TransactionDurationAlertTrigger')
+      ),
+      validate: () => ({
+        errors: [],
+      }),
+      requiresAppContext: true,
+    });
+
+    plugins.triggers_actions_ui.alertTypeRegistry.register({
+      id: AlertType.TransactionDurationAnomaly,
+      name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
+        defaultMessage: 'Transaction duration anomaly',
+      }),
+      iconClass: 'bell',
+      alertParamsExpression: lazy(
+        () =>
+          import('./components/shared/TransactionDurationAnomalyAlertTrigger')
       ),
       validate: () => ({
         errors: [],

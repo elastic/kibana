@@ -13,6 +13,7 @@ describe('IndexParamsFields renders', () => {
     const actionParams = {
       documents: [{ test: 123 }],
     };
+
     const wrapper = mountWithIntl(
       <ParamsFields
         actionParams={actionParams}

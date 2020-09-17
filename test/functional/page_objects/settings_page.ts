@@ -282,9 +282,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async clickIndexPatternLogstash() {
-      const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
+    async clickIndexPatternByName(name: string) {
+      const indexLink = await find.byXPath(`//a[descendant::*[text()='${name}']]`);
       await indexLink.click();
+    }
+
+    async clickIndexPatternLogstash() {
+      await this.clickIndexPatternByName('logstash-*');
     }
 
     async getIndexPatternList() {
@@ -352,6 +356,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async clickAddNewIndexPatternButton() {
+      await PageObjects.common.scrollKibanaBodyTop();
       await testSubjects.click('createIndexPatternButton');
     }
 

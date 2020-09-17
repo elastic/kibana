@@ -33,10 +33,6 @@ export interface MonitoringElasticsearchConfig {
   hosts: string[];
 }
 
-export interface LegacyAPI {
-  getServerStatus: () => string;
-}
-
 export interface PluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
@@ -77,7 +73,6 @@ export interface LegacyShimDependencies {
 }
 
 export interface IBulkUploader {
-  setKibanaStatusGetter: (getter: () => string | undefined) => void;
   getKibanaStats: () => any;
 }
 

@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
-import { DetailItem } from '../../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
@@ -28,7 +28,7 @@ CollapseLink.displayName = 'CollapseLink';
 interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
-  data: DetailItem[];
+  data: TimelineEventsDetailsItem[];
   id: string;
   view: View;
   onEventToggled: () => void;

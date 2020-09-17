@@ -523,6 +523,4 @@ export interface CallCluster {
 export interface ElasticsearchPlugin {
   status: { on: (status: string, cb: () => void) => void };
   getCluster(name: string): Cluster;
-  createCluster(name: string, config: ClusterConfig): Cluster;
-  waitUntilReady(): Promise<void>;
 }

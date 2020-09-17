@@ -9,15 +9,21 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['maps']);
+  const security = getService('security');
 
   describe('Add layer panel', () => {
     const LAYER_NAME = 'World Countries';
 
     before(async () => {
+      await security.testUser.setRoles(['global_maps_all']);
       await PageObjects.maps.openNewMap();
       await PageObjects.maps.clickAddLayer();
       await PageObjects.maps.selectEMSBoundariesSource();
       await PageObjects.maps.selectVectorLayer(LAYER_NAME);
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should show unsaved layer in layer TOC', async () => {

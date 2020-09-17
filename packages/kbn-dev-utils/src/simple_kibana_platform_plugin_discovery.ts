@@ -20,67 +20,37 @@
 import Path from 'path';
 
 import globby from 'globby';
-import loadJsonFile from 'load-json-file';
 
-export interface KibanaPlatformPlugin {
-  readonly directory: string;
-  readonly manifestPath: string;
-  readonly manifest: {
-    id: string;
-    [key: string]: unknown;
-  };
-}
+import { parseKibanaPlatformPlugin } from './parse_kibana_platform_plugin';
 
 /**
  * Helper to find the new platform plugins.
  */
-export function simpleKibanaPlatformPluginDiscovery(scanDirs: string[], paths: string[]) {
+export function simpleKibanaPlatformPluginDiscovery(scanDirs: string[], pluginPaths: string[]) {
   const patterns = Array.from(
     new Set([
       // find kibana.json files up to 5 levels within the scan dir
       ...scanDirs.reduce(
         (acc: string[], dir) => [
           ...acc,
-          `${dir}/*/kibana.json`,
-          `${dir}/*/*/kibana.json`,
-          `${dir}/*/*/*/kibana.json`,
-          `${dir}/*/*/*/*/kibana.json`,
-          `${dir}/*/*/*/*/*/kibana.json`,
+          Path.resolve(dir, '*/kibana.json'),
+          Path.resolve(dir, '*/*/kibana.json'),
+          Path.resolve(dir, '*/*/*/kibana.json'),
+          Path.resolve(dir, '*/*/*/*/kibana.json'),
+          Path.resolve(dir, '*/*/*/*/*/kibana.json'),
         ],
         []
       ),
-      ...paths.map((path) => `${path}/kibana.json`),
+      ...pluginPaths.map((path) => Path.resolve(path, `kibana.json`)),
     ])
   );
 
   const manifestPaths = globby.sync(patterns, { absolute: true }).map((path) =>
-    // absolute paths returned from globby are using normalize or something so the path separators are `/` even on windows, Path.resolve solves this
+    // absolute paths returned from globby are using normalize or
+    // something so the path separators are `/` even on windows,
+    // Path.resolve solves this
     Path.resolve(path)
   );
 
-  return manifestPaths.map(
-    (manifestPath): KibanaPlatformPlugin => {
-      if (!Path.isAbsolute(manifestPath)) {
-        throw new TypeError('expected new platform manifest path to be absolute');
-      }
-
-      const manifest = loadJsonFile.sync(manifestPath);
-      if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
-        throw new TypeError('expected new platform plugin manifest to be a JSON encoded object');
-      }
-
-      if (typeof manifest.id !== 'string') {
-        throw new TypeError('expected new platform plugin manifest to have a string id');
-      }
-
-      return {
-        directory: Path.dirname(manifestPath),
-        manifestPath,
-        manifest: {
-          ...manifest,
-          id: manifest.id,
-        },
-      };
-    }
-  );
+  return manifestPaths.map(parseKibanaPlatformPlugin);
 }

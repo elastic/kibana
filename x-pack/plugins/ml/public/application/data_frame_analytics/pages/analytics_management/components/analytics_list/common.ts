@@ -26,6 +26,7 @@ export type Clause = Parameters<typeof Query['isMust']>[0];
 type ExtractClauseType<T> = T extends (x: any) => x is infer Type ? Type : never;
 export type TermClause = ExtractClauseType<typeof Ast['Term']['isInstance']>;
 export type FieldClause = ExtractClauseType<typeof Ast['Field']['isInstance']>;
+export type Value = Parameters<typeof Ast['Term']['must']>[0];
 
 interface ProgressSection {
   phase: string;

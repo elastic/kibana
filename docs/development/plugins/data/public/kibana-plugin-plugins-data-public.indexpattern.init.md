@@ -7,15 +7,8 @@
 <b>Signature:</b>
 
 ```typescript
-init(forceFieldRefresh?: boolean): Promise<this>;
+init(): Promise<this>;
 ```
-
-## Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  forceFieldRefresh | <code>boolean</code> |  |
-
 <b>Returns:</b>
 
 `Promise<this>`

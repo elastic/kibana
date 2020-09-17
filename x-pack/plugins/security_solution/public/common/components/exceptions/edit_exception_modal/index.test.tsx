@@ -11,7 +11,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { act } from 'react-dom/test-utils';
 
 import { EditExceptionModal } from './';
-import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
+import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import {
   stubIndexPattern,
@@ -19,7 +19,6 @@ import {
 } from 'src/plugins/data/common/index_patterns/index_pattern.stub';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { createUseKibanaMock } from '../../../mock/kibana_react';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { EntriesArray } from '../../../../../../lists/common/schemas/types';
 import * as builder from '../builder';
@@ -30,8 +29,6 @@ jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../builder');
-
-const useKibanaMock = useKibana as jest.Mock;
 
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -45,10 +42,6 @@ describe('When the edit exception modal is opened', () => {
       .spyOn(builder, 'ExceptionBuilderComponent')
       .mockReturnValue(<></>);
 
-    const kibanaMock = createUseKibanaMock()();
-    useKibanaMock.mockImplementation(() => ({
-      ...kibanaMock,
-    }));
     (useSignalIndex as jest.Mock).mockReturnValue({
       loading: false,
       signalIndexName: 'test-signal',
@@ -84,6 +77,7 @@ describe('When the edit exception modal is opened', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={[]}
+            ruleId="123"
             ruleName={ruleName}
             exceptionListType={'endpoint'}
             onCancel={jest.fn()}
@@ -112,6 +106,7 @@ describe('When the edit exception modal is opened', () => {
           <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
             <EditExceptionModal
               ruleIndices={['filebeat-*']}
+              ruleId="123"
               ruleName={ruleName}
               exceptionListType={'endpoint'}
               onCancel={jest.fn()}
@@ -154,6 +149,7 @@ describe('When the edit exception modal is opened', () => {
           <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
             <EditExceptionModal
               ruleIndices={['filebeat-*']}
+              ruleId="123"
               ruleName={ruleName}
               exceptionListType={'endpoint'}
               onCancel={jest.fn()}
@@ -197,6 +193,7 @@ describe('When the edit exception modal is opened', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={['filebeat-*']}
+            ruleId="123"
             ruleName={ruleName}
             exceptionListType={'detection'}
             onCancel={jest.fn()}
@@ -236,6 +233,7 @@ describe('When the edit exception modal is opened', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <EditExceptionModal
             ruleIndices={['filebeat-*']}
+            ruleId="123"
             ruleName={ruleName}
             exceptionListType={'detection'}
             onCancel={jest.fn()}

@@ -11,7 +11,8 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaContext, IKibanaContext } from '../index';
-import { AppLogic, IAppLogicActions, IAppLogicValues } from './app_logic';
+import { HttpLogic } from '../shared/http';
+import { AppLogic } from './app_logic';
 import { IInitialAppData } from '../../../common/types';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
@@ -27,6 +28,8 @@ import {
 } from './routes';
 
 import { SetupGuide } from './components/setup_guide';
+import { ErrorConnecting } from './components/error_connecting';
+import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
@@ -46,8 +49,9 @@ export const AppSearchUnconfigured: React.FC = () => (
 );
 
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic) as IAppLogicValues;
-  const { initializeAppData } = useActions(AppLogic) as IAppLogicActions;
+  const { hasInitialized } = useValues(AppLogic);
+  const { initializeAppData } = useActions(AppLogic);
+  const { errorConnecting } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -60,14 +64,21 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
       </Route>
       <Route>
         <Layout navigation={<AppSearchNav />}>
-          <Switch>
-            <Route exact path={ROOT_PATH}>
-              <Redirect to={ENGINES_PATH} />
-            </Route>
-            <Route exact path={ENGINES_PATH}>
-              <EngineOverview />
-            </Route>
-          </Switch>
+          {errorConnecting ? (
+            <ErrorConnecting />
+          ) : (
+            <Switch>
+              <Route exact path={ROOT_PATH}>
+                <Redirect to={ENGINES_PATH} />
+              </Route>
+              <Route exact path={ENGINES_PATH}>
+                <EngineOverview />
+              </Route>
+              <Route>
+                <NotFound product={APP_SEARCH_PLUGIN} />
+              </Route>
+            </Switch>
+          )}
         </Layout>
       </Route>
     </Switch>

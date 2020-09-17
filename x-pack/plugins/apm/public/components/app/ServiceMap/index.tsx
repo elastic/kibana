@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTheme } from '../../../hooks/useTheme';
 import {
   invalidLicenseMessage,
-  isValidPlatinumLicense,
+  isActivePlatinumLicense,
 } from '../../../../common/service_map';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
@@ -36,7 +36,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
   const { data = { elements: [] } } = useFetcher(() => {
     // When we don't have a license or a valid license, don't make the request.
-    if (!license || !isValidPlatinumLicense(license)) {
+    if (!license || !isActivePlatinumLicense(license)) {
       return;
     }
 
@@ -57,7 +57,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     }
   }, [license, serviceName, urlParams]);
 
-  const { ref, height, width } = useRefDimensions();
+  const { ref, height } = useRefDimensions();
 
   useTrackPageview({ app: 'apm', path: 'service_map' });
   useTrackPageview({ app: 'apm', path: 'service_map', delay: 15000 });
@@ -66,7 +66,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     return null;
   }
 
-  return isValidPlatinumLicense(license) ? (
+  return isActivePlatinumLicense(license) ? (
     <div
       style={{
         height: height - parseInt(theme.eui.gutterTypes.gutterLarge, 10),
@@ -78,7 +78,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         height={height}
         serviceName={serviceName}
         style={getCytoscapeDivStyle(theme)}
-        width={width}
       >
         <Controls />
         <BetaBadge />

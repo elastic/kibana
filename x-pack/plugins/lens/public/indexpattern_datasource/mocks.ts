@@ -11,6 +11,7 @@ export const createMockedIndexPattern = (): IndexPattern => ({
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
+  hasRestrictions: false,
   fields: [
     {
       name: 'timestamp',
@@ -63,6 +64,16 @@ export const createMockedIndexPattern = (): IndexPattern => ({
       searchable: true,
       esTypes: ['keyword'],
     },
+    {
+      name: 'scripted',
+      displayName: 'Scripted',
+      type: 'string',
+      searchable: true,
+      aggregatable: true,
+      scripted: true,
+      lang: 'painless',
+      script: '1234',
+    },
   ],
 });
 
@@ -70,6 +81,7 @@ export const createMockedRestrictedIndexPattern = () => ({
   id: '2',
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
+  hasRestrictions: true,
   fields: [
     {
       name: 'timestamp',
@@ -93,6 +105,8 @@ export const createMockedRestrictedIndexPattern = () => ({
       searchable: true,
       scripted: true,
       esTypes: ['keyword'],
+      lang: 'painless',
+      script: '1234',
     },
   ],
   typeMeta: {

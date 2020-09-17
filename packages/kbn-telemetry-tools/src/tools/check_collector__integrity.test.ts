@@ -20,6 +20,7 @@
 import { cloneDeep } from 'lodash';
 import * as ts from 'typescript';
 import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
+import { parsedIndexedInterfaceWithNoMatchingSchema } from './__fixture__/parsed_indexed_interface_with_not_matching_schema';
 import { checkCompatibleTypeDescriptor, checkMatchingMapping } from './check_collector_integrity';
 import * as path from 'path';
 import { readFile } from 'fs';
@@ -80,6 +81,20 @@ describe('checkCompatibleTypeDescriptor', () => {
   it('returns no diff on compatible type descriptor with mapping', () => {
     const incompatibles = checkCompatibleTypeDescriptor([parsedWorkingCollector]);
     expect(incompatibles).toHaveLength(0);
+  });
+
+  it('returns diff on indexed interface with no matching schema', () => {
+    const incompatibles = checkCompatibleTypeDescriptor([
+      parsedIndexedInterfaceWithNoMatchingSchema,
+    ]);
+    expect(incompatibles).toHaveLength(1);
+    const { diff, message } = incompatibles[0];
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    expect(diff).toEqual({ '.@@INDEX@@.count_2.kind': 'number' });
+    expect(message).toHaveLength(1);
+    expect(message).toEqual([
+      'incompatible Type key (Usage..@@INDEX@@.count_2): expected (undefined) got ("number").',
+    ]);
   });
 
   describe('Interface Change', () => {

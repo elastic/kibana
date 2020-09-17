@@ -38,6 +38,7 @@ function UsedByIcon({ usedBy }) {
         aria-label={i18n.translate('xpack.ml.settings.filterLists.table.inUseAriaLabel', {
           defaultMessage: 'In use',
         })}
+        data-test-subj="mlFilterListUsedByIcon inUse"
       />
     );
   } else {
@@ -47,6 +48,7 @@ function UsedByIcon({ usedBy }) {
         aria-label={i18n.translate('xpack.ml.settings.filterLists.table.notInUseAriaLabel', {
           defaultMessage: 'Not in use',
         })}
+        data-test-subj="mlFilterListUsedByIcon notInUse"
       />
     );
   }
@@ -82,10 +84,16 @@ function getColumns() {
         defaultMessage: 'ID',
       }),
       render: (id) => (
-        <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`}>{id}</EuiLink>
+        <EuiLink
+          href={`#/settings/filter_lists/edit_filter_list/${id}`}
+          data-test-subj="mlEditFilterListLink"
+        >
+          {id}
+        </EuiLink>
       ),
       sortable: true,
       scope: 'row',
+      'data-test-subj': 'mlFilterListColumnId',
     },
     {
       field: 'description',
@@ -93,6 +101,7 @@ function getColumns() {
         defaultMessage: 'Description',
       }),
       sortable: true,
+      'data-test-subj': 'mlFilterListColumnDescription',
     },
     {
       field: 'item_count',
@@ -100,6 +109,7 @@ function getColumns() {
         defaultMessage: 'Item count',
       }),
       sortable: true,
+      'data-test-subj': 'mlFilterListColumnItemCount',
     },
     {
       field: 'used_by',
@@ -108,6 +118,7 @@ function getColumns() {
       }),
       render: (usedBy) => <UsedByIcon usedBy={usedBy} />,
       sortable: true,
+      'data-test-subj': 'mlFilterListColumnInUse',
     },
   ];
 
@@ -189,7 +200,7 @@ export function FilterListsTable({
           </EuiFlexGroup>
         </React.Fragment>
       ) : (
-        <React.Fragment>
+        <div data-test-subj="mlFilterListTableContainer">
           <EuiInMemoryTable
             className="ml-filter-lists-table"
             items={filterLists}
@@ -201,8 +212,11 @@ export function FilterListsTable({
             selection={tableSelection}
             isSelectable={true}
             data-test-subj="mlFilterListsTable"
+            rowProps={(item) => ({
+              'data-test-subj': `mlCalendarListRow row-${item.filter_id}`,
+            })}
           />
-        </React.Fragment>
+        </div>
       )}
     </React.Fragment>
   );
