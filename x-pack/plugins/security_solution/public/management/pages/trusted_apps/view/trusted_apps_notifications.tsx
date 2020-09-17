@@ -17,7 +17,6 @@ const getDeletionErrorMessage = (error: ServerApiError, entry: Immutable<Trusted
   return {
     title: i18n.translate('xpack.securitySolution.trustedapps.deletionError.title', {
       defaultMessage: 'Removal failure',
-      values: { name: entry.name },
     }),
     text: i18n.translate('xpack.securitySolution.trustedapps.deletionError.text', {
       defaultMessage:
