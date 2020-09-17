@@ -469,7 +469,7 @@ describe('Lens App', () => {
       expect(props.redirectTo).toHaveBeenCalled();
     });
 
-    it('adds to the recently viewed list on load', async () => {
+    it('adds to the recently accessed list on load', async () => {
       const { component, services } = mountWith({});
 
       await act(async () => {
@@ -695,7 +695,7 @@ describe('Lens App', () => {
         expect(props.redirectTo).toHaveBeenCalledWith('aaa');
       });
 
-      it('adds to the recently viewed list on save', async () => {
+      it('adds to the recently accessed list on save', async () => {
         const { services } = await save({
           initialSavedObjectId: undefined,
           newCopyOnSave: false,

@@ -208,7 +208,7 @@ export function App({
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
-    const byValueMode =
+    const isByValueMode =
       // Temporarily required until the 'by value' paradigm is default.
       dashboardFeatureFlag.allowByValueEmbeddables &&
       state.isLinkedToOriginatingApp &&
@@ -222,7 +222,7 @@ export function App({
         text: getOriginatingAppName(),
       });
     }
-    if (!byValueMode) {
+    if (!isByValueMode) {
       breadcrumbs.push({
         href: application.getUrlForApp('visualize'),
         onClick: (e) => {
@@ -238,8 +238,8 @@ export function App({
       defaultMessage: 'Create',
     });
     if (state.persistedDoc) {
-      currentDocTitle = byValueMode
-        ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit Visualization' })
+      currentDocTitle = isByValueMode
+        ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
         : state.persistedDoc.title;
     }
     breadcrumbs.push({ text: currentDocTitle });
@@ -377,6 +377,7 @@ export function App({
       )) as LensEmbeddableInput;
 
       if (saveProps.returnToOrigin && redirectToOrigin) {
+        // disabling the validation on app leave because the document has been saved.
         onAppLeave((actions) => {
           return actions.default();
         });
@@ -439,6 +440,7 @@ export function App({
     actions: {
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
+          // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
             return actions.default();
           });

@@ -32,14 +32,19 @@ import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/pub
 import { EditorFrameInstance } from '..';
 
 export interface LensAppState {
-  indicateNoData: boolean;
   isLoading: boolean;
-  isSaveModalVisible: boolean;
-  indexPatternsForTopNav: IndexPattern[];
-  currentInput?: LensEmbeddableInput;
-  isLinkedToOriginatingApp?: boolean;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
+  isSaveModalVisible: boolean;
+
+  // Used to show a popover that guides the user towards changing the date range when no data is available.
+  indicateNoData: boolean;
+
+  // index patterns used to determine which filters are available in the top nav.
+  indexPatternsForTopNav: IndexPattern[];
+
+  // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
+  isLinkedToOriginatingApp?: boolean;
 
   // Properties needed to interface with TopNav
   dateRange: {
@@ -64,7 +69,11 @@ export interface LensAppProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   redirectTo: (savedObjectId?: string) => void;
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
+
+  // The initial input passed in by the container when editing. Can be either by reference or by value.
   initialInput?: LensEmbeddableInput;
+
+  // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
 }
 
