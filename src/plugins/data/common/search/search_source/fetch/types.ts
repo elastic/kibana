@@ -19,7 +19,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { LegacyFetchHandlers } from '../legacy/types';
-import { GetConfigFn } from '../../types';
+import { GetConfigFn } from '../../../types';
 
 /**
  * @internal

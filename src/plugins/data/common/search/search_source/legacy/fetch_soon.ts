@@ -18,9 +18,9 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { UI_SETTINGS } from '../../constants';
-import { FetchHandlers } from '../fetch/types';
-import { ISearchOptions, SearchRequest } from '../index';
+import { UI_SETTINGS } from '../../../constants';
+import { FetchHandlers, SearchRequest } from '../fetch';
+import { ISearchOptions } from '../../index';
 import { callClient } from './call_client';
 
 /**

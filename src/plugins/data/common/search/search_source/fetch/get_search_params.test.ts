@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
-import { LegacyFetchHandlers } from './types';
+import { UI_SETTINGS } from '../../../constants';
+import { GetConfigFn } from '../../../types';
+import { getSearchParams } from './get_search_params';
 
-/**
- * Wrapper for calling the internal msearch endpoint from the client.
- * This is needed to abstract away differences in the http service
- * between client & server.
- *
- * @internal
- */
-export function getCallMsearch({ http }: { http: HttpStart }): LegacyFetchHandlers['callMsearch'] {
-  return async ({ body, signal }) => {
-    return http.post('/internal/_msearch', {
-      body: JSON.stringify(body),
-      signal,
-    });
-  };
+function getConfigStub(config: any = {}): GetConfigFn {
+  return (key) => config[key];
 }
+
+describe('getSearchParams', () => {
+  test('includes custom preference', () => {
+    const config = getConfigStub({
+      [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
+      [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
+    });
+    const searchParams = getSearchParams(config);
+    expect(searchParams.preference).toBe('aaa');
+  });
+});

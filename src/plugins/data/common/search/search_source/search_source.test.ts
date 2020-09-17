@@ -20,7 +20,7 @@
 import { Observable, BehaviorSubject } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
 import { GetConfigFn } from '../../types';
-import { fetchSoon } from '../legacy';
+import { fetchSoon } from './legacy';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 
 jest.mock('../legacy', () => ({

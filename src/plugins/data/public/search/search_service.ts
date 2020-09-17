@@ -28,7 +28,7 @@ import {
   SearchSource,
   SearchSourceDependencies,
 } from '../../common/search';
-import { getCallMsearch } from '../../common/search/legacy/call_msearch';
+import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';

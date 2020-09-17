@@ -18,10 +18,10 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { UI_SETTINGS } from '../../constants';
-import { GetConfigFn } from '../../types';
-import { FetchHandlers } from '../fetch/types';
-import { ISearchOptions, SearchRequest } from '../index';
+import { UI_SETTINGS } from '../../../constants';
+import { GetConfigFn } from '../../../types';
+import { FetchHandlers, SearchRequest } from '../fetch';
+import { ISearchOptions } from '../../index';
 import { callClient } from './call_client';
 import { fetchSoon } from './fetch_soon';
 
