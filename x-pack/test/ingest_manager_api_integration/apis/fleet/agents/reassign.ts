@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         .get(`/api/ingest_manager/fleet/agents`)
         .set('kbn-xsrf', 'xxx');
       expect(body.total).to.eql(4);
-      body.list.forEach((agent) => {
+      body.list.forEach((agent: any) => {
         expect(agent.policy_id).to.eql('policy2');
       });
     });
