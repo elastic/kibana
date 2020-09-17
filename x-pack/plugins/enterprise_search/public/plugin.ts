@@ -5,26 +5,25 @@
  */
 
 import {
-  Plugin,
-  PluginInitializerContext,
+  AppMountParameters,
   CoreSetup,
   CoreStart,
-  AppMountParameters,
   HttpSetup,
+  Plugin,
+  PluginInitializerContext,
 } from 'src/core/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-
-import { IInitialAppData } from '../common/types';
 import {
-  ENTERPRISE_SEARCH_PLUGIN,
   APP_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
+import { IInitialAppData } from '../common/types';
 import { ExternalUrl, IExternalUrl } from './applications/shared/enterprise_search_url';
 
 export interface ClientConfigType {
@@ -54,6 +53,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: ENTERPRISE_SEARCH_PLUGIN.ID,
       title: ENTERPRISE_SEARCH_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
       appRoute: ENTERPRISE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -73,6 +73,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: APP_SEARCH_PLUGIN.ID,
       title: APP_SEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
       appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -92,6 +93,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: WORKPLACE_SEARCH_PLUGIN.ID,
       title: WORKPLACE_SEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
       appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {

@@ -32,7 +32,7 @@ export async function fetchSoon(
   options: ISearchOptions,
   fetchHandlers: FetchHandlers
 ) {
-  const msToDelay = fetchHandlers.config.get(UI_SETTINGS.COURIER_BATCH_SEARCHES) ? 50 : 0;
+  const msToDelay = fetchHandlers.getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES) ? 50 : 0;
   return delayedFetch(request, options, fetchHandlers, msToDelay);
 }
 

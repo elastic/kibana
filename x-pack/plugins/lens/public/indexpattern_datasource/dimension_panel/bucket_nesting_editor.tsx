@@ -99,6 +99,7 @@ export function BucketNestingEditor({
           label={i18n.translate('xpack.lens.indexPattern.groupingControlLabel', {
             defaultMessage: 'Grouping',
           })}
+          labelType="legend"
         >
           <>
             <EuiRadio

@@ -236,22 +236,22 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
-        global_dashboard_read: {
+        global_discover_all: {
           kibana: [
             {
               feature: {
-                dashboard: ['read'],
+                discover: ['all'],
               },
               spaces: ['*'],
             },
           ],
         },
 
-        global_dashboard_all: {
+        global_dashboard_read: {
           kibana: [
             {
               feature: {
-                dashboard: ['all'],
+                dashboard: ['read'],
               },
               spaces: ['*'],
             },
@@ -309,11 +309,53 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        global_maps_read: {
+          kibana: [
+            {
+              feature: {
+                maps: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         geoshape_data_reader: {
           elasticsearch: {
             indices: [
               {
                 names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_points_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_points*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_shapes_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        meta_for_geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['meta_for_geo_shapes*'],
                 privileges: ['read', 'view_index_metadata'],
               },
             ],
@@ -356,6 +398,7 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        // using this role even for remote clusters
         global_ccr_role: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],
