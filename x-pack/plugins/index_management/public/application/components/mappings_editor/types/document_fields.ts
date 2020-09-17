@@ -59,6 +59,7 @@ export type MainType =
   | 'geo_point'
   | 'geo_shape'
   | 'token_count'
+  | 'histogram'
   | 'constant_keyword'
   | 'wildcard'
   /**
