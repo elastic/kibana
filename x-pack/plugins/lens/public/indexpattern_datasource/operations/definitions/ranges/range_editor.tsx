@@ -134,6 +134,7 @@ const BaseRangeEditor = ({
                       values: { histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS },
                     })}
                     type="questionInCircle"
+                    color="subdued"
                   />
                 </>
               }
