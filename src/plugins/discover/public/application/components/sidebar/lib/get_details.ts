@@ -25,8 +25,11 @@ export function getDetails(
   field: IndexPatternField,
   hits: Array<Record<string, unknown>>,
   columns: string[],
-  indexPattern: IndexPattern
+  indexPattern?: IndexPattern
 ) {
+  if (!indexPattern) {
+    return {};
+  }
   const details = {
     ...fieldCalculator.getFieldValueCounts({
       hits,

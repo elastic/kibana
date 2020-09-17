@@ -71,6 +71,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  constant_keyword: {
+    value: 'constant_keyword',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.constantKeywordDescription', {
+      defaultMessage: 'Constant keyword',
+    }),
+    documentation: {
+      main: '/keyword.html#constant-keyword-field-type',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.constantKeywordLongDescription"
+          defaultMessage="Constant keyword fields are a special type of keyword fields for fields that contain the same keyword across all documents in the index. Supports the same queries and aggregations as {keyword} fields."
+          values={{
+            keyword: <EuiCode inline>{'keyword'}</EuiCode>,
+          }}
+        />
+      </p>
+    ),
+  },
   numeric: {
     value: 'numeric',
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.numericDescription', {
@@ -822,6 +842,7 @@ export const MAIN_TYPES: MainType[] = [
   'binary',
   'boolean',
   'completion',
+  'constant_keyword',
   'date',
   'date_nanos',
   'dense_vector',
