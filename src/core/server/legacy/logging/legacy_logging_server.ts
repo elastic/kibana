@@ -19,10 +19,8 @@
 
 import { ServerExtType, Server } from 'hapi';
 import Podium from 'podium';
-import { setupLogging, attachMetaData } from '@kbn/legacy-logging';
+import { setupLogging, attachMetaData, legacyLoggingConfigSchema } from '@kbn/legacy-logging';
 import { LogLevel, LogRecord } from '@kbn/logging';
-// @ts-expect-error: implicit any for JS file
-import { Config } from '../../../../legacy/server/config';
 import { LegacyVars } from '../../types';
 
 const isEmptyObject = (obj: object) => Object.keys(obj).length === 0;
@@ -82,18 +80,15 @@ export class LegacyLoggingServer {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
-    const config = {
-      logging: {
-        ...legacyLoggingConfig,
-        events: {
-          ...legacyLoggingConfig.events,
-          ops: '__no-ops__',
-        },
+    const { value: loggingConfig } = legacyLoggingConfigSchema.validate({
+      ...legacyLoggingConfig,
+      events: {
+        ...legacyLoggingConfig.events,
+        ops: '__no-ops__',
       },
-    };
-    const legacyConfig = Config.withDefaultSchema(config);
+    });
 
-    setupLogging((this as unknown) as Server, legacyConfig.get('logging'), 2147483647);
+    setupLogging((this as unknown) as Server, loggingConfig, 2147483647);
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {
