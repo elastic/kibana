@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './types';
+export interface CursorPosition {
+  start: number;
+  end: number;
+}
