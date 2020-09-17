@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const TEST_FILTER_COLUMN_NAMES = [['extension'], ['geo.src']];
+  const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
   describe('Discover a11y tests', () => {
     before(async () => {
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test on tables with columns view', async () => {
-      for (const [columnName] of TEST_FILTER_COLUMN_NAMES) {
+      for (const columnName of TEST_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItemToggle(columnName);
       }
       await a11y.testAppSnapshot();

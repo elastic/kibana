@@ -118,11 +118,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async loadSavedSearch(searchName: string) {
-      // data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
       await this.openLoadSavedSearchPanel();
-      // const searchLink = await find.byButtonText(searchName);
-      //
-      // await searchLink.click();
       await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
       await header.waitUntilLoadingHasFinished();
     }
