@@ -28,7 +28,96 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
   ...mockAlertsSearchStrategyResponse,
   inspect: {
     dsl: [
-      '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "alertsGroup": {\n        "terms": {\n          "field": "event.module",\n          "missing": "All others",\n          "order": {\n            "_count": "desc"\n          },\n          "size": 10\n        },\n        "aggs": {\n          "alerts": {\n            "date_histogram": {\n              "field": "@timestamp",\n              "fixed_interval": "2700000ms",\n              "min_doc_count": 0,\n              "extended_bounds": {\n                "min": 1599574984482,\n                "max": 1599661384482\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"host.name\\"}}],\\"minimum_should_match\\":1}}]}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "bool": {\n              "filter": [\n                {\n                  "bool": {\n                    "should": [\n                      {\n                        "match": {\n                          "event.kind": "alert"\n                        }\n                      }\n                    ],\n                    "minimum_should_match": 1\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-08T14:23:04.482Z",\n                "lte": "2020-09-09T14:23:04.482Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
+      JSON.stringify(
+        {
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          allowNoIndices: true,
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              alertsGroup: {
+                terms: {
+                  field: 'event.module',
+                  missing: 'All others',
+                  order: { _count: 'desc' },
+                  size: 10,
+                },
+                aggs: {
+                  alerts: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: '2700000ms',
+                      min_doc_count: 0,
+                      extended_bounds: { min: 1599574984482, max: 1599661384482 },
+                    },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { match_all: {} },
+                        {
+                          bool: {
+                            filter: [
+                              {
+                                bool: {
+                                  should: [{ exists: { field: 'host.name' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          bool: {
+                            should: [{ match: { 'event.kind': 'alert' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-08T14:23:04.482Z',
+                        lte: '2020-09-09T14:23:04.482Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: true,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   matrixHistogramData: [],
@@ -105,7 +194,75 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
   ...mockAnomaliesSearchStrategyResponse,
   inspect: {
     dsl: [
-      '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggs": {\n      "anomalyActionGroup": {\n        "terms": {\n          "field": "job_id",\n          "order": {\n            "_count": "desc"\n          },\n          "size": 10\n        },\n        "aggs": {\n          "anomalies": {\n            "date_histogram": {\n              "field": "timestamp",\n              "fixed_interval": "2700000ms",\n              "min_doc_count": 0,\n              "extended_bounds": {\n                "min": 1599578075566,\n                "max": 1599664475566\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}},{\\"bool\\":{\\"should\\":[],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"result_type\\":\\"record\\"}},null,{\\"range\\":{\\"record_score\\":{\\"gte\\":50}}}],\\"should\\":[{\\"exists\\":{\\"field\\":\\"source.ip\\"}},{\\"exists\\":{\\"field\\":\\"destination.ip\\"}}],\\"must_not\\":[],\\"minimum_should_match\\":1}}",\n          {\n            "range": {\n              "timestamp": {\n                "gte": "2020-09-08T15:14:35.566Z",\n                "lte": "2020-09-09T15:14:35.566Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
+      JSON.stringify(
+        {
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          allowNoIndices: true,
+          ignoreUnavailable: true,
+          body: {
+            aggs: {
+              anomalyActionGroup: {
+                terms: { field: 'job_id', order: { _count: 'desc' }, size: 10 },
+                aggs: {
+                  anomalies: {
+                    date_histogram: {
+                      field: 'timestamp',
+                      fixed_interval: '2700000ms',
+                      min_doc_count: 0,
+                      extended_bounds: { min: 1599578075566, max: 1599664475566 },
+                    },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { match_all: {} },
+                        { bool: { should: [], minimum_should_match: 1 } },
+                        { match_phrase: { result_type: 'record' } },
+                        null,
+                        { range: { record_score: { gte: 50 } } },
+                      ],
+                      should: [
+                        { exists: { field: 'source.ip' } },
+                        { exists: { field: 'destination.ip' } },
+                      ],
+                      must_not: [],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    range: {
+                      timestamp: {
+                        gte: '2020-09-08T15:14:35.566Z',
+                        lte: '2020-09-09T15:14:35.566Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: true,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   matrixHistogramData: [],
@@ -219,7 +376,64 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
   ...mockAuthenticationsSearchStrategyResponse,
   inspect: {
     dsl: [
-      '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "eventActionGroup": {\n        "terms": {\n          "field": "event.outcome",\n          "include": [\n            "success",\n            "failure"\n          ],\n          "order": {\n            "_count": "desc"\n          },\n          "size": 2\n        },\n        "aggs": {\n          "events": {\n            "date_histogram": {\n              "field": "@timestamp",\n              "fixed_interval": "2700000ms",\n              "min_doc_count": 0,\n              "extended_bounds": {\n                "min": 1599578520325,\n                "max": 1599664920325\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "bool": {\n              "must": [\n                {\n                  "term": {\n                    "event.category": "authentication"\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-08T15:22:00.325Z",\n                "lte": "2020-09-09T15:22:00.325Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
+      JSON.stringify(
+        {
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          allowNoIndices: true,
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              eventActionGroup: {
+                terms: {
+                  field: 'event.outcome',
+                  include: ['success', 'failure'],
+                  order: { _count: 'desc' },
+                  size: 2,
+                },
+                aggs: {
+                  events: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: '2700000ms',
+                      min_doc_count: 0,
+                      extended_bounds: { min: 1599578520325, max: 1599664920325 },
+                    },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  { bool: { must: [{ term: { 'event.category': 'authentication' } }] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-08T15:22:00.325Z',
+                        lte: '2020-09-09T15:22:00.325Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: true,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   matrixHistogramData: [
@@ -728,7 +942,63 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
   ...mockEventsSearchStrategyResponse,
   inspect: {
     dsl: [
-      '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "eventActionGroup": {\n        "terms": {\n          "field": "event.action",\n          "missing": "All others",\n          "order": {\n            "_count": "desc"\n          },\n          "size": 10\n        },\n        "aggs": {\n          "events": {\n            "date_histogram": {\n              "field": "@timestamp",\n              "fixed_interval": "2700000ms",\n              "min_doc_count": 0,\n              "extended_bounds": {\n                "min": 1599581486215,\n                "max": 1599667886215\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-08T16:11:26.215Z",\n                "lte": "2020-09-09T16:11:26.215Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
+      JSON.stringify(
+        {
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          allowNoIndices: true,
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              eventActionGroup: {
+                terms: {
+                  field: 'event.action',
+                  missing: 'All others',
+                  order: { _count: 'desc' },
+                  size: 10,
+                },
+                aggs: {
+                  events: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: '2700000ms',
+                      min_doc_count: 0,
+                      extended_bounds: { min: 1599581486215, max: 1599667886215 },
+                    },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-08T16:11:26.215Z',
+                        lte: '2020-09-09T16:11:26.215Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: true,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   totalCount: 0,
@@ -1294,7 +1564,58 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
   ...mockDnsSearchStrategyResponse,
   inspect: {
     dsl: [
-      '{\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "allowNoIndices": true,\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "NetworkDns": {\n        "date_histogram": {\n          "field": "@timestamp",\n          "fixed_interval": "2700000ms"\n        },\n        "aggs": {\n          "dns": {\n            "terms": {\n              "field": "dns.question.registered_domain",\n              "order": {\n                "orderAgg": "desc"\n              },\n              "size": 10\n            },\n            "aggs": {\n              "orderAgg": {\n                "cardinality": {\n                  "field": "dns.question.name"\n                }\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-08T15:41:15.528Z",\n                "lte": "2020-09-09T15:41:15.529Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": true\n  }\n}',
+      JSON.stringify(
+        {
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          allowNoIndices: true,
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              NetworkDns: {
+                date_histogram: { field: '@timestamp', fixed_interval: '2700000ms' },
+                aggs: {
+                  dns: {
+                    terms: {
+                      field: 'dns.question.registered_domain',
+                      order: { orderAgg: 'desc' },
+                      size: 10,
+                    },
+                    aggs: { orderAgg: { cardinality: { field: 'dns.question.name' } } },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-08T15:41:15.528Z',
+                        lte: '2020-09-09T15:41:15.529Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: true,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   matrixHistogramData: [

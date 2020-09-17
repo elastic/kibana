@@ -9,8 +9,8 @@ import {
   ClassificationAnalysis,
   OutlierAnalysis,
   RegressionAnalysis,
-  ANALYSIS_CONFIG_TYPE,
 } from '../types/data_frame_analytics';
+import { ANALYSIS_CONFIG_TYPE } from '../../common/constants/data_frame_analytics';
 
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
   const keys = Object.keys(arg);

@@ -413,12 +413,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.trim', {
       defaultMessage: 'Trim',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.trim', {
+      defaultMessage: 'Removes leading and trailing whitespace from a string.',
+    }),
   },
   uppercase: {
     FieldsComponent: Uppercase,
     docLinkPath: '/uppercase-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.uppercase', {
       defaultMessage: 'Uppercase',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.uppercase', {
+      defaultMessage: 'Converts a string to uppercase.',
     }),
   },
   urldecode: {
@@ -427,12 +433,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.urldecode', {
       defaultMessage: 'URL decode',
     }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.urldecode', {
+      defaultMessage: 'Decodes a URL-encoded string.',
+    }),
   },
   user_agent: {
     FieldsComponent: UserAgent,
     docLinkPath: '/user-agent-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
       defaultMessage: 'User agent',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.description.userAgent', {
+      defaultMessage: "Extracts values from a browser's user agent string.",
     }),
   },
 };

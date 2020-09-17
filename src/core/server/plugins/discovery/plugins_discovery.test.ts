@@ -17,18 +17,19 @@
  * under the License.
  */
 
+// must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { mockPackage } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 
 import { first, map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { CoreContext } from '../../core_context';
 
 const KIBANA_ROOT = process.cwd();
@@ -94,6 +95,7 @@ describe('plugins discovery system', () => {
     };
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { envName: 'development' },
       })
@@ -382,6 +384,7 @@ describe('plugins discovery system', () => {
     const extraPluginTestPath = resolve(process.cwd(), 'my-extra-plugin');
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { dev: false, envName: 'development' },
       })
@@ -409,6 +412,7 @@ describe('plugins discovery system', () => {
     const extraPluginTestPath = resolve(process.cwd(), 'my-extra-plugin');
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { dev: false, envName: 'production' },
       })
