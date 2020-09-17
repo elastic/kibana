@@ -233,9 +233,9 @@ function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }
             {isOrigin && (
               <StyledAnalyzedEvent
                 color={descriptionText}
-                data-test-subj="resolver:node-list:node-link:origin"
+                data-test-subj="resolver:node-list:node-link:analyzed-event"
               >
-                {i18n.translate('xpack.securitySolution.resolver.panel.table.row.originLabel', {
+                {i18n.translate('xpack.securitySolution.resolver.panel.table.row.analyzedEvent', {
                   defaultMessage: 'ANALYZED EVENT',
                 })}
               </StyledAnalyzedEvent>
