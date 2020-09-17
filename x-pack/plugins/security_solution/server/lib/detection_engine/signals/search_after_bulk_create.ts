@@ -84,7 +84,7 @@ export const searchAfterAndBulkCreate = async ({
   buildRuleMessage,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const toReturn: SearchAfterAndBulkCreateReturnType = {
-    success: false,
+    success: true,
     searchAfterTimes: [],
     bulkCreateTimes: [],
     lastLookBackDate: null,
@@ -167,7 +167,6 @@ export const searchAfterAndBulkCreate = async ({
               } was 0, exiting and moving on to next tuple`
             )
           );
-          toReturn.success = true;
           break;
         }
         toReturn.lastLookBackDate =
@@ -246,9 +245,11 @@ export const searchAfterAndBulkCreate = async ({
             sortId = filteredEvents.hits.hits[0].sort
               ? filteredEvents.hits.hits[0].sort[0]
               : undefined;
+            toReturn.success = toReturn.success && bulkSuccess;
+            toReturn.errors = [...new Set([...toReturn.errors, ...bulkErrors])];
           } else {
             logger.debug(buildRuleMessage('sortIds was empty on filteredEvents'));
-            toReturn.success = toReturn.success ? bulkSuccess : false;
+            toReturn.success = toReturn.success && bulkSuccess;
             toReturn.errors = [...new Set([...toReturn.errors, ...bulkErrors])];
             break;
           }
@@ -263,7 +264,6 @@ export const searchAfterAndBulkCreate = async ({
             sortId = searchResult.hits.hits[0].sort ? searchResult.hits.hits[0].sort[0] : undefined;
           } else {
             logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
-            toReturn.success = true;
             break;
           }
         }
@@ -275,6 +275,5 @@ export const searchAfterAndBulkCreate = async ({
     }
   }
   logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
-  toReturn.success = true;
   return toReturn;
 };

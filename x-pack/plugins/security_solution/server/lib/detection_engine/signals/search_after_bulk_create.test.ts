@@ -22,6 +22,7 @@ import uuid from 'uuid';
 import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { BulkResponse } from './types';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -810,5 +811,87 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
     expect(lastLookBackDate).toEqual(null);
+  });
+
+  test('if returns error array when singleSearchAfter returns errors', async () => {
+    const sampleParams = sampleRuleAlertParams(10);
+    const bulkItem: BulkResponse = {
+      took: 100,
+      errors: true,
+      items: [
+        {
+          create: {
+            _version: 1,
+            _index: 'index-123',
+            _id: 'id-123',
+            status: 201,
+            error: {
+              type: 'network',
+              reason: 'error on creation',
+              shard: 'shard-123',
+              index: 'index-123',
+            },
+          },
+        },
+      ],
+    };
+    mockService.callCluster
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce(bulkItem);
+    listClient.getListItemByValues = jest.fn(({ value }) =>
+      Promise.resolve(
+        value.slice(0, 2).map((item) => ({
+          ...getListItemResponseMock(),
+          value: item,
+        }))
+      )
+    );
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
+    const {
+      success,
+      createdSignalsCount,
+      lastLookBackDate,
+      errors,
+    } = await searchAfterAndBulkCreate({
+      listClient,
+      exceptionsList: [],
+      gap: null,
+      previousStartedAt: new Date(),
+      ruleParams: sampleParams,
+      services: mockService,
+      logger: mockLogger,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+    expect(success).toEqual(false);
+    expect(errors).toEqual(['error on creation']);
+    expect(createdSignalsCount).toEqual(1); // can still create signals in addition to reporting errors
+    expect(lastLookBackDate?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
   });
 });
