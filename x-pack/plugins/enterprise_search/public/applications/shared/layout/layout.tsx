@@ -14,6 +14,7 @@ import './layout.scss';
 
 interface ILayoutProps {
   navigation: React.ReactNode;
+  restrictWidth?: boolean;
 }
 
 export interface INavContext {
@@ -21,7 +22,7 @@ export interface INavContext {
 }
 export const NavContext = React.createContext({});
 
-export const Layout: React.FC<ILayoutProps> = ({ children, navigation }) => {
+export const Layout: React.FC<ILayoutProps> = ({ children, navigation, restrictWidth }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const toggleNavigation = () => setIsNavOpen(!isNavOpen);
   const closeNavigation = () => setIsNavOpen(false);
@@ -54,7 +55,9 @@ export const Layout: React.FC<ILayoutProps> = ({ children, navigation }) => {
         </div>
         <NavContext.Provider value={{ closeNavigation }}>{navigation}</NavContext.Provider>
       </EuiPageSideBar>
-      <EuiPageBody className="enterpriseSearchLayout__body">{children}</EuiPageBody>
+      <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
+        {children}
+      </EuiPageBody>
     </EuiPage>
   );
 };

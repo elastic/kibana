@@ -47,6 +47,7 @@ export const getActions = (
   reFetchRules: (refreshPrePackagedRule?: boolean) => void
 ) => [
   {
+    'data-test-subj': 'editRuleAction',
     description: i18n.EDIT_RULE_SETTINGS,
     icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
