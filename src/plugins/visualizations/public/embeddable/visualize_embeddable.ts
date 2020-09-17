@@ -280,6 +280,17 @@ export class VisualizeEmbeddable
     this.updateOutput({ loading: false, error });
   };
 
+  updateOutput = (outputChanges: Partial<VisualizeOutput>) => {
+    const updatedOutput = { ...outputChanges };
+    const { title } = outputChanges;
+    // in case of by-value visualization we need to update the title so that it is available in subsequent edits
+    if (this.output.title !== title && title !== undefined && title !== '') {
+      this.vis.title = title;
+      updatedOutput.defaultTitle = title;
+    }
+    super.updateOutput(updatedOutput);
+  };
+
   /**
    *
    * @param {Element} domNode
@@ -424,7 +435,7 @@ export class VisualizeEmbeddable
     const input = {
       savedVis: this.vis.serialize(),
     };
-    if (this.getTitle()) {
+    if (this.getTitle() !== '') {
       input.savedVis.title = this.getTitle();
     }
     delete input.savedVis.id;
@@ -441,8 +452,8 @@ export class VisualizeEmbeddable
     if (!this.attributeService) {
       throw new Error('AttributeService must be defined for getInputAsRefType');
     }
-    const saveModalTitle = this.getTitle()
-      ? this.getTitle()
+    const saveModalTitle = this.vis.title
+      ? this.vis.title
       : i18n.translate('visualizations.embeddable.placeholderTitle', {
           defaultMessage: 'Placeholder Title',
         });
