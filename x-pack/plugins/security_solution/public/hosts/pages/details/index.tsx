@@ -9,6 +9,7 @@ import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { HostItem } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -25,7 +26,7 @@ import { HostOverview } from '../../../overview/components/host_overview';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
-import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
+import { HostOverviewByNameQuery } from '../../containers/hosts/details';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useWithSource } from '../../../common/containers/source';
@@ -137,7 +138,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                           inspect={inspect}
                           refetch={refetch}
                           setQuery={setQuery}
-                          data={hostOverview}
+                          data={hostOverview as HostItem}
                           anomaliesData={anomaliesData}
                           isLoadingAnomaliesData={isLoadingAnomaliesData}
                           loading={loading}

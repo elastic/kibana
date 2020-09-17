@@ -65,9 +65,9 @@ export async function createTestUserService(
   }
 
   return new (class TestUser {
-    async restoreDefaults() {
+    async restoreDefaults(shouldRefreshBrowser: boolean = true) {
       if (isEnabled()) {
-        await this.setRoles(config.get('security.defaultRoles'));
+        await this.setRoles(config.get('security.defaultRoles'), shouldRefreshBrowser);
       }
     }
 
@@ -81,6 +81,9 @@ export async function createTestUserService(
         });
 
         if (browser && testSubjects && shouldRefreshBrowser) {
+          // accept alert if it pops up
+          const alert = await browser.getAlert();
+          await alert?.accept();
           if (await testSubjects.exists('kibanaChrome', { allowHidden: true })) {
             await browser.refresh();
             await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);

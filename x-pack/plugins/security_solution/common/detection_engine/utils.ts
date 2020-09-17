@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import dateMath from '@elastic/datemath';
-
 import { EntriesArray } from '../shared_imports';
-import { RuleType } from './types';
+import { Type } from './schemas/common/schemas';
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
   const found = entries.filter(({ type }) => type === 'list');
@@ -20,16 +17,6 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
   return found.length > 0;
 };
 
-export const isThresholdRule = (ruleType: RuleType) => ruleType === 'threshold';
-
-export const parseScheduleDates = (time: string): moment.Moment | null => {
-  const isValidDateString = !isNaN(Date.parse(time));
-  const isValidInput = isValidDateString || time.trim().startsWith('now');
-  const formattedDate = isValidDateString
-    ? moment(time)
-    : isValidInput
-    ? dateMath.parse(time)
-    : null;
-
-  return formattedDate ?? null;
-};
+export const isEqlRule = (ruleType: Type | undefined) => ruleType === 'eql';
+export const isThresholdRule = (ruleType: Type | undefined) => ruleType === 'threshold';
+export const isQueryRule = (ruleType: Type | undefined) => ruleType === 'query';

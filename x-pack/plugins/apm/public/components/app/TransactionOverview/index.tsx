@@ -7,7 +7,6 @@
 import {
   EuiCallOut,
   EuiCode,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -20,23 +19,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { useLocation } from '../../../hooks/useLocation';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
-import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
-import { TransactionList } from './List';
+import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 
 function getRedirectLocation({
@@ -62,10 +59,14 @@ function getRedirectLocation({
   }
 }
 
-export function TransactionOverview() {
+interface TransactionOverviewProps {
+  serviceName: string;
+}
+
+export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { serviceName, transactionType } = urlParams;
+  const { transactionType } = urlParams;
 
   // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
   const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
@@ -125,20 +126,8 @@ export function TransactionOverview() {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <TransactionBreakdown />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErroneousTransactionsRateChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-
-            <EuiSpacer size="s" />
-
             <TransactionCharts
               charts={transactionCharts}
-              location={location}
               urlParams={urlParams}
             />
           </ChartsSyncContextProvider>

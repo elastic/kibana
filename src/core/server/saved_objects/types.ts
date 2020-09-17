@@ -18,9 +18,8 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
+import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
-import { PropertyValidators } from './validation';
 
 export {
   SavedObjectsImportResponse,
@@ -34,10 +33,9 @@ export {
   SavedObjectsImportRetry,
 } from './import/types';
 
-import { LegacyConfig } from '../legacy';
-import { SavedObjectUnsanitizedDoc } from './serialization';
-import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 import { SavedObject } from '../../types';
+
+type KueryNode = any;
 
 export {
   SavedObjectAttributes,
@@ -89,7 +87,7 @@ export interface SavedObjectsFindOptions {
   rootSearchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
-  filter?: string;
+  filter?: string | KueryNode;
   namespaces?: string[];
   /** An optional ES preference value to be used for the query **/
   preference?: string;
@@ -265,93 +263,4 @@ export interface SavedObjectsTypeManagementDefinition {
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyUiExports {
-  savedObjectMappings: SavedObjectsLegacyMapping[];
-  savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
-  savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
-  savedObjectValidations: PropertyValidators;
-  savedObjectsManagement: SavedObjectsLegacyManagementDefinition;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyMapping {
-  pluginId: string;
-  properties: SavedObjectsTypeMappingDefinitions;
-}
-
-/**
- * @internal
- * @deprecated Use {@link SavedObjectsTypeManagementDefinition | management definition} when registering
- *             from new platform plugins
- */
-export interface SavedObjectsLegacyManagementDefinition {
-  [key: string]: SavedObjectsLegacyManagementTypeDefinition;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyManagementTypeDefinition {
-  isImportableAndExportable?: boolean;
-  defaultSearchField?: string;
-  icon?: string;
-  getTitle?: (savedObject: SavedObject<any>) => string;
-  getEditUrl?: (savedObject: SavedObject<any>) => string;
-  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyMigrationDefinitions {
-  [type: string]: SavedObjectLegacyMigrationMap;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectLegacyMigrationMap {
-  [version: string]: SavedObjectLegacyMigrationFn;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export type SavedObjectLegacyMigrationFn = (
-  doc: SavedObjectUnsanitizedDoc,
-  log: SavedObjectsMigrationLogger
-) => SavedObjectUnsanitizedDoc;
-
-/**
- * @internal
- * @deprecated
- */
-interface SavedObjectsLegacyTypeSchema {
-  isNamespaceAgnostic?: boolean;
-  /** Cannot be used in conjunction with `isNamespaceAgnostic` */
-  multiNamespace?: boolean;
-  hidden?: boolean;
-  indexPattern?: ((config: LegacyConfig) => string) | string;
-  convertToAliasScript?: string;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacySchemaDefinitions {
-  [type: string]: SavedObjectsLegacyTypeSchema;
 }

@@ -43,7 +43,6 @@ export interface OwnProps {
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
-  exceptionsModal?: (refetch: inputsModel.Refetch) => React.ReactNode;
 }
 
 type Props = OwnProps & PropsFromRedux;
@@ -75,7 +74,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
-  exceptionsModal,
 }) => {
   const [
     { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
@@ -158,7 +156,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           toggleColumn={toggleColumn}
           utilityBar={utilityBar}
           graphEventId={graphEventId}
-          exceptionsModal={exceptionsModal}
         />
       </InspectButtonContainer>
     </FullScreenContainer>
@@ -223,7 +220,6 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
-    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       deepEqual(prevProps.columns, nextProps.columns) &&
@@ -244,7 +240,6 @@ export const StatefulEventsViewer = connector(
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.start === nextProps.start &&
       prevProps.utilityBar === nextProps.utilityBar &&
-      prevProps.graphEventId === nextProps.graphEventId &&
-      prevProps.exceptionsModal === nextProps.exceptionsModal
+      prevProps.graphEventId === nextProps.graphEventId
   )
 );

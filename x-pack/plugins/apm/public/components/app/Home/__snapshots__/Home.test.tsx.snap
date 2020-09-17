@@ -18,6 +18,7 @@ exports[`Home component should render services 1`] = `
           "currentAppId$": Observable {
             "_isScalar": false,
           },
+          "navigateToUrl": [Function],
         },
         "chrome": Object {
           "docTitle": Object {
@@ -78,6 +79,7 @@ exports[`Home component should render traces 1`] = `
           "currentAppId$": Observable {
             "_isScalar": false,
           },
+          "navigateToUrl": [Function],
         },
         "chrome": Object {
           "docTitle": Object {

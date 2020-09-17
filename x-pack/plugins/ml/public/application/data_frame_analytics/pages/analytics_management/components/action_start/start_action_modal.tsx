@@ -17,7 +17,7 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, item, startAndCl
         <EuiOverlayMask>
           <EuiConfirmModal
             title={i18n.translate('xpack.ml.dataframe.analyticsList.startModalTitle', {
-              defaultMessage: 'Start {analyticsId}',
+              defaultMessage: 'Start {analyticsId}?',
               values: { analyticsId: item.config.id },
             })}
             onCancel={closeModal}
@@ -40,7 +40,7 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, item, startAndCl
             <p>
               {i18n.translate('xpack.ml.dataframe.analyticsList.startModalBody', {
                 defaultMessage:
-                  'A data frame analytics job will increase search and indexing load in your cluster. Please stop the analytics job if excessive load is experienced. Are you sure you want to start this analytics job?',
+                  'A data frame analytics job increases search and indexing load in your cluster. If excessive load occurs, stop the job.',
               })}
             </p>
           </EuiConfirmModal>

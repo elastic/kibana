@@ -26,6 +26,8 @@ exports[`Modal all errors rendering it renders the default all errors modal when
         data-test-subj="modal-all-errors-accordion"
         id="accordion1"
         initialIsOpen={true}
+        isLoading={false}
+        isLoadingMessage={false}
         key="id-super-id-0"
         paddingSize="none"
       >

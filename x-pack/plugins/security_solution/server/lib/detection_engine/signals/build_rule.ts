@@ -12,6 +12,7 @@ import { buildRiskScoreFromMapping } from './mappings/build_risk_score_from_mapp
 import { SignalSourceHit } from './types';
 import { buildSeverityFromMapping } from './mappings/build_severity_from_mapping';
 import { buildRuleNameFromMapping } from './mappings/build_rule_name_from_mapping';
+import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
 
 interface BuildRuleParams {
   ruleParams: RuleTypeParams;
@@ -64,7 +65,7 @@ export const buildRule = ({
 
   const meta = { ...ruleParams.meta, ...riskScoreMeta, ...severityMeta, ...ruleNameMeta };
 
-  return pickBy<RulesSchema>((value: unknown) => value != null, {
+  const rule = pickBy<RulesSchema>((value: unknown) => value != null, {
     id,
     rule_id: ruleParams.ruleId ?? '(unknown rule_id)',
     actions,
@@ -111,4 +112,17 @@ export const buildRule = ({
     anomaly_threshold: ruleParams.anomalyThreshold,
     threshold: ruleParams.threshold,
   });
+  return removeInternalTagsFromRule(rule);
+};
+
+export const removeInternalTagsFromRule = (rule: Partial<RulesSchema>): Partial<RulesSchema> => {
+  if (rule.tags == null) {
+    return rule;
+  } else {
+    const ruleWithoutInternalTags: Partial<RulesSchema> = {
+      ...rule,
+      tags: rule.tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER)),
+    };
+    return ruleWithoutInternalTags;
+  }
 };

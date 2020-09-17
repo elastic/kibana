@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { Coordinate, TimeSeries } from '../../../../../../typings/timeseries';
 import { useChartsSync } from '../../../../../hooks/useChartsSync';
-// @ts-ignore
+// @ts-expect-error
 import CustomPlot from '../../CustomPlot';
 
 interface Props {
@@ -19,6 +19,7 @@ interface Props {
   height?: number;
   stacked?: boolean;
   onHover?: () => void;
+  visibleLegendCount?: number;
   onToggleLegend?: (disabledSeriesState: boolean[]) => void;
 }
 
@@ -32,6 +33,7 @@ function TransactionLineChart(props: Props) {
     truncateLegends,
     stacked = false,
     onHover,
+    visibleLegendCount,
     onToggleLegend,
   } = props;
 
@@ -59,6 +61,7 @@ function TransactionLineChart(props: Props) {
       height={height}
       truncateLegends={truncateLegends}
       {...(stacked ? { stackBy: 'y' } : {})}
+      visibleLegendCount={visibleLegendCount}
       onToggleLegend={onToggleLegend}
     />
   );

@@ -19,17 +19,22 @@
 
 // @ts-ignore
 import { fieldCalculator } from './field_calculator';
-import { IndexPatternField } from '../../../../../../data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
 
 export function getDetails(
   field: IndexPatternField,
   hits: Array<Record<string, unknown>>,
-  columns: string[]
+  columns: string[],
+  indexPattern?: IndexPattern
 ) {
+  if (!indexPattern) {
+    return {};
+  }
   const details = {
     ...fieldCalculator.getFieldValueCounts({
       hits,
       field,
+      indexPattern,
       count: 5,
       grouped: false,
     }),
@@ -37,7 +42,7 @@ export function getDetails(
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {
-      bucket.display = field.format.convert(bucket.value);
+      bucket.display = indexPattern.getFormatterForField(field).convert(bucket.value);
     }
   }
   return details;

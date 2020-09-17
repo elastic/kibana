@@ -34,7 +34,6 @@ export const getPackagePoliciesHandler: RequestHandler<
         total,
         page,
         perPage,
-        success: true,
       },
     });
   } catch (e) {
@@ -59,7 +58,6 @@ export const getOnePackagePolicyHandler: RequestHandler<TypeOf<
       return response.ok({
         body: {
           item: packagePolicy,
-          success: true,
         },
       });
     } else {
@@ -115,7 +113,7 @@ export const createPackagePolicyHandler: RequestHandler<
     const packagePolicy = await packagePolicyService.create(soClient, callCluster, newData, {
       user,
     });
-    const body: CreatePackagePolicyResponse = { item: packagePolicy, success: true };
+    const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({
       body,
     });
@@ -163,7 +161,7 @@ export const updatePackagePolicyHandler: RequestHandler<
       { user }
     );
     return response.ok({
-      body: { item: updatedPackagePolicy, success: true },
+      body: { item: updatedPackagePolicy },
     });
   } catch (e) {
     return response.customError({
