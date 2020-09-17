@@ -16,6 +16,7 @@ describe('HttpLogic', () => {
     http: null,
     httpInterceptors: [],
     errorConnecting: false,
+    readOnlyMode: false,
   };
 
   beforeEach(() => {
@@ -31,12 +32,17 @@ describe('HttpLogic', () => {
   describe('initializeHttp()', () => {
     it('sets values based on passed props', () => {
       HttpLogic.mount();
-      HttpLogic.actions.initializeHttp({ http: mockHttp, errorConnecting: true });
+      HttpLogic.actions.initializeHttp({
+        http: mockHttp,
+        errorConnecting: true,
+        readOnlyMode: true,
+      });
 
       expect(HttpLogic.values).toEqual({
         http: mockHttp,
         httpInterceptors: [],
         errorConnecting: true,
+        readOnlyMode: true,
       });
     });
   });
@@ -52,48 +58,108 @@ describe('HttpLogic', () => {
     });
   });
 
+  describe('setReadOnlyMode()', () => {
+    it('sets readOnlyMode value', () => {
+      HttpLogic.mount();
+      HttpLogic.actions.setReadOnlyMode(true);
+      expect(HttpLogic.values.readOnlyMode).toEqual(true);
+
+      HttpLogic.actions.setReadOnlyMode(false);
+      expect(HttpLogic.values.readOnlyMode).toEqual(false);
+    });
+  });
+
   describe('http interceptors', () => {
     describe('initializeHttpInterceptors()', () => {
       beforeEach(() => {
         HttpLogic.mount();
         jest.spyOn(HttpLogic.actions, 'setHttpInterceptors');
-        jest.spyOn(HttpLogic.actions, 'setErrorConnecting');
         HttpLogic.actions.initializeHttp({ http: mockHttp });
-
         HttpLogic.actions.initializeHttpInterceptors();
       });
 
       it('calls http.intercept and sets an array of interceptors', () => {
-        mockHttp.intercept.mockImplementationOnce(() => 'removeInterceptorFn' as any);
+        mockHttp.intercept
+          .mockImplementationOnce(() => 'removeErrorInterceptorFn' as any)
+          .mockImplementationOnce(() => 'removeReadOnlyInterceptorFn' as any);
         HttpLogic.actions.initializeHttpInterceptors();
 
         expect(mockHttp.intercept).toHaveBeenCalled();
-        expect(HttpLogic.actions.setHttpInterceptors).toHaveBeenCalledWith(['removeInterceptorFn']);
+        expect(HttpLogic.actions.setHttpInterceptors).toHaveBeenCalledWith([
+          'removeErrorInterceptorFn',
+          'removeReadOnlyInterceptorFn',
+        ]);
       });
 
       describe('errorConnectingInterceptor', () => {
+        let interceptedResponse: any;
+
+        beforeEach(() => {
+          interceptedResponse = mockHttp.intercept.mock.calls[0][0].responseError;
+          jest.spyOn(HttpLogic.actions, 'setErrorConnecting');
+        });
+
         it('handles errors connecting to Enterprise Search', async () => {
-          const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          const httpResponse = { response: { url: '/api/app_search/engines', status: 502 } };
-          await expect(responseError(httpResponse)).rejects.toEqual(httpResponse);
+          const httpResponse = {
+            response: { url: '/api/app_search/engines', status: 502 },
+          };
+          await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalled();
         });
 
         it('does not handle non-502 Enterprise Search errors', async () => {
-          const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          const httpResponse = { response: { url: '/api/workplace_search/overview', status: 404 } };
-          await expect(responseError(httpResponse)).rejects.toEqual(httpResponse);
+          const httpResponse = {
+            response: { url: '/api/workplace_search/overview', status: 404 },
+          };
+          await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
         });
 
-        it('does not handle errors for unrelated calls', async () => {
-          const { responseError } = mockHttp.intercept.mock.calls[0][0] as any;
-          const httpResponse = { response: { url: '/api/some_other_plugin/', status: 502 } };
-          await expect(responseError(httpResponse)).rejects.toEqual(httpResponse);
+        it('does not handle errors for non-Enterprise Search API calls', async () => {
+          const httpResponse = {
+            response: { url: '/api/some_other_plugin/', status: 502 },
+          };
+          await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
           expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('readOnlyModeInterceptor', () => {
+        let interceptedResponse: any;
+
+        beforeEach(() => {
+          interceptedResponse = mockHttp.intercept.mock.calls[1][0].response;
+          jest.spyOn(HttpLogic.actions, 'setReadOnlyMode');
+        });
+
+        it('sets readOnlyMode to true if the response header is true', async () => {
+          const httpResponse = {
+            response: { url: '/api/app_search/engines', headers: { get: () => 'true' } },
+          };
+          await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+
+          expect(HttpLogic.actions.setReadOnlyMode).toHaveBeenCalledWith(true);
+        });
+
+        it('sets readOnlyMode to false if the response header is false', async () => {
+          const httpResponse = {
+            response: { url: '/api/workplace_search/overview', headers: { get: () => 'false' } },
+          };
+          await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+
+          expect(HttpLogic.actions.setReadOnlyMode).toHaveBeenCalledWith(false);
+        });
+
+        it('does not handle headers for non-Enterprise Search API calls', async () => {
+          const httpResponse = {
+            response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
+          };
+          await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+
+          expect(HttpLogic.actions.setReadOnlyMode).not.toHaveBeenCalled();
         });
       });
     });

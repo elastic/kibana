@@ -5,8 +5,7 @@
  */
 
 import { xpackMain } from './legacy/plugins/xpack_main';
-import { security } from './legacy/plugins/security';
 
 module.exports = function (kibana) {
-  return [xpackMain(kibana), security(kibana)];
+  return [xpackMain(kibana)];
 };
