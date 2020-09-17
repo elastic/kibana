@@ -59,7 +59,6 @@ export interface RequestHandlerParams {
   indexPattern?: IIndexPattern;
   query?: Query;
   filters?: Filter[];
-  forceFetch: boolean;
   filterManager: FilterManager;
   uiState?: PersistedState;
   partialRows?: boolean;
@@ -79,7 +78,6 @@ const handleCourierRequest = async ({
   indexPattern,
   query,
   filters,
-  forceFetch,
   partialRows,
   metricsAtAllLevels,
   inspectorAdapters,
@@ -274,7 +272,6 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       query: get(input, 'query', undefined) as any,
       filters: get(input, 'filters', undefined),
       timeFields: args.timeFields,
-      forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       inspectorAdapters: inspectorAdapters as Adapters,
