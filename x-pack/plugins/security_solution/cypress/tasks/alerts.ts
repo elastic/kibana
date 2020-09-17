@@ -25,7 +25,6 @@ import {
   ALERT_RISK_SCORE_HEADER,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
-import { waitForThePageToBeUpdated } from './security_header';
 
 export const closeFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
