@@ -5,7 +5,6 @@
  */
 import { timeline } from '../objects/timeline';
 
-import { TIMELINES } from '../screens/security_header';
 import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
@@ -21,14 +20,12 @@ import {
 } from '../screens/timeline';
 import {
   TIMELINES_DESCRIPTION,
-  TIMELINES_USERNAME,
   TIMELINES_PINNED_EVENT_COUNT,
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
 
 import { loginAndWaitForPage } from '../tasks/login';
-import { navigateFromHeaderTo } from '../tasks/security_header';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
   addDescriptionToTimeline,
@@ -39,6 +36,7 @@ import {
   closeTimeline,
   createNewTimeline,
   markAsFavorite,
+  openTimelineFromSettings,
   pinFirstEvent,
   populateTimeline,
   waitForTimelineChanges,
@@ -76,11 +74,10 @@ describe('Timelines', () => {
     waitForTimelineChanges();
     createNewTimeline();
     closeTimeline();
-    navigateFromHeaderTo(TIMELINES);
+    openTimelineFromSettings();
 
     cy.contains(timeline.title).should('exist');
     cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
-    cy.get(TIMELINES_USERNAME).first().should('have.text', 'elastic');
     cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
     cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
     cy.get(TIMELINES_FAVORITE).first().should('exist');
