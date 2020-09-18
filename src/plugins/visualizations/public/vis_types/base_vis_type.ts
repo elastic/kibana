@@ -18,9 +18,11 @@
  */
 
 import _ from 'lodash';
+import { ReactElement } from 'react';
 import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Adapters } from '../../../inspector/public';
+import { Vis } from '../vis';
 
 export interface BaseVisTypeOptions {
   name: string;
@@ -43,6 +45,8 @@ export interface BaseVisTypeOptions {
   useCustomNoDataScreen?: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst;
+  isDeprecated?: boolean;
+  getDeprecationMessage?: (vis: Vis) => ReactElement<any>;
 }
 
 export class BaseVisType {
@@ -68,6 +72,8 @@ export class BaseVisType {
   useCustomNoDataScreen: boolean;
   inspectorAdapters?: Adapters | (() => Adapters);
   toExpressionAst?: VisToExpressionAst;
+  isDeprecated: boolean;
+  getDeprecationMessage?: (vis: Vis) => ReactElement<any>;
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {
@@ -105,6 +111,8 @@ export class BaseVisType {
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
+    this.isDeprecated = opts.isDeprecated || false;
+    this.getDeprecationMessage = opts.getDeprecationMessage;
   }
 
   public get schemas() {

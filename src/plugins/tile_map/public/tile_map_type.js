@@ -25,6 +25,7 @@ import { createTileMapVisualization } from './tile_map_visualization';
 import { TileMapOptions } from './components/tile_map_options';
 import { supportsCssFilters } from './css_filters';
 import { truncatedColorSchemas } from '../../charts/public';
+import { getDeprecationMessage } from './get_deprecation_message';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -32,6 +33,8 @@ export function createTileMapTypeDefinition(dependencies) {
 
   return {
     name: 'tile_map',
+    isDeprecated: true,
+    getDeprecationMessage,
     title: i18n.translate('tileMap.vis.mapTitle', {
       defaultMessage: 'Coordinate Map',
     }),
