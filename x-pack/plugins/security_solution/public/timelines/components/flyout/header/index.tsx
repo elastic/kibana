@@ -129,8 +129,6 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
     dispatch(timelineActions.updateDescription({ id, description })),
   updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
     dispatch(timelineActions.updateIsFavorite({ id, isFavorite })),
-  updateIsLive: ({ id, isLive }: { id: string; isLive: boolean }) =>
-    dispatch(timelineActions.updateIsLive({ id, isLive })),
   updateNote: (note: Note) => dispatch(appActions.updateNote({ note })),
   updateTitle: ({ id, title }: { id: string; title: string }) =>
     dispatch(timelineActions.updateTitle({ id, title })),

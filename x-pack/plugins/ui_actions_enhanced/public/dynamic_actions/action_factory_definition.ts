@@ -47,6 +47,12 @@ export interface ActionFactoryDefinition<
   licenseFeatureName?: string;
 
   /**
+   * Is this action factory not GA?
+   * Adds a beta badge on a list item representing this ActionFactory
+   */
+  readonly isBeta?: boolean;
+
+  /**
    * This method should return a definition of a new action, normally used to
    * register it in `ui_actions` registry.
    */

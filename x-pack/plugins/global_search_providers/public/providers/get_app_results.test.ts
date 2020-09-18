@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppNavLinkStatus, AppStatus, PublicAppInfo } from 'src/core/public';
+import {
+  AppNavLinkStatus,
+  AppStatus,
+  PublicAppInfo,
+  DEFAULT_APP_CATEGORIES,
+} from 'src/core/public';
 import { appToResult, getAppResults, scoreApp } from './get_app_results';
 
 const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
@@ -70,6 +75,7 @@ describe('appToResult', () => {
       title: 'Foo',
       euiIconType: 'fooIcon',
       appRoute: '/app/foo',
+      category: DEFAULT_APP_CATEGORIES.security,
     });
     expect(appToResult(app, 42)).toEqual({
       id: 'foo',
@@ -77,6 +83,31 @@ describe('appToResult', () => {
       type: 'application',
       icon: 'fooIcon',
       url: '/app/foo',
+      meta: {
+        categoryId: DEFAULT_APP_CATEGORIES.security.id,
+        categoryLabel: DEFAULT_APP_CATEGORIES.security.label,
+      },
+      score: 42,
+    });
+  });
+
+  it('converts an app without category to a result', () => {
+    const app = createApp({
+      id: 'foo',
+      title: 'Foo',
+      euiIconType: 'fooIcon',
+      appRoute: '/app/foo',
+    });
+    expect(appToResult(app, 42)).toEqual({
+      id: 'foo',
+      title: 'Foo',
+      type: 'application',
+      icon: 'fooIcon',
+      url: '/app/foo',
+      meta: {
+        categoryId: null,
+        categoryLabel: null,
+      },
       score: 42,
     });
   });
