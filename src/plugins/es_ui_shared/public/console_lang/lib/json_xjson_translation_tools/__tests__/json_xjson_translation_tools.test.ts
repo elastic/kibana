@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
 // @ts-ignore
 import collapsingTests from './utils_string_collapsing.txt';
 // @ts-ignore
@@ -63,7 +62,7 @@ describe('JSON to XJSON conversion tools', () => {
   });
 });
 
-_.each(collapsingTests.split(/^=+$/m), function (fixture) {
+collapsingTests.split(/^=+$/m).forEach((fixture: any) => {
   if (fixture.trim() === '') {
     return;
   }
@@ -77,7 +76,7 @@ _.each(collapsingTests.split(/^=+$/m), function (fixture) {
   });
 });
 
-_.each(expandingTests.split(/^=+$/m), function (fixture) {
+expandingTests.split(/^=+$/m).forEach((fixture: any) => {
   if (fixture.trim() === '') {
     return;
   }

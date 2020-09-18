@@ -18,7 +18,7 @@
  */
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { set } from '@elastic/safer-lodash-set';
 
 import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
