@@ -141,7 +141,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
       });
     }
     const onComboChange = (comboOptions: EuiComboBoxOptionOption[]) => {
-      setTemplateError(undefined);
+      setTemplateError('');
       setTemplateName(comboOptions.length > 0 ? comboOptions[0].label : '');
     };
     return (
