@@ -23,6 +23,7 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const MAPS_APP_URL_GENERATOR = 'MAPS_APP_URL_GENERATOR';
 export const MAPS_APP_TILE_MAP_URL_GENERATOR = 'MAPS_APP_TILE_MAP_URL_GENERATOR';
+export const MAPS_APP_REGION_MAP_URL_GENERATOR = 'MAPS_APP_REGION_MAP_URL_GENERATOR';
 
 export interface MapsUrlGeneratorState {
   /**
@@ -160,6 +161,67 @@ export const createTileMapUrlGenerator = (
     });
     if (tileMapLayerDescriptor) {
       initialLayers.push(tileMapLayerDescriptor);
+    }
+
+    return createMapUrl({
+      initialLayers,
+      filters,
+      query,
+      timeRange,
+      hash: true,
+      getStartServices,
+    });
+  },
+});
+
+export const createRegionMapUrlGenerator = (
+  getStartServices: GetStartServices
+): UrlGeneratorsDefinition<typeof MAPS_APP_REGION_MAP_URL_GENERATOR> => ({
+  id: MAPS_APP_REGION_MAP_URL_GENERATOR,
+  createUrl: async ({
+    title,
+    emsLayerId,
+    leftFieldName,
+    termsFieldName,
+    colorSchema,
+    indexPatternId,
+    indexPatternTitle,
+    metricAgg,
+    metricFieldName,
+    filters,
+    query,
+    timeRange,
+    hash,
+  }: {
+    title?: string;
+    emsLayerId?: string;
+    leftFieldName?: string;
+    termsFieldName?: string;
+    colorSchema: string;
+    indexPatternId?: string;
+    indexPatternTitle?: string;
+    metricAgg: string;
+    metricFieldName?: string;
+    timeRange?: TimeRange;
+    filters?: Filter[];
+    query?: Query;
+    hash?: boolean;
+  }): Promise<string> => {
+    const mapModules = await lazyLoadMapModules();
+    const initialLayers = [];
+    const regionMapLayerDescriptor = mapModules.createRegionMapLayerDescriptor({
+      title,
+      emsLayerId,
+      leftFieldName,
+      termsFieldName,
+      colorSchema,
+      indexPatternId,
+      indexPatternTitle,
+      metricAgg,
+      metricFieldName,
+    });
+    if (regionMapLayerDescriptor) {
+      initialLayers.push(regionMapLayerDescriptor);
     }
 
     return createMapUrl({

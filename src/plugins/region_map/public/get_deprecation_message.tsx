@@ -20,20 +20,20 @@
 import React from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getCoreService, getQueryService, getShareService } from './services';
+import { getCoreService, getQueryService, getShareService } from './kibana_services';
 import { indexPatterns } from '../../data/public';
 import { Vis } from '../../visualizations/public';
 
 export function getDeprecationMessage(vis: Vis) {
-  const mapsTileMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
-    'MAPS_APP_TILE_MAP_URL_GENERATOR'
+  const mapsRegionMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
+    'MAPS_APP_REGION_MAP_URL_GENERATOR'
   );
 
   let action;
-  if (!mapsTileMapUrlGenerator) {
+  if (!mapsRegionMapUrlGenerator) {
     action = (
       <FormattedMessage
-        id="tileMap.vis.defaultDistributionMessage"
+        id="regionMap.vis.defaultDistributionMessage"
         defaultMessage="To get Maps, upgrade to the {defaultDistribution} of Elasticsearch and Kibana."
         values={{
           defaultDistribution: (
@@ -59,10 +59,14 @@ export function getDeprecationMessage(vis: Vis) {
             const query = getQueryService();
             const createUrlParams = {
               title: vis.title,
-              mapType: vis.params.mapType,
+              emsLayerId: vis.params.selectedLayer.isEMS ? vis.params.selectedLayer.id : undefined,
+              leftFieldName: vis.params.selectedLayer.isEMS
+                ? vis.params.selectedJoinField.name
+                : undefined,
+              termsFieldName: undefined,
               colorSchema: vis.params.colorSchema,
               indexPatternId: vis.data.indexPattern?.id,
-              geoFieldName: undefined,
+              indexPatternTitle: vis.data.indexPattern?.title,
               metricAgg: 'count',
               metricFieldName: undefined,
               filters: query.filterManager.getFilters(),
@@ -71,20 +75,8 @@ export function getDeprecationMessage(vis: Vis) {
             };
 
             const bucketAggs = vis.data?.aggs?.byType('buckets');
-            if (bucketAggs?.length && bucketAggs[0].type.dslName === 'geohash_grid') {
-              createUrlParams.geoFieldName = bucketAggs[0].getField()?.name;
-            } else if (vis.data.indexPattern) {
-              // attempt to default to first geo point field when geohash is not configured yet
-              const geoField = vis.data.indexPattern.fields.find((field) => {
-                return (
-                  !indexPatterns.isNestedField(field) &&
-                  field.aggregatable &&
-                  field.type === 'geo_point'
-                );
-              });
-              if (geoField) {
-                createUrlParams.geoFieldName = geoField.name;
-              }
+            if (bucketAggs?.length && bucketAggs[0].type.dslName === 'terms') {
+              createUrlParams.termsFieldName = bucketAggs[0].getField()?.name;
             }
 
             const metricAggs = vis.data?.aggs?.byType('metrics');
@@ -93,12 +85,12 @@ export function getDeprecationMessage(vis: Vis) {
               createUrlParams.metricFieldName = metricAggs[0].getField()?.name;
             }
 
-            const url = await mapsTileMapUrlGenerator.createUrl(createUrlParams);
+            const url = await mapsRegionMapUrlGenerator.createUrl(createUrlParams);
             getCoreService().application.navigateToUrl(url);
           }}
           size="s"
         >
-          <FormattedMessage id="tileMap.vis.viewInMaps" defaultMessage="View in Maps" />
+          <FormattedMessage id="regionMap.vis.viewInMaps" defaultMessage="View in Maps" />
         </EuiButton>
       </div>
     );
@@ -106,8 +98,8 @@ export function getDeprecationMessage(vis: Vis) {
 
   return (
     <FormattedMessage
-      id="tileMap.vis.deprecationMessage"
-      defaultMessage="Coordinate map will migrate to Maps in 8.0. With Maps, you can add multiple layers and indices, plot individual documents, symbolize features from data values, and more. {action}"
+      id="regionMap.vis.deprecationMessage"
+      defaultMessage="Region map will migrate to Maps in 8.0. With Maps, you can add multiple layers and indices, plot individual documents, symbolize features from data values, and more. {action}"
       values={{ action }}
     />
   );

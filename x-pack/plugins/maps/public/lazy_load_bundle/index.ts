@@ -60,8 +60,29 @@ interface LazyLoadedMapModules {
     title?: string;
     mapType: string;
     colorSchema: string;
-    indexPatternId: string;
+    indexPatternId?: string;
     geoFieldName?: string;
+    metricAgg: string;
+    metricFieldName?: string;
+  }) => LayerDescriptor | null;
+  createRegionMapLayerDescriptor: ({
+    title,
+    emsLayerId,
+    leftFieldName,
+    termsFieldName,
+    colorSchema,
+    indexPatternId,
+    indexPatternTitle,
+    metricAgg,
+    metricFieldName,
+  }: {
+    title?: string;
+    emsLayerId?: string;
+    leftFieldName?: string;
+    termsFieldName?: string;
+    colorSchema: string;
+    indexPatternId?: string;
+    indexPatternTitle?: string;
     metricAgg: string;
     metricFieldName?: string;
   }) => LayerDescriptor | null;
@@ -90,6 +111,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       registerSource,
       getIndexPatternsFromIds,
       createTileMapLayerDescriptor,
+      createRegionMapLayerDescriptor,
     } = await import('./lazy');
 
     resolve({
@@ -109,6 +131,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       registerSource,
       getIndexPatternsFromIds,
       createTileMapLayerDescriptor,
+      createRegionMapLayerDescriptor,
     });
   });
   return loadModulesPromise;
