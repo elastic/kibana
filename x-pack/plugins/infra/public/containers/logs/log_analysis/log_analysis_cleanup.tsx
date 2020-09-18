@@ -32,18 +32,19 @@ const deleteJobs = async <JobType extends string>(
   fetch: HttpSetup['fetch']
 ) => {
   const deleteJobsResponse = await callDeleteJobs({ spaceId, sourceId, jobTypes }, fetch);
-  await waitUntilJobsAreDeleted(spaceId, sourceId, jobTypes);
+  await waitUntilJobsAreDeleted(spaceId, sourceId, jobTypes, fetch);
   return deleteJobsResponse;
 };
 
 const waitUntilJobsAreDeleted = async <JobType extends string>(
   spaceId: string,
   sourceId: string,
-  jobTypes: JobType[]
+  jobTypes: JobType[],
+  fetch: HttpSetup['fetch']
 ) => {
   const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType));
   while (true) {
-    const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks();
+    const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks(fetch);
     const needToWait = jobIdsBeingDeleted.some((jobId) => moduleJobIds.includes(jobId));
 
     if (needToWait) {

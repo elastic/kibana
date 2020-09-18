@@ -42,8 +42,8 @@ export const callDeleteJobs = async <JobType extends string>(
   );
 };
 
-export const callGetJobDeletionTasks = async () => {
-  const jobDeletionTasksResponse = await npStart.http.fetch('/api/ml/jobs/deleting_jobs_tasks');
+export const callGetJobDeletionTasks = async (fetch: HttpSetup['fetch']) => {
+  const jobDeletionTasksResponse = await fetch('/api/ml/jobs/deleting_jobs_tasks');
 
   return pipe(
     getJobDeletionTasksResponsePayloadRT.decode(jobDeletionTasksResponse),
