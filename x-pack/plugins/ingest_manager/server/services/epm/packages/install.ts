@@ -7,7 +7,7 @@
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
 import Boom from 'boom';
-import { UpgradePackageError, UpgradePackageInfo } from '../../../../common';
+import { BulkInstallPackageInfo, IBulkInstallPackageError } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
@@ -40,7 +40,7 @@ import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
-import { handleIngestError } from '../../../errors/handlers';
+import { formatBulkInstallError } from '../../../errors/handlers';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -99,14 +99,21 @@ export async function ensureInstalledPackage(options: {
   return installation;
 }
 
-export async function handleInstallPackageFailure(
-  savedObjectsClient: SavedObjectsClientContract,
-  error: IngestManagerError | Boom | Error,
-  pkgName: string,
-  pkgVersion: string,
-  installedPkg: SavedObject<Installation> | undefined,
-  callCluster: CallESAsCurrentUser
-) {
+export async function handleInstallPackageFailure({
+  savedObjectsClient,
+  error,
+  pkgName,
+  pkgVersion,
+  installedPkg,
+  callCluster,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  error: IngestManagerError | Boom | Error;
+  pkgName: string;
+  pkgVersion: string;
+  installedPkg: SavedObject<Installation> | undefined;
+  callCluster: CallESAsCurrentUser;
+}) {
   if (error instanceof IngestManagerError) {
     return;
   }
@@ -144,7 +151,9 @@ export async function handleInstallPackageFailure(
   }
 }
 
-export async function upgradePackages({
+type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
+
+export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToUpgrade,
   callCluster,
@@ -152,9 +161,8 @@ export async function upgradePackages({
   savedObjectsClient: SavedObjectsClientContract;
   packagesToUpgrade: string[];
   callCluster: CallESAsCurrentUser;
-}): Promise<Array<UpgradePackageInfo | UpgradePackageError>> {
-  const res: Array<UpgradePackageInfo | UpgradePackageError> = [];
-
+}): Promise<BulkInstallResponse[]> {
+  const res: BulkInstallResponse[] = [];
   for (const pkgToUpgrade of packagesToUpgrade) {
     let installedPkg: SavedObject<Installation> | undefined;
     let latestPackage: RegistrySearchResult | undefined;
@@ -164,7 +172,7 @@ export async function upgradePackages({
         Registry.fetchFindLatestPackage(pkgToUpgrade),
       ]);
     } catch (e) {
-      res.push({ name: pkgToUpgrade, ...handleIngestError(e) });
+      res.push({ name: pkgToUpgrade, ...formatBulkInstallError(e) });
       continue;
     }
 
@@ -184,15 +192,15 @@ export async function upgradePackages({
           assets,
         });
       } catch (e) {
-        res.push({ name: pkgToUpgrade, ...handleIngestError(e) });
-        await handleInstallPackageFailure(
+        res.push({ name: pkgToUpgrade, ...formatBulkInstallError(e) });
+        await handleInstallPackageFailure({
           savedObjectsClient,
-          e,
-          latestPackage.name,
-          latestPackage.version,
+          error: e,
+          pkgName: latestPackage.name,
+          pkgVersion: latestPackage.version,
           installedPkg,
-          callCluster
-        );
+          callCluster,
+        });
       }
     } else {
       // package was already at the latest version

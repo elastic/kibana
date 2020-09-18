@@ -14,7 +14,7 @@ import {
   installPackageFromRegistryHandler,
   installPackageByUploadHandler,
   deletePackageHandler,
-  upgradePackagesFromRegistryHandler,
+  bulkInstallPackagesFromRegistryHandler,
 } from './handlers';
 import {
   GetCategoriesRequestSchema,
@@ -86,11 +86,11 @@ export const registerRoutes = (router: IRouter) => {
 
   router.post(
     {
-      path: EPM_API_ROUTES.BULK_UPGRADE_PATTERN,
+      path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    upgradePackagesFromRegistryHandler
+    bulkInstallPackagesFromRegistryHandler
   );
 
   router.post(

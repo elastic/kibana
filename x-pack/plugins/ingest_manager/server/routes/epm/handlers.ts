@@ -13,7 +13,7 @@ import {
   GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
-  UpgradePackagesResponse,
+  BulkInstallPackagesResponse,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
@@ -37,7 +37,10 @@ import {
 } from '../../services/epm/packages';
 import { defaultIngestErrorHandler } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
-import { handleInstallPackageFailure, upgradePackages } from '../../services/epm/packages/install';
+import {
+  handleInstallPackageFailure,
+  bulkInstallPackages,
+} from '../../services/epm/packages/install';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -155,32 +158,32 @@ export const installPackageFromRegistryHandler: RequestHandler<
     return response.ok({ body });
   } catch (e) {
     const defaultResult = await defaultIngestErrorHandler({ error: e, response });
-    await handleInstallPackageFailure(
+    await handleInstallPackageFailure({
       savedObjectsClient,
-      e,
+      error: e,
       pkgName,
       pkgVersion,
       installedPkg,
-      callCluster
-    );
+      callCluster,
+    });
 
     return defaultResult;
   }
 };
 
-export const upgradePackagesFromRegistryHandler: RequestHandler<
+export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-  const res = await upgradePackages({
+  const res = await bulkInstallPackages({
     savedObjectsClient,
     callCluster,
     packagesToUpgrade: request.body.upgrade,
   });
-  const body: UpgradePackagesResponse = {
+  const body: BulkInstallPackagesResponse = {
     response: res,
   };
   return response.ok({ body });
