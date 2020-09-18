@@ -5,7 +5,6 @@
  */
 
 import uuid from 'uuid/v4';
-import { i18n } from '@kbn/i18n';
 import {
   AggDescriptor,
   ColorDynamicOptions,
@@ -42,7 +41,7 @@ export function createAggDescriptor(metricAgg: string, metricFieldName?: string)
 }
 
 export function createRegionMapLayerDescriptor({
-  title,
+  label,
   emsLayerId,
   leftFieldName,
   termsFieldName,
@@ -52,7 +51,7 @@ export function createRegionMapLayerDescriptor({
   metricAgg,
   metricFieldName,
 }: {
-  title?: string;
+  label: string;
   emsLayerId?: string;
   leftFieldName?: string;
   termsFieldName?: string;
@@ -66,11 +65,6 @@ export function createRegionMapLayerDescriptor({
     return null;
   }
 
-  const label = title
-    ? title
-    : i18n.translate('xpack.maps.createRegionMapDescriptor.layerLabel', {
-        defaultMessage: 'Region map',
-      });
   const metricsDescriptor = createAggDescriptor(metricAgg, metricFieldName);
   const joinId = uuid();
   const joinKey = getJoinAggKey({

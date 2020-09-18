@@ -49,7 +49,7 @@ interface LazyLoadedMapModules {
   registerSource(entry: SourceRegistryEntry): void;
   getIndexPatternsFromIds: (indexPatternIds: string[]) => Promise<IndexPattern[]>;
   createTileMapLayerDescriptor: ({
-    title,
+    label,
     mapType,
     colorSchema,
     indexPatternId,
@@ -57,7 +57,7 @@ interface LazyLoadedMapModules {
     metricAgg,
     metricFieldName,
   }: {
-    title?: string;
+    label: string;
     mapType: string;
     colorSchema: string;
     indexPatternId?: string;
@@ -66,7 +66,7 @@ interface LazyLoadedMapModules {
     metricFieldName?: string;
   }) => LayerDescriptor | null;
   createRegionMapLayerDescriptor: ({
-    title,
+    label,
     emsLayerId,
     leftFieldName,
     termsFieldName,
@@ -76,7 +76,7 @@ interface LazyLoadedMapModules {
     metricAgg,
     metricFieldName,
   }: {
-    title?: string;
+    label: string;
     emsLayerId?: string;
     leftFieldName?: string;
     termsFieldName?: string;

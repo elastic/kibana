@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   AggDescriptor,
   ColorDynamicOptions,
@@ -66,7 +65,7 @@ export function createAggDescriptor(
 }
 
 export function createTileMapLayerDescriptor({
-  title,
+  label,
   mapType,
   colorSchema,
   indexPatternId,
@@ -74,7 +73,7 @@ export function createTileMapLayerDescriptor({
   metricAgg,
   metricFieldName,
 }: {
-  title?: string;
+  label: string;
   mapType: string;
   colorSchema: string;
   indexPatternId?: string;
@@ -86,11 +85,6 @@ export function createTileMapLayerDescriptor({
     return null;
   }
 
-  const label = title
-    ? title
-    : i18n.translate('xpack.maps.createTileMapDescriptor.layerLabel', {
-        defaultMessage: 'Coordinate map',
-      });
   const metricsDescriptor = createAggDescriptor(mapType, metricAgg, metricFieldName);
   const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
     indexPatternId,

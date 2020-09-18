@@ -124,7 +124,7 @@ export const createTileMapUrlGenerator = (
 ): UrlGeneratorsDefinition<typeof MAPS_APP_TILE_MAP_URL_GENERATOR> => ({
   id: MAPS_APP_TILE_MAP_URL_GENERATOR,
   createUrl: async ({
-    title,
+    label,
     mapType,
     colorSchema,
     indexPatternId,
@@ -136,7 +136,7 @@ export const createTileMapUrlGenerator = (
     timeRange,
     hash,
   }: {
-    title?: string;
+    label: string;
     mapType: string;
     colorSchema: string;
     indexPatternId?: string;
@@ -151,7 +151,7 @@ export const createTileMapUrlGenerator = (
     const mapModules = await lazyLoadMapModules();
     const initialLayers = [];
     const tileMapLayerDescriptor = mapModules.createTileMapLayerDescriptor({
-      title,
+      label,
       mapType,
       colorSchema,
       indexPatternId,
@@ -179,7 +179,7 @@ export const createRegionMapUrlGenerator = (
 ): UrlGeneratorsDefinition<typeof MAPS_APP_REGION_MAP_URL_GENERATOR> => ({
   id: MAPS_APP_REGION_MAP_URL_GENERATOR,
   createUrl: async ({
-    title,
+    label,
     emsLayerId,
     leftFieldName,
     termsFieldName,
@@ -193,7 +193,7 @@ export const createRegionMapUrlGenerator = (
     timeRange,
     hash,
   }: {
-    title?: string;
+    label: string;
     emsLayerId?: string;
     leftFieldName?: string;
     termsFieldName?: string;
@@ -210,7 +210,7 @@ export const createRegionMapUrlGenerator = (
     const mapModules = await lazyLoadMapModules();
     const initialLayers = [];
     const regionMapLayerDescriptor = mapModules.createRegionMapLayerDescriptor({
-      title,
+      label,
       emsLayerId,
       leftFieldName,
       termsFieldName,

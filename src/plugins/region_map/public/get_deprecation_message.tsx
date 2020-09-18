@@ -17,87 +17,58 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getCoreService, getQueryService, getShareService } from './kibana_services';
 import { Vis } from '../../visualizations/public';
+import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
 export function getDeprecationMessage(vis: Vis) {
   const mapsRegionMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
     'MAPS_APP_REGION_MAP_URL_GENERATOR'
   );
 
-  let action;
-  if (!mapsRegionMapUrlGenerator) {
-    action = (
-      <FormattedMessage
-        id="regionMap.vis.defaultDistributionMessage"
-        defaultMessage="To get Maps, upgrade to the {defaultDistribution} of Elasticsearch and Kibana."
-        values={{
-          defaultDistribution: (
-            <EuiLink
-              color="accent"
-              external
-              href="https://www.elastic.co/downloads/kibana"
-              target="_blank"
-            >
-              default distribution
-            </EuiLink>
-          ),
-        }}
-      />
-    );
-  } else {
-    action = (
-      <div>
-        <EuiButton
-          onClick={async (e: React.MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
+  const title = i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' });
 
-            const query = getQueryService();
-            const createUrlParams: { [key: string]: any } = {
-              title: vis.title,
-              emsLayerId: vis.params.selectedLayer.isEMS ? vis.params.selectedLayer.id : undefined,
-              leftFieldName: vis.params.selectedLayer.isEMS
-                ? vis.params.selectedJoinField.name
-                : undefined,
-              colorSchema: vis.params.colorSchema,
-              indexPatternId: vis.data.indexPattern?.id,
-              indexPatternTitle: vis.data.indexPattern?.title,
-              metricAgg: 'count',
-              filters: query.filterManager.getFilters(),
-              query: query.queryString.getQuery(),
-              timeRange: query.timefilter.timefilter.getTime(),
-            };
+  async function onClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
 
-            const bucketAggs = vis.data?.aggs?.byType('buckets');
-            if (bucketAggs?.length && bucketAggs[0].type.dslName === 'terms') {
-              createUrlParams.termsFieldName = bucketAggs[0].getField()?.name;
-            }
+    const query = getQueryService();
+    const createUrlParams: { [key: string]: any } = {
+      label: vis.title ? vis.title : title,
+      emsLayerId: vis.params.selectedLayer.isEMS ? vis.params.selectedLayer.id : undefined,
+      leftFieldName: vis.params.selectedLayer.isEMS ? vis.params.selectedJoinField.name : undefined,
+      colorSchema: vis.params.colorSchema,
+      indexPatternId: vis.data.indexPattern?.id,
+      indexPatternTitle: vis.data.indexPattern?.title,
+      metricAgg: 'count',
+      filters: query.filterManager.getFilters(),
+      query: query.queryString.getQuery(),
+      timeRange: query.timefilter.timefilter.getTime(),
+    };
 
-            const metricAggs = vis.data?.aggs?.byType('metrics');
-            if (metricAggs?.length) {
-              createUrlParams.metricAgg = metricAggs[0].type.dslName;
-              createUrlParams.metricFieldName = metricAggs[0].getField()?.name;
-            }
+    const bucketAggs = vis.data?.aggs?.byType('buckets');
+    if (bucketAggs?.length && bucketAggs[0].type.dslName === 'terms') {
+      createUrlParams.termsFieldName = bucketAggs[0].getField()?.name;
+    }
 
-            const url = await mapsRegionMapUrlGenerator.createUrl(createUrlParams);
-            getCoreService().application.navigateToUrl(url);
-          }}
-          size="s"
-        >
-          <FormattedMessage id="regionMap.vis.viewInMaps" defaultMessage="View in Maps" />
-        </EuiButton>
-      </div>
-    );
+    const metricAggs = vis.data?.aggs?.byType('metrics');
+    if (metricAggs?.length) {
+      createUrlParams.metricAgg = metricAggs[0].type.dslName;
+      createUrlParams.metricFieldName = metricAggs[0].getField()?.name;
+    }
+
+    const url = await mapsRegionMapUrlGenerator.createUrl(createUrlParams);
+    getCoreService().application.navigateToUrl(url);
   }
 
   return (
-    <FormattedMessage
-      id="regionMap.vis.deprecationMessage"
-      defaultMessage="Region map will migrate to Maps in 8.0. With Maps, you can add multiple layers and indices, plot individual documents, symbolize features from data values, and more. {action}"
-      values={{ action }}
+    <LegacyMapDeprecationMessage
+      isMapsAvailable={!!mapsRegionMapUrlGenerator}
+      onClick={onClick}
+      visualizationLabel={title}
     />
   );
 }
