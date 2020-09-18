@@ -45,7 +45,7 @@ export class IngestPipelinesUrlGenerator
   public readonly id = INGEST_PIPELINES_APP_ULR_GENERATOR;
 
   public readonly createUrl = async (state: IngestPipelinesUrlGeneratorState): Promise<string> => {
-    return `${await this.getAppBasePath(state.absolute)}${URL_GENERATOR[state.page](
+    return `${await this.getAppBasePath(!!state.absolute)}${URL_GENERATOR[state.page](
       state.pipelineId!
     )}`;
   };
