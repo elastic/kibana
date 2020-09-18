@@ -20,8 +20,8 @@
 import expect from '@kbn/expect';
 import {
   PIE_CHART_VIS_NAME,
-  AREA_CHART_VIS_NAME,
-  LINE_CHART_VIS_NAME,
+  // AREA_CHART_VIS_NAME,
+  // LINE_CHART_VIS_NAME,
 } from '../../page_objects/dashboard_page';
 import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -30,9 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardReplacePanel = getService('dashboardReplacePanel');
+  // const dashboardReplacePanel = getService('dashboardReplacePanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const renderable = getService('renderable');
+  // const renderable = getService('renderable');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
@@ -73,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.expectExistsClonePanelAction();
       await dashboardPanelActions.expectExistsReplacePanelAction();
       await dashboardPanelActions.expectExistsRemovePanelAction();
+      await dashboardPanelActions.expectExistsToggleExpandAction();
     });
 
     it('are shown in edit mode after a hard refresh', async () => {
@@ -102,6 +103,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('deletes the visualization when delete link is clicked', async () => {
+        await PageObjects.header.clickDashboard();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await dashboardPanelActions.removePanel();
+
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.be(0);
+      });
+    });
+
+    describe('saved search object edit menu', () => {
+      const searchName = 'my search';
+
+      before(async () => {
+        await PageObjects.header.clickDiscover();
+        await PageObjects.discover.clickNewSearchButton();
+        await dashboardVisualizations.createSavedSearch({ name: searchName, fields: ['bytes'] });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.header.clickDashboard();
+
+        const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+        if (inViewMode) await PageObjects.dashboard.switchToEditMode();
+        await dashboardAddPanel.addSavedSearch(searchName);
+      });
+
+      it('should be one panel on dashboard', async () => {
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.be(1);
+      });
+
+      it('opens a saved search when edit link is clicked', async () => {
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const queryName = await PageObjects.discover.getCurrentQueryName();
+        expect(queryName).to.be(searchName);
+      });
+
+      it('deletes the saved search when delete link is clicked', async () => {
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardPanelActions.removePanel();
@@ -141,51 +179,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     /*
 
 
-      describe('saved search object edit menu', () => {
-        const searchName = 'my search';
-        before(async () => {
-          await PageObjects.header.clickDiscover();
-          await PageObjects.discover.clickNewSearchButton();
-          await dashboardVisualizations.createSavedSearch({ name: searchName, fields: ['bytes'] });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.header.clickDashboard();
-          const inViewMode = await PageObjects.dashboard.getIsInViewMode();
-          if (inViewMode) {
-            await PageObjects.dashboard.switchToEditMode();
-          }
-          await dashboardAddPanel.addSavedSearch(searchName);
-
-          const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.be(1);
-        });
-
-        it('opens a saved search when edit link is clicked', async () => {
-          await dashboardPanelActions.openContextMenu();
-          await dashboardPanelActions.clickEdit();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const queryName = await PageObjects.discover.getCurrentQueryName();
-          expect(queryName).to.be(searchName);
-        });
-
-        it('deletes the saved search when delete link is clicked', async () => {
-          await PageObjects.header.clickDashboard();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await dashboardPanelActions.removePanel();
-
-          const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.be(0);
-        });
-      });
-    });
 
 
-    // Panel expand should also be shown in view mode, but only on mouse hover.
-    describe('panel expand control', function () {
-      it('shown in edit mode', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await dashboardPanelActions.expectExistsToggleExpandAction();
-      });
-    });
+
     */
   });
 }

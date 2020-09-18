@@ -105,6 +105,8 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
     async removePanel() {
       log.debug('removePanel');
       await this.openContextMenu();
+      const isActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
       const isPanelActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
       if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
@@ -113,6 +115,8 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
     async removePanelByTitle(title: string) {
       const header = await this.getPanelHeading(title);
       await this.openContextMenu(header);
+      const isActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
@@ -225,10 +229,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async expectExistsToggleExpandAction() {
       log.debug('expectExistsToggleExpandAction');
-      await this.openContextMenu();
-      if (await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ)) return;
-      await this.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+      await this.expectExistsPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
     async getPanelHeading(title: string) {
