@@ -66,13 +66,14 @@ export type ActionConnector = ActionResult;
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
+const ConfigureCaseConnectorRt = rt.type({
+  id: rt.string,
+  name: rt.string,
+  type: rt.string,
+});
 
 const CasesConfigureBasicRt = rt.type({
-  connector: rt.type({
-    id: rt.string,
-    name: rt.string,
-    type: rt.string,
-  }),
+  connector: ConfigureCaseConnectorRt,
   closure_type: ClosureTypeRT,
 });
 
@@ -100,6 +101,7 @@ export const CaseConfigureResponseRt = rt.intersection([
 ]);
 
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRT>;
+export type ConfigureCaseConnector = rt.TypeOf<typeof ConfigureCaseConnectorRt>;
 export type CasesConfigure = rt.TypeOf<typeof CasesConfigureBasicRt>;
 
 export type CasesConfigureRequest = rt.TypeOf<typeof CasesConfigureRequestRt>;
