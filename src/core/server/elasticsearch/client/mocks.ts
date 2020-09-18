@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { ElasticsearchClient } from './types';
@@ -75,7 +74,7 @@ export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 const createClientMock = (): ElasticsearchClientMock =>
   (createInternalClientMock() as unknown) as ElasticsearchClientMock;
 
-interface ScopedClusterClientMock {
+export interface ScopedClusterClientMock {
   asInternalUser: ElasticsearchClientMock;
   asCurrentUser: ElasticsearchClientMock;
 }

@@ -19,7 +19,7 @@
 
 import { join } from 'path';
 import { run, createFlagError } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { storybookAliases } from './aliases';
 import { clean } from './commands/clean';
 
