@@ -45,43 +45,15 @@ describe('AppLogic', () => {
           onboardingComplete: true,
           role: DEFAULT_INITIAL_APP_DATA.appSearch.role,
         },
-        myRole: {
+        myRole: expect.objectContaining({
           id: 'account_id:somestring|user_oid:somestring',
           roleType: 'owner',
           availableRoleTypes: ['owner', 'admin'],
           credentialTypes: ['admin', 'private', 'search'],
           canAccessAllEngines: true,
-          can: expect.any(Function),
-          // Has access
           canViewAccountCredentials: true,
-          canViewEngines: true,
-          canManageEngines: true,
-          // Does not have access
-          canViewMetaEngines: false,
-          canViewEngineAnalytics: false,
-          canViewEngineApiLogs: false,
-          canViewEngineCrawler: false,
-          canViewEngineCredentials: false,
-          canViewEngineDocuments: false,
-          canViewEngineSchema: false,
-          canViewEngineQueryTester: false,
-          canViewMetaEngineSourceEngines: false,
-          canViewSettings: false,
-          canViewRoleMappings: false,
-          canManageMetaEngines: false,
-          canManageLogSettings: false,
-          canManageSettings: false,
-          canManageEngineCrawler: false,
-          canManageEngineDocuments: false,
-          canManageEngineSynonyms: false,
-          canManageEngineCredentials: false,
-          canManageEngineCurations: false,
-          canManageEngineRelevanceTuning: false,
-          canManageEngineReferenceUi: false,
-          canManageEngineResultSettings: false,
-          canManageEngineSchema: false,
-          canManageMetaEngineSourceEngines: false,
-        },
+          // Truncated for brevity - see utils/role/index.test.ts for full output
+        }),
       });
     });
   });

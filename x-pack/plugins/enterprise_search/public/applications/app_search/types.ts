@@ -7,6 +7,7 @@
 export * from '../../../common/types/app_search';
 
 export type TRole = 'owner' | 'admin' | 'dev' | 'editor' | 'analyst';
+export type TAbility = 'manage' | 'edit' | 'view';
 
 export interface IRole {
   id: string;
@@ -14,7 +15,7 @@ export interface IRole {
   availableRoleTypes: TRole[];
   credentialTypes: string[];
   canAccessAllEngines: boolean;
-  can(action: string, subject: string): boolean;
+  can(action: TAbility, subject: string): boolean;
   canViewEngines: boolean;
   canViewMetaEngines: boolean;
   canViewAccountCredentials: boolean;
