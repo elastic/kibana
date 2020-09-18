@@ -230,6 +230,11 @@ export class ReportingCore {
   }
 
   public async getUiSettingsClient(request: KibanaRequest) {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    const spaceId = this.getSpaceId(request);
+    if (spacesService && spaceId) {
+      this.logger.info(`Creating UI Settings Client for space: ${spaceId}`);
+    }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
   }
