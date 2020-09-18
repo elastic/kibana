@@ -176,7 +176,6 @@ export async function bulkInstallPackages({
       continue;
     }
 
-    // TODO I think we want version here and not `install_version`?
     if (!installedPkg || semver.gt(latestPackage.version, installedPkg.attributes.version)) {
       const pkgkey = Registry.pkgToPkgKey({
         name: latestPackage.name,
