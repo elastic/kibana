@@ -16,7 +16,7 @@ export const spaces = (kibana: Record<string, any>) =>
     id: 'spaces',
     configPrefix: 'xpack.spaces',
     publicDir: resolve(__dirname, 'public'),
-    require: ['elasticsearch', 'xpack_main'],
+    require: ['xpack_main'],
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
