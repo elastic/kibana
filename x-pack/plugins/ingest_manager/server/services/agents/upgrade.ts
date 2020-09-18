@@ -5,9 +5,10 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { AgentAction, AgentSOAttributes } from '../../types';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AgentUpgradeActionSOAttributes, AgentSOAttributes, AgentAction } from '../../types';
+import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAgentAction } from './actions';
+import { appContextService } from '../app_context';
 
 export async function sendUpgradeAgentAction({
   soClient,
@@ -39,13 +40,21 @@ export async function ackAgentUpgraded(
   soClient: SavedObjectsClientContract,
   agentAction: AgentAction
 ) {
-  if (!agentAction.data.version) throw new Error('version is missing in UPGRADE action');
+  const {
+    attributes: { data },
+  } = await appContextService
+    .getEncryptedSavedObjects()
+    .getDecryptedAsInternalUser<AgentUpgradeActionSOAttributes>(
+      AGENT_ACTION_SAVED_OBJECT_TYPE,
+      agentAction.id
+    );
+  const { version } = JSON.parse(data);
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentAction.agent_id, {
     upgraded_at: new Date().toISOString(),
     local_metadata: {
       elastic: {
         agent: {
-          version: agentAction.data.version,
+          version,
         },
       },
     },
