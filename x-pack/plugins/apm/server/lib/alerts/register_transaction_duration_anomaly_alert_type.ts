@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { ANOMALY_SEVERITY } from '../../../../ml/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import {
@@ -18,6 +17,7 @@ import { AlertingPlugin } from '../../../../alerts/server';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
 import { getMLJobIds } from '../service_map/get_service_anomalies';
+import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -57,24 +57,9 @@ export function registerTransactionDurationAnomalyAlertType({
     },
     actionVariables: {
       context: [
-        {
-          description: i18n.translate(
-            'xpack.apm.registerTransactionDurationAnomalyAlertType.variables.serviceName',
-            {
-              defaultMessage: 'Service name',
-            }
-          ),
-          name: 'serviceName',
-        },
-        {
-          description: i18n.translate(
-            'xpack.apm.registerTransactionDurationAnomalyAlertType.variables.transactionType',
-            {
-              defaultMessage: 'Transaction type',
-            }
-          ),
-          name: 'transactionType',
-        },
+        apmActionVariables.serviceName,
+        apmActionVariables.transactionType,
+        apmActionVariables.environment,
       ],
     },
     producer: 'apm',
@@ -110,6 +95,7 @@ export function registerTransactionDurationAnomalyAlertType({
 
       const anomalySearchParams = {
         body: {
+          terminateAfter: 1,
           size: 0,
           query: {
             bool: {
@@ -153,10 +139,10 @@ export function registerTransactionDurationAnomalyAlertType({
         );
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
           serviceName: alertParams.serviceName,
+          transactionType: alertParams.transactionType,
+          environment: alertParams.environment,
         });
       }
-
-      return {};
     },
   });
 }

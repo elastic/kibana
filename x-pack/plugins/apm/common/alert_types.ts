@@ -9,42 +9,33 @@ import { ValuesType } from 'utility-types';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../../ml/common';
 
 export enum AlertType {
-  ErrorRate = 'apm.error_rate',
+  ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
+  TransactionErrorRate = 'apm.transaction_error_rate',
   TransactionDuration = 'apm.transaction_duration',
   TransactionDurationAnomaly = 'apm.transaction_duration_anomaly',
 }
 
+const THRESHOLD_MET_GROUP = {
+  id: 'threshold_met',
+  name: i18n.translate('xpack.apm.a.thresholdMet', {
+    defaultMessage: 'Threshold met',
+  }),
+};
+
 export const ALERT_TYPES_CONFIG = {
-  [AlertType.ErrorRate]: {
-    name: i18n.translate('xpack.apm.errorRateAlert.name', {
-      defaultMessage: 'Error rate',
+  [AlertType.ErrorCount]: {
+    name: i18n.translate('xpack.apm.errorCountAlert.name', {
+      defaultMessage: 'Error count threshold',
     }),
-    actionGroups: [
-      {
-        id: 'threshold_met',
-        name: i18n.translate('xpack.apm.errorRateAlert.thresholdMet', {
-          defaultMessage: 'Threshold met',
-        }),
-      },
-    ],
+    actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
     producer: 'apm',
   },
   [AlertType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
-      defaultMessage: 'Transaction duration',
+      defaultMessage: 'Transaction duration threshold',
     }),
-    actionGroups: [
-      {
-        id: 'threshold_met',
-        name: i18n.translate(
-          'xpack.apm.transactionDurationAlert.thresholdMet',
-          {
-            defaultMessage: 'Threshold met',
-          }
-        ),
-      },
-    ],
+    actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
     producer: 'apm',
   },
@@ -52,41 +43,18 @@ export const ALERT_TYPES_CONFIG = {
     name: i18n.translate('xpack.apm.transactionDurationAnomalyAlert.name', {
       defaultMessage: 'Transaction duration anomaly',
     }),
-    actionGroups: [
-      {
-        id: 'threshold_met',
-        name: i18n.translate(
-          'xpack.apm.transactionDurationAlert.thresholdMet',
-          {
-            defaultMessage: 'Threshold met',
-          }
-        ),
-      },
-    ],
+    actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
     producer: 'apm',
   },
-};
-
-export const TRANSACTION_ALERT_AGGREGATION_TYPES = {
-  avg: i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.avg',
-    {
-      defaultMessage: 'Average',
-    }
-  ),
-  '95th': i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.95th',
-    {
-      defaultMessage: '95th percentile',
-    }
-  ),
-  '99th': i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.99th',
-    {
-      defaultMessage: '99th percentile',
-    }
-  ),
+  [AlertType.TransactionErrorRate]: {
+    name: i18n.translate('xpack.apm.transactionErrorRateAlert.name', {
+      defaultMessage: 'Transaction error rate threshold',
+    }),
+    actionGroups: [THRESHOLD_MET_GROUP],
+    defaultActionGroupId: 'threshold_met',
+    producer: 'apm',
+  },
 };
 
 export const ANOMALY_ALERT_SEVERITY_TYPES = [
@@ -123,3 +91,11 @@ export const ANOMALY_ALERT_SEVERITY_TYPES = [
 export type AnomalyAlertSeverityType = ValuesType<
   typeof ANOMALY_ALERT_SEVERITY_TYPES
 >['type'];
+
+// Server side registrations
+// x-pack/plugins/apm/server/lib/alerts/<alert>.ts
+// x-pack/plugins/apm/server/lib/alerts/register_apm_alerts.ts
+
+// Client side registrations:
+// x-pack/plugins/apm/public/components/alerting/<alert>/index.tsx
+// x-pack/plugins/apm/public/components/alerting/register_apm_alerts

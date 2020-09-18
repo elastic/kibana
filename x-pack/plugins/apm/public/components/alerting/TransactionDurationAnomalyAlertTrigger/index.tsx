@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiExpression, EuiSelect } from '@elastic/eui';
+
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ANOMALY_SEVERITY } from '../../../../../ml/common';
@@ -17,14 +18,16 @@ import {
   AnomalySeverity,
   SelectAnomalySeverity,
 } from './SelectAnomalySeverity';
-import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
+import {
+  EnvironmentField,
+  ServiceField,
+  TransactionTypeField,
+} from '../fields';
 
 interface Params {
   windowSize: number;
@@ -47,9 +50,9 @@ interface Props {
 
 export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
-  const { serviceName } = alertParams;
   const { urlParams } = useUrlParams();
   const transactionTypes = useServiceTransactionTypes(urlParams);
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
   const supportedTransactionTypes = transactionTypes.filter((transactionType) =>
@@ -60,10 +63,13 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     return null;
   }
 
+  // 'page-load' for RUM, 'request' otherwise
+  const transactionType = supportedTransactionTypes[0];
+
   const defaults: Params = {
     windowSize: 15,
     windowUnit: 'm',
-    transactionType: supportedTransactionTypes[0], // 'page-load' for RUM, 'request' otherwise
+    transactionType,
     serviceName,
     environment: urlParams.environment || ENVIRONMENT_ALL.value,
     anomalySeverityType: ANOMALY_SEVERITY.CRITICAL,
@@ -75,31 +81,13 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   };
 
   const fields = [
-    <EuiExpression
-      description={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.service',
-        {
-          defaultMessage: 'Service',
-        }
-      )}
-      value={serviceName}
+    <ServiceField value={serviceName} />,
+    <TransactionTypeField currentValue={transactionType} />,
+    <EnvironmentField
+      currentValue={params.environment}
+      options={environmentOptions}
+      onChange={(e) => setAlertParams('environment', e.target.value)}
     />,
-    <PopoverExpression
-      value={getEnvironmentLabel(params.environment)}
-      title={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.environment',
-        {
-          defaultMessage: 'Environment',
-        }
-      )}
-    >
-      <EuiSelect
-        value={params.environment}
-        options={environmentOptions}
-        onChange={(e) => setAlertParams('environment', e.target.value)}
-        compressed
-      />
-    </PopoverExpression>,
     <PopoverExpression
       value={<AnomalySeverity type={params.anomalySeverityType} />}
       title={i18n.translate(
