@@ -5,8 +5,7 @@
  */
 
 import { xpackMain } from './legacy/plugins/xpack_main';
-import { spaces } from './legacy/plugins/spaces';
 
 module.exports = function (kibana) {
-  return [xpackMain(kibana), spaces(kibana)];
+  return [xpackMain(kibana)];
 };
