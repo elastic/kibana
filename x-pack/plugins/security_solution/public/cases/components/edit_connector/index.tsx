@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
+import deepEqual from 'fast-deep-equal';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -18,17 +19,21 @@ import styled, { css } from 'styled-components';
 import { noop } from 'lodash/fp';
 
 import * as i18n from '../../translations';
-import { Form, UseField, useForm } from '../../../shared_imports';
+import { Form, UseField, useForm, useFormData } from '../../../shared_imports';
 import { schema } from './schema';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ActionConnector } from '../../../../../case/common/api/cases';
+import { SettingFieldsForm } from '../settings/fields_form';
+import { getConnectorById } from '../configure_cases/utils';
 
 interface EditConnectorProps {
   connectors: ActionConnector[];
   disabled?: boolean;
   isLoading: boolean;
-  onSubmit: (connectorId: string, onSuccess: () => void, onError: () => void) => void;
   selectedConnector: string;
+  onSubmit: (connectorId: string, onSuccess: () => void, onError: () => void) => void;
+  onFieldsChange: (fields: Record<string, unknown>) => void;
+  fields: Record<string, unknown>;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -47,6 +52,8 @@ export const EditConnector = React.memo(
     isLoading,
     onSubmit,
     selectedConnector,
+    onFieldsChange,
+    fields,
   }: EditConnectorProps) => {
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
@@ -55,13 +62,32 @@ export const EditConnector = React.memo(
     });
 
     const { setFieldValue, submit } = form;
+    const [{ connectorId }] = useFormData<{
+      connectorId: string;
+    }>({
+      form,
+      watch: ['connectorId', 'description'],
+    });
+
     const [connectorHasChanged, setConnectorHasChanged] = useState(false);
+    const [actionConnector, setActionConnector] = useState<ActionConnector | null>(null);
 
     const onChangeConnector = useCallback(
-      (connectorId) => {
-        setConnectorHasChanged(selectedConnector !== connectorId);
+      (newConnectorId) => {
+        setConnectorHasChanged(selectedConnector !== newConnectorId);
       },
       [selectedConnector]
+    );
+
+    const onFields = useCallback(
+      (newFields) => {
+        if (!deepEqual(newFields, fields)) {
+          setConnectorHasChanged(true);
+        }
+
+        onFieldsChange(newFields);
+      },
+      [fields, onFieldsChange]
     );
 
     const onError = useCallback(() => {
@@ -81,6 +107,10 @@ export const EditConnector = React.memo(
         setConnectorHasChanged(false);
       }
     }, [submit, onSubmit, onError]);
+
+    useEffect(() => {
+      setActionConnector(getConnectorById(connectorId, connectors) ?? null);
+    }, [connectors, connectorId]);
 
     return (
       <EuiText>
@@ -113,6 +143,13 @@ export const EditConnector = React.memo(
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </Form>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SettingFieldsForm
+                connector={actionConnector}
+                onFieldsChange={onFields}
+                fields={fields}
+              />
             </EuiFlexItem>
             {connectorHasChanged && (
               <EuiFlexItem>

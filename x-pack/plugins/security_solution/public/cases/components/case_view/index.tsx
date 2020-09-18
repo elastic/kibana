@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { Case, CaseConnector } from '../../containers/types';
+import { ActionConnector, Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -40,6 +40,7 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
+import { SettingFieldsForm } from '../settings/fields_form';
 
 interface Props {
   caseId: string;
@@ -83,6 +84,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const allCasesLink = getCaseUrl(search);
     const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
     const [initLoadingData, setInitLoadingData] = useState(true);
+    const [fields, setFields] = useState<Record<string, unknown>>(caseData.connector?.fields ?? {});
 
     const {
       caseUserActions,
@@ -221,12 +223,12 @@ export const CaseComponent = React.memo<CaseProps>(
 
         onUpdateField({
           key: 'connector',
-          value: { ...connectorToUpdate, fields: {} },
+          value: { ...connectorToUpdate, fields },
           onSuccess,
           onError,
         });
       },
-      [onUpdateField, connectors]
+      [onUpdateField, connectors, fields]
     );
 
     const onSubmitTags = useCallback((newTags) => onUpdateField({ key: 'tags', value: newTags }), [
@@ -399,6 +401,8 @@ export const CaseComponent = React.memo<CaseProps>(
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
                   selectedConnector={caseData.connector.id}
+                  onFieldsChange={setFields}
+                  fields={fields}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

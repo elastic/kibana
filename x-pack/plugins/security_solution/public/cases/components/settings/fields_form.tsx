@@ -13,16 +13,18 @@ import { useCaseSettings } from './use_case_settings';
 interface Props {
   connector: CaseSettingsConnector | null;
   onFieldsChange: (fields: Record<string, unknown>) => void;
+  fields?: Record<string, unknown>;
 }
 
-const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange }) => {
+const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange, fields }) => {
   const { caseSettingsRegistry } = useCaseSettings();
-  const [fields, setFields] = useState<Record<string, unknown>>({});
-  const onChange = useCallback((p, v) => setFields((prevFields) => ({ ...prevFields, [p]: v })), [
-    setFields,
-  ]);
+  const [currentFields, setCurrentFields] = useState<Record<string, unknown>>(fields ?? {});
+  const onChange = useCallback(
+    (p, v) => setCurrentFields((prevFields) => ({ ...prevFields, [p]: v })),
+    [setCurrentFields]
+  );
 
-  useEffect(() => onFieldsChange(fields), [fields, onFieldsChange]);
+  useEffect(() => onFieldsChange(currentFields), [currentFields, onFieldsChange]);
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {
     return null;
@@ -43,7 +45,7 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, onFieldsChange
             </EuiFlexGroup>
           }
         >
-          <FieldsComponent fields={fields} connector={connector} onChange={onChange} />
+          <FieldsComponent fields={currentFields} connector={connector} onChange={onChange} />
         </Suspense>
       ) : null}
     </>
