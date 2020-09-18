@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo } from 'react';
 
 import { LastEventIndexKey } from '../../../graphql/types';
-import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
+import { useTimelineLastEventTime } from '../../containers/events/last_event_time';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 
@@ -20,11 +20,13 @@ export interface LastEventTimeProps {
 }
 
 export const LastEventTime = memo<LastEventTimeProps>(({ hostName, indexKey, ip }) => {
-  const { loading, lastSeen, errorMessage } = useLastEventTimeQuery(
+  const [loading, { lastSeen, errorMessage }] = useTimelineLastEventTime({
     indexKey,
-    { hostName, ip },
-    'default'
-  );
+    details: {
+      hostName,
+      ip,
+    },
+  });
 
   if (errorMessage != null) {
     return (

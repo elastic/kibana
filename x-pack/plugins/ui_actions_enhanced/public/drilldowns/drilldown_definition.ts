@@ -37,6 +37,12 @@ export interface DrilldownDefinition<
   id: string;
 
   /**
+   * Is this action factory not GA?
+   * Adds a beta badge on a list item representing this ActionFactory
+   */
+  readonly isBeta?: boolean;
+
+  /**
    * Minimal license level
    * Empty means no restrictions
    */

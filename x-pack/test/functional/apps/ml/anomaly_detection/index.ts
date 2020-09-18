@@ -10,6 +10,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     loadTestFile(require.resolve('./single_metric_job'));
+    loadTestFile(require.resolve('./single_metric_job_without_datafeed_start'));
     loadTestFile(require.resolve('./multi_metric_job'));
     loadTestFile(require.resolve('./population_job'));
     loadTestFile(require.resolve('./saved_search_job'));
