@@ -437,8 +437,7 @@ describe('DynamicActionManager', () => {
           name: 'foo',
           config: {},
         };
-
-        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects;
+        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects.toThrow();
       });
     });
   });
@@ -703,5 +702,19 @@ describe('DynamicActionManager', () => {
     );
 
     expect(basicAndGoldActions).toHaveLength(2);
+  });
+
+  test("failing to revive/kill an action doesn't fail action manager", async () => {
+    const { manager, uiActions, storage } = setup([event1, event3, event2]);
+
+    uiActions.registerActionFactory(actionFactoryDefinition1);
+
+    await manager.start();
+
+    expect(uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(2);
+    expect(await storage.list()).toEqual([event1, event3, event2]);
+
+    await manager.stop();
+    expect(uiActions.getTriggerActions('VALUE_CLICK_TRIGGER')).toHaveLength(0);
   });
 });

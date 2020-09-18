@@ -70,6 +70,10 @@ export class UiActionsServiceEnhancements {
     return actionFactory;
   };
 
+  public readonly hasActionFactory = (actionFactoryId: string): boolean => {
+    return this.actionFactories.has(actionFactoryId);
+  };
+
   /**
    * Returns an array of all action factories.
    */

@@ -58,7 +58,10 @@ export interface SetupContract
 
 export interface StartContract
   extends UiActionsStart,
-    Pick<UiActionsServiceEnhancements, 'getActionFactory' | 'getActionFactories'> {
+    Pick<
+      UiActionsServiceEnhancements,
+      'getActionFactory' | 'hasActionFactory' | 'getActionFactories'
+    > {
   FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
 }
 
