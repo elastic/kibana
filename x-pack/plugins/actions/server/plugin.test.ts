@@ -294,7 +294,7 @@ describe('Actions Plugin', () => {
         pluginSetup.registerType(actionType);
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        pluginStart.isActionExecutable('123', 'my-action-type', { notifyUsage: true })
+        pluginStart.isActionExecutable('123', 'my-action-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
           'Connector: My action type'
         );
