@@ -110,7 +110,7 @@ export function DescriptiveName({ event }: { event: ResolverEvent }) {
       id="xpack.securitySolution.resolver.eventDescription.entityIDLabel"
       defaultMessage="{ entityID }"
       values={{
-        dnsQuestionName: entityID(event),
+        entityID: entityID(event),
       }}
     />
   );
