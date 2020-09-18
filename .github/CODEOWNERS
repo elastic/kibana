@@ -147,6 +147,7 @@
 #CC# /src/plugins/home/public @elastic/kibana-core-ui
 #CC# /src/plugins/home/server/services/ @elastic/kibana-core-ui
 #CC# /src/plugins/home/ @elastic/kibana-core-ui
+#CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core-ui
 
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
@@ -256,7 +257,8 @@
 #CC# /x-pack/legacy/server/lib/ @elastic/kibana-platform
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-platform
 #CC# /x-pack/plugins/features/ @elastic/kibana-platform
-#CC# /x-pack/plugins/global_search @elastic/kibana-platform
+#CC# /x-pack/plugins/global_search/ @elastic/kibana-platform
+#CC# /src/legacy/plugin_discovery/ @elastic/kibana-platform
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
