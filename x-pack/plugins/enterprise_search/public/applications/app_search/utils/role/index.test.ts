@@ -21,7 +21,6 @@ describe('getRoleAbilities', () => {
       can: expect.any(Function),
       // Has access
       canViewAccountCredentials: true,
-      canViewEngines: true,
       canManageEngines: true,
       // Does not have access
       canViewMetaEngines: false,

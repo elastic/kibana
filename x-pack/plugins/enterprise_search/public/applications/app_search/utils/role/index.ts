@@ -16,7 +16,6 @@ export interface IRole {
   credentialTypes: string[];
   canAccessAllEngines: boolean;
   can(action: TAbility, subject: string): boolean;
-  canViewEngines: boolean;
   canViewMetaEngines: boolean;
   canViewAccountCredentials: boolean;
   canViewEngineAnalytics: boolean;
@@ -70,10 +69,9 @@ export const getRoleAbilities = (role: IAccount['role']): IRole => {
   };
 
   // Ability shorthands (also in top level of role obj for convenience)
-  // Example usage: `const { myRole: { canViewEngines } } = useValues(AppLogic);`
+  // Example usage: `const { myRole: { canViewSettings } } = useValues(AppLogic);`
   const abilities = {
     canAccessAllEngines: role.ability.accessAllEngines,
-    canViewEngines: myRole.can('view', 'account_engines'),
     canViewMetaEngines: myRole.can('view', 'account_meta_engines'),
     canViewAccountCredentials: myRole.can('view', 'account_credentials'),
     canViewEngineAnalytics: myRole.can('view', 'engine_analytics'),

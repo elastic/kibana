@@ -13,7 +13,6 @@ import { shallow } from 'enzyme';
 import { useValues, useActions } from 'kea';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { NotFound } from '../shared/not_found';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { EngineOverview } from './components/engine_overview';
@@ -56,6 +55,7 @@ describe('AppSearchConfigured', () => {
 
     expect(wrapper.find(Layout)).toHaveLength(1);
     expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 
   it('initializes app data with passed props', () => {
@@ -94,38 +94,16 @@ describe('AppSearchConfigured', () => {
   });
 
   describe('ability checks', () => {
-    it('renders a 404 if a user has no view abilities', () => {
-      const wrapper = shallow(<AppSearchConfigured />);
-
-      expect(wrapper.find(NotFound)).toHaveLength(2);
-    });
-
-    it('renders the engines overview if a user can view engines', () => {
-      (useValues as jest.Mock).mockImplementation(() => ({
-        myRole: { canViewEngines: true },
-      }));
-
-      const wrapper = shallow(<AppSearchConfigured />);
-
-      expect(wrapper.find(EngineOverview)).toHaveLength(1);
-      expect(wrapper.find(NotFound)).toHaveLength(1);
-    });
+    // TODO: Use this section for routes wrapped in canViewX conditionals
+    // e.g., it('renders settings if a user can view settings')
   });
 });
 
 describe('AppSearchNav', () => {
-  it('renders', () => {
+  it('renders with the Engines link', () => {
     const wrapper = shallow(<AppSearchNav />);
 
     expect(wrapper.find(SideNav)).toHaveLength(1);
-  });
-
-  it('renders the Engines link', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({
-      myRole: { canViewEngines: true },
-    }));
-    const wrapper = shallow(<AppSearchNav />);
-
     expect(wrapper.find(SideNavLink).prop('to')).toEqual('/engines');
   });
 
@@ -135,7 +113,7 @@ describe('AppSearchNav', () => {
     }));
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).prop('to')).toEqual(
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
       'http://localhost:3002/as/settings/account'
     );
   });
@@ -146,7 +124,9 @@ describe('AppSearchNav', () => {
     }));
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).prop('to')).toEqual('http://localhost:3002/as/credentials');
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
+      'http://localhost:3002/as/credentials'
+    );
   });
 
   it('renders the Role Mappings link', () => {
@@ -155,6 +135,8 @@ describe('AppSearchNav', () => {
     }));
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).prop('to')).toEqual('http://localhost:3002/as#/role-mappings');
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
+      'http://localhost:3002/as#/role-mappings'
+    );
   });
 });

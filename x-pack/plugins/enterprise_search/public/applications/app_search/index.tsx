@@ -50,10 +50,7 @@ export const AppSearchUnconfigured: React.FC = () => (
 
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { initializeAppData } = useActions(AppLogic);
-  const {
-    hasInitialized,
-    myRole: { canViewEngines },
-  } = useValues(AppLogic);
+  const { hasInitialized } = useValues(AppLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
@@ -72,17 +69,11 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
           ) : (
             <Switch>
               <Route exact path={ROOT_PATH}>
-                {canViewEngines ? (
-                  <Redirect to={ENGINES_PATH} />
-                ) : (
-                  <NotFound product={APP_SEARCH_PLUGIN} />
-                )}
+                <Redirect to={ENGINES_PATH} />
               </Route>
-              {canViewEngines && (
-                <Route exact path={ENGINES_PATH}>
-                  <EngineOverview />
-                </Route>
-              )}
+              <Route exact path={ENGINES_PATH}>
+                <EngineOverview />
+              </Route>
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
@@ -100,18 +91,16 @@ export const AppSearchNav: React.FC = () => {
   } = useContext(KibanaContext) as IKibanaContext;
 
   const {
-    myRole: { canViewEngines, canViewSettings, canViewAccountCredentials, canViewRoleMappings },
+    myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
   } = useValues(AppLogic);
 
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
-      {canViewEngines && (
-        <SideNavLink to={ENGINES_PATH} isRoot>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
-            defaultMessage: 'Engines',
-          })}
-        </SideNavLink>
-      )}
+      <SideNavLink to={ENGINES_PATH} isRoot>
+        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
+          defaultMessage: 'Engines',
+        })}
+      </SideNavLink>
       {canViewSettings && (
         <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
