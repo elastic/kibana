@@ -123,10 +123,6 @@ export class ReportInfoButton extends Component<Props, State> {
         description: get(info, 'payload.title') || NA,
       },
       {
-        title: 'Type',
-        description: get(info, 'payload.type') || NA,
-      },
-      {
         title: 'Layout',
         description: get(info, 'meta.layout') || NA,
       },

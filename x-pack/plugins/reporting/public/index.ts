@@ -20,7 +20,7 @@ export interface JobStatusBucket {
   id: JobId;
   status: JobStatus;
   title: string;
-  type: string;
+  jobtype: string;
   maxSizeReached?: boolean;
   csvContainsFormulas?: boolean;
 }

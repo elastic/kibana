@@ -34,7 +34,7 @@ function reportToJobStatusBucket(src: ReportDocument): JobStatusBucket {
     id: src._id,
     status: src._source.status,
     title: src._source.payload.title,
-    type: src._source.jobtype,
+    jobtype: src._source.jobtype,
     maxSizeReached: src._source.output?.max_size_reached,
     csvContainsFormulas: src._source.output?.csv_contains_formulas,
   };

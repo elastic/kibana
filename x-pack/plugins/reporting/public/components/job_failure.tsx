@@ -22,7 +22,7 @@ export const getFailureToast = (
       <FormattedMessage
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
         defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
-        values={{ reportObjectType: job.type, reportObjectTitle: job.title }}
+        values={{ reportObjectType: job.jobtype, reportObjectTitle: job.title }}
       />
     ),
     text: toMountPoint(

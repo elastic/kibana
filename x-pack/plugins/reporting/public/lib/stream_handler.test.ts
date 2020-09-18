@@ -110,7 +110,7 @@ describe('stream handler', () => {
           {
             id: 'yas1',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
           } as JobStatusBucket,
         ],
@@ -131,7 +131,7 @@ describe('stream handler', () => {
           {
             id: 'yas2',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             maxSizeReached: true,
           } as JobStatusBucket,
@@ -153,7 +153,7 @@ describe('stream handler', () => {
           {
             id: 'yas3',
             title: 'Yas',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             csvContainsFormulas: true,
           } as JobStatusBucket,
@@ -176,7 +176,7 @@ describe('stream handler', () => {
           {
             id: 'yas7',
             title: 'Yas 7',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'failed',
           } as JobStatusBucket,
         ],
@@ -196,20 +196,20 @@ describe('stream handler', () => {
           {
             id: 'yas8',
             title: 'Yas 8',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
           } as JobStatusBucket,
           {
             id: 'yas9',
             title: 'Yas 9',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             csvContainsFormulas: true,
           } as JobStatusBucket,
           {
             id: 'yas10',
             title: 'Yas 10',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'completed',
             maxSizeReached: true,
           } as JobStatusBucket,
@@ -218,7 +218,7 @@ describe('stream handler', () => {
           {
             id: 'yas13',
             title: 'Yas 13',
-            type: 'yas',
+            jobtype: 'yas',
             status: 'failed',
           } as JobStatusBucket,
         ],

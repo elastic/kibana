@@ -22,7 +22,7 @@ export const getSuccessToast = (
     <FormattedMessage
       id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
       defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
-      values={{ reportObjectType: job.type, reportObjectTitle: job.title }}
+      values={{ reportObjectType: job.jobtype, reportObjectTitle: job.title }}
     />
   ),
   color: 'success',
