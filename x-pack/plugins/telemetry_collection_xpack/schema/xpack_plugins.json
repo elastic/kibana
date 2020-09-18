@@ -155,6 +155,272 @@
         }
       }
     },
+    "lens": {
+      "properties": {
+        "events_30_days": {
+          "properties": {
+            "app_query_change": {
+              "type": "long"
+            },
+            "indexpattern_field_info_click": {
+              "type": "long"
+            },
+            "loaded": {
+              "type": "long"
+            },
+            "app_filters_updated": {
+              "type": "long"
+            },
+            "app_date_change": {
+              "type": "long"
+            },
+            "save_failed": {
+              "type": "long"
+            },
+            "loaded_404": {
+              "type": "long"
+            },
+            "drop_total": {
+              "type": "long"
+            },
+            "chart_switch": {
+              "type": "long"
+            },
+            "suggestion_confirmed": {
+              "type": "long"
+            },
+            "suggestion_clicked": {
+              "type": "long"
+            },
+            "drop_onto_workspace": {
+              "type": "long"
+            },
+            "drop_non_empty": {
+              "type": "long"
+            },
+            "drop_empty": {
+              "type": "long"
+            },
+            "indexpattern_changed": {
+              "type": "long"
+            },
+            "indexpattern_filters_cleared": {
+              "type": "long"
+            },
+            "indexpattern_type_filter_toggled": {
+              "type": "long"
+            },
+            "indexpattern_existence_toggled": {
+              "type": "long"
+            },
+            "indexpattern_show_all_fields_clicked": {
+              "type": "long"
+            },
+            "drop_onto_dimension": {
+              "type": "long"
+            },
+            "indexpattern_dimension_removed": {
+              "type": "long"
+            },
+            "indexpattern_dimension_field_changed": {
+              "type": "long"
+            },
+            "xy_change_layer_display": {
+              "type": "long"
+            },
+            "xy_layer_removed": {
+              "type": "long"
+            },
+            "xy_layer_added": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_terms": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_date_histogram": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_avg": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_min": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_max": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_sum": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_count": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_cardinality": {
+              "type": "long"
+            }
+          }
+        },
+        "events_90_days": {
+          "properties": {
+            "app_query_change": {
+              "type": "long"
+            },
+            "indexpattern_field_info_click": {
+              "type": "long"
+            },
+            "loaded": {
+              "type": "long"
+            },
+            "app_filters_updated": {
+              "type": "long"
+            },
+            "app_date_change": {
+              "type": "long"
+            },
+            "save_failed": {
+              "type": "long"
+            },
+            "loaded_404": {
+              "type": "long"
+            },
+            "drop_total": {
+              "type": "long"
+            },
+            "chart_switch": {
+              "type": "long"
+            },
+            "suggestion_confirmed": {
+              "type": "long"
+            },
+            "suggestion_clicked": {
+              "type": "long"
+            },
+            "drop_onto_workspace": {
+              "type": "long"
+            },
+            "drop_non_empty": {
+              "type": "long"
+            },
+            "drop_empty": {
+              "type": "long"
+            },
+            "indexpattern_changed": {
+              "type": "long"
+            },
+            "indexpattern_filters_cleared": {
+              "type": "long"
+            },
+            "indexpattern_type_filter_toggled": {
+              "type": "long"
+            },
+            "indexpattern_existence_toggled": {
+              "type": "long"
+            },
+            "indexpattern_show_all_fields_clicked": {
+              "type": "long"
+            },
+            "drop_onto_dimension": {
+              "type": "long"
+            },
+            "indexpattern_dimension_removed": {
+              "type": "long"
+            },
+            "indexpattern_dimension_field_changed": {
+              "type": "long"
+            },
+            "xy_change_layer_display": {
+              "type": "long"
+            },
+            "xy_layer_removed": {
+              "type": "long"
+            },
+            "xy_layer_added": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_terms": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_date_histogram": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_avg": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_min": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_max": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_sum": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_count": {
+              "type": "long"
+            },
+            "indexpattern_dimension_operation_cardinality": {
+              "type": "long"
+            }
+          }
+        },
+        "suggestion_events_30_days": {
+          "properties": {
+            "back_to_current": {
+              "type": "long"
+            },
+            "reload": {
+              "type": "long"
+            },
+            "position_0_of_5": {
+              "type": "long"
+            }
+          }
+        },
+        "suggestion_events_90_days": {
+          "properties": {
+            "back_to_current": {
+              "type": "long"
+            },
+            "reload": {
+              "type": "long"
+            },
+            "position_0_of_5": {
+              "type": "long"
+            }
+          }
+        },
+        "saved_overall_total": {
+          "type": "long"
+        },
+        "saved_30_days_total": {
+          "type": "long"
+        },
+        "saved_90_days_total": {
+          "type": "long"
+        },
+        "saved_overall": {
+          "properties": {
+            "bar_stacked": {
+              "type": "long"
+            }
+          }
+        },
+        "saved_30_days": {
+          "properties": {
+            "bar_stacked": {
+              "type": "long"
+            }
+          }
+        },
+        "saved_90_days": {
+          "properties": {
+            "bar_stacked": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "mlTelemetry": {
       "properties": {
         "file_data_visualizer": {
