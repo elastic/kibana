@@ -42,12 +42,12 @@ export function getSeverity(score?: number) {
 export function getSeverityColor(theme: EuiTheme, severity?: Severity) {
   switch (severity) {
     case Severity.warning:
-      return theme.eui.euiColorVis0;
+      return theme.eui.euiColorVis0_behindText;
     case Severity.minor:
     case Severity.major:
-      return theme.eui.euiColorVis5;
+      return theme.eui.euiColorVis5_behindText;
     case Severity.critical:
-      return theme.eui.euiColorVis9;
+      return theme.eui.euiColorVis9_behindText;
     default:
       return;
   }
