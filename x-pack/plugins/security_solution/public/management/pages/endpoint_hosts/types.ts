@@ -11,6 +11,7 @@ import {
   HostPolicyResponse,
   AppLocation,
   PolicyData,
+  MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../ingest_manager/common';
@@ -65,6 +66,8 @@ export interface EndpointState {
   isAutoRefreshEnabled: boolean;
   /** The current auto refresh interval for data in ms */
   autoRefreshInterval: number;
+  /** The query strategy version that informs whether the transform for KQL is enabled or not */
+  queryStrategyVersion: MetadataQueryStrategyVersions;
 }
 
 /**
