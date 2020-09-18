@@ -47,9 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const Table = await testSubjects.findAll('resolver:node-list:item');
       for (const value of Table) {
-        const text = await (
-          await value.findByCssSelector('[class*="StyledLabelTitle"]')
-        )._webElement.getText();
+        const text = await value._webElement.getText();
         TableData.push(text.split('\n')[0]);
       }
       await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
