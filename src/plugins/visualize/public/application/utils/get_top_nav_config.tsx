@@ -355,12 +355,7 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
-              if (
-                originatingApp === 'dashboards' &&
-                dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables
-              ) {
-                return cancelAndReturn();
-              }
+              return cancelAndReturn();
             },
           },
         ]
