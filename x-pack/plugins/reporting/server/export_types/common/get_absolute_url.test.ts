@@ -7,7 +7,7 @@
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 
 const defaultOptions = {
-  defaultBasePath: 'sbp',
+  basePath: 'sbp',
   protocol: 'http:',
   hostname: 'localhost',
   port: 5601,
@@ -64,8 +64,8 @@ test(`uses the provided hash with queryString`, () => {
 });
 
 test(`uses the provided basePath`, () => {
-  const getAbsoluteUrl = getAbsoluteUrlFactory(defaultOptions);
-  const absoluteUrl = getAbsoluteUrl({ basePath: '/s/marketing' });
+  const getAbsoluteUrl = getAbsoluteUrlFactory({ ...defaultOptions, basePath: '/s/marketing' });
+  const absoluteUrl = getAbsoluteUrl();
   expect(absoluteUrl).toBe(`http://localhost:5601/s/marketing/app/kibana`);
 });
 
