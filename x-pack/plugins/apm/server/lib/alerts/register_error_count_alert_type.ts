@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   ESSearchResponse,
@@ -17,11 +17,11 @@ import {
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
+import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -29,21 +29,21 @@ interface RegisterAlertParams {
 }
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
+  serviceName: schema.string(),
   environment: schema.string(),
 });
 
-const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorRate];
+const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
 
-export function registerErrorRateAlertType({
+export function registerErrorCountAlertType({
   alerts,
   config$,
 }: RegisterAlertParams) {
   alerts.registerType({
-    id: AlertType.ErrorRate,
+    id: AlertType.ErrorCount,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
@@ -52,37 +52,26 @@ export function registerErrorRateAlertType({
     },
     actionVariables: {
       context: [
-        {
-          description: i18n.translate(
-            'xpack.apm.registerErrorRateAlertType.variables.serviceName',
-            {
-              defaultMessage: 'Service name',
-            }
-          ),
-          name: 'serviceName',
-        },
+        apmActionVariables.serviceName,
+        apmActionVariables.environment,
+        apmActionVariables.threshold,
+        apmActionVariables.triggerValue,
       ],
     },
     producer: 'apm',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
-
-      const alertParams = params as TypeOf<typeof paramsSchema>;
-
+      const alertParams = params;
       const indices = await getApmIndices({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
 
-      const environmentTerm =
-        alertParams.environment === ENVIRONMENT_ALL.value
-          ? []
-          : [{ term: { [SERVICE_ENVIRONMENT]: alertParams.environment } }];
-
       const searchParams = {
         index: indices['apm_oss.errorIndices'],
         size: 0,
         body: {
+          track_total_hits: true,
           query: {
             bool: {
               filter: [
@@ -93,21 +82,12 @@ export function registerErrorRateAlertType({
                     },
                   },
                 },
-                {
-                  term: {
-                    [PROCESSOR_EVENT]: 'error',
-                  },
-                },
-                {
-                  term: {
-                    [SERVICE_NAME]: alertParams.serviceName,
-                  },
-                },
-                ...environmentTerm,
+                { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
+                { term: { [SERVICE_NAME]: alertParams.serviceName } },
+                ...getEnvironmentUiFilterES(alertParams.environment),
               ],
             },
           },
-          track_total_hits: true,
         },
       };
 
@@ -116,18 +96,19 @@ export function registerErrorRateAlertType({
         ESSearchRequest
       > = await services.callCluster('search', searchParams);
 
-      const value = response.hits.total.value;
+      const errorCount = response.hits.total.value;
 
-      if (value && value > alertParams.threshold) {
+      if (errorCount > alertParams.threshold) {
         const alertInstance = services.alertInstanceFactory(
-          AlertType.ErrorRate
+          AlertType.ErrorCount
         );
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
           serviceName: alertParams.serviceName,
+          environment: alertParams.environment,
+          threshold: alertParams.threshold,
+          triggerValue: errorCount,
         });
       }
-
-      return {};
     },
   });
 }
