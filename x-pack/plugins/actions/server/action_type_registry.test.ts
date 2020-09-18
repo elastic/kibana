@@ -71,6 +71,10 @@ describe('register()', () => {
         },
       ]
     `);
+    expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
+      'Connector: My action type',
+      'basic'
+    );
   });
 
   test('shallow clones the given action type', () => {
@@ -234,11 +238,19 @@ describe('isActionTypeEnabled', () => {
     expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
   });
 
-  test('should call isLicenseValidForActionType of the license state', async () => {
+  test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     actionTypeRegistry.isActionTypeEnabled('foo');
     expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
       notifyUsage: false,
+    });
+  });
+
+  test('should call isLicenseValidForActionType of the license state with notifyUsage true when specified', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionTypeRegistry.isActionTypeEnabled('foo', { notifyUsage: true });
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+      notifyUsage: true,
     });
   });
 
@@ -300,5 +312,38 @@ describe('ensureActionTypeEnabled', () => {
     expect(() =>
       actionTypeRegistry.ensureActionTypeEnabled('foo')
     ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+  });
+});
+
+describe('isActionExecutable()', () => {
+  let actionTypeRegistry: ActionTypeRegistry;
+  const fooActionType: ActionType = {
+    id: 'foo',
+    name: 'Foo',
+    minimumLicenseRequired: 'basic',
+    executor: async (options) => {
+      return { status: 'ok', actionId: options.actionId };
+    },
+  };
+
+  beforeEach(() => {
+    actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register(fooActionType);
+  });
+
+  test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionTypeRegistry.isActionExecutable('123', 'foo');
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+      notifyUsage: false,
+    });
+  });
+
+  test('should call isLicenseValidForActionType of the license state with notifyUsage true when specified', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionTypeRegistry.isActionExecutable('123', 'foo', { notifyUsage: true });
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+      notifyUsage: true,
+    });
   });
 });

@@ -256,5 +256,49 @@ describe('Actions Plugin', () => {
         );
       });
     });
+
+    describe('isActionTypeEnabled()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionTypeEnabled('my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
+        );
+      });
+    });
+
+    describe('isActionExecutable()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionExecutable('123', 'my-action-type', { notifyUsage: true })
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
+        );
+      });
+    });
   });
 });

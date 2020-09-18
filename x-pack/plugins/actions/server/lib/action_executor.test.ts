@@ -89,6 +89,9 @@ test('successfully executes', async () => {
   );
 
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('1', 'test', {
+    notifyUsage: true,
+  });
 
   expect(actionType.executor).toHaveBeenCalledWith({
     actionId: '1',
