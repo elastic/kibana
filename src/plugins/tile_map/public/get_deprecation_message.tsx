@@ -19,8 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiButton, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { getCoreService, getQueryService, getShareService } from './services';
 import { indexPatterns } from '../../data/public';
 import { Vis } from '../../visualizations/public';

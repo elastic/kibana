@@ -19,8 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiButton, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { getCoreService, getQueryService, getShareService } from './kibana_services';
 import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
