@@ -13,6 +13,7 @@ import {
   ThirdPartyField,
   CasesConfigure,
   ActionConnector,
+  ConfigureCaseConnector,
 } from '../../../../../case/common/api';
 
 export {
@@ -22,6 +23,7 @@ export {
   ClosureType,
   ThirdPartyField,
   ActionConnector,
+  ConfigureCaseConnector,
 };
 
 export interface CasesConfigurationMapping {
@@ -43,5 +45,3 @@ export interface CaseConfigure {
 export interface CCMapsCombinedActionAttributes extends CasesConfigurationMaps {
   actionType?: ActionType;
 }
-
-export type CaseConnector = CasesConfigure['connector'];
