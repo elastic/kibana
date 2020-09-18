@@ -10,3 +10,8 @@ export const getEqlValidationResponseMock = (): EqlValidationSchema => ({
   valid: false,
   errors: ['line 3:52: token recognition error at: '],
 });
+
+export const getValidEqlValidationResponseMock = (): EqlValidationSchema => ({
+  valid: true,
+  errors: [],
+});

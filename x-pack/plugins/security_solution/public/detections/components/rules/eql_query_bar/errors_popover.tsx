@@ -27,6 +27,7 @@ export const ErrorsPopover: FC<ErrorsPopoverProps> = ({ ariaLabel, errors }) => 
 
   return (
     <EuiPopover
+      data-test-subj="eql-validation-errors-popover"
       button={
         <EuiButtonEmpty
           iconType="crossInACircleFilled"
