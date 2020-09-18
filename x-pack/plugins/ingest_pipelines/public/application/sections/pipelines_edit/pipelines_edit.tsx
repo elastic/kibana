@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 
 import { EuiCallOut } from '@elastic/eui';
-import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
-import { PipelineForm } from '../../components';
 
+import { INGEST_PIPELINES_PAGES, URL_GENERATOR } from '../../services/navigation';
+import { PipelineForm } from '../../components';
 import { attemptToURIDecode } from '../shared';
 
 interface MatchParams {
@@ -56,11 +56,11 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(BASE_PATH + `?pipeline=${encodeURIComponent(updatedPipeline.name)}`);
+    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST](updatedPipeline.name));
   };
 
   const onCancel = () => {
-    history.push(BASE_PATH);
+    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST]());
   };
 
   useEffect(() => {

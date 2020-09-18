@@ -5,10 +5,14 @@
  */
 
 import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
-import { BASE_PATH } from '../../../common/constants';
 import { PipelinesCreate } from '../../../public/application/sections/pipelines_create';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
+import {
+  INGEST_PIPELINES_PAGES,
+  ROUTES_CONFIG,
+  URL_GENERATOR,
+} from '../../../public/application/services/navigation';
 
 export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
@@ -16,8 +20,8 @@ export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}/create`],
-    componentRoutePath: `${BASE_PATH}/create`,
+    initialEntries: [URL_GENERATOR[INGEST_PIPELINES_PAGES.CREATE]()],
+    componentRoutePath: ROUTES_CONFIG[INGEST_PIPELINES_PAGES.CREATE],
   },
   doMountAsync: true,
 };

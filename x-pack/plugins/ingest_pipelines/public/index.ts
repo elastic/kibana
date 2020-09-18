@@ -9,3 +9,10 @@ import { IngestPipelinesPlugin } from './plugin';
 export function plugin() {
   return new IngestPipelinesPlugin();
 }
+
+export {
+  INGEST_PIPELINES_APP_ULR_GENERATOR,
+  IngestPipelinesUrlGeneratorState,
+} from './url_generator';
+
+export { INGEST_PIPELINES_PAGES } from './application/services/navigation';

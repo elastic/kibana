@@ -24,9 +24,9 @@ import {
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
-import { BASE_PATH } from '../../../../common/constants';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
+import { INGEST_PIPELINES_PAGES, URL_GENERATOR } from '../../services/navigation';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
@@ -68,16 +68,16 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   }, [pipelineNameFromLocation, data]);
 
   const goToEditPipeline = (name: string) => {
-    history.push(`${BASE_PATH}/edit/${encodeURIComponent(name)}`);
+    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.EDIT](name));
   };
 
   const goToClonePipeline = (name: string) => {
-    history.push(`${BASE_PATH}/create/${encodeURIComponent(name)}`);
+    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.CLONE](name));
   };
 
   const goHome = () => {
     setShowFlyout(false);
-    history.push(BASE_PATH);
+    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST]());
   };
 
   if (data && data.length === 0) {
