@@ -19,17 +19,17 @@
 
 // import expect from '@kbn/expect';
 // import sinon from 'sinon';
-import { merge, omit } from 'lodash';
+import { merge, omit, get } from 'lodash';
 
 import { mockGetClusterInfo } from './get_cluster_info.test';
 import { mockGetClusterStats } from './get_cluster_stats.test';
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
-// const mockUsageCollection = (kibanaUsage = {}) => ({
-//   bulkFetch: () => kibanaUsage,
-//   toObject: (data) => data,
-// });
+const mockUsageCollection = (kibanaUsage = {}) => ({
+  bulkFetch: () => kibanaUsage,
+  toObject: (data: any) => data,
+});
 
 // const getMockServer = (getCluster = sinon.stub()) => ({
 //   log(tags, message) {
@@ -53,25 +53,16 @@ import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 //   },
 // });
 function mockGetNodesUsage(nodesUsage: any) {
+  const response = Promise.resolve({ body: nodesUsage });
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.nodes.usage.mockResolvedValueOnce(nodesUsage);
+  esClient.nodes.usage.mockImplementationOnce(
+    // @ts-ignore
+    async (_params = { metric: '_all', timeout: TIMEOUT }) => {
+      return response;
+    }
+  );
   return esClient;
 }
-// function mockGetNodesUsage(callCluster, nodesUsage, req) {
-//   callCluster
-//     .withArgs(
-//       req,
-//       {
-//         method: 'GET',
-//         path: '/_nodes/usage',
-//         query: {
-//           timeout: TIMEOUT,
-//         },
-//       },
-//       'transport.request'
-//     )
-//     .returns(nodesUsage);
-// }
 
 function mockGetLocalStats(clusterInfo: any, clusterStats: any, nodesUsage: any) {
   mockGetClusterInfo(clusterInfo);
@@ -154,6 +145,7 @@ describe('get_local_stats', () => {
     ...clusterStats,
     nodes: merge(clusterStats.nodes, { usage: nodesUsage }),
   };
+
   const combinedStatsResult = {
     collection: 'local',
     cluster_uuid: clusterUuid,
@@ -216,6 +208,7 @@ describe('get_local_stats', () => {
         void 0,
         context
       );
+
       const { stack_stats: stack, ...cluster } = result;
       expect(cluster.collection).toBe(combinedStatsResult.collection);
       expect(cluster.cluster_uuid).toBe(combinedStatsResult.cluster_uuid);
@@ -225,8 +218,10 @@ describe('get_local_stats', () => {
 
       expect(cluster.version).toEqual(combinedStatsResult.version);
       expect(cluster.cluster_stats).toEqual(combinedStatsResult.cluster_stats);
-      // expect(cluster.license).toEqual(combinedStatsResult.license);
-      // expect(stack.xpack).toEqual(combinedStatsResult.stack_stats.xpack);
+      expect(get(cluster, 'license', '')).toEqual(get(combinedStatsResult, 'license', ''));
+      expect(get(stack, 'xpack', '')).toEqual(
+        get(combinedStatsResult, ['stack_stats', 'xpack'], '')
+      );
     });
   });
 
