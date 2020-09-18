@@ -138,7 +138,7 @@ export const createTileMapUrlGenerator = (
     title?: string;
     mapType: string;
     colorSchema: string;
-    indexPatternId: string;
+    indexPatternId?: string;
     geoFieldName?: string;
     metricAgg: string;
     metricFieldName?: string;

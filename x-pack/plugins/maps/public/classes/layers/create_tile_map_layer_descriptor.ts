@@ -77,12 +77,12 @@ export function createTileMapLayerDescriptor({
   title?: string;
   mapType: string;
   colorSchema: string;
-  indexPatternId: string;
+  indexPatternId?: string;
   geoFieldName?: string;
   metricAgg: string;
   metricFieldName?: string;
 }): LayerDescriptor | null {
-  if (!geoFieldName) {
+  if (!indexPatternId || !geoFieldName) {
     return null;
   }
 

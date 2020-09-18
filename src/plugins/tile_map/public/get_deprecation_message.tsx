@@ -53,14 +53,25 @@ export function getDeprecationMessage(vis: Vis) {
     action = (
       <div>
         <EuiButton
-          onClick={async (e) => {
+          onClick={async (e: React.MouseEvent<HTMLButtonElement>) => {
             e.preventDefault();
 
-            let geoFieldName: string;
-            const bucketAggs = vis.data?.aggs.byType('buckets');
-            if (bucketAggs.length && bucketAggs[0].type.dslName === 'geohash_grid') {
-              geoFieldName = bucketAggs[0].getField()?.name;
-            } else {
+            const query = getQueryService();
+            const createUrlParams = {
+              title: vis.title,
+              mapType: vis.params.mapType,
+              colorSchema: vis.params.colorSchema,
+              indexPatternId: vis.data.indexPattern?.id,
+              metricAgg: 'count',
+              filters: query.filterManager.getFilters(),
+              query: query.queryString.getQuery(),
+              timeRange: query.timefilter.timefilter.getTime(),
+            };
+
+            const bucketAggs = vis.data?.aggs?.byType('buckets');
+            if (bucketAggs?.length && bucketAggs[0].type.dslName === 'geohash_grid') {
+              createUrlParams.geoFieldName = bucketAggs[0].getField()?.name;
+            } else if (vis.data.indexPattern) {
               // attempt to default to first geo point field when geohash is not configured yet
               const geoField = vis.data.indexPattern.fields.find((field) => {
                 return (
@@ -70,31 +81,17 @@ export function getDeprecationMessage(vis: Vis) {
                 );
               });
               if (geoField) {
-                geoFieldName = geoField.name;
+                createUrlParams.geoFieldName = geoField.name;
               }
             }
 
-            let metricAgg: string = 'count';
-            let metricFieldName: string;
-            const metricAggs = vis.data?.aggs.byType('metrics');
-            if (metricAggs.length) {
-              metricAgg = metricAggs[0].type.dslName;
-              metricFieldName = metricAggs[0].getField()?.name;
+            const metricAggs = vis.data?.aggs?.byType('metrics');
+            if (metricAggs?.length) {
+              createUrlParams.metricAgg = metricAggs[0].type.dslName;
+              createUrlParams.metricFieldName = metricAggs[0].getField()?.name;
             }
 
-            const query = getQueryService();
-            const url = await mapsTileMapUrlGenerator.createUrl({
-              title: vis.title,
-              mapType: vis.params.mapType,
-              colorSchema: vis.params.colorSchema,
-              indexPatternId: vis.data.indexPattern.id,
-              geoFieldName,
-              metricAgg,
-              metricFieldName,
-              filters: query.filterManager.getFilters(),
-              query: query.queryString.getQuery(),
-              timeRange: query.timefilter.timefilter.getTime(),
-            });
+            const url = await mapsTileMapUrlGenerator.createUrl(createUrlParams);
             getCoreService().application.navigateToUrl(url);
           }}
           size="s"

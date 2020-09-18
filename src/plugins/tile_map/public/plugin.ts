@@ -42,7 +42,7 @@ import {
   setShareService,
 } from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { SharePluginSetup, SharePluginStart } from '../../share/public';
+import { SharePluginStart } from '../../share/public';
 
 export interface TileMapConfigType {
   tilemap: any;

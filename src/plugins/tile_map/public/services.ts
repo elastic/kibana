@@ -21,7 +21,7 @@ import { CoreStart } from 'kibana/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { SharePluginSetup, SharePluginStart } from '../../share/public';
+import { SharePluginStart } from '../../share/public';
 
 export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');
 
@@ -33,7 +33,7 @@ export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
 >('Query');
 
-export const [getShareService, setShareService] = createGetterSetter<SharePluginSetup>('Share');
+export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
 export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
   'KibanaLegacy'
