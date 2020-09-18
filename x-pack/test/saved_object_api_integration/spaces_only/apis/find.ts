@@ -15,7 +15,7 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 
-const createTestCases = (spaceId: string, crossSpaceSearch: string[]) => {
+const createTestCases = (spaceId: string, crossSpaceSearch?: string[]) => {
   const cases = getTestCases({ currentSpace: spaceId, crossSpaceSearch });
   return Object.values(cases);
 };
@@ -25,14 +25,14 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   const { addTests, createTestDefinitions } = findTestSuiteFactory(esArchiver, supertest);
-  const createTests = (spaceId: string, crossSpaceSearch: string[]) => {
+  const createTests = (spaceId: string, crossSpaceSearch?: string[]) => {
     const testCases = createTestCases(spaceId, crossSpaceSearch);
     return createTestDefinitions(testCases, false);
   };
 
   describe('_find', () => {
     getTestScenarios().spaces.forEach(({ spaceId }) => {
-      const currentSpaceTests = createTests(spaceId, []);
+      const currentSpaceTests = createTests(spaceId);
       const explicitCrossSpaceTests = createTests(spaceId, [
         DEFAULT_SPACE_ID,
         SPACE_1_ID,

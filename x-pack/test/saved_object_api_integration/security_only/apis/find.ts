@@ -17,7 +17,7 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 
-const createTestCases = (crossSpaceSearch: string[]) => {
+const createTestCases = (crossSpaceSearch?: string[]) => {
   const cases = getTestCases({ crossSpaceSearch });
 
   const normalTypes = [
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const { addTests, createTestDefinitions } = findTestSuiteFactory(esArchiver, supertest);
   const createTests = (user: TestUser) => {
-    const defaultCases = createTestCases([]);
+    const defaultCases = createTestCases();
     const crossSpaceCases = createTestCases([DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID]);
 
     if (user.username === AUTHENTICATION.SUPERUSER.username) {
