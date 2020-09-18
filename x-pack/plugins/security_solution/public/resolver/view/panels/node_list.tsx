@@ -29,26 +29,6 @@ import { ResolverState } from '../../types';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { useColors } from '../use_colors';
 
-const StyledLimitWarning = styled(LimitWarning)`
-  flex-flow: row wrap;
-  display: block;
-  align-items: baseline;
-  margin-top: 1em;
-
-  & .euiCallOutHeader {
-    display: inline;
-    margin-right: 0.25em;
-  }
-
-  & .euiText {
-    display: inline;
-  }
-
-  & .euiText p {
-    display: inline;
-  }
-`;
-
 const StyledButtonTextContainer = styled.div`
   align-items: center;
   display: flex;
@@ -189,7 +169,7 @@ export const NodeList = memo(() => {
   return (
     <StyledPanel>
       <Breadcrumbs breadcrumbs={crumbs} />
-      {showWarning && <StyledLimitWarning numberDisplayed={numberOfProcesses} />}
+      {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView>
         rowProps={rowProps}

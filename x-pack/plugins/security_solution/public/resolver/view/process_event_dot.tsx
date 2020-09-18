@@ -16,7 +16,6 @@ import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
-import { useNavigateOrReplace } from './use_navigate_or_replace';
 import { fontSize } from './font_size';
 import { useCubeAssets } from './use_cube_assets';
 import { useSymbolIDs } from './use_symbol_ids';

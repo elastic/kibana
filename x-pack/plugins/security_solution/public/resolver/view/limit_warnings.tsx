@@ -7,8 +7,8 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
+import { LimitWarningsEuiCallOut } from './styles';
 
 const lineageLimitMessage = (
   <FormattedMessage
@@ -63,12 +63,10 @@ const RelatedLimitTitleMessage = React.memo(function ({
  * Limit warning for hitting the /events API limit
  */
 export const RelatedEventLimitWarning = React.memo(function ({
-  className,
   eventType,
   numberActuallyDisplayed,
   numberMissing,
 }: {
-  className?: string;
   eventType: string;
   numberActuallyDisplayed: number;
   numberMissing: number;
@@ -77,9 +75,8 @@ export const RelatedEventLimitWarning = React.memo(function ({
    * Based on API limits, all related events may not be displayed.
    */
   return (
-    <EuiCallOut
+    <LimitWarningsEuiCallOut
       size="s"
-      className={className}
       title={
         <RelatedLimitTitleMessage
           category={eventType}
@@ -90,27 +87,20 @@ export const RelatedEventLimitWarning = React.memo(function ({
       <p>
         <RelatedEventsLimitMessage category={eventType} numberOfEventsMissing={numberMissing} />
       </p>
-    </EuiCallOut>
+    </LimitWarningsEuiCallOut>
   );
 });
 
 /**
  * Limit warning for hitting a limit of nodes in the tree
  */
-export const LimitWarning = React.memo(function ({
-  className,
-  numberDisplayed,
-}: {
-  className?: string;
-  numberDisplayed: number;
-}) {
+export const LimitWarning = React.memo(function ({ numberDisplayed }: { numberDisplayed: number }) {
   return (
-    <EuiCallOut
+    <LimitWarningsEuiCallOut
       size="s"
-      className={className}
       title={<LineageTitleMessage numberOfEntries={numberDisplayed} />}
     >
       <p>{lineageLimitMessage}</p>
-    </EuiCallOut>
+    </LimitWarningsEuiCallOut>
   );
 });

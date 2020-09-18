@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import styled from 'styled-components';
 import { StyledPanel } from '../styles';
 import { formatDate, BoldCode, StyledTime } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
@@ -37,32 +36,12 @@ import { useLinkProps } from '../use_link_props';
  */
 
 interface MatchingEventEntry {
-  formattedDate: string;
+  formattedDate?: string;
   eventType: string;
   eventCategory: string;
   name: ReactNode;
   setQueryParams: () => void;
 }
-
-const StyledRelatedLimitWarning = styled(RelatedEventLimitWarning)`
-  flex-flow: row wrap;
-  display: block;
-  align-items: baseline;
-  margin-top: 1em;
-
-  & .euiCallOutHeader {
-    display: inline;
-    margin-right: 0.25em;
-  }
-
-  & .euiText {
-    display: inline;
-  }
-
-  & .euiText p {
-    display: inline;
-  }
-`;
 
 const NodeCategoryEntries = memo(function ({
   crumbs,
@@ -89,7 +68,7 @@ const NodeCategoryEntries = memo(function ({
     <>
       <Breadcrumbs breadcrumbs={crumbs} />
       {shouldShowLimitWarning && typeof numberDisplayed !== 'undefined' && numberMissing ? (
-        <StyledRelatedLimitWarning
+        <RelatedEventLimitWarning
           eventType={eventType}
           numberActuallyDisplayed={numberDisplayed}
           numberMissing={numberMissing}
@@ -205,7 +184,7 @@ const NodeEventList = memo(function ({
   const matchingEventEntries: MatchingEventEntry[] = useMemo(() => {
     return eventsForCurrentCategory.map((resolverEvent) => {
       const eventTime = event.eventTimestamp(resolverEvent);
-      const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime);
+      const formattedDate = eventTime !== undefined ? formatDate(eventTime) : eventTime;
       const entityId = event.eventId(resolverEvent);
       return {
         formattedDate,

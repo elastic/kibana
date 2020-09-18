@@ -97,7 +97,7 @@ export const EventDetail = memo(function ({
   const processName = parentEvent ? event.processName(parentEvent) : null;
 
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
-  const relatedsReady = relatedsReadyMap.get(nodeID!);
+  const relatedsReady = relatedsReadyMap.get(nodeID);
   const dispatch = useResolverDispatch();
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
