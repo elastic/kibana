@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { HttpSetup } from 'src/core/public';
 import { getJobId } from '../../../../common/log_analysis';
 import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
 
 export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
   spaceId: string,
   sourceId: string,
-  jobTypes: JobType[]
+  jobTypes: JobType[],
+  fetch: HttpSetup['fetch']
 ) => {
   try {
     await callStopDatafeeds(spaceId, sourceId, jobTypes);
@@ -21,15 +22,16 @@ export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
     }
   }
 
-  return await deleteJobs(spaceId, sourceId, jobTypes);
+  return await deleteJobs(spaceId, sourceId, jobTypes, fetch);
 };
 
 const deleteJobs = async <JobType extends string>(
   spaceId: string,
   sourceId: string,
-  jobTypes: JobType[]
+  jobTypes: JobType[],
+  fetch: HttpSetup['fetch']
 ) => {
-  const deleteJobsResponse = await callDeleteJobs(spaceId, sourceId, jobTypes);
+  const deleteJobsResponse = await callDeleteJobs({ spaceId, sourceId, jobTypes }, fetch);
   await waitUntilJobsAreDeleted(spaceId, sourceId, jobTypes);
   return deleteJobsResponse;
 };

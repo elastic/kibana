@@ -37,7 +37,11 @@ export interface ModuleDescriptor<JobType extends string> {
     sourceConfiguration: ModuleSourceConfiguration,
     fetch: HttpSetup['fetch']
   ) => Promise<SetupMlModuleResponsePayload>;
-  cleanUpModule: (spaceId: string, sourceId: string) => Promise<DeleteJobsResponsePayload>;
+  cleanUpModule: (
+    spaceId: string,
+    sourceId: string,
+    fetch: HttpSetup['fetch']
+  ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (
     indices: string[],
     timestampField: string,

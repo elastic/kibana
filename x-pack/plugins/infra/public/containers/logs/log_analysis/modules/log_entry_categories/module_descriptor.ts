@@ -120,8 +120,8 @@ const setUpModule = async (
   );
 };
 
-const cleanUpModule = async (spaceId: string, sourceId: string) => {
-  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryCategoriesJobTypes);
+const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpSetup['fetch']) => {
+  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryCategoriesJobTypes, fetch);
 };
 
 const validateSetupIndices = async (

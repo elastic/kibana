@@ -94,7 +94,7 @@ export const useLogAnalysisModule = <JobType extends string>({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await moduleDescriptor.cleanUpModule(spaceId, sourceId);
+        return await moduleDescriptor.cleanUpModule(spaceId, sourceId, services.http.fetch);
       },
     },
     [spaceId, sourceId]

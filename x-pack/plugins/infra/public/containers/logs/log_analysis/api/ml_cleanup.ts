@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import type { HttpSetup } from 'src/core/public';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -13,13 +14,20 @@ import { npStart } from '../../../../legacy_singletons';
 import { getDatafeedId, getJobId } from '../../../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
+interface DeleteJobsRequestArgs<JobType extends string> {
+  spaceId: string;
+  sourceId: string;
+  jobTypes: JobType[];
+}
+
 export const callDeleteJobs = async <JobType extends string>(
-  spaceId: string,
-  sourceId: string,
-  jobTypes: JobType[]
+  requestArgs: DeleteJobsRequestArgs<JobType>,
+  fetch: HttpSetup['fetch']
 ) => {
+  const { spaceId, sourceId, jobTypes } = requestArgs;
+
   // NOTE: Deleting the jobs via this API will delete the datafeeds at the same time
-  const deleteJobsResponse = await npStart.http.fetch('/api/ml/jobs/delete_jobs', {
+  const deleteJobsResponse = await fetch('/api/ml/jobs/delete_jobs', {
     method: 'POST',
     body: JSON.stringify(
       deleteJobsRequestPayloadRT.encode({
