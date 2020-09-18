@@ -30,11 +30,7 @@ import { getJoinAggKey } from '../../../common/get_agg_key';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
-export function createAggDescriptor(
-  mapType: string,
-  metricAgg: string,
-  metricFieldName?: string
-): AggDescriptor {
+export function createAggDescriptor(metricAgg: string, metricFieldName?: string): AggDescriptor {
   const aggTypeKey = Object.keys(AGG_TYPE).find((key) => {
     return AGG_TYPE[key as keyof typeof AGG_TYPE] === metricAgg;
   });

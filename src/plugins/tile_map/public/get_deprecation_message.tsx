@@ -57,14 +57,12 @@ export function getDeprecationMessage(vis: Vis) {
             e.preventDefault();
 
             const query = getQueryService();
-            const createUrlParams = {
+            const createUrlParams: { [key: string]: any } = {
               title: vis.title,
               mapType: vis.params.mapType,
               colorSchema: vis.params.colorSchema,
               indexPatternId: vis.data.indexPattern?.id,
-              geoFieldName: undefined,
               metricAgg: 'count',
-              metricFieldName: undefined,
               filters: query.filterManager.getFilters(),
               query: query.queryString.getQuery(),
               timeRange: query.timefilter.timefilter.getTime(),

@@ -21,7 +21,6 @@ import React from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getCoreService, getQueryService, getShareService } from './kibana_services';
-import { indexPatterns } from '../../data/public';
 import { Vis } from '../../visualizations/public';
 
 export function getDeprecationMessage(vis: Vis) {
@@ -57,18 +56,16 @@ export function getDeprecationMessage(vis: Vis) {
             e.preventDefault();
 
             const query = getQueryService();
-            const createUrlParams = {
+            const createUrlParams: { [key: string]: any } = {
               title: vis.title,
               emsLayerId: vis.params.selectedLayer.isEMS ? vis.params.selectedLayer.id : undefined,
               leftFieldName: vis.params.selectedLayer.isEMS
                 ? vis.params.selectedJoinField.name
                 : undefined,
-              termsFieldName: undefined,
               colorSchema: vis.params.colorSchema,
               indexPatternId: vis.data.indexPattern?.id,
               indexPatternTitle: vis.data.indexPattern?.title,
               metricAgg: 'count',
-              metricFieldName: undefined,
               filters: query.filterManager.getFilters(),
               query: query.queryString.getQuery(),
               timeRange: query.timefilter.timefilter.getTime(),
