@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -37,8 +38,8 @@ import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 
 const indexPatternCache = createIndexPatternCache();
-
-type IndexPatternCachedFieldType = 'id' | 'title';
+const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
+const savedObjectType = 'index-pattern';
 
 export interface IndexPatternSavedObjectAttrs {
   title: string;
@@ -113,22 +114,6 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
-  getFields = async (fields: IndexPatternCachedFieldType[], refresh: boolean = false) => {
-    if (!this.savedObjectsCache || refresh) {
-      await this.refreshSavedObjectsCache();
-    }
-    if (!this.savedObjectsCache) {
-      return [];
-    }
-    return this.savedObjectsCache.map((obj: Record<string, any>) => {
-      const result: Partial<Record<IndexPatternCachedFieldType, string>> = {};
-      fields.forEach(
-        (f: IndexPatternCachedFieldType) => (result[f] = obj[f] || obj?.attributes?.[f])
-      );
-      return result;
-    });
-  };
-
   getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
     return this.apiClient.getFieldsForTimePattern(options);
   };
@@ -181,6 +166,7 @@ export class IndexPatternsService {
       apiClient: this.apiClient,
       patternCache: indexPatternCache,
       fieldFormats: this.fieldFormats,
+      indexPatternsService: this,
       onNotification: this.onNotification,
       onError: this.onError,
       shortDotsEnable,
@@ -189,6 +175,93 @@ export class IndexPatternsService {
 
     indexPattern.initFromSpec(spec);
     return indexPattern;
+  }
+
+  async save(indexPattern: IndexPattern, saveAttempts: number = 0): Promise<void | Error> {
+    if (!indexPattern.id) return;
+    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+
+    const body = indexPattern.prepBody();
+
+    const originalChangedKeys: string[] = [];
+    Object.entries(body).forEach(([key, value]) => {
+      if (value !== indexPattern.originalBody[key]) {
+        originalChangedKeys.push(key);
+      }
+    });
+
+    return this.savedObjectsClient
+      .update(savedObjectType, indexPattern.id, body, { version: indexPattern.version })
+      .then((resp) => {
+        indexPattern.id = resp.id;
+        indexPattern.version = resp.version;
+      })
+      .catch((err) => {
+        if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
+          const samePattern = new IndexPattern(indexPattern.id, {
+            savedObjectsClient: this.savedObjectsClient,
+            apiClient: this.apiClient,
+            patternCache: indexPatternCache,
+            fieldFormats: this.fieldFormats,
+            indexPatternsService: this,
+            onNotification: this.onNotification,
+            onError: this.onError,
+            shortDotsEnable,
+            metaFields,
+          });
+
+          return samePattern.init().then(() => {
+            // What keys changed from now and what the server returned
+            const updatedBody = samePattern.prepBody();
+
+            // Build a list of changed keys from the server response
+            // and ensure we ignore the key if the server response
+            // is the same as the original response (since that is expected
+            // if we made a change in that key)
+
+            const serverChangedKeys: string[] = [];
+            Object.entries(updatedBody).forEach(([key, value]) => {
+              if (value !== (body as any)[key] && value !== indexPattern.originalBody[key]) {
+                serverChangedKeys.push(key);
+              }
+            });
+
+            let unresolvedCollision = false;
+            for (const originalKey of originalChangedKeys) {
+              for (const serverKey of serverChangedKeys) {
+                if (originalKey === serverKey) {
+                  unresolvedCollision = true;
+                  break;
+                }
+              }
+            }
+
+            if (unresolvedCollision) {
+              const title = i18n.translate('data.indexPatterns.unableWriteLabel', {
+                defaultMessage:
+                  'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
+              });
+
+              this.onNotification({ title, color: 'danger' });
+              throw err;
+            }
+
+            // Set the updated response on this object
+            serverChangedKeys.forEach((key) => {
+              (indexPattern as any)[key] = (samePattern as any)[key];
+            });
+            indexPattern.version = samePattern.version;
+
+            // Clear cache
+            indexPatternCache.clear(indexPattern.id!);
+
+            // Try the save again
+            return this.save(indexPattern, saveAttempts);
+          });
+        }
+        throw err;
+      });
   }
 
   async make(id?: string): Promise<IndexPattern> {
@@ -200,6 +273,7 @@ export class IndexPatternsService {
       apiClient: this.apiClient,
       patternCache: indexPatternCache,
       fieldFormats: this.fieldFormats,
+      indexPatternsService: this,
       onNotification: this.onNotification,
       onError: this.onError,
       shortDotsEnable,

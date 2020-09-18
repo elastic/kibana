@@ -13,14 +13,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects([
-    'header',
-    'common',
-    'visualize',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['header', 'header', 'timePicker']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -105,13 +98,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const target = await testSubjects.find('indexPattern-dimension-field');
       await comboBox.openOptionsList(target);
       await comboBox.setElement(target, opts.field);
+      await testSubjects.click('lns-indexPattern-dimensionContainerTitle');
     },
 
     /**
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
-      await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimensionPopover-remove`);
+      await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
 
     /**

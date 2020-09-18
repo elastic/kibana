@@ -45,14 +45,18 @@ export interface ChromeNavControl {
  * @public
  */
 export interface ChromeNavControls {
-  /** Register a nav control to be presented on the left side of the chrome header. */
+  /** Register a nav control to be presented on the bottom-left side of the chrome header. */
   registerLeft(navControl: ChromeNavControl): void;
-  /** Register a nav control to be presented on the right side of the chrome header. */
+  /** Register a nav control to be presented on the top-right side of the chrome header. */
   registerRight(navControl: ChromeNavControl): void;
+  /** Register a nav control to be presented on the top-center side of the chrome header. */
+  registerCenter(navControl: ChromeNavControl): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
   /** @internal */
   getRight$(): Observable<ChromeNavControl[]>;
+  /** @internal */
+  getCenter$(): Observable<ChromeNavControl[]>;
 }
 
 /** @internal */
@@ -62,6 +66,7 @@ export class NavControlsService {
   public start() {
     const navControlsLeft$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
+    const navControlsCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
 
     return {
       // In the future, registration should be moved to the setup phase. This
@@ -72,6 +77,9 @@ export class NavControlsService {
       registerRight: (navControl: ChromeNavControl) =>
         navControlsRight$.next(new Set([...navControlsRight$.value.values(), navControl])),
 
+      registerCenter: (navControl: ChromeNavControl) =>
+        navControlsCenter$.next(new Set([...navControlsCenter$.value.values(), navControl])),
+
       getLeft$: () =>
         navControlsLeft$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
@@ -79,6 +87,11 @@ export class NavControlsService {
         ),
       getRight$: () =>
         navControlsRight$.pipe(
+          map((controls) => sortBy([...controls.values()], 'order')),
+          takeUntil(this.stop$)
+        ),
+      getCenter$: () =>
+        navControlsCenter$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),

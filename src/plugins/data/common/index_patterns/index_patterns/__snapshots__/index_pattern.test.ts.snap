@@ -631,7 +631,7 @@ Object {
   "id": "test-pattern",
   "sourceFilters": undefined,
   "timeFieldName": "timestamp",
-  "title": "test-pattern",
+  "title": "title",
   "typeMeta": undefined,
   "version": 2,
 }
