@@ -4,7 +4,6 @@
     "mocks.ts",
     "typings/**/*",
     "plugins/**/*",
-    "legacy/plugins/**/*",
     "test_utils/**/*",
     "tasks/**/*"
   ],
@@ -19,7 +18,6 @@
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "plugins/spaces/*": ["x-pack/legacy/plugins/spaces/public/*"],
       "test_utils/*": ["x-pack/test_utils/*"],
       "fixtures/*": ["src/fixtures/*"]
     },

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { spaces } from './legacy/plugins/spaces';
-
-module.exports = function (kibana) {
-  return [spaces(kibana)];
+module.exports = function () {
+  return [];
 };
