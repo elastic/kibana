@@ -29,7 +29,7 @@ Feature: CSM Dashboard
     Then breakdown series should appear in chart
 
   Scenario: Search by url filter focus
-    When a user click inside url search field
+    When a user clicks inside url search field
     Then it display top pages in the suggestion popover
 
   Scenario: Search by url filter
