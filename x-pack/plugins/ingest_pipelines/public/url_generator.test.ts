@@ -8,7 +8,7 @@ import { IngestPipelinesUrlGenerator } from './url_generator';
 import { INGEST_PIPELINES_PAGES } from './application/services/navigation';
 
 describe('IngestPipelinesUrlGenerator', () => {
-  const getAppBasePath = (absolute) => {
+  const getAppBasePath = (absolute: boolean = false) => {
     if (absolute) {
       return Promise.resolve('http://localhost/app/test_app');
     }
