@@ -123,14 +123,14 @@ describe('EventsViewer', () => {
       expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
     });
     // TO DO sourcerer @X
-    // test('it renders the footer containing the Load More button', () => {
-    //   const wrapper = mount(
-    //     <TestProviders>
-    //       <StatefulEventsViewer {...testProps} />
-    //     </TestProviders>
-    //   );
-    //   expect(wrapper.find(`[data-test-subj="TimelineMoreButton"]`).first().exists()).toBe(true);
-    // });
+    test('it renders the footer containing the pagination', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+      expect(wrapper.find(`[data-test-subj="timeline-pagination"]`).first().exists()).toBe(true);
+    });
 
     defaultHeaders.forEach((header) => {
       test(`it renders the ${header.id} default EventsViewer column header`, () => {

@@ -273,6 +273,7 @@ describe('Epic Timeline', () => {
             script: null,
           },
         ],
+        indexNames: [],
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: {

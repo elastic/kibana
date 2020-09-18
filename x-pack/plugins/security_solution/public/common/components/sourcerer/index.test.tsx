@@ -8,8 +8,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { SourcererComponent } from './index';
-import * as i18n from './translations';
-import { ADD_INDEX_PATH, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
   apolloClientObservable,
@@ -20,6 +19,9 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore, State } from '../../store';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { act } from 'react-dom/test-utils';
+import { wait as waitFor } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -32,18 +34,13 @@ jest.mock('react-redux', () => {
 });
 
 const mockOptions = [
-  {
-    label: 'apm-*-transaction*',
-    key: 'apm-*-transaction*-0',
-    value: 'apm-*-transaction*',
-    checked: 'on',
-  },
-  { label: 'auditbeat-*', key: 'auditbeat-*-1', value: 'auditbeat-*', checked: 'on' },
-  { label: 'endgame-*', key: 'endgame-*-2', value: 'endgame-*', checked: 'on' },
-  { label: 'filebeat-*', key: 'filebeat-*-3', value: 'filebeat-*', checked: 'on' },
-  { label: 'logs-*', key: 'logs-*-4', value: 'logs-*', checked: 'on' },
-  { label: 'packetbeat-*', key: 'packetbeat-*-5', value: 'packetbeat-*', checked: 'on' },
-  { label: 'winlogbeat-*', key: 'winlogbeat-*-6', value: 'winlogbeat-*', checked: 'on' },
+  { label: 'apm-*-transaction*', value: 'apm-*-transaction*' },
+  { label: 'auditbeat-*', value: 'auditbeat-*' },
+  { label: 'endgame-*', value: 'endgame-*' },
+  { label: 'filebeat-*', value: 'filebeat-*' },
+  { label: 'logs-*', value: 'logs-*' },
+  { label: 'packetbeat-*', value: 'packetbeat-*' },
+  { label: 'winlogbeat-*', value: 'winlogbeat-*' },
 ];
 
 const defaultProps = {
@@ -84,7 +81,7 @@ describe('Sourcerer component', () => {
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     expect(
-      wrapper.find(`[data-test-subj="indexPattern-switcher"]`).first().prop('options')
+      wrapper.find(`[data-test-subj="indexPattern-switcher"]`).first().prop('selectedOptions')
     ).toEqual(mockOptions);
   });
   it('Mounts with some options selected', () => {
@@ -117,64 +114,33 @@ describe('Sourcerer component', () => {
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     expect(
-      wrapper.find(`[data-test-subj="indexPattern-switcher"]`).first().prop('options')
-    ).toEqual(mockOptions.map((o, i) => (i === 0 ? o : { ...o, checked: undefined })));
+      wrapper.find(`[data-test-subj="indexPattern-switcher"]`).first().prop('selectedOptions')
+    ).toEqual([mockOptions[0]]);
   });
-  it('onChange calls updateSourcererScopeIndices', () => {
+  it('onChange calls updateSourcererScopeIndices', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <SourcererComponent {...defaultProps} />
       </TestProviders>
     );
+    expect(true).toBeTruthy();
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
 
-    const switcherOnChange = wrapper
-      .find(`[data-test-subj="indexPattern-switcher"]`)
-      .first()
-      .prop('onChange');
-    // @ts-ignore
-    switcherOnChange([mockOptions[0], mockOptions[1]]);
+    await act(async () => {
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }).onChange([mockOptions[0], mockOptions[1]]);
+      await waitFor(() => {
+        wrapper.update();
+      });
+    });
+    wrapper.find(`[data-test-subj="add-index"]`).first().simulate('click');
+
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedIndexPatterns({
         id: SourcererScopeName.default,
         selectedPatterns: [mockOptions[0].value, mockOptions[1].value],
       })
-    );
-  });
-  it('Disabled options have icon tooltip', () => {
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <SourcererComponent {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-    // @ts-ignore
-    const Rendered = wrapper
-      .find(`[data-test-subj="indexPattern-switcher"]`)
-      .first()
-      .prop('renderOption')(
-      {
-        label: 'blobbeat-*',
-        key: 'blobbeat-*-1',
-        value: 'blobbeat-*',
-        disabled: true,
-        checked: undefined,
-      },
-      ''
-    );
-    expect(Rendered.props.children[1].props.content).toEqual(i18n.DISABLED_INDEX_PATTERNS);
-  });
-
-  it('Button links to index path', () => {
-    const wrapper = mount(
-      <TestProviders store={store}>
-        <SourcererComponent {...defaultProps} />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
-
-    expect(wrapper.find(`[data-test-subj="add-index"]`).first().prop('href')).toEqual(
-      ADD_INDEX_PATH
     );
   });
 });

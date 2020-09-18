@@ -10,7 +10,7 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { Provider } from 'react-redux';
 
-import { dedupeIndexName, useInitSourcerer } from '.';
+import { useInitSourcerer } from '.';
 import { mockPatterns, mockSource } from './mocks';
 // import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -104,27 +104,8 @@ describe('Sourcerer Hooks', () => {
       storage
     );
   });
-
-  describe('dedupeIndexName', () => {
-    it('dedupe from kibana index', async () => {
-      expect(
-        dedupeIndexName(
-          ['*:auditbeat-*', 'kibana-index-*'],
-          ['*:auditbeat-*', '*:endgame-*', '*:filebeat-*', '*:winlogbeat-*', '*:gsuite*']
-        )
-      ).toEqual([
-        '*:endgame-*',
-        '*:filebeat-*',
-        '*:winlogbeat-*',
-        '*:gsuite*',
-        '*:auditbeat-*',
-        'kibana-index-*',
-      ]);
-    });
-  });
-
   describe('Initialization', () => {
-    it('initializes loading default index patterns', async () => {
+    it('initializes loading default and timeline index patterns', async () => {
       await act(async () => {
         const { waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -137,9 +118,13 @@ describe('Sourcerer Hooks', () => {
           payload: { id: 'default', loading: true },
         });
         expect(mockDispatch.mock.calls[1][0]).toEqual({
-          type: 'x-pack/security_solution/local/sourcerer/SET_INDEX_PATTERNS_LIST',
-          payload: { allIndexPatterns: mockPatterns, kibanaIndexPatterns: [] },
+          type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
+          payload: { id: 'timeline', loading: true },
         });
+        // expect(mockDispatch.mock.calls[1][0]).toEqual({
+        //   type: 'x-pack/security_solution/local/sourcerer/SET_INDEX_PATTERNS_LIST',
+        //   payload: { allIndexPatterns: mockPatterns, kibanaIndexPatterns: [] },
+        // });
       });
     });
     // TO DO sourcerer @S

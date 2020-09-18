@@ -213,16 +213,6 @@ describe('Timeline', () => {
 
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
-    // TO DO sourcerer @X
-    // test('it defaults to showing `All`', () => {
-    //   const wrapper = mount(
-    //     <TestProviders>
-    //       <TimelineComponent {...props} />
-    //     </TestProviders>
-    //   );
-    //
-    //   expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual('All');
-    // });
 
     it('it shows the timeline footer', () => {
       const wrapper = mount(
