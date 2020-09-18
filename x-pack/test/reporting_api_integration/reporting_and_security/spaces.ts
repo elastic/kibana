@@ -12,9 +12,18 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
   const supertest = getService('supertest');
   const log = getService('log');
+
+  const setSpaceConfig = async (spaceId: string, settings: object) => {
+    return await kibanaServer.request({
+      path: `/s/${spaceId}/api/kibana/settings`,
+      method: 'POST',
+      body: { changes: settings },
+    });
+  };
 
   const getCompleted$ = (downloadPath: string) => {
     return Rx.interval(2000).pipe(
@@ -28,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     );
   };
 
-  describe('Exports from Non-default Space', () => {
+  describe('Exports and Spaces', () => {
     before(async () => {
       await esArchiver.load('reporting/ecommerce');
       await esArchiver.load('reporting/ecommerce_kibana_spaces'); // multiple spaces with different config settings
@@ -40,49 +49,56 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    it('should complete a job of CSV saved search export in non-default space', async () => {
-      const downloadPath = await reportingAPI.postJobJSON(
-        `/s/non_default_space/api/reporting/generate/csv`,
-        {
-          jobParams:
-            `(browserTimezone:UTC,conflictedTypesFields:!(),fields:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency),indexPatternId:'067dec90-e7ee-11ea-a730-d58e9ea7581b',metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-11T08:24:16.425Z',lte:'2019-07-13T09:31:07.520Z')))),must:!(),must_not:!(),should:!())),script_fields:(),` +
-            `sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency),version:!t),index:'ecommerce*'),title:'Ecom Search')`,
-        }
-      );
-
-      const completed$ = getCompleted$(downloadPath);
-      const reportCompleted = await completed$.toPromise();
-      expect(reportCompleted).to.match(
-        /^"order_date";category;"customer_first_name";"customer_full_name";"total_quantity";"total_unique_products";"taxless_total_price";"taxful_total_price";currency\n"Jul 12, 2019 @ 00:00:00.000";/
-      ); // UTC timezone, semicolon separator
-    });
-
-    it('uses the default space settings', async () => {
-      // MUST NOT have time zone field in the params for space setting to take effect
-      const defaultSpaceJob = await reportingAPI.postJobJSON(`/api/reporting/generate/csv`, {
-        jobParams: `(conflictedTypesFields:!(),fields:!(order_date,order_date,customer_full_name,taxful_total_price),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,customer_full_name,taxful_total_price)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-11T04:49:43.495Z',lte:'2019-07-14T10:25:34.149Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,customer_full_name,taxful_total_price),version:!t),index:'ec*'),title:'EC SEARCH')`,
+    describe('CSV saved search export', () => {
+      it('should use formats from the default space', async () => {
+        kibanaServer.uiSettings.update({ 'csv:separator': ',', 'dateFormat:tz': 'UTC' });
+        const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv`, {
+          jobParams: `(conflictedTypesFields:!(),fields:!(order_date,order_date,customer_full_name,taxful_total_price),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,customer_full_name,taxful_total_price)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-11T04:49:43.495Z',lte:'2019-07-14T10:25:34.149Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,customer_full_name,taxful_total_price),version:!t),index:'ec*'),title:'EC SEARCH')`,
+        });
+        const csv = await getCompleted$(path).toPromise();
+        expect(csv).to.match(
+          /^"order_date","order_date","customer_full_name","taxful_total_price"\n"Jul 12, 2019 @ 00:00:00.000","Jul 12, 2019 @ 00:00:00.000","Sultan Al Boone","173.96"/
+        );
       });
 
-      const defaultCompleted$ = getCompleted$(defaultSpaceJob);
-      const defaultReport = await defaultCompleted$.toPromise();
-      expect(defaultReport).to.match(
-        /^"order_date","order_date","customer_full_name","taxful_total_price"\n"Jul 12, 2019 @ 00:00:00.000","Jul 12, 2019 @ 00:00:00.000","Sultan Al Boone","173.96"/
-      ); // UTC timezone, comma separator
-    });
-
-    it(`uses browserTimezone in jobParams override space setting`, async () => {
-      // MUST have time zone field in the params and timezone set to `Browser` in Advanced Settings
-      const timezoneParamsJob = await reportingAPI.postJobJSON(`/api/reporting/generate/csv`, {
-        jobParams:
-          `(browserTimezone:America/Phoenix,conflictedTypesFields:!(),fields:!(order_date,category,customer_full_name,taxful_total_price,currency),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,category,customer_full_name,taxful_total_price,currency)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-05-30T05:09:59.743Z',lte:'2019-07-26T08:47:09.682Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,category,customer_full_name,taxful_total_price,currency),` +
-          `version:!t),index:'ec*'),title:'EC SEARCH from DEFAULT')`,
+      it('should use formats from non-default spaces', async () => {
+        setSpaceConfig('non_default_space', { 'csv:separator': ';', 'dateFormat:tz': 'US/Alaska' });
+        const path = await reportingAPI.postJobJSON(
+          `/s/non_default_space/api/reporting/generate/csv`,
+          {
+            jobParams: `(conflictedTypesFields:!(),fields:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency),indexPatternId:'067dec90-e7ee-11ea-a730-d58e9ea7581b',metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-11T08:24:16.425Z',lte:'2019-07-13T09:31:07.520Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,category,customer_first_name,customer_full_name,total_quantity,total_unique_products,taxless_total_price,taxful_total_price,currency),version:!t),index:'ecommerce*'),title:'Ecom Search')`,
+          }
+        );
+        const csv = await getCompleted$(path).toPromise();
+        expect(csv).to.match(
+          /^"order_date";category;"customer_first_name";"customer_full_name";"total_quantity";"total_unique_products";"taxless_total_price";"taxful_total_price";currency\n"Jul 11, 2019 @ 16:00:00.000";/
+        );
       });
 
-      const completed$ = getCompleted$(timezoneParamsJob);
-      const report = await completed$.toPromise();
-      expect(report).to.match(
-        /^"order_date",category,"customer_full_name","taxful_total_price",currency\n"Jul 11, 2019 @ 17:00:00.000"/
-      );
+      it(`should use browserTimezone in jobParams for date formatting`, async () => {
+        const tzParam = 'America/Phoenix';
+        const tzSettings = 'Browser';
+        setSpaceConfig('non_default_space', { 'csv:separator': ';', 'dateFormat:tz': tzSettings });
+        const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv`, {
+          jobParams: `(browserTimezone:${tzParam},conflictedTypesFields:!(),fields:!(order_date,category,customer_full_name,taxful_total_price,currency),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,category,customer_full_name,taxful_total_price,currency)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-05-30T05:09:59.743Z',lte:'2019-07-26T08:47:09.682Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,category,customer_full_name,taxful_total_price,currency),version:!t),index:'ec*'),title:'EC SEARCH from DEFAULT')`,
+        });
+
+        const csv = await getCompleted$(path).toPromise();
+        expect(csv).to.match(
+          /^"order_date",category,"customer_full_name","taxful_total_price",currency\n"Jul 11, 2019 @ 17:00:00.000"/
+        );
+      });
+
+      it(`should default to UTC for date formatting when timezone is not known`, async () => {
+        kibanaServer.uiSettings.update({ 'csv:separator': ',', 'dateFormat:tz': 'Browser' });
+        const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv`, {
+          jobParams: `(conflictedTypesFields:!(),fields:!(order_date,order_date,customer_full_name,taxful_total_price),indexPatternId:aac3e500-f2c7-11ea-8250-fb138aa491e7,metaFields:!(_source,_id,_type,_index,_score),objectType:search,searchRequest:(body:(_source:(includes:!(order_date,customer_full_name,taxful_total_price)),docvalue_fields:!((field:order_date,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-11T04:49:43.495Z',lte:'2019-07-14T10:25:34.149Z')))),must:!(),must_not:!(),should:!())),script_fields:(),sort:!((order_date:(order:desc,unmapped_type:boolean))),stored_fields:!(order_date,customer_full_name,taxful_total_price),version:!t),index:'ec*'),title:'EC SEARCH')`,
+        });
+        const csv = await getCompleted$(path).toPromise();
+        expect(csv).to.match(
+          /^"order_date","order_date","customer_full_name","taxful_total_price"\n"Jul 12, 2019 @ 00:00:00.000","Jul 12, 2019 @ 00:00:00.000","Sultan Al Boone","173.96"/
+        );
+      });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/76551
