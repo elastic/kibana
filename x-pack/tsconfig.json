@@ -4,6 +4,7 @@
     "mocks.ts",
     "typings/**/*",
     "plugins/**/*",
+    "legacy/plugins/**/*",
     "test_utils/**/*",
     "tasks/**/*"
   ],
