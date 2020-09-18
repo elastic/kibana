@@ -6,14 +6,14 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ErrorRateAlertTrigger } from '.';
+import { ErrorCountAlertTrigger } from '.';
 import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
-storiesOf('app/ErrorRateAlertTrigger', module).add(
+storiesOf('app/ErrorCountAlertTrigger', module).add(
   'example',
   () => {
     const params = {
@@ -26,7 +26,7 @@ storiesOf('app/ErrorRateAlertTrigger', module).add(
         value={(mockApmPluginContextValue as unknown) as ApmPluginContextValue}
       >
         <div style={{ width: 400 }}>
-          <ErrorRateAlertTrigger
+          <ErrorCountAlertTrigger
             alertParams={params as any}
             setAlertParams={() => undefined}
             setAlertProperty={() => undefined}
@@ -37,7 +37,7 @@ storiesOf('app/ErrorRateAlertTrigger', module).add(
   },
   {
     info: {
-      propTablesExclude: [ErrorRateAlertTrigger, MockApmPluginContextWrapper],
+      propTablesExclude: [ErrorCountAlertTrigger, MockApmPluginContextWrapper],
       source: false,
     },
   }
