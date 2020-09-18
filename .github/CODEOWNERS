@@ -59,7 +59,6 @@
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
-/src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
 /src/apm.js @watson @vigneshshanmugam
 
@@ -83,9 +82,6 @@
 /src/plugins/home/public @elastic/kibana-core-ui
 /src/plugins/home/server/*.ts @elastic/kibana-core-ui
 /src/plugins/home/server/services/ @elastic/kibana-core-ui
-# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
-/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-core-ui
-/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
 
 # Observability UIs
@@ -167,7 +163,6 @@
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
-/x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
@@ -285,8 +280,6 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Core design
 /src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
-/src/legacy/core_plugins/kibana/public/home/**/*.scss @elastic/kibana-core-ui-designers
-/x-pack/legacy/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers
 
