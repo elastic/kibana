@@ -5,11 +5,14 @@
  */
 
 import { ESFilter } from '../../../../typings/elasticsearch';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  ENVIRONMENT_ALL,
+} from '../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 
 export function getEnvironmentUiFilterES(environment?: string): ESFilter[] {
-  if (!environment) {
+  if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }
   if (environment === ENVIRONMENT_NOT_DEFINED.value) {

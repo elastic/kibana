@@ -13,7 +13,15 @@ import { UserScenarios } from '../scenarios';
 export default function catalogueTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  const esFeatureExceptions = ['security', 'rollup_jobs', 'reporting', 'transform', 'watcher'];
+  const esFeatureExceptions = [
+    'security',
+    'index_lifecycle_management',
+    'snapshot_restore',
+    'rollup_jobs',
+    'reporting',
+    'transform',
+    'watcher',
+  ];
 
   describe('catalogue', () => {
     UserScenarios.forEach((scenario) => {

@@ -1,6 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ServiceOverview -> List renders columns correctly 1`] = `<HealthBadge />`;
+exports[`ServiceOverview -> List renders columns correctly 1`] = `
+<HealthBadge
+  healthStatus="unknown"
+/>
+`;
 
 exports[`ServiceOverview -> List renders empty state 1`] = `
 <Memo(UnoptimizedManagedTable)
@@ -51,7 +55,7 @@ exports[`ServiceOverview -> List renders empty state 1`] = `
   }
   initialPageSize={50}
   initialSortDirection="desc"
-  initialSortField="severity"
+  initialSortField="healthStatus"
   items={Array []}
   sortFn={[Function]}
 />
@@ -106,7 +110,7 @@ exports[`ServiceOverview -> List renders with data 1`] = `
   }
   initialPageSize={50}
   initialSortDirection="desc"
-  initialSortField="severity"
+  initialSortField="healthStatus"
   items={
     Array [
       Object {
