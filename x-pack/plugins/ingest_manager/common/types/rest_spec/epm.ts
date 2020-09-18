@@ -89,6 +89,12 @@ export interface BulkInstallPackagesResponse {
   response: Array<BulkInstallPackageInfo | IBulkInstallPackageError>;
 }
 
+export interface BulkInstallPackagesRequest {
+  body: {
+    packages: string[];
+  };
+}
+
 export interface MessageResponse {
   response: string;
 }
