@@ -101,11 +101,6 @@ test('enqueues execution per selected action', async () => {
       },
     ]
   `);
-  expect(createExecutionHandlerParams.actionsPlugin.isActionExecutable).toHaveBeenCalledWith(
-    '1',
-    'test',
-    { notifyUsage: true }
-  );
 
   const eventLogger = createExecutionHandlerParams.eventLogger;
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
