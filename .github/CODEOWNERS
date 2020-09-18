@@ -182,6 +182,8 @@
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 #CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
 #CC# /src/plugins/home/server/tutorials @elastic/kibana-gis
+#CC# /src/plugins/tile_map/ @elastic/kibana-gis
+#CC# /src/plugins/region_map/ @elastic/kibana-gis
 
 # Operations
 /src/dev/ @elastic/kibana-operations
@@ -204,6 +206,7 @@
 /src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
+#CC# /packages/kbn-expect/ @elastic/kibana-operations
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
