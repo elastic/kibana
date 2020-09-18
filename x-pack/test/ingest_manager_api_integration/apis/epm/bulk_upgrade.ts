@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/ingest_manager/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ upgrade: ['multiple_versions'] })
+          .send({ packages: ['multiple_versions'] })
           .expect(200);
         expect(body.response.length).equal(1);
         expect(body.response[0].name).equal('multiple_versions');
@@ -60,7 +60,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/ingest_manager/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ upgrade: ['multiple_versions', 'multiple_versions'] })
+          .send({ packages: ['multiple_versions', 'multiple_versions'] })
           .expect(200);
         expect(body.response.length).equal(2);
         expect(body.response[0].name).equal('multiple_versions');
@@ -77,7 +77,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/ingest_manager/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ upgrade: ['multiple_versions', 'blahblah'] })
+          .send({ packages: ['multiple_versions', 'blahblah'] })
           .expect(200);
         expect(body.response.length).equal(2);
         expect(body.response[0].name).equal('multiple_versions');
@@ -93,7 +93,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/ingest_manager/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ upgrade: ['multiple_versions', 'overrides'] })
+          .send({ packages: ['multiple_versions', 'overrides'] })
           .expect(200);
         expect(body.response.length).equal(2);
         expect(body.response[0].name).equal('multiple_versions');
@@ -117,7 +117,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/ingest_manager/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ upgrade: ['multiple_versions'] })
+          .send({ packages: ['multiple_versions'] })
           .expect(200);
         expect(body.response.length).equal(1);
         expect(body.response[0].name).equal('multiple_versions');

@@ -181,7 +181,7 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   const res = await bulkInstallPackages({
     savedObjectsClient,
     callCluster,
-    packagesToUpgrade: request.body.upgrade,
+    packagesToUpgrade: request.body.packages,
   });
   const body: BulkInstallPackagesResponse = {
     response: res,
