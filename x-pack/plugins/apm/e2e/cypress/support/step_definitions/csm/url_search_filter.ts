@@ -16,7 +16,7 @@ When(`a user clicks inside url search field`, () => {
   });
 });
 
-Then(`it display top pages in the suggestion popover`, () => {
+Then(`it displays top pages in the suggestion popover`, () => {
   cy.get('kbnLoadingIndicator').should('not.be.visible');
 
   cy.get('div.euiPopover__panel-isOpen', DEFAULT_TIMEOUT).within(() => {
