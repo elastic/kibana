@@ -38,9 +38,9 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
   onCancel,
 }) => {
   const [isLegacy, setIsLegacy] = useState<boolean>(false);
-  const [templateName, setTemplateName] = useState<string>();
-  const [aliasName, setAliasName] = useState<string>();
-  const [templateError, setTemplateError] = useState<string>();
+  const [templateName, setTemplateName] = useState<string>('');
+  const [aliasName, setAliasName] = useState<string>('');
+  const [templateError, setTemplateError] = useState<string>('');
 
   const { error, isLoading, data: templates, resendRequest } = useLoadIndexTemplates(isLegacy);
 
@@ -141,12 +141,8 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
       });
     }
     const onComboChange = (comboOptions: EuiComboBoxOptionOption[]) => {
-      let value = '';
-      if (comboOptions.length > 0) {
-        value = comboOptions[0].label;
-      }
       setTemplateError(undefined);
-      setTemplateName(value);
+      setTemplateName(comboOptions.length > 0 ? comboOptions[0].label : '');
     };
     return (
       <EuiForm>
@@ -165,7 +161,9 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
             }}
           />
         </EuiFormRow>
-        {!error ? (
+        {error ? (
+          renderUnableToLoadTemplatesCallout()
+        ) : (
           <>
             {renderTemplateHasPolicyWarning()}
             <EuiFormRow
@@ -202,8 +200,6 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
               />
             </EuiFormRow>
           </>
-        ) : (
-          renderUnableToLoadTemplatesCallout()
         )}
         {renderAliasFormElement()}
       </EuiForm>
@@ -226,7 +222,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
         {
           policyName,
           templateName,
-          aliasName,
+          aliasName: aliasName === '' ? undefined : aliasName,
         },
         isLegacy
       );
