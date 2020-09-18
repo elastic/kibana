@@ -98,7 +98,8 @@
     "**/load-grunt-config/js-yaml": "^3.13.1",
     "**/request": "^2.88.2",
     "**/serialize-javascript": "^2.1.1",
-    "@types/react": "16.3.14"
+    "@types/react": "16.3.14",
+    "**/sass-graph/yargs/yargs-parser": "5.0.0-security.0"
   },
   "workspaces": {
     "packages": [
