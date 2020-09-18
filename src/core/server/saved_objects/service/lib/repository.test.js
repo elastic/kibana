@@ -2616,6 +2616,8 @@ describe('SavedObjectsRepository', () => {
         const test = async (types) => {
           const result = await savedObjectsRepository.find({
             typesAndNamespacesMap: new Map(types.map((x) => [x, undefined])),
+            type: '',
+            namespaces: [],
           });
           expect(result).toEqual(expect.objectContaining({ saved_objects: [] }));
           expect(client.search).not.toHaveBeenCalled();
@@ -2629,7 +2631,8 @@ describe('SavedObjectsRepository', () => {
 
     describe('search dsl', () => {
       const commonOptions = {
-        namespaces: [namespace],
+        type: [type], // cannot be used when `typesAndNamespacesMap` is present
+        namespaces: [namespace], // cannot be used when `typesAndNamespacesMap` is present
         search: 'foo*',
         searchFields: ['foo'],
         sortField: 'name',
@@ -2643,20 +2646,16 @@ describe('SavedObjectsRepository', () => {
       };
 
       it(`passes mappings, registry, and search options to getSearchDsl`, async () => {
-        const relevantOpts = {
-          ...commonOptions,
-          type: [type], // cannot be used when `typesAndNamespacesMap` is present
-        };
-
-        await findSuccess(relevantOpts, namespace);
-        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, relevantOpts);
+        await findSuccess(commonOptions, namespace);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, commonOptions);
       });
 
       it(`accepts typesAndNamespacesMap`, async () => {
         const relevantOpts = {
           ...commonOptions,
           type: '',
-          typesAndNamespacesMap: new Map([[type, [namespace]]]), // cannot be used when `type` is truthy
+          namespaces: [],
+          typesAndNamespacesMap: new Map([[type, [namespace]]]), // can only be used when `type` is falsy and `namespaces` is an empty array
         };
 
         await findSuccess(relevantOpts, namespace);
