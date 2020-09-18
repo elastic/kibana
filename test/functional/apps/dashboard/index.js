@@ -98,7 +98,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./bwc_shared_urls'));
       loadTestFile(require.resolve('./panel_replacing'));
       loadTestFile(require.resolve('./panel_cloning'));
-      loadTestFile(require.resolve('./panel_controls'));
+      loadTestFile(require.resolve('./panel_context_menu'));
       loadTestFile(require.resolve('./dashboard_state'));
     });
 

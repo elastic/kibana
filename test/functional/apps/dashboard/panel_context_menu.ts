@@ -17,22 +17,22 @@
  * under the License.
  */
 
-// import expect from '@kbn/expect';
-// import {
-//   PIE_CHART_VIS_NAME,
-//   AREA_CHART_VIS_NAME,
-//   LINE_CHART_VIS_NAME,
-// } from '../../page_objects/dashboard_page';
-// import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
+import expect from '@kbn/expect';
+import {
+  PIE_CHART_VIS_NAME,
+  AREA_CHART_VIS_NAME,
+  LINE_CHART_VIS_NAME,
+} from '../../page_objects/dashboard_page';
+import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  // const browser = getService('browser');
-  // const dashboardPanelActions = getService('dashboardPanelActions');
-  // const dashboardAddPanel = getService('dashboardAddPanel');
-  // const dashboardReplacePanel = getService('dashboardReplacePanel');
-  // const dashboardVisualizations = getService('dashboardVisualizations');
-  // const renderable = getService('renderable');
+  const browser = getService('browser');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardReplacePanel = getService('dashboardReplacePanel');
+  const dashboardVisualizations = getService('dashboardVisualizations');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
@@ -40,34 +40,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'timePicker',
   ]);
-  // const dashboardName = 'Dashboard Panel Controls Test';
+  const dashboardName = 'Dashboard Panel Controls Test';
 
-  describe('dashboard panel controls', function viewEditModeTests() {
+  describe('dashboard panel context menu', function viewEditModeTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setHistoricalDataRange();
+      await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
     });
 
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
+    it('are hidden in view mode', async function () {
+      await PageObjects.dashboard.saveDashboard(dashboardName);
+
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.expectMissingEditPanelAction();
+      await dashboardPanelActions.expectMissingRemovePanelAction();
+    });
+
     /*
-    describe('panel edit controls', function () {
-      before(async () => {
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setHistoricalDataRange();
-        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-      });
-
-      it('are hidden in view mode', async function () {
-        await PageObjects.dashboard.saveDashboard(dashboardName);
-
-        await dashboardPanelActions.openContextMenu();
-        await dashboardPanelActions.expectMissingEditPanelAction();
-        await dashboardPanelActions.expectMissingRemovePanelAction();
-      });
-
       it('are shown in edit mode', async function () {
         await PageObjects.dashboard.switchToEditMode();
 
