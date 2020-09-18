@@ -4,71 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeParamsExpressionProps } from '../../../../../../types';
-import { GeoThresholdAlertParams, TrackingEvent, ES_GEO_FIELD_TYPES } from '../../types';
+import { IErrorObject } from '../../../../../../types';
+import { ES_GEO_FIELD_TYPES } from '../../types';
 import { AlertsContextValue } from '../../../../../context/alerts_context';
-import { firstFieldOption } from '../../../../../../common/index_controls';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
+import { IFieldType } from '../../../../../../../../../../src/plugins/data/common/index_patterns/fields';
+import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 
-const DEFAULT_VALUES = {
-  TRACKING_EVENT: TrackingEvent.entered,
-  ENTITY: '',
-  INDEX: '',
-  DATE_FIELD: '',
-  SHAPES_ARR: [],
-  TYPE: '',
-  GEO_FIELD: '',
-};
+interface Props {
+  dateField: string;
+  geoField: string;
+  alertsContext: AlertsContextValue;
+  errors: IErrorObject;
+  setAlertParamsDate: (date: string) => void;
+  setAlertParamsGeoField: (geoField: string) => void;
+  setAlertProperty: (alertProp: string, alertParams: unknown) => void;
+  setIndexPattern: (indexPattern: IIndexPattern) => void;
+  indexPattern: IIndexPattern;
+  isInvalid: boolean;
+}
 
-export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
-  GeoThresholdAlertParams,
-  AlertsContextValue
->> = ({
-  alertParams,
+export const EntityIndexExpression: FunctionComponent<Props> = ({
   setAlertParamsDate,
   setAlertParamsGeoField,
-  setAlertProperty,
   errors,
   alertsContext,
   setIndexPattern,
   indexPattern,
   isInvalid,
+  dateField: timeField,
+  geoField,
 }) => {
-  const {
-    trackingEvent,
-    entity,
-    index,
-    dateField: timeField,
-    shapesArr,
-    type,
-    geoField,
-  } = alertParams;
   const { dataUi, dataIndexPatterns, http } = alertsContext;
   const { IndexPatternSelect } = dataUi;
-
-  const setToDefaultParams = async () => {
-    setAlertProperty('params', {
-      ...alertParams,
-      trackingEvent: trackingEvent ?? DEFAULT_VALUES.TRACKING_EVENT,
-      entity: entity ?? DEFAULT_VALUES.ENTITY,
-      index: index ?? DEFAULT_VALUES.INDEX,
-      dateField: timeField ?? DEFAULT_VALUES.DATE_FIELD,
-      shapesArr: shapesArr ?? DEFAULT_VALUES.SHAPES_ARR,
-      type: type ?? DEFAULT_VALUES.TYPE,
-      geoField: geoField ?? DEFAULT_VALUES.GEO_FIELD,
-    });
-  };
-
-  useEffect(() => {
-    setToDefaultParams();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const indexPopover = (
     <Fragment>
@@ -77,7 +51,6 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
           onChange={(_indexPattern) => {
             // reset time field and expression fields if indices are deleted
             if (!_indexPattern) {
-              setToDefaultParams();
               return;
             }
             setIndexPattern(_indexPattern);
@@ -103,10 +76,13 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
             defaultMessage: 'Select time field',
           })}
           value={timeField}
-          onChange={(_timeField: string | undefined) => setAlertParamsDate(_timeField)}
+          onChange={(_timeField: string | undefined) =>
+            _timeField && setAlertParamsDate(_timeField)
+          }
           fields={
-            indexPattern.fields.length &&
-            indexPattern.fields.filter((field) => field.spec.type === 'date')
+            (indexPattern.fields.length &&
+              indexPattern.fields.filter((field: IFieldType) => field.type === 'date')) ||
+            []
           }
         />
       </EuiFormRow>
@@ -122,10 +98,15 @@ export const EntityIndexExpression: React.FunctionComponent<AlertTypeParamsExpre
             defaultMessage: 'Select geo field',
           })}
           value={geoField}
-          onChange={(_geoField: string | undefined) => setAlertParamsGeoField(_geoField)}
+          onChange={(_geoField: string | undefined) =>
+            _geoField && setAlertParamsGeoField(_geoField)
+          }
           fields={
-            indexPattern.fields.length &&
-            indexPattern.fields.filter((field) => ES_GEO_FIELD_TYPES.includes(field.spec.type))
+            (indexPattern.fields.length &&
+              indexPattern.fields.filter((field: IFieldType) =>
+                ES_GEO_FIELD_TYPES.includes(field.type)
+              )) ||
+            []
           }
         />
       </EuiFormRow>

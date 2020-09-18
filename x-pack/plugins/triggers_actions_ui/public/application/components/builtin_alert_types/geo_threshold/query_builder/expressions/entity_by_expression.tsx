@@ -4,20 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeParamsExpressionProps } from '../../../../../../types';
-import { GeoThresholdAlertParams } from '../../types';
-import { AlertsContextValue } from '../../../../../context/alerts_context';
+import { IErrorObject } from '../../../../../../types';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
 import { IFieldType } from '../../../../../../../../../../src/plugins/data/common/index_patterns/fields';
 
-export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
-  GeoThresholdAlertParams,
-  AlertsContextValue
->> = ({ errors, entity, setAlertParamsEntity, indexFields, isInvalid }) => {
+interface Props {
+  errors: IErrorObject;
+  entity: string;
+  setAlertParamsEntity: (entity: string) => void;
+  indexFields: IFieldType[];
+  isInvalid: boolean;
+}
+
+export const EntityByExpression: FunctionComponent<Props> = ({
+  errors,
+  entity,
+  setAlertParamsEntity,
+  indexFields,
+  isInvalid,
+}) => {
   const ENTITY_TYPES = ['string', 'number'];
   const indexPopover = (
     <EuiFormRow id="someSelect" fullWidth error={errors.index}>
@@ -29,12 +38,10 @@ export const EntityByExpression: React.FunctionComponent<AlertTypeParamsExpressi
           }
         )}
         value={entity}
-        onChange={(_entity) => setAlertParamsEntity(_entity)}
+        onChange={(_entity) => _entity && setAlertParamsEntity(_entity)}
         fields={indexFields.filter(
           (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
         )}
-        isClearable={false}
-        compressed
       />
     </EuiFormRow>
   );

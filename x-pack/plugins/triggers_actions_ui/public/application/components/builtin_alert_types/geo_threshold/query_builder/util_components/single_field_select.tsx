@@ -6,68 +6,45 @@
 
 import _ from 'lodash';
 import React from 'react';
-
 import {
   EuiComboBox,
-  EuiComboBoxProps,
   EuiComboBoxOptionOption,
   EuiHighlight,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { FieldIcon } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
-function fieldsToOptions(
-  fields?: IFieldType[],
-  isFieldDisabled?: (field: IFieldType) => boolean
-): Array<EuiComboBoxOptionOption<IFieldType>> {
+function fieldsToOptions(fields?: IFieldType[]): Array<EuiComboBoxOptionOption<IFieldType>> {
   if (!fields) {
     return [];
   }
 
   return fields
-    .map((field) => {
-      const option: EuiComboBoxOptionOption<IFieldType> = {
-        value: field,
-        label: field.name,
-      };
-      if (isFieldDisabled && isFieldDisabled(field)) {
-        option.disabled = true;
-      }
-      return option;
-    })
+    .map((field) => ({
+      value: field,
+      label: field.name,
+    }))
     .sort((a, b) => {
       return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
     });
 }
 
-type Props = Omit<
-  EuiComboBoxProps<IFieldType>,
-  'isDisabled' | 'onChange' | 'options' | 'renderOption' | 'selectedOptions' | 'singleSelection'
-> & {
-  fields?: IFieldType[];
-  onChange: (fieldName?: string) => void;
+interface Props {
+  placeholder: string;
   value: string | null; // index pattern field name
-  isFieldDisabled?: (field: IFieldType) => boolean;
-  getFieldDisabledReason?: (field: IFieldType) => string | null;
-};
+  onChange: (fieldName?: string) => void;
+  fields: IFieldType[];
+}
 
-export function SingleFieldSelect({
-  fields,
-  getFieldDisabledReason,
-  isFieldDisabled,
-  onChange,
-  value,
-  ...rest
-}: Props) {
+export function SingleFieldSelect({ placeholder, value, onChange, fields }: Props) {
   function renderOption(
     option: EuiComboBoxOptionOption<IFieldType>,
     searchValue: string,
     contentClassName: string
   ) {
-    const content = (
+    return (
       <EuiFlexGroup className={contentClassName} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={null}>
           <FieldIcon type={option.value!.type} fill="none" />
@@ -76,17 +53,6 @@ export function SingleFieldSelect({
           <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-
-    const disabledReason =
-      option.disabled && getFieldDisabledReason ? getFieldDisabledReason(option.value!) : null;
-
-    return disabledReason ? (
-      <EuiToolTip position="left" content={disabledReason}>
-        {content}
-      </EuiToolTip>
-    ) : (
-      content
     );
   }
 
@@ -105,12 +71,14 @@ export function SingleFieldSelect({
   return (
     <EuiComboBox
       singleSelection={true}
-      options={fieldsToOptions(fields, isFieldDisabled)}
+      options={fieldsToOptions(fields)}
       selectedOptions={selectedOptions}
       onChange={onSelection}
       isDisabled={!fields}
       renderOption={renderOption}
-      {...rest}
+      isClearable={false}
+      placeholder={placeholder}
+      compressed
     />
   );
 }

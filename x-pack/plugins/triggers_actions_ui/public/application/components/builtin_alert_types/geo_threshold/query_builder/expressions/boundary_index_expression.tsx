@@ -4,20 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeParamsExpressionProps } from '../../../../../../types';
-import { GeoThresholdAlertParams, ES_GEO_SHAPE_TYPES } from '../../types';
+import { IErrorObject } from '../../../../../../types';
+import { ES_GEO_SHAPE_TYPES, GeoThresholdAlertParams } from '../../types';
 import { AlertsContextValue } from '../../../../../context/alerts_context';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
+import { IFieldType } from '../../../../../../../../../../src/plugins/data/common/index_patterns/fields';
+import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 
-export const BoundaryIndexExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
-  GeoThresholdAlertParams,
-  AlertsContextValue
->> = ({
+interface Props {
+  alertParams: GeoThresholdAlertParams;
+  alertsContext: AlertsContextValue;
+  errors: IErrorObject;
+  boundaryIndexPattern: IIndexPattern;
+  setBoundaryIndexPattern: (boundaryIndexPattern?: IIndexPattern) => void;
+  setBoundaryGeoField: (boundaryGeoField?: string) => void;
+}
+
+export const BoundaryIndexExpression: FunctionComponent<Props> = ({
   alertParams,
   alertsContext,
   errors,
@@ -43,7 +51,6 @@ export const BoundaryIndexExpression: React.FunctionComponent<AlertTypeParamsExp
           IndexPatternSelectComponent={IndexPatternSelect}
           indexPatternService={dataIndexPatterns}
           http={http}
-          geoTypes={ES_GEO_SHAPE_TYPES}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -60,10 +67,11 @@ export const BoundaryIndexExpression: React.FunctionComponent<AlertTypeParamsExp
           value={boundaryGeoField}
           onChange={setBoundaryGeoField}
           fields={
-            boundaryIndexPattern.fields.length &&
-            boundaryIndexPattern.fields.filter((field) =>
-              ES_GEO_SHAPE_TYPES.includes(field.spec.type)
-            )
+            (boundaryIndexPattern.fields.length &&
+              boundaryIndexPattern.fields.filter((field: IFieldType) =>
+                ES_GEO_SHAPE_TYPES.includes(field.type)
+              )) ||
+            []
           }
         />
       </EuiFormRow>

@@ -15,6 +15,7 @@ import { ExpressionWithPopover } from './util_components/expression_with_popover
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
+import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -30,8 +31,8 @@ const DEFAULT_VALUES = {
 };
 
 const conditionOptions = Object.keys(TrackingEvent).map((key) => ({
-  text: TrackingEvent[key],
-  value: TrackingEvent[key],
+  text: (TrackingEvent as any)[key],
+  value: (TrackingEvent as any)[key],
 }));
 
 export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
@@ -51,17 +52,37 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     boundaryGeoField,
   } = alertParams;
 
-  const [indexPattern, _setIndexPattern] = useState({ id: '', fields: [] });
-  const setIndexPattern = (_indexPattern) => {
-    _setIndexPattern(_indexPattern);
-    setAlertParams('indexTitle', _indexPattern.title);
-    setAlertParams('indexId', _indexPattern.id);
+  const [indexPattern, _setIndexPattern] = useState<IIndexPattern>({
+    id: '',
+    fields: [],
+    title: '',
+  });
+  const setIndexPattern = (_indexPattern?: IIndexPattern) => {
+    if (_indexPattern) {
+      _setIndexPattern(_indexPattern);
+      if (_indexPattern.title) {
+        setAlertParams('indexTitle', _indexPattern.title);
+      }
+      if (_indexPattern.id) {
+        setAlertParams('indexId', _indexPattern.id);
+      }
+    }
   };
-  const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState({ id: '', fields: [] });
-  const setBoundaryIndexPattern = (_indexPattern) => {
-    _setBoundaryIndexPattern(_indexPattern);
-    setAlertParams('boundaryIndexTitle', _indexPattern.title);
-    setAlertParams('boundaryIndexId', _indexPattern.id);
+  const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState<IIndexPattern>({
+    id: '',
+    fields: [],
+    title: '',
+  });
+  const setBoundaryIndexPattern = (_indexPattern?: IIndexPattern) => {
+    if (_indexPattern) {
+      _setBoundaryIndexPattern(_indexPattern);
+      if (_indexPattern.title) {
+        setAlertParams('boundaryIndexTitle', _indexPattern.title);
+      }
+      if (_indexPattern.id) {
+        setAlertParams('boundaryIndexId', _indexPattern.id);
+      }
+    }
   };
 
   const hasExpressionErrors = false;
@@ -120,11 +141,11 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       </EuiTitle>
       <EuiSpacer size="s" />
       <EntityIndexExpression
-        alertInterval={alertInterval}
-        alertParams={alertParams}
+        dateField={dateField}
+        geoField={geoField}
         alertsContext={alertsContext}
         errors={errors}
-        setAlertParamsDate={(date) => setAlertParams('dateField', date)}
+        setAlertParamsDate={(_date) => setAlertParams('dateField', _date)}
         setAlertParamsGeoField={(_geoField) => setAlertParams('geoField', _geoField)}
         setAlertProperty={setAlertProperty}
         setIndexPattern={setIndexPattern}
@@ -195,7 +216,9 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         errors={errors}
         boundaryIndexPattern={boundaryIndexPattern}
         setBoundaryIndexPattern={setBoundaryIndexPattern}
-        setBoundaryGeoField={(_geoField) => setAlertParams('boundaryGeoField', _geoField)}
+        setBoundaryGeoField={(_geoField: string | undefined) =>
+          _geoField && setAlertParams('boundaryGeoField', _geoField)
+        }
       />
     </Fragment>
   );

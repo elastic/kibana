@@ -8,18 +8,16 @@ import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern } from 'src/plugins/data/public';
-import { IndexPatternsService } from '../../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-
-const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
+import { IndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
+import { HttpSetup } from 'kibana/public';
+import { ES_GEO_FIELD_TYPES } from '../../types';
 
 interface Props {
   onChange: (indexPattern: IndexPattern) => void;
-  value: string | null;
+  value: string | undefined;
   IndexPatternSelectComponent: unknown;
-  indexPatternsService: IndexPatternsService;
-  http: unknown;
-  geoTypes: unknown;
+  indexPatternService: IndexPatternsContract;
+  http: HttpSetup;
 }
 
 interface State {
@@ -139,7 +137,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
                 defaultMessage: 'Select index pattern',
               }
             )}
-            fieldTypes={this.props.geoTypes || ES_GEO_FIELD_TYPES}
+            fieldTypes={ES_GEO_FIELD_TYPES}
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}
           />
