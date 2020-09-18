@@ -48,7 +48,7 @@ export class IngestPipelinesPlugin implements Plugin {
       },
     });
 
-    registerUrlGenerator(coreSetup, management);
+    registerUrlGenerator(coreSetup, management, share);
   }
 
   public start() {}

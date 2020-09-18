@@ -10,9 +10,9 @@ import { INGEST_PIPELINES_PAGES } from './application/services/navigation';
 describe('IngestPipelinesUrlGenerator', () => {
   const getAppBasePath = (absolute) => {
     if (absolute) {
-      return 'http://localhost/app/test_app';
+      return Promise.resolve('http://localhost/app/test_app');
     }
-    return '/app/test_app';
+    return Promise.resolve('/app/test_app');
   };
   const urlGenerator = new IngestPipelinesUrlGenerator(getAppBasePath);
 
