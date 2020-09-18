@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('has the correct calculation for average', () => {
-          expectSnapshot(errorRateResponse.average).toMatchInline(`0.14086309523809523`);
+          expectSnapshot(errorRateResponse.average).toMatchInline(`0.14086`);
         });
 
         it('has the correct error rate', () => {

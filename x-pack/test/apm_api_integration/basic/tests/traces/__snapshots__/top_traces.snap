@@ -12,11 +12,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "POST /api/orders",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 3347,
-    "impact": 0.003559081182448518,
+    "impact": 0.00356,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.stats",
@@ -24,11 +24,11 @@ Array [
     "serviceName": "opbeans-python",
     "transactionName": "GET opbeans.views.stats",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 4479,
-    "impact": 0.00538210376096966,
+    "impact": 0.00538,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/customers/:id",
@@ -36,11 +36,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/customers/:id",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 7287,
-    "impact": 0.009904230439845424,
+    "impact": 0.0099,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/products/top",
@@ -48,11 +48,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/products/top",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 8023,
-    "impact": 0.011089517204678958,
+    "impact": 0.01109,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::OrdersController#show",
@@ -60,11 +60,11 @@ Array [
     "serviceName": "opbeans-ruby",
     "transactionName": "Api::OrdersController#show",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 8282,
-    "impact": 0.011506622193934236,
+    "impact": 0.01151,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/orders/:id",
@@ -72,11 +72,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/orders/:id",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 12116,
-    "impact": 0.017681064390091532,
+    "impact": 0.01768,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::ProductsController#top",
@@ -84,11 +84,11 @@ Array [
     "serviceName": "opbeans-ruby",
     "transactionName": "Api::ProductsController#top",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 6451,
-    "impact": 0.018946873353622995,
+    "impact": 0.01895,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/products",
@@ -96,11 +96,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/products",
     "transactionType": "request",
-    "transactionsPerMinute": 0.06666666666666667,
+    "transactionsPerMinute": 0.06667,
   },
   Object {
     "averageResponseTime": 13360,
-    "impact": 0.019684456693696034,
+    "impact": 0.01968,
     "key": Object {
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#customers",
@@ -108,11 +108,11 @@ Array [
     "serviceName": "opbeans-java",
     "transactionName": "APIRestController#customers",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 7903,
-    "impact": 0.023623602653998786,
+    "impact": 0.02362,
     "key": Object {
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#product",
@@ -120,11 +120,11 @@ Array [
     "serviceName": "opbeans-java",
     "transactionName": "APIRestController#product",
     "transactionType": "request",
-    "transactionsPerMinute": 0.06666666666666667,
+    "transactionsPerMinute": 0.06667,
   },
   Object {
     "averageResponseTime": 17913,
-    "impact": 0.027016808107129565,
+    "impact": 0.02702,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/stats",
@@ -132,11 +132,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/stats",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
-    "averageResponseTime": 6065.666666666667,
-    "impact": 0.02747417419573381,
+    "averageResponseTime": 6065.66667,
+    "impact": 0.02747,
     "key": Object {
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#topProducts",
@@ -148,7 +148,7 @@ Array [
   },
   Object {
     "averageResponseTime": 2340.875,
-    "impact": 0.02832770950193187,
+    "impact": 0.02833,
     "key": Object {
       "service.name": "opbeans-java",
       "transaction.name": "ResourceHttpRequestHandler",
@@ -156,11 +156,11 @@ Array [
     "serviceName": "opbeans-java",
     "transactionName": "ResourceHttpRequestHandler",
     "transactionType": "request",
-    "transactionsPerMinute": 0.26666666666666666,
+    "transactionsPerMinute": 0.26667,
   },
   Object {
-    "averageResponseTime": 7340.666666666667,
-    "impact": 0.03363412239612548,
+    "averageResponseTime": 7340.66667,
+    "impact": 0.03363,
     "key": Object {
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#customerWhoBought",
@@ -172,7 +172,7 @@ Array [
   },
   Object {
     "averageResponseTime": 7689,
-    "impact": 0.03531703634891222,
+    "impact": 0.03532,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/types",
@@ -184,7 +184,7 @@ Array [
   },
   Object {
     "averageResponseTime": 11598,
-    "impact": 0.035524783621552876,
+    "impact": 0.03552,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/products/:id/customers",
@@ -192,11 +192,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/products/:id/customers",
     "transactionType": "request",
-    "transactionsPerMinute": 0.06666666666666667,
+    "transactionsPerMinute": 0.06667,
   },
   Object {
     "averageResponseTime": 12077.5,
-    "impact": 0.03706919939257919,
+    "impact": 0.03707,
     "key": Object {
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#order",
@@ -204,11 +204,11 @@ Array [
     "serviceName": "opbeans-java",
     "transactionName": "APIRestController#order",
     "transactionType": "request",
-    "transactionsPerMinute": 0.06666666666666667,
+    "transactionsPerMinute": 0.06667,
   },
   Object {
     "averageResponseTime": 6296.5,
-    "impact": 0.03872956712973051,
+    "impact": 0.03873,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::TypesController#index",
@@ -216,11 +216,11 @@ Array [
     "serviceName": "opbeans-ruby",
     "transactionName": "Api::TypesController#index",
     "transactionType": "request",
-    "transactionsPerMinute": 0.13333333333333333,
+    "transactionsPerMinute": 0.13333,
   },
   Object {
     "averageResponseTime": 28181,
-    "impact": 0.04355284683173653,
+    "impact": 0.04355,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.customer",
@@ -228,11 +228,11 @@ Array [
     "serviceName": "opbeans-python",
     "transactionName": "GET opbeans.views.customer",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 7439,
-    "impact": 0.046089296090721335,
+    "impact": 0.04609,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/customers/:id",
@@ -240,11 +240,11 @@ Array [
     "serviceName": "opbeans-go",
     "transactionName": "GET /api/customers/:id",
     "transactionType": "request",
-    "transactionsPerMinute": 0.13333333333333333,
+    "transactionsPerMinute": 0.13333,
   },
   Object {
-    "averageResponseTime": 10471.333333333334,
-    "impact": 0.0487594121995447,
+    "averageResponseTime": 10471.33333,
+    "impact": 0.04876,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/types/:id",
@@ -256,7 +256,7 @@ Array [
   },
   Object {
     "averageResponseTime": 20810.5,
-    "impact": 0.0651972138417402,
+    "impact": 0.0652,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api/customers",
@@ -264,11 +264,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "GET /api/customers",
     "transactionType": "request",
-    "transactionsPerMinute": 0.06666666666666667,
+    "transactionsPerMinute": 0.06667,
   },
   Object {
     "averageResponseTime": 11732.25,
-    "impact": 0.07374545045551247,
+    "impact": 0.07375,
     "key": Object {
       "service.name": "opbeans-java",
       "transaction.name": "APIRestController#customer",
@@ -276,11 +276,11 @@ Array [
     "serviceName": "opbeans-java",
     "transactionName": "APIRestController#customer",
     "transactionType": "request",
-    "transactionsPerMinute": 0.13333333333333333,
+    "transactionsPerMinute": 0.13333,
   },
   Object {
     "averageResponseTime": 47646,
-    "impact": 0.0749001387848408,
+    "impact": 0.0749,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.customers",
@@ -288,11 +288,11 @@ Array [
     "serviceName": "opbeans-python",
     "transactionName": "GET opbeans.views.customers",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 13160.75,
-    "impact": 0.08294752732271193,
+    "impact": 0.08295,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.products",
@@ -300,11 +300,11 @@ Array [
     "serviceName": "opbeans-python",
     "transactionName": "GET opbeans.views.products",
     "transactionType": "request",
-    "transactionsPerMinute": 0.13333333333333333,
+    "transactionsPerMinute": 0.13333,
   },
   Object {
-    "averageResponseTime": 4131.461538461538,
-    "impact": 0.08466426059895181,
+    "averageResponseTime": 4131.46154,
+    "impact": 0.08466,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/types/:id",
@@ -312,11 +312,11 @@ Array [
     "serviceName": "opbeans-go",
     "transactionName": "GET /api/types/:id",
     "transactionType": "request",
-    "transactionsPerMinute": 0.43333333333333335,
+    "transactionsPerMinute": 0.43333,
   },
   Object {
     "averageResponseTime": 13869.25,
-    "impact": 0.08751152554491062,
+    "impact": 0.08751,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::StatsController#index",
@@ -324,11 +324,11 @@ Array [
     "serviceName": "opbeans-ruby",
     "transactionName": "Api::StatsController#index",
     "transactionType": "request",
-    "transactionsPerMinute": 0.13333333333333333,
+    "transactionsPerMinute": 0.13333,
   },
   Object {
-    "averageResponseTime": 20643.333333333332,
-    "impact": 0.09790372050886552,
+    "averageResponseTime": 20643.33333,
+    "impact": 0.0979,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::ProductsController#show",
@@ -340,7 +340,7 @@ Array [
   },
   Object {
     "averageResponseTime": 15596.5,
-    "impact": 0.09863808296099064,
+    "impact": 0.09864,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::TypesController#show",
@@ -348,11 +348,11 @@ Array [
     "serviceName": "opbeans-ruby",
     "transactionName": "Api::TypesController#show",
     "transactionType": "request",
-    "transactionsPerMinute": 0.13333333333333333,
+    "transactionsPerMinute": 0.13333,
   },
   Object {
     "averageResponseTime": 20989,
-    "impact": 0.09957375090986059,
+    "impact": 0.09957,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.orders",
@@ -364,7 +364,7 @@ Array [
   },
   Object {
     "averageResponseTime": 74419,
-    "impact": 0.11801655529963453,
+    "impact": 0.11802,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.product_type",
@@ -372,11 +372,11 @@ Array [
     "serviceName": "opbeans-python",
     "transactionName": "GET opbeans.views.product_type",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
-    "averageResponseTime": 10678.42857142857,
-    "impact": 0.11854800181104089,
+    "averageResponseTime": 10678.42857,
+    "impact": 0.11855,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/orders/:id",
@@ -384,11 +384,11 @@ Array [
     "serviceName": "opbeans-go",
     "transactionName": "GET /api/orders/:id",
     "transactionType": "request",
-    "transactionsPerMinute": 0.23333333333333334,
+    "transactionsPerMinute": 0.23333,
   },
   Object {
-    "averageResponseTime": 27078.666666666668,
-    "impact": 0.12899495187011034,
+    "averageResponseTime": 27078.66667,
+    "impact": 0.12899,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::OrdersController#index",
@@ -399,8 +399,8 @@ Array [
     "transactionsPerMinute": 0.1,
   },
   Object {
-    "averageResponseTime": 11827.42857142857,
-    "impact": 0.13150080269358994,
+    "averageResponseTime": 11827.42857,
+    "impact": 0.1315,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/customers",
@@ -408,11 +408,11 @@ Array [
     "serviceName": "opbeans-go",
     "transactionName": "GET /api/customers",
     "transactionType": "request",
-    "transactionsPerMinute": 0.23333333333333334,
+    "transactionsPerMinute": 0.23333,
   },
   Object {
     "averageResponseTime": 21770.75,
-    "impact": 0.13841121778584634,
+    "impact": 0.13841,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.product",
@@ -420,11 +420,11 @@ Array [
     "serviceName": "opbeans-python",
     "transactionName": "GET opbeans.views.product",
     "transactionType": "request",
-    "transactionsPerMinute": 0.13333333333333333,
+    "transactionsPerMinute": 0.13333,
   },
   Object {
     "averageResponseTime": 10252,
-    "impact": 0.1467613697908217,
+    "impact": 0.14676,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/types",
@@ -436,7 +436,7 @@ Array [
   },
   Object {
     "averageResponseTime": 100570,
-    "impact": 0.16013127566262603,
+    "impact": 0.16013,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.top_products",
@@ -444,11 +444,11 @@ Array [
     "serviceName": "opbeans-python",
     "transactionName": "GET opbeans.views.top_products",
     "transactionType": "request",
-    "transactionsPerMinute": 0.03333333333333333,
+    "transactionsPerMinute": 0.03333,
   },
   Object {
     "averageResponseTime": 15505,
-    "impact": 0.1979283957314345,
+    "impact": 0.19793,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::CustomersController#index",
@@ -456,11 +456,11 @@ Array [
     "serviceName": "opbeans-ruby",
     "transactionName": "Api::CustomersController#index",
     "transactionType": "request",
-    "transactionsPerMinute": 0.26666666666666666,
+    "transactionsPerMinute": 0.26667,
   },
   Object {
     "averageResponseTime": 22856.5,
-    "impact": 0.21902360134631826,
+    "impact": 0.21902,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/products",
@@ -472,7 +472,7 @@ Array [
   },
   Object {
     "averageResponseTime": 17250.125,
-    "impact": 0.2204118040518706,
+    "impact": 0.22041,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::ProductsController#index",
@@ -480,11 +480,11 @@ Array [
     "serviceName": "opbeans-ruby",
     "transactionName": "Api::ProductsController#index",
     "transactionType": "request",
-    "transactionsPerMinute": 0.26666666666666666,
+    "transactionsPerMinute": 0.26667,
   },
   Object {
-    "averageResponseTime": 20089.555555555555,
-    "impact": 0.2893468583571687,
+    "averageResponseTime": 20089.55556,
+    "impact": 0.28935,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Api::CustomersController#show",
@@ -495,8 +495,8 @@ Array [
     "transactionsPerMinute": 0.3,
   },
   Object {
-    "averageResponseTime": 26487.85714285714,
-    "impact": 0.29676939463314395,
+    "averageResponseTime": 26487.85714,
+    "impact": 0.29677,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/stats",
@@ -504,11 +504,11 @@ Array [
     "serviceName": "opbeans-go",
     "transactionName": "GET /api/stats",
     "transactionType": "request",
-    "transactionsPerMinute": 0.23333333333333334,
+    "transactionsPerMinute": 0.23333,
   },
   Object {
-    "averageResponseTime": 14957.538461538461,
-    "impact": 0.31131653504991197,
+    "averageResponseTime": 14957.53846,
+    "impact": 0.31132,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/products/:id/customers",
@@ -516,11 +516,11 @@ Array [
     "serviceName": "opbeans-go",
     "transactionName": "GET /api/products/:id/customers",
     "transactionType": "request",
-    "transactionsPerMinute": 0.43333333333333335,
+    "transactionsPerMinute": 0.43333,
   },
   Object {
     "averageResponseTime": 30178.5,
-    "impact": 0.678579893755146,
+    "impact": 0.67858,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "GET /api",
@@ -528,11 +528,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "GET /api",
     "transactionType": "request",
-    "transactionsPerMinute": 0.4666666666666667,
+    "transactionsPerMinute": 0.46667,
   },
   Object {
     "averageResponseTime": 32625.875,
-    "impact": 0.8388432258236366,
+    "impact": 0.83884,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/products/:id",
@@ -540,11 +540,11 @@ Array [
     "serviceName": "opbeans-go",
     "transactionName": "GET /api/products/:id",
     "transactionType": "request",
-    "transactionsPerMinute": 0.5333333333333333,
+    "transactionsPerMinute": 0.53333,
   },
   Object {
-    "averageResponseTime": 121200.83333333333,
-    "impact": 1.1692918352841768,
+    "averageResponseTime": 121200.83333,
+    "impact": 1.16929,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "GET opbeans.views.product_customers",
@@ -555,8 +555,8 @@ Array [
     "transactionsPerMinute": 0.2,
   },
   Object {
-    "averageResponseTime": 38025.86666666667,
-    "impact": 3.6724805948748136,
+    "averageResponseTime": 38025.86667,
+    "impact": 3.67248,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "opbeans.tasks.sync_orders",
@@ -568,7 +568,7 @@ Array [
   },
   Object {
     "averageResponseTime": 815238,
-    "impact": 11.8142250451802,
+    "impact": 11.81423,
     "key": Object {
       "service.name": "opbeans-java",
       "transaction.name": "DispatcherServlet#doGet",
@@ -579,8 +579,8 @@ Array [
     "transactionsPerMinute": 0.3,
   },
   Object {
-    "averageResponseTime": 691636.3636363636,
-    "impact": 12.25042667907868,
+    "averageResponseTime": 691636.36364,
+    "impact": 12.25043,
     "key": Object {
       "service.name": "opbeans-rum",
       "transaction.name": "/customers",
@@ -588,11 +588,11 @@ Array [
     "serviceName": "opbeans-rum",
     "transactionName": "/customers",
     "transactionType": "page-load",
-    "transactionsPerMinute": 0.36666666666666664,
+    "transactionsPerMinute": 0.36667,
   },
   Object {
     "averageResponseTime": 1590910.5,
-    "impact": 20.494746747861388,
+    "impact": 20.49475,
     "key": Object {
       "service.name": "opbeans-go",
       "transaction.name": "GET /api/orders",
@@ -600,11 +600,11 @@ Array [
     "serviceName": "opbeans-go",
     "transactionName": "GET /api/orders",
     "transactionType": "request",
-    "transactionsPerMinute": 0.26666666666666666,
+    "transactionsPerMinute": 0.26667,
   },
   Object {
-    "averageResponseTime": 303589.16279069765,
-    "impact": 21.02144244954455,
+    "averageResponseTime": 303589.16279,
+    "impact": 21.02144,
     "key": Object {
       "service.name": "opbeans-ruby",
       "transaction.name": "Rack",
@@ -612,11 +612,11 @@ Array [
     "serviceName": "opbeans-ruby",
     "transactionName": "Rack",
     "transactionType": "request",
-    "transactionsPerMinute": 1.4333333333333333,
+    "transactionsPerMinute": 1.43333,
   },
   Object {
     "averageResponseTime": 1180200,
-    "impact": 28.507858596190804,
+    "impact": 28.50786,
     "key": Object {
       "service.name": "opbeans-rum",
       "transaction.name": "/products",
@@ -627,8 +627,8 @@ Array [
     "transactionsPerMinute": 0.5,
   },
   Object {
-    "averageResponseTime": 1073178.5714285714,
-    "impact": 48.390399898683754,
+    "averageResponseTime": 1073178.57143,
+    "impact": 48.3904,
     "key": Object {
       "service.name": "opbeans-rum",
       "transaction.name": "/dashboard",
@@ -636,11 +636,11 @@ Array [
     "serviceName": "opbeans-rum",
     "transactionName": "/dashboard",
     "transactionType": "page-load",
-    "transactionsPerMinute": 0.9333333333333333,
+    "transactionsPerMinute": 0.93333,
   },
   Object {
-    "averageResponseTime": 2676214.285714286,
-    "impact": 60.33667329750868,
+    "averageResponseTime": 2676214.28571,
+    "impact": 60.33667,
     "key": Object {
       "service.name": "opbeans-rum",
       "transaction.name": "/orders",
@@ -648,11 +648,11 @@ Array [
     "serviceName": "opbeans-rum",
     "transactionName": "/orders",
     "transactionType": "page-load",
-    "transactionsPerMinute": 0.4666666666666667,
+    "transactionsPerMinute": 0.46667,
   },
   Object {
-    "averageResponseTime": 928922.4347826086,
-    "impact": 68.81313564424958,
+    "averageResponseTime": 928922.43478,
+    "impact": 68.81314,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "Process completed order",
@@ -660,11 +660,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "Process completed order",
     "transactionType": "Worker",
-    "transactionsPerMinute": 1.5333333333333334,
+    "transactionsPerMinute": 1.53333,
   },
   Object {
-    "averageResponseTime": 1012219.0930232558,
-    "impact": 70.09342088866295,
+    "averageResponseTime": 1012219.09302,
+    "impact": 70.09342,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "Process payment",
@@ -672,11 +672,11 @@ Array [
     "serviceName": "opbeans-node",
     "transactionName": "Process payment",
     "transactionType": "Worker",
-    "transactionsPerMinute": 1.4333333333333333,
+    "transactionsPerMinute": 1.43333,
   },
   Object {
-    "averageResponseTime": 126010.60833333334,
-    "impact": 73.05405786950051,
+    "averageResponseTime": 126010.60833,
+    "impact": 73.05406,
     "key": Object {
       "service.name": "opbeans-python",
       "transaction.name": "opbeans.tasks.update_stats",
@@ -687,8 +687,8 @@ Array [
     "transactionsPerMinute": 12,
   },
   Object {
-    "averageResponseTime": 1041680.2444444444,
-    "impact": 75.48871418577934,
+    "averageResponseTime": 1041680.24444,
+    "impact": 75.48871,
     "key": Object {
       "service.name": "opbeans-node",
       "transaction.name": "Update shipping status",

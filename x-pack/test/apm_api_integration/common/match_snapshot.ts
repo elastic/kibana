@@ -13,6 +13,7 @@ import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { Suite, Test } from 'mocha';
 import { flatten } from 'lodash';
+import { roundNumbers } from './utils/round_number';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -185,10 +186,12 @@ export function expectSnapshot(received: any) {
     throw new Error('A current Mocha context is needed to match snapshots');
   }
 
+  const _received = roundNumbers(received);
+
   return {
-    toMatch: expectToMatchSnapshot.bind(null, testContext.snapshotContext, received),
+    toMatch: expectToMatchSnapshot.bind(null, testContext.snapshotContext, _received),
     // use bind to support optional 3rd argument (actual)
-    toMatchInline: expectToMatchInlineSnapshot.bind(null, testContext.snapshotContext, received),
+    toMatchInline: expectToMatchInlineSnapshot.bind(null, testContext.snapshotContext, _received),
   };
 }
 

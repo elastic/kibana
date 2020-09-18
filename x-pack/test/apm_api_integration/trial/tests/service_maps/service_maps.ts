@@ -163,8 +163,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "service.environment": "testing",
                 "service.name": "opbeans-go",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 3933482.1764705875,
-                  "anomalyScore": 2.6101702751482714,
+                  "actualValue": 3933482.17647,
+                  "anomalyScore": 2.61017,
                   "healthStatus": "healthy",
                   "jobId": "apm-testing-d457-high_mean_transaction_duration",
                   "transactionType": "request",
@@ -178,8 +178,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "service.environment": "production",
                 "service.name": "opbeans-ruby",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 684716.5813953485,
-                  "anomalyScore": 0.20498907719907372,
+                  "actualValue": 684716.5814,
+                  "anomalyScore": 0.20499,
                   "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",
