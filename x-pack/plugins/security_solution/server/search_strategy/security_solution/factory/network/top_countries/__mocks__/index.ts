@@ -8,9 +8,9 @@ import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/dat
 
 import {
   Direction,
-  NetworkTopCountriesRequestOptions,
-  NetworkQueries,
   FlowTargetSourceDest,
+  NetworkQueries,
+  NetworkTopCountriesRequestOptions,
   NetworkTopTablesFields,
 } from '../../../../../../../common/search_strategy';
 
@@ -54,7 +54,60 @@ export const formattedSearchStrategyResponse = {
   edges: [],
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "top_countries_count": {\n        "cardinality": {\n          "field": "destination.geo.country_iso_code"\n        }\n      },\n      "destination": {\n        "terms": {\n          "field": "destination.geo.country_iso_code",\n          "size": 10,\n          "order": {\n            "bytes_in": "desc"\n          }\n        },\n        "aggs": {\n          "bytes_in": {\n            "sum": {\n              "field": "source.bytes"\n            }\n          },\n          "bytes_out": {\n            "sum": {\n              "field": "destination.bytes"\n            }\n          },\n          "flows": {\n            "cardinality": {\n              "field": "network.community_id"\n            }\n          },\n          "source_ips": {\n            "cardinality": {\n              "field": "source.ip"\n            }\n          },\n          "destination_ips": {\n            "cardinality": {\n              "field": "destination.ip"\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-13T09:58:58.637Z",\n                "lte": "2020-09-14T09:58:58.637Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    }\n  },\n  "size": 0,\n  "track_total_hits": false\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              top_countries_count: { cardinality: { field: 'destination.geo.country_iso_code' } },
+              destination: {
+                terms: {
+                  field: 'destination.geo.country_iso_code',
+                  size: 10,
+                  order: { bytes_in: 'desc' },
+                },
+                aggs: {
+                  bytes_in: { sum: { field: 'source.bytes' } },
+                  bytes_out: { sum: { field: 'destination.bytes' } },
+                  flows: { cardinality: { field: 'network.community_id' } },
+                  source_ips: { cardinality: { field: 'source.ip' } },
+                  destination_ips: { cardinality: { field: 'destination.ip' } },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-13T09:58:58.637Z',
+                        lte: '2020-09-14T09:58:58.637Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          size: 0,
+          track_total_hits: false,
+        },
+        null,
+        2
+      ),
     ],
   },
   pageInfo: { activePage: 0, fakeTotalCount: 0, showMorePagesIndicator: false },
@@ -90,7 +143,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
           {
             range: {
               '@timestamp': {
