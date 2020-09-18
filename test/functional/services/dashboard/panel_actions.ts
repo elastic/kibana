@@ -79,6 +79,9 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async clickEdit() {
       log.debug('clickEdit');
+      await this.openContextMenu();
+      const isActionVisible = await testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.waitForTopNavToBeVisible();
@@ -102,6 +105,8 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
     async removePanel() {
       log.debug('removePanel');
       await this.openContextMenu();
+      const isPanelActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
+      if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 

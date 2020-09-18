@@ -63,87 +63,83 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.expectMissingRemovePanelAction();
     });
 
-    /*
-      it('are shown in edit mode', async function () {
-        await PageObjects.dashboard.switchToEditMode();
+    it('are shown in edit mode', async function () {
+      await PageObjects.dashboard.switchToEditMode();
 
-        const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
-        expect(isContextMenuIconVisible).to.equal(true);
-        await dashboardPanelActions.openContextMenu();
-        await dashboardPanelActions.expectExistsEditPanelAction();
-        await dashboardPanelActions.expectExistsDuplicatePanelAction();
+      const isContextMenuIconVisible = await dashboardPanelActions.isContextMenuIconVisible();
+      expect(isContextMenuIconVisible).to.equal(true);
 
-        await dashboardPanelActions.clickContextMenuMoreItem();
-        await dashboardPanelActions.expectExistsReplacePanelAction();
-        await dashboardPanelActions.expectExistsRemovePanelAction();
-      });
+      await dashboardPanelActions.expectExistsEditPanelAction();
+      await dashboardPanelActions.expectExistsClonePanelAction();
+      await dashboardPanelActions.expectExistsReplacePanelAction();
+      await dashboardPanelActions.expectExistsRemovePanelAction();
+    });
 
-      // Based off an actual bug encountered in a PR where a hard refresh in edit mode did not show the edit mode
-      // controls.
-      it('are shown in edit mode after a hard refresh', async () => {
-        const currentUrl = await browser.getCurrentUrl();
-        // the second parameter of true will include the timestamp in the url and trigger a hard refresh.
-        await browser.get(currentUrl.toString(), true);
+    it('are shown in edit mode after a hard refresh', async () => {
+      // Based off an actual bug encountered in a PR where a hard refresh in
+      // edit mode did not show the edit mode controls.
+      const currentUrl = await browser.getCurrentUrl();
+      // The second parameter of true will include the timestamp in the url and
+      // trigger a hard refresh.
+      await browser.get(currentUrl.toString(), true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await dashboardPanelActions.expectExistsEditPanelAction();
+      await dashboardPanelActions.expectExistsClonePanelAction();
+      await dashboardPanelActions.expectExistsReplacePanelAction();
+      await dashboardPanelActions.expectExistsRemovePanelAction();
+
+      // Get rid of the timestamp in the url.
+      await browser.get(currentUrl.toString(), false);
+    });
+
+    describe('visualization object edit menu', () => {
+      it('opens a visualization when edit link is clicked', async () => {
+        await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
+      });
 
+      it('deletes the visualization when delete link is clicked', async () => {
+        await PageObjects.header.clickDashboard();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await dashboardPanelActions.removePanel();
+
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.be(0);
+      });
+    });
+
+    /*
+    describe('on an expanded panel', function () {
+      before(async () => {
+        await renderable.waitForRender();
+        await PageObjects.dashboard.saveDashboard(dashboardName);
         await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.clickExpandPanelToggle();
+      });
+
+      it('are hidden in view mode', async function () {
+        await dashboardPanelActions.expectMissingEditPanelAction();
+        await dashboardPanelActions.expectMissingDuplicatePanelAction();
+        await dashboardPanelActions.expectMissingReplacePanelAction();
+        await dashboardPanelActions.expectMissingRemovePanelAction();
+      });
+      it('in edit mode hides remove icons ', async function () {
+        await PageObjects.dashboard.switchToEditMode();
         await dashboardPanelActions.expectExistsEditPanelAction();
-        await dashboardPanelActions.expectExistsDuplicatePanelAction();
-
-        await dashboardPanelActions.clickContextMenuMoreItem();
+        await dashboardPanelActions.expectExistsClonePanelAction();
         await dashboardPanelActions.expectExistsReplacePanelAction();
-        await dashboardPanelActions.expectExistsRemovePanelAction();
-
-        // Get rid of the timestamp in the url.
-        await browser.get(currentUrl.toString(), false);
+        await dashboardPanelActions.expectMissingRemovePanelAction();
       });
-
-      describe('on an expanded panel', function () {
-        it('are hidden in view mode', async function () {
-          await renderable.waitForRender();
-          await PageObjects.dashboard.saveDashboard(dashboardName);
-          await dashboardPanelActions.openContextMenu();
-          await dashboardPanelActions.clickExpandPanelToggle();
-          await dashboardPanelActions.openContextMenu();
-          await dashboardPanelActions.expectMissingEditPanelAction();
-          await dashboardPanelActions.expectMissingDuplicatePanelAction();
-
-          await dashboardPanelActions.clickContextMenuMoreItem();
-          await dashboardPanelActions.expectMissingReplacePanelAction();
-          await dashboardPanelActions.expectMissingRemovePanelAction();
-        });
-
-        it('in edit mode hides remove icons ', async function () {
-          await PageObjects.dashboard.switchToEditMode();
-          await dashboardPanelActions.openContextMenu();
-          await dashboardPanelActions.expectExistsEditPanelAction();
-          await dashboardPanelActions.expectExistsDuplicatePanelAction();
-
-          await dashboardPanelActions.clickContextMenuMoreItem();
-          await dashboardPanelActions.expectExistsReplacePanelAction();
-          await dashboardPanelActions.expectMissingRemovePanelAction();
-          await dashboardPanelActions.clickExpandPanelToggle();
-        });
+      after(async () => {
+        await dashboardPanelActions.clickExpandPanelToggle();
       });
+    });
+     */
+    /*
 
-      describe('visualization object edit menu', () => {
-        it('opens a visualization when edit link is clicked', async () => {
-          await dashboardPanelActions.openContextMenu();
-          await dashboardPanelActions.clickEdit();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const currentUrl = await browser.getCurrentUrl();
-          expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
-        });
-
-        it('deletes the visualization when delete link is clicked', async () => {
-          await PageObjects.header.clickDashboard();
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await dashboardPanelActions.removePanel();
-
-          const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.be(0);
-        });
-      });
 
       describe('saved search object edit menu', () => {
         const searchName = 'my search';
