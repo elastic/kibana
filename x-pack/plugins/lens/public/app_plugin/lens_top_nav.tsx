@@ -10,10 +10,11 @@ import { LensTopNavActions } from './types';
 
 export function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
+  showCancel: boolean;
   actions: LensTopNavActions;
   savingPermitted: boolean;
 }): TopNavMenuData[] {
-  const { showSaveAndReturn, actions, savingPermitted } = options;
+  const { showSaveAndReturn, showCancel, actions, savingPermitted } = options;
   const topNavMenu: TopNavMenuData[] = [];
   if (showSaveAndReturn) {
     topNavMenu.push({
@@ -42,7 +43,7 @@ export function getLensTopNavConfig(options: {
     disableButton: !savingPermitted,
   });
 
-  if (showSaveAndReturn) {
+  if (showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
         defaultMessage: 'cancel',

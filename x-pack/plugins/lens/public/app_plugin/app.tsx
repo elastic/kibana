@@ -436,6 +436,7 @@ export function App({
         // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
+    showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
     actions: {
       saveAndReturn: () => {
