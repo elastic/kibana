@@ -733,11 +733,7 @@ export const relatedEventTotalForProcess: (
       if (!stats) {
         return null;
       }
-      let total = 0;
-      for (const value of Object.values(stats.events.byCategory)) {
-        total += value;
-      }
-      return total;
+      return stats.events.total;
     };
   }
 );

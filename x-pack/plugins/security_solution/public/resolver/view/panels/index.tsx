@@ -17,10 +17,7 @@ import { EventDetail } from './event_detail';
 import { PanelViewAndParameters } from '../../types';
 
 /**
- *
- * This component implements the strategy laid out above by determining the "right" view and doing some other housekeeping e.g. effects to keep the UI-selected node in line with what's indicated by the URL parameters.
- *
- * @returns {JSX.Element} The "right" table content to show based on the query params as described above
+ * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)
  */
 export const PanelRouter = memo(function () {
   const params: PanelViewAndParameters = useSelector(selectors.panelViewAndParameters);

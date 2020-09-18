@@ -15,7 +15,6 @@ import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/ty
 import * as selectors from '../../store/selectors';
 import { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { PanelLoading } from './panel_loading';
 import { useLinkProps } from '../use_link_props';
 
@@ -27,7 +26,11 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
     selectors.relatedEventsStats(state)(nodeID)
   );
   if (processEvent === null || relatedEventsStats === undefined) {
-    return <PanelLoading />;
+    return (
+      <StyledPanel>
+        <PanelLoading />
+      </StyledPanel>
+    );
   } else {
     return (
       <StyledPanel>
@@ -60,29 +63,8 @@ const EventCountsForProcess = memo(function ({
     count: number;
   }
 
-  const relatedEventsState = { stats: relatedStats.events.byCategory };
   const processName = processEvent && event.processName(processEvent);
   const processEntityId = event.entityId(processEvent);
-  /**
-   * totalCount: This will reflect the aggregated total by category for all related events
-   * e.g. [dns,file],[dns,file],[registry] will have an aggregate total of 5. This is to keep the
-   * total number consistent with the "broken out" totals we see elsewhere in the app.
-   * E.g. on the rleated list by type, the above would show as:
-   * 2 dns
-   * 2 file
-   * 1 registry
-   * So it would be extremely disorienting to show the user a "3" above that as a total.
-   */
-  const totalCount = Object.values(relatedStats.events.byCategory).reduce(
-    (sum, val) => sum + val,
-    0
-  );
-  const eventsString = i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.panel.processEventCounts.events',
-    {
-      defaultMessage: 'Events',
-    }
-  );
 
   const eventLinkNavProps = useLinkProps({
     panelView: 'nodes',
@@ -100,7 +82,12 @@ const EventCountsForProcess = memo(function ({
   const crumbs = useMemo(() => {
     return [
       {
-        text: eventsString,
+        text: i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.processEventCounts.events',
+          {
+            defaultMessage: 'Events',
+          }
+        ),
         ...eventLinkNavProps,
       },
       {
@@ -111,23 +98,16 @@ const EventCountsForProcess = memo(function ({
         text: (
           <FormattedMessage
             id="xpack.securitySolution.endpoint.resolver.panel.relatedCounts.numberOfEventsInCrumb"
-            values={{ totalCount }}
+            values={{ totalCount: relatedStats.events.total }}
             defaultMessage="{totalCount} Events"
           />
         ),
         ...nodeDetailNavProps,
       },
     ];
-  }, [
-    processName,
-    totalCount,
-    eventsString,
-    eventLinkNavProps,
-    nodeDetailNavProps,
-    processDetailNavProps,
-  ]);
+  }, [relatedStats, processName, eventLinkNavProps, nodeDetailNavProps, processDetailNavProps]);
   const rows = useMemo(() => {
-    return Object.entries(relatedEventsState.stats).map(
+    return Object.entries(relatedStats.events.byCategory).map(
       ([eventType, count]): EventCountsTableView => {
         return {
           name: eventType,
@@ -135,7 +115,7 @@ const EventCountsForProcess = memo(function ({
         };
       }
     );
-  }, [relatedEventsState]);
+  }, [relatedStats]);
 
   const eventDetailNavProps = useLinkProps({
     panelView: 'eventDetail',

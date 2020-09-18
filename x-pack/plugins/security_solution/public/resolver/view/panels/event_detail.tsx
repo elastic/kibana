@@ -90,31 +90,14 @@ export const EventDetail = memo(function ({
     selectors.processEventForID(state)(nodeID)
   );
 
-  const relatedEventsStats = useSelector((state: ResolverState) =>
-    selectors.relatedEventsStats(state)(nodeID)
-  );
-  const countForParent: number = Object.values(relatedEventsStats?.events.byCategory || {}).reduce(
-    (sum, val) => sum + val,
-    0
-  );
-  const processName = (parentEvent && event.processName(parentEvent)) || '*';
-  const processEntityId = (parentEvent && event.entityId(parentEvent)) || '';
-  const totalCount = countForParent || 0;
-  const eventsString = i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
-    {
-      defaultMessage: 'Events',
-    }
-  );
-  const naString = i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.NA',
-    {
-      defaultMessage: 'N/A',
-    }
+  const totalCount = useSelector(
+    (state: ResolverState) => selectors.relatedEventsStats(state)(nodeID)?.events.total
   );
 
+  const processName = parentEvent ? event.processName(parentEvent) : null;
+
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
-  const relatedsReady = relatedsReadyMap.get(processEntityId!);
+  const relatedsReady = relatedsReadyMap.get(nodeID!);
   const dispatch = useResolverDispatch();
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
@@ -125,22 +108,23 @@ export const EventDetail = memo(function ({
    * to request them.
    */
   useEffect(() => {
-    if (
-      typeof relatedsReady === 'undefined' &&
-      processEntityId !== null &&
-      processEntityId !== undefined
-    ) {
+    if (typeof relatedsReady === 'undefined' && nodeID !== null && nodeID !== undefined) {
       dispatch({
         type: 'appDetectedMissingEventData',
-        payload: processEntityId,
+        payload: nodeID,
       });
     }
-  }, [relatedsReady, dispatch, processEntityId]);
+  }, [relatedsReady, dispatch, nodeID]);
 
   const [
     relatedEventToShowDetailsFor,
     countBySameCategory,
-    relatedEventCategory = naString,
+    relatedEventCategory = i18n.translate(
+      'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.NA',
+      {
+        defaultMessage: 'N/A',
+      }
+    ),
     sections,
     formattedDate,
   ] = useSelector((state: ResolverState) =>
@@ -149,22 +133,27 @@ export const EventDetail = memo(function ({
 
   const nodeDetailLinkNavProps = useLinkProps({
     panelView: 'nodeDetail',
-    panelParameters: { nodeID: processEntityId },
+    panelParameters: { nodeID },
   });
 
   const nodeEventsLinkNavProps = useLinkProps({
     panelView: 'nodeEvents',
-    panelParameters: { nodeID: processEntityId },
+    panelParameters: { nodeID },
   });
 
   const nodeEventsOfTypeLinkNavProps = useLinkProps({
     panelView: 'nodeEventsOfType',
-    panelParameters: { nodeID: processEntityId, eventType: relatedEventCategory },
+    panelParameters: { nodeID, eventType: relatedEventCategory },
   });
   const crumbs = useMemo(() => {
     return [
       {
-        text: eventsString,
+        text: i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
+          {
+            defaultMessage: 'Events',
+          }
+        ),
         ...nodesLinkNavProps,
       },
       {
@@ -206,9 +195,8 @@ export const EventDetail = memo(function ({
       },
     ];
   }, [
-    processName,
-    eventsString,
     totalCount,
+    processName,
     countBySameCategory,
     relatedEventCategory,
     relatedEventToShowDetailsFor,

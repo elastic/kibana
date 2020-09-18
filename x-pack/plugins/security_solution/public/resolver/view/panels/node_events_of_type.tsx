@@ -16,12 +16,11 @@ import { StyledPanel } from '../styles';
 import { formatDate, BoldCode, StyledTime } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
-import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
+import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { RelatedEventLimitWarning } from '../limit_warnings';
 import { ResolverState } from '../../types';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { useRelatedEventDetailNavigation } from '../use_related_event_detail_navigation';
 import { PanelLoading } from './panel_loading';
 import { DescriptiveName } from './descriptive_name';
@@ -135,18 +134,22 @@ export function NodeEventsOfType({ nodeID, eventType }: { nodeID: string; eventT
   const processEvent = useSelector((state: ResolverState) =>
     selectors.processEventForID(state)(nodeID)
   );
-  const relatedEventsStats = useSelector((state: ResolverState) =>
-    selectors.relatedEventsStats(state)(nodeID)
+  const eventCount = useSelector(
+    (state: ResolverState) => selectors.relatedEventsStats(state)(nodeID)?.events.total
   );
 
   return (
     <StyledPanel>
-      <NodeEventList
-        processEvent={processEvent}
-        eventType={eventType}
-        relatedStats={relatedEventsStats}
-        nodeID={nodeID}
-      />
+      {eventCount === undefined || processEvent === null ? (
+        <PanelLoading />
+      ) : (
+        <NodeEventList
+          processEvent={processEvent}
+          eventType={eventType}
+          eventCount={eventCount}
+          nodeID={nodeID}
+        />
+      )}
     </StyledPanel>
   );
 }
@@ -154,12 +157,12 @@ export function NodeEventsOfType({ nodeID, eventType }: { nodeID: string; eventT
 const NodeEventList = memo(function ({
   processEvent,
   eventType,
-  relatedStats,
+  eventCount,
   nodeID,
 }: {
   processEvent: ResolverEvent | null;
   eventType: string;
-  relatedStats: ResolverNodeStats | undefined;
+  eventCount: number;
   nodeID: string;
 }) {
   const processName = processEvent && event.processName(processEvent);
@@ -167,9 +170,6 @@ const NodeEventList = memo(function ({
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
   });
-  const totalCount = relatedStats
-    ? Object.values(relatedStats.events.byCategory).reduce((sum, val) => sum + val, 0)
-    : 0;
   const eventsString = i18n.translate(
     'xpack.securitySolution.endpoint.resolver.panel.processEventListByType.events',
     {
@@ -241,7 +241,7 @@ const NodeEventList = memo(function ({
         text: (
           <FormattedMessage
             id="xpack.securitySolution.endpoint.resolver.panel.relatedEventList.numberOfEvents"
-            values={{ totalCount }}
+            values={{ totalCount: eventCount }}
             defaultMessage="{totalCount} Events"
           />
         ),
@@ -259,11 +259,11 @@ const NodeEventList = memo(function ({
       },
     ];
   }, [
+    eventCount,
     eventType,
     eventsString,
     matchingEventEntries.length,
     processName,
-    totalCount,
     nodeDetailNavProps,
     nodesLinkNavProps,
     nodeEventsNavProps,
