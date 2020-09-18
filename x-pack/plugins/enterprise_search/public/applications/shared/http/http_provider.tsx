@@ -11,9 +11,10 @@ import { HttpSetup } from 'src/core/public';
 
 import { HttpLogic } from './http_logic';
 
-interface IHttpProviderProps {
+export interface IHttpProviderProps {
   http: HttpSetup;
   errorConnecting?: boolean;
+  readOnlyMode?: boolean;
 }
 
 export const HttpProvider: React.FC<IHttpProviderProps> = (props) => {

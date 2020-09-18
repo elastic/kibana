@@ -10,6 +10,7 @@ import { actionsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { ActionsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { AuthenticatedUser } from '../../../security/server';
+import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 const request = {} as KibanaRequest;
 
@@ -195,7 +196,7 @@ describe('ensureAuthorized', () => {
     `);
   });
 
-  test('exempts users from requiring privileges to execute actions when shouldUseLegacyRbac is true', async () => {
+  test('exempts users from requiring privileges to execute actions when authorizationMode is Legacy', async () => {
     const { authorization, authentication } = mockSecurity();
     const checkPrivileges: jest.MockedFunction<ReturnType<
       typeof authorization.checkPrivilegesDynamicallyWithRequest
@@ -206,7 +207,7 @@ describe('ensureAuthorized', () => {
       authorization,
       authentication,
       auditLogger,
-      shouldUseLegacyRbac: true,
+      authorizationMode: AuthorizationMode.Legacy,
     });
 
     authentication.getCurrentUser.mockReturnValueOnce(({

@@ -14,13 +14,17 @@ import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
+  METRIC_CGROUP_MEMORY_USAGE_BYTES,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
+import {
+  percentCgroupMemoryUsedScript,
+  percentSystemMemoryUsedScript,
+} from '../metrics/by_agent/shared/memory';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
@@ -205,26 +209,50 @@ async function getMemoryStats({
   filter,
 }: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
   const { apmEventClient } = setup;
-  const response = await apmEventClient.search({
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...filter,
-            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-          ],
+
+  const getAvgMemoryUsage = async ({
+    additionalFilters,
+    script,
+  }: {
+    additionalFilters: ESFilter[];
+    script: typeof percentCgroupMemoryUsedScript;
+  }) => {
+    const response = await apmEventClient.search({
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [...filter, ...additionalFilters],
+          },
+        },
+        aggs: {
+          avgMemoryUsage: { avg: { script } },
         },
       },
-      aggs: { avgMemoryUsage: { avg: { script: percentMemoryUsedScript } } },
-    },
+    });
+
+    return response.aggregations?.avgMemoryUsage.value ?? null;
+  };
+
+  let avgMemoryUsage = await getAvgMemoryUsage({
+    additionalFilters: [
+      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+    ],
+    script: percentCgroupMemoryUsedScript,
   });
 
-  return {
-    avgMemoryUsage: response.aggregations?.avgMemoryUsage.value ?? null,
-  };
+  if (!avgMemoryUsage) {
+    avgMemoryUsage = await getAvgMemoryUsage({
+      additionalFilters: [
+        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+      ],
+      script: percentSystemMemoryUsedScript,
+    });
+  }
+
+  return { avgMemoryUsage };
 }

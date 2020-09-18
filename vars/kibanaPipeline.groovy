@@ -1,4 +1,4 @@
-def withPostBuildReporting(Closure closure) {
+def withPostBuildReporting(Map params, Closure closure) {
   try {
     closure()
   } finally {
@@ -9,8 +9,10 @@ def withPostBuildReporting(Closure closure) {
       print ex
     }
 
-    catchErrors {
-      runErrorReporter([pwd()] + parallelWorkspaces)
+    if (params.runErrorReporter) {
+      catchErrors {
+        runErrorReporter([pwd()] + parallelWorkspaces)
+      }
     }
 
     catchErrors {

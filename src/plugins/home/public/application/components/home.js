@@ -163,7 +163,10 @@ export class Home extends Component {
                   </EuiFlexItem>
 
                   {stackManagement ? (
-                    <EuiFlexItem className="homHeader__actionItem">
+                    <EuiFlexItem
+                      className="homHeader__actionItem"
+                      data-test-subj="homManagementActionItem"
+                    >
                       <EuiButtonEmpty
                         onClick={createAppNavigationHandler(stackManagement.path)}
                         iconType="gear"
