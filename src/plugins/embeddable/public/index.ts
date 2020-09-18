@@ -78,6 +78,8 @@ export {
   EmbeddableRendererProps,
 } from './lib';
 
+export { EnhancementRegistryDefinition } from './types';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
