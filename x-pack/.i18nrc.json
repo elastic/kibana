@@ -49,7 +49,7 @@
     "xpack.server": "legacy/server",
     "xpack.securitySolution": "plugins/security_solution",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
-    "xpack.spaces": ["legacy/plugins/spaces", "plugins/spaces"],
+    "xpack.spaces": "plugins/spaces",
     "xpack.taskManager": "legacy/plugins/task_manager",
     "xpack.transform": "plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",

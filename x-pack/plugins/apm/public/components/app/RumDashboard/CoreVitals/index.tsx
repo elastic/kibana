@@ -28,7 +28,7 @@ export function CoreVitals({ data, loading }: Props) {
       <EuiFlexItem>
         <CoreVitalItem
           title={LCP_LABEL}
-          value={lcp ? lcp + 's' : '0'}
+          value={lcp ? lcp + ' s' : '0'}
           ranks={lcpRanks}
           loading={loading}
           thresholds={CoreVitalsThresholds.LCP}
@@ -37,7 +37,7 @@ export function CoreVitals({ data, loading }: Props) {
       <EuiFlexItem>
         <CoreVitalItem
           title={FID_LABEL}
-          value={fid ? fid + 's' : '0'}
+          value={fid ? fid + ' s' : '0'}
           ranks={fidRanks}
           loading={loading}
           thresholds={CoreVitalsThresholds.FID}
