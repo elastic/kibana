@@ -201,6 +201,11 @@ export class AttributeService<
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
 
+          // Remove unneeded attributes from the original input.
+          delete (input as { [ATTRIBUTE_SERVICE_KEY]?: SavedObjectAttributes })[
+            ATTRIBUTE_SERVICE_KEY
+          ];
+
           // Combine input and wrapped input to preserve any passed in explicit Input.
           resolve({ ...input, ...wrappedInput });
           return { id: wrappedInput.savedObjectId };
