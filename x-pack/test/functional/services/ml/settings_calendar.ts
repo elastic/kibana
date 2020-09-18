@@ -124,7 +124,7 @@ export function MachineLearningSettingsCalendarProvider(
       await testSubjects.existOrFail('mlPageCalendarEdit');
     },
 
-    async assertApplyToAllJobsSwitchCheckedState(expectedValue: boolean) {
+    async assertApplyToAllJobsSwitchEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlCalendarApplyToAllJobsSwitch');
       expect(isEnabled).to.eql(
         expectedValue,
@@ -257,7 +257,7 @@ export function MachineLearningSettingsCalendarProvider(
       if ((await this.getApplyToAllJobsSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
           await testSubjects.clickWhenNotDisabled(subj);
-          await this.assertApplyToAllJobsSwitchCheckedState(toggle);
+          await this.assertApplyToAllJobsSwitchEnabled(toggle);
         });
       }
     },
@@ -297,11 +297,6 @@ export function MachineLearningSettingsCalendarProvider(
         clearWithKeyboard: true,
       });
       await this.assertCalendarEventDescriptionValue(eventDescription);
-    },
-
-    async createNewCalendarEvent(eventDescription: string) {
-      await this.openNewCalendarEventForm();
-      await this.setCalendarEventDescription(eventDescription);
     },
 
     async cancelNewCalendarEvent() {

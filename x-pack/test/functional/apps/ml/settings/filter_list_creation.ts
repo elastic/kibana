@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToSettings();
       await ml.settings.navigateToFilterListsManagement();
 
-      await ml.testExecution.logTestStep('filter list creation creates new filter lists');
       await ml.testExecution.logTestStep('filter list creation loads the filter creation page');
       await ml.settingsFilterList.navigateToFilterListCreationPage();
 
