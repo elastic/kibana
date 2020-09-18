@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
+export * from './determine_allocation_type';
 
-export * from './policies';
+export * from './check_phase_compatibility';
