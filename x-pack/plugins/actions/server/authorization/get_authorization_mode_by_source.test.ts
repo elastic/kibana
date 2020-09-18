@@ -3,88 +3,93 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { shouldLegacyRbacApplyBySource } from './should_legacy_rbac_apply_by_source';
+import {
+  getAuthorizationModeBySource,
+  AuthorizationMode,
+} from './get_authorization_mode_by_source';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import uuid from 'uuid';
 import { asSavedObjectExecutionSource } from '../lib';
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
-describe(`#shouldLegacyRbacApplyBySource`, () => {
-  test('should return false if no source is provided', async () => {
-    expect(await shouldLegacyRbacApplyBySource(unsecuredSavedObjectsClient)).toEqual(false);
+describe(`#getAuthorizationModeBySource`, () => {
+  test('should return RBAC if no source is provided', async () => {
+    expect(await getAuthorizationModeBySource(unsecuredSavedObjectsClient)).toEqual(
+      AuthorizationMode.RBAC
+    );
   });
 
-  test('should return false if source is not an alert', async () => {
+  test('should return RBAC if source is not an alert', async () => {
     expect(
-      await shouldLegacyRbacApplyBySource(
+      await getAuthorizationModeBySource(
         unsecuredSavedObjectsClient,
         asSavedObjectExecutionSource({
           type: 'action',
           id: uuid.v4(),
         })
       )
-    ).toEqual(false);
+    ).toEqual(AuthorizationMode.RBAC);
   });
 
-  test('should return false if source alert is not marked as legacy', async () => {
+  test('should return RBAC if source alert is not marked as legacy', async () => {
     const id = uuid.v4();
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAlert({ id }));
     expect(
-      await shouldLegacyRbacApplyBySource(
+      await getAuthorizationModeBySource(
         unsecuredSavedObjectsClient,
         asSavedObjectExecutionSource({
           type: 'alert',
           id,
         })
       )
-    ).toEqual(false);
+    ).toEqual(AuthorizationMode.RBAC);
   });
 
-  test('should return true if source alert is marked as legacy', async () => {
+  test('should return Legacy if source alert is marked as legacy', async () => {
     const id = uuid.v4();
     unsecuredSavedObjectsClient.get.mockResolvedValue(
       mockAlert({ id, attributes: { meta: { versionApiKeyLastmodified: 'pre-7.10.0' } } })
     );
     expect(
-      await shouldLegacyRbacApplyBySource(
+      await getAuthorizationModeBySource(
         unsecuredSavedObjectsClient,
         asSavedObjectExecutionSource({
           type: 'alert',
           id,
         })
       )
-    ).toEqual(true);
+    ).toEqual(AuthorizationMode.Legacy);
   });
 
-  test('should return false if source alert is marked as modern', async () => {
+  test('should return RBAC if source alert is marked as modern', async () => {
     const id = uuid.v4();
     unsecuredSavedObjectsClient.get.mockResolvedValue(
       mockAlert({ id, attributes: { meta: { versionApiKeyLastmodified: '7.10.0' } } })
     );
     expect(
-      await shouldLegacyRbacApplyBySource(
+      await getAuthorizationModeBySource(
         unsecuredSavedObjectsClient,
         asSavedObjectExecutionSource({
           type: 'alert',
           id,
         })
       )
-    ).toEqual(false);
+    ).toEqual(AuthorizationMode.RBAC);
   });
 
-  test('should return false if source alert is marked with a last modified version', async () => {
+  test('should return RBAC if source alert doesnt have a last modified version', async () => {
     const id = uuid.v4();
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAlert({ id, attributes: { meta: {} } }));
     expect(
-      await shouldLegacyRbacApplyBySource(
+      await getAuthorizationModeBySource(
         unsecuredSavedObjectsClient,
         asSavedObjectExecutionSource({
           type: 'alert',
           id,
         })
       )
-    ).toEqual(false);
+    ).toEqual(AuthorizationMode.RBAC);
   });
 });
 
