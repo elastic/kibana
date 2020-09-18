@@ -24,6 +24,7 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import {
+  ElasticsearchClient,
   IRouter,
   LegacyAPICaller,
   MetricsServiceSetup,
@@ -37,6 +38,22 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMe
 });
 
 const SNAPSHOT_REGEX = /-snapshot/i;
+
+export interface ESClusterInfo {
+  cluster_uuid: string;
+  cluster_name: string;
+  version: {
+    number: string;
+    build_flavor: string;
+    build_type: string;
+    build_hash: string;
+    build_date: string;
+    build_snapshot?: boolean;
+    lucene_version: string;
+    minimum_wire_compatibility_version: string;
+    minimum_index_compatibility_version: string;
+  };
+}
 
 export function registerStatsRoute({
   router,
@@ -61,13 +78,21 @@ export function registerStatsRoute({
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
 }) {
-  const getUsage = async (callCluster: LegacyAPICaller): Promise<any> => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster);
+  const getUsage = async (
+    callCluster: LegacyAPICaller,
+    esClient: ElasticsearchClient
+  ): Promise<any> => {
+    const usage = await collectorSet.bulkFetchUsage(callCluster, esClient);
     return collectorSet.toObject(usage);
   };
 
-  const getClusterUuid = async (callCluster: LegacyAPICaller): Promise<string> => {
-    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
+  // const getClusterUuid = async (callCluster: LegacyAPICaller): Promise<string> => {
+  //   const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
+  //   return uuid;
+  // };
+  const getClusterUuid = async (esClient: ElasticsearchClient): Promise<string> => {
+    const result = await esClient.info<ESClusterInfo>();
+    const { cluster_uuid: uuid } = result.body;
     return uuid;
   };
 
@@ -96,14 +121,15 @@ export function registerStatsRoute({
       let extended;
       if (isExtended) {
         const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
         const collectorsReady = await collectorSet.areAllCollectorsReady();
 
         if (shouldGetUsage && !collectorsReady) {
           return res.customError({ statusCode: 503, body: { message: STATS_NOT_READY_MESSAGE } });
         }
 
-        const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
-        const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(callCluster)]);
+        const usagePromise = shouldGetUsage ? getUsage(callCluster, esClient) : Promise.resolve({});
+        const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(esClient)]);
 
         let modifiedUsage = usage;
         if (isLegacy) {
