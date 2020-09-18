@@ -13,21 +13,20 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const kibanaVersionAccessor = kibanaServer.version;
-  let kibanaVersion: string;
 
   describe('fleet upgrade agent', () => {
     skipIfNoDockerRegistry(providerContext);
     setupIngest(providerContext);
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
-      kibanaVersion = await kibanaVersionAccessor.get();
     });
     after(async () => {
       await esArchiver.unload('fleet/agents');
     });
 
     it('should respond 200 to upgrade agent with valid parameters', async () => {
+      const kibanaVersionAccessor = kibanaServer.version;
+      const kibanaVersion = await kibanaVersionAccessor.get();
       await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/upgrade`)
         .set('kbn-xsrf', 'xxx')
