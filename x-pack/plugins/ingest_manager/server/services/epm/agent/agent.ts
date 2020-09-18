@@ -6,12 +6,14 @@
 
 import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
-import { DatasourceConfigRecord } from '../../../../common';
+import { PackagePolicyConfigRecord } from '../../../../common';
 
-export function createStream(variables: DatasourceConfigRecord, streamTemplate: string) {
+const handlebars = Handlebars.create();
+
+export function createStream(variables: PackagePolicyConfigRecord, streamTemplate: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables, streamTemplate);
 
-  const template = Handlebars.compile(streamTemplate, { noEscape: true });
+  const template = handlebars.compile(streamTemplate, { noEscape: true });
   let stream = template(vars);
   stream = replaceRootLevelYamlVariables(yamlValues, stream);
 
@@ -52,7 +54,7 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: DatasourceConfigRecord, streamTemplate: string) {
+function buildTemplateVariables(variables: PackagePolicyConfigRecord, streamTemplate: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
@@ -86,6 +88,16 @@ function buildTemplateVariables(variables: DatasourceConfigRecord, streamTemplat
 
   return { vars, yamlValues };
 }
+
+function containsHelper(this: any, item: string, list: string[], options: any) {
+  if (Array.isArray(list) && list.includes(item)) {
+    if (options && options.fn) {
+      return options.fn(this);
+    }
+  }
+  return '';
+}
+handlebars.registerHelper('contains', containsHelper);
 
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {

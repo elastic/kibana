@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
+
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -57,6 +58,26 @@ export default function ({ getService }: FtrProviderContext) {
               transformFilterAggTypeSelector: 'term',
               transformFilterTermValueSelector: 'New York',
             },
+            subAggs: [
+              {
+                identifier: 'max(products.base_price)',
+                label: 'products.base_price.max',
+              },
+              {
+                identifier: 'filter(customer_gender)',
+                label: 'customer_gender.filter',
+                form: {
+                  transformFilterAggTypeSelector: 'term',
+                  transformFilterTermValueSelector: 'FEMALE',
+                },
+                subAggs: [
+                  {
+                    identifier: 'avg(taxful_total_price)',
+                    label: 'taxful_total_price.avg',
+                  },
+                ],
+              },
+            ],
           },
         ],
         transformId: `ec_1_${Date.now()}`,
@@ -87,10 +108,31 @@ export default function ({ getService }: FtrProviderContext) {
                   field: 'products.base_price',
                 },
               },
-              'geoip.city_name.filter': {
+              'New York': {
                 filter: {
                   term: {
                     'geoip.city_name': 'New York',
+                  },
+                },
+                aggs: {
+                  'products.base_price.max': {
+                    max: {
+                      field: 'products.base_price',
+                    },
+                  },
+                  FEMALE: {
+                    filter: {
+                      term: {
+                        customer_gender: 'FEMALE',
+                      },
+                    },
+                    aggs: {
+                      'taxful_total_price.avg': {
+                        avg: {
+                          field: 'taxful_total_price',
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -101,14 +143,30 @@ export default function ({ getService }: FtrProviderContext) {
             values: [`Men's Accessories`],
           },
           row: {
-            status: 'stopped',
+            status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
           },
           indexPreview: {
-            columns: 20,
+            columns: 10,
             rows: 5,
           },
+          histogramCharts: [
+            { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'currency', legend: '1 category' },
+            {
+              chartAvailable: false,
+              id: 'customer_birth_date',
+              legend: '0 documents contain field.',
+            },
+            { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
+            { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'customer_gender', legend: '2 categories' },
+            { chartAvailable: true, id: 'customer_id', legend: 'top 20 of 46 categories' },
+            { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
+            { chartAvailable: true, id: 'customer_phone', legend: '1 category' },
+            { chartAvailable: true, id: 'day_of_week', legend: '7 categories' },
+          ],
         },
       },
       {
@@ -131,6 +189,12 @@ export default function ({ getService }: FtrProviderContext) {
             form: {
               transformFilterAggTypeSelector: 'exists',
             },
+            subAggs: [
+              {
+                identifier: 'max(products.discount_amount)',
+                label: 'products.discount_amount.max',
+              },
+            ],
           },
         ],
         transformId: `ec_2_${Date.now()}`,
@@ -162,6 +226,13 @@ export default function ({ getService }: FtrProviderContext) {
                     field: 'customer_phone',
                   },
                 },
+                aggs: {
+                  'products.discount_amount.max': {
+                    max: {
+                      field: 'products.discount_amount',
+                    },
+                  },
+                },
               },
             },
           },
@@ -170,14 +241,15 @@ export default function ({ getService }: FtrProviderContext) {
             values: ['AE', 'CO', 'EG', 'FR', 'GB'],
           },
           row: {
-            status: 'stopped',
+            status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
           },
           indexPreview: {
-            columns: 20,
+            columns: 10,
             rows: 5,
           },
+          histogramCharts: [],
         },
       },
     ];
@@ -186,56 +258,57 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
+          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
-        it('loads the home page', async () => {
+        it('loads the wizard for the source data', async () => {
+          await transform.testExecution.logTestStep('loads the home page');
           await transform.navigation.navigateTo();
           await transform.management.assertTransformListPageExists();
-        });
 
-        it('displays the stats bar', async () => {
+          await transform.testExecution.logTestStep('displays the stats bar');
           await transform.management.assertTransformStatsBarExists();
-        });
 
-        it('loads the source selection modal', async () => {
+          await transform.testExecution.logTestStep('loads the source selection modal');
           await transform.management.startTransformCreation();
-        });
 
-        it('selects the source data', async () => {
+          await transform.testExecution.logTestStep('selects the source data');
           await transform.sourceSelection.selectSource(testData.source);
         });
 
-        it('displays the define pivot step', async () => {
+        it('navigates through the wizard and sets all needed fields', async () => {
+          await transform.testExecution.logTestStep('displays the define pivot step');
           await transform.wizard.assertDefineStepActive();
-        });
 
-        it('loads the index preview', async () => {
+          await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
-        });
 
-        it('shows the index preview', async () => {
+          await transform.testExecution.logTestStep('shows the index preview');
           await transform.wizard.assertIndexPreview(
             testData.expected.indexPreview.columns,
             testData.expected.indexPreview.rows
           );
-        });
 
-        it('displays an empty pivot preview', async () => {
+          await transform.testExecution.logTestStep('displays an empty pivot preview');
           await transform.wizard.assertPivotPreviewEmpty();
-        });
 
-        it('displays the query input', async () => {
+          await transform.testExecution.logTestStep('displays the query input');
           await transform.wizard.assertQueryInputExists();
           await transform.wizard.assertQueryValue('');
-        });
 
-        it('displays the advanced query editor switch', async () => {
+          await transform.testExecution.logTestStep('displays the advanced query editor switch');
           await transform.wizard.assertAdvancedQueryEditorSwitchExists();
           await transform.wizard.assertAdvancedQueryEditorSwitchCheckState(false);
-        });
 
-        it('adds the group by entries', async () => {
+          await transform.testExecution.logTestStep('enables the index preview histogram charts');
+          await transform.wizard.enableIndexPreviewHistogramCharts();
+
+          await transform.testExecution.logTestStep('displays the index preview histogram charts');
+          await transform.wizard.assertIndexPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
+
+          await transform.testExecution.logTestStep('adds the group by entries');
           for (const [index, entry] of testData.groupByEntries.entries()) {
             await transform.wizard.assertGroupByInputExists();
             await transform.wizard.assertGroupByInputValue([]);
@@ -246,120 +319,98 @@ export default function ({ getService }: FtrProviderContext) {
               entry.intervalLabel
             );
           }
-        });
 
-        it('adds the aggregation entries', async () => {
-          for (const [index, agg] of testData.aggregationEntries.entries()) {
-            await transform.wizard.assertAggregationInputExists();
-            await transform.wizard.assertAggregationInputValue([]);
-            await transform.wizard.addAggregationEntry(index, agg.identifier, agg.label, agg.form);
-          }
-        });
+          await transform.testExecution.logTestStep('adds the aggregation entries');
+          await transform.wizard.addAggregationEntries(testData.aggregationEntries);
 
-        it('displays the advanced pivot editor switch', async () => {
+          await transform.testExecution.logTestStep('displays the advanced pivot editor switch');
           await transform.wizard.assertAdvancedPivotEditorSwitchExists();
           await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
-        });
 
-        it('displays the advanced configuration', async () => {
+          await transform.testExecution.logTestStep('displays the advanced configuration');
           await transform.wizard.enabledAdvancedPivotEditor();
           await transform.wizard.assertAdvancedPivotEditorContent(
             testData.expected.pivotAdvancedEditorValueArr
           );
-        });
 
-        it('loads the pivot preview', async () => {
+          await transform.testExecution.logTestStep('loads the pivot preview');
           await transform.wizard.assertPivotPreviewLoaded();
-        });
 
-        it('shows the pivot preview', async () => {
+          await transform.testExecution.logTestStep('shows the pivot preview');
+          await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
             testData.expected.pivotPreview.column,
             testData.expected.pivotPreview.values
           );
-        });
 
-        it('loads the details step', async () => {
+          await transform.testExecution.logTestStep('loads the details step');
           await transform.wizard.advanceToDetailsStep();
-        });
 
-        it('inputs the transform id', async () => {
+          await transform.testExecution.logTestStep('inputs the transform id');
           await transform.wizard.assertTransformIdInputExists();
           await transform.wizard.assertTransformIdValue('');
           await transform.wizard.setTransformId(testData.transformId);
-        });
 
-        it('inputs the transform description', async () => {
+          await transform.testExecution.logTestStep('inputs the transform description');
           await transform.wizard.assertTransformDescriptionInputExists();
           await transform.wizard.assertTransformDescriptionValue('');
           await transform.wizard.setTransformDescription(testData.transformDescription);
-        });
 
-        it('inputs the destination index', async () => {
+          await transform.testExecution.logTestStep('inputs the destination index');
           await transform.wizard.assertDestinationIndexInputExists();
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
-        });
 
-        it('displays the create index pattern switch', async () => {
+          await transform.testExecution.logTestStep('displays the create index pattern switch');
           await transform.wizard.assertCreateIndexPatternSwitchExists();
           await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
-        });
 
-        it('displays the continuous mode switch', async () => {
+          await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
-        });
 
-        it('loads the create step', async () => {
+          await transform.testExecution.logTestStep('loads the create step');
           await transform.wizard.advanceToCreateStep();
-        });
 
-        it('displays the create and start button', async () => {
+          await transform.testExecution.logTestStep('displays the create and start button');
           await transform.wizard.assertCreateAndStartButtonExists();
           await transform.wizard.assertCreateAndStartButtonEnabled(true);
-        });
 
-        it('displays the create button', async () => {
+          await transform.testExecution.logTestStep('displays the create button');
           await transform.wizard.assertCreateButtonExists();
           await transform.wizard.assertCreateButtonEnabled(true);
-        });
 
-        it('displays the copy to clipboard button', async () => {
+          await transform.testExecution.logTestStep('displays the copy to clipboard button');
           await transform.wizard.assertCopyToClipboardButtonExists();
           await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
-        it('creates the transform', async () => {
+        it('runs the transform and displays it correctly in the job list', async () => {
+          await transform.testExecution.logTestStep('creates the transform');
           await transform.wizard.createTransform();
-        });
 
-        it('starts the transform and finishes processing', async () => {
+          await transform.testExecution.logTestStep('starts the transform and finishes processing');
           await transform.wizard.startTransform();
           await transform.wizard.waitForProgressBarComplete();
-        });
 
-        it('returns to the management page', async () => {
+          await transform.testExecution.logTestStep('returns to the management page');
           await transform.wizard.returnToManagement();
-        });
 
-        it('displays the transforms table', async () => {
+          await transform.testExecution.logTestStep('displays the transforms table');
           await transform.management.assertTransformsTableExists();
-        });
 
-        it('displays the created transform in the transform list', async () => {
+          await transform.testExecution.logTestStep(
+            'displays the created transform in the transform list'
+          );
           await transform.table.refreshTransformList();
-          await transform.table.filterWithSearchString(testData.transformId);
-          const rows = await transform.table.parseTransformTable();
-          expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
-        });
+          await transform.table.filterWithSearchString(testData.transformId, 1);
 
-        it('job creation displays details for the created job in the job list', async () => {
+          await transform.testExecution.logTestStep(
+            'transform creation displays details for the created transform in the transform list'
+          );
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
-            sourceIndex: testData.source,
-            destinationIndex: testData.destinationIndex,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

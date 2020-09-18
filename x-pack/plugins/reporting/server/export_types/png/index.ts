@@ -12,24 +12,24 @@ import {
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE as jobType,
 } from '../../../common/constants';
-import { ESQueueCreateJobFn, ESQueueWorkerExecuteFn, ExportTypeDefinition } from '../..//types';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { createJobFnFactory } from './create_job';
+import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { createJobFactory } from './server/create_job';
-import { executeJobFactory } from './server/execute_job';
-import { JobDocPayloadPNG, JobParamsPNG } from './types';
+import { JobParamsPNG, TaskPayloadPNG } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
   JobParamsPNG,
-  ESQueueCreateJobFn<JobParamsPNG>,
-  JobDocPayloadPNG,
-  ESQueueWorkerExecuteFn<JobDocPayloadPNG>
+  CreateJobFn<JobParamsPNG>,
+  TaskPayloadPNG,
+  RunTaskFn<TaskPayloadPNG>
 > => ({
   ...metadata,
   jobType,
   jobContentEncoding: 'base64',
   jobContentExtension: 'PNG',
-  createJobFactory,
-  executeJobFactory,
+  createJobFnFactory,
+  runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,
     LICENSE_TYPE_STANDARD,

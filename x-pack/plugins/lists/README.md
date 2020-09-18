@@ -32,13 +32,11 @@ source `$HOME/.zshrc` or `${HOME}.bashrc` to ensure variables are set:
 source ~/.zshrc
 ```
 
-Open your `kibana.dev.yml` file and add these lines:
+Open your `kibana.dev.yml` file and add these lines with your name:
 
 ```sh
-# Enable lists feature
-xpack.lists.enabled: true
-xpack.lists.listIndex: '.lists-frank'
-xpack.lists.listItemIndex: '.items-frank'
+xpack.lists.listIndex: '.lists-your-name'
+xpack.lists.listItemIndex: '.items-your-name'
 ```
 
 Restart Kibana and ensure that you are using `--no-base-path` as changing the base path is a feature but will
@@ -59,7 +57,7 @@ which will:
 - Delete any existing exception list items you have
 - Delete any existing mapping, policies, and templates, you might have previously had.
 - Add the latest list and list item index and its mappings using your settings from `kibana.dev.yml` environment variable of `xpack.lists.listIndex` and `xpack.lists.listItemIndex`.
-- Posts the sample list from `./lists/new/list_ip.json`
+- Posts the sample list from `./lists/new/ip_list.json`
 
 Now you can run
 
@@ -71,7 +69,7 @@ You should see the new list created like so:
 
 ```sh
 {
-  "id": "list-ip",
+  "id": "ip_list",
   "created_at": "2020-05-28T19:15:22.344Z",
   "created_by": "yo",
   "description": "This list describes bad internet ip",
@@ -98,7 +96,7 @@ You should see the new list item created and attached to the above list like so:
   "value": "127.0.0.1",
   "created_at": "2020-05-28T19:15:49.790Z",
   "created_by": "yo",
-  "list_id": "list-ip",
+  "list_id": "ip_list",
   "tie_breaker_id": "a881bf2e-1e17-4592-bba8-d567cb07d234",
   "updated_at": "2020-05-28T19:15:49.790Z",
   "updated_by": "yo"
@@ -149,7 +147,7 @@ And you can attach exception list items like so:
     "malware",
     "os:linux"
   ],
-  "comment": [],
+  "comments": [],
   "created_at": "2020-05-28T19:17:21.099Z",
   "created_by": "yo",
   "description": "This is a sample endpoint type exception",
@@ -157,12 +155,14 @@ And you can attach exception list items like so:
     {
       "field": "actingProcess.file.signer",
       "operator": "included",
-      "match": "Elastic, N.V."
+      "type": "match",
+      "value": "Elastic, N.V."
     },
     {
       "field": "event.category",
       "operator": "included",
-      "match_any": [
+      "type": "match_any",
+      "value": [
         "process",
         "malware"
       ]
@@ -195,7 +195,7 @@ You can then do find for each one like so:
   "cursor": "WzIwLFsiYzU3ZWZiYzQtNDk3Ny00YTMyLTk5NWYtY2ZkMjk2YmVkNTIxIl1d",
   "data": [
     {
-      "id": "list-ip",
+      "id": "ip_list",
       "created_at": "2020-05-28T19:15:22.344Z",
       "created_by": "yo",
       "description": "This list describes bad internet ip",

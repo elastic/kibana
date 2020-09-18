@@ -8,19 +8,10 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getFindResultStatus, ruleStatusRequest } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('find_statuses', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -66,7 +57,7 @@ describe('find_statuses', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('"id" is not allowed');
+      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "undefined" supplied to "ids"');
     });
   });
 });

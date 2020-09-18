@@ -12,7 +12,7 @@ NOTE: When running multiple tenants of Kibana by changing the `kibana.index` in 
 [[xpack-kibana-role-management]]
 === {kib} role management
 
-To create a role that grants {kib} privileges, go to **Management -> Security -> Roles** and click **Create role**.
+To create a role that grants {kib} privileges, open the menu, go to *Stack Management > Security > Roles* and click **Create role**. 
 
 [[adding_kibana_privileges]]
 ==== Adding {kib} privileges
@@ -28,7 +28,9 @@ Use the **Privilege** menu to grant access to features. The default is **Custom*
 
 When using the **Customize by feature** option, you can choose either **All**, **Read** or **None** for access to each feature. As new features are added to Kibana, roles that use the custom option do not automatically get access to the new features. You must manually update the roles.
 
-NOTE: Machine Learning and Stack Monitoring rely on built-in roles to grant access. When a user is assigned the appropriate roles, the Machine Learning and Stack Monitoring application are available; otherwise, these applications are not visible.
+NOTE: *{stack-monitor-app}* relies on built-in roles to grant access. When a
+user is assigned the appropriate roles, the *{stack-monitor-app}* application is
+available; otherwise, it is not visible.
 
 To apply your changes, click **Create space privilege**. The space privilege shows up under the Kibana privileges section of the role.
 

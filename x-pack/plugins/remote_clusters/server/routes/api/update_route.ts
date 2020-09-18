@@ -14,7 +14,7 @@ import { serializeCluster, deserializeCluster, Cluster, ClusterInfoEs } from '..
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 
 const bodyValidation = schema.object({
   skipUnavailable: schema.boolean(),

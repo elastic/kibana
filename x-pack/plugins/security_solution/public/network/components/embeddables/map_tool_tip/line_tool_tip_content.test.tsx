@@ -6,6 +6,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+
+import '../../../../common/mock/match_media';
 import { LineToolTipContentComponent } from './line_tool_tip_content';
 import {
   SUM_OF_CLIENT_BYTES,
@@ -13,8 +15,10 @@ import {
   SUM_OF_SERVER_BYTES,
   SUM_OF_SOURCE_BYTES,
 } from '../map_config';
-import { ITooltipProperty } from '../../../../../../maps/public';
-import { TooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import {
+  ITooltipProperty,
+  TooltipProperty,
+} from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 describe('LineToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [

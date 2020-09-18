@@ -11,3 +11,4 @@ export {
   SavedObjectDescriptor,
 } from './encrypted_saved_objects_service';
 export { EncryptionError } from './encryption_error';
+export { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';

@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
@@ -41,13 +40,12 @@ const Container = styled.div<IContainerStyleProps>`
   padding-bottom: ${px(units.plus)};
   margin-right: ${(props) => px(props.timelineMargins.right)};
   margin-left: ${(props) => px(props.timelineMargins.left)};
-  border-top: 1px solid ${theme.euiColorLightShade};
-  background-color: ${(props) =>
-    props.isSelected ? theme.euiColorLightestShade : 'initial'};
+  background-color: ${({ isSelected, theme }) =>
+    isSelected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;
 
   &:hover {
-    background-color: ${theme.euiColorLightestShade};
+    background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
   }
 `;
 
@@ -110,13 +108,11 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
 }
 
 interface SpanActionToolTipProps {
+  children: ReactNode;
   item?: IWaterfallItem;
 }
 
-const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
-  item,
-  children,
-}) => {
+function SpanActionToolTip({ item, children }: SpanActionToolTipProps) {
   if (item?.docType === 'span') {
     return (
       <EuiToolTip content={`${item.doc.span.subtype}.${item.doc.span.action}`}>
@@ -125,7 +121,7 @@ const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
     );
   }
   return <>{children}</>;
-};
+}
 
 function Duration({ item }: { item: IWaterfallItem }) {
   return (
@@ -194,7 +190,10 @@ export function WaterfallItem({
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
-      onClick={onClick}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        onClick();
+      }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
         style={{ left: `${left}%`, width: `${width}%` }}

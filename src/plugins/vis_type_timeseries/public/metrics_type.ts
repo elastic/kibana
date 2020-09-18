@@ -24,8 +24,8 @@ import { metricsRequestHandler } from './request_handler';
 import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
-import { defaultFeedbackMessage } from '../../kibana_utils/public';
 import { VisEditor } from './application/components/vis_editor_lazy';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -34,7 +34,6 @@ export const metricsVisDefinition = {
     defaultMessage: 'Build time-series using a visual pipeline interface',
   }),
   icon: 'visVisualBuilder',
-  feedbackMessage: defaultFeedbackMessage,
   visConfig: {
     defaults: {
       id: '61ca57f0-469d-11e7-af02-69e470af7417',
@@ -69,6 +68,7 @@ export const metricsVisDefinition = {
       axis_scale: 'normal',
       show_legend: 1,
       show_grid: 1,
+      tooltip_mode: 'show_all',
     },
     component: VisEditor,
   },
@@ -79,5 +79,9 @@ export const metricsVisDefinition = {
     showIndexSelection: false,
   },
   requestHandler: metricsRequestHandler,
+  getSupportedTriggers: () => {
+    return [VIS_EVENT_TO_TRIGGER.applyFilter];
+  },
+  inspectorAdapters: {},
   responseHandler: 'none',
 };

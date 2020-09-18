@@ -13,14 +13,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects([
-    'header',
-    'common',
-    'visualize',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['header', 'header', 'timePicker']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -28,15 +21,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async toggleIndexPatternFiltersPopover() {
       await testSubjects.click('lnsIndexPatternFiltersToggle');
-    },
-
-    /**
-     * Toggles the field existence checkbox.
-     */
-    async toggleExistenceFilter() {
-      await this.toggleIndexPatternFiltersPopover();
-      await testSubjects.click('lnsEmptyFilter');
-      await this.toggleIndexPatternFiltersPopover();
     },
 
     async findAllFields() {
@@ -47,10 +31,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
-    goToTimeRange(fromTime?: string, toTime?: string) {
+    async goToTimeRange(fromTime?: string, toTime?: string) {
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
       fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
       toTime = toTime || PageObjects.timePicker.defaultEndTime;
-      return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
 
     /**
@@ -83,16 +68,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Uses the Lens visualization switcher to switch visualizations.
-     *
-     * @param dataTestSubj - the data-test-subj of the visualization to switch to
-     */
-    async switchToVisualization(dataTestSubj: string) {
-      await testSubjects.click('lnsChartSwitchPopover');
-      await testSubjects.click(dataTestSubj);
-    },
-
-    /**
      * Clicks a visualize list item's title (in the visualize app).
      *
      * @param title - the title of the list item to be clicked
@@ -107,27 +82,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param opts.dimension - the selector of the dimension being changed
      * @param opts.operation - the desired operation ID for the dimension
      * @param opts.field - the desired field for the dimension
+     * @param layerIndex - the index of the layer
      */
-    async configureDimension(opts: { dimension: string; operation: string; field: string }) {
-      await find.clickByCssSelector(opts.dimension);
+    async configureDimension(
+      opts: { dimension: string; operation: string; field: string },
+      layerIndex = 0
+    ) {
+      await retry.try(async () => {
+        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
+        await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
+      });
 
-      await find.clickByCssSelector(
-        `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.operation}"],
-          [data-test-subj="lns-indexPatternDimension-${opts.operation}"]`
-      );
+      await testSubjects.click(`lns-indexPatternDimension-${opts.operation}`);
 
       const target = await testSubjects.find('indexPattern-dimension-field');
       await comboBox.openOptionsList(target);
       await comboBox.setElement(target, opts.field);
+      await testSubjects.click('lns-indexPattern-dimensionContainerTitle');
     },
 
     /**
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
-      await find.clickByCssSelector(
-        `[data-test-subj="${dimensionTestSubj}"] [data-test-subj="indexPattern-dimensionPopover-remove"]`
-      );
+      await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
 
     /**
@@ -165,6 +143,137 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     getTitle() {
       return testSubjects.getVisibleText('lns_ChartTitle');
+    },
+
+    /**
+     * Uses the Lens visualization switcher to switch visualizations.
+     *
+     * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
+     * lnsDatatable or bar_stacked
+     */
+    async switchToVisualization(subVisualizationId: string) {
+      await this.openChartSwitchPopover();
+      await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
+    },
+
+    async openChartSwitchPopover() {
+      if (await testSubjects.exists('visTypeTitle')) {
+        return;
+      }
+      await retry.try(async () => {
+        await testSubjects.click('lnsChartSwitchPopover');
+        await testSubjects.existOrFail('visTypeTitle');
+      });
+    },
+
+    /**
+     * Checks a specific subvisualization in the chart switcher for a "data loss" indicator
+     *
+     * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
+     * lnsDatatable or bar_stacked
+     */
+    async hasChartSwitchWarning(subVisualizationId: string) {
+      await this.openChartSwitchPopover();
+      const element = await testSubjects.find(`lnsChartSwitchPopover_${subVisualizationId}`);
+      return await find.descendantExistsByCssSelector(
+        '.euiKeyPadMenuItem__betaBadgeWrapper',
+        element
+      );
+    },
+
+    /**
+     * Uses the Lens layer switcher to switch seriesType for xy charts.
+     *
+     * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
+     * line,
+     */
+    async switchLayerSeriesType(seriesType: string) {
+      await retry.try(async () => {
+        await testSubjects.click('lns_layer_settings');
+        await testSubjects.exists(`lnsXY_seriesType-${seriesType}`);
+      });
+
+      return await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
+    },
+
+    /**
+     * Returns the number of layers visible in the chart configuration
+     */
+    async getLayerCount() {
+      const elements = await testSubjects.findAll('lnsLayerRemove');
+      return elements.length;
+    },
+
+    /**
+     * Adds a new layer to the chart, fails if the chart does not support new layers
+     */
+    async createLayer() {
+      await testSubjects.click('lnsLayerAddButton');
+    },
+
+    async linkedToOriginatingApp() {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('lnsApp_saveAndReturnButton');
+    },
+
+    async notLinkedToOriginatingApp() {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('lnsApp_saveAndReturnButton');
+    },
+    /**
+     * Gets label of dimension trigger in dimension panel
+     *
+     * @param dimension - the selector of the dimension
+     */
+    async getDimensionTriggerText(dimension: string, index = 0) {
+      const dimensionElements = await testSubjects.findAll(dimension);
+      const trigger = await testSubjects.findDescendant(
+        'lns-dimensionTrigger',
+        dimensionElements[index]
+      );
+      return await trigger.getVisibleText();
+    },
+
+    /**
+     * Gets text of the specified datatable header cell
+     *
+     * @param index - index of th element in datatable
+     */
+    async getDatatableHeaderText(index = 0) {
+      return find
+        .byCssSelector(
+          `[data-test-subj="lnsDataTable"] thead th:nth-child(${
+            index + 1
+          }) .euiTableCellContent__text`
+        )
+        .then((el) => el.getVisibleText());
+    },
+
+    /**
+     * Gets text of the specified datatable cell
+     *
+     * @param rowIndex - index of row of the cell
+     * @param colIndex - index of column of the cell
+     */
+    async getDatatableCellText(rowIndex = 0, colIndex = 0) {
+      return find
+        .byCssSelector(
+          `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${
+            colIndex + 1
+          })`
+        )
+        .then((el) => el.getVisibleText());
+    },
+
+    /**
+     * Asserts that metric has expected title and count
+     *
+     * @param title - expected title
+     * @param count - expected count of metric
+     */
+    async assertMetric(title: string, count: string) {
+      await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
+      await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
     },
   });
 }

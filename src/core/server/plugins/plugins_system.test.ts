@@ -24,18 +24,19 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
-import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
+import { Logger } from '../logging';
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 function createPlugin(
   id: string,
   {
@@ -54,6 +55,7 @@ function createPlugin(
       kibanaVersion: '7.0.0',
       requiredPlugins: required,
       optionalPlugins: optional,
+      requiredBundles: [],
       server,
       ui,
     },
@@ -72,7 +74,7 @@ const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
 beforeEach(() => {
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 
@@ -98,15 +100,27 @@ test('getPluginDependencies returns dependency tree of symbols', () => {
   pluginsSystem.addPlugin(createPlugin('no-dep'));
 
   expect(pluginsSystem.getPluginDependencies()).toMatchInlineSnapshot(`
-    Map {
-      Symbol(plugin-a) => Array [
-        Symbol(no-dep),
-      ],
-      Symbol(plugin-b) => Array [
-        Symbol(plugin-a),
-        Symbol(no-dep),
-      ],
-      Symbol(no-dep) => Array [],
+    Object {
+      "asNames": Map {
+        "plugin-a" => Array [
+          "no-dep",
+        ],
+        "plugin-b" => Array [
+          "plugin-a",
+          "no-dep",
+        ],
+        "no-dep" => Array [],
+      },
+      "asOpaqueIds": Map {
+        Symbol(plugin-a) => Array [
+          Symbol(no-dep),
+        ],
+        Symbol(plugin-b) => Array [
+          Symbol(plugin-a),
+          Symbol(no-dep),
+        ],
+        Symbol(no-dep) => Array [],
+      },
     }
   `);
 });
@@ -435,6 +449,21 @@ describe('setup', () => {
       `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
     );
   });
+
+  it('logs only server-side plugins', async () => {
+    [
+      createPlugin('order-0'),
+      createPlugin('order-not-run', { server: false }),
+      createPlugin('order-1'),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+    await pluginsSystem.setupPlugins(setupDeps);
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.info).toHaveBeenCalledWith(`Setting up [2] plugins: [order-1,order-0]`);
+  });
 });
 
 describe('start', () => {
@@ -460,5 +489,21 @@ describe('start', () => {
     await expect(promise).rejects.toMatchInlineSnapshot(
       `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
     );
+  });
+
+  it('logs only server-side plugins', async () => {
+    [
+      createPlugin('order-0'),
+      createPlugin('order-not-run', { server: false }),
+      createPlugin('order-1'),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
   });
 });

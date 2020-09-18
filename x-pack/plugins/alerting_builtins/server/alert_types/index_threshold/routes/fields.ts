@@ -14,7 +14,7 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
 } from 'kibana/server';
 import { Service } from '../../../types';
 
@@ -93,7 +93,7 @@ interface Field {
 }
 
 async function getRawFields(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   indexes: string[]
 ): Promise<RawFields> {
   const params = {

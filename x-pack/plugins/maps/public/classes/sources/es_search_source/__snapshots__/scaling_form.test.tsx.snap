@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should not render clusters option when clustering is not supported 1`] = `
+exports[`scaling form should disable clusters option when clustering is not supported 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -24,22 +24,56 @@ exports[`should not render clusters option when clustering is not supported 1`] 
     hasEmptyLabelSpace={false}
     labelType="label"
   >
-    <EuiRadioGroup
-      idSelected="LIMIT"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "id": "LIMIT",
-            "label": "Limit results to 10000.",
-          },
-          Object {
-            "id": "TOP_HITS",
-            "label": "Show top hits per entity.",
-          },
-        ]
-      }
-    />
+    <div>
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10000."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        id="TOP_HITS"
+        label="Show top hits per entity."
+        onChange={[Function]}
+      />
+      <EuiToolTip
+        content="Simulated clustering disabled"
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={true}
+          id="CLUSTERS"
+          label="Show clusters when results exceed 10000."
+          onChange={[Function]}
+        />
+      </EuiToolTip>
+      <EuiToolTip
+        content={
+          <React.Fragment>
+            <EuiBetaBadge
+              label="beta"
+            />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Use vector tiles for faster display of large datasets.
+          </React.Fragment>
+        }
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={false}
+          id="MVT"
+          label="Use vector tiles"
+          onChange={[Function]}
+        />
+      </EuiToolTip>
+    </div>
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
@@ -59,7 +93,7 @@ exports[`should not render clusters option when clustering is not supported 1`] 
 </Fragment>
 `;
 
-exports[`should render 1`] = `
+exports[`scaling form should disable mvt option when mvt is not supported 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -83,26 +117,40 @@ exports[`should render 1`] = `
     hasEmptyLabelSpace={false}
     labelType="label"
   >
-    <EuiRadioGroup
-      idSelected="LIMIT"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "id": "LIMIT",
-            "label": "Limit results to 10000.",
-          },
-          Object {
-            "id": "TOP_HITS",
-            "label": "Show top hits per entity.",
-          },
-          Object {
-            "id": "CLUSTERS",
-            "label": "Show clusters when results exceed 10000.",
-          },
-        ]
-      }
-    />
+    <div>
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10000."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        id="TOP_HITS"
+        label="Show top hits per entity."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        disabled={false}
+        id="CLUSTERS"
+        label="Show clusters when results exceed 10000."
+        onChange={[Function]}
+      />
+      <EuiToolTip
+        content="Simulated mvt disabled"
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={true}
+          id="MVT"
+          label="Use vector tiles"
+          onChange={[Function]}
+        />
+      </EuiToolTip>
+    </div>
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
@@ -122,7 +170,7 @@ exports[`should render 1`] = `
 </Fragment>
 `;
 
-exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
+exports[`scaling form should render 1`] = `
 <Fragment>
   <EuiTitle
     size="xs"
@@ -146,26 +194,137 @@ exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
     hasEmptyLabelSpace={false}
     labelType="label"
   >
-    <EuiRadioGroup
-      idSelected="TOP_HITS"
+    <div>
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10000."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        id="TOP_HITS"
+        label="Show top hits per entity."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        disabled={false}
+        id="CLUSTERS"
+        label="Show clusters when results exceed 10000."
+        onChange={[Function]}
+      />
+      <EuiToolTip
+        content={
+          <React.Fragment>
+            <EuiBetaBadge
+              label="beta"
+            />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Use vector tiles for faster display of large datasets.
+          </React.Fragment>
+        }
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={false}
+          id="MVT"
+          label="Use vector tiles"
+          onChange={[Function]}
+        />
+      </EuiToolTip>
+    </div>
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={true}
+      compressed={true}
+      label="Dynamically filter for data in the visible map area"
       onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "id": "LIMIT",
-            "label": "Limit results to 10000.",
-          },
-          Object {
-            "id": "TOP_HITS",
-            "label": "Show top hits per entity.",
-          },
-          Object {
-            "id": "CLUSTERS",
-            "label": "Show clusters when results exceed 10000.",
-          },
-        ]
-      }
     />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`scaling form should render top hits form when scaling type is TOP_HITS 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h5>
+      <FormattedMessage
+        defaultMessage="Scaling"
+        id="xpack.maps.esSearch.scaleTitle"
+        values={Object {}}
+      />
+    </h5>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <div>
+      <EuiRadio
+        checked={false}
+        id="LIMIT"
+        label="Limit results to 10000."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={true}
+        id="TOP_HITS"
+        label="Show top hits per entity."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        disabled={false}
+        id="CLUSTERS"
+        label="Show clusters when results exceed 10000."
+        onChange={[Function]}
+      />
+      <EuiToolTip
+        content={
+          <React.Fragment>
+            <EuiBetaBadge
+              label="beta"
+            />
+            <EuiHorizontalRule
+              margin="xs"
+            />
+            Use vector tiles for faster display of large datasets.
+          </React.Fragment>
+        }
+        delay="regular"
+        position="left"
+      >
+        <EuiRadio
+          checked={false}
+          disabled={false}
+          id="MVT"
+          label="Use vector tiles"
+          onChange={[Function]}
+        />
+      </EuiToolTip>
+    </div>
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
@@ -197,8 +356,10 @@ exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
     <SingleFieldSelect
       compressed={true}
       fields={Array []}
+      isClearable={false}
       onChange={[Function]}
       placeholder="Select entity field"
+      value={null}
     />
   </EuiFormRow>
 </Fragment>

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/forbid-elements */
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -12,7 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
-  // @ts-ignore hasn't been converted to TypeScript yet
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,7 +25,6 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-// @ts-ignore converting /libs/constants to TS breaks CI
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 import { ElementCard } from '../element_card';

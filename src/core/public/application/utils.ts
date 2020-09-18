@@ -18,12 +18,7 @@
  */
 
 import { IBasePath } from '../http';
-import { App, LegacyApp, PublicAppInfo, PublicLegacyAppInfo } from './types';
-
-export interface AppUrlInfo {
-  app: string;
-  path?: string;
-}
+import { App, AppNavLinkStatus, AppStatus, ParsedAppUrl, PublicAppInfo } from './types';
 
 /**
  * Utility to remove trailing, leading or duplicate slashes.
@@ -52,18 +47,14 @@ export const removeSlashes = (
 export const appendAppPath = (appBasePath: string, path: string = '') => {
   // Only prepend slash if not a hash or query path
   path = path === '' || path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
-  // Do not remove trailing slash when in hashbang
-  const removeTrailing = path.indexOf('#') === -1;
+  // Do not remove trailing slash when in hashbang or basePath
+  const removeTrailing = path.indexOf('#') === -1 && appBasePath.indexOf('#') === -1;
   return removeSlashes(`${appBasePath}${path}`, {
     trailing: removeTrailing,
     duplicates: true,
     leading: false,
   });
 };
-
-export function isLegacyApp(app: App | LegacyApp): app is LegacyApp {
-  return app.legacy === true;
-}
 
 /**
  * Converts a relative path to an absolute url.
@@ -92,16 +83,16 @@ export const relativeToAbsolute = (url: string): string => {
 export const parseAppUrl = (
   url: string,
   basePath: IBasePath,
-  apps: Map<string, App<unknown> | LegacyApp>,
+  apps: Map<string, App<unknown>>,
   getOrigin: () => string = () => window.location.origin
-): AppUrlInfo | undefined => {
+): ParsedAppUrl | undefined => {
   url = removeBasePath(url, basePath, getOrigin());
   if (!url.startsWith('/')) {
     return undefined;
   }
 
   for (const app of apps.values()) {
-    const appPath = isLegacyApp(app) ? app.appUrl : app.appRoute || `/app/${app.id}`;
+    const appPath = app.appRoute || `/app/${app.id}`;
 
     if (url.startsWith(appPath)) {
       const path = url.substr(appPath.length);
@@ -120,18 +111,18 @@ const removeBasePath = (url: string, basePath: IBasePath, origin: string): strin
   return basePath.remove(url);
 };
 
-export function getAppInfo(app: App<unknown> | LegacyApp): PublicAppInfo | PublicLegacyAppInfo {
-  if (isLegacyApp(app)) {
-    const { updater$, ...infos } = app;
-    return {
-      ...infos,
-      legacy: true,
-    };
-  } else {
-    const { updater$, mount, ...infos } = app;
-    return {
-      ...infos,
-      legacy: false,
-    };
-  }
+export function getAppInfo(app: App<unknown>): PublicAppInfo {
+  const navLinkStatus =
+    app.navLinkStatus === AppNavLinkStatus.default
+      ? app.status === AppStatus.inaccessible
+        ? AppNavLinkStatus.hidden
+        : AppNavLinkStatus.visible
+      : app.navLinkStatus!;
+  const { updater$, mount, ...infos } = app;
+  return {
+    ...infos,
+    status: app.status!,
+    navLinkStatus,
+    appRoute: app.appRoute!,
+  };
 }

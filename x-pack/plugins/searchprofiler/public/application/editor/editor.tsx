@@ -10,7 +10,9 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import { Editor as AceEditor } from 'brace';
 
 import { initializeEditor } from './init_editor';
-import { useUIAceKeyboardMode } from '../../../../../../src/plugins/es_ui_shared/public';
+import { ace } from '../../../../../../src/plugins/es_ui_shared/public';
+
+const { useUIAceKeyboardMode } = ace;
 
 type EditorShim = ReturnType<typeof createEditorShim>;
 

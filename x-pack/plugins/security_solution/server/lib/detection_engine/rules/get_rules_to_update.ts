@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PrepackagedRules } from '../types';
+import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { RuleAlertType } from './types';
 
 export const getRulesToUpdate = (
-  rulesFromFileSystem: PrepackagedRules[],
+  rulesFromFileSystem: AddPrepackagedRulesSchemaDecoded[],
   installedRules: RuleAlertType[]
-): PrepackagedRules[] => {
+): AddPrepackagedRulesSchemaDecoded[] => {
   return rulesFromFileSystem.filter((rule) =>
     installedRules.some((installedRule) => {
       return (

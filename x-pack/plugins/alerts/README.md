@@ -18,6 +18,7 @@ Table of Contents
 		- [Methods](#methods)
 		- [Executor](#executor)
 		- [Example](#example)
+	- [Role Based Access-Control](#role-based-access-control)
 	- [Alert Navigation](#alert-navigation)
 	- [RESTful API](#restful-api)
 		- [`POST /api/alerts/alert`: Create alert](#post-apialert-create-alert)
@@ -25,6 +26,7 @@ Table of Contents
 		- [`GET /api/alerts/_find`: Find alerts](#get-apialertfind-find-alerts)
 		- [`GET /api/alerts/alert/{id}`: Get alert](#get-apialertid-get-alert)
 		- [`GET /api/alerts/alert/{id}/state`: Get alert state](#get-apialertidstate-get-alert-state)
+		- [`GET /api/alerts/alert/{id}/_instance_summary`: Get alert instance summary](#get-apialertidstate-get-alert-instance-summary)
 		- [`GET /api/alerts/list_alert_types`: List alert types](#get-apialerttypes-list-alert-types)
 		- [`PUT /api/alerts/alert/{id}`: Update alert](#put-apialertid-update-alert)
 		- [`POST /api/alerts/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
@@ -58,7 +60,8 @@ A Kibana alert detects a condition and executes one or more actions when that co
 ## Usage
 
 1. Develop and register an alert type (see alert types -> example).
-2. Create an alert using the RESTful API (see alerts -> create).
+2. Configure feature level privileges using RBAC 
+3. Create an alert using the RESTful API (see alerts -> create).
 
 ## Limitations
 
@@ -103,7 +106,7 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |---|---|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user who created the alert (only when security isenabled).|
-|services.getScopedCallCluster|This function scopes an instance of CallCluster by returning a `callCluster(path, opts)` function that runs in the context of the user who created the alert when security is enabled. This must only be called with instances of CallCluster provided by core.|
+|services.getLegacyScopedClusterClient|This function returns an instance of the LegacyScopedClusterClient scoped to the user who created the alert when security is enabled.|
 |services.alertInstanceFactory(id)|This [alert instance factory](#alert-instance-factory) creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |startedAt|The date and time the alert type started execution.|
@@ -293,6 +296,111 @@ server.newPlatform.setup.plugins.alerts.registerType({
 });
 ```
 
+## Role Based Access-Control
+Once you have registered your AlertType, you need to grant your users privileges to use it.
+When registering a feature in Kibana you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
+
+Assuming your feature introduces its own AlertTypes, you'll want to control which roles have all/read privileges for these AlertTypes when they're inside the feature.
+In addition, when users are inside your feature you might want to grant them access to AlertTypes from other features, such as built-in AlertTypes or AlertTypes provided by other features.
+
+You can control all of these abilities by assigning privileges to the Alerting Framework from within your own feature, for example:
+
+```typescript
+features.registerKibanaFeature({
+	id: 'my-application-id',
+	name: 'My Application',
+	app: [],
+	privileges: {
+		all: {
+			alerting: {
+				all: [
+					// grant `all` over our own types
+					'my-application-id.my-alert-type',
+					'my-application-id.my-restricted-alert-type',
+					// grant `all` over the built-in IndexThreshold
+					'.index-threshold',
+					// grant `all` over Uptime's TLS AlertType
+					'xpack.uptime.alerts.actionGroups.tls'
+				],
+			},
+		},
+		read: {
+			alerting: {
+				read: [
+					// grant `read` over our own type
+					'my-application-id.my-alert-type',
+					// grant `read` over the built-in IndexThreshold
+					'.index-threshold', 
+					// grant `read` over Uptime's TLS AlertType
+					'xpack.uptime.alerts.actionGroups.tls'
+				],
+			},
+		},
+	},
+});
+```
+
+In this example we can see the following:
+- Our feature grants any user who's assigned the `all` role in our feature the `all` role in the Alerting framework over every alert of the `my-application-id.my-alert-type` type which is created _inside_ the feature. What that means is that this privilege will allow the user to execute any of the `all` operations (listed below) on these alerts as long as their `consumer` is `my-application-id`. Below that you'll notice we've done the same with the `read` role, which is grants the Alerting Framework's `read` role privileges over these very same alerts.
+- In addition, our feature grants the same privileges over any alert of type `my-application-id.my-restricted-alert-type`, which is another hypothetical alertType registered by this feature. It's worth noting though that this type has been omitted from the `read` role. What this means is that only users with the `all` role will be able to interact with alerts of this type.
+- Next, lets look at the `.index-threshold` and `xpack.uptime.alerts.actionGroups.tls` types. These have been specified in both `read` and `all`, which means that all the users in the feature will gain privileges over alerts of these types (as long as their `consumer` is `my-application-id`). The difference between these two and the previous two is that they are _produced_ by other features! `.index-threshold` is a built-in type, provided by the _Built-In Alerts_ feature, and `xpack.uptime.alerts.actionGroups.tls` is an AlertType provided by the _Uptime_ feature. Specifying these type here tells the Alerting Framework that as far as the `my-application-id` feature is concerned, the user is privileged to use them (with `all` and `read` applied), but that isn't enough. Using another feature's AlertType is only possible if both the producer of the AlertType, and the consumer of the AlertType, explicitly grant privileges to do so. In this case, the _Built-In Alerts_ & _Uptime_ features would have to explicitly add these privileges to a role and this role would have to be granted to this user.
+
+It's important to note that any role can be granted a mix of `all` and `read` privileges accross multiple type, for example:
+
+```typescript
+features.registerKibanaFeature({
+	id: 'my-application-id',
+	name: 'My Application',
+	app: [],
+	privileges: {
+		all: {
+			alerting: {
+				all: [
+					'my-application-id.my-alert-type',
+					'my-application-id.my-restricted-alert-type'
+				],
+			},
+		},
+		read: {
+			alerting: {
+				all: [
+					'my-application-id.my-alert-type'
+				]
+				read: [
+					'my-application-id.my-restricted-alert-type'
+				],
+			},
+		},
+	},
+});
+```
+
+In the above example, you note that instead of denying users with the `read` role any access to the `my-application-id.my-restricted-alert-type` type, we've decided that these users _should_ be granted `read` privileges over the _resitricted_ AlertType.
+As part of that same change, we also decided that not only should they be allowed to `read` the _restricted_ AlertType, but actually, despite having `read` privileges to the feature as a whole, we do actually want to allow them to create our basic 'my-application-id.my-alert-type' AlertType, as we consider it an extension of _reading_ data in our feature, rather than _writing_ it.
+
+### `read` privileges vs. `all` privileges
+When a user is granted the `read` role in the Alerting Framework, they will be able to execute the following api calls:
+- `get`
+- `getAlertState`
+- `find`
+
+When a user is granted the `all` role in the Alerting Framework, they will be able to execute all of the `read` privileged api calls, but in addition they'll be granted the following calls:
+- `create`
+- `delete`
+- `update`
+- `enable`
+- `disable`
+- `updateApiKey`
+- `muteAll`
+- `unmuteAll`
+- `muteInstance`
+- `unmuteInstance`
+
+Finally, all users, whether they're granted any role or not, are privileged to call the following:
+- `listAlertTypes`, but the output is limited to displaying the AlertTypes the user is perivileged to `get`
+
+Attempting to execute any operation the user isn't privileged to execute will result in an Authorization error thrown by the AlertsClient.
+
 ## Alert Navigation
 When registering an Alert Type, you'll likely want to provide a way of viewing alerts of that type within your own plugin, or perhaps you want to provide a view for all alerts created from within your solution within your own UI.
 
@@ -397,6 +505,23 @@ Params:
 |---|---|---|
 |id|The id of the alert whose state you're trying to get.|string|
 
+### `GET /api/alerts/alert/{id}/_instance_summary`: Get alert instance summary
+
+Similar to the `GET state` call, but collects additional information from
+the event log.
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert whose instance summary you're trying to get.|string|
+
+Query:
+
+|Property|Description|Type|
+|---|---|---|
+|dateStart|The date to start looking for alert events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
+
 ### `GET /api/alerts/list_alert_types`: List alert types
 
 No parameters.
@@ -482,13 +607,15 @@ A schedule is structured such that the key specifies the format you wish to use 
 We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
 Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
 
-There are plans to support multiple other schedule formats in the near fuiture.
+There are plans to support multiple other schedule formats in the near future.
 
 ## Alert instance factory
 
 **alertInstanceFactory(id)**
 
-One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same id. These instances support state persisting between alert type execution, but will clear out once the alert instance stops executing.
+One service passed in to alert types is an alert instance factory. This factory creates instances of alerts and must be used in order to execute actions. The `id` you give to the alert instance factory is a unique identifier to the alert instance (ex: server identifier if the instance is about the server). The instance factory will use this identifier to retrieve the state of previous instances with the same `id`. These instances support state persisting between alert type execution, but will clear out once the alert instance stops executing.
+
+Note that the `id` only needs to be unique **within the scope of a specific alert**, not unique across all alerts or alert types. For example, Alert 1 and Alert 2 can both create an alert instance with an `id` of `"a"` without conflicting with one another. But if Alert 1 creates 2 alert instances, then they must be differentiated with `id`s of `"a"` and `"b"`.
 
 This factory returns an instance of `AlertInstance`. The alert instance class has the following methods, note that we have removed the methods that you shouldn't touch.
 

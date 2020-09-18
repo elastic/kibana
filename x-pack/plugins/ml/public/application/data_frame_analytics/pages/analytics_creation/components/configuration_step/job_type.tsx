@@ -8,7 +8,7 @@ import React, { Fragment, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
@@ -21,24 +21,21 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
   const outlierHelpText = i18n.translate(
     'xpack.ml.dataframe.analytics.create.outlierDetectionHelpText',
     {
-      defaultMessage:
-        'Outlier detection jobs require a source index that is mapped as a table-like data structure and analyze only numeric and boolean fields. Use the advanced editor to add custom options to the configuration.',
+      defaultMessage: 'Outlier detection identifies unusual data points in the data set.',
     }
   );
 
   const regressionHelpText = i18n.translate(
     'xpack.ml.dataframe.analytics.create.outlierRegressionHelpText',
     {
-      defaultMessage:
-        'Regression jobs analyze only numeric fields. Use the advanced editor to apply custom options, such as the prediction field name.',
+      defaultMessage: 'Regression predicts numerical values in the data set.',
     }
   );
 
   const classificationHelpText = i18n.translate(
     'xpack.ml.dataframe.analytics.create.classificationHelpText',
     {
-      defaultMessage:
-        'Classification jobs require a source index that is mapped as a table-like data structure and support fields that are numeric, boolean, text, keyword, or ip. Use the advanced editor to apply custom options, such as the prediction field name.',
+      defaultMessage: 'Classification predicts labels of data points in the data set.',
     }
   );
 
@@ -71,7 +68,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
             setFormState({
               previousJobType: type,
               jobType: value,
-              excludes: [],
+              includes: [],
               requiredFieldsError: undefined,
             });
           }}

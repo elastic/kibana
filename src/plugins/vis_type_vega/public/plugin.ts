@@ -18,8 +18,10 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { Plugin as DataPublicPlugin } from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
+import { Setup as InspectorSetup } from '../../inspector/public';
+
 import {
   setNotifications,
   setData,
@@ -28,19 +30,22 @@ import {
   setUISettings,
   setKibanaMapFactory,
   setMapsLegacyConfig,
+  setInjectedMetadata,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { getKibanaMapFactoryProvider, IServiceSettings } from '../../maps_legacy/public';
+import { IServiceSettings } from '../../maps_legacy/public';
 import './index.scss';
 import { ConfigSchema } from '../config';
+
+import { getVegaInspectorView } from './vega_inspector';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
   core: CoreSetup;
   plugins: {
-    data: ReturnType<DataPublicPlugin['setup']>;
+    data: DataPublicPluginSetup;
   };
   serviceSettings: IServiceSettings;
 }
@@ -49,13 +54,14 @@ export interface VegaVisualizationDependencies {
 export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  data: ReturnType<DataPublicPlugin['setup']>;
+  inspector: InspectorSetup;
+  data: DataPublicPluginSetup;
   mapsLegacy: any;
 }
 
 /** @internal */
 export interface VegaPluginStartDependencies {
-  data: ReturnType<DataPublicPlugin['start']>;
+  data: DataPublicPluginStart;
 }
 
 /** @internal */
@@ -68,15 +74,14 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
+    { inspector, data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
-      esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);
-    setKibanaMapFactory(getKibanaMapFactoryProvider(core));
+    setKibanaMapFactory(mapsLegacy.getKibanaMapFactoryProvider);
     setMapsLegacyConfig(mapsLegacy.config);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
@@ -87,6 +92,8 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       serviceSettings: mapsLegacy.serviceSettings,
     };
 
+    inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
+
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 
     visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
@@ -96,5 +103,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     setNotifications(core.notifications);
     setSavedObjects(core.savedObjects);
     setData(data);
+    setInjectedMetadata(core.injectedMetadata);
   }
 }

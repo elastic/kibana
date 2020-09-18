@@ -95,6 +95,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
       const myMapping = mapping ?? defaultMapping;
       onChangeMapping(setActionTypeToMapping(caseField, newActionType, myMapping));
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapping]
   );
 
@@ -103,6 +104,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
       const myMapping = mapping ?? defaultMapping;
       onChangeMapping(setThirdPartyToMapping(caseField, newThirdPartyField, myMapping));
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapping]
   );
 

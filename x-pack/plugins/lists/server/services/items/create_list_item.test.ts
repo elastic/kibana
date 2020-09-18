@@ -8,7 +8,7 @@ import { getListItemResponseMock } from '../../../common/schemas/response/list_i
 import { getIndexESListItemMock } from '../../../common/schemas/elastic_query/index_es_list_item_schema.mock';
 import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
-import { createListItem } from './create_list_item';
+import { CreateListItemOptions, createListItem } from './create_list_item';
 import { getCreateListItemOptionsMock } from './create_list_item.mock';
 
 describe('crete_list_item', () => {
@@ -36,6 +36,7 @@ describe('crete_list_item', () => {
       body,
       id: LIST_ITEM_ID,
       index: LIST_ITEM_INDEX,
+      refresh: 'wait_for',
     };
     expect(options.callCluster).toBeCalledWith('index', expected);
   });
@@ -47,5 +48,16 @@ describe('crete_list_item', () => {
     const expected = getListItemResponseMock();
     expected.id = 'elastic-id-123';
     expect(list).toEqual(expected);
+  });
+
+  test('It returns null if an item does not match something such as an ip_range with an empty serializer', async () => {
+    const options: CreateListItemOptions = {
+      ...getCreateListItemOptionsMock(),
+      serializer: '',
+      type: 'ip_range',
+      value: '# some comment',
+    };
+    const list = await createListItem(options);
+    expect(list).toEqual(null);
   });
 });

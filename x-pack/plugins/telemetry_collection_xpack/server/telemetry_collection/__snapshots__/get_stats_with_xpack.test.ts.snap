@@ -1,118 +1,158 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Telemetry Collection: Get Aggregated Stats OSS-like telemetry (no license nor X-Pack telemetry) 1`] = `
-Array [
-  Object {
-    "cluster_name": "test",
-    "cluster_stats": Object {},
-    "cluster_uuid": "test",
-    "collection": "local",
-    "stack_stats": Object {
-      "kibana": Object {
-        "count": 1,
-        "great": "googlymoogly",
-        "indices": 1,
-        "os": Object {
-          "platformReleases": Array [
-            Object {
-              "count": 1,
-              "platformRelease": "iv",
-            },
-          ],
-          "platforms": Array [
-            Object {
-              "count": 1,
-              "platform": "rocky",
-            },
-          ],
-        },
-        "plugins": Object {
-          "clouds": Object {
-            "chances": 95,
-          },
-          "localization": Object {
-            "integrities": Object {},
-            "labelsCount": 0,
-            "locale": "en",
-          },
-          "rain": Object {
-            "chances": 2,
-          },
-          "snow": Object {
-            "chances": 0,
-          },
-          "sun": Object {
-            "chances": 5,
-          },
-        },
-        "versions": Array [
+Object {
+  "cluster_name": "test",
+  "cluster_stats": Object {
+    "nodes": Object {
+      "usage": Object {
+        "nodes": Array [
           Object {
-            "count": 1,
-            "version": "8675309",
+            "aggregations": Object {
+              "terms": Object {
+                "bytes": 2,
+              },
+            },
+            "node_id": "some_node_id",
+            "rest_actions": Object {
+              "nodes_usage_action": 1,
+            },
+            "since": 1588616945163,
+            "timestamp": 1588617023177,
           },
         ],
       },
     },
-    "version": "8.0.0",
   },
-]
+  "cluster_uuid": "test",
+  "collection": "local",
+  "stack_stats": Object {
+    "data": Array [],
+    "kibana": Object {
+      "count": 1,
+      "great": "googlymoogly",
+      "indices": 1,
+      "os": Object {
+        "platformReleases": Array [
+          Object {
+            "count": 1,
+            "platformRelease": "iv",
+          },
+        ],
+        "platforms": Array [
+          Object {
+            "count": 1,
+            "platform": "rocky",
+          },
+        ],
+      },
+      "plugins": Object {
+        "clouds": Object {
+          "chances": 95,
+        },
+        "localization": Object {
+          "integrities": Object {},
+          "labelsCount": 0,
+          "locale": "en",
+        },
+        "rain": Object {
+          "chances": 2,
+        },
+        "snow": Object {
+          "chances": 0,
+        },
+        "sun": Object {
+          "chances": 5,
+        },
+      },
+      "versions": Array [
+        Object {
+          "count": 1,
+          "version": "8675309",
+        },
+      ],
+    },
+  },
+  "timestamp": Any<String>,
+  "version": "8.0.0",
+}
 `;
 
 exports[`Telemetry Collection: Get Aggregated Stats X-Pack telemetry (license + X-Pack) 1`] = `
-Array [
-  Object {
-    "cluster_name": "test",
-    "cluster_stats": Object {},
-    "cluster_uuid": "test",
-    "collection": "local",
-    "stack_stats": Object {
-      "kibana": Object {
-        "count": 1,
-        "great": "googlymoogly",
-        "indices": 1,
-        "os": Object {
-          "platformReleases": Array [
-            Object {
-              "count": 1,
-              "platformRelease": "iv",
-            },
-          ],
-          "platforms": Array [
-            Object {
-              "count": 1,
-              "platform": "rocky",
-            },
-          ],
-        },
-        "plugins": Object {
-          "clouds": Object {
-            "chances": 95,
-          },
-          "localization": Object {
-            "integrities": Object {},
-            "labelsCount": 0,
-            "locale": "en",
-          },
-          "rain": Object {
-            "chances": 2,
-          },
-          "snow": Object {
-            "chances": 0,
-          },
-          "sun": Object {
-            "chances": 5,
-          },
-        },
-        "versions": Array [
+Object {
+  "cluster_name": "test",
+  "cluster_stats": Object {
+    "nodes": Object {
+      "usage": Object {
+        "nodes": Array [
           Object {
-            "count": 1,
-            "version": "8675309",
+            "aggregations": Object {
+              "terms": Object {
+                "bytes": 2,
+              },
+            },
+            "node_id": "some_node_id",
+            "rest_actions": Object {
+              "nodes_usage_action": 1,
+            },
+            "since": 1588616945163,
+            "timestamp": 1588617023177,
           },
         ],
       },
-      "xpack": Object {},
     },
-    "version": "8.0.0",
   },
-]
+  "cluster_uuid": "test",
+  "collection": "local",
+  "stack_stats": Object {
+    "data": Array [],
+    "kibana": Object {
+      "count": 1,
+      "great": "googlymoogly",
+      "indices": 1,
+      "os": Object {
+        "platformReleases": Array [
+          Object {
+            "count": 1,
+            "platformRelease": "iv",
+          },
+        ],
+        "platforms": Array [
+          Object {
+            "count": 1,
+            "platform": "rocky",
+          },
+        ],
+      },
+      "plugins": Object {
+        "clouds": Object {
+          "chances": 95,
+        },
+        "localization": Object {
+          "integrities": Object {},
+          "labelsCount": 0,
+          "locale": "en",
+        },
+        "rain": Object {
+          "chances": 2,
+        },
+        "snow": Object {
+          "chances": 0,
+        },
+        "sun": Object {
+          "chances": 5,
+        },
+      },
+      "versions": Array [
+        Object {
+          "count": 1,
+          "version": "8675309",
+        },
+      ],
+    },
+    "xpack": Object {},
+  },
+  "timestamp": Any<String>,
+  "version": "8.0.0",
+}
 `;

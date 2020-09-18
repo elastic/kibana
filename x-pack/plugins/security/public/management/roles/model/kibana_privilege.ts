@@ -10,7 +10,7 @@ export class KibanaPrivilege {
   constructor(public readonly id: string, public readonly actions: string[] = []) {}
 
   public get name() {
-    return _.capitalize(this.id);
+    return _.upperFirst(this.id);
   }
 
   public grantsPrivilege(candidatePrivilege: KibanaPrivilege) {

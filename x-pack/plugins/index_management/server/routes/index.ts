@@ -6,6 +6,7 @@
 
 import { RouteDependencies } from '../types';
 
+import { registerDataStreamRoutes } from './api/data_streams';
 import { registerIndicesRoutes } from './api/indices';
 import { registerTemplateRoutes } from './api/templates';
 import { registerMappingRoute } from './api/mapping';
@@ -15,6 +16,7 @@ import { registerComponentTemplateRoutes } from './api/component_templates';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
+    registerDataStreamRoutes(dependencies);
     registerIndicesRoutes(dependencies);
     registerTemplateRoutes(dependencies);
     registerSettingsRoutes(dependencies);

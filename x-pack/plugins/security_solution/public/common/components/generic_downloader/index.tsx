@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { isFunction } from 'lodash/fp';
 import * as i18n from './translations';
 
-import { ExportDocumentsProps } from '../../../alerts/containers/detection_engine/rules';
+import { ExportDocumentsProps } from '../../../detections/containers/detection_engine/rules';
 import { useStateToaster, errorToToaster } from '../toasters';
 
 const InvisibleAnchor = styled.a`
@@ -95,6 +95,7 @@ export const GenericDownloaderComponent = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ids]);
 
   return <InvisibleAnchor ref={anchorRef} />;

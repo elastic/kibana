@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IVectorStyle } from '../vector_style';
-
-jest.mock('ui/new_platform');
 jest.mock('../components/vector_style_editor', () => ({
   VectorStyleEditor: () => {
     return <div>mockVectorStyleEditor</div>;
@@ -18,79 +15,54 @@ import { shallow } from 'enzyme';
 
 // @ts-ignore
 import { DynamicSizeProperty } from './dynamic_size_property';
-import { StyleMeta } from '../style_meta';
-import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
-import { DataRequest } from '../../../util/data_request';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
+import { Map as MbMap } from 'mapbox-gl';
+import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
+import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
-// @ts-ignore
-const mockField: IField = {
-  async getLabel() {
-    return 'foobar_label';
-  },
-  getName() {
-    return 'foobar';
-  },
-  getRootName() {
-    return 'foobar';
-  },
-  getOrigin() {
-    return FIELD_ORIGIN.SOURCE;
-  },
-  supportsFieldMeta() {
-    return true;
-  },
-  canValueBeFormatted() {
-    return true;
-  },
-  async getDataType() {
-    return 'number';
-  },
+export class MockMbMap {
+  _paintPropertyCalls: unknown[];
+
+  constructor() {
+    this._paintPropertyCalls = [];
+  }
+  setPaintProperty(...args: unknown[]) {
+    this._paintPropertyCalls.push([...args]);
+  }
+
+  getPaintPropertyCalls(): unknown[] {
+    return this._paintPropertyCalls;
+  }
+}
+
+const makeProperty = (
+  options: SizeDynamicOptions,
+  mockStyle: MockStyle,
+  field: IField = mockField
+) => {
+  return new DynamicSizeProperty(
+    options,
+    VECTOR_STYLES.ICON_SIZE,
+    field,
+    (new MockLayer(mockStyle) as unknown) as IVectorLayer,
+    () => {
+      return (value: RawValue) => value + '_format';
+    },
+    false
+  );
 };
 
-// @ts-ignore
-const mockLayer: IVectorLayer = {
-  getDataRequest(): DataRequest | undefined {
-    return undefined;
-  },
-  getStyle(): IVectorStyle {
-    // @ts-ignore
-    return {
-      getStyleMeta(): StyleMeta {
-        return new StyleMeta({
-          geometryTypes: {
-            isPointsOnly: true,
-            isLinesOnly: false,
-            isPolygonsOnly: false,
-          },
-          fieldMeta: {
-            foobar: {
-              range: { min: 0, max: 100, delta: 100 },
-              categories: { categories: [] },
-            },
-          },
-        });
-      },
-    };
-  },
-};
-
-const makeProperty: DynamicSizeProperty = (options: object) => {
-  return new DynamicSizeProperty(options, VECTOR_STYLES.ICON_SIZE, mockField, mockLayer, () => {
-    return (x: string) => x + '_format';
-  });
-};
-
-const defaultLegendParams = {
-  isPointsOnly: true,
-  isLinesOnly: false,
-};
+const fieldMetaOptions = { isEnabled: true };
 
 describe('renderLegendDetailRow', () => {
   test('Should render as range', async () => {
-    const sizeProp = makeProperty();
-    const legendRow = sizeProp.renderLegendDetailRow(defaultLegendParams);
+    const sizeProp = makeProperty(
+      { minSize: 0, maxSize: 10, fieldMetaOptions },
+      new MockStyle({ min: 0, max: 100 })
+    );
+    const legendRow = sizeProp.renderLegendDetailRow();
     const component = shallow(legendRow);
 
     // Ensure all promises resolve
@@ -98,5 +70,77 @@ describe('renderLegendDetailRow', () => {
     // Ensure the state changes are reflected
     component.update();
     expect(component).toMatchSnapshot();
+  });
+});
+
+describe('syncSize', () => {
+  test('Should sync with circle-radius prop', async () => {
+    const sizeProp = makeProperty(
+      { minSize: 8, maxSize: 32, fieldMetaOptions },
+      new MockStyle({ min: 0, max: 100 })
+    );
+    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
+
+    sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
+
+    // @ts-expect-error
+    expect(mockMbMap.getPaintPropertyCalls()).toEqual([
+      [
+        'foobar',
+        'circle-radius',
+        [
+          'interpolate',
+          ['linear'],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['feature-state', 'foobar'], null],
+              -1,
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 0],
+            ],
+            0,
+          ],
+          0,
+          8,
+          100,
+          32,
+        ],
+      ],
+    ]);
+  });
+
+  test('Should truncate interpolate expression to max when no delta', async () => {
+    const sizeProp = makeProperty(
+      { minSize: 8, maxSize: 32, fieldMetaOptions },
+      new MockStyle({ min: 100, max: 100 })
+    );
+    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
+
+    sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
+
+    // @ts-expect-error
+    expect(mockMbMap.getPaintPropertyCalls()).toEqual([
+      [
+        'foobar',
+        'circle-radius',
+        [
+          'interpolate',
+          ['linear'],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['feature-state', 'foobar'], null],
+              99,
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 100],
+            ],
+            0,
+          ],
+          100,
+          32,
+        ],
+      ],
+    ]);
   });
 });

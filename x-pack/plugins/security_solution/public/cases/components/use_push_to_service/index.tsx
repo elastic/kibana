@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { Case } from '../../containers/types';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { getConfigureCasesUrl } from '../../../common/components/link_to';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
+import { getConfigureCasesUrl, useFormatUrl } from '../../../common/components/link_to';
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
 import { Connector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
+import { LinkAnchor } from '../../../common/components/links';
+import { SecurityPageName } from '../../../app/types';
+import { ErrorMessage } from '../callout/types';
 
 export interface UsePushToService {
   caseId: string;
@@ -48,8 +50,8 @@ export const usePushToService = ({
   userCanCrud,
   isValidConnector,
 }: UsePushToService): ReturnUsePushToService => {
-  const urlSearch = useGetUrlSearch(navTabs.case);
-
+  const history = useHistory();
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
   const { isLoading, postPushToService } = usePostPushToService();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
@@ -66,12 +68,16 @@ export const usePushToService = ({
     }
   }, [caseId, caseServices, caseConnectorId, caseConnectorName, postPushToService, updateCase]);
 
+  const goToConfigureCases = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      history.push(getConfigureCasesUrl(urlSearch));
+    },
+    [history, urlSearch]
+  );
+
   const errorsMsg = useMemo(() => {
-    let errors: Array<{
-      title: string;
-      description: JSX.Element;
-      errorType?: 'primary' | 'success' | 'warning' | 'danger';
-    }> = [];
+    let errors: ErrorMessage[] = [];
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
@@ -79,6 +85,7 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
+          id: 'connector-missing-error',
           title: i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE,
           description: (
             <FormattedMessage
@@ -86,9 +93,13 @@ export const usePushToService = ({
               id="xpack.securitySolution.case.caseView.pushToServiceDisableByNoConnectors"
               values={{
                 link: (
-                  <EuiLink href={getConfigureCasesUrl(urlSearch)} target="_blank">
+                  <LinkAnchor
+                    onClick={goToConfigureCases}
+                    href={formatUrl(getConfigureCasesUrl())}
+                    target="_blank"
+                  >
                     {i18n.LINK_CONNECTOR_CONFIGURE}
-                  </EuiLink>
+                  </LinkAnchor>
                 ),
               }}
             />
@@ -99,6 +110,7 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
+          id: 'connector-not-selected-error',
           title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
           description: (
             <FormattedMessage
@@ -112,6 +124,7 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
+          id: 'connector-deleted-error',
           title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
           description: (
             <FormattedMessage
@@ -127,6 +140,7 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
+          id: 'closed-case-push-error',
           title: i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE,
           description: (
             <FormattedMessage
@@ -141,6 +155,7 @@ export const usePushToService = ({
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionLicense, caseStatus, connectors.length, caseConnectorId, loadingLicense, urlSearch]);
 
   const pushToServiceButton = useMemo(() => {
@@ -160,6 +175,7 @@ export const usePushToService = ({
           : i18n.PUSH_THIRD(caseConnectorName)}
       </EuiButton>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     caseConnectorId,
     caseConnectorName,

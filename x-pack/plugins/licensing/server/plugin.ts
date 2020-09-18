@@ -15,8 +15,8 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-  IClusterClient,
-  IScopedClusterClient,
+  ILegacyClusterClient,
+  ILegacyScopedClusterClient,
   ScopeableRequest,
 } from 'src/core/server';
 
@@ -100,20 +100,20 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     const pollingFrequency = config.api_polling_frequency;
 
     async function callAsInternalUser(
-      ...args: Parameters<IScopedClusterClient['callAsInternalUser']>
-    ): ReturnType<IScopedClusterClient['callAsInternalUser']> {
+      ...args: Parameters<ILegacyScopedClusterClient['callAsInternalUser']>
+    ): ReturnType<ILegacyScopedClusterClient['callAsInternalUser']> {
       const [coreStart] = await core.getStartServices();
       const client = coreStart.elasticsearch.legacy.client;
       return await client.callAsInternalUser(...args);
     }
 
-    const client: IClusterClient = {
+    const client: ILegacyClusterClient = {
       callAsInternalUser,
-      asScoped(request?: ScopeableRequest): IScopedClusterClient {
+      asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient {
         return {
           async callAsCurrentUser(
-            ...args: Parameters<IScopedClusterClient['callAsCurrentUser']>
-          ): ReturnType<IScopedClusterClient['callAsCurrentUser']> {
+            ...args: Parameters<ILegacyScopedClusterClient['callAsCurrentUser']>
+          ): ReturnType<ILegacyScopedClusterClient['callAsCurrentUser']> {
             const [coreStart] = await core.getStartServices();
             const _client = coreStart.elasticsearch.legacy.client;
             return await _client.asScoped(request).callAsCurrentUser(...args);
@@ -128,9 +128,14 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       pollingFrequency.asMilliseconds()
     );
 
-    core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
+    core.http.registerRouteHandlerContext(
+      'licensing',
+      createRouteHandlerContext(license$, core.getStartServices)
+    );
 
-    registerRoutes(core.http.createRouter(), core.getStartServices);
+    const featureUsageSetup = this.featureUsage.setup();
+
+    registerRoutes(core.http.createRouter(), featureUsageSetup, core.getStartServices);
     core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
 
     this.refresh = refresh;
@@ -140,11 +145,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       refresh,
       license$,
       createLicensePoller: this.createLicensePoller.bind(this),
-      featureUsage: this.featureUsage.setup(),
+      featureUsage: featureUsageSetup,
     };
   }
 
-  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: number) {
+  private createLicensePoller(clusterClient: ILegacyClusterClient, pollingFrequency: number) {
     this.logger.debug(`Polling Elasticsearch License API with frequency ${pollingFrequency}ms.`);
 
     const intervalRefresh$ = timer(0, pollingFrequency);
@@ -173,7 +178,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     };
   }
 
-  private fetchLicense = async (clusterClient: IClusterClient): Promise<ILicense> => {
+  private fetchLicense = async (clusterClient: ILegacyClusterClient): Promise<ILicense> => {
     try {
       const response = await clusterClient.callAsInternalUser('transport.request', {
         method: 'GET',

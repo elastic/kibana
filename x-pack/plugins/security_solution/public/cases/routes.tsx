@@ -5,13 +5,16 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { Case } from './pages';
-import { SiemPageName } from '../app/types';
+import { NotFoundPage } from '../app/404';
 
-export const getCasesRoutes = () => [
-  <Route path={`/:pageName(${SiemPageName.case})`}>
-    <Case />
-  </Route>,
-];
+export const CasesRoutes: React.FC = () => (
+  <Switch>
+    <Route path="/">
+      <Case />
+    </Route>
+    <Route render={() => <NotFoundPage />} />
+  </Switch>
+);

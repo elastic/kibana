@@ -17,12 +17,15 @@
  * under the License.
  */
 
-import { APICaller, CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { LegacyAPICaller, CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { tsvbTelemetrySavedObjectType } from '../saved_objects';
 
 export interface ValidationTelemetryServiceSetup {
   logFailedValidation: () => void;
+}
+export interface Usage {
+  failed_validations: number;
 }
 
 export class ValidationTelemetryService implements Plugin<ValidationTelemetryServiceSetup> {
@@ -43,10 +46,10 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
     });
     if (usageCollection) {
       usageCollection.registerCollector(
-        usageCollection.makeUsageCollector({
+        usageCollection.makeUsageCollector<Usage>({
           type: 'tsvb-validation',
           isReady: () => this.kibanaIndex !== '',
-          fetch: async (callCluster: APICaller) => {
+          fetch: async (callCluster: LegacyAPICaller) => {
             try {
               const response = await callCluster('get', {
                 index: this.kibanaIndex,
@@ -62,6 +65,9 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
                 failed_validations: 0,
               };
             }
+          },
+          schema: {
+            failed_validations: { type: 'long' },
           },
         })
       );

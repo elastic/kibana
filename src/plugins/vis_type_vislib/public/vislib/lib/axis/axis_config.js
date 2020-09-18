@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import d3 from 'd3';
 import { SCALE_MODES } from './scale_modes';
@@ -220,7 +221,7 @@ export class AxisConfig {
   }
 
   set(property, value) {
-    return _.set(this._values, property, value);
+    return set(this._values, property, value);
   }
 
   isHorizontal() {

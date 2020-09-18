@@ -26,30 +26,36 @@ import {
  * actions the endpoint took to apply the policy configuration.
  */
 const PolicyResponseConfigAccordion = styled(EuiAccordion)`
-  > .euiAccordion__triggerWrapper {
+  .euiAccordion__triggerWrapper {
     padding: ${(props) => props.theme.eui.paddingSizes.s};
   }
+
   &.euiAccordion-isOpen {
     background-color: ${(props) => props.theme.eui.euiFocusBackgroundColor};
   }
+
   .euiAccordion__childWrapper {
     background-color: ${(props) => props.theme.eui.euiColorLightestShade};
   }
+
   .policyResponseAttentionBadge {
     background-color: ${(props) => props.theme.eui.euiColorDanger};
     color: ${(props) => props.theme.eui.euiColorEmptyShade};
   }
+
   .euiAccordion__button {
     :hover,
     :focus {
       text-decoration: none;
     }
   }
+
   :hover:not(.euiAccordion-isOpen) {
     background-color: ${(props) => props.theme.eui.euiColorLightestShade};
   }
 
   .policyResponseActionsAccordion {
+    .euiAccordion__iconWrapper,
     svg {
       height: ${(props) => props.theme.eui.euiIconSizes.small};
       width: ${(props) => props.theme.eui.euiIconSizes.small};
@@ -58,6 +64,10 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
 
   .policyResponseStatusHealth {
     width: 100px;
+  }
+
+  .policyResponseMessage {
+    padding-left: ${(props) => props.theme.eui.paddingSizes.l};
   }
 `;
 
@@ -80,7 +90,7 @@ const ResponseActions = memo(
             <EuiAccordion
               id={action + index}
               key={action + index}
-              data-test-subj="hostDetailsPolicyResponseActionsAccordion"
+              data-test-subj="endpointDetailsPolicyResponseActionsAccordion"
               className="policyResponseActionsAccordion"
               buttonContent={
                 <EuiText
@@ -105,7 +115,7 @@ const ResponseActions = memo(
               }
             >
               <EuiText size="xs" data-test-subj="policyResponseMessage">
-                <p>{statuses.message}</p>
+                <p className="policyResponseMessage">{statuses.message}</p>
               </EuiText>
             </EuiAccordion>
           );
@@ -130,21 +140,17 @@ export const PolicyResponse = memo(
     responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
     responseAttentionCount: Map<string, number>;
   }) => {
+    const generateId = useMemo(() => htmlIdGenerator(), []);
+
     return (
       <>
         {Object.entries(responseConfig).map(([key, val]) => {
           const attentionCount = responseAttentionCount.get(key);
           return (
             <PolicyResponseConfigAccordion
-              id={
-                /* eslint-disable-next-line react-hooks/rules-of-hooks */
-                useMemo(() => htmlIdGenerator()(), [])
-              }
-              key={
-                /* eslint-disable-next-line react-hooks/rules-of-hooks */
-                useMemo(() => htmlIdGenerator()(), [])
-              }
-              data-test-subj="hostDetailsPolicyResponseConfigAccordion"
+              id={generateId(`id_${key}`)}
+              key={generateId(`key_${key}`)}
+              data-test-subj="endpointDetailsPolicyResponseConfigAccordion"
               buttonContent={
                 <EuiText size="s">
                   <p>{formatResponse(key)}</p>
@@ -156,7 +162,7 @@ export const PolicyResponse = memo(
                 attentionCount > 0 && (
                   <EuiNotificationBadge
                     className="policyResponseAttentionBadge"
-                    data-test-subj="hostDetailsPolicyResponseAttentionBadge"
+                    data-test-subj="endpointDetailsPolicyResponseAttentionBadge"
                   >
                     {attentionCount}
                   </EuiNotificationBadge>

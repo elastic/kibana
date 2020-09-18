@@ -4,7 +4,7 @@ exports[`renderLegendDetailRow Should render as range 1`] = `
 <RangedStyleLegendRow
   fieldLabel="foobar_label"
   header={
-    <ForwardRef
+    <EuiFlexGroup
       alignItems="center"
       gutterSize="xs"
       justifyContent="spaceBetween"
@@ -64,7 +64,7 @@ exports[`renderLegendDetailRow Should render as range 1`] = `
           />
         </EuiFlexItem>
       </React.Fragment>
-    </ForwardRef>
+    </EuiFlexGroup>
   }
   maxLabel="100_format"
   minLabel="0_format"

@@ -1,5 +1,5 @@
 [[connect-to-elasticsearch]]
-== Adding data
+== Add data to {kib}
 
 To start working with your data in {kib}, you can:
 
@@ -11,17 +11,26 @@ To start working with your data in {kib}, you can:
 
 * Connect {kib} with existing {es} indices.
 
-If you're not ready to use your own data, you can add a <<get-data-in, sample data set>>
+If you're not ready to use your own data, you can add a <<gs-get-data-into-kibana, sample data set>>
 to see all that you can do in {kib}.
 
 [float]
 [[upload-data-kibana]]
 === Upload a CSV, JSON, or log file
 
-To visualize data in a CSV, JSON, or log file, you can
-upload it using the File Data Visualizer.  On the home page,
-click *Import a CSV, NDSON, or log file*, and then drag your file into the
-File Data Visualizer. You can upload a file up to 100 MB.
+experimental[]
+
+To visualize data in a CSV, JSON, or log file, you can upload it using the File 
+Data Visualizer. On the home page, click *Import a CSV, NDSON, or log file*, and 
+then drag your file into the File Data Visualizer. Alternatively, you can open 
+it by navigating to *Machine Learning* from the side navigation and selecting 
+*Data Visualizer*.
+
+[role="screenshot"]
+image::images/data-viz-homepage.jpg[File Data Visualizer on the home page]
+
+You can upload a file up to 100 MB. This value is configurable up to 1 GB in
+<<kibana-ml-settings, Advanced Settings>>.
 
 [role="screenshot"]
 image::images/add-data-fv.png[File Data Visualizer]
@@ -37,7 +46,7 @@ repeated production process, but rather for the initial exploration of your data
 === Upload geospatial data
 
 To visualize geospatial data in a point or shape file, you can upload it using the <<geojson-upload, GeoJSON Upload>>
-feature in *Elastic Maps*, and then use that data as a layer in a map.
+feature in Maps, and then use that data as a layer in a map.
 The data is also available for use in the broader Kibana ecosystem, for example,
 in visualizations and Canvas workpads.
 With GeoJSON Upload, you can upload a file up to 50 MB.
@@ -88,7 +97,7 @@ Using a wildcard is the more popular approach.
 comparisons.
 +
 Kibana reads the index mapping and lists all fields that contain a timestamp. If your
-index doesn't have time-based data, choose *I don't want to use the Time Filter*.
+index doesn't have time-based data, choose *I don't want to use the time filter*.
 +
 You must select a time field to use global time filters on your dashboards.
 

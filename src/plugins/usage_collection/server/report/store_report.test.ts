@@ -20,7 +20,7 @@
 import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
 import { storeReport } from './store_report';
 import { ReportSchemaType } from './schema';
-import { METRIC_TYPE } from '../../public';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 describe('store_report', () => {
   test('stores report for all types of data', async () => {

@@ -11,22 +11,35 @@ import {
   validateEvents,
   validateChildren,
   validateAncestry,
+  validateAlerts,
+  validateEntities,
 } from '../../../common/endpoint/schema/resolver';
 import { handleEvents } from './resolver/events';
 import { handleChildren } from './resolver/children';
 import { handleAncestry } from './resolver/ancestry';
 import { handleTree } from './resolver/tree';
+import { handleAlerts } from './resolver/alerts';
+import { handleEntities } from './resolver/entity';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
 
-  router.get(
+  router.post(
     {
       path: '/api/endpoint/resolver/{id}/events',
       validate: validateEvents,
       options: { authRequired: true },
     },
     handleEvents(log, endpointAppContext)
+  );
+
+  router.post(
+    {
+      path: '/api/endpoint/resolver/{id}/alerts',
+      validate: validateAlerts,
+      options: { authRequired: true },
+    },
+    handleAlerts(log, endpointAppContext)
   );
 
   router.get(
@@ -54,5 +67,17 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       options: { authRequired: true },
     },
     handleTree(log, endpointAppContext)
+  );
+
+  /**
+   * Used to get details about an entity, aka process.
+   */
+  router.get(
+    {
+      path: '/api/endpoint/resolver/entity',
+      validate: validateEntities,
+      options: { authRequired: true },
+    },
+    handleEntities()
   );
 }

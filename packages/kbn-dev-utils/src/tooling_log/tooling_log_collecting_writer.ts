@@ -18,13 +18,14 @@
  */
 
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
+import { LogLevel } from './log_levels';
 
 export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
   messages: string[] = [];
 
-  constructor() {
+  constructor(level: LogLevel = 'verbose') {
     super({
-      level: 'verbose',
+      level,
       writeTo: {
         write: (msg) => {
           // trim trailing new line

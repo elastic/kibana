@@ -1,6 +1,6 @@
 [role="xpack"]
 [[cluster-alerts]]
-== Cluster Alerts
+= Cluster Alerts
 
 The *Stack Monitoring > Clusters* page in {kib} summarizes the status of your
 {stack}. You can drill down into the metrics to view more information about your
@@ -39,11 +39,12 @@ valid for 30 days.
 The {monitor-features} check the cluster alert conditions every minute. Cluster
 alerts are automatically dismissed when the condition is resolved.
 
-include::cluster-alerts-license.asciidoc[]
+NOTE: {watcher} must be enabled to view cluster alerts. If you have a Basic
+license, Top Cluster Alerts are not displayed.
 
 [float]
 [[cluster-alert-email-notifications]]
-==== Email Notifications
+== Email Notifications
 To receive email notifications for the Cluster Alerts:
 
 . Configure an email account as described in

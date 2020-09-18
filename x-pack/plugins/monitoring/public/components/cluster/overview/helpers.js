@@ -29,13 +29,17 @@ export function HealthStatusIndicator(props) {
   const statusColor = statusColorMap[props.status] || 'n/a';
 
   return (
-    <EuiHealth color={statusColor} data-test-subj="statusIcon">
-      <FormattedMessage
-        id="xpack.monitoring.cluster.overview.healthStatusDescription"
-        defaultMessage="Health is {status}"
-        values={{ status: props.status || 'n/a' }}
-      />
-    </EuiHealth>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiHealth color={statusColor} data-test-subj="statusIcon">
+          <FormattedMessage
+            id="xpack.monitoring.cluster.overview.healthStatusDescription"
+            defaultMessage="Health is {status}"
+            values={{ status: props.status || 'n/a' }}
+          />
+        </EuiHealth>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

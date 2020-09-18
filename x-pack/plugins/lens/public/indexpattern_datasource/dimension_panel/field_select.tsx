@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './field_select.scss';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBoxOptionOption,
+  EuiComboBoxProps,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
@@ -24,9 +31,8 @@ export interface FieldChoice {
   operationType?: OperationType;
 }
 
-export interface FieldSelectProps {
+export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   currentIndexPattern: IndexPattern;
-  showEmptyFields: boolean;
   fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
@@ -39,7 +45,6 @@ export interface FieldSelectProps {
 
 export function FieldSelect({
   currentIndexPattern,
-  showEmptyFields,
   fieldMap,
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
@@ -48,6 +53,7 @@ export function FieldSelect({
   onChoose,
   onDeleteColumn,
   existingFields,
+  ...rest
 }: FieldSelectProps) {
   const { operationByField } = operationFieldSupportMatrix;
   const memoizedFieldOptions = useMemo(() => {
@@ -68,10 +74,14 @@ export function FieldSelect({
       (field) => fieldMap[field].type === 'document'
     );
 
+    const containsData = (field: string) =>
+      fieldMap[field].type === 'document' ||
+      fieldExists(existingFields, currentIndexPattern.title, field);
+
     function fieldNamesToOptions(items: string[]) {
       return items
         .map((field) => ({
-          label: field,
+          label: fieldMap[field].displayName,
           value: {
             type: 'field',
             field,
@@ -81,12 +91,9 @@ export function FieldSelect({
                 ? selectedColumnOperationType
                 : undefined,
           },
-          exists:
-            fieldMap[field].type === 'document' ||
-            fieldExists(existingFields, currentIndexPattern.title, field),
+          exists: containsData(field),
           compatible: isCompatibleWithCurrentOperation(field),
         }))
-        .filter((field) => showEmptyFields || field.exists)
         .sort((a, b) => {
           if (a.compatible && !b.compatible) {
             return -1;
@@ -100,33 +107,49 @@ export function FieldSelect({
           label,
           value,
           className: classNames({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnFieldSelect__option--incompatible': !compatible,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnFieldSelect__option--nonExistant': !exists,
           }),
-          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
+          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${value.field}`,
         }));
     }
 
-    const fieldOptions: unknown[] = fieldNamesToOptions(specialFields);
+    const [availableFields, emptyFields] = _.partition(normalFields, containsData);
 
-    if (fields.length > 0) {
-      fieldOptions.push({
-        label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
-          defaultMessage: 'Individual fields',
-        }),
-        options: fieldNamesToOptions(normalFields),
-      });
-    }
+    const constructFieldsOptions = (fieldsArr: string[], label: string) =>
+      fieldsArr.length > 0 && {
+        label,
+        options: fieldNamesToOptions(fieldsArr),
+      };
 
-    return fieldOptions;
+    const availableFieldsOptions = constructFieldsOptions(
+      availableFields,
+      i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
+        defaultMessage: 'Available fields',
+      })
+    );
+
+    const emptyFieldsOptions = constructFieldsOptions(
+      emptyFields,
+      i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
+        defaultMessage: 'Empty fields',
+      })
+    );
+
+    return [
+      ...fieldNamesToOptions(specialFields),
+      availableFieldsOptions,
+      emptyFieldsOptions,
+    ].filter(Boolean);
   }, [
     incompatibleSelectedOperationType,
     selectedColumnOperationType,
-    selectedColumnSourceField,
-    operationFieldSupportMatrix,
     currentIndexPattern,
     fieldMap,
-    showEmptyFields,
+    operationByField,
+    existingFields,
   ]);
 
   return (
@@ -139,13 +162,13 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumnOperationType)}
+      isInvalid={Boolean(incompatibleSelectedOperationType)}
       selectedOptions={
         ((selectedColumnOperationType
           ? selectedColumnSourceField
             ? [
                 {
-                  label: selectedColumnSourceField,
+                  label: fieldMap[selectedColumnSourceField].displayName,
                   value: { type: 'field', field: selectedColumnSourceField },
                 },
               ]
@@ -165,7 +188,7 @@ export function FieldSelect({
       }}
       renderOption={(option, searchValue) => {
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={null}>
               <LensFieldIcon
                 type={((option.value as unknown) as { dataType: DataType }).dataType}
@@ -178,6 +201,7 @@ export function FieldSelect({
           </EuiFlexGroup>
         );
       }}
+      {...rest}
     />
   );
 }

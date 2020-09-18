@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 import { Scroll } from '../lists/types';
@@ -15,7 +15,7 @@ import { getSourceWithTieBreaker } from './get_source_with_tie_breaker';
 import { TieBreaker, getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
 
 interface GetSearchAfterOptions {
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   filter: Filter;
   hops: number;
   hopSize: number;

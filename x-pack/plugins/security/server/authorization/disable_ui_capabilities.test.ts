@@ -7,19 +7,28 @@
 import { Actions } from '.';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 
-import { httpServerMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { authorizationMock } from './index.mock';
-import { Feature } from '../../../features/server';
+import { KibanaFeature, ElasticsearchFeature } from '../../../features/server';
+import { AuthenticatedUser } from '..';
+import { CheckPrivilegesResponse } from './types';
 
 type MockAuthzOptions =
   | { rejectCheckPrivileges: any }
-  | { resolveCheckPrivileges: { privileges: Array<{ privilege: string; authorized: boolean }> } };
+  | {
+      resolveCheckPrivileges: {
+        privileges: CheckPrivilegesResponse['privileges'];
+      };
+    };
 
 const actions = new Actions('1.0.0-zeta1');
 const mockRequest = httpServerMock.createKibanaRequest();
 
 const createMockAuthz = (options: MockAuthzOptions) => {
   const mock = authorizationMock.create({ version: '1.0.0-zeta1' });
+  // plug actual ui actions into mock Actions with
+  mock.actions = actions;
+
   mock.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
     expect(request).toBe(mockRequest);
 
@@ -28,13 +37,33 @@ const createMockAuthz = (options: MockAuthzOptions) => {
         throw options.rejectCheckPrivileges;
       }
 
-      const expected = options.resolveCheckPrivileges.privileges.map((x) => x.privilege);
-      expect(checkActions).toEqual(expected);
+      const expectedKibana = options.resolveCheckPrivileges.privileges.kibana.map(
+        (x) => x.privilege
+      );
+      const expectedCluster = (
+        options.resolveCheckPrivileges.privileges.elasticsearch.cluster ?? []
+      ).map((x) => x.privilege);
+
+      expect(checkActions).toEqual({
+        kibana: expectedKibana,
+        elasticsearch: { cluster: expectedCluster, index: {} },
+      });
       return options.resolveCheckPrivileges;
     });
   });
+  mock.checkElasticsearchPrivilegesWithRequest.mockImplementation((request) => {
+    expect(request).toBe(mockRequest);
+    return jest.fn().mockImplementation((privileges) => {});
+  });
   return mock;
 };
+
+const createMockUser = (user: Partial<AuthenticatedUser> = {}) =>
+  ({
+    username: 'mock_user',
+    roles: [],
+    ...user,
+  } as AuthenticatedUser);
 
 describe('usingPrivileges', () => {
   describe('checkPrivileges errors', () => {
@@ -42,27 +71,40 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: { statusCode: 401, message: 'super informative message' },
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
         [
-          new Feature({
+          new KibanaFeature({
             id: 'fooFeature',
-            name: 'Foo Feature',
-            app: [],
+            name: 'Foo KibanaFeature',
+            app: ['fooApp', 'foo'],
             navLinkId: 'foo',
             privileges: null,
           }),
         ],
+        [
+          new ElasticsearchFeature({
+            id: 'esFeature',
+            privileges: [
+              {
+                requiredClusterPrivileges: [],
+                ui: [],
+              },
+            ],
+          }),
+        ],
         mockLoggers.get(),
-        mockAuthz
+        mockAuthz,
+        createMockUser()
       );
 
       const result = await usingPrivileges(
         Object.freeze({
           navLinks: {
             foo: true,
+            fooApp: true,
             bar: true,
           },
           management: {
@@ -85,6 +127,7 @@ describe('usingPrivileges', () => {
       expect(result).toEqual({
         navLinks: {
           foo: false,
+          fooApp: false,
           bar: true,
         },
         management: {
@@ -103,7 +146,7 @@ describe('usingPrivileges', () => {
         },
       });
 
-      expect(loggingServiceMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Disabling all uiCapabilities because we received a 401: super informative message",
@@ -116,21 +159,33 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: { statusCode: 403, message: 'even more super informative message' },
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
         [
-          new Feature({
+          new KibanaFeature({
             id: 'fooFeature',
-            name: 'Foo Feature',
-            app: [],
+            name: 'Foo KibanaFeature',
+            app: ['foo'],
             navLinkId: 'foo',
             privileges: null,
           }),
         ],
+        [
+          new ElasticsearchFeature({
+            id: 'esFeature',
+            privileges: [
+              {
+                requiredClusterPrivileges: [],
+                ui: [],
+              },
+            ],
+          }),
+        ],
         mockLoggers.get(),
-        mockAuthz
+        mockAuthz,
+        createMockUser()
       );
 
       const result = await usingPrivileges(
@@ -176,7 +231,7 @@ describe('usingPrivileges', () => {
           bar: false,
         },
       });
-      expect(loggingServiceMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Disabling all uiCapabilities because we received a 403: even more super informative message",
@@ -189,13 +244,15 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: new Error('something else entirely'),
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
         [],
+        [],
         mockLoggers.get(),
-        mockAuthz
+        mockAuthz,
+        createMockUser()
       );
 
       await expect(
@@ -212,7 +269,7 @@ describe('usingPrivileges', () => {
           catalogue: {},
         })
       ).rejects.toThrowErrorMatchingSnapshot();
-      expect(loggingServiceMock.collect(mockLoggers)).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers)).toMatchInlineSnapshot(`
         Object {
           "debug": Array [],
           "error": Array [],
@@ -229,40 +286,91 @@ describe('usingPrivileges', () => {
   test(`disables ui capabilities when they don't have privileges`, async () => {
     const mockAuthz = createMockAuthz({
       resolveCheckPrivileges: {
-        privileges: [
-          { privilege: actions.ui.get('navLinks', 'foo'), authorized: true },
-          { privilege: actions.ui.get('navLinks', 'bar'), authorized: false },
-          { privilege: actions.ui.get('navLinks', 'quz'), authorized: false },
-          { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
-          { privilege: actions.ui.get('management', 'kibana', 'settings'), authorized: false },
-          { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
-          { privilege: actions.ui.get('fooFeature', 'bar'), authorized: false },
-          { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
-          { privilege: actions.ui.get('barFeature', 'bar'), authorized: false },
-        ],
+        privileges: {
+          kibana: [
+            { privilege: actions.ui.get('navLinks', 'foo'), authorized: true },
+            { privilege: actions.ui.get('navLinks', 'bar'), authorized: false },
+            { privilege: actions.ui.get('navLinks', 'quz'), authorized: false },
+            { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
+            { privilege: actions.ui.get('management', 'kibana', 'settings'), authorized: false },
+            {
+              privilege: actions.ui.get('management', 'kibana', 'esManagement'),
+              authorized: false,
+            },
+            { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
+            { privilege: actions.ui.get('fooFeature', 'bar'), authorized: false },
+            { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
+            { privilege: actions.ui.get('barFeature', 'bar'), authorized: false },
+          ],
+          elasticsearch: {
+            cluster: [
+              { privilege: 'manage', authorized: false },
+              { privilege: 'monitor', authorized: true },
+              { privilege: 'manage_security', authorized: true },
+            ],
+            index: {},
+          },
+        },
       },
     });
 
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        new Feature({
+        new KibanaFeature({
           id: 'fooFeature',
-          name: 'Foo Feature',
+          name: 'Foo KibanaFeature',
           navLinkId: 'foo',
           app: [],
           privileges: null,
         }),
-        new Feature({
+        new KibanaFeature({
           id: 'barFeature',
-          name: 'Bar Feature',
+          name: 'Bar KibanaFeature',
           navLinkId: 'bar',
-          app: [],
+          app: ['bar'],
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
-      mockAuthz
+      [
+        new ElasticsearchFeature({
+          id: 'esFeature',
+          privileges: [
+            {
+              requiredClusterPrivileges: ['manage'],
+              ui: ['es_manage'],
+            },
+            {
+              requiredClusterPrivileges: ['monitor'],
+              ui: ['es_monitor'],
+            },
+          ],
+        }),
+        new ElasticsearchFeature({
+          id: 'esSecurityFeature',
+          privileges: [
+            {
+              requiredClusterPrivileges: ['manage_security'],
+              ui: ['es_manage_sec'],
+            },
+          ],
+        }),
+        new ElasticsearchFeature({
+          id: 'esManagementFeature',
+          management: {
+            kibana: ['esManagement'],
+          },
+          privileges: [
+            {
+              requiredClusterPrivileges: ['manage_security'],
+              ui: [],
+            },
+          ],
+        }),
+      ],
+      loggingSystemMock.create().get(),
+      mockAuthz,
+      createMockUser()
     );
 
     const result = await usingPrivileges(
@@ -276,6 +384,7 @@ describe('usingPrivileges', () => {
           kibana: {
             indices: true,
             settings: false,
+            esManagement: true,
           },
         },
         catalogue: {},
@@ -287,6 +396,14 @@ describe('usingPrivileges', () => {
           foo: true,
           bar: true,
         },
+        esFeature: {
+          es_manage: true,
+          es_monitor: true,
+        },
+        esSecurityFeature: {
+          es_manage_sec: true,
+        },
+        esManagementFeature: {},
       })
     );
 
@@ -300,6 +417,7 @@ describe('usingPrivileges', () => {
         kibana: {
           indices: true,
           settings: false,
+          esManagement: true,
         },
       },
       catalogue: {},
@@ -311,44 +429,70 @@ describe('usingPrivileges', () => {
         foo: true,
         bar: false,
       },
+      esFeature: {
+        es_manage: false,
+        es_monitor: true,
+      },
+      esSecurityFeature: {
+        es_manage_sec: true,
+      },
+      esManagementFeature: {},
     });
   });
 
   test(`doesn't re-enable disabled uiCapabilities`, async () => {
     const mockAuthz = createMockAuthz({
       resolveCheckPrivileges: {
-        privileges: [
-          { privilege: actions.ui.get('navLinks', 'foo'), authorized: true },
-          { privilege: actions.ui.get('navLinks', 'bar'), authorized: true },
-          { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
-          { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
-          { privilege: actions.ui.get('fooFeature', 'bar'), authorized: true },
-          { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
-          { privilege: actions.ui.get('barFeature', 'bar'), authorized: true },
-        ],
+        privileges: {
+          kibana: [
+            { privilege: actions.ui.get('navLinks', 'foo'), authorized: true },
+            { privilege: actions.ui.get('navLinks', 'bar'), authorized: true },
+            { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
+            { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
+            { privilege: actions.ui.get('fooFeature', 'bar'), authorized: true },
+            { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
+            { privilege: actions.ui.get('barFeature', 'bar'), authorized: true },
+          ],
+          elasticsearch: {
+            cluster: [],
+            index: {},
+          },
+        },
       },
     });
 
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        new Feature({
+        new KibanaFeature({
           id: 'fooFeature',
-          name: 'Foo Feature',
+          name: 'Foo KibanaFeature',
           navLinkId: 'foo',
           app: [],
           privileges: null,
         }),
-        new Feature({
+        new KibanaFeature({
           id: 'barFeature',
-          name: 'Bar Feature',
+          name: 'Bar KibanaFeature',
           navLinkId: 'bar',
           app: [],
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
-      mockAuthz
+      [
+        new ElasticsearchFeature({
+          id: 'esFeature',
+          privileges: [
+            {
+              requiredClusterPrivileges: [],
+              ui: [],
+            },
+          ],
+        }),
+      ],
+      loggingSystemMock.create().get(),
+      mockAuthz,
+      createMockUser()
     );
 
     const result = await usingPrivileges(
@@ -404,16 +548,28 @@ describe('all', () => {
     const { all } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        new Feature({
+        new KibanaFeature({
           id: 'fooFeature',
-          name: 'Foo Feature',
-          app: [],
+          name: 'Foo KibanaFeature',
+          app: ['foo'],
           navLinkId: 'foo',
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
-      mockAuthz
+      [
+        new ElasticsearchFeature({
+          id: 'esFeature',
+          privileges: [
+            {
+              requiredClusterPrivileges: [],
+              ui: ['bar'],
+            },
+          ],
+        }),
+      ],
+      loggingSystemMock.create().get(),
+      mockAuthz,
+      createMockUser()
     );
 
     const result = all(
@@ -436,6 +592,9 @@ describe('all', () => {
           foo: true,
           bar: true,
         },
+        esFeature: {
+          bar: true,
+        },
       })
     );
     expect(result).toEqual({
@@ -455,6 +614,9 @@ describe('all', () => {
       },
       barFeature: {
         foo: false,
+        bar: false,
+      },
+      esFeature: {
         bar: false,
       },
     });

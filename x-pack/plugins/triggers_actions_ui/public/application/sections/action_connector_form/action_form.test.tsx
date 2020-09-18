@@ -149,6 +149,16 @@ describe('action_form', () => {
           config: {},
           isPreconfigured: false,
         },
+        {
+          secrets: {},
+          id: '.servicenow',
+          actionTypeId: '.servicenow',
+          name: 'Non consumer connector',
+          config: {
+            isCaseOwned: true,
+          },
+          isPreconfigured: false,
+        },
       ]);
       const mocks = coreMock.createSetup();
       const [
@@ -207,7 +217,10 @@ describe('action_form', () => {
       wrapper = mountWithIntl(
         <ActionForm
           actions={initialAlert.actions}
-          messageVariables={['test var1', 'test var2']}
+          messageVariables={[
+            { name: 'testVar1', description: 'test var1' },
+            { name: 'testVar2', description: 'test var2' },
+          ]}
           defaultActionGroupId={'default'}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;

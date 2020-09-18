@@ -6,18 +6,21 @@
 import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { TelemetryPluginSetup } from '../../../../src/plugins/telemetry/public';
-import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
+import { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../../plugins/licensing/public';
 import { PLUGIN } from '../common/constants';
 import { ClientConfigType } from './types';
 import { AppDependencies } from './application';
 import { BreadcrumbService } from './application/breadcrumbs';
 
-interface PluginsDependencies {
+interface PluginsDependenciesSetup {
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
-  telemetry?: TelemetryPluginSetup;
+}
+
+interface PluginsDependenciesStart {
+  telemetry?: TelemetryPluginStart;
 }
 
 export interface LicenseManagementUIPluginSetup {
@@ -31,7 +34,10 @@ export class LicenseManagementUIPlugin
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup, plugins: PluginsDependencies): LicenseManagementUIPluginSetup {
+  setup(
+    coreSetup: CoreSetup<PluginsDependenciesStart>,
+    plugins: PluginsDependenciesSetup
+  ): LicenseManagementUIPluginSetup {
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     if (!config.ui.enabled) {
@@ -42,29 +48,34 @@ export class LicenseManagementUIPlugin
     }
 
     const { getStartServices } = coreSetup;
-    const { management, telemetry, licensing } = plugins;
+    const { management, licensing } = plugins;
 
-    management.sections.getSection(ManagementSectionId.Stack).registerApp({
+    management.sections.section.stack.registerApp({
       id: PLUGIN.id,
       title: PLUGIN.title,
       order: 0,
       mount: async ({ element, setBreadcrumbs, history }) => {
-        const [core] = await getStartServices();
+        const [coreStart, { telemetry }] = await getStartServices();
         const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
 
         // Setup documentation links
-        const { docLinks } = core;
+        const {
+          docLinks,
+          chrome: { docTitle },
+        } = coreStart;
         const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
         const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
         const appDocLinks = {
           security: `${esBase}/security-settings.html`,
         };
 
+        docTitle.change(PLUGIN.title);
+
         // Setup services
         this.breadcrumbService.setup(setBreadcrumbs);
 
         const appDependencies: AppDependencies = {
-          core,
+          core: coreStart,
           config,
           plugins: {
             licensing,
@@ -81,8 +92,12 @@ export class LicenseManagementUIPlugin
         };
 
         const { renderApp } = await import('./application');
+        const unmountAppCallback = renderApp(element, appDependencies);
 
-        return renderApp(element, appDependencies);
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
 

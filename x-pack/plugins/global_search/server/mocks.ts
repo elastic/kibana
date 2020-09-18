@@ -11,6 +11,7 @@ import {
   RouteHandlerGlobalSearchContext,
 } from './types';
 import { searchServiceMock } from './services/search_service.mock';
+import { contextMock } from './services/context.mock';
 
 const createSetupMock = (): jest.Mocked<GlobalSearchPluginSetup> => {
   const searchMock = searchServiceMock.createSetupContract();
@@ -29,17 +30,18 @@ const createStartMock = (): jest.Mocked<GlobalSearchPluginStart> => {
 };
 
 const createRouteHandlerContextMock = (): jest.Mocked<RouteHandlerGlobalSearchContext> => {
-  const contextMock = {
+  const handlerContextMock = {
     find: jest.fn(),
   };
 
-  contextMock.find.mockReturnValue(of([]));
+  handlerContextMock.find.mockReturnValue(of([]));
 
-  return contextMock;
+  return handlerContextMock;
 };
 
 export const globalSearchPluginMock = {
   createSetupContract: createSetupMock,
   createStartContract: createStartMock,
   createRouteHandlerContext: createRouteHandlerContextMock,
+  createProviderContext: contextMock.create,
 };

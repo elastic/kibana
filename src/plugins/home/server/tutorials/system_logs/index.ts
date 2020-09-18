@@ -37,6 +37,7 @@ export function systemLogsSpecProvider(context: TutorialContext): TutorialSchema
     name: i18n.translate('home.tutorials.systemLogs.nameTitle', {
       defaultMessage: 'System logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.systemLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs written by the local Syslog server.',

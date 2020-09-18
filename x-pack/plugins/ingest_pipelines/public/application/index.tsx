@@ -7,7 +7,7 @@
 import { HttpSetup } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { NotificationsSetup } from 'kibana/public';
+import { NotificationsSetup, IUiSettingsClient } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
@@ -25,6 +25,7 @@ export interface AppServices {
   api: ApiService;
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
+  uiSettings: IUiSettingsClient;
 }
 
 export interface CoreServices {

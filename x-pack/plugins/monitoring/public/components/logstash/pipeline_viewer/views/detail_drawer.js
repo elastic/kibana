@@ -26,6 +26,7 @@ import {
 import { Sparkline } from '../../../sparkline';
 import { formatMetric } from '../../../../lib/format_number';
 import { FormattedMessage } from '@kbn/i18n/react';
+import './detail_drawer.scss';
 
 function renderIcon(vertex) {
   return <EuiIcon type={vertex.iconType} className="lspvDetailDrawerIcon" />;

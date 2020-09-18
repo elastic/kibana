@@ -14,6 +14,7 @@ import {
   OsEcsFields,
   SourceConfiguration,
   TimerangeInput,
+  DocValueFieldsInput,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { Hit, Hits, SearchHit, TotalValue } from '../types';
@@ -50,6 +51,7 @@ export interface HostLastFirstSeenRequestOptions {
   hostName: string;
   sourceConfiguration: SourceConfiguration;
   defaultIndex: string[];
+  docValueFields?: DocValueFieldsInput[];
 }
 
 export interface HostOverviewRequestOptions extends HostLastFirstSeenRequestOptions {

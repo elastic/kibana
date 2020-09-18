@@ -7,8 +7,6 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type UUIDC = t.Type<string, string, unknown>;
-
 const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
@@ -16,7 +14,7 @@ const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  *   - Natural Number (positive integer and not a float),
  *   - Between the values [0 and 100] inclusive.
  */
-export const UUID: UUIDC = new t.Type<string, string, unknown>(
+export const UUID = new t.Type<string, string, unknown>(
   'UUID',
   t.string.is,
   (input, context): Either<t.Errors, string> => {
@@ -26,3 +24,5 @@ export const UUID: UUIDC = new t.Type<string, string, unknown>(
   },
   t.identity
 );
+
+export type UUIDC = typeof UUID;

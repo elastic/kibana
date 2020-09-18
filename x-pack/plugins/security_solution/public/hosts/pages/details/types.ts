@@ -7,12 +7,12 @@
 import { ActionCreator } from 'typescript-fsa';
 import { Query, IIndexPattern, Filter } from 'src/plugins/data/public';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { HostComponentProps } from '../../../common/components/link_to/redirect_to_hosts';
 import { HostsTableType } from '../../store/model';
 import { HostsQueryProps } from '../types';
 import { NavTab } from '../../../common/components/navigation/types';
 import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
 import { hostsModel } from '../../store';
+import { DocValueFields } from '../../../common/containers/source';
 
 interface HostDetailsComponentReduxProps {
   query: Query;
@@ -22,8 +22,8 @@ interface HostDetailsComponentReduxProps {
 interface HostBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
   detailName: string;
   hostDetailsPagePath: string;
@@ -33,14 +33,13 @@ interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchPro
   setHostDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
-export interface HostDetailsProps extends HostsQueryProps {
+export interface HostDetailsProps {
   detailName: string;
   hostDetailsPagePath: string;
 }
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
-  HostComponentProps &
   HostsQueryProps;
 
 type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
@@ -58,6 +57,7 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
+    docValueFields?: DocValueFields[];
     pageFilters?: Filter[];
     filterQuery: string;
     indexPattern: IIndexPattern;
@@ -66,6 +66,6 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
 
 export type SetAbsoluteRangeDatePicker = ActionCreator<{
   id: InputsModelId;
-  from: number;
-  to: number;
+  from: string;
+  to: string;
 }>;

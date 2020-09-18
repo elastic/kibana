@@ -76,10 +76,15 @@ export const processFieldsMap: Readonly<Record<string, string>> = {
   'process.name': 'process.name',
   'process.ppid': 'process.ppid',
   'process.args': 'process.args',
+  'process.entity_id': 'process.entity_id',
   'process.executable': 'process.executable',
   'process.title': 'process.title',
   'process.thread': 'process.thread',
   'process.working_directory': 'process.working_directory',
+};
+
+export const agentFieldsMap: Readonly<Record<string, string>> = {
+  'agent.type': 'agent.type',
 };
 
 export const userFieldsMap: Readonly<Record<string, string>> = {
@@ -317,6 +322,9 @@ export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.rule.updated_by': 'signal.rule.updated_by',
   'signal.rule.version': 'signal.rule.version',
   'signal.rule.note': 'signal.rule.note',
+  'signal.rule.threshold': 'signal.rule.threshold',
+  'signal.rule.exceptions_list': 'signal.rule.exceptions_list',
+  'signal.status': 'signal.status',
 };
 
 export const ruleFieldsMap: Readonly<Record<string, string>> = {
@@ -327,6 +335,7 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',
   message: 'message',
+  ...{ ...agentFieldsMap },
   ...{ ...auditdMap },
   ...{ ...destinationFieldsMap },
   ...{ ...dnsFieldsMap },

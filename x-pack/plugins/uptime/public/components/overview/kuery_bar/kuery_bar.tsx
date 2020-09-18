@@ -5,22 +5,23 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { uniqueId, startsWith } from 'lodash';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, htmlIdGenerator } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useSearchText, useUrlParams } from '../../../hooks';
 import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
-  DataPublicPluginSetup,
+  DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from './use_index_pattern';
 
 const Container = styled.div`
   margin-bottom: 4px;
+  position: relative;
 `;
 
 interface State {
@@ -35,60 +36,87 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 
 interface Props {
   'aria-label': string;
-  autocomplete: DataPublicPluginSetup['autocomplete'];
+  defaultKuery?: string;
   'data-test-subj': string;
+  shouldUpdateUrl?: boolean;
+  updateDefaultKuery?: (value: string) => void;
 }
 
 export function KueryBar({
   'aria-label': ariaLabel,
-  autocomplete: autocompleteService,
+  defaultKuery,
   'data-test-subj': dataTestSubj,
+  shouldUpdateUrl,
+  updateDefaultKuery,
 }: Props) {
   const { loading, index_pattern: indexPattern } = useIndexPattern();
   const { updateSearchText } = useSearchText();
+
+  const {
+    services: {
+      data: { autocomplete },
+    },
+  } = useKibana<{ data: DataPublicPluginStart }>();
 
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingIndexPattern: true,
   });
+  const [suggestionLimit, setSuggestionLimit] = useState(15);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { search: kuery } = getUrlParams();
+  const { search: kuery, dateRangeStart, dateRangeEnd } = getUrlParams();
 
   useEffect(() => {
     updateSearchText(kuery);
   }, [kuery, updateSearchText]);
 
+  useEffect(() => {
+    if (updateDefaultKuery && kuery) {
+      updateDefaultKuery(kuery);
+    } else if (defaultKuery && updateDefaultKuery) {
+      updateDefaultKuery(defaultKuery);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const indexPatternMissing = loading && !indexPattern;
 
-  async function onChange(inputValue: string, selectionStart: number) {
+  async function onChange(inputValue: string, selectionStart: number | null) {
     if (!indexPattern) {
       return;
     }
 
-    updateSearchText(inputValue);
-
     setIsLoadingSuggestions(true);
     setState({ ...state, suggestions: [] });
+    setSuggestionLimit(15);
 
-    const currentRequest = uniqueId();
+    const currentRequest = htmlIdGenerator()();
     currentRequestCheck = currentRequest;
 
     try {
       const suggestions = (
-        (await autocompleteService.getQuerySuggestions({
+        (await autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [indexPattern],
           query: inputValue,
-          selectionStart,
-          selectionEnd: selectionStart,
+          selectionStart: selectionStart || 0,
+          selectionEnd: selectionStart || 0,
+          boolFilter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: dateRangeStart,
+                  lte: dateRangeEnd,
+                },
+              },
+            },
+          ],
         })) || []
-      )
-        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
-        .slice(0, 15);
-
+      ).filter((suggestion: QuerySuggestion) => !suggestion.text.startsWith('span.'));
       if (currentRequest !== currentRequestCheck) {
         return;
       }
@@ -112,23 +140,34 @@ export function KueryBar({
         return;
       }
 
-      updateUrlParams({ search: inputValue.trim() });
+      if (shouldUpdateUrl !== false) {
+        updateUrlParams({ search: inputValue.trim() });
+      }
+      updateSearchText(inputValue);
+      if (updateDefaultKuery) {
+        updateDefaultKuery(inputValue);
+      }
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }
   }
 
+  const increaseLimit = () => {
+    setSuggestionLimit(suggestionLimit + 15);
+  };
+
   return (
     <Container>
       <Typeahead
-        aria-label={ariaLabel}
-        data-test-subj={dataTestSubj}
+        ariaLabel={ariaLabel}
+        dataTestSubj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
-        initialValue={kuery}
+        initialValue={defaultKuery || kuery}
         onChange={onChange}
         onSubmit={onSubmit}
-        suggestions={state.suggestions}
+        suggestions={state.suggestions.slice(0, suggestionLimit)}
+        loadMore={increaseLimit}
         queryExample=""
       />
 

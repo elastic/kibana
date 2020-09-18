@@ -15,17 +15,8 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('query for signal', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -128,9 +119,12 @@ describe('query for signal', () => {
         path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         body: {},
       });
-      const result = server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalledWith('"value" must have at least 1 children');
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: '"value" must have at least 1 children',
+        status_code: 400,
+      });
     });
   });
 });

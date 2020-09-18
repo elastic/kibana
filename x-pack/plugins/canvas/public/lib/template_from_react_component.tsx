@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ComponentType, FunctionComponent } from 'react';
+import React, { ComponentType, FC } from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
 import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -16,9 +16,9 @@ interface Props {
 }
 
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
-  const WrappedComponent: FunctionComponent<Props> = (props) => (
+  const WrappedComponent: FC<Props> = (props) => (
     <ErrorBoundary>
-      {({ error }: { error: Error }) => {
+      {({ error }) => {
         if (error) {
           props.renderError();
           return null;

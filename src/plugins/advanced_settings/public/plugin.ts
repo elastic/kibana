@@ -17,8 +17,8 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { ManagementApp, ManagementSectionId } from '../../management/public';
+import { CoreSetup, Plugin } from 'kibana/public';
+import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
@@ -30,11 +30,10 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
-  private managementApp?: ManagementApp;
-  public setup(core: CoreSetup, { management }: AdvancedSettingsPluginSetup) {
-    const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
+  public setup(core: CoreSetup, { management, home }: AdvancedSettingsPluginSetup) {
+    const kibanaSection = management.sections.section.kibana;
 
-    this.managementApp = kibanaSection.registerApp({
+    kibanaSection.registerApp({
       id: 'settings',
       title,
       order: 3,
@@ -46,16 +45,27 @@ export class AdvancedSettingsPlugin
       },
     });
 
+    if (home) {
+      home.featureCatalogue.register({
+        id: 'advanced_settings',
+        title,
+        description: i18n.translate('advancedSettings.featureCatalogueTitle', {
+          defaultMessage:
+            'Customize your Kibana experience — change the date format, turn on dark mode, and more.',
+        }),
+        icon: 'gear',
+        path: '/app/management/kibana/settings',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
+
     return {
       component: component.setup,
     };
   }
 
-  public start(core: CoreStart) {
-    if (!core.application.capabilities.management.kibana.settings) {
-      this.managementApp!.disable();
-    }
-
+  public start() {
     return {
       component: component.start,
     };

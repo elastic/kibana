@@ -16,7 +16,7 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
     >
       <input
         aria-label="Search certificates"
-        class="euiFieldSearch euiFieldSearch--fullWidth"
+        class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
         data-test-subj="uptimeCertSearch"
         placeholder="Search certificates"
         type="search"
@@ -90,8 +90,43 @@ exports[`CertificatesSearch shallow renders expected elements for valid props 1`
     }
   }
 >
-  <CertificateSearch
-    setSearch={[MockFunction]}
-  />
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <CertificateSearch
+      setSearch={[MockFunction]}
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

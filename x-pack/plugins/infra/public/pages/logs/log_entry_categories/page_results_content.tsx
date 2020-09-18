@@ -12,28 +12,38 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
+import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useInterval } from '../../../hooks/use_interval';
-import { CategoryJobNoticesSection } from './sections/notices/notices_section';
+import { PageViewLogInContext } from '../stream/page_view_log_in_context';
 import { TopCategoriesSection } from './sections/top_categories';
-import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
 import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
+import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
+interface LogEntryCategoriesResultsContentProps {
+  onOpenSetup: () => void;
+}
+
+export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryCategoriesResultsContentProps> = ({
+  onOpenSetup,
+}) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
+
+  const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
   const {
     fetchJobStatus,
     fetchModuleDefinition,
+    moduleDescriptor,
     setupStatus,
-    viewSetupForReconfiguration,
-    viewSetupForUpdate,
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
@@ -63,7 +73,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   const showLoadDataErrorNotification = useCallback(
     (error: Error) => {
-      // eslint-disable-next-line no-unused-expressions
       services.notifications?.toasts.addError(error, {
         title: loadDataErrorTitle,
       });
@@ -128,7 +137,10 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   ]);
 
   const isFirstUse = useMemo(
-    () => setupStatus.type === 'skipped' && !!setupStatus.newlyCreated && !hasResults,
+    () =>
+      ((setupStatus.type === 'skipped' && !!setupStatus.newlyCreated) ||
+        setupStatus.type === 'succeeded') &&
+      !hasResults,
     [hasResults, setupStatus]
   );
 
@@ -159,54 +171,64 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   );
 
   return (
-    <ResultsContentPage>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem />
-              <EuiFlexItem grow={false}>
-                <EuiSuperDatePicker
-                  start={selectedTimeRange.startTime}
-                  end={selectedTimeRange.endTime}
-                  onTimeChange={handleSelectedTimeRangeChange}
-                  isPaused={autoRefresh.isPaused}
-                  refreshInterval={autoRefresh.interval}
-                  onRefreshChange={handleAutoRefreshChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CategoryJobNoticesSection
-            hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
-            hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
-            hasStoppedJobs={hasStoppedJobs}
-            isFirstUse={isFirstUse}
-            onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
-            onRecreateMlJobForUpdate={viewSetupForUpdate}
-            qualityWarnings={categoryQualityWarnings}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="m">
-            <TopCategoriesSection
-              availableDatasets={logEntryCategoryDatasets}
-              isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
-              isLoadingTopCategories={isLoadingTopLogEntryCategories}
-              jobId={jobIds['log-entry-categories-count']}
-              onChangeDatasetSelection={setCategoryQueryDatasets}
-              onRequestRecreateMlJob={viewSetupForReconfiguration}
-              selectedDatasets={categoryQueryDatasets}
-              sourceId={sourceId}
-              timeRange={categoryQueryTimeRange.timeRange}
-              topCategories={topLogEntryCategories}
+    <ViewLogInContext.Provider
+      sourceId={sourceId}
+      startTimestamp={categoryQueryTimeRange.timeRange.startTime}
+      endTimestamp={categoryQueryTimeRange.timeRange.endTime}
+    >
+      <ResultsContentPage>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiPanel paddingSize="m">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem />
+                <EuiFlexItem grow={false}>
+                  <EuiSuperDatePicker
+                    start={selectedTimeRange.startTime}
+                    end={selectedTimeRange.endTime}
+                    onTimeChange={handleSelectedTimeRangeChange}
+                    isPaused={autoRefresh.isPaused}
+                    refreshInterval={autoRefresh.interval}
+                    onRefreshChange={handleAutoRefreshChange}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CategoryJobNoticesSection
+              hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
+              hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
+              hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+              hasStoppedJobs={hasStoppedJobs}
+              isFirstUse={isFirstUse}
+              moduleName={moduleDescriptor.moduleName}
+              onRecreateMlJobForReconfiguration={onOpenSetup}
+              onRecreateMlJobForUpdate={onOpenSetup}
+              qualityWarnings={categoryQualityWarnings}
             />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ResultsContentPage>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPanel paddingSize="m">
+              <TopCategoriesSection
+                availableDatasets={logEntryCategoryDatasets}
+                hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
+                isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
+                isLoadingTopCategories={isLoadingTopLogEntryCategories}
+                jobId={jobIds['log-entry-categories-count']}
+                onChangeDatasetSelection={setCategoryQueryDatasets}
+                onRequestRecreateMlJob={onOpenSetup}
+                selectedDatasets={categoryQueryDatasets}
+                sourceId={sourceId}
+                timeRange={categoryQueryTimeRange.timeRange}
+                topCategories={topLogEntryCategories}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ResultsContentPage>
+      <PageViewLogInContext />
+    </ViewLogInContext.Provider>
   );
 };
 

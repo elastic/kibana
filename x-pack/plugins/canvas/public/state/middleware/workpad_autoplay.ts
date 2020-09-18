@@ -9,9 +9,9 @@ import { State } from '../../../types';
 import { getFullscreen } from '../selectors/app';
 import { getInFlight } from '../selectors/resolved_args';
 import { getWorkpad, getPages, getSelectedPageIndex, getAutoplay } from '../selectors/workpad';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { appUnload } from '../actions/app';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { routerProvider } from '../../lib/router_provider';
 import { setAutoplayInterval } from '../../lib/app_state';
 import { createTimeInterval } from '../../lib/time_interval';

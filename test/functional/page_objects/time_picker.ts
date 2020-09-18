@@ -21,32 +21,55 @@ import moment from 'moment';
 import { FtrProviderContext } from '../ftr_provider_context.d';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
+export type CommonlyUsed =
+  | 'Today'
+  | 'This_week'
+  | 'Last_15 minutes'
+  | 'Last_30 minutes'
+  | 'Last_1 hour'
+  | 'Last_24 hours'
+  | 'Last_7 days'
+  | 'Last_30 days'
+  | 'Last_90 days'
+  | 'Last_1 year';
+
 export function TimePickerProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const { header, common } = getPageObjects(['header', 'common']);
-
-  type CommonlyUsed =
-    | 'Today'
-    | 'This_week'
-    | 'Last_15 minutes'
-    | 'Last_30 minutes'
-    | 'Last_1 hour'
-    | 'Last_24 hours'
-    | 'Last_7 days'
-    | 'Last_30 days'
-    | 'Last_90 days'
-    | 'Last_1 year';
+  const { header } = getPageObjects(['header']);
+  const kibanaServer = getService('kibanaServer');
 
   class TimePicker {
     defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
     defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
+    defaultStartTimeUTC = '2015-09-18T06:31:44.000Z';
+    defaultEndTimeUTC = '2015-09-23T18:31:44.000Z';
 
     async setDefaultAbsoluteRange() {
       await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
+    }
+
+    async ensureHiddenNoDataPopover() {
+      const isVisible = await testSubjects.exists('noDataPopoverDismissButton');
+      if (isVisible) {
+        await testSubjects.click('noDataPopoverDismissButton');
+      }
+    }
+
+    /**
+     * the provides a quicker way to set the timepicker to the default range, saves a few seconds
+     */
+    async setDefaultAbsoluteRangeViaUiSettings() {
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults': `{ "from": "${this.defaultStartTimeUTC}", "to": "${this.defaultEndTimeUTC}"}`,
+      });
+    }
+
+    async resetDefaultAbsoluteRangeViaUiSettings() {
+      await kibanaServer.uiSettings.replace({});
     }
 
     private async getTimePickerPanel() {
@@ -75,13 +98,6 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
         const input = await testSubjects.find(dataTestSubj);
         await input.clearValue();
         await input.type(value);
-      } else if (browser.isInternetExplorer) {
-        const input = await testSubjects.find(dataTestSubj);
-        const currentValue = await input.getAttribute('value');
-        await input.type(browser.keys.ARROW_RIGHT.repeat(currentValue.length));
-        await input.type(browser.keys.BACK_SPACE.repeat(currentValue.length));
-        await input.type(value);
-        await input.click();
       } else {
         await testSubjects.setValue(dataTestSubj, value);
       }
@@ -111,7 +127,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
-      await common.sleep(500);
+      await browser.pressKeys(browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
 
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
@@ -209,6 +225,12 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
         start,
         end,
       };
+    }
+
+    public async getShowDatesButtonText() {
+      const button = await testSubjects.find('superDatePickerShowDatesButton');
+      const text = await button.getVisibleText();
+      return text;
     }
 
     public async getTimeDurationForSharing() {

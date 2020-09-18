@@ -27,6 +27,7 @@ import {
   IIndexPattern,
   injectSearchSourceReferences,
 } from '../../../data/public';
+import { FailedImport } from './process_import_response';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -159,10 +160,6 @@ function groupByType(docs: SavedObjectsRawDoc[]): Record<string, SavedObjectsRaw
   }, defaultDocTypes);
 }
 
-async function awaitEachItemInParallel<T, R>(list: T[], op: (item: T) => R) {
-  return await Promise.all(list.map((item) => op(item)));
-}
-
 export async function resolveIndexPatternConflicts(
   resolutions: Array<{ oldId: string; newId: string }>,
   conflictedIndexPatterns: any[],
@@ -174,7 +171,7 @@ export async function resolveIndexPatternConflicts(
 ) {
   let importCount = 0;
 
-  await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj, doc }) => {
+  for (const { obj, doc } of conflictedIndexPatterns) {
     const serializedSearchSource = JSON.parse(
       doc._source.kibanaSavedObjectMeta?.searchSourceJSON || '{}'
     );
@@ -219,7 +216,7 @@ export async function resolveIndexPatternConflicts(
 
     if (!allResolved) {
       // The user decided to skip this conflict so do nothing
-      return;
+      continue;
     }
     obj.searchSource = await dependencies.search.searchSource.create(
       serializedSearchSourceWithInjectedReferences
@@ -227,17 +224,17 @@ export async function resolveIndexPatternConflicts(
     if (await saveObject(obj, overwriteAll)) {
       importCount++;
     }
-  });
+  }
   return importCount;
 }
 
 export async function saveObjects(objs: SavedObject[], overwriteAll: boolean) {
   let importCount = 0;
-  await awaitEachItemInParallel(objs, async (obj) => {
+  for (const obj of objs) {
     if (await saveObject(obj, overwriteAll)) {
       importCount++;
     }
-  });
+  }
   return importCount;
 }
 
@@ -252,16 +249,16 @@ export async function resolveSavedSearches(
   overwriteAll: boolean
 ) {
   let importCount = 0;
-  await awaitEachItemInParallel(savedSearches, async (searchDoc) => {
+  for (const searchDoc of savedSearches) {
     const obj = await getSavedObject(searchDoc, services);
     if (!obj) {
       // Just ignore?
-      return;
+      continue;
     }
     if (await importDocument(obj, searchDoc, overwriteAll)) {
       importCount++;
     }
-  });
+  }
   return importCount;
 }
 
@@ -277,9 +274,12 @@ export async function resolveSavedObjects(
   // Keep track of how many we actually import because the user
   // can cancel an override
   let importedObjectCount = 0;
-  const failedImports: any[] = [];
+  const failedImports: FailedImport[] = [];
   // Start with the index patterns since everything is dependent on them
-  await awaitEachItemInParallel(docTypes.indexPatterns, async (indexPatternDoc) => {
+  // As the confirmation opens a modal, and as we only allow one modal at a time
+  // (opening a new one close the previous with a rejection)
+  // we can't do that in parallel
+  for (const indexPatternDoc of docTypes.indexPatterns) {
     try {
       const importedIndexPatternId = await importIndexPattern(
         indexPatternDoc,
@@ -291,9 +291,9 @@ export async function resolveSavedObjects(
         importedObjectCount++;
       }
     } catch (error) {
-      failedImports.push({ indexPatternDoc, error });
+      failedImports.push({ obj: indexPatternDoc as any, error });
     }
-  });
+  }
 
   // We want to do the same for saved searches, but we want to keep them separate because they need
   // to be applied _first_ because other saved objects can be dependent on those saved searches existing
@@ -310,7 +310,7 @@ export async function resolveSavedObjects(
   // likely that these saved objects will work once resaved so keep them around to resave them.
   const conflictedSavedObjectsLinkedToSavedSearches: any[] = [];
 
-  await awaitEachItemInParallel(docTypes.searches, async (searchDoc) => {
+  for (const searchDoc of docTypes.searches) {
     const obj = await getSavedObject(searchDoc, services);
 
     try {
@@ -328,9 +328,9 @@ export async function resolveSavedObjects(
         failedImports.push({ obj, error });
       }
     }
-  });
+  }
 
-  await awaitEachItemInParallel(docTypes.other, async (otherDoc) => {
+  for (const otherDoc of docTypes.other) {
     const obj = await getSavedObject(otherDoc, services);
 
     try {
@@ -349,7 +349,7 @@ export async function resolveSavedObjects(
         failedImports.push({ obj, error });
       }
     }
-  });
+  }
 
   return {
     conflictedIndexPatterns,

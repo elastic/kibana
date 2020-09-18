@@ -37,6 +37,7 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.envoyproxyLogs.nameTitle', {
       defaultMessage: 'Envoyproxy',
     }),
+    moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.envoyproxyLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from the Envoy proxy.',

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
 import {
   Filter,
@@ -32,7 +33,7 @@ interface FindListOptions {
   page: Page;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
 }
 
@@ -71,7 +72,10 @@ export const findList = async ({
   });
 
   if (scroll.validSearchAfterFound) {
-    const response = await callCluster<SearchEsListSchema>('search', {
+    // Note: This typing of response = await callCluster<SearchResponse<SearchEsListSchema>>
+    // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
+    // to explicitly define the type <T>.
+    const response = await callCluster<SearchResponse<SearchEsListSchema>>('search', {
       body: {
         query,
         search_after: scroll.searchAfter,
@@ -79,6 +83,7 @@ export const findList = async ({
       },
       ignoreUnavailable: true,
       index: listIndex,
+      seq_no_primary_term: true,
       size: perPage,
     });
     return {

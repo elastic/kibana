@@ -5,12 +5,14 @@
  */
 import React, { useCallback } from 'react';
 import {
-  EuiBadge,
-  EuiTableFieldDataColumnType,
-  EuiTableComputedColumnType,
-  EuiTableActionsColumnType,
   EuiAvatar,
+  EuiBadgeGroup,
+  EuiBadge,
   EuiLink,
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
+  HorizontalAlignment,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
@@ -18,7 +20,6 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { Case } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseDetailsLink } from '../../../common/components/links';
-import { TruncatableText } from '../../../common/components/truncatable_text';
 import * as i18n from './translations';
 
 export type CasesColumns =
@@ -34,147 +35,160 @@ const Spacer = styled.span`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
+const TagWrapper = styled(EuiBadgeGroup)`
+  width: 100%;
+`;
+
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export const getCasesColumns = (
   actions: Array<DefaultItemIconButtonAction<Case>>,
-  filterStatus: string
-): CasesColumns[] => [
-  {
-    name: i18n.NAME,
-    render: (theCase: Case) => {
-      if (theCase.id != null && theCase.title != null) {
-        const caseDetailsLinkComponent = (
-          <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-            {theCase.title}
-          </CaseDetailsLink>
-        );
-        return theCase.status === 'open' ? (
-          caseDetailsLinkComponent
-        ) : (
-          <>
-            <MediumShadeText>
+  filterStatus: string,
+  isModal: boolean
+): CasesColumns[] => {
+  const columns = [
+    {
+      name: i18n.NAME,
+      render: (theCase: Case) => {
+        if (theCase.id != null && theCase.title != null) {
+          const caseDetailsLinkComponent = !isModal ? (
+            <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+              {theCase.title}
+            </CaseDetailsLink>
+          ) : (
+            <span>{theCase.title}</span>
+          );
+          return theCase.status === 'open' ? (
+            caseDetailsLinkComponent
+          ) : (
+            <>
               {caseDetailsLinkComponent}
-              <Spacer>{i18n.CLOSED}</Spacer>
-            </MediumShadeText>
-          </>
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    field: 'createdBy',
-    name: i18n.REPORTER,
-    render: (createdBy: Case['createdBy']) => {
-      if (createdBy != null) {
-        return (
-          <>
-            <EuiAvatar
-              className="userAction__circle"
-              name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
-              size="s"
-            />
-            <Spacer data-test-subj="case-table-column-createdBy">
-              {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
-            </Spacer>
-          </>
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    field: 'tags',
-    name: i18n.TAGS,
-    render: (tags: Case['tags']) => {
-      if (tags != null && tags.length > 0) {
-        return (
-          <TruncatableText>
-            {tags.map((tag: string, i: number) => (
-              <EuiBadge
-                color="hollow"
-                key={`${tag}-${i}`}
-                data-test-subj={`case-table-column-tags-${i}`}
-              >
-                {tag}
-              </EuiBadge>
-            ))}
-          </TruncatableText>
-        );
-      }
-      return getEmptyTagValue();
-    },
-    truncateText: true,
-  },
-  {
-    align: 'right',
-    field: 'totalComment',
-    name: i18n.COMMENTS,
-    sortable: true,
-    render: (totalComment: Case['totalComment']) =>
-      totalComment != null
-        ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
-        : getEmptyTagValue(),
-  },
-  filterStatus === 'open'
-    ? {
-        field: 'createdAt',
-        name: i18n.OPENED_ON,
-        sortable: true,
-        render: (createdAt: Case['createdAt']) => {
-          if (createdAt != null) {
-            return (
-              <span data-test-subj={`case-table-column-createdAt`}>
-                <FormattedRelativePreferenceDate value={createdAt} />
-              </span>
-            );
-          }
-          return getEmptyTagValue();
-        },
-      }
-    : {
-        field: 'closedAt',
-        name: i18n.CLOSED_ON,
-        sortable: true,
-        render: (closedAt: Case['closedAt']) => {
-          if (closedAt != null) {
-            return (
-              <span data-test-subj={`case-table-column-closedAt`}>
-                <FormattedRelativePreferenceDate value={closedAt} />
-              </span>
-            );
-          }
-          return getEmptyTagValue();
-        },
+              <Spacer>
+                <MediumShadeText>{i18n.CLOSED}</MediumShadeText>
+              </Spacer>
+            </>
+          );
+        }
+        return getEmptyTagValue();
       },
-  {
-    name: i18n.EXTERNAL_INCIDENT,
-    render: (theCase: Case) => {
-      if (theCase.id != null) {
-        return <ExternalServiceColumn theCase={theCase} />;
-      }
-      return getEmptyTagValue();
     },
-  },
-  {
-    name: i18n.INCIDENT_MANAGEMENT_SYSTEM,
-    render: (theCase: Case) => {
-      if (theCase.externalService != null) {
-        return renderStringField(
-          `${theCase.externalService.connectorName}`,
-          `case-table-column-connector`
-        );
-      }
-      return getEmptyTagValue();
+    {
+      field: 'createdBy',
+      name: i18n.REPORTER,
+      render: (createdBy: Case['createdBy']) => {
+        if (createdBy != null) {
+          return (
+            <>
+              <EuiAvatar
+                className="userAction__circle"
+                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
+                size="s"
+              />
+              <Spacer data-test-subj="case-table-column-createdBy">
+                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
+              </Spacer>
+            </>
+          );
+        }
+        return getEmptyTagValue();
+      },
     },
-  },
-  {
-    name: i18n.ACTIONS,
-    actions,
-  },
-];
+    {
+      field: 'tags',
+      name: i18n.TAGS,
+      render: (tags: Case['tags']) => {
+        if (tags != null && tags.length > 0) {
+          return (
+            <TagWrapper>
+              {tags.map((tag: string, i: number) => (
+                <EuiBadge
+                  color="hollow"
+                  key={`${tag}-${i}`}
+                  data-test-subj={`case-table-column-tags-${i}`}
+                >
+                  {tag}
+                </EuiBadge>
+              ))}
+            </TagWrapper>
+          );
+        }
+        return getEmptyTagValue();
+      },
+      truncateText: true,
+    },
+    {
+      align: 'right' as HorizontalAlignment,
+      field: 'totalComment',
+      name: i18n.COMMENTS,
+      sortable: true,
+      render: (totalComment: Case['totalComment']) =>
+        totalComment != null
+          ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+          : getEmptyTagValue(),
+    },
+    filterStatus === 'open'
+      ? {
+          field: 'createdAt',
+          name: i18n.OPENED_ON,
+          sortable: true,
+          render: (createdAt: Case['createdAt']) => {
+            if (createdAt != null) {
+              return (
+                <span data-test-subj={`case-table-column-createdAt`}>
+                  <FormattedRelativePreferenceDate value={createdAt} />
+                </span>
+              );
+            }
+            return getEmptyTagValue();
+          },
+        }
+      : {
+          field: 'closedAt',
+          name: i18n.CLOSED_ON,
+          sortable: true,
+          render: (closedAt: Case['closedAt']) => {
+            if (closedAt != null) {
+              return (
+                <span data-test-subj={`case-table-column-closedAt`}>
+                  <FormattedRelativePreferenceDate value={closedAt} />
+                </span>
+              );
+            }
+            return getEmptyTagValue();
+          },
+        },
+    {
+      name: i18n.EXTERNAL_INCIDENT,
+      render: (theCase: Case) => {
+        if (theCase.id != null) {
+          return <ExternalServiceColumn theCase={theCase} />;
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      name: i18n.INCIDENT_MANAGEMENT_SYSTEM,
+      render: (theCase: Case) => {
+        if (theCase.externalService != null) {
+          return renderStringField(
+            `${theCase.externalService.connectorName}`,
+            `case-table-column-connector`
+          );
+        }
+        return getEmptyTagValue();
+      },
+    },
+    {
+      name: i18n.ACTIONS,
+      actions,
+    },
+  ];
+  if (isModal) {
+    columns.pop(); // remove actions if in modal
+  }
+  return columns;
+};
 
 interface Props {
   theCase: Case;

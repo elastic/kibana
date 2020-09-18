@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -37,30 +37,20 @@ export class MetricsService
   private readonly logger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
-  private metrics$ = new Subject<OpsMetrics>();
+  private metrics$ = new ReplaySubject<OpsMetrics>(1);
+  private service?: InternalMetricsServiceSetup;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
   }
 
   public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
-    this.metricsCollector = new OpsMetricsCollector(http.server);
-
-    const metricsObservable = this.metrics$.asObservable();
-
-    return {
-      getOpsMetrics$: () => metricsObservable,
-    };
-  }
-
-  public async start(): Promise<InternalMetricsServiceStart> {
-    if (!this.metricsCollector) {
-      throw new Error('#setup() needs to be run first');
-    }
     const config = await this.coreContext.configService
       .atPath<OpsConfigType>(opsConfig.path)
       .pipe(first())
       .toPromise();
+
+    this.metricsCollector = new OpsMetricsCollector(http.server, config.cGroupOverrides);
 
     await this.refreshMetrics();
 
@@ -68,7 +58,22 @@ export class MetricsService
       this.refreshMetrics();
     }, config.interval.asMilliseconds());
 
-    return {};
+    const metricsObservable = this.metrics$.asObservable();
+
+    this.service = {
+      collectionInterval: config.interval.asMilliseconds(),
+      getOpsMetrics$: () => metricsObservable,
+    };
+
+    return this.service;
+  }
+
+  public async start(): Promise<InternalMetricsServiceStart> {
+    if (!this.service) {
+      throw new Error('#setup() needs to be run first');
+    }
+
+    return this.service;
   }
 
   private async refreshMetrics() {

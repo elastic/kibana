@@ -4,26 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { validate } from '../../../../../common/validate';
+import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import {
+  queryRulesBulkSchema,
+  QueryRulesBulkSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import { IRouter, RouteConfig, RequestHandler } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
 import { getIdBulkError } from './utils';
-import { transformValidateBulkError, validate } from './validate';
-import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
-import { DeleteRulesRequestParams } from '../../rules/types';
+import { transformValidateBulkError } from './validate';
+import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
 import { deleteNotifications } from '../../notifications/delete_notifications';
 import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-type Config = RouteConfig<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
-type Handler = RequestHandler<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
+type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
+type Handler = RequestHandler<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
 
 export const deleteRulesBulkRoute = (router: IRouter) => {
   const config: Config = {
     validate: {
-      body: buildRouteValidation<DeleteRulesRequestParams>(queryRulesBulkSchema),
+      body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
+        queryRulesBulkSchema
+      ),
     },
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
     options: {
@@ -46,6 +53,15 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
       request.body.map(async (payloadRule) => {
         const { id, rule_id: ruleId } = payloadRule;
         const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
+        const validationErrors = queryRuleValidateTypeDependents(payloadRule);
+        if (validationErrors.length) {
+          return createBulkErrorObject({
+            ruleId: idOrRuleIdOrUnknown,
+            statusCode: 400,
+            message: validationErrors.join(),
+          });
+        }
+
         try {
           const rule = await deleteRules({
             alertsClient,

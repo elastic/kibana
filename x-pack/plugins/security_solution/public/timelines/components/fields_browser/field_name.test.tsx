@@ -9,6 +9,7 @@ import React from 'react';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
 
 import { FieldName } from './field_name';
@@ -24,10 +25,13 @@ const defaultProps = {
   }),
   fieldId: timestampFieldId,
   onUpdateColumns: jest.fn(),
-  timelineId: 'timeline-id',
 };
 
 describe('FieldName', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   test('it renders the field name', () => {
     const wrapper = mount(
       <TestProviders>
@@ -46,8 +50,9 @@ describe('FieldName', () => {
         <FieldName {...defaultProps} />
       </TestProviders>
     );
-
-    wrapper.simulate('mouseenter');
+    wrapper.find('[data-test-subj="withHoverActionsButton"]').at(0).simulate('mouseenter');
+    wrapper.update();
+    jest.runAllTimers();
     wrapper.update();
     expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
   });
@@ -61,6 +66,6 @@ describe('FieldName', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('strong').first().text()).toEqual(highlight);
+    expect(wrapper.find('mark').first().text()).toEqual(highlight);
   });
 });

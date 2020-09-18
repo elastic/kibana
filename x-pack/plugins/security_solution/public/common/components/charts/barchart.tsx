@@ -98,11 +98,24 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        tickSize={tickSize}
+        style={{
+          tickLine: {
+            size: tickSize,
+          },
+        }}
         tickFormat={xTickFormatter}
       />
 
-      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
+      <Axis
+        id={yAxisId}
+        position={Position.Left}
+        style={{
+          tickLine: {
+            size: tickSize,
+          },
+        }}
+        tickFormat={yTickFormatter}
+      />
     </Chart>
   ) : null;
 };
@@ -117,6 +130,7 @@ interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
+  timelineId?: string;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -125,21 +139,23 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   barChart,
   configs,
   stackByField,
+  timelineId,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const legendItems: LegendItem[] = useMemo(
     () =>
       barChart != null && stackByField != null
         ? barChart.map((d, i) => ({
-            color: d.color ?? i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
+            color: d.color ?? (i < defaultLegendColors.length ? defaultLegendColors[i] : undefined),
             dataProviderId: escapeDataProviderId(
               `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
             ),
+            timelineId,
             field: stackByField,
             value: d.key,
           }))
         : NO_LEGEND_DATA,
-    [barChart, stackByField]
+    [barChart, stackByField, timelineId]
   );
 
   const customHeight = get('customHeight', configs);

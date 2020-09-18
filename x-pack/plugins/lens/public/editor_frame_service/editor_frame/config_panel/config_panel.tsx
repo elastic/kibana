@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import './config_panel.scss';
 
 import React, { useMemo, memo } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Visualization } from '../../../types';
-import { ChartSwitch } from './chart_switch';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
@@ -20,21 +20,8 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   const { visualizationState } = props;
 
   return (
-    <>
-      <ChartSwitch
-        data-test-subj="lnsChartSwitcher"
-        visualizationMap={props.visualizationMap}
-        visualizationId={props.activeVisualizationId}
-        visualizationState={props.visualizationState}
-        datasourceMap={props.datasourceMap}
-        datasourceStates={props.datasourceStates}
-        dispatch={props.dispatch}
-        framePublicAPI={props.framePublicAPI}
-      />
-      {activeVisualization && visualizationState && (
-        <LayerPanels {...props} activeVisualization={activeVisualization} />
-      )}
-    </>
+    activeVisualization &&
+    visualizationState && <LayerPanels {...props} activeVisualization={activeVisualization} />
   );
 });
 
@@ -53,29 +40,29 @@ function LayerPanels(
   } = props;
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
         visualizationId: activeVisualization.id,
         newState,
         clearStagedPreview: false,
       });
     },
-    [props.dispatch, activeVisualization]
+    [dispatch, activeVisualization]
   );
   const updateDatasource = useMemo(
     () => (datasourceId: string, newState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
         updater: () => newState,
         datasourceId,
         clearStagedPreview: false,
       });
     },
-    [props.dispatch]
+    [dispatch]
   );
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_STATE',
         subType: 'UPDATE_ALL_STATES',
         updater: (prevState) => {
@@ -97,17 +84,18 @@ function LayerPanels(
         },
       });
     },
-    [props.dispatch]
+    [dispatch]
   );
   const layerIds = activeVisualization.getLayerIds(visualizationState);
 
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId) => (
+      {layerIds.map((layerId, index) => (
         <LayerPanel
           {...props}
           key={layerId}
           layerId={layerId}
+          dataTestSubj={`lns-layerPanel-${index}`}
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
@@ -143,7 +131,7 @@ function LayerPanels(
               className="lnsConfigPanel__addLayerBtn"
               fullWidth
               size="s"
-              data-test-subj="lnsXY_layer_add"
+              data-test-subj="lnsLayerAddButton"
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}

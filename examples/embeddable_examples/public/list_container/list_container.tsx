@@ -42,10 +42,10 @@ export class ListContainer extends Container<{}, ContainerInput> {
   }
 
   public render(node: HTMLElement) {
-    this.node = node;
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
+    this.node = node;
     ReactDOM.render(
       <ListContainerComponent embeddable={this} embeddableServices={this.embeddableServices} />,
       node

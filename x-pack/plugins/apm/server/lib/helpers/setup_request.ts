@@ -5,40 +5,43 @@
  */
 
 import moment from 'moment';
+import { isActivePlatinumLicense } from '../../../common/service_map';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { APMConfig } from '../..';
 import {
   getApmIndices,
   ApmIndicesConfig,
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
-import { ESClient } from './es_client';
 import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { getESClient } from './es_client';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
+import {
+  APMEventClient,
+  createApmEventClient,
+} from './create_es_client/create_apm_event_client';
+import {
+  APMInternalClient,
+  createInternalESClient,
+} from './create_es_client/create_internal_es_client';
 
-function decodeUiFilters(
-  indexPattern: IIndexPattern | undefined,
-  uiFiltersEncoded?: string
-) {
-  if (!uiFiltersEncoded || !indexPattern) {
+function decodeUiFilters(uiFiltersEncoded?: string) {
+  if (!uiFiltersEncoded) {
     return [];
   }
   const uiFilters = JSON.parse(uiFiltersEncoded);
-  return getUiFiltersES(indexPattern, uiFilters);
+  return getUiFiltersES(uiFilters);
 }
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
 
 export interface Setup {
-  client: ESClient;
-  internalClient: ESClient;
+  apmEventClient: APMEventClient;
+  internalClient: APMInternalClient;
+  ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
-  dynamicIndexPattern?: IIndexPattern;
 }
 
 export interface SetupTimeRange {
@@ -74,27 +77,37 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   const { config } = context;
   const { query } = context.params;
 
-  const indices = await getApmIndices({
-    savedObjectsClient: context.core.savedObjects.client,
-    config,
-  });
+  const [indices, includeFrozen] = await Promise.all([
+    getApmIndices({
+      savedObjectsClient: context.core.savedObjects.client,
+      config,
+    }),
+    context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+  ]);
 
-  const dynamicIndexPattern = await getDynamicIndexPattern({
-    context,
-    indices,
-    processorEvent: query.processorEvent,
-  });
-
-  const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
+  const uiFiltersES = decodeUiFilters(query.uiFilters);
 
   const coreSetupRequest = {
     indices,
-    client: getESClient(context, request, { clientAsInternalUser: false }),
-    internalClient: getESClient(context, request, {
-      clientAsInternalUser: true,
+    apmEventClient: createApmEventClient({
+      context,
+      request,
+      indices,
+      options: { includeFrozen },
     }),
+    internalClient: createInternalESClient({
+      context,
+      request,
+    }),
+    ml:
+      context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
+        ? getMlSetup(
+            context.plugins.ml,
+            context.core.savedObjects.client,
+            request
+          )
+        : undefined,
     config,
-    dynamicIndexPattern,
   };
 
   return {
@@ -103,4 +116,16 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     ...('uiFilters' in query ? { uiFiltersES } : {}),
     ...coreSetupRequest,
   } as InferSetup<TParams>;
+}
+
+function getMlSetup(
+  ml: Required<APMRequestHandlerContext['plugins']>['ml'],
+  savedObjectsClient: APMRequestHandlerContext['core']['savedObjects']['client'],
+  request: KibanaRequest
+) {
+  return {
+    mlSystem: ml.mlSystemProvider(request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    modules: ml.modulesProvider(request, savedObjectsClient),
+  };
 }

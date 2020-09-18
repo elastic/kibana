@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { deepFreeze } from '@kbn/std';
 import {
   KibanaRequest,
   Logger,
   HttpServiceSetup,
-  IClusterClient,
+  ILegacyClusterClient,
   Headers,
 } from '../../../../../../src/core/server';
-import { deepFreeze } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -23,9 +23,12 @@ import { Tokens } from '../tokens';
 export interface AuthenticationProviderOptions {
   name: string;
   basePath: HttpServiceSetup['basePath'];
-  client: IClusterClient;
+  client: ILegacyClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
+  urls: {
+    loggedOut: string;
+  };
 }
 
 /**

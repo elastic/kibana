@@ -107,7 +107,7 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
 };
 
 interface SwitchContainerProps {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
   children: ReactNode;
 }
 
@@ -115,8 +115,8 @@ const SwitchContainer = withTheme(({ children, theme }: SwitchContainerProps) =>
   return (
     <div
       style={{
-        padding: theme.eui.paddingSizes.m,
-        borderTop: `1px solid ${theme.eui.euiBorderColor}`,
+        padding: theme?.eui.paddingSizes.m,
+        borderTop: `1px solid ${theme?.eui.euiBorderColor}`,
       }}
     >
       {children}

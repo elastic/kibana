@@ -4,39 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SignalSourceHit, Signal, Ancestor } from './types';
-import { OutputRuleAlertRest } from '../types';
 
-export const buildAncestor = (
-  doc: SignalSourceHit,
-  rule: Partial<OutputRuleAlertRest>
-): Ancestor => {
-  const existingSignal = doc._source.signal?.parent;
-  if (existingSignal != null) {
+/**
+ * Takes a parent signal or event document and extracts the information needed for the corresponding entry in the child
+ * signal's `signal.parents` array.
+ * @param doc The parent signal or event
+ */
+export const buildParent = (doc: SignalSourceHit): Ancestor => {
+  if (doc._source.signal != null) {
     return {
-      rule: rule.id != null ? rule.id : '',
+      rule: doc._source.signal.rule.id,
       id: doc._id,
       type: 'signal',
       index: doc._index,
-      depth: existingSignal.depth + 1,
+      // We first look for signal.depth and use that if it exists. If it doesn't exist, this should be a pre-7.10 signal
+      // and should have signal.parent.depth instead. signal.parent.depth in this case is treated as equivalent to signal.depth.
+      depth: doc._source.signal.depth ?? doc._source.signal.parent?.depth ?? 1,
     };
   } else {
     return {
-      rule: rule.id != null ? rule.id : '',
       id: doc._id,
       type: 'event',
       index: doc._index,
-      depth: 1,
+      depth: 0,
     };
   }
 };
 
-export const buildAncestorsSignal = (
-  doc: SignalSourceHit,
-  rule: Partial<OutputRuleAlertRest>
-): Signal['ancestors'] => {
-  const newAncestor = buildAncestor(doc, rule);
+/**
+ * Takes a parent signal or event document with N ancestors and adds the parent document to the ancestry array,
+ * creating an array of N+1 ancestors.
+ * @param doc The parent signal/event for which to extend the ancestry.
+ */
+export const buildAncestors = (doc: SignalSourceHit): Ancestor[] => {
+  const newAncestor = buildParent(doc);
   const existingAncestors = doc._source.signal?.ancestors;
   if (existingAncestors != null) {
     return [...existingAncestors, newAncestor];
@@ -45,33 +48,33 @@ export const buildAncestorsSignal = (
   }
 };
 
-export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleAlertRest>): Signal => {
-  const ruleWithoutInternalTags = removeInternalTagsFromRule(rule);
-  const parent = buildAncestor(doc, rule);
-  const ancestors = buildAncestorsSignal(doc, rule);
-  const signal: Signal = {
-    parent,
+/**
+ * Builds the `signal.*` fields that are common across all signals.
+ * @param docs The parent signals/events of the new signal to be built.
+ * @param rule The rule that is generating the new signal.
+ */
+export const buildSignal = (docs: SignalSourceHit[], rule: Partial<RulesSchema>): Signal => {
+  const parents = docs.map(buildParent);
+  const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
+  const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
+  return {
+    parents,
     ancestors,
-    original_time: doc._source['@timestamp'],
     status: 'open',
-    rule: ruleWithoutInternalTags,
+    rule,
+    depth,
   };
-  if (doc._source.event != null) {
-    return { ...signal, original_event: doc._source.event };
-  }
-  return signal;
 };
 
-export const removeInternalTagsFromRule = (
-  rule: Partial<OutputRuleAlertRest>
-): Partial<OutputRuleAlertRest> => {
-  if (rule.tags == null) {
-    return rule;
-  } else {
-    const ruleWithoutInternalTags: Partial<OutputRuleAlertRest> = {
-      ...rule,
-      tags: rule.tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER)),
-    };
-    return ruleWithoutInternalTags;
-  }
+/**
+ * Creates signal fields that are only available in the special case where a signal has only 1 parent signal/event.
+ * @param doc The parent signal/event of the new signal to be built.
+ */
+export const additionalSignalFields = (doc: SignalSourceHit) => {
+  return {
+    parent: buildParent(doc),
+    original_time: doc._source['@timestamp'],
+    original_event: doc._source.event ?? undefined,
+    threshold_count: doc._source.threshold_count ?? undefined,
+  };
 };

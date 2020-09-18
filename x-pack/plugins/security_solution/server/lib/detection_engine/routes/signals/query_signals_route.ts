@@ -6,26 +6,45 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
-import { SignalsQueryRestParams } from '../../signals/types';
-import { querySignalsSchema } from '../schemas/query_signals_index_schema';
-import { transformError, buildRouteValidation, buildSiemResponse } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+
+import {
+  querySignalsSchema,
+  QuerySignalsSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 
 export const querySignalsRoute = (router: IRouter) => {
   router.post(
     {
       path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
       validate: {
-        body: buildRouteValidation<SignalsQueryRestParams>(querySignalsSchema),
+        body: buildRouteValidation<typeof querySignalsSchema, QuerySignalsSchemaDecoded>(
+          querySignalsSchema
+        ),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { query, aggs, _source, track_total_hits, size } = request.body;
+      const siemResponse = buildSiemResponse(response);
+      if (
+        query == null &&
+        aggs == null &&
+        _source == null &&
+        track_total_hits == null &&
+        size == null
+      ) {
+        return siemResponse.error({
+          statusCode: 400,
+          body: '"value" must have at least 1 children',
+        });
+      }
       const clusterClient = context.core.elasticsearch.legacy.client;
       const siemClient = context.securitySolution!.getAppClient();
-      const siemResponse = buildSiemResponse(response);
 
       try {
         const result = await clusterClient.callAsCurrentUser('search', {

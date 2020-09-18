@@ -37,6 +37,7 @@ export function kafkaLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.kafkaLogs.nameTitle', {
       defaultMessage: 'Kafka logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.kafkaLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs created by Kafka.',

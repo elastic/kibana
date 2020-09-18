@@ -5,13 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { map, trunc } from 'lodash';
+import { map, truncate } from 'lodash';
 import open from 'opn';
 import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { ViewZoomWidthHeight } from '../../../export_types/common/layouts/layout';
+import { getDisallowedOutgoingUrlError } from '../';
 import { LevelLogger } from '../../../lib';
-import { ConditionalHeaders, ElementPosition } from '../../../types';
+import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
+import { ElementPosition } from '../../../lib/screenshots';
+import { ConditionalHeaders } from '../../../types';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
@@ -70,12 +72,15 @@ export class HeadlessChromiumDriver {
   }
 
   private truncateUrl(url: string) {
-    return trunc(url, {
+    return truncate(url, {
       length: 100,
       omission: '[truncated]',
     });
   }
 
+  /*
+   * Call Page.goto and wait to see the Kibana DOM content
+   */
   public async open(
     url: string,
     {
@@ -113,6 +118,16 @@ export class HeadlessChromiumDriver {
     logger.info(`handled ${this.interceptedCount} page requests`);
   }
 
+  /*
+   * Let modules poll if Chrome is still running so they can short circuit if needed
+   */
+  public isPageOpen() {
+    return !this.page.isClosed();
+  }
+
+  /*
+   * Call Page.screenshot and return a base64-encoded string of the image
+   */
   public async screenshot(elementPosition: ElementPosition): Promise<string> {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
@@ -220,18 +235,13 @@ export class HeadlessChromiumDriver {
 
       // We should never ever let file protocol requests go through
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
         await client.send('Fetch.failRequest', {
           errorReason: 'Aborted',
           requestId,
         });
         this.page.browser().close();
-        throw new Error(
-          i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
-            defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}", exiting`,
-            values: { interceptedUrl },
-          })
-        );
+        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        return;
       }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
@@ -292,9 +302,9 @@ export class HeadlessChromiumDriver {
       }
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
         this.page.browser().close();
-        throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
+        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        return;
       }
     });
 

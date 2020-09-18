@@ -20,10 +20,18 @@
 import Path from 'path';
 import Os from 'os';
 
-import { Bundle, WorkerConfig } from '../common';
+import {
+  Bundle,
+  WorkerConfig,
+  CacheableWorkerConfig,
+  ThemeTag,
+  ThemeTags,
+  parseThemeTags,
+} from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
+import { filterById } from './filter_by_id';
 
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
@@ -34,9 +42,26 @@ function pickMaxWorkerCount(dist: boolean) {
   return Math.max(maxWorkers, 2);
 }
 
+function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj) as any) {
+    if (!keys.includes(key)) {
+      result[key] = value;
+    }
+  }
+  return result as Omit<T, K>;
+}
+
 interface Options {
   /** absolute path to root of the repo/build */
   repoRoot: string;
+  /**
+   * absolute path to the root directory where output should be written to. This
+   * defaults to the repoRoot but can be customized to write output somewhere else.
+   *
+   * This is how we write output to the build directory in the Kibana build tasks.
+   */
+  outputRoot?: string;
   /** enable to run the optimizer in watch mode */
   watch?: boolean;
   /** the maximum number of workers that will be created */
@@ -60,13 +85,38 @@ interface Options {
   pluginScanDirs?: string[];
   /** absolute paths that should be added to the default scan dirs */
   extraPluginScanDirs?: string[];
+  /**
+   * array of comma separated patterns that will be matched against bundle ids.
+   * bundles will only be built if they match one of the specified patterns.
+   * `*` can exist anywhere in each pattern and will match anything, `!` inverts the pattern
+   *
+   * examples:
+   *  --filter foo --filter bar # [foo, bar], excludes [foobar]
+   *  --filter foo,bar # [foo, bar], excludes [foobar]
+   *  --filter foo* # [foo, foobar], excludes [bar]
+   *  --filter f*r # [foobar], excludes [foo, bar]
+   */
+  filter?: string[];
 
   /** flag that causes the core bundle to be built along with plugins */
   includeCoreBundle?: boolean;
+
+  /**
+   * style themes that sass files will be converted to, the correct style will be
+   * loaded in the browser automatically by checking the global `__kbnThemeTag__`.
+   * Specifying additional styles increases build time.
+   *
+   * Defaults:
+   *  - "*" when building the dist
+   *  - comma separated list of themes in the `KBN_OPTIMIZER_THEMES` env var
+   *  - "k7light"
+   */
+  themes?: ThemeTag | '*' | ThemeTag[];
 }
 
-interface ParsedOptions {
+export interface ParsedOptions {
   repoRoot: string;
+  outputRoot: string;
   watch: boolean;
   maxWorkerCount: number;
   profileWebpack: boolean;
@@ -74,8 +124,10 @@ interface ParsedOptions {
   dist: boolean;
   pluginPaths: string[];
   pluginScanDirs: string[];
+  filters: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
+  themeTags: ThemeTags;
 }
 
 export class OptimizerConfig {
@@ -88,10 +140,16 @@ export class OptimizerConfig {
     const inspectWorkers = !!options.inspectWorkers;
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
+    const filters = options.filter || [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
       throw new TypeError('repoRoot must be an absolute path');
+    }
+
+    const outputRoot = options.outputRoot ?? repoRoot;
+    if (!Path.isAbsolute(outputRoot)) {
+      throw new TypeError('outputRoot must be an absolute path');
     }
 
     /**
@@ -129,17 +187,24 @@ export class OptimizerConfig {
       throw new TypeError('worker count must be a number');
     }
 
+    const themeTags = parseThemeTags(
+      options.themes || (dist ? '*' : process.env.KBN_OPTIMIZER_THEMES)
+    );
+
     return {
       watch,
       dist,
       repoRoot,
+      outputRoot,
       maxWorkerCount,
       profileWebpack,
       cache,
       pluginScanDirs,
       pluginPaths,
+      filters,
       inspectWorkers,
       includeCoreBundle,
+      themeTags,
     };
   }
 
@@ -152,18 +217,18 @@ export class OptimizerConfig {
             new Bundle({
               type: 'entry',
               id: 'core',
-              entry: './public/index',
+              publicDirNames: ['public', 'public/utils'],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
-              outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
+              outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
             }),
           ]
         : []),
-      ...getPluginBundles(plugins, options.repoRoot),
+      ...getPluginBundles(plugins, options.repoRoot, options.outputRoot),
     ];
 
     return new OptimizerConfig(
-      bundles,
+      filterById(options.filters, bundles),
       options.cache,
       options.watch,
       options.inspectWorkers,
@@ -171,7 +236,8 @@ export class OptimizerConfig {
       options.repoRoot,
       options.maxWorkerCount,
       options.dist,
-      options.profileWebpack
+      options.profileWebpack,
+      options.themeTags
     );
   }
 
@@ -184,7 +250,8 @@ export class OptimizerConfig {
     public readonly repoRoot: string,
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
-    public readonly profileWebpack: boolean
+    public readonly profileWebpack: boolean,
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
@@ -195,7 +262,18 @@ export class OptimizerConfig {
       repoRoot: this.repoRoot,
       watch: this.watch,
       optimizerCacheKey,
+      themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
+  }
+
+  getCacheableWorkerConfig(): CacheableWorkerConfig {
+    return omit(this.getWorkerConfig('♻'), [
+      // these config options don't change the output of the bundles, so
+      // should not invalidate caches when they change
+      'watch',
+      'profileWebpack',
+      'cache',
+    ]);
   }
 }

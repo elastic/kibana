@@ -13,23 +13,24 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
 } from 'kibana/server';
 
-import { PLUGIN } from '../common';
+import { PLUGIN, APP_REQUIRED_CLUSTER_PRIVILEGES } from '../common';
 import { License } from './services';
 import { ApiRoutes } from './routes';
-import { isEsError, wrapEsError } from './lib';
+import { wrapEsError } from './lib';
+import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch_sr';
 import { Dependencies } from './types';
 import { SnapshotRestoreConfig } from './config';
 
 export interface SnapshotRestoreContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
@@ -42,7 +43,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
   private readonly logger: Logger;
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
-  private snapshotRestoreESClient?: ICustomClusterClient;
+  private snapshotRestoreESClient?: ILegacyCustomClusterClient;
 
   constructor(private context: PluginInitializerContext) {
     const { logger } = this.context;
@@ -53,7 +54,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
 
   public async setup(
     { http, getStartServices }: CoreSetup,
-    { licensing, security, cloud }: Dependencies
+    { licensing, features, security, cloud }: Dependencies
   ): Promise<void> {
     const pluginConfig = await this.context.config
       .create<SnapshotRestoreConfig>()
@@ -79,6 +80,20 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
         logger: this.logger,
       }
     );
+
+    features.registerElasticsearchFeature({
+      id: PLUGIN.id,
+      management: {
+        data: [PLUGIN.id],
+      },
+      catalogue: [PLUGIN.id],
+      privileges: [
+        {
+          requiredClusterPrivileges: [...APP_REQUIRED_CLUSTER_PRIVILEGES],
+          ui: [],
+        },
+      ],
+    });
 
     http.registerRouteHandlerContext('snapshotRestore', async (ctx, request) => {
       this.snapshotRestoreESClient =

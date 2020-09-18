@@ -22,6 +22,7 @@ import numeral from '@elastic/numeral';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 
+import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
@@ -88,6 +89,15 @@ const manageStringify = (object: Record<string, unknown> | Response): string => 
   }
 };
 
+export const formatIndexPatternRequested = (indices: string[] = []) => {
+  if (indices.length === 1 && indices[0] === NO_ALERT_INDEX) {
+    return <i>{i18n.NO_ALERT_INDEX_FOUND}</i>;
+  }
+  return indices.length > 0
+    ? indices.filter((i) => i !== NO_ALERT_INDEX).join(', ')
+    : i18n.SOMETHING_WENT_WRONG;
+};
+
 export const ModalInspectQuery = ({
   closeModal,
   isShowing = false,
@@ -113,7 +123,7 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="index-pattern-description">
-          {inspectRequest != null ? inspectRequest.index.join(', ') : i18n.SOMETHING_WENT_WRONG}
+          {formatIndexPatternRequested(inspectRequest?.index ?? [])}
         </span>
       ),
     },

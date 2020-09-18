@@ -10,13 +10,45 @@ Some APM app features are provided via a REST API:
 
 * <<agent-config-api>>
 * <<apm-annotation-api>>
+* <<kibana-api,Kibana API>>
 
 [float]
 [[apm-api-example]]
 === Using the APIs
 
-Users interacting with APM APIs must have <<apm-app-api-user,sufficient privileges>>.
-In addition, there are request headers to be aware of, like `kbn-xsrf: true`, and `Content-Type: applicaton/json`.
+// The following content is reused throughout the API docs
+// tag::using-the-APIs[]
+Interact with APM APIs using cURL or another API tool.
+All APM APIs are Kibana APIs, not Elasticsearch APIs;
+because of this, the Kibana dev tools console cannot be used to interact with APM APIs.
+
+For all APM APIs, you must use a request header.
+Supported headers are `Authorization`, `kbn-xsrf`, and `Content-Type`.
+
+`Authorization: ApiKey {credentials}`::
+Kibana supports token-based authentication with the Elasticsearch API key service.
+The API key returned by the  {ref}/security-api-create-api-key.html[Elasticsearch create API key API]
+can be used by sending a request with an `Authorization` header that has a value of `ApiKey` followed by the `{credentials}`,
+where `{credentials}` is the base64 encoding of `id` and `api_key` joined by a colon.
++
+Alternatively, you can create a user and use their username and password to authenticate API access: `-u $USER:$PASSWORD`.
++
+Whether using `Authorization: ApiKey {credentials}`, or `-u $USER:$PASSWORD`,
+users interacting with APM APIs must have <<apm-app-api-user,sufficient privileges>>.
+
+`kbn-xsrf: true`::
+  By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
+
+* The API endpoint uses the `GET` or `HEAD` operations
+* The path is whitelisted using the <<settings-xsrf-whitelist, `server.xsrf.whitelist`>> setting
+* XSRF protections are disabled using the <<settings-xsrf-disableProtection, `server.xsrf.disableProtection`>> setting
+
+`Content-Type: application/json`::
+  Applicable only when you send a payload in the API request.
+  {kib} API requests and responses use JSON.
+  Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header.
+// end::using-the-APIs[]
+
 Here's an example CURL request that adds an annotation to the APM app:
 
 [source,curl]
@@ -38,9 +70,6 @@ curl -X POST \
     }'
 ----
 
-The Kibana <<api,REST API reference>> provides additional information on how to use Kibana APIs,
-required request headers, and token-based authentication options.
-
 ////
 *******************************************************
 ////
@@ -59,7 +88,15 @@ The following Agent configuration APIs are available:
 * <<apm-list-config>> to list all Agent configurations.
 * <<apm-search-config>> to search for an Agent configuration.
 
-See <<apm-app-api-config-manager>> for information on the privileges required to use this API endpoint.
+[float]
+[[use-agent-config-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
 
 ////
 *******************************************************
@@ -100,7 +137,7 @@ See <<apm-app-api-config-manager>> for information on the privileges required to
 [[apm-update-config-example]]
 ===== Example
 
-[source,console]
+[source,curl]
 --------------------------------------------------
 PUT /api/apm/settings/agent-configuration
 {
@@ -150,7 +187,7 @@ PUT /api/apm/settings/agent-configuration
 [[apm-delete-config-example]]
 ===== Example
 
-[source,console]
+[source,curl]
 --------------------------------------------------
 DELETE /api/apm/settings/agent-configuration
 {
@@ -228,7 +265,7 @@ DELETE /api/apm/settings/agent-configuration
 [[apm-list-config-example]]
 ===== Example
 
-[source,console]
+[source,curl]
 --------------------------------------------------
 GET  /api/apm/settings/agent-configuration
 --------------------------------------------------
@@ -293,7 +330,7 @@ GET  /api/apm/settings/agent-configuration
 [[apm-search-config-example]]
 ===== Example
 
-[source,console]
+[source,curl]
 --------------------------------------------------
 POST /api/apm/settings/agent-configuration/search
 {
@@ -317,6 +354,10 @@ POST /api/apm/settings/agent-configuration/search
 The Annotation API allows you to annotate visualizations in the APM app with significant events, like deployments,
 allowing you to easily see how these events are impacting the performance of your existing applications.
 
+By default, annotations are stored in a newly created `observability-annotations` index.
+The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
+If you change the default index name, you'll also need to <<apm-app-annotation-user-create,update your user privileges>> accordingly.
+
 The following APIs are available:
 
 * <<apm-annotation-create>> to create an annotation for APM.
@@ -324,10 +365,15 @@ The following APIs are available:
 // * <<obs-annotation-get>> GET /api/observability/annotation/:id
 // * <<obs-annotation-delete>> DELETE /api/observability/annotation/:id
 
-By default, annotations are stored in a newly created `observability-annotations` index.
-The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
+[float]
+[[use-annotation-api]]
+==== How to use APM APIs
 
-See <<apm-app-api-annotation-manager>> for information on the privileges required to use this API endpoint.
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
 
 ////
 *******************************************************
@@ -352,7 +398,7 @@ See <<apm-app-api-annotation-manager>> for information on the privileges require
 [%collapsible%open]
 ======
 `version` :::
-  (required, string) Name of service.
+  (required, string) Version of service.
 
 `environment` :::
   (optional, string) Environment of service.
@@ -374,19 +420,20 @@ While you can add additional tags, you cannot remove the `apm` tag.
 
 The following example creates an annotation for a service named `opbeans-java`.
 
-[source,console]
+[source,curl]
 --------------------------------------------------
-POST /api/apm/services/opbeans-java/annotation
-{
-	"@timestamp": "2020-05-08T10:31:30.452Z",
-	"service": {
-		"version": "1.2"
-	},
-	"message": "Deployment 1.2",
-	"tags": [
-		"elastic.co", "customer"
-	]
-}
+curl -X POST \
+  http://localhost:5601/api/apm/services/opbeans-java/annotation \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+-d '{
+      "@timestamp": "2020-05-08T10:31:30.452Z",
+      "service": {
+        "version": "1.2"
+      },
+      "message": "Deployment 1.2"
+    }'
 --------------------------------------------------
 
 [[apm-annotation-config-body]]
@@ -422,3 +469,87 @@ POST /api/apm/services/opbeans-java/annotation
   }
 }
 --------------------------------------------------
+
+////
+*******************************************************
+////
+
+[[kibana-api]]
+=== Kibana API
+
+In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
+which you can use to automate certain aspects of configuring and deploying Kibana.
+An example is below.
+
+[[api-create-apm-index-pattern]]
+==== Customize the APM index pattern
+
+As an alternative to updating <<apm-settings-in-kibana,`apm_oss.indexPattern`>> in your `kibana.yml` configuration file,
+you can use Kibana's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
+
+The following example sets the default APM app index pattern to `some-other-pattern-*`:
+
+[source,sh]
+----
+curl -X PUT "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic ${YOUR_AUTH_TOKEN}' \
+-d' {
+      "attributes": {
+        "title": "some-other-pattern-*", <2>
+      }
+    }'
+----
+<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
+This value should not be changed
+<2> Your custom index pattern matcher.
+
+The API returns the following:
+
+[source,json]
+----
+{
+   "id":"apm_static_index_pattern_id",
+   "type":"index-pattern",
+   "updated_at":"2020-07-06T22:55:59.555Z",
+   "version":"WzYsMV0=",
+   "attributes":{
+      "title":"some-other-pattern-*"
+   }
+}
+----
+
+To view the new APM app index pattern, use the <<saved-objects-api-get,GET object API>>:
+
+[source,sh]
+----
+curl -X GET "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic ${YOUR_AUTH_TOKEN}'
+----
+<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
+
+The API returns the following:
+
+[source,json]
+----
+{
+  "id":"apm_static_index_pattern_id",
+  "type":"index-pattern",
+  "updated_at":"2020-07-06T22:55:59.555Z",
+  "version":"WzYsMV0=",
+  "attributes":{...}
+    "fieldFormatMap":"{...}
+    "fields":"[{...},{...},...]
+    "sourceFilters":"[{\"value\":\"sourcemap.sourcemap\"}]",
+    "timeFieldName":"@timestamp",
+    "title":"some-other-pattern-*"
+   },
+   ...
+}
+----
+
+// More examples will go here
+
+More information on Kibana's API is available in <<api,REST API>>.

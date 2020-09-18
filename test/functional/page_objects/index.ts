@@ -38,6 +38,7 @@ import { VisualizeChartPageProvider } from './visualize_chart_page';
 import { TileMapPageProvider } from './tile_map_page';
 import { TagCloudPageProvider } from './tag_cloud_page';
 import { VegaChartPageProvider } from './vega_chart_page';
+import { SavedObjectsPageProvider } from './management/saved_objects_page';
 
 export const pageObjects = {
   common: CommonPageProvider,
@@ -61,4 +62,5 @@ export const pageObjects = {
   tileMap: TileMapPageProvider,
   tagCloud: TagCloudPageProvider,
   vegaChart: VegaChartPageProvider,
+  savedObjects: SavedObjectsPageProvider,
 };

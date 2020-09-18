@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CANVAS_USAGE_TYPE } from '../../common/lib/constants';
+import { LegacyAPICaller } from 'kibana/server';
 import { TelemetryCollector } from '../../types';
 
 import { workpadCollector } from './workpad_collector';
@@ -31,20 +30,16 @@ export function registerCanvasUsageCollector(
   }
 
   const canvasCollector = usageCollection.makeUsageCollector({
-    type: CANVAS_USAGE_TYPE,
+    type: 'canvas',
     isReady: () => true,
-    fetch: async (callCluster: CallCluster) => {
+    fetch: async (callCluster: LegacyAPICaller) => {
       const collectorResults = await Promise.all(
         collectors.map((collector) => collector(kibanaIndex, callCluster))
       );
 
-      return collectorResults.reduce(
-        (reduction, usage) => {
-          return { ...reduction, ...usage };
-        },
-
-        {}
-      );
+      return collectorResults.reduce((reduction, usage) => {
+        return { ...reduction, ...usage };
+      }, {});
     },
   });
 

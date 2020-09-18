@@ -7,7 +7,6 @@
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ScopedHistory } from 'kibana/public';
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
@@ -17,7 +16,15 @@ import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
-import { Feature } from '../../../../features/public';
+import { KibanaFeature } from '../../../../features/public';
+
+// To be resolved by EUI team.
+// https://github.com/elastic/eui/issues/3712
+jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
+  return {
+    EuiOverlayMask: (props: any) => <div>{props.children}</div>,
+  };
+});
 
 const space = {
   id: 'my-space',
@@ -27,7 +34,7 @@ const space = {
 
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
-  new Feature({
+  new KibanaFeature({
     id: 'feature-1',
     name: 'feature 1',
     icon: 'spacesApp',
@@ -38,7 +45,7 @@ featuresStart.getFeatures.mockResolvedValue([
 
 describe('ManageSpacePage', () => {
   const getUrlForApp = (appId: string) => appId;
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create();
 
   it('allows a space to be created', async () => {
     const spacesManager = spacesManagerMock.create();

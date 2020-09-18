@@ -19,6 +19,7 @@
 
 import { cloneDeep, pick, throttle } from 'lodash';
 import { resolve as resolveUrl } from 'url';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObject,
@@ -31,7 +32,10 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
-type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
+type SavedObjectsFindOptions = Omit<
+  SavedObjectFindOptionsServer,
+  'namespace' | 'sortOrder' | 'rootSearchFields'
+>;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -162,7 +166,9 @@ export class SavedObjectsClient {
             });
 
             if (!foundObject) {
-              return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
+              return queueItem.resolve(
+                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+              );
             }
 
             queueItem.resolve(foundObject);
@@ -292,6 +298,8 @@ export class SavedObjectsClient {
       sortField: 'sort_field',
       type: 'type',
       filter: 'filter',
+      namespaces: 'namespaces',
+      preference: 'preference',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
@@ -302,7 +310,6 @@ export class SavedObjectsClient {
       query,
     });
     return request.then((resp) => {
-      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['find']>>,
         SavedObjectsFindResponsePublic
@@ -313,7 +320,10 @@ export class SavedObjectsClient {
           per_page: 'perPage',
           page: 'page',
         },
-        resp
+        {
+          ...resp,
+          saved_objects: resp.saved_objects.map((d) => this.createSavedObject(d)),
+        }
       ) as SavedObjectsFindResponsePublic<T>;
     });
   };

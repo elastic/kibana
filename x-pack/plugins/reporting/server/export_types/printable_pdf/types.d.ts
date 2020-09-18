@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobDocPayload } from '../../../server/types';
-import { LayoutInstance, LayoutParams } from '../common/layouts';
+import { BaseParams, BasePayload } from '../../../server/types';
+import { LayoutInstance, LayoutParams } from '../../lib/layouts';
 
 // Job params: structure of incoming user request data, after being parsed from RISON
-export interface JobParamsPDF {
-  objectType: string; // visualization, dashboard, etc. Used for job info & telemetry
+export interface JobParamsPDF extends BaseParams {
   title: string;
   relativeUrls: string[];
-  browserTimezone: string;
   layout: LayoutInstance;
 }
 
 // Job payload: structure of stored job data provided by create_job
-export interface JobDocPayloadPDF extends JobDocPayload<JobParamsPDF> {
+export interface TaskPayloadPDF extends BasePayload<JobParamsPDF> {
   basePath?: string;
   browserTimezone: string;
   forceNow?: string;

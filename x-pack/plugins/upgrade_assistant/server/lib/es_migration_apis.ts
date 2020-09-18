@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
-import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
+import { ILegacyScopedClusterClient } from 'src/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationAPIResponse } from '../../../../../src/core/server/elasticsearch/legacy/api_types';
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = await dataClient.callAsCurrentUser('transport.request', {
@@ -34,7 +35,7 @@ export async function getUpgradeAssistantStatus(
 
     indices.forEach((indexData) => {
       indexData.blockerForReindexing =
-        indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
+        indexStates[indexData.index!] === 'closed' ? 'index-closed' : undefined;
     });
   }
 

@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setBasePath, toggleIntegrationsPopover, setAlertFlyoutVisible } from '../../actions';
+import {
+  setBasePath,
+  toggleIntegrationsPopover,
+  setAlertFlyoutVisible,
+  setSearchTextAction,
+} from '../../actions';
 import { uiReducer } from '../ui';
 import { Action } from 'redux-actions';
 
@@ -19,6 +24,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -38,6 +44,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -54,6 +61,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -63,7 +71,34 @@ describe('ui reducer', () => {
         "basePath": "",
         "esKuery": "",
         "integrationsPopoverOpen": null,
+        "monitorId": "test",
         "searchText": "",
+      }
+    `);
+  });
+
+  it('sets the search text', () => {
+    const action = setSearchTextAction('lorem ipsum') as Action<never>;
+    expect(
+      uiReducer(
+        {
+          alertFlyoutVisible: false,
+          basePath: '',
+          esKuery: '',
+          integrationsPopoverOpen: null,
+          searchText: '',
+          monitorId: 'test',
+        },
+        action
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "alertFlyoutVisible": false,
+        "basePath": "",
+        "esKuery": "",
+        "integrationsPopoverOpen": null,
+        "monitorId": "test",
+        "searchText": "lorem ipsum",
       }
     `);
   });

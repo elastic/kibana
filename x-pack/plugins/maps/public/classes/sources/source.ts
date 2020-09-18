@@ -11,13 +11,13 @@ import { ReactElement } from 'react';
 import { Adapters } from 'src/plugins/inspector/public';
 import { copyPersistentState } from '../../reducers/util';
 
-import { SourceDescriptor } from '../../../common/descriptor_types';
 import { IField } from '../fields/field';
-import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 
 export type SourceEditorArgs = {
-  onChange: (args: OnSourceChangeArgs) => void;
+  onChange: (...args: OnSourceChangeArgs[]) => void;
 };
 
 export type ImmutableSourceProperty = {
@@ -37,8 +37,6 @@ export type PreIndexedShape = {
   path: string;
 };
 
-export type FieldFormatter = (value: string | number | null | undefined | boolean) => string;
-
 export interface ISource {
   destroy(): void;
   getDisplayName(): Promise<string>;
@@ -54,8 +52,9 @@ export interface ISource {
   isESSource(): boolean;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
-  isJoinable(): boolean;
-  cloneDescriptor(): SourceDescriptor;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
+  cloneDescriptor(): AbstractSourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   getIndexPatternIds(): string[];
@@ -69,18 +68,17 @@ export interface ISource {
 }
 
 export class AbstractSource implements ISource {
-  readonly _descriptor: SourceDescriptor;
+  readonly _descriptor: AbstractSourceDescriptor;
   readonly _inspectorAdapters?: Adapters | undefined;
 
-  constructor(descriptor: SourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
     this._descriptor = descriptor;
     this._inspectorAdapters = inspectorAdapters;
   }
 
   destroy(): void {}
 
-  cloneDescriptor(): SourceDescriptor {
-    // @ts-ignore
+  cloneDescriptor(): AbstractSourceDescriptor {
     return copyPersistentState(this._descriptor);
   }
 
@@ -148,8 +146,12 @@ export class AbstractSource implements ISource {
     return 0;
   }
 
-  isJoinable(): boolean {
+  showJoinEditor(): boolean {
     return false;
+  }
+
+  getJoinsDisabledReason() {
+    return null;
   }
 
   isESSource(): boolean {

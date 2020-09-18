@@ -18,10 +18,10 @@
  */
 
 import { Router } from './router';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { schema } from '@kbn/config-schema';
 
-const logger = loggingServiceMock.create().get();
+const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 describe('Router', () => {

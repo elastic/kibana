@@ -5,28 +5,21 @@
  */
 
 import { EuiButtonIcon, EuiPopover, EuiSelectableOption, EuiToolTip } from '@elastic/eui';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import { timelineActions } from '../../../../timelines/store/timeline';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 interface InsertTimelinePopoverProps {
   isDisabled: boolean;
   hideUntitled?: boolean;
-  onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
-}
-
-interface RouterState {
-  insertTimeline: {
-    timelineId: string;
-    timelineSavedObjectId: string;
-    timelineTitle: string;
-  };
+  onTimelineChange: (
+    timelineTitle: string,
+    timelineId: string | null,
+    graphEventId?: string
+  ) => void;
 }
 
 type Props = InsertTimelinePopoverProps;
@@ -36,23 +29,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
   hideUntitled = false,
   onTimelineChange,
 }) => {
-  const dispatch = useDispatch();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { state } = useLocation();
-  const [routerState, setRouterState] = useState<RouterState | null>(state ?? null);
-
-  useEffect(() => {
-    if (routerState && routerState.insertTimeline) {
-      dispatch(
-        timelineActions.showTimeline({ id: routerState.insertTimeline.timelineId, show: false })
-      );
-      onTimelineChange(
-        routerState.insertTimeline.timelineTitle,
-        routerState.insertTimeline.timelineSavedObjectId
-      );
-      setRouterState(null);
-    }
-  }, [routerState]);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -102,6 +79,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
       button={insertTimelineButton}
       isOpen={isPopoverOpen}
       closePopover={handleClosePopover}
+      repositionOnScroll
     >
       <SelectableTimeline
         hideUntitled={hideUntitled}

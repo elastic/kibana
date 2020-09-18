@@ -38,7 +38,7 @@ import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
+import { getSortForSearchSource } from '../angular/doc_table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -78,7 +78,8 @@ interface SearchEmbeddableConfig {
   filterManager: FilterManager;
 }
 
-export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
+export class SearchEmbeddable
+  extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;
@@ -297,17 +298,17 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
-    this.searchScope.isLoading = true;
+    this.updateOutput({ loading: true, error: undefined });
 
     try {
       // Make the request
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
       });
-      this.searchScope.isLoading = false;
+      this.updateOutput({ loading: false, error: undefined });
 
       // Log response to inspector
-      inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+      inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {
@@ -315,14 +316,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         this.searchScope!.totalHitCount = resp.hits.total;
       });
     } catch (error) {
-      // If the fetch was aborted, no need to surface this in the UI
-      if (error.name === 'AbortError') return;
-
-      getServices().toastNotifications.addError(error, {
-        title: i18n.translate('discover.embeddable.errorTitle', {
-          defaultMessage: 'Error fetching data',
-        }),
-      });
+      this.updateOutput({ loading: false, error });
     }
   };
 

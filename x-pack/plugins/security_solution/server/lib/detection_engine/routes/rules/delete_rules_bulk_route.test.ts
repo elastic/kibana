@@ -17,19 +17,10 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('delete_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -105,11 +96,33 @@ describe('delete_rules', () => {
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
         body: [{}],
       });
-      const result = server.validate(request);
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: { message: 'either "id" or "rule_id" must be set', status_code: 400 },
+          rule_id: '(unknown id)',
+        },
+      ]);
+    });
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because ["value" must contain at least one of [id, rule_id]]'
-      );
+    test('rejects requests with both id and rule_id', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+        body: [{ id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f', rule_id: 'rule_1' }],
+      });
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message: 'both "id" and "rule_id" cannot exist, choose one or the other',
+            status_code: 400,
+          },
+          rule_id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f',
+        },
+      ]);
     });
   });
 });

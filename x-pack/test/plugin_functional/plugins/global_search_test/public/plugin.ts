@@ -17,7 +17,8 @@ import { createResult } from '../common/utils';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchTestPluginSetup {}
 export interface GlobalSearchTestPluginStart {
-  findAll: (term: string) => Promise<GlobalSearchResult[]>;
+  findTest: (term: string) => Promise<GlobalSearchResult[]>;
+  findReal: (term: string) => Promise<GlobalSearchResult[]>;
 }
 
 export interface GlobalSearchTestPluginSetupDeps {
@@ -74,13 +75,23 @@ export class GlobalSearchTestPlugin
     { globalSearch }: GlobalSearchTestPluginStartDeps
   ): GlobalSearchTestPluginStart {
     return {
-      findAll: (term) =>
+      findTest: (term) =>
         globalSearch
           .find(term, {})
           .pipe(
             map((batch) => batch.results),
             // restrict to test type to avoid failure when real providers are present
             map((results) => results.filter((r) => r.type.startsWith('test_'))),
+            reduce((memo, results) => [...memo, ...results])
+          )
+          .toPromise(),
+      findReal: (term) =>
+        globalSearch
+          .find(term, {})
+          .pipe(
+            map((batch) => batch.results),
+            // remove test types
+            map((results) => results.filter((r) => !r.type.startsWith('test_'))),
             reduce((memo, results) => [...memo, ...results])
           )
           .toPromise(),

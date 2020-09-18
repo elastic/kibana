@@ -92,9 +92,7 @@
           "master": 1,
           "ingest": 1
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ],
+        "versions": ["7.0.0-alpha1"],
         "os": {
           "available_processors": 4,
           "allocated_processors": 1,
@@ -214,9 +212,7 @@
             }
           },
           "audit": {
-            "outputs": [
-              "logfile"
-            ],
+            "outputs": ["logfile"],
             "enabled": false
           },
           "ipfilter": {
@@ -383,9 +379,7 @@
           "master": 1,
           "ingest": 1
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ],
+        "versions": ["7.0.0-alpha1"],
         "os": {
           "available_processors": 4,
           "allocated_processors": 1,
@@ -461,34 +455,22 @@
           "enabled": true,
           "realms": {
             "file": {
-              "name": [
-                "default_file"
-              ],
+              "name": ["default_file"],
               "available": true,
-              "size": [
-                0
-              ],
+              "size": [0],
               "enabled": true,
-              "order": [
-                2147483647
-              ]
+              "order": [2147483647]
             },
             "ldap": {
               "available": true,
               "enabled": false
             },
             "native": {
-              "name": [
-                "default_native"
-              ],
+              "name": ["default_native"],
               "available": true,
-              "size": [
-                2
-              ],
+              "size": [2],
               "enabled": true,
-              "order": [
-                2147483647
-              ]
+              "order": [2147483647]
             },
             "active_directory": {
               "available": true,
@@ -523,9 +505,7 @@
             }
           },
           "audit": {
-            "outputs": [
-              "logfile"
-            ],
+            "outputs": ["logfile"],
             "enabled": false
           },
           "ipfilter": {
@@ -700,9 +680,7 @@
           "master": 2,
           "ingest": 2
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ],
+        "versions": ["7.0.0-alpha1"],
         "os": {
           "available_processors": 8,
           "allocated_processors": 2,
@@ -778,34 +756,22 @@
           "enabled": true,
           "realms": {
             "file": {
-              "name": [
-                "default_file"
-              ],
+              "name": ["default_file"],
               "available": true,
-              "size": [
-                0
-              ],
+              "size": [0],
               "enabled": true,
-              "order": [
-                2147483647
-              ]
+              "order": [2147483647]
             },
             "ldap": {
               "available": true,
               "enabled": false
             },
             "native": {
-              "name": [
-                "default_native"
-              ],
+              "name": ["default_native"],
               "available": true,
-              "size": [
-                1
-              ],
+              "size": [1],
               "enabled": true,
-              "order": [
-                2147483647
-              ]
+              "order": [2147483647]
             },
             "active_directory": {
               "available": true,
@@ -840,9 +806,7 @@
             }
           },
           "audit": {
-            "outputs": [
-              "logfile"
-            ],
+            "outputs": ["logfile"],
             "enabled": false
           },
           "ipfilter": {

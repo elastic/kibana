@@ -23,16 +23,16 @@ uiRoutes
   .when('/home', {
     template,
     resolve: {
-      clusters: (Private, kbnUrl) => {
+      clusters: (Private) => {
         const routeInit = Private(routeInitProvider);
         return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true }).then((clusters) => {
           if (!clusters || !clusters.length) {
-            kbnUrl.changePath('/no-data');
+            window.location.hash = '#/no-data';
             return Promise.reject();
           }
           if (clusters.length === 1) {
             // Bypass the cluster listing if there is just 1 cluster
-            kbnUrl.redirect('/overview');
+            window.history.replaceState(null, null, '#/overview');
             return Promise.reject();
           }
           return clusters;
@@ -51,7 +51,6 @@ uiRoutes
         });
 
         const $route = $injector.get('$route');
-        const kbnUrl = $injector.get('kbnUrl');
         const globalState = $injector.get('globalState');
         const storage = $injector.get('localStorage');
         const showLicenseExpiration = $injector.get('showLicenseExpiration');
@@ -67,7 +66,6 @@ uiRoutes
                 angular={{
                   scope: $scope,
                   globalState,
-                  kbnUrl,
                   storage,
                   showLicenseExpiration,
                 }}
@@ -81,4 +79,4 @@ uiRoutes
       }
     },
   })
-  .otherwise({ redirectTo: '/no-data' });
+  .otherwise({ redirectTo: '/loading' });

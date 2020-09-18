@@ -1,0 +1,96 @@
+.list-group-menu {
+  &.select-mode a {
+    outline: none;
+    color: tintOrShade($euiColorPrimary, 10%, 10%);
+  }
+
+  .list-group-menu-item {
+    list-style: none;
+    color: tintOrShade($euiColorPrimary, 10%, 10%);
+
+    &.active {
+      font-weight: bold;
+      background-color: $euiColorLightShade;
+    }
+
+    &:hover {
+      background-color: tintOrShade($euiColorPrimary, 90%, 90%);
+    }
+
+    li {
+      list-style: none;
+      color: tintOrShade($euiColorPrimary, 10%, 10%);
+    }
+  }
+}
+
+
+saved-object-finder {
+
+  .list-sort-button {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border: none;
+    padding: $euiSizeS $euiSize;
+    font-weight: $euiFontWeightRegular;
+    background-color: $euiColorLightestShade;
+  }
+
+  .li-striped {
+    li {
+      border: none;
+    }
+
+    li:nth-child(even) {
+      background-color: $euiColorLightestShade;
+    }
+
+    li:nth-child(odd) {
+      background-color: $euiColorEmptyShade;
+    }
+
+    .paginate-heading {
+      font-weight: $euiFontWeightRegular;
+      color: $euiColorDarkestShade;
+    }
+
+    .list-group-item {
+      padding: $euiSizeS $euiSize;
+
+      ul {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+
+        .finder-type {
+          margin-right: $euiSizeS;
+        }
+      }
+
+      a {
+        display: block;
+        color: $euiColorPrimary;
+
+        i {
+          color: shade($euiColorPrimary, 10%);
+          margin-right: $euiSizeS;
+        }
+      }
+
+      &:first-child {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+
+      &.list-group-no-results p {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  paginate {
+    paginate-controls {
+      margin: $euiSize;
+    }
+  }
+}

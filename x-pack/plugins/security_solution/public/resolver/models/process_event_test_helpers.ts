@@ -38,5 +38,5 @@ export function mockProcessEvent(parts: DeepPartial<LegacyEndpointEvent>): Legac
       },
     },
     parts
-  );
+  ) as LegacyEndpointEvent;
 }

@@ -9,46 +9,20 @@ import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MLFlyoutView } from '../ml_flyout';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
-import { License } from '../../../../../../../plugins/licensing/common/license';
-
-const expiredLicense = new License({
-  signature: 'test signature',
-  license: {
-    expiryDateInMillis: 0,
-    mode: 'platinum',
-    status: 'expired',
-    type: 'platinum',
-    uid: '1',
-  },
-  features: {
-    ml: {
-      isAvailable: false,
-      isEnabled: false,
-    },
-  },
-});
-
-const validLicense = new License({
-  signature: 'test signature',
-  license: {
-    expiryDateInMillis: 30000,
-    mode: 'platinum',
-    status: 'active',
-    type: 'platinum',
-    uid: '2',
-  },
-  features: {
-    ml: {
-      isAvailable: true,
-      isEnabled: true,
-    },
-  },
-});
+import * as redux from 'react-redux';
 
 describe('ML Flyout component', () => {
   const createJob = () => {};
   const onClose = () => {};
   const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
+
+  beforeEach(() => {
+    const spy = jest.spyOn(redux, 'useDispatch');
+    spy.mockReturnValue(jest.fn());
+
+    const spy1 = jest.spyOn(redux, 'useSelector');
+    spy1.mockReturnValue(true);
+  });
 
   it('renders without errors', () => {
     const wrapper = shallowWithIntl(
@@ -62,8 +36,12 @@ describe('ML Flyout component', () => {
     expect(wrapper).toMatchSnapshot();
   });
   it('shows license info if no ml available', () => {
+    const spy1 = jest.spyOn(redux, 'useSelector');
+
+    // return false value for no license
+    spy1.mockReturnValue(false);
+
     const value = {
-      license: expiredLicense,
       basePath: '',
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
@@ -88,7 +66,6 @@ describe('ML Flyout component', () => {
 
   it('able to create job if valid license is available', () => {
     const value = {
-      license: validLicense,
       basePath: '',
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,

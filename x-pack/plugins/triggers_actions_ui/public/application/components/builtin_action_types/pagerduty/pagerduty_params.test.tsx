@@ -7,6 +7,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EventActionOptions, SeverityActionOptions } from '.././types';
 import PagerDutyParamsFields from './pagerduty_params';
+import { DocLinksStart } from 'kibana/public';
 
 describe('PagerDutyParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -21,12 +22,14 @@ describe('PagerDutyParamsFields renders', () => {
       group: 'group',
       class: 'test class',
     };
+
     const wrapper = mountWithIntl(
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [] }}
         editAction={() => {}}
         index={0}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
@@ -39,7 +42,7 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="componentInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="groupInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="pagerdutySummaryInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
   });
 });

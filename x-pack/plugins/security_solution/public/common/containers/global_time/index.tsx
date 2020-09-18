@@ -18,8 +18,8 @@ interface SetQuery {
 }
 
 export interface GlobalTimeArgs {
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   setQuery: ({ id, inspect, loading, refetch }: SetQuery) => void;
   deleteQuery?: ({ id }: { id: string }) => void;
   isInitializing: boolean;
@@ -59,6 +59,7 @@ export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
     return () => {
       deleteAllQuery({ id: 'global' });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -93,3 +94,5 @@ export const connector = connect(mapStateToProps, mapDispatchToProps);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export const GlobalTime = connector(React.memo(GlobalTimeComponent));
+
+GlobalTime.displayName = 'GlobalTime';

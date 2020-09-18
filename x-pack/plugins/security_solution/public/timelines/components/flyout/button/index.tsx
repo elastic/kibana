@@ -10,7 +10,7 @@ import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { WithSource } from '../../../../common/containers/source';
+import { useWithSource } from '../../../../common/containers/source';
 import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
@@ -39,6 +39,7 @@ const Container = styled.div`
   }
 
   .${FLYOUT_BUTTON_CLASS_NAME} {
+    background: ${({ theme }) => rgba(theme.eui.euiPageBackgroundColor, 1)};
     border-radius: 4px 4px 0 0;
     box-shadow: none;
     height: 46px;
@@ -84,6 +85,7 @@ interface FlyoutButtonProps {
 export const FlyoutButton = React.memo<FlyoutButtonProps>(
   ({ onOpen, show, dataProviders, timelineId }) => {
     const badgeCount = useMemo(() => getBadgeCount(dataProviders), [dataProviders]);
+    const { browserFields } = useWithSource();
 
     if (!show) {
       return null;
@@ -121,19 +123,16 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
           </EuiNotificationBadge>
         </BadgeButtonContainer>
         <DataProvidersPanel paddingSize="none">
-          <WithSource sourceId="default">
-            {({ browserFields }) => (
-              <DataProviders
-                browserFields={browserFields}
-                id={timelineId}
-                dataProviders={dataProviders}
-                onDataProviderEdited={noop}
-                onDataProviderRemoved={noop}
-                onToggleDataProviderEnabled={noop}
-                onToggleDataProviderExcluded={noop}
-              />
-            )}
-          </WithSource>
+          <DataProviders
+            browserFields={browserFields}
+            timelineId={timelineId}
+            dataProviders={dataProviders}
+            onDataProviderEdited={noop}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={noop}
+            onToggleDataProviderExcluded={noop}
+            onToggleDataProviderType={noop}
+          />
         </DataProvidersPanel>
       </Container>
     );

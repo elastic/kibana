@@ -17,6 +17,7 @@ import * as i18n from '../translations';
 import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -27,10 +28,12 @@ export const getCommonColumns = ({
   itemIdToExpandedNotesRowMap,
   onOpenTimeline,
   onToggleShowNotes,
+  timelineType,
 }: {
   onOpenTimeline: OnOpenTimeline;
   onToggleShowNotes: OnToggleShowNotes;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  timelineType: TimelineType | null;
 }) => [
   {
     isExpander: true,
@@ -55,7 +58,7 @@ export const getCommonColumns = ({
   {
     dataType: 'string',
     field: 'title',
-    name: i18n.TIMELINE_NAME,
+    name: timelineType === TimelineType.default ? i18n.TIMELINE_NAME : i18n.TIMELINE_TEMPLATE_NAME,
     render: (title: string, timelineResult: OpenTimelineResult) =>
       timelineResult.savedObjectId != null ? (
         <EuiLink

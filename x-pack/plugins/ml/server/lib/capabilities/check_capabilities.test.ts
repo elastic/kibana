@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
 import { capabilitiesProvider } from './check_capabilities';
 import { MlLicense } from '../../../common/license';
@@ -22,14 +23,35 @@ const mlLicenseBasic = {
 const mlIsEnabled = async () => true;
 const mlIsNotEnabled = async () => false;
 
-const callWithRequestNonUpgrade = async () => ({ upgrade_mode: false });
-const callWithRequestUpgrade = async () => ({ upgrade_mode: true });
+const mlClusterClientNonUpgrade = ({
+  asInternalUser: {
+    ml: {
+      info: async () => ({
+        body: {
+          upgrade_mode: false,
+        },
+      }),
+    },
+  },
+} as unknown) as IScopedClusterClient;
+
+const mlClusterClientUpgrade = ({
+  asInternalUser: {
+    ml: {
+      info: async () => ({
+        body: {
+          upgrade_mode: true,
+        },
+      }),
+    },
+  },
+} as unknown) as IScopedClusterClient;
 
 describe('check_capabilities', () => {
   describe('getCapabilities() - right number of capabilities', () => {
     test('kibana capabilities count', async (done) => {
       const { getCapabilities } = capabilitiesProvider(
-        callWithRequestNonUpgrade,
+        mlClusterClientNonUpgrade,
         getAdminCapabilities(),
         mlLicense,
         mlIsEnabled
@@ -44,7 +66,7 @@ describe('check_capabilities', () => {
   describe('getCapabilities() with security', () => {
     test('ml_user capabilities only', async (done) => {
       const { getCapabilities } = capabilitiesProvider(
-        callWithRequestNonUpgrade,
+        mlClusterClientNonUpgrade,
         getUserCapabilities(),
         mlLicense,
         mlIsEnabled
@@ -93,7 +115,7 @@ describe('check_capabilities', () => {
 
     test('full capabilities', async (done) => {
       const { getCapabilities } = capabilitiesProvider(
-        callWithRequestNonUpgrade,
+        mlClusterClientNonUpgrade,
         getAdminCapabilities(),
         mlLicense,
         mlIsEnabled
@@ -142,7 +164,7 @@ describe('check_capabilities', () => {
 
     test('upgrade in progress with full capabilities', async (done) => {
       const { getCapabilities } = capabilitiesProvider(
-        callWithRequestUpgrade,
+        mlClusterClientUpgrade,
         getAdminCapabilities(),
         mlLicense,
         mlIsEnabled
@@ -191,7 +213,7 @@ describe('check_capabilities', () => {
 
     test('upgrade in progress with partial capabilities', async (done) => {
       const { getCapabilities } = capabilitiesProvider(
-        callWithRequestUpgrade,
+        mlClusterClientUpgrade,
         getUserCapabilities(),
         mlLicense,
         mlIsEnabled
@@ -240,7 +262,7 @@ describe('check_capabilities', () => {
 
     test('full capabilities, ml disabled in space', async (done) => {
       const { getCapabilities } = capabilitiesProvider(
-        callWithRequestNonUpgrade,
+        mlClusterClientNonUpgrade,
         getDefaultCapabilities(),
         mlLicense,
         mlIsNotEnabled
@@ -290,7 +312,7 @@ describe('check_capabilities', () => {
 
   test('full capabilities, basic license, ml disabled in space', async (done) => {
     const { getCapabilities } = capabilitiesProvider(
-      callWithRequestNonUpgrade,
+      mlClusterClientNonUpgrade,
       getDefaultCapabilities(),
       mlLicenseBasic,
       mlIsNotEnabled

@@ -6,76 +6,30 @@
 
 import React, { FC, Fragment } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageContentHeader,
-  EuiPageContent,
-  EuiPageBody,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AnomalyDetectionSettings } from './anomaly_detection_settings';
+
 import { NavigationMenu } from '../components/navigation_menu';
 
-interface Props {
-  canGetFilters: boolean;
-  canGetCalendars: boolean;
-}
-
-export const Settings: FC<Props> = ({ canGetFilters, canGetCalendars }) => {
+export const Settings: FC = () => {
   return (
     <Fragment>
       <NavigationMenu tabId="settings" />
       <EuiPage className="mlSettingsPage" data-test-subj="mlPageSettings">
-        <EuiPageBody className="mlSettingsPage__body">
-          <EuiPageContent className="mlSettingsPage__content" horizontalPosition="center">
-            <EuiPageContentHeader>
+        <EuiPageBody>
+          <EuiPageHeader className="mlSettingsPage__header">
+            <EuiPageHeaderSection>
               <EuiTitle>
                 <h1>
-                  <FormattedMessage
-                    id="xpack.ml.settings.jobManagementTitle"
-                    defaultMessage="Job Management"
-                  />
+                  <FormattedMessage id="xpack.ml.settings.title" defaultMessage="Settings" />
                 </h1>
               </EuiTitle>
-            </EuiPageContentHeader>
-
-            <EuiFlexGroup gutterSize="xl">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="ml_calendar_mng_button"
-                  size="l"
-                  color="primary"
-                  href="#/settings/calendars_list"
-                  isDisabled={canGetCalendars === false}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.settings.calendarManagementButtonLabel"
-                    defaultMessage="Calendar management"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="ml_filter_lists_button"
-                  size="l"
-                  color="primary"
-                  href="#/settings/filter_lists"
-                  isDisabled={canGetFilters === false}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.settings.filterListsButtonLabel"
-                    defaultMessage="Filter Lists"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContent>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+          <AnomalyDetectionSettings />
         </EuiPageBody>
       </EuiPage>
     </Fragment>

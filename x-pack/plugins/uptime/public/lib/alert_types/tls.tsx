@@ -6,20 +6,20 @@
 
 import React from 'react';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
-import { CLIENT_ALERT_TYPES } from '../../../common/constants';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
 
 const { name, defaultActionMessage } = TlsTranslations;
-
-export const initTlsAlertType: AlertTypeInitializer = (): AlertTypeModel => ({
+const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
+export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
-  alertParamsExpression: React.lazy(() =>
-    import('../../components/overview/alerts/alerts_containers/alert_tls')
+  alertParamsExpression: (params: any) => (
+    <TLSAlert core={core} plugins={plugins} params={params} />
   ),
   name,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
-  requiresAppContext: true,
+  requiresAppContext: false,
 });

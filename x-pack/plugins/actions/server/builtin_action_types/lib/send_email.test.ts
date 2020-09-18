@@ -10,14 +10,15 @@ jest.mock('nodemailer', () => ({
 
 import { Logger } from '../../../../../../src/core/server';
 import { sendEmail } from './send_email';
-import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
+import { ProxySettings } from '../../types';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
 const sendMailMock = jest.fn();
 
-const mockLogger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
+const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('send_email module', () => {
   beforeEach(() => {
@@ -63,14 +64,73 @@ describe('send_email module', () => {
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {
+    const sendEmailOptions = getSendEmailOptions(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
+      },
+      {
+        proxyUrl: 'https://example.com',
+        proxyRejectUnauthorizedCertificates: false,
+      }
+    );
+    // @ts-expect-error
+    delete sendEmailOptions.transport.service;
+    // @ts-expect-error
+    delete sendEmailOptions.transport.user;
+    // @ts-expect-error
+    delete sendEmailOptions.transport.password;
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": undefined,
+          "host": "example.com",
+          "port": 1025,
+          "proxy": "https://example.com",
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": false,
+          },
+        },
+      ]
+    `);
+    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "bcc": Array [],
+          "cc": Array [
+            "bob@example.com",
+            "robert@example.com",
+          ],
+          "from": "fred@example.com",
+          "html": "<p>a message</p>
+      ",
+          "subject": "a subject",
+          "text": "a message",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test('rejectUnauthorized default setting email using not secure host/port', async () => {
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         host: 'example.com',
         port: 1025,
       },
     });
+    // @ts-expect-error
     delete sendEmailOptions.transport.service;
+    // @ts-expect-error
     delete sendEmailOptions.transport.user;
+    // @ts-expect-error
     delete sendEmailOptions.transport.password;
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
@@ -81,7 +141,7 @@ describe('send_email module', () => {
           "port": 1025,
           "secure": false,
           "tls": Object {
-            "rejectUnauthorized": false,
+            "rejectUnauthorized": undefined,
           },
         },
       ]
@@ -115,8 +175,11 @@ describe('send_email module', () => {
         secure: true,
       },
     });
+    // @ts-expect-error
     delete sendEmailOptions.transport.service;
+    // @ts-expect-error
     delete sendEmailOptions.transport.user;
+    // @ts-expect-error
     delete sendEmailOptions.transport.password;
 
     const result = await sendEmail(mockLogger, sendEmailOptions);
@@ -161,7 +224,10 @@ describe('send_email module', () => {
   });
 });
 
-function getSendEmailOptions({ content = {}, routing = {}, transport = {} } = {}) {
+function getSendEmailOptions(
+  { content = {}, routing = {}, transport = {} } = {},
+  proxySettings?: ProxySettings
+) {
   return {
     content: {
       ...content,
@@ -181,5 +247,6 @@ function getSendEmailOptions({ content = {}, routing = {}, transport = {} } = {}
       user: 'elastic',
       password: 'changeme',
     },
+    proxySettings,
   };
 }

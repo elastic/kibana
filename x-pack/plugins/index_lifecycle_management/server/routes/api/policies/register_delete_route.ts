@@ -5,12 +5,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function deletePolicies(callAsCurrentUser: APICaller, policyNames: string): Promise<any> {
+async function deletePolicies(
+  callAsCurrentUser: LegacyAPICaller,
+  policyNames: string
+): Promise<any> {
   const params = {
     method: 'DELETE',
     path: `/_ilm/policy/${encodeURIComponent(policyNames)}`,

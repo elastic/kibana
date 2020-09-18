@@ -8,8 +8,16 @@ import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionWizard } from './action_wizard';
-import { ActionFactoryDefinition, ActionFactory } from '../../dynamic_actions';
+import { ActionFactory, ActionFactoryDefinition } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
+import { licensingMock } from '../../../../licensing/public/mocks';
+import {
+  APPLY_FILTER_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  Trigger,
+  TriggerId,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/ui_actions/public';
 
 type ActionBaseConfig = object;
 
@@ -101,10 +109,17 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   create: () => ({
     id: 'test',
     execute: async () => alert('Navigate to dashboard!'),
+    enhancements: {},
   }),
+  supportedTriggers(): any[] {
+    return [APPLY_FILTER_TRIGGER];
+  },
 };
 
-export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory);
+export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory, {
+  getLicense: () => licensingMock.createLicense(),
+  getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+});
 
 interface UrlDrilldownConfig {
   url: string;
@@ -157,14 +172,46 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
     return Promise.resolve(true);
   },
   create: () => null as any,
+  supportedTriggers(): any[] {
+    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
+  },
 };
 
-export const urlFactory = new ActionFactory(urlDrilldownActionFactory);
+export const urlFactory = new ActionFactory(urlDrilldownActionFactory, {
+  getLicense: () => licensingMock.createLicense(),
+  getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+});
+
+export const mockSupportedTriggers: TriggerId[] = [
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  APPLY_FILTER_TRIGGER,
+];
+export const mockGetTriggerInfo = (triggerId: TriggerId): Trigger => {
+  const titleMap = {
+    [VALUE_CLICK_TRIGGER]: 'Single click',
+    [SELECT_RANGE_TRIGGER]: 'Range selection',
+    [APPLY_FILTER_TRIGGER]: 'Apply filter',
+  } as Record<any, string>;
+
+  const descriptionMap = {
+    [VALUE_CLICK_TRIGGER]: 'A single point clicked on a visualization',
+    [SELECT_RANGE_TRIGGER]: 'Select a group of values',
+    [APPLY_FILTER_TRIGGER]: 'Apply filter description...',
+  } as Record<any, string>;
+
+  return {
+    id: triggerId,
+    title: titleMap[triggerId] ?? 'Unknown',
+    description: descriptionMap[triggerId] ?? 'Unknown description',
+  };
+};
 
 export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
   const [state, setState] = useState<{
     currentActionFactory?: ActionFactory;
     config?: ActionBaseConfig;
+    selectedTriggers?: TriggerId[];
   }>({});
 
   function changeActionFactory(newActionFactory?: ActionFactory) {
@@ -175,7 +222,9 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
 
     setState({
       currentActionFactory: newActionFactory,
-      config: newActionFactory.createConfig(),
+      config: newActionFactory.createConfig({
+        triggers: state.selectedTriggers ?? [],
+      }),
     });
   }
 
@@ -194,7 +243,15 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
           changeActionFactory(newActionFactory);
         }}
         currentActionFactory={state.currentActionFactory}
-        context={{}}
+        context={{ triggers: state.selectedTriggers ?? [] }}
+        onSelectedTriggersChange={(triggers) => {
+          setState({
+            ...state,
+            selectedTriggers: triggers,
+          });
+        }}
+        getTriggerInfo={mockGetTriggerInfo}
+        supportedTriggers={[VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER]}
       />
       <div style={{ marginTop: '44px' }} />
       <hr />
@@ -202,8 +259,13 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
       <div>Action Factory Config: {JSON.stringify(state.config)}</div>
       <div>
         Is config valid:{' '}
-        {JSON.stringify(state.currentActionFactory?.isConfigValid(state.config!) ?? false)}
+        {JSON.stringify(
+          state.currentActionFactory?.isConfigValid(state.config!, {
+            triggers: state.selectedTriggers ?? [],
+          }) ?? false
+        )}
       </div>
+      <div>Picked trigger: {state.selectedTriggers?.[0]}</div>
     </>
   );
 }

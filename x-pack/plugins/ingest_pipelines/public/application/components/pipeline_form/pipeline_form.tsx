@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
-import { Pipeline } from '../../../../common/types';
+import { Pipeline, Processor } from '../../../../common/types';
+
+import './pipeline_form.scss';
+
+import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_processors_editor';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
-import { PipelineTestFlyout } from './pipeline_test_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
+import { PipelineForm as IPipelineForm } from './types';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
@@ -26,14 +30,15 @@ export interface PipelineFormProps {
   isEditing?: boolean;
 }
 
+const defaultFormValue: Pipeline = Object.freeze({
+  name: '',
+  description: '',
+  processors: [],
+  on_failure: [],
+});
+
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
-  defaultValue = {
-    name: '',
-    description: '',
-    processors: '',
-    on_failure: '',
-    version: '',
-  },
+  defaultValue = defaultFormValue,
   onSave,
   isSaving,
   saveError,
@@ -42,23 +47,44 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
-  const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
+  const {
+    processors: initialProcessors,
+    on_failure: initialOnFailureProcessors,
+    ...defaultFormValues
+  } = defaultValue;
 
-  const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
-    if (isValid) {
-      onSave(formData as Pipeline);
+  const [processorsState, setProcessorsState] = useState<{
+    processors: Processor[];
+    onFailure?: Processor[];
+  }>({
+    processors: initialProcessors,
+    onFailure: initialOnFailureProcessors,
+  });
+
+  const processorStateRef = useRef<OnUpdateHandlerArg>();
+
+  const handleSave: FormConfig<IPipelineForm>['onSubmit'] = async (formData, isValid) => {
+    if (!isValid) {
+      return;
+    }
+
+    if (processorStateRef.current) {
+      const state = processorStateRef.current;
+      if (await state.validate()) {
+        onSave({ ...formData, ...state.getData() });
+      }
     }
   };
 
-  const handleTestPipelineClick = () => {
-    setIsTestingPipeline(true);
-  };
-
-  const { form } = useForm({
+  const { form } = useForm<IPipelineForm>({
     schema: pipelineFormSchema,
-    defaultValue,
+    defaultValue: defaultFormValues,
     onSubmit: handleSave,
   });
+
+  const onEditorFlyoutOpen = useCallback(() => {
+    setIsRequestVisible(false);
+  }, [setIsRequestVisible]);
 
   const saveButtonLabel = isSaving ? (
     <FormattedMessage
@@ -77,6 +103,11 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     />
   );
 
+  const onProcessorsChangeHandler = useCallback<OnUpdateHandler>(
+    (arg) => (processorStateRef.current = arg),
+    []
+  );
+
   return (
     <>
       <Form
@@ -86,14 +117,18 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         error={form.getErrors()}
       >
         {/* Request error */}
-        {saveError && <PipelineFormError errorMessage={saveError.message} />}
+        {saveError && <PipelineFormError error={saveError} />}
 
         {/* All form fields */}
         <PipelineFormFields
+          onLoadJson={({ processors, on_failure: onFailure }) => {
+            setProcessorsState({ processors, onFailure });
+          }}
+          onEditorFlyoutOpen={onEditorFlyoutOpen}
+          processors={processorsState.processors}
+          onFailure={processorsState.onFailure}
+          onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
-          isTestButtonDisabled={isTestingPipeline || form.isValid === false}
-          onTestPipelineClick={handleTestPipelineClick}
-          hasOnFailure={Boolean(defaultValue.on_failure)}
           isEditing={isEditing}
         />
 
@@ -147,16 +182,10 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* ES request flyout */}
         {isRequestVisible ? (
           <PipelineRequestFlyout
+            readProcessors={() =>
+              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
+            }
             closeFlyout={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
-          />
-        ) : null}
-
-        {/* Test pipeline flyout */}
-        {isTestingPipeline ? (
-          <PipelineTestFlyout
-            closeFlyout={() => {
-              setIsTestingPipeline((prevIsTestingPipeline) => !prevIsTestingPipeline);
-            }}
           />
         ) : null}
       </Form>

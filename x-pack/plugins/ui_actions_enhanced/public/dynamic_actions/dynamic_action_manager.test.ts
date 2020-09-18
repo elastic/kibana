@@ -7,11 +7,12 @@
 import { DynamicActionManager } from './dynamic_action_manager';
 import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
 import { UiActionsService } from '../../../../../src/plugins/ui_actions/public';
-import { ActionInternal } from '../../../../../src/plugins/ui_actions/public/actions';
+import { ActionRegistry } from '../../../../../src/plugins/ui_actions/public/types';
 import { of } from '../../../../../src/plugins/kibana_utils';
 import { UiActionsServiceEnhancements } from '../services';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { SerializedAction, SerializedEvent } from './types';
+import { licensingMock } from '../../../licensing/public/mocks';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',
@@ -23,6 +24,9 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
     execute: async () => {},
     getDisplayName: () => name,
   }),
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 };
 
 const actionFactoryDefinition2: ActionFactoryDefinition = {
@@ -35,6 +39,9 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
     execute: async () => {},
     getDisplayName: () => name,
   }),
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 };
 
 const event1: SerializedEvent = {
@@ -67,14 +74,23 @@ const event3: SerializedEvent = {
   },
 };
 
-const setup = (events: readonly SerializedEvent[] = []) => {
+const setup = (
+  events: readonly SerializedEvent[] = [],
+  { getLicenseInfo = () => licensingMock.createLicense() } = {
+    getLicenseInfo: () => licensingMock.createLicense(),
+  }
+) => {
   const isCompatible = async () => true;
   const storage: ActionStorage = new MemoryActionStorage(events);
-  const actions = new Map<string, ActionInternal>();
+  const actions: ActionRegistry = new Map();
   const uiActions = new UiActionsService({
     actions,
   });
-  const uiActionsEnhancements = new UiActionsServiceEnhancements();
+  const uiActionsEnhancements = new UiActionsServiceEnhancements({
+    getLicense: getLicenseInfo,
+    featureUsageSetup: licensingMock.createSetup().featureUsage,
+    getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+  });
   const manager = new DynamicActionManager({
     isCompatible,
     storage,
@@ -95,6 +111,9 @@ const setup = (events: readonly SerializedEvent[] = []) => {
 };
 
 describe('DynamicActionManager', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   test('can instantiate', () => {
     const { manager } = setup([event1]);
     expect(manager).toBeInstanceOf(DynamicActionManager);
@@ -103,11 +122,11 @@ describe('DynamicActionManager', () => {
   describe('.start()', () => {
     test('instantiates stored events', async () => {
       const { manager, actions, uiActions } = setup([event1]);
-      const create1 = jest.fn();
-      const create2 = jest.fn();
+      const create1 = jest.spyOn(actionFactoryDefinition1, 'create');
+      const create2 = jest.spyOn(actionFactoryDefinition2, 'create');
 
-      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
-      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
+      uiActions.registerActionFactory(actionFactoryDefinition1);
+      uiActions.registerActionFactory(actionFactoryDefinition2);
 
       expect(create1).toHaveBeenCalledTimes(0);
       expect(create2).toHaveBeenCalledTimes(0);
@@ -122,11 +141,11 @@ describe('DynamicActionManager', () => {
 
     test('does nothing when no events stored', async () => {
       const { manager, actions, uiActions } = setup();
-      const create1 = jest.fn();
-      const create2 = jest.fn();
+      const create1 = jest.spyOn(actionFactoryDefinition1, 'create');
+      const create2 = jest.spyOn(actionFactoryDefinition2, 'create');
 
-      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
-      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
+      uiActions.registerActionFactory(actionFactoryDefinition1);
+      uiActions.registerActionFactory(actionFactoryDefinition2);
 
       expect(create1).toHaveBeenCalledTimes(0);
       expect(create2).toHaveBeenCalledTimes(0);
@@ -207,11 +226,9 @@ describe('DynamicActionManager', () => {
   describe('.stop()', () => {
     test('removes events from UI actions registry', async () => {
       const { manager, actions, uiActions } = setup([event1, event2]);
-      const create1 = jest.fn();
-      const create2 = jest.fn();
 
-      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
-      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
+      uiActions.registerActionFactory(actionFactoryDefinition1);
+      uiActions.registerActionFactory(actionFactoryDefinition2);
 
       expect(actions.size).toBe(0);
 
@@ -407,6 +424,21 @@ describe('DynamicActionManager', () => {
         await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
 
         expect(actions.size).toBe(0);
+      });
+
+      test('throws when trigger is unknown', async () => {
+        const { manager, uiActions } = setup([]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects;
       });
     });
   });
@@ -631,5 +663,45 @@ describe('DynamicActionManager', () => {
         expect(manager.state.get().events).toEqual([]);
       });
     });
+  });
+
+  test('revived actions incompatible when license is not enough', async () => {
+    const getLicenseInfo = jest.fn(() =>
+      licensingMock.createLicense({ license: { type: 'basic' } })
+    );
+    const { manager, uiActions } = setup([event1, event3], { getLicenseInfo });
+    const basicActionFactory: ActionFactoryDefinition = {
+      ...actionFactoryDefinition1,
+      minimalLicense: 'basic',
+      licenseFeatureName: 'Feature 1',
+    };
+
+    const goldActionFactory: ActionFactoryDefinition = {
+      ...actionFactoryDefinition2,
+      minimalLicense: 'gold',
+      licenseFeatureName: 'Feature 2',
+    };
+
+    uiActions.registerActionFactory(basicActionFactory);
+    uiActions.registerActionFactory(goldActionFactory);
+
+    await manager.start();
+
+    const basicActions = await uiActions.getTriggerCompatibleActions(
+      'VALUE_CLICK_TRIGGER',
+      {} as any
+    );
+    expect(basicActions).toHaveLength(1);
+
+    getLicenseInfo.mockImplementation(() =>
+      licensingMock.createLicense({ license: { type: 'gold' } })
+    );
+
+    const basicAndGoldActions = await uiActions.getTriggerCompatibleActions(
+      'VALUE_CLICK_TRIGGER',
+      {} as any
+    );
+
+    expect(basicAndGoldActions).toHaveLength(2);
   });
 });

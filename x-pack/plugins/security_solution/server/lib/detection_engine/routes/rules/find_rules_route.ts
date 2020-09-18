@@ -4,22 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
+import {
+  findRulesSchema,
+  FindRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/find_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
-import { FindRulesRequestParams } from '../../rules/types';
-import { findRulesSchema } from '../schemas/find_rules_schema';
 import { transformValidateFindAlerts } from './validate';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 export const findRulesRoute = (router: IRouter) => {
   router.get(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find`,
       validate: {
-        query: buildRouteValidation<FindRulesRequestParams>(findRulesSchema),
+        query: buildRouteValidation<typeof findRulesSchema, FindRulesSchemaDecoded>(
+          findRulesSchema
+        ),
       },
       options: {
         tags: ['access'],
@@ -27,6 +33,10 @@ export const findRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const validationErrors = findRuleValidateTypeDependents(request.query);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
 
       try {
         const { query } = request;
@@ -45,6 +55,7 @@ export const findRulesRoute = (router: IRouter) => {
           sortField: query.sort_field,
           sortOrder: query.sort_order,
           filter: query.filter,
+          fields: query.fields,
         });
         const ruleStatuses = await Promise.all(
           rules.data.map(async (rule) => {

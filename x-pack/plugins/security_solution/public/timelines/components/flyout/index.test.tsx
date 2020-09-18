@@ -5,7 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import { set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -14,6 +14,8 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
@@ -26,17 +28,17 @@ jest.mock('../timeline', () => ({
   StatefulTimeline: () => <div />,
 }));
 
-const testFlyoutHeight = 980;
 const usersViewing = ['elastic'];
 
 describe('Flyout', () => {
   const state: State = mockGlobalState;
+  const { storage } = createSecuritySolutionStorageMock();
 
   describe('rendering', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
       expect(wrapper.find('Flyout')).toMatchSnapshot();
@@ -45,7 +47,7 @@ describe('Flyout', () => {
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -59,12 +61,14 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(
         stateShowIsTrue,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable
+        apolloClientObservable,
+        kibanaObservable,
+        storage
       );
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -82,12 +86,14 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable
+        apolloClientObservable,
+        kibanaObservable,
+        storage
       );
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -103,12 +109,14 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable
+        apolloClientObservable,
+        kibanaObservable,
+        storage
       );
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -118,7 +126,7 @@ describe('Flyout', () => {
     test('it hides the data providers badge when the timeline does NOT have data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -136,12 +144,14 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
         SUB_PLUGINS_REDUCER,
-        apolloClientObservable
+        apolloClientObservable,
+        kibanaObservable,
+        storage
       );
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -156,7 +166,6 @@ describe('Flyout', () => {
         <TestProviders>
           <FlyoutComponent
             dataProviders={mockDataProviders}
-            flyoutHeight={testFlyoutHeight}
             show={false}
             showTimeline={showTimeline}
             timelineId="test"

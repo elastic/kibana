@@ -8,12 +8,15 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
-import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+  SERVER_APP_ID,
+} from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
+import { isThresholdRule, isEqlRule } from '../../../../common/detection_engine/utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
-
-import { ListClient } from '../../../../../lists/server';
-
 import { getInputIndex } from './get_input_output_index';
 import {
   searchAfterAndBulkCreate,
@@ -21,11 +24,19 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns, parseScheduleDates } from './utils';
+import {
+  getGapBetweenRuns,
+  getListsClient,
+  getExceptions,
+  getGapMaxCatchupRatio,
+  MAX_RULE_GAP_RATIO,
+} from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
+import { findThresholdSignals } from './find_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
+import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -34,7 +45,6 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
-import { hasListsFeature } from '../feature_flags';
 
 export const signalRulesAlertType = ({
   logger,
@@ -55,9 +65,10 @@ export const signalRulesAlertType = ({
     validate: {
       params: signalParamsSchema(),
     },
-    producer: 'siem',
+    producer: SERVER_APP_ID,
     async executor({
       previousStartedAt,
+      startedAt,
       alertId,
       services,
       params,
@@ -78,8 +89,9 @@ export const signalRulesAlertType = ({
         savedId,
         query,
         to,
+        threshold,
         type,
-        exceptions_list: exceptionsList,
+        exceptionsList,
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -109,7 +121,6 @@ export const signalRulesAlertType = ({
         enabled,
         schedule: { interval },
         throttle,
-        params: ruleParams,
       } = savedObject.attributes;
       const updatedAt = savedObject.updated_at ?? '';
       const refresh = actions.length ? 'wait_for' : false;
@@ -121,21 +132,45 @@ export const signalRulesAlertType = ({
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
+      logger.debug(buildRuleMessage(`interval: ${interval}`));
       await ruleStatusService.goingToRun();
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
       if (gap != null && gap.asMilliseconds() > 0) {
-        const gapString = gap.humanize();
-        const gapMessage = buildRuleMessage(
-          `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
-          'Consider increasing your look behind time or adding more Kibana instances.'
-        );
-        logger.warn(gapMessage);
+        const fromUnit = from[from.length - 1];
+        const { ratio } = getGapMaxCatchupRatio({
+          logger,
+          buildRuleMessage,
+          previousStartedAt,
+          ruleParamsFrom: from,
+          interval,
+          unit: fromUnit,
+        });
+        if (ratio && ratio >= MAX_RULE_GAP_RATIO) {
+          const gapString = gap.humanize();
+          const gapMessage = buildRuleMessage(
+            `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
+            'Consider increasing your look behind time or adding more Kibana instances.'
+          );
+          logger.warn(gapMessage);
 
-        hasError = true;
-        await ruleStatusService.error(gapMessage, { gap: gapString });
+          hasError = true;
+          await ruleStatusService.error(gapMessage, { gap: gapString });
+        }
       }
       try {
+        const { listClient, exceptionsClient } = getListsClient({
+          services,
+          updatedByUser,
+          spaceId,
+          lists,
+          savedObjectClient: services.savedObjectsClient,
+        });
+        const exceptionItems = await getExceptions({
+          client: exceptionsClient,
+          lists: exceptionsList ?? [],
+        });
+
         if (isMlRule(type)) {
           if (ml == null) {
             throw new Error('ML plugin unavailable during rule execution');
@@ -150,9 +185,11 @@ export const signalRulesAlertType = ({
             );
           }
 
-          const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
+          // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
+          // currently unused by the jobsSummary function.
+          const fakeRequest = {} as KibanaRequest;
           const summaryJobs = await ml
-            .jobServiceProvider(scopedMlCallCluster)
+            .jobServiceProvider(fakeRequest)
             .jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
@@ -170,8 +207,7 @@ export const signalRulesAlertType = ({
 
           const anomalyResults = await findMlSignals({
             ml,
-            callCluster: scopedMlCallCluster,
-            // This is needed to satisfy the ML Services API, but can be empty as it is
+            // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
             // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,
             jobId: machineLearningJobId,
@@ -209,19 +245,9 @@ export const signalRulesAlertType = ({
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
-        } else {
-          let listClient: ListClient | undefined;
-          if (hasListsFeature()) {
-            if (lists == null) {
-              throw new Error('lists plugin unavailable during rule execution');
-            }
-            listClient = await lists.getListClient(
-              services.callCluster,
-              spaceId,
-              updatedByUser ?? 'elastic'
-            );
-          }
-
+        } else if (isEqlRule(type)) {
+          throw new Error('EQL Rules are under development, execution is not yet implemented');
+        } else if (isThresholdRule(type) && threshold) {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -231,13 +257,68 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             index: inputIndex,
-            // temporary filter out list type
-            lists: exceptionsList?.filter((item) => item.values_type !== 'list'),
+            lists: exceptionItems ?? [],
+          });
+
+          const { searchResult: thresholdResults } = await findThresholdSignals({
+            inputIndexPattern: inputIndex,
+            from,
+            to,
+            services,
+            logger,
+            filter: esFilter,
+            threshold,
+          });
+
+          const {
+            success,
+            bulkCreateDuration,
+            createdItemsCount,
+          } = await bulkCreateThresholdSignals({
+            actions,
+            throttle,
+            someResult: thresholdResults,
+            ruleParams: params,
+            filter: esFilter,
+            services,
+            logger,
+            id: alertId,
+            inputIndexPattern: inputIndex,
+            signalsIndex: outputIndex,
+            startedAt,
+            name,
+            createdBy,
+            createdAt,
+            updatedBy,
+            updatedAt,
+            interval,
+            enabled,
+            refresh,
+            tags,
+          });
+          result.success = success;
+          result.createdSignalsCount = createdItemsCount;
+          if (bulkCreateDuration) {
+            result.bulkCreateTimes.push(bulkCreateDuration);
+          }
+        } else {
+          const inputIndex = await getInputIndex(services, version, index);
+          const esFilter = await getFilter({
+            type,
+            filters,
+            language,
+            query,
+            savedId,
+            services,
+            index: inputIndex,
+            lists: exceptionItems ?? [],
           });
 
           result = await searchAfterAndBulkCreate({
+            gap,
+            previousStartedAt,
             listClient,
-            exceptionsList,
+            exceptionsList: exceptionItems ?? [],
             ruleParams: params,
             services,
             logger,
@@ -257,13 +338,14 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
             throttle,
+            buildRuleMessage,
           });
         }
 
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {
-              ...ruleParams,
+              ...params,
               name,
               id: savedObject.id,
             };
@@ -275,7 +357,8 @@ export const signalRulesAlertType = ({
               from: fromInMs,
               to: toInMs,
               id: savedObject.id,
-              kibanaSiemAppUrl: meta?.kibana_siem_app_url,
+              kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                ?.kibana_siem_app_url,
             });
 
             logger.info(

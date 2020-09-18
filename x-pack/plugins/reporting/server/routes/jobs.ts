@@ -4,49 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
+import Boom from 'boom';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { jobsQueryFactory } from '../lib/jobs_query';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { jobsQueryFactory } from './lib/jobs_query';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
 } from './lib/job_response_handler';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
-interface ListQuery {
-  page: string;
-  size: string;
-  ids?: string; // optional field forbids us from extending RequestQuery
-}
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export async function registerJobInfoRoutes(reporting: ReportingCore) {
-  const config = reporting.getConfig();
+const handleUnavailable = (res: any) => {
+  return res.custom({ statusCode: 503, body: 'Not Available' });
+};
+
+export function registerJobInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
-  const { elasticsearch, router } = setupDeps;
-  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+  const { router } = setupDeps;
 
   // list jobs in the queue, paginated
   router.get(
     {
       path: `${MAIN_ENTRY}/list`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          page: schema.string({ defaultValue: '0' }),
+          size: schema.string({ defaultValue: '10' }),
+          ids: schema.maybe(schema.string()),
+        }),
+      },
     },
     userHandler(async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
-      const {
-        page: queryPage = '0',
-        size: querySize = '10',
-        ids: queryIds = null,
-      } = req.query as ListQuery;
+      const { page: queryPage = '0', size: querySize = '10', ids: queryIds = null } = req.query;
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
+      const jobsQuery = jobsQueryFactory(reporting);
       const results = await jobsQuery.list(jobTypes, user, page, size, jobIds);
 
       return res.ok({
@@ -65,10 +70,16 @@ export async function registerJobInfoRoutes(reporting: ReportingCore) {
       validate: false,
     },
     userHandler(async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
+      const jobsQuery = jobsQueryFactory(reporting);
       const count = await jobsQuery.count(jobTypes, user);
 
       return res.ok({
@@ -91,11 +102,17 @@ export async function registerJobInfoRoutes(reporting: ReportingCore) {
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { docId } = req.params as { docId: string };
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
+      const { docId } = req.params;
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
+      const jobsQuery = jobsQueryFactory(reporting);
       const result = await jobsQuery.get(user, docId, { includeContent: true });
 
       if (!result) {
@@ -130,11 +147,17 @@ export async function registerJobInfoRoutes(reporting: ReportingCore) {
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { docId } = req.params as { docId: string };
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return res.custom({ statusCode: 503 });
+      }
+
+      const { docId } = req.params;
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
 
+      const jobsQuery = jobsQueryFactory(reporting);
       const result = await jobsQuery.get(user, docId);
 
       if (!result) {
@@ -164,12 +187,7 @@ export async function registerJobInfoRoutes(reporting: ReportingCore) {
   );
 
   // trigger a download of the output from a job
-  const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const downloadResponseHandler = downloadJobResponseHandlerFactory(
-    config,
-    elasticsearch,
-    exportTypesRegistry
-  );
+  const downloadResponseHandler = downloadJobResponseHandlerFactory(reporting);
 
   router.get(
     {
@@ -181,7 +199,12 @@ export async function registerJobInfoRoutes(reporting: ReportingCore) {
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { docId } = req.params as { docId: string };
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
+      const { docId } = req.params;
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();
@@ -191,7 +214,7 @@ export async function registerJobInfoRoutes(reporting: ReportingCore) {
   );
 
   // allow a report to be deleted
-  const deleteResponseHandler = deleteJobResponseHandlerFactory(config, elasticsearch);
+  const deleteResponseHandler = deleteJobResponseHandlerFactory(reporting);
   router.delete(
     {
       path: `${MAIN_ENTRY}/delete/{docId}`,
@@ -202,7 +225,12 @@ export async function registerJobInfoRoutes(reporting: ReportingCore) {
       },
     },
     userHandler(async (user, context, req, res) => {
-      const { docId } = req.params as { docId: string };
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return handleUnavailable(res);
+      }
+
+      const { docId } = req.params;
       const {
         management: { jobTypes = [] },
       } = await reporting.getLicenseInfo();

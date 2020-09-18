@@ -77,6 +77,7 @@ describe('findRelationships', () => {
           type: 'parent-type',
           id: 'parent-id',
           attributes: {},
+          score: 1,
           references: [],
         },
       ],

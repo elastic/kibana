@@ -6,10 +6,10 @@
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { outputService, appContextService } from '../../services';
-import { GetFleetStatusResponse } from '../../../common';
+import { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 import { PostFleetSetupRequestSchema } from '../../types';
-import { IngestManagerError, getHTTPResponseCode } from '../../errors';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -20,6 +20,8 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
     const isTLSCheckDisabled = appContextService.getConfig()?.fleet?.tlsCheckDisabled ?? false;
+    const isUsingEphemeralEncryptionKey = appContextService.getEncryptedSavedObjectsSetup()
+      .usingEphemeralEncryptionKey;
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isAdminUserSetup) {
@@ -32,6 +34,10 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
       missingRequirements.push('tls_required');
     }
 
+    if (isUsingEphemeralEncryptionKey) {
+      missingRequirements.push('encrypted_saved_object_encryption_key_required');
+    }
+
     const body: GetFleetStatusResponse = {
       isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
@@ -40,11 +46,8 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -64,43 +67,22 @@ export const createFleetSetupHandler: RequestHandler<
     return response.ok({
       body: { isInitialized: true },
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
 export const ingestManagerSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-  const logger = appContextService.getLogger();
+
   try {
+    const body: PostIngestSetupResponse = { isInitialized: true };
     await setupIngestManager(soClient, callCluster);
     return response.ok({
-      body: { isInitialized: true },
+      body,
     });
-  } catch (e) {
-    if (e instanceof IngestManagerError) {
-      logger.error(e.message);
-      return response.customError({
-        statusCode: getHTTPResponseCode(e),
-        body: { message: e.message },
-      });
-    }
-    if (e.isBoom) {
-      logger.error(e.output.payload.message);
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
-      });
-    }
-    logger.error(e.message);
-    logger.error(e.stack);
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

@@ -5,11 +5,14 @@
  */
 
 import { MouseEventHandler, useCallback } from 'react';
-import { ApplicationStart } from 'kibana/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ApplicationStart, NavigateToAppOptions } from 'kibana/public';
+import { useKibana } from '../../lib/kibana';
 
-type NavigateToAppHandlerProps = Parameters<ApplicationStart['navigateToApp']>;
-type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+type NavigateToAppHandlerOptions<S = unknown> = NavigateToAppOptions & {
+  state?: S;
+  onClick?: EventHandlerCallback;
+};
+type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement | Element>;
 
 /**
  * Provides an event handlers that can be used with (for example) `onClick` to prevent the
@@ -22,17 +25,15 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
  *
  * @example
  *
- * const handleOnClick = useNavigateToAppEventHandler('ingestManager', {path: '#/configs'})
- * return <EuiLink onClick={handleOnClick}>See configs</EuiLink>
+ * const handleOnClick = useNavigateToAppEventHandler('ingestManager', {path: '#/policies'})
+ * return <EuiLink onClick={handleOnClick}>See policies</EuiLink>
  */
-export const useNavigateToAppEventHandler = (
+export const useNavigateToAppEventHandler = <S = unknown>(
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
-  appId: NavigateToAppHandlerProps[0],
+  appId: Parameters<ApplicationStart['navigateToApp']>[0],
 
   /** Options, some of which are passed along to the app route */
-  options?: NavigateToAppHandlerProps[1] & {
-    onClick?: EventHandlerCallback;
-  }
+  options?: NavigateToAppHandlerOptions<S>
 ): EventHandlerCallback => {
   const { services } = useKibana();
   const { path, state, onClick } = options || {};

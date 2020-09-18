@@ -35,4 +35,11 @@ export const awsS3: InventoryModel = {
     'awsS3DownloadBytes',
     'awsS3UploadBytes',
   ],
+  tooltipMetrics: [
+    's3BucketSize',
+    's3NumberOfObjects',
+    's3TotalRequests',
+    's3UploadBytes',
+    's3DownloadBytes',
+  ],
 };

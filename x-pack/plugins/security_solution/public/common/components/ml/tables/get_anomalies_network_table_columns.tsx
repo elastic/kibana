@@ -7,27 +7,27 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Columns } from '../../paginated_table';
 import { Anomaly, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { EntityDraggable } from '../entity_draggable';
 import { createCompoundNetworkKey } from './create_compound_key';
-import { IPDetailsLink } from '../../links';
+import { NetworkDetailsLink } from '../../links';
 
 import * as i18n from './translations';
 import { getEntries } from '../get_entries';
 import { DraggableScore } from '../score/draggable_score';
-import { createExplorerLink } from '../links/create_explorer_link';
+import { ExplorerLink } from '../links/create_explorer_link';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { NetworkType } from '../../../../network/store/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { FlowTarget } from '../../../../graphql/types';
 
 export const getAnomaliesNetworkTableColumns = (
-  startDate: number,
-  endDate: number,
+  startDate: string,
+  endDate: string,
   flowTarget?: FlowTarget
 ): [
   Columns<AnomaliesByNetwork['ip'], AnomaliesByNetwork>,
@@ -46,7 +46,7 @@ export const getAnomaliesNetworkTableColumns = (
         rowItem: ip,
         attrName: anomaliesByNetwork.type,
         idPrefix: `anomalies-network-table-ip-${createCompoundNetworkKey(anomaliesByNetwork)}`,
-        render: (item) => <IPDetailsLink ip={item} flowTarget={flowTarget} />,
+        render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
       }),
   },
   {
@@ -54,12 +54,12 @@ export const getAnomaliesNetworkTableColumns = (
     field: 'anomaly.jobId',
     sortable: true,
     render: (jobId, anomaliesByHost) => (
-      <EuiLink
-        href={`${createExplorerLink(anomaliesByHost.anomaly, startDate, endDate)}`}
-        target="_blank"
-      >
-        {jobId}
-      </EuiLink>
+      <ExplorerLink
+        score={anomaliesByHost.anomaly}
+        startDate={startDate}
+        endDate={endDate}
+        linkName={jobId}
+      />
     ),
   },
   {
@@ -127,8 +127,8 @@ export const getAnomaliesNetworkTableColumns = (
 
 export const getAnomaliesNetworkTableColumnsCurated = (
   pageType: NetworkType,
-  startDate: number,
-  endDate: number,
+  startDate: string,
+  endDate: string,
   flowTarget?: FlowTarget
 ) => {
   const columns = getAnomaliesNetworkTableColumns(startDate, endDate, flowTarget);

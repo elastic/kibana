@@ -29,11 +29,11 @@ const FieldsBrowserContainer = styled.div<{ width: number }>`
   border: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  left: 0;
+  left: 8px;
   padding: ${({ theme }) => theme.eui.paddingSizes.s} ${({ theme }) => theme.eui.paddingSizes.s}
-    ${({ theme }) => theme.eui.paddingSizes.m};
+    ${({ theme }) => theme.eui.paddingSizes.s};
   position: absolute;
-  top: calc(100% + ${({ theme }) => theme.eui.euiSize});
+  top: calc(100% + 4px);
   width: ${({ width }) => width}px;
   z-index: 9990;
 `;
@@ -46,13 +46,7 @@ PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
-  | 'browserFields'
-  | 'isEventViewer'
-  | 'height'
-  | 'onFieldSelected'
-  | 'onUpdateColumns'
-  | 'timelineId'
-  | 'width'
+  'browserFields' | 'height' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId' | 'width'
 > & {
   /**
    * The current timeline column headers
@@ -106,7 +100,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   browserFields,
   columnHeaders,
   filteredBrowserFields,
-  isEventViewer,
   isSearching,
   onCategorySelected,
   onFieldSelected,
@@ -180,6 +173,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
 
   useEffect(() => {
     scrollViews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategoryId, timelineId]);
 
   return (
@@ -192,7 +186,6 @@ const FieldsBrowserComponent: React.FC<Props> = ({
         <Header
           data-test-subj="header"
           filteredBrowserFields={filteredBrowserFields}
-          isEventViewer={isEventViewer}
           isSearching={isSearching}
           onOutsideClick={onOutsideClick}
           onSearchInputChange={onInputChange}

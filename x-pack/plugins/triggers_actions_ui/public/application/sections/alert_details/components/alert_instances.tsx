@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padLeft, difference, chunk } from 'lodash';
-import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
+import { padStart, chunk } from 'lodash';
+import { Alert, AlertInstanceSummary, AlertInstanceStatus, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
@@ -20,13 +20,15 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 type AlertInstancesProps = {
   alert: Alert;
-  alertState: AlertTaskState;
+  readOnly: boolean;
+  alertInstanceSummary: AlertInstanceSummary;
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 export const alertInstancesTableColumns = (
-  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>
+  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>,
+  readOnly: boolean
 ) => [
   {
     field: 'instance',
@@ -90,6 +92,7 @@ export const alertInstancesTableColumns = (
             showLabel={false}
             compressed={true}
             checked={alertInstance.isMuted}
+            disabled={readOnly}
             data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
             onChange={() => onMuteAction(alertInstance)}
           />
@@ -103,13 +106,14 @@ export const alertInstancesTableColumns = (
 
 function durationAsString(duration: Duration): string {
   return [duration.hours(), duration.minutes(), duration.seconds()]
-    .map((value) => padLeft(`${value}`, 2, '0'))
+    .map((value) => padStart(`${value}`, 2, '0'))
     .join(':');
 }
 
 export function AlertInstances({
   alert,
-  alertState: { alertInstances = {} },
+  readOnly,
+  alertInstanceSummary,
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
@@ -120,15 +124,12 @@ export function AlertInstances({
     size: DEFAULT_SEARCH_PAGE_SIZE,
   });
 
-  const mergedAlertInstances = [
-    ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-      alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
-    ),
-    ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map((instanceId) =>
-      alertInstanceToListItem(durationEpoch, alert, instanceId)
-    ),
-  ];
-  const pageOfAlertInstances = getPage(mergedAlertInstances, pagination);
+  const alertInstances = Object.entries(
+    alertInstanceSummary.instances
+  ).map(([instanceId, instance]) =>
+    alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
+  );
+  const pageOfAlertInstances = getPage(alertInstances, pagination);
 
   const onMuteAction = async (instance: AlertInstanceListItem) => {
     await (instance.isMuted
@@ -151,7 +152,7 @@ export function AlertInstances({
         pagination={{
           pageIndex: pagination.index,
           pageSize: pagination.size,
-          totalItemCount: mergedAlertInstances.length,
+          totalItemCount: alertInstances.length,
         }}
         onChange={({ page: changedPage }: { page: Pagination }) => {
           setPagination(changedPage);
@@ -162,7 +163,7 @@ export function AlertInstances({
         cellProps={() => ({
           'data-test-subj': 'cell',
         })}
-        columns={alertInstancesTableColumns(onMuteAction)}
+        columns={alertInstancesTableColumns(onMuteAction, readOnly)}
         data-test-subj="alertInstancesList"
       />
     </Fragment>
@@ -193,29 +194,27 @@ const ACTIVE_LABEL = i18n.translate(
 
 const INACTIVE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive',
-  { defaultMessage: 'Inactive' }
+  { defaultMessage: 'OK' }
 );
-
-const durationSince = (durationEpoch: number, startTime?: number) =>
-  startTime ? durationEpoch - startTime : 0;
 
 export function alertInstanceToListItem(
   durationEpoch: number,
   alert: Alert,
   instanceId: string,
-  instance?: RawAlertInstance
+  instance: AlertInstanceStatus
 ): AlertInstanceListItem {
-  const isMuted = alert.mutedInstanceIds.findIndex((muted) => muted === instanceId) >= 0;
+  const isMuted = !!instance?.muted;
+  const status =
+    instance?.status === 'Active'
+      ? { label: ACTIVE_LABEL, healthColor: 'primary' }
+      : { label: INACTIVE_LABEL, healthColor: 'subdued' };
+  const start = instance?.activeStartDate ? new Date(instance.activeStartDate) : undefined;
+  const duration = start ? durationEpoch - start.valueOf() : 0;
   return {
     instance: instanceId,
-    status: instance
-      ? { label: ACTIVE_LABEL, healthColor: 'primary' }
-      : { label: INACTIVE_LABEL, healthColor: 'subdued' },
-    start: instance?.meta?.lastScheduledActions?.date,
-    duration: durationSince(
-      durationEpoch,
-      instance?.meta?.lastScheduledActions?.date?.getTime() ?? 0
-    ),
+    status,
+    start,
+    duration,
     isMuted,
   };
 }

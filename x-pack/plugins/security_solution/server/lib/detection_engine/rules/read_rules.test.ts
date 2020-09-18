@@ -40,6 +40,7 @@ describe('read_rules', () => {
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const alertsClient = alertsClientMock.create();
       const result = getResult();
+      // @ts-expect-error
       delete result.alertTypeId;
       alertsClient.get.mockResolvedValue(result);
 
@@ -81,18 +82,6 @@ describe('read_rules', () => {
       }
     });
 
-    test('should return the output from alertsClient if id is set but ruleId is null', async () => {
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult());
-
-      const rule = await readRules({
-        alertsClient,
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        ruleId: null,
-      });
-      expect(rule).toEqual(getResult());
-    });
-
     test('should return the output from alertsClient if id is undefined but ruleId is set', async () => {
       const alertsClient = alertsClientMock.create();
       alertsClient.get.mockResolvedValue(getResult());
@@ -126,23 +115,10 @@ describe('read_rules', () => {
 
       const rule = await readRules({
         alertsClient,
-        id: null,
+        id: undefined,
         ruleId: 'rule-1',
       });
       expect(rule).toEqual(getResult());
-    });
-
-    test('should return null if id and ruleId are null', async () => {
-      const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-
-      const rule = await readRules({
-        alertsClient,
-        id: null,
-        ruleId: null,
-      });
-      expect(rule).toEqual(null);
     });
 
     test('should return null if id and ruleId are undefined', async () => {

@@ -29,8 +29,9 @@ function findOrCreateGroupWithNodes(
    * look for the full id. Otherwise we need to find the parent group and
    * then look for the group in it's sub groups.
    */
-  if (path.length === 2) {
-    const parentId = first(path).value;
+  const firstPath = first(path);
+  if (path.length === 2 && firstPath) {
+    const parentId = firstPath.value;
     const existingParentGroup = groups.find((g) => g.id === parentId);
     if (isWaffleMapGroupWithGroups(existingParentGroup)) {
       const existingSubGroup = existingParentGroup.groups.find((g) => g.id === id);
@@ -95,7 +96,7 @@ export function createWaffleMapNode(node: SnapshotNode): InfraWaffleMapNode {
     id: nodePathItem.value,
     ip: nodePathItem.ip,
     name: nodePathItem.label || nodePathItem.value,
-    metric: node.metric,
+    metrics: node.metrics,
   };
 }
 

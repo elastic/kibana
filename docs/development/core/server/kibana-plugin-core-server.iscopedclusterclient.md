@@ -2,14 +2,20 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [IScopedClusterClient](./kibana-plugin-core-server.iscopedclusterclient.md)
 
-## IScopedClusterClient type
+## IScopedClusterClient interface
 
-Serves the same purpose as "normal" `ClusterClient` but exposes additional `callAsCurrentUser` method that doesn't use credentials of the Kibana internal user (as `callAsInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.
-
-See [ScopedClusterClient](./kibana-plugin-core-server.scopedclusterclient.md)<!-- -->.
+Serves the same purpose as the normal [cluster client](./kibana-plugin-core-server.iclusterclient.md) but exposes an additional `asCurrentUser` method that doesn't use credentials of the Kibana internal user (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+export interface IScopedClusterClient 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [asCurrentUser](./kibana-plugin-core-server.iscopedclusterclient.ascurrentuser.md) | <code>ElasticsearchClient</code> | A [client](./kibana-plugin-core-server.elasticsearchclient.md) to be used to query the elasticsearch cluster on behalf of the user that initiated the request to the Kibana server. |
+|  [asInternalUser](./kibana-plugin-core-server.iscopedclusterclient.asinternaluser.md) | <code>ElasticsearchClient</code> | A [client](./kibana-plugin-core-server.elasticsearchclient.md) to be used to query the elasticsearch cluster on behalf of the internal Kibana user. |
+

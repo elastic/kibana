@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { deepFreeze } from '@kbn/std';
 import {
-  deepFreeze,
   CoreSetup,
   PluginInitializer,
   SavedObjectsNamespaceType,
+  SavedObjectUnsanitizedDoc,
 } from '../../../../../../src/core/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -23,6 +24,17 @@ const SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE =
   'saved-object-with-secret-and-multiple-spaces';
 const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
 
+const SAVED_OBJECT_WITH_MIGRATION_TYPE = 'saved-object-with-migration';
+interface MigratedTypePre790 {
+  nonEncryptedAttribute: string;
+  encryptedAttribute: string;
+}
+interface MigratedType {
+  nonEncryptedAttribute: string;
+  encryptedAttribute: string;
+  additionalEncryptedAttribute: string;
+}
+
 export interface PluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   spaces: SpacesPluginSetup;
@@ -34,7 +46,7 @@ export interface PluginsStart {
 }
 
 export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> = () => ({
-  setup(core: CoreSetup<PluginsStart>, deps) {
+  setup(core: CoreSetup<PluginsStart>, deps: PluginsSetup) {
     for (const [name, namespaceType, hidden] of [
       [SAVED_OBJECT_WITH_SECRET_TYPE, 'single', false],
       [HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE, 'single', true],
@@ -71,6 +83,8 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
       mappings: deepFreeze({ properties: { publicProperty: { type: 'keyword' } } }),
     });
 
+    defineTypeWithMigration(core, deps);
+
     const router = core.http.createRouter();
     router.get(
       {
@@ -103,3 +117,83 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
   start() {},
   stop() {},
 });
+
+function defineTypeWithMigration(core: CoreSetup<PluginsStart>, deps: PluginsSetup) {
+  const typePriorTo790 = {
+    type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
+    attributesToEncrypt: new Set(['encryptedAttribute']),
+  };
+
+  // current type is registered
+  deps.encryptedSavedObjects.registerType({
+    type: SAVED_OBJECT_WITH_MIGRATION_TYPE,
+    attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
+  });
+
+  core.savedObjects.registerType({
+    name: SAVED_OBJECT_WITH_MIGRATION_TYPE,
+    hidden: false,
+    namespaceType: 'single',
+    mappings: {
+      properties: {
+        nonEncryptedAttribute: {
+          type: 'keyword',
+        },
+        encryptedAttribute: {
+          type: 'binary',
+        },
+        additionalEncryptedAttribute: {
+          type: 'keyword',
+        },
+      },
+    },
+    migrations: {
+      // in this version we migrated a non encrypted field and type didnt change
+      '7.8.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedTypePre790>(
+        function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+          return true;
+        },
+        (
+          doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
+        ): SavedObjectUnsanitizedDoc<MigratedTypePre790> => {
+          const {
+            attributes: { nonEncryptedAttribute },
+          } = doc;
+          return {
+            ...doc,
+            attributes: {
+              ...doc.attributes,
+              nonEncryptedAttribute: `${nonEncryptedAttribute}-migrated`,
+            },
+          };
+        },
+        // type hasn't changed as the field we're updating is not an encrypted one
+        typePriorTo790,
+        typePriorTo790
+      ),
+      // in this version we encrypted an existing non encrypted field
+      '7.9.0': deps.encryptedSavedObjects.createMigration<MigratedTypePre790, MigratedType>(
+        function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<MigratedTypePre790> {
+          return true;
+        },
+        (
+          doc: SavedObjectUnsanitizedDoc<MigratedTypePre790>
+        ): SavedObjectUnsanitizedDoc<MigratedType> => {
+          const {
+            attributes: { nonEncryptedAttribute },
+          } = doc;
+          return {
+            ...doc,
+            attributes: {
+              ...doc.attributes,
+              nonEncryptedAttribute,
+              // clone and modify the non encrypted field
+              additionalEncryptedAttribute: `${nonEncryptedAttribute}-encrypted`,
+            },
+          };
+        },
+        typePriorTo790
+      ),
+    },
+  });
+}

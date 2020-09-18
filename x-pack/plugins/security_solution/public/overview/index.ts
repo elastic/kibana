@@ -5,14 +5,14 @@
  */
 
 import { SecuritySubPlugin } from '../app/types';
-import { getOverviewRoutes } from './routes';
+import { OverviewRoutes } from './routes';
 
 export class Overview {
   public setup() {}
 
   public start(): SecuritySubPlugin {
     return {
-      routes: getOverviewRoutes(),
+      SubPluginRoutes: OverviewRoutes,
     };
   }
 }

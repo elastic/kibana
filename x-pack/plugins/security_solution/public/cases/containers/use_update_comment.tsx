@@ -111,6 +111,7 @@ export const useUpdateComment = (): UseUpdateComment => {
         abortCtrl.abort();
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

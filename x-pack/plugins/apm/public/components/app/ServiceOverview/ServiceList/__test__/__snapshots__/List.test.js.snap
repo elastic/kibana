@@ -1,74 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ServiceOverview -> List should render columns correctly 1`] = `
-<EuiToolTip
-  content="opbeans-python"
-  delay="regular"
-  id="service-name-tooltip"
-  position="top"
->
-  <ForwardRef(Styled(TransactionOverviewLink))
-    serviceName="opbeans-python"
-  >
-    opbeans-python
-  </ForwardRef(Styled(TransactionOverviewLink))>
-</EuiToolTip>
-`;
-
-exports[`ServiceOverview -> List should render empty state 1`] = `
-<Memo(UnoptimizedManagedTable)
-  columns={
-    Array [
-      Object {
-        "field": "serviceName",
-        "name": "Name",
-        "render": [Function],
-        "sortable": true,
-        "width": "40%",
-      },
-      Object {
-        "field": "environments",
-        "name": "Environment",
-        "render": [Function],
-        "sortable": true,
-        "width": "20%",
-      },
-      Object {
-        "field": "agentName",
-        "name": "Agent",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "number",
-        "field": "avgResponseTime",
-        "name": "Avg. response time",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "number",
-        "field": "transactionsPerMinute",
-        "name": "Trans. per minute",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "number",
-        "field": "errorsPerMinute",
-        "name": "Errors per minute",
-        "render": [Function],
-        "sortable": true,
-      },
-    ]
-  }
-  initialPageSize={50}
-  initialSortField="serviceName"
-  items={Array []}
+exports[`ServiceOverview -> List renders columns correctly 1`] = `
+<HealthBadge
+  healthStatus="unknown"
 />
 `;
 
-exports[`ServiceOverview -> List should render with data 1`] = `
+exports[`ServiceOverview -> List renders empty state 1`] = `
 <Memo(UnoptimizedManagedTable)
   columns={
     Array [
@@ -84,39 +22,95 @@ exports[`ServiceOverview -> List should render with data 1`] = `
         "name": "Environment",
         "render": [Function],
         "sortable": true,
-        "width": "20%",
+        "width": "160px",
       },
       Object {
-        "field": "agentName",
-        "name": "Agent",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
+        "align": "left",
         "dataType": "number",
         "field": "avgResponseTime",
         "name": "Avg. response time",
         "render": [Function],
         "sortable": true,
+        "width": "160px",
       },
       Object {
+        "align": "left",
         "dataType": "number",
         "field": "transactionsPerMinute",
         "name": "Trans. per minute",
         "render": [Function],
         "sortable": true,
+        "width": "160px",
       },
       Object {
+        "align": "left",
         "dataType": "number",
         "field": "errorsPerMinute",
-        "name": "Errors per minute",
+        "name": "Error rate %",
         "render": [Function],
         "sortable": true,
+        "width": "160px",
       },
     ]
   }
   initialPageSize={50}
-  initialSortField="serviceName"
+  initialSortDirection="desc"
+  initialSortField="healthStatus"
+  items={Array []}
+  sortFn={[Function]}
+/>
+`;
+
+exports[`ServiceOverview -> List renders with data 1`] = `
+<Memo(UnoptimizedManagedTable)
+  columns={
+    Array [
+      Object {
+        "field": "serviceName",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+        "width": "40%",
+      },
+      Object {
+        "field": "environments",
+        "name": "Environment",
+        "render": [Function],
+        "sortable": true,
+        "width": "160px",
+      },
+      Object {
+        "align": "left",
+        "dataType": "number",
+        "field": "avgResponseTime",
+        "name": "Avg. response time",
+        "render": [Function],
+        "sortable": true,
+        "width": "160px",
+      },
+      Object {
+        "align": "left",
+        "dataType": "number",
+        "field": "transactionsPerMinute",
+        "name": "Trans. per minute",
+        "render": [Function],
+        "sortable": true,
+        "width": "160px",
+      },
+      Object {
+        "align": "left",
+        "dataType": "number",
+        "field": "errorsPerMinute",
+        "name": "Error rate %",
+        "render": [Function],
+        "sortable": true,
+        "width": "160px",
+      },
+    ]
+  }
+  initialPageSize={50}
+  initialSortDirection="desc"
+  initialSortField="healthStatus"
   items={
     Array [
       Object {
@@ -125,19 +119,35 @@ exports[`ServiceOverview -> List should render with data 1`] = `
         "environments": Array [
           "test",
         ],
-        "errorsPerMinute": 46.06666666666667,
+        "errorsPerMinute": Object {
+          "timeseries": Array [],
+          "value": 46.06666666666667,
+        },
         "serviceName": "opbeans-node",
-        "transactionsPerMinute": 0,
+        "transactionsPerMinute": Object {
+          "timeseries": Array [],
+          "value": 0,
+        },
       },
       Object {
         "agentName": "python",
-        "avgResponseTime": 91535.42944785276,
+        "avgResponseTime": Object {
+          "timeseries": Array [],
+          "value": 91535.42944785276,
+        },
         "environments": Array [],
-        "errorsPerMinute": 12.6,
+        "errorsPerMinute": Object {
+          "timeseries": Array [],
+          "value": 12.6,
+        },
         "serviceName": "opbeans-python",
-        "transactionsPerMinute": 86.93333333333334,
+        "transactionsPerMinute": Object {
+          "timeseries": Array [],
+          "value": 86.93333333333334,
+        },
       },
     ]
   }
+  sortFn={[Function]}
 />
 `;

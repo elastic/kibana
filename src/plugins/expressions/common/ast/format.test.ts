@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { formatExpression } from './format';
+import { ExpressionAstExpression, ExpressionAstArgument } from './types';
+import { format } from './format';
 
-describe('formatExpression()', () => {
-  test('converts expression AST to string', () => {
-    const str = formatExpression({
+describe('format()', () => {
+  test('formats an expression AST', () => {
+    const ast: ExpressionAstExpression = {
       type: 'expression',
       chain: [
         {
@@ -32,8 +33,13 @@ describe('formatExpression()', () => {
           function: 'foo',
         },
       ],
-    });
+    };
 
-    expect(str).toMatchInlineSnapshot(`"foo bar=\\"baz\\""`);
+    expect(format(ast, 'expression')).toMatchInlineSnapshot(`"foo bar=\\"baz\\""`);
+  });
+
+  test('formats an argument', () => {
+    const ast: ExpressionAstArgument = 'foo';
+    expect(format(ast, 'argument')).toMatchInlineSnapshot(`"\\"foo\\""`);
   });
 });

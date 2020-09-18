@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 import Boom from 'boom';
-import { unique } from 'lodash';
+import { uniq } from 'lodash';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -16,15 +16,31 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getParsedUiFilters } from '../lib/helpers/convert_ui_filters/get_parsed_ui_filters';
 
-export const servicesRoute = createRoute((core) => ({
+export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
   params: {
     query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
+    const { environment } = getParsedUiFilters({
+      uiFilters: context.params.query.uiFilters,
+      logger: context.logger,
+    });
+
     const setup = await setupRequest(context, request);
-    const services = await getServices(setup);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    const services = await getServices({
+      setup,
+      searchAggregatedTransactions,
+      mlAnomaliesEnvironment: environment,
+    });
 
     return services;
   },
@@ -41,7 +57,15 @@ export const serviceAgentNameRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    return getServiceAgentName(serviceName, setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceAgentName({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 }));
 
@@ -56,7 +80,13 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    return getServiceTransactionTypes(serviceName, setup);
+    return getServiceTransactionTypes({
+      serviceName,
+      setup,
+      searchAggregatedTransactions: await getSearchAggregatedTransactions(
+        setup
+      ),
+    });
   },
 }));
 
@@ -94,17 +124,25 @@ export const serviceAnnotationsRoute = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
-    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
-      context,
-      request
-    );
+    const [
+      annotationsClient,
+      searchAggregatedTransactions,
+    ] = await Promise.all([
+      context.plugins.observability?.getScopedAnnotationsClient(
+        context,
+        request
+      ),
+      getSearchAggregatedTransactions(setup),
+    ]);
 
     return getServiceAnnotations({
       setup,
+      searchAggregatedTransactions,
       serviceName,
       environment,
       annotationsClient,
       apiCaller: context.core.elasticsearch.legacy.client.callAsCurrentUser,
+      logger: context.logger,
     });
   },
 }));
@@ -159,7 +197,7 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
         ...body.service,
         name: path.serviceName,
       },
-      tags: unique(['apm'].concat(body.tags ?? [])),
+      tags: uniq(['apm'].concat(body.tags ?? [])),
     });
   },
 }));

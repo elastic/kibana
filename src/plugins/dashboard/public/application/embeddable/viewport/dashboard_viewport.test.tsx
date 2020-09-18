@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { skip } from 'rxjs/operators';
@@ -32,7 +31,6 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../../embeddable_plugin_test_samples';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
-// eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { applicationServiceMock } from '../../../../../../core/public/mocks';
 
@@ -54,6 +52,7 @@ function getProps(
     application: applicationServiceMock.createStartContract(),
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
+      getEmbeddablePanel: jest.fn(),
       getEmbeddableFactories: start.getEmbeddableFactories,
       getEmbeddableFactory: start.getEmbeddableFactory,
     } as any,

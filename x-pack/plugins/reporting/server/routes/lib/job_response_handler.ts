@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchServiceSetup, kibanaResponseFactory } from 'kibana/server';
-import { AuthenticatedUser } from '../../../../security/server';
-import { ReportingConfig } from '../../';
-import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { ExportTypesRegistry } from '../../lib/export_types_registry';
-import { jobsQueryFactory } from '../../lib/jobs_query';
+import { kibanaResponseFactory } from 'kibana/server';
+import { ReportingCore } from '../../';
+import { ALLOWED_JOB_CONTENT_TYPES } from '../../../common/constants';
+import { ReportingUser } from '../../types';
 import { getDocumentPayloadFactory } from './get_document_payload';
+import { jobsQueryFactory } from './jobs_query';
 
 interface JobResponseHandlerParams {
   docId: string;
@@ -20,18 +19,15 @@ interface JobResponseHandlerOpts {
   excludeContent?: boolean;
 }
 
-export function downloadJobResponseHandlerFactory(
-  config: ReportingConfig,
-  elasticsearch: ElasticsearchServiceSetup,
-  exportTypesRegistry: ExportTypesRegistry
-) {
-  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
+  const jobsQuery = jobsQueryFactory(reporting);
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
   const getDocumentPayload = getDocumentPayloadFactory(exportTypesRegistry);
 
   return async function jobResponseHandler(
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
-    user: AuthenticatedUser | null,
+    user: ReportingUser,
     params: JobResponseHandlerParams,
     opts: JobResponseHandlerOpts = {}
   ) {
@@ -50,35 +46,32 @@ export function downloadJobResponseHandlerFactory(
       });
     }
 
-    const response = getDocumentPayload(doc);
+    const payload = getDocumentPayload(doc);
 
-    if (!WHITELISTED_JOB_CONTENT_TYPES.includes(response.contentType)) {
+    if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
       return res.badRequest({
-        body: `Unsupported content-type of ${response.contentType} specified by job output`,
+        body: `Unsupported content-type of ${payload.contentType} specified by job output`,
       });
     }
 
     return res.custom({
-      body: typeof response.content === 'string' ? Buffer.from(response.content) : response.content,
-      statusCode: response.statusCode,
+      body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
+      statusCode: payload.statusCode,
       headers: {
-        ...response.headers,
-        'content-type': response.contentType,
+        ...payload.headers,
+        'content-type': payload.contentType || '',
       },
     });
   };
 }
 
-export function deleteJobResponseHandlerFactory(
-  config: ReportingConfig,
-  elasticsearch: ElasticsearchServiceSetup
-) {
-  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+export function deleteJobResponseHandlerFactory(reporting: ReportingCore) {
+  const jobsQuery = jobsQueryFactory(reporting);
 
   return async function deleteJobResponseHander(
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
-    user: AuthenticatedUser | null,
+    user: ReportingUser,
     params: JobResponseHandlerParams
   ) {
     const { docId } = params;

@@ -7,11 +7,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
+
+import '../../../common/mock/match_media';
 import { AllCases } from '.';
 import { TestProviders } from '../../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
+import { useKibana } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -24,10 +27,15 @@ jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
+
+jest.mock('../../../common/components/link_to');
+
+jest.mock('../../../common/lib/kibana');
 
 describe('AllCases', () => {
   const dispatchResetIsDeleted = jest.fn();
@@ -41,6 +49,7 @@ describe('AllCases', () => {
   const setSelectedCases = jest.fn();
   const updateBulkStatus = jest.fn();
   const fetchCasesStatus = jest.fn();
+  const onRowClick = jest.fn();
   const emptyTag = getEmptyTagValue().props.children;
 
   const defaultGetCases = {
@@ -73,6 +82,9 @@ describe('AllCases', () => {
     dispatchResetIsUpdated,
     updateBulkStatus,
   };
+
+  let navigateToApp: jest.Mock;
+
   /* eslint-disable no-console */
   // Silence until enzyme fixed to use ReactTestUtils.act()
   const originalError = console.error;
@@ -84,13 +96,16 @@ describe('AllCases', () => {
   });
   /* eslint-enable no-console */
   beforeEach(() => {
-    jest.resetAllMocks();
-    useUpdateCasesMock.mockImplementation(() => defaultUpdateCases);
-    useGetCasesMock.mockImplementation(() => defaultGetCases);
-    useDeleteCasesMock.mockImplementation(() => defaultDeleteCases);
-    useGetCasesStatusMock.mockImplementation(() => defaultCasesStatus);
+    jest.clearAllMocks();
+    navigateToApp = jest.fn();
+    useKibanaMock().services.application.navigateToApp = navigateToApp;
+    useUpdateCasesMock.mockReturnValue(defaultUpdateCases);
+    useGetCasesMock.mockReturnValue(defaultGetCases);
+    useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
+    useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     moment.tz.setDefault('UTC');
   });
+
   it('should render AllCases', () => {
     const wrapper = mount(
       <TestProviders>
@@ -98,7 +113,7 @@ describe('AllCases', () => {
       </TestProviders>
     );
     expect(wrapper.find(`a[data-test-subj="case-details-link"]`).first().prop('href')).toEqual(
-      `#/link-to/case/${useGetCasesMockState.data.cases[0].id}?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))`
+      `/${useGetCasesMockState.data.cases[0].id}`
     );
     expect(wrapper.find(`a[data-test-subj="case-details-link"]`).first().text()).toEqual(
       useGetCasesMockState.data.cases[0].title
@@ -121,7 +136,7 @@ describe('AllCases', () => {
     );
   });
   it('should render empty fields', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
         ...defaultGetCases.data,
@@ -137,7 +152,7 @@ describe('AllCases', () => {
           },
         ],
       },
-    }));
+    });
     const wrapper = mount(
       <TestProviders>
         <AllCases userCanCrud={true} />
@@ -151,8 +166,22 @@ describe('AllCases', () => {
       expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
       expect(column.find('span').text()).toEqual(emptyTag);
     };
-    getCasesColumns([], 'open').map((i, key) => i.name != null && checkIt(`${i.name}`, key));
+    getCasesColumns([], 'open', false).map((i, key) => i.name != null && checkIt(`${i.name}`, key));
   });
+
+  it('should not render case link or actions on modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+    const checkIt = (columnName: string) => {
+      expect(columnName).not.toEqual(i18n.ACTIONS);
+    };
+    getCasesColumns([], 'open', true).map((i, key) => i.name != null && checkIt(`${i.name}`));
+    expect(wrapper.find(`a[data-test-subj="case-details-link"]`).exists()).toBeFalsy();
+  });
+
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
       <TestProviders>
@@ -184,10 +213,10 @@ describe('AllCases', () => {
     });
   });
   it('opens case when row action icon clicked', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: 'closed' },
-    }));
+    });
 
     const wrapper = mount(
       <TestProviders>
@@ -205,10 +234,11 @@ describe('AllCases', () => {
     });
   });
   it('Bulk delete', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       selectedCases: useGetCasesMockState.data.cases,
-    }));
+    });
+
     useDeleteCasesMock
       .mockReturnValueOnce({
         ...defaultDeleteCases,
@@ -239,10 +269,10 @@ describe('AllCases', () => {
     );
   });
   it('Bulk close status update', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       selectedCases: useGetCasesMockState.data.cases,
-    }));
+    });
 
     const wrapper = mount(
       <TestProviders>
@@ -254,14 +284,14 @@ describe('AllCases', () => {
     expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, 'closed');
   });
   it('Bulk open status update', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       selectedCases: useGetCasesMockState.data.cases,
       filterOptions: {
         ...defaultGetCases.filterOptions,
         status: 'closed',
       },
-    }));
+    });
 
     const wrapper = mount(
       <TestProviders>
@@ -273,10 +303,10 @@ describe('AllCases', () => {
     expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, 'open');
   });
   it('isDeleted is true, refetch', () => {
-    useDeleteCasesMock.mockImplementation(() => ({
+    useDeleteCasesMock.mockReturnValue({
       ...defaultDeleteCases,
       isDeleted: true,
-    }));
+    });
 
     mount(
       <TestProviders>
@@ -288,10 +318,10 @@ describe('AllCases', () => {
     expect(dispatchResetIsDeleted).toBeCalled();
   });
   it('isUpdated is true, refetch', () => {
-    useUpdateCasesMock.mockImplementation(() => ({
+    useUpdateCasesMock.mockReturnValue({
       ...defaultUpdateCases,
       isUpdated: true,
-    }));
+    });
 
     mount(
       <TestProviders>
@@ -301,5 +331,97 @@ describe('AllCases', () => {
     expect(refetchCases).toBeCalled();
     expect(fetchCasesStatus).toBeCalled();
     expect(dispatchResetIsUpdated).toBeCalled();
+  });
+
+  it('should not render header when modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="all-cases-header"]').exists()).toBe(false);
+  });
+
+  it('should not render table utility bar when modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="case-table-utility-bar-actions"]').exists()).toBe(false);
+  });
+
+  it('case table should not be selectable when modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="cases-table"]').first().prop('isSelectable')).toBe(false);
+  });
+
+  it('should call onRowClick with no cases and modal=true', () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        total: 0,
+        cases: [],
+      },
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} onRowClick={onRowClick} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
+    expect(onRowClick).toHaveBeenCalled();
+  });
+
+  it('should call navigateToApp with no cases and modal=false', () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        total: 0,
+        cases: [],
+      },
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={false} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
+    expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/create' });
+  });
+
+  it('should call onRowClick when clicking a case with modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} onRowClick={onRowClick} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
+    expect(onRowClick).toHaveBeenCalledWith('1');
+  });
+
+  it('should NOT call onRowClick when clicking a case with modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={false} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
+    expect(onRowClick).not.toHaveBeenCalled();
   });
 });

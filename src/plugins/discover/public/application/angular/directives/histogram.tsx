@@ -40,12 +40,13 @@ import {
   ElementClickListener,
   XYChartElementEvent,
   BrushEndListener,
+  Theme,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import { getServices } from '../../../kibana_services';
 import { Chart as IChart } from '../helpers/point_series';
 
@@ -56,6 +57,7 @@ export interface DiscoverHistogramProps {
 
 interface DiscoverHistogramState {
   chartsTheme: EuiChartThemeType['theme'];
+  chartsBaseTheme: Theme;
 }
 
 function findIntervalFromDuration(
@@ -126,18 +128,21 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   private subscription?: Subscription;
   public state = {
     chartsTheme: getServices().theme.chartsDefaultTheme,
+    chartsBaseTheme: getServices().theme.chartsDefaultBaseTheme,
   };
 
   componentDidMount() {
-    this.subscription = getServices().theme.chartsTheme$.subscribe(
-      (chartsTheme: EuiChartThemeType['theme']) => this.setState({ chartsTheme })
+    this.subscription = combineLatest(
+      getServices().theme.chartsTheme$,
+      getServices().theme.chartsBaseTheme$
+    ).subscribe(([chartsTheme, chartsBaseTheme]) =>
+      this.setState({ chartsTheme, chartsBaseTheme })
     );
   }
 
   componentWillUnmount() {
     if (this.subscription) {
       this.subscription.unsubscribe();
-      this.subscription = undefined;
     }
   }
 
@@ -204,7 +209,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const uiSettings = getServices().uiSettings;
     const timeZone = getTimezone(uiSettings);
     const { chartData } = this.props;
-    const { chartsTheme } = this.state;
+    const { chartsTheme, chartsBaseTheme } = this.state;
 
     if (!chartData) {
       return null;
@@ -293,6 +298,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           onElementClick={this.onElementClick(xInterval)}
           tooltip={tooltipProps}
           theme={chartsTheme}
+          baseTheme={chartsBaseTheme}
         />
         <Axis
           id="discover-histogram-left-axis"
@@ -323,6 +329,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
         />
         <HistogramBarSeries
           id="discover-histogram"
+          minBarHeight={2}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"

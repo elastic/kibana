@@ -7,20 +7,35 @@
 import { cloneDeep } from 'lodash/fp';
 import { mockIndexPattern } from '../../../common/mock';
 
+import { DataProviderType } from './data_providers/data_provider';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { buildGlobalQuery, combineQueries } from './helpers';
+import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { EsQueryConfig, Filter, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
-const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+const startDate = '2018-03-23T18:49:23.132Z';
+const endDate = '2018-03-24T03:33:52.253Z';
 
 describe('Build KQL Query', () => {
   test('Build KQL query with one data provider', () => {
-    const dataProviders = mockDataProviders.slice(0, 1);
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1"');
+  });
+
+  test('Build KQL query with one template data provider', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].type = DataProviderType.template;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name :*');
+  });
+
+  test('Build KQL query with one disabled data provider', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = false;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('');
   });
 
   test('Build KQL query with one data provider as timestamp (string input)', () => {
@@ -35,6 +50,14 @@ describe('Build KQL Query', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     dataProviders[0].queryMatch.field = '@timestamp';
     dataProviders[0].queryMatch.value = 1521848183232;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('@timestamp: 1521848183232');
+  });
+
+  test('Buld KQL query with one data provider as timestamp (numeric input as string)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].queryMatch.field = '@timestamp';
+    dataProviders[0].queryMatch.value = '1521848183232';
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('@timestamp: 1521848183232');
   });
@@ -55,17 +78,61 @@ describe('Build KQL Query', () => {
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('event.end: 1521848183232');
   });
 
-  test('Build KQL query with two data provider', () => {
-    const dataProviders = mockDataProviders.slice(0, 2);
+  test('Buld KQL query with one data provider as date type (numeric input as string)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].queryMatch.field = 'event.end';
+    dataProviders[0].queryMatch.value = '1521848183232';
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
-    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1" ) or (name : "Provider 2" )');
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('event.end: 1521848183232');
+  });
+
+  test('Build KQL query with two data provider', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1") or (name : "Provider 2")');
+  });
+
+  test('Build KQL query with two data provider and first is disabled', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].enabled = false;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 2"');
+  });
+
+  test('Build KQL query with two data provider and second is disabled', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[1].enabled = false;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1"');
+  });
+
+  test('Build KQL query with two data provider (first is template)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].type = DataProviderType.template;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name :*) or (name : "Provider 2")');
+  });
+
+  test('Build KQL query with two data provider (second is template)', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[1].type = DataProviderType.template;
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('(name : "Provider 1") or (name :*)');
   });
 
   test('Build KQL query with one data provider and one and', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
-    dataProviders[0].and = mockDataProviders.slice(1, 2);
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(1, 2));
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 1" and name : "Provider 2"');
+  });
+
+  test('Build KQL query with one disabled data provider and one and', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = false;
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(1, 2));
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual('name : "Provider 2"');
   });
 
   test('Build KQL query with one data provider and one and as timestamp (string input)', () => {
@@ -106,28 +173,50 @@ describe('Build KQL Query', () => {
 
   test('Build KQL query with two data provider and multiple and', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
-    dataProviders[0].and = mockDataProviders.slice(2, 4);
-    dataProviders[1].and = mockDataProviders.slice(4, 5);
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
+    dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual(
       '(name : "Provider 1" and name : "Provider 3" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5")'
     );
   });
 
+  test('Build KQL query with two data provider and multiple and and first data provider is disabled', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].enabled = false;
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
+    dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual(
+      '(name : "Provider 3" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5")'
+    );
+  });
+
+  test('Build KQL query with two data provider and multiple and and first and provider is disabled', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
+    dataProviders[0].and[0].enabled = false;
+    dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
+    const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
+    expect(cleanUpKqlQuery(kqlQuery)).toEqual(
+      '(name : "Provider 1" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5")'
+    );
+  });
+
   test('Build KQL query with all data provider', () => {
     const kqlQuery = buildGlobalQuery(mockDataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual(
-      '(name : "Provider 1" ) or (name : "Provider 2" ) or (name : "Provider 3" ) or (name : "Provider 4" ) or (name : "Provider 5" ) or (name : "Provider 6" ) or (name : "Provider 7" ) or (name : "Provider 8" ) or (name : "Provider 9" ) or (name : "Provider 10" )'
+      '(name : "Provider 1") or (name : "Provider 2") or (name : "Provider 3") or (name : "Provider 4") or (name : "Provider 5") or (name : "Provider 6") or (name : "Provider 7") or (name : "Provider 8") or (name : "Provider 9") or (name : "Provider 10")'
     );
   });
 
   test('Build complex KQL query with and and or', () => {
     const dataProviders = cloneDeep(mockDataProviders);
-    dataProviders[0].and = mockDataProviders.slice(2, 4);
-    dataProviders[1].and = mockDataProviders.slice(4, 5);
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
+    dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
     const kqlQuery = buildGlobalQuery(dataProviders, mockBrowserFields);
     expect(cleanUpKqlQuery(kqlQuery)).toEqual(
-      '(name : "Provider 1" and name : "Provider 3" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5") or (name : "Provider 3" ) or (name : "Provider 4" ) or (name : "Provider 5" ) or (name : "Provider 6" ) or (name : "Provider 7" ) or (name : "Provider 8" ) or (name : "Provider 9" ) or (name : "Provider 10" )'
+      '(name : "Provider 1" and name : "Provider 3" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5") or (name : "Provider 3") or (name : "Provider 4") or (name : "Provider 5") or (name : "Provider 6") or (name : "Provider 7") or (name : "Provider 8") or (name : "Provider 9") or (name : "Provider 10")'
     );
   });
 });
@@ -171,8 +260,7 @@ describe('Combined Queries', () => {
         isEventViewer,
       })
     ).toEqual({
-      filterQuery:
-        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
+      filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
     });
   });
 
@@ -218,12 +306,12 @@ describe('Combined Queries', () => {
       })
     ).toEqual({
       filterQuery:
-        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}},{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
+        '{"bool":{"must":[],"filter":[{"match_all":{}},{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
     });
   });
 
   test('Only Data Provider', () => {
-    const dataProviders = mockDataProviders.slice(0, 1);
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     const { filterQuery } = combineQueries({
       config,
       dataProviders,
@@ -236,7 +324,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -256,7 +344,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -276,7 +364,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -296,7 +384,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -316,7 +404,7 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 
@@ -333,12 +421,12 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 
   test('Data Provider & KQL search query', () => {
-    const dataProviders = mockDataProviders.slice(0, 1);
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     const { filterQuery } = combineQueries({
       config,
       dataProviders,
@@ -351,12 +439,12 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 
   test('Data Provider & KQL filter query', () => {
-    const dataProviders = mockDataProviders.slice(0, 1);
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
     const { filterQuery } = combineQueries({
       config,
       dataProviders,
@@ -369,14 +457,14 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
     );
   });
 
   test('Data Provider & KQL search query multiple', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
-    dataProviders[0].and = mockDataProviders.slice(2, 4);
-    dataProviders[1].and = mockDataProviders.slice(4, 5);
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
+    dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
     const { filterQuery } = combineQueries({
       config,
       dataProviders,
@@ -389,14 +477,14 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
     );
   });
 
   test('Data Provider & KQL filter query multiple', () => {
     const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
-    dataProviders[0].and = mockDataProviders.slice(2, 4);
-    dataProviders[1].and = mockDataProviders.slice(4, 5);
+    dataProviders[0].and = cloneDeep(mockDataProviders.slice(2, 4));
+    dataProviders[1].and = cloneDeep(mockDataProviders.slice(4, 5));
     const { filterQuery } = combineQueries({
       config,
       dataProviders,
@@ -409,7 +497,47 @@ describe('Combined Queries', () => {
       end: endDate,
     })!;
     expect(filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
     );
+  });
+
+  describe('resolverIsShowing', () => {
+    test('it returns true when graphEventId is NOT an empty string', () => {
+      expect(resolverIsShowing('a valid id')).toBe(true);
+    });
+
+    test('it returns false when graphEventId is undefined', () => {
+      expect(resolverIsShowing(undefined)).toBe(false);
+    });
+
+    test('it returns false when graphEventId is an empty string', () => {
+      expect(resolverIsShowing('')).toBe(false);
+    });
+  });
+
+  describe('showGlobalFilters', () => {
+    test('it returns false when `globalFullScreen` is true and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: 'a valid id' })).toBe(false);
+    });
+
+    test('it returns true when `globalFullScreen` is true and `graphEventId` is undefined, because Resolver is NOT showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: undefined })).toBe(true);
+    });
+
+    test('it returns true when `globalFullScreen` is true and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: '' })).toBe(true);
+    });
+
+    test('it returns true when `globalFullScreen` is false and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: 'a valid id' })).toBe(true);
+    });
+
+    test('it returns true when `globalFullScreen` is false and `graphEventId` is undefined, because Resolver is NOT showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: undefined })).toBe(true);
+    });
+
+    test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
+    });
   });
 });

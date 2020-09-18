@@ -18,6 +18,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
+import { PingRedirects } from './ping_redirects';
 
 interface Props {
   ping: Ping;
@@ -47,7 +48,7 @@ const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
 };
 
 const BodyExcerpt = ({ content }: { content: string }) =>
-  content ? <EuiCodeBlock>{content}</EuiCodeBlock> : null;
+  content ? <EuiCodeBlock overflowHeight={250}>{content}</EuiCodeBlock> : null;
 
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
@@ -78,7 +79,12 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
     });
   }
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction="column">
+      {ping?.http?.response?.redirects && (
+        <EuiFlexItem>
+          <PingRedirects monitorStatus={ping} showTitle={true} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiCallOut color={ping?.error ? 'danger' : 'primary'}>
           <EuiDescriptionList listItems={listItems} />

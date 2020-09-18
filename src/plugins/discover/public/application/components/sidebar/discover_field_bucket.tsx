@@ -17,11 +17,12 @@
  * under the License.
  */
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
 import { IndexPatternField } from '../../../../../data/public';
+import './discover_field_bucket.scss';
 
 interface Props {
   bucket: Bucket;
@@ -47,18 +48,40 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem className="eui-textTruncate">
-          <EuiText size="xs" className="eui-textTruncate">
-            {bucket.display === '' ? emptyTxt : bucket.display}
-          </EuiText>
+      <EuiFlexGroup justifyContent="spaceBetween" responsive={false} gutterSize="s">
+        <EuiFlexItem className="dscFieldDetails__barContainer" grow={1}>
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={1} className="eui-textTruncate">
+              <EuiText
+                title={
+                  bucket.display === ''
+                    ? emptyTxt
+                    : `${bucket.display}: ${bucket.count} (${bucket.percent}%)`
+                }
+                size="xs"
+                className="eui-textTruncate"
+              >
+                {bucket.display === '' ? emptyTxt : bucket.display}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="eui-textTruncate">
+              <EuiText color="secondary" size="xs" className="eui-textTruncate">
+                {bucket.percent}%
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <StringFieldProgressBar
+            value={bucket.value}
+            percent={bucket.percent}
+            count={bucket.count}
+          />
         </EuiFlexItem>
         {field.filterable && (
           <EuiFlexItem grow={false}>
             <div>
               <EuiButtonIcon
                 iconSize="s"
-                iconType="magnifyWithPlus"
+                iconType="plusInCircle"
                 onClick={() => onAddFilter(field, bucket.value, '+')}
                 aria-label={addLabel}
                 data-test-subj={`plus-${field.name}-${bucket.value}`}
@@ -73,7 +96,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
               />
               <EuiButtonIcon
                 iconSize="s"
-                iconType="magnifyWithMinus"
+                iconType="minusInCircle"
                 onClick={() => onAddFilter(field, bucket.value, '-')}
                 aria-label={removeLabel}
                 data-test-subj={`minus-${field.name}-${bucket.value}`}
@@ -90,7 +113,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <StringFieldProgressBar percent={bucket.percent} count={bucket.count} />
+      <EuiSpacer size="s" />
     </>
   );
 }

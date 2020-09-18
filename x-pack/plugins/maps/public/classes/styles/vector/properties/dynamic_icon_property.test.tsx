@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { shallow } from 'enzyme';
 
-jest.mock('ui/new_platform');
 jest.mock('../components/vector_style_editor', () => ({
   VectorStyleEditor: () => {
     return <div>mockVectorStyleEditor</div>;
@@ -15,27 +13,33 @@ jest.mock('../components/vector_style_editor', () => ({
 }));
 
 import React from 'react';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
 import { mockField, MockLayer } from './__tests__/test_util';
 import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
 const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mockField) => {
+  const defaultOptions: IconDynamicOptions = {
+    iconPaletteId: null,
+    fieldMetaOptions: { isEnabled: false },
+  };
+  const mockVectorLayer = (new MockLayer() as unknown) as IVectorLayer;
   return new DynamicIconProperty(
-    { ...options, fieldMetaOptions: { isEnabled: false } },
+    { ...defaultOptions, ...options },
     VECTOR_STYLES.ICON,
     field,
-    new MockLayer(),
+    mockVectorLayer,
     () => {
-      return (x: string) => x + '_format';
+      return (value: RawValue) => value + '_format';
     }
   );
 };
 
-describe('DynamicIconProperty', () => {
-  it('should derive category number from palettes', async () => {
+describe('getNumberOfCategories', () => {
+  test('should derive category number from palettes', async () => {
     const filled = makeProperty({
       iconPaletteId: 'filledShapes',
     });
@@ -47,15 +51,53 @@ describe('DynamicIconProperty', () => {
   });
 });
 
-test('Should render categorical legend with breaks', async () => {
-  const iconStyle = makeProperty({
-    iconPaletteId: 'filledShapes',
+describe('renderLegendDetailRow', () => {
+  test('Should render categorical legend with breaks', async () => {
+    const iconStyle = makeProperty({
+      iconPaletteId: 'filledShapes',
+    });
+
+    const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
+    const component = shallow(legendRow);
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.update();
+
+    expect(component).toMatchSnapshot();
   });
+});
 
-  const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
-  const component = shallow(legendRow);
-  await new Promise((resolve) => process.nextTick(resolve));
-  component.update();
+describe('get mapbox icon-image expression (via internal _getMbIconImageExpression)', () => {
+  describe('categorical icon palette', () => {
+    test('should return mapbox expression for pre-defined icon palette', async () => {
+      const iconStyle = makeProperty({
+        iconPaletteId: 'filledShapes',
+      });
+      expect(iconStyle._getMbIconImageExpression(15)).toEqual([
+        'match',
+        ['to-string', ['get', 'foobar']],
+        'US',
+        'circle-15',
+        'CN',
+        'marker-15',
+        'square-15',
+      ]);
+    });
 
-  expect(component).toMatchSnapshot();
+    test('should return mapbox expression for custom icon palette', async () => {
+      const iconStyle = makeProperty({
+        useCustomIconMap: true,
+        customIconStops: [
+          { stop: null, icon: 'circle' },
+          { stop: 'MX', icon: 'marker' },
+        ],
+      });
+      expect(iconStyle._getMbIconImageExpression(15)).toEqual([
+        'match',
+        ['to-string', ['get', 'foobar']],
+        'MX',
+        'marker-15',
+        'circle-15',
+      ]);
+    });
+  });
 });

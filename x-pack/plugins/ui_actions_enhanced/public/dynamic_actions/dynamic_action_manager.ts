@@ -12,7 +12,10 @@ import {
   UiActionsActionDefinition as ActionDefinition,
 } from '../../../../../src/plugins/ui_actions/public';
 import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
-import { StateContainer, createStateContainer } from '../../../../../src/plugins/kibana_utils';
+import {
+  StateContainer,
+  createStateContainer,
+} from '../../../../../src/plugins/kibana_utils/common';
 import { StartContract } from '../plugin';
 import { SerializedAction, SerializedEvent } from './types';
 
@@ -69,15 +72,29 @@ export class DynamicActionManager {
     const { uiActions, isCompatible } = this.params;
 
     const actionId = this.generateActionId(eventId);
-    const factory = uiActions.getActionFactory(event.action.factoryId);
-    const actionDefinition: ActionDefinition = {
-      ...factory.create(action as SerializedAction<object>),
-      id: actionId,
-      isCompatible,
-    };
 
-    uiActions.registerAction(actionDefinition);
-    for (const trigger of triggers) uiActions.attachAction(trigger as any, actionId);
+    const factory = uiActions.getActionFactory(event.action.factoryId);
+    const actionDefinition: ActionDefinition = factory.create(action as SerializedAction<object>);
+    uiActions.registerAction({
+      ...actionDefinition,
+      id: actionId,
+      isCompatible: async (context) => {
+        if (!(await isCompatible(context))) return false;
+        if (!actionDefinition.isCompatible) return true;
+        return actionDefinition.isCompatible(context);
+      },
+    });
+
+    const supportedTriggers = factory.supportedTriggers();
+    for (const trigger of triggers) {
+      if (!supportedTriggers.includes(trigger as any))
+        throw new Error(
+          `Can't attach [action=${actionId}] to [trigger=${trigger}]. Supported triggers for this action: ${supportedTriggers.join(
+            ','
+          )}`
+        );
+      uiActions.attachAction(trigger as any, actionId);
+    }
   }
 
   protected killAction({ eventId, triggers }: SerializedEvent) {

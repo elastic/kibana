@@ -18,18 +18,20 @@
  */
 
 import _ from 'lodash';
-import { VisualizationControllerConstructor } from '../types';
+import { VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+import { TriggerContextMapping } from '../../../ui_actions/public';
+import { Adapters } from '../../../inspector/public';
 
 export interface BaseVisTypeOptions {
   name: string;
   title: string;
   description?: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   icon?: string;
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
-  feedbackMessage?: string;
   options?: Record<string, any>;
-  visualization: VisualizationControllerConstructor;
+  visualization: VisualizationControllerConstructor | undefined;
   visConfig?: Record<string, any>;
   editor?: any;
   editorConfig?: Record<string, any>;
@@ -39,18 +41,21 @@ export interface BaseVisTypeOptions {
   hierarchicalData?: boolean | unknown;
   setup?: unknown;
   useCustomNoDataScreen?: boolean;
+  inspectorAdapters?: Adapters | (() => Adapters);
+  toExpressionAst?: VisToExpressionAst;
 }
 
 export class BaseVisType {
   name: string;
   title: string;
   description: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   icon?: string;
   image?: string;
   stage: 'experimental' | 'beta' | 'production';
-  feedbackMessage: string;
+  isExperimental: boolean;
   options: Record<string, any>;
-  visualization: VisualizationControllerConstructor;
+  visualization: VisualizationControllerConstructor | undefined;
   visConfig: Record<string, any>;
   editor: any;
   editorConfig: Record<string, any>;
@@ -61,6 +66,8 @@ export class BaseVisType {
   hierarchicalData: boolean | unknown;
   setup?: unknown;
   useCustomNoDataScreen: boolean;
+  inspectorAdapters?: Adapters | (() => Adapters);
+  toExpressionAst?: VisToExpressionAst;
 
   constructor(opts: BaseVisTypeOptions) {
     if (!opts.icon && !opts.image) {
@@ -78,6 +85,7 @@ export class BaseVisType {
 
     this.name = opts.name;
     this.description = opts.description || '';
+    this.getSupportedTriggers = opts.getSupportedTriggers;
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
@@ -87,7 +95,7 @@ export class BaseVisType {
     this.editorConfig = _.defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = _.defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage || 'production';
-    this.feedbackMessage = opts.feedbackMessage || '';
+    this.isExperimental = opts.stage === 'experimental';
     this.hidden = opts.hidden || false;
     this.requestHandler = opts.requestHandler || 'courier';
     this.responseHandler = opts.responseHandler || 'none';
@@ -95,10 +103,8 @@ export class BaseVisType {
     this.requiresSearch = this.requestHandler !== 'none';
     this.hierarchicalData = opts.hierarchicalData || false;
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
-  }
-
-  shouldMarkAsExperimentalInUI() {
-    return this.stage === 'experimental';
+    this.inspectorAdapters = opts.inspectorAdapters;
+    this.toExpressionAst = opts.toExpressionAst;
   }
 
   public get schemas() {

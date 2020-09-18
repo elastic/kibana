@@ -67,7 +67,7 @@ export class InnerCustomPlot extends PureComponent {
     (series) => {
       return series.slice(
         0,
-        VISIBLE_LEGEND_COUNT + getHiddenLegendCount(series)
+        this.props.visibleLegendCount + getHiddenLegendCount(series)
       );
     }
   );
@@ -78,6 +78,10 @@ export class InnerCustomPlot extends PureComponent {
         const disabledValue = seriesEnabledState[_i];
         return i === _i ? !disabledValue : !!disabledValue;
       });
+
+      if (typeof this.props.onToggleLegend === 'function') {
+        this.props.onToggleLegend(nextSeriesEnabledState);
+      }
 
       return {
         seriesEnabledState: nextSeriesEnabledState,
@@ -124,14 +128,20 @@ export class InnerCustomPlot extends PureComponent {
   }
 
   render() {
-    const { series, truncateLegends, width, annotations } = this.props;
+    const {
+      series,
+      truncateLegends,
+      width,
+      annotations,
+      visibleLegendCount,
+    } = this.props;
 
     if (!width) {
       return null;
     }
 
     const hiddenSeriesCount = Math.max(
-      series.length - VISIBLE_LEGEND_COUNT - getHiddenLegendCount(series),
+      series.length - visibleLegendCount - getHiddenLegendCount(series),
       0
     );
     const visibleSeries = this.getVisibleSeries({ series });
@@ -144,7 +154,7 @@ export class InnerCustomPlot extends PureComponent {
     const hasValidCoordinates = flatten(series.map((s) => s.data)).some((p) =>
       isValidCoordinateValue(p.y)
     );
-    const noHits = !hasValidCoordinates;
+    const noHits = this.props.noHits || !hasValidCoordinates;
 
     const plotValues = this.getPlotValues({
       visibleSeries,
@@ -168,7 +178,7 @@ export class InnerCustomPlot extends PureComponent {
             tickFormatX={this.props.tickFormatX}
           />
 
-          {this.state.showAnnotations && !isEmpty(annotations) && (
+          {this.state.showAnnotations && !isEmpty(annotations) && !noHits && (
             <AnnotationsPlot
               plotValues={plotValues}
               width={width}
@@ -202,7 +212,7 @@ export class InnerCustomPlot extends PureComponent {
           hiddenSeriesCount={hiddenSeriesCount}
           clickLegend={this.clickLegend}
           seriesEnabledState={this.state.seriesEnabledState}
-          hasAnnotations={!isEmpty(annotations)}
+          hasAnnotations={!isEmpty(annotations) && !noHits}
           showAnnotations={this.state.showAnnotations}
           onAnnotationsToggle={() => {
             this.setState(({ showAnnotations }) => ({
@@ -234,6 +244,9 @@ InnerCustomPlot.propTypes = {
       firstSeen: PropTypes.number,
     })
   ),
+  noHits: PropTypes.bool,
+  visibleLegendCount: PropTypes.number,
+  onToggleLegend: PropTypes.func,
 };
 
 InnerCustomPlot.defaultProps = {
@@ -241,6 +254,9 @@ InnerCustomPlot.defaultProps = {
   tickFormatX: undefined,
   tickFormatY: (y) => y,
   truncateLegends: false,
+  xAxisTickSizeOuter: 0,
+  noHits: false,
+  visibleLegendCount: VISIBLE_LEGEND_COUNT,
 };
 
 export default makeWidthFlexible(InnerCustomPlot);

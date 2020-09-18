@@ -369,6 +369,7 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",
+              "logs-*",
               "packetbeat-*",
               "winlogbeat-*",
             ],

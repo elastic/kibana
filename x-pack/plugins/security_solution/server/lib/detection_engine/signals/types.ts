@@ -4,36 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType, State, AlertExecutorOptions } from '../../../../../alerts/server';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import { AlertType, AlertTypeState, AlertExecutorOptions } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleAlertParams, OutputRuleAlertRest } from '../types';
+import { RuleTypeParams } from '../types';
 import { SearchResponse } from '../../types';
+
+// used for gap detection code
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export type unitType = 's' | 'm' | 'h';
+export const isValidUnit = (unitParam: string): unitParam is unitType =>
+  ['s', 'm', 'h'].includes(unitParam);
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
   query: object | undefined | null;
-  status: 'open' | 'closed';
+  status: Status;
 }
 
 export interface SignalsStatusParams {
   signalIds: string[] | undefined | null;
   query: object | undefined | null;
-  status: 'open' | 'closed';
+  status: Status;
 }
-
-export interface SignalQueryParams {
-  query: object | undefined | null;
-  aggs: object | undefined | null;
-  _source: string[] | undefined | null;
-  size: number | undefined | null;
-  track_total_hits: boolean | undefined | null;
-}
-
-export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
-  signal_ids: SignalsStatusParams['signalIds'];
-};
-
-export type SignalsQueryRestParams = SignalQueryParams;
 
 export type SearchTypes =
   | string
@@ -50,8 +44,16 @@ export interface SignalSource {
   [key: string]: SearchTypes;
   '@timestamp': string;
   signal?: {
-    parent: Ancestor;
+    // parent is deprecated: new signals should populate parents instead
+    // both are optional until all signals with parent are gone and we can safely remove it
+    parent?: Ancestor;
+    parents?: Ancestor[];
     ancestors: Ancestor[];
+    rule: {
+      id: string;
+    };
+    // signal.depth doesn't exist on pre-7.10 signals
+    depth?: number;
   };
 }
 
@@ -105,10 +107,7 @@ export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
 
 export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: RuleAlertParams & {
-    scrollSize: number;
-    scrollLock: string;
-  };
+  params: RuleTypeParams;
 };
 
 // This returns true because by default a RuleAlertTypeDefinition is an AlertType
@@ -118,11 +117,11 @@ export const isAlertExecutor = (obj: SignalRuleAlertTypeDefinition): obj is Aler
 };
 
 export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
+  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<AlertTypeState | void>;
 };
 
 export interface Ancestor {
-  rule: string;
+  rule?: string;
   id: string;
   type: string;
   index: string;
@@ -130,12 +129,16 @@ export interface Ancestor {
 }
 
 export interface Signal {
-  rule: Partial<OutputRuleAlertRest>;
-  parent: Ancestor;
+  rule: Partial<RulesSchema>;
+  // DEPRECATED: use parents instead of parent
+  parent?: Ancestor;
+  parents: Ancestor[];
   ancestors: Ancestor[];
-  original_time: string;
+  original_time?: string;
   original_event?: SearchTypes;
-  status: 'open' | 'closed';
+  status: Status;
+  threshold_count?: SearchTypes;
+  depth: number;
 }
 
 export interface SignalHit {
@@ -159,12 +162,7 @@ export interface AlertAttributes {
 }
 
 export interface RuleAlertAttributes extends AlertAttributes {
-  params: Omit<
-    RuleAlertParams,
-    'ruleId' | 'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
-  > & {
-    ruleId: string;
-  };
+  params: RuleTypeParams;
 }
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;

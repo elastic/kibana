@@ -4,23 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { eventId } from '../../../../../common/endpoint/models/event';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
+import {
+  eventIDSafeVersion,
+  timestampSafeVersion,
+} from '../../../../../common/endpoint/models/event';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
+import { ChildrenPaginationCursor } from './children_pagination';
 
-/**
- * Represents a single result bucket of an aggregation
- */
-export interface AggBucket {
-  key: string;
-  doc_count: number;
-}
-
-interface TotalsAggregation {
-  totals?: {
-    buckets?: AggBucket[];
-  };
-}
+type SearchAfterFields = [number, string];
 
 interface PaginationCursor {
   timestamp: number;
@@ -28,25 +20,71 @@ interface PaginationCursor {
 }
 
 /**
- * The result structure of a query that leverages pagination. This includes totals that can be used to determine if
- * additional nodes exist and additional queries need to be made to retrieve the nodes.
+ * The sort direction for the timestamp field
  */
-export interface PaginatedResults {
-  /**
-   * Resulting events returned from the query.
-   */
-  results: ResolverEvent[];
-  /**
-   * Mapping of unique ID to total number of events that exist in ES. The events this references is scoped to the events
-   * that the query is searching for.
-   */
-  totals: Record<string, number>;
+export type TimeSortDirection = 'asc' | 'desc';
+
+/**
+ * Defines the sorting fields for queries that leverage pagination
+ */
+export type SortFields = [
+  {
+    '@timestamp': string;
+  },
+  { [x: string]: string }
+];
+
+/**
+ * Defines a type of a function used to convert the parsed json data into a typescript type.
+ * If the function fails to transform the data it should return undefined.
+ */
+export type Decoder<T> = (parsed: T | undefined) => T | undefined;
+
+/**
+ * Interface for defining the returned pagination information.
+ */
+export interface PaginationFields {
+  sort: SortFields;
+  size: number;
+  searchAfter?: SearchAfterFields;
+}
+
+/**
+ * A function to encode a cursor from a pagination object.
+ *
+ * @param data Transforms a pagination cursor into a base64 encoded string
+ */
+export function urlEncodeCursor(data: PaginationCursor | ChildrenPaginationCursor): string {
+  const value = JSON.stringify(data);
+  return Buffer.from(value, 'utf8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+/**
+ * A function to decode a cursor.
+ *
+ * @param cursor a cursor encoded by the `urlEncodeCursor` function
+ * @param decode a function to transform the parsed data into an actual type
+ */
+export function urlDecodeCursor<T>(cursor: string, decode: Decoder<T>): T | undefined {
+  const fixedCursor = cursor.replace(/\-/g, '+').replace(/_/g, '/');
+  const data = Buffer.from(fixedCursor, 'base64').toString('utf8');
+  let parsed: T;
+  try {
+    parsed = JSON.parse(data);
+  } catch (e) {
+    return;
+  }
+
+  return decode(parsed);
 }
 
 /**
  * This class handles constructing pagination cursors that resolver can use to return additional events in subsequent
- * queries. It also constructs an aggregation query to determine the totals for other queries. This class should be used
- * with a query to build cursors for paginated results.
+ * queries.
  */
 export class PaginationBuilder {
   constructor(
@@ -64,38 +102,45 @@ export class PaginationBuilder {
     private readonly eventID?: string
   ) {}
 
-  private static urlEncodeCursor(data: PaginationCursor): string {
-    const value = JSON.stringify(data);
-    return Buffer.from(value, 'utf8')
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/g, '');
-  }
-
-  private static urlDecodeCursor(cursor: string): PaginationCursor {
-    const fixedCursor = cursor.replace(/\-/g, '+').replace(/_/g, '/');
-    const data = Buffer.from(fixedCursor, 'base64').toString('utf8');
-    const { timestamp, eventID } = JSON.parse(data);
-    // take some extra care to only grab the things we want
-    // convert the timestamp string to date object
-    return { timestamp, eventID };
+  /**
+   * Validates that the parsed object is actually a PaginationCursor.
+   *
+   * @param parsed an object parsed from an encoded cursor.
+   */
+  static decode(parsed: PaginationCursor | undefined): PaginationCursor | undefined {
+    if (parsed && parsed.timestamp && parsed.eventID) {
+      const { timestamp, eventID } = parsed;
+      return { timestamp, eventID };
+    }
   }
 
   /**
-   * Constructs a cursor to use in subsequent queries to retrieve the next set of results.
+   * Construct a cursor to use in subsequent queries.
    *
-   * @param total the total events that exist in ES scoped for a particular query.
    * @param results the events that were returned by the ES query
    */
-  static buildCursor(total: number, results: ResolverEvent[]): string | null {
-    if (total > results.length && results.length > 0) {
-      const lastResult = results[results.length - 1];
-      const cursor = {
-        timestamp: lastResult['@timestamp'],
-        eventID: eventId(lastResult),
-      };
-      return PaginationBuilder.urlEncodeCursor(cursor);
+  static buildCursor(results: SafeResolverEvent[]): string | null {
+    const lastResult = results[results.length - 1];
+    const cursor = {
+      timestamp: timestampSafeVersion(lastResult) ?? 0,
+      eventID:
+        eventIDSafeVersion(lastResult) === undefined ? '' : String(eventIDSafeVersion(lastResult)),
+    };
+    return urlEncodeCursor(cursor);
+  }
+
+  /**
+   * Constructs a cursor if the requested limit has not been met.
+   *
+   * @param requestLimit the request limit for a query.
+   * @param results the events that were returned by the ES query
+   */
+  static buildCursorRequestLimit(
+    requestLimit: number,
+    results: SafeResolverEvent[]
+  ): string | null {
+    if (requestLimit <= results.length && results.length > 0) {
+      return PaginationBuilder.buildCursor(results);
     }
     return null;
   }
@@ -110,8 +155,8 @@ export class PaginationBuilder {
   static createBuilder(limit: number, after?: string): PaginationBuilder {
     if (after) {
       try {
-        const cursor = PaginationBuilder.urlDecodeCursor(after);
-        if (cursor.timestamp && cursor.eventID) {
+        const cursor = urlDecodeCursor(after, PaginationBuilder.decode);
+        if (cursor && cursor.timestamp && cursor.eventID) {
           return new PaginationBuilder(limit, cursor.timestamp, cursor.eventID);
         }
       } catch (err) {
@@ -122,47 +167,40 @@ export class PaginationBuilder {
   }
 
   /**
-   * Creates an object for adding the pagination fields to a query
+   * Helper for creates an object for adding the pagination fields to a query
    *
-   * @param numTerms number of unique IDs that are being search for in this query
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
-   * @param aggregator the field that specifies a unique ID per event (e.g. entity_id)
-   * @param aggs other aggregations being used with this query
+   * @param timeSort is the timestamp sort direction
    * @returns an object containing the pagination information
    */
-  buildQueryFields(
-    numTerms: number,
+  buildQueryFieldsAsInterface(
     tiebreaker: string,
-    aggregator: string,
-    aggs: JsonObject = {}
-  ): JsonObject {
-    const fields: JsonObject = {};
-    fields.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
-    fields.aggs = { ...aggs, totals: { terms: { field: aggregator, size: numTerms } } };
-    fields.size = this.size;
+    timeSort: TimeSortDirection = 'asc'
+  ): PaginationFields {
+    const sort: SortFields = [{ '@timestamp': timeSort }, { [tiebreaker]: 'asc' }];
+    let searchAfter: SearchAfterFields | undefined;
     if (this.timestamp && this.eventID) {
-      fields.search_after = [this.timestamp, this.eventID] as Array<number | string>;
+      searchAfter = [this.timestamp, this.eventID];
     }
-    return fields;
+
+    return { sort, size: this.size, searchAfter };
   }
 
   /**
-   * Returns the totals found for the specified query
+   * Creates an object for adding the pagination fields to a query
    *
-   * @param aggregations the aggregation field from the ES response
-   * @returns a mapping of unique ID (e.g. entity_ids) to totals found for those IDs
+   * @param tiebreaker a unique field to use as the tiebreaker for the search_after
+   * @param timeSort is the timestamp sort direction
+   * @returns an object containing the pagination information
    */
-  static getTotals(aggregations?: TotalsAggregation): Record<string, number> {
-    if (!aggregations?.totals?.buckets) {
-      return {};
+  buildQueryFields(tiebreaker: string, timeSort: TimeSortDirection = 'asc'): JsonObject {
+    const fields: JsonObject = {};
+    const pagination = this.buildQueryFieldsAsInterface(tiebreaker, timeSort);
+    fields.sort = pagination.sort;
+    fields.size = pagination.size;
+    if (pagination.searchAfter) {
+      fields.search_after = pagination.searchAfter;
     }
-
-    return aggregations?.totals?.buckets?.reduce(
-      (cumulative: Record<string, number>, bucket: AggBucket) => ({
-        ...cumulative,
-        [bucket.key]: bucket.doc_count,
-      }),
-      {}
-    );
+    return fields;
   }
 }

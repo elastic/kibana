@@ -16,7 +16,7 @@ import {
   SavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '../../../../../src/core/server';
-import { coreMock, loggingServiceMock } from 'src/core/server/mocks';
+import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { SpacesLicenseService } from '../../common/licensing';
 import { ILicense } from '../../../licensing/server';
@@ -59,7 +59,7 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
 
   const license$ = new Rx.BehaviorSubject(license);
 
-  const logger = loggingServiceMock.createLogger();
+  const logger = loggingSystemMock.createLogger();
 
   const { license: spacesLicense } = new SpacesLicenseService().setup({ license$ });
 

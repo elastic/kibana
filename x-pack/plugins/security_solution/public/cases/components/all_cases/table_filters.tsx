@@ -66,12 +66,14 @@ const CasesTableFiltersComponent = ({
       const newReporters = selectedReporters.filter((r) => reporters.includes(r));
       handleSelectedReporters(newReporters);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reporters]);
   useEffect(() => {
     if (selectedTags.length) {
       const newTags = selectedTags.filter((t) => tags.includes(t));
       handleSelectedTags(newTags);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tags]);
 
   const handleSelectedReporters = useCallback(
@@ -84,6 +86,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ reporters: reportersObj });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedReporters, respReporters]
   );
 
@@ -94,6 +97,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ tags: newTags });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedTags]
   );
   const handleOnSearch = useCallback(
@@ -104,6 +108,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ search: trimSearch });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [search]
   );
   const handleToggleFilter = useCallback(
@@ -113,6 +118,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ status: showOpen ? 'open' : 'closed' });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [showOpenCases]
   );
   return (

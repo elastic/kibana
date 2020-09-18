@@ -16,21 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import React, { useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
+import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
-import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import * as React from 'react';
-import ReactDOM from 'react-dom';
-import { useEffect, useRef } from 'react';
 
-import { AppMountContext, AppMountDeprecated, ScopedHistory } from 'kibana/public';
+import { ApplicationStart, ChromeStart, ScopedHistory } from 'src/core/public';
+
 import { DevToolApp } from './dev_tool';
 
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
-  appMountContext: AppMountContext;
   updateRoute: (newRoute: string) => void;
 }
 
@@ -40,12 +40,7 @@ interface MountedDevToolDescriptor {
   unmountHandler: () => void;
 }
 
-function DevToolsWrapper({
-  devTools,
-  activeDevTool,
-  appMountContext,
-  updateRoute,
-}: DevToolsWrapperProps) {
+function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
   useEffect(
@@ -90,16 +85,18 @@ function DevToolsWrapper({
             if (mountedTool.current) {
               mountedTool.current.unmountHandler();
             }
+
             const params = {
               element,
               appBasePath: '',
               onAppLeave: () => undefined,
+              setHeaderActionMenu: () => undefined,
               // TODO: adapt to use Core's ScopedHistory
               history: {} as any,
             };
-            const unmountHandler = isAppMountDeprecated(activeDevTool.mount)
-              ? await activeDevTool.mount(appMountContext, params)
-              : await activeDevTool.mount(params);
+
+            const unmountHandler = await activeDevTool.mount(params);
+
             mountedTool.current = {
               devTool: activeDevTool,
               mountpoint: element,
@@ -112,19 +109,20 @@ function DevToolsWrapper({
   );
 }
 
-function redirectOnMissingCapabilities(appMountContext: AppMountContext) {
-  if (!appMountContext.core.application.capabilities.dev_tools.show) {
-    appMountContext.core.application.navigateToApp('home');
+function redirectOnMissingCapabilities(application: ApplicationStart) {
+  if (!application.capabilities.dev_tools.show) {
+    application.navigateToApp('home');
     return true;
   }
   return false;
 }
 
-function setBadge(appMountContext: AppMountContext) {
-  if (appMountContext.core.application.capabilities.dev_tools.save) {
+function setBadge(application: ApplicationStart, chrome: ChromeStart) {
+  if (application.capabilities.dev_tools.save) {
     return;
   }
-  appMountContext.core.chrome.setBadge({
+
+  chrome.setBadge({
     text: i18n.translate('devTools.badge.readOnly.text', {
       defaultMessage: 'Read only',
     }),
@@ -135,16 +133,16 @@ function setBadge(appMountContext: AppMountContext) {
   });
 }
 
-function setTitle(appMountContext: AppMountContext) {
-  appMountContext.core.chrome.docTitle.change(
+function setTitle(chrome: ChromeStart) {
+  chrome.docTitle.change(
     i18n.translate('devTools.pageTitle', {
       defaultMessage: 'Dev Tools',
     })
   );
 }
 
-function setBreadcrumbs(appMountContext: AppMountContext) {
-  appMountContext.core.chrome.setBreadcrumbs([
+function setBreadcrumbs(chrome: ChromeStart) {
+  chrome.setBreadcrumbs([
     {
       text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
         defaultMessage: 'Dev Tools',
@@ -156,16 +154,19 @@ function setBreadcrumbs(appMountContext: AppMountContext) {
 
 export function renderApp(
   element: HTMLElement,
-  appMountContext: AppMountContext,
+  application: ApplicationStart,
+  chrome: ChromeStart,
   history: ScopedHistory,
   devTools: readonly DevToolApp[]
 ) {
-  if (redirectOnMissingCapabilities(appMountContext)) {
+  if (redirectOnMissingCapabilities(application)) {
     return () => {};
   }
-  setBadge(appMountContext);
-  setBreadcrumbs(appMountContext);
-  setTitle(appMountContext);
+
+  setBadge(application, chrome);
+  setBreadcrumbs(chrome);
+  setTitle(chrome);
+
   ReactDOM.render(
     <I18nProvider>
       <Router>
@@ -183,7 +184,6 @@ export function renderApp(
                     updateRoute={props.history.push}
                     activeDevTool={devTool}
                     devTools={devTools}
-                    appMountContext={appMountContext}
                   />
                 )}
               />
@@ -204,12 +204,8 @@ export function renderApp(
   });
 
   return () => {
+    chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
     unlisten();
   };
-}
-
-function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
-  // Mount functions with two arguments are assumed to expect deprecated `context` object.
-  return mount.length === 2;
 }

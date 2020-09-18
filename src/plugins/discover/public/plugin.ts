@@ -36,7 +36,8 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
@@ -53,8 +54,12 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
+  setHeaderActionMenuMounter,
+  setUiActions,
   setScopedHistory,
   getScopedHistory,
+  syncHistoryLocations,
+  getServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
@@ -64,6 +69,7 @@ import {
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGenerator,
 } from './url_generator';
+import { SearchEmbeddableFactory } from './application/embeddable';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -115,6 +121,7 @@ export interface DiscoverSetupPlugins {
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
   kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
@@ -130,6 +137,8 @@ export interface DiscoverStartPlugins {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share?: SharePluginStart;
+  kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
 }
@@ -195,6 +204,7 @@ export class DiscoverPlugin
       appUnMounted,
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
+      restorePreviousUrl,
     } = createKbnUrlTracker({
       // we pass getter here instead of plain `history`,
       // so history is lazily created (when app is mounted)
@@ -220,7 +230,7 @@ export class DiscoverPlugin
         },
       ],
     });
-    setUrlTracker({ setTrackedUrl });
+    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -231,7 +241,7 @@ export class DiscoverPlugin
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
-      euiIconType: 'discoverApp',
+      euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
@@ -242,6 +252,8 @@ export class DiscoverPlugin
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
         setScopedHistory(params.history);
+        setHeaderActionMenuMounter(params.setHeaderActionMenu);
+        syncHistoryLocations();
         appMounted();
         const {
           plugins: { data: dataStart },
@@ -254,13 +266,26 @@ export class DiscoverPlugin
         params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
+          params.element.classList.remove('dscAppWrapper');
           unmount();
           appUnMounted();
         };
       },
     });
 
-    plugins.kibanaLegacy.forwardApp('discover', 'discover');
+    plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
+      return `#${path}`;
+    });
+    plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
+      return `#${path}`;
+    });
+    plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
+      const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
+      if (!id) {
+        return `#${path.replace('/discover', '') || '/'}`;
+      }
+      return `#/view/${id}${tail || ''}`;
+    });
 
     if (plugins.home) {
       registerFeature(plugins.home);
@@ -296,11 +321,18 @@ export class DiscoverPlugin
       this.innerAngularInitialized = true;
     };
 
+    setUiActions(plugins.uiActions);
+
     this.initializeServices = async () => {
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins, this.initializerContext);
+      const services = await buildServices(
+        core,
+        plugins,
+        this.initializerContext,
+        this.getEmbeddableInjector
+      );
       setServices(services);
       this.servicesInitialized = true;
 
@@ -328,12 +360,7 @@ export class DiscoverPlugin
   /**
    * register embeddable with a slimmer embeddable version of inner angular
    */
-  private async registerEmbeddable(
-    core: CoreSetup<DiscoverStartPlugins>,
-    plugins: DiscoverSetupPlugins
-  ) {
-    const { SearchEmbeddableFactory } = await import('./application/embeddable');
-
+  private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     if (!this.getEmbeddableInjector) {
       throw Error('Discover plugin method getEmbeddableInjector is undefined');
     }
@@ -356,13 +383,9 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
+      getServices().kibanaLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
-      getInnerAngularModuleEmbeddable(
-        embeddableAngularName,
-        core,
-        plugins,
-        this.initializerContext
-      );
+      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');
       this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
     }

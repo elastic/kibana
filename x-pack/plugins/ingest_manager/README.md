@@ -2,13 +2,13 @@
 
 ## Plugin
 
-- The plugin is disabled by default. See the TypeScript type for the [the available plugin configuration options](https://github.com/elastic/kibana/blob/master/x-pack/plugins/ingest_manager/common/types/index.ts#L9-L27)
-- Setting `xpack.ingestManager.enabled=true` enables the plugin including the EPM and Fleet features. It also adds the `DATASOURCE_API_ROUTES` and `AGENT_CONFIG_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
-- Adding `--xpack.ingestManager.epm.enabled=false` will disable the EPM API & UI
+- The plugin is enabled by default. See the TypeScript type for the [the available plugin configuration options](https://github.com/elastic/kibana/blob/master/x-pack/plugins/ingest_manager/common/types/index.ts#L9-L27)
+- Adding `xpack.ingestManager.enabled=false` will disable the plugin including the EPM and Fleet features. It will also remove the `PACKAGE_POLICY_API_ROUTES` and `AGENT_POLICY_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
 - Adding `--xpack.ingestManager.fleet.enabled=false` will disable the Fleet API & UI
   - [code for adding the routes](https://github.com/elastic/kibana/blob/1f27d349533b1c2865c10c45b2cf705d7416fb36/x-pack/plugins/ingest_manager/server/plugin.ts#L115-L133)
   - [Integration tests](server/integration_tests/router.test.ts)
 - Both EPM and Fleet require `ingestManager` be enabled. They are not standalone features.
+- For Gold+ license, a custom package registry URL can be used by setting `xpack.ingestManager.registryUrl=http://localhost:8080`
 
 ## Fleet Requirements
 
@@ -45,63 +45,26 @@ One common development workflow is:
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
 ](https://github.com/elastic/kibana/blob/master/style_guides/architecture_style_guide.md#file-and-folder-structure). We also follow the pattern of developing feature branches under your personal fork of Kibana.
 
-### API Tests
+### Tests
 
-#### Ingest & Fleet
+#### API integration tests
 
-1. In one terminal, change to the `x-pack` directory and start the test server with
+You need to have `docker` to run ingest manager api integration tests
 
-   ```
-   node scripts/functional_tests_server.js --config test/api_integration/config.ts
-   ```
-
-1. in a second terminal, run the tests from the Kibana root directory with
-   ```
-   node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.ts
-   ```
-
-#### EPM
-
-1. In one terminal, change to the `x-pack` directory and start the test server with
+1. In one terminal, run the tests from the Kibana root directory with
 
    ```
-   node scripts/functional_tests_server.js --config test/epm_api_integration/config.ts
+   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/ingest_manager_api_integration/config.ts
    ```
 
 1. in a second terminal, run the tests from the Kibana root directory with
+
    ```
-   node scripts/functional_test_runner.js --config x-pack/test/epm_api_integration/config.ts
+   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts
    ```
 
-### Staying up-to-date with `master`
+   Optionally you can filter which tests you want to run using `--grep`
 
-While we're developing in the `feature-ingest` feature branch, here's is more information on keeping up to date with upstream kibana.
-
-<details>
-  <summary>merge upstream <code>master</code> into <code>feature-ingest</code></summary>
-
-```bash
-## checkout feature branch to your fork
-git checkout -B feature-ingest origin/feature-ingest
-
-## make sure your feature branch is current with upstream feature branch
-git pull upstream feature-ingest
-
-## pull in changes from upstream master
-git pull upstream master
-
-## push changes to your remote
-git push origin
-
-# /!\ Open a DRAFT PR /!\
-# Normal PRs will re-notify authors of commits already merged
-# Draft PR will trigger CI run. Once CI is green ...
-# /!\ DO NOT USE THE GITHUB UI TO MERGE THE PR /!\
-
-## push your changes to upstream feature branch from the terminal; not GitHub UI
-git push upstream
-```
-
-</details>
-
-See https://github.com/elastic/kibana/pull/37950 for an example.
+   ```
+   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts --grep='fleet'
+   ```

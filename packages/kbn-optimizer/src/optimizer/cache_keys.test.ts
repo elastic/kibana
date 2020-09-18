@@ -20,7 +20,8 @@
 import Path from 'path';
 
 import jestDiff from 'jest-diff';
-import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { reformatJestDiff, getOptimizerCacheKey, diffCacheKey } from './cache_keys';
 import { OptimizerConfig } from './optimizer_config';
@@ -103,6 +104,10 @@ describe('getOptimizerCacheKey()', () => {
                 "dist": false,
                 "optimizerCacheKey": "♻",
                 "repoRoot": <absolute path>,
+                "themeTags": Array [
+                  "v7dark",
+                  "v7light",
+                ],
               },
             }
           `);

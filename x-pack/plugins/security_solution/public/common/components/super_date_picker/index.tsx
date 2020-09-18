@@ -117,6 +117,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [end, id, isQuickSelection, kqlQuery, start, timelineId]
     );
 
@@ -136,6 +137,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [id, isQuickSelection, duration, policy, toStr]
     );
 
@@ -175,6 +177,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           setIsQuickSelection(newIsQuickSelection);
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [recentlyUsedRanges, kqlQuery]
     );
 
@@ -213,9 +216,9 @@ export const formatDate = (
   options?: {
     roundUp?: boolean;
   }
-) => {
+): string => {
   const momentDate = dateMath.parse(date, options);
-  return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
+  return momentDate != null && momentDate.isValid() ? momentDate.toISOString() : '';
 };
 
 export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({

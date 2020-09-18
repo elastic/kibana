@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { uniq } from 'lodash';
 import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -47,7 +48,7 @@ export const getIndexOptions = async (
   }) as string[];
 
   if (matchingIndices.length || matchingIndexPatterns.length) {
-    const matchingOptions = _.uniq([...matchingIndices, ...matchingIndexPatterns]);
+    const matchingOptions = uniq([...matchingIndices, ...matchingIndexPatterns]);
 
     options.push({
       label: i18n.translate(

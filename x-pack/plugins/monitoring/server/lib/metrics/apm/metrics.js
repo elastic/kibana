@@ -449,4 +449,143 @@ export const metrics = {
       }
     ),
   }),
+  apm_acm_response_count: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.count',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.countTitle', {
+      defaultMessage: 'Response Count Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.countLabel', {
+      defaultMessage: 'Count',
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.countDescription', {
+      defaultMessage: 'HTTP requests responded to by APM Server',
+    }),
+  }),
+  apm_acm_response_errors_count: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.errors.count',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errorCountTitle', {
+      defaultMessage: 'Response Error Count Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errorCountLabel', {
+      defaultMessage: 'Error Count',
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errorCountDescription', {
+      defaultMessage: 'HTTP errors count',
+    }),
+  }),
+  apm_acm_response_valid_ok: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.valid.ok',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.validOkTitle', {
+      defaultMessage: 'Response OK Count Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.validOkLabel', {
+      defaultMessage: 'OK',
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.validOkDescription', {
+      defaultMessage: '200 OK response count',
+    }),
+  }),
+  apm_acm_response_valid_notmodified: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.valid.notmodified',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.validNotModifiedTitle', {
+      defaultMessage: 'Response Not Modified Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.validNotModifiedLabel', {
+      defaultMessage: 'Not Modified',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apm.acmResponse.validNotModifiedDescription',
+      {
+        defaultMessage: '304 Not modified response count',
+      }
+    ),
+  }),
+  apm_acm_response_errors_forbidden: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.errors.forbidden',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.forbiddenTitle', {
+      defaultMessage: 'Response Errors Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.forbiddenLabel', {
+      defaultMessage: 'Count',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apm.acmResponse.errors.forbiddenDescription',
+      {
+        defaultMessage: 'Forbidden HTTP requests rejected count',
+      }
+    ),
+  }),
+  apm_acm_response_errors_unauthorized: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.errors.unauthorized',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.unauthorizedTitle', {
+      defaultMessage: 'Response Unauthorized Errors Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.unauthorizedLabel', {
+      defaultMessage: 'Unauthorized',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apm.acmResponse.errors.unauthorizedDescription',
+      {
+        defaultMessage: 'Unauthorized HTTP requests rejected count',
+      }
+    ),
+  }),
+  apm_acm_response_errors_unavailable: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.errors.unavailable',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.unavailableTitle', {
+      defaultMessage: 'Response Unavailable Errors Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.unavailableLabel', {
+      defaultMessage: 'Unavailable',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apm.acmResponse.errors.unavailableDescription',
+      {
+        defaultMessage:
+          'Unavailable HTTP response count. Possible misconfiguration or unsupported version of Kibana',
+      }
+    ),
+  }),
+  apm_acm_response_errors_method: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.errors.method',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.methodTitle', {
+      defaultMessage: 'Response Method Errors Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.methodLabel', {
+      defaultMessage: 'Method',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apm.acmResponse.errors.methodDescription',
+      {
+        defaultMessage: 'HTTP requests rejected due to incorrect HTTP method',
+      }
+    ),
+  }),
+  apm_acm_response_errors_invalidquery: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.response.errors.invalidquery',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.invalidqueryTitle', {
+      defaultMessage: 'Response Invalid Query Errors Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.errors.invalidqueryLabel', {
+      defaultMessage: 'Invalid Query',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apm.acmResponse.errors.invalidqueryDescription',
+      {
+        defaultMessage: 'Invalid HTTP query',
+      }
+    ),
+  }),
+  apm_acm_request_count: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.acm.request.count',
+    title: i18n.translate('xpack.monitoring.metrics.apm.acmRequest.countTitle', {
+      defaultMessage: 'Requests Agent Configuration Management',
+    }),
+    label: i18n.translate('xpack.monitoring.metrics.apm.acmRequest.countTitleLabel', {
+      defaultMessage: 'Count',
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.acmRequest.countTitleDescription', {
+      defaultMessage: 'HTTP Requests received by agent configuration managemen',
+    }),
+  }),
 };

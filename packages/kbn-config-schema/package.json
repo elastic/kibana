@@ -10,10 +10,11 @@
     "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {
-    "typescript": "3.7.2",
-    "tsd": "^0.7.4"
+    "typescript": "4.0.2",
+    "tsd": "^0.13.1"
   },
   "peerDependencies": {
+    "lodash": "^4.17.15",
     "joi": "^13.5.2",
     "moment": "^2.24.0",
     "type-detect": "^4.0.8"

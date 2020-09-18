@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { BrowserFields } from '../../../../common/containers/source';
-import { TimelineItem } from '../../../../graphql/types';
+import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
+import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
+import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../common/lib/note';
-import { appSelectors, State } from '../../../../common/store';
+import { appSelectors, inputsModel, State } from '../../../../common/store';
 import { appActions } from '../../../../common/store/actions';
+import { useManageTimeline } from '../../manage_timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -35,16 +36,16 @@ import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
-import { useManageTimeline } from '../../manage_timeline';
 
 interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
-  height?: number;
+  docValueFields: DocValueFields[];
   id: string;
   isEventViewer?: boolean;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
+  refetch: inputsModel.Refetch;
 }
 
 type StatefulBodyComponentProps = OwnProps & PropsFromRedux;
@@ -58,8 +59,10 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     browserFields,
     columnHeaders,
     data,
+    docValueFields,
     eventIdToNoteIds,
-    height,
+    eventType,
+    excludedRowRendererIds,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -71,9 +74,12 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     selectedEventIds,
     setSelected,
     clearSelected,
+    show,
     showCheckboxes,
-    showRowRenderers,
+    graphEventId,
+    refetch,
     sort,
+    timelineType,
     toggleColumn,
     unPinEvent,
     updateColumns,
@@ -94,7 +100,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     const onAddNoteToEvent: AddNoteToEvent = useCallback(
       ({ eventId, noteId }: { eventId: string; noteId: string }) =>
         addNoteToEvent!({ id, eventId, noteId }),
-      [id]
+      [id, addNoteToEvent]
     );
 
     const onRowSelected: OnRowSelected = useCallback(
@@ -131,36 +137,56 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       (sorted) => {
         updateSort!({ id, sort: sorted });
       },
-      [id]
+      [id, updateSort]
     );
 
     const onColumnRemoved: OnColumnRemoved = useCallback(
       (columnId) => removeColumn!({ id, columnId }),
-      [id]
+      [id, removeColumn]
     );
 
     const onColumnResized: OnColumnResized = useCallback(
       ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
-      [id]
+      [applyDeltaToColumnWidth, id]
     );
 
-    const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [id]);
+    const onPinEvent: OnPinEvent = useCallback((eventId) => pinEvent!({ id, eventId }), [
+      id,
+      pinEvent,
+    ]);
 
-    const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [id]);
+    const onUnPinEvent: OnUnPinEvent = useCallback((eventId) => unPinEvent!({ id, eventId }), [
+      id,
+      unPinEvent,
+    ]);
 
-    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
+    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), [
+      updateNote,
+    ]);
 
     const onUpdateColumns: OnUpdateColumns = useCallback(
       (columns) => updateColumns!({ id, columns }),
-      [id]
+      [id, updateColumns]
     );
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (selectAll) {
+      if (selectAll && !isSelectAllChecked) {
         onSelectAll({ isSelected: true });
       }
-    }, [selectAll]); // onSelectAll dependency not necessary
+    }, [isSelectAllChecked, onSelectAll, selectAll]);
+
+    const enabledRowRenderers = useMemo(() => {
+      if (
+        excludedRowRendererIds &&
+        excludedRowRendererIds.length === Object.keys(RowRendererId).length
+      )
+        return [plainRowRenderer];
+
+      if (!excludedRowRendererIds) return rowRenderers;
+
+      return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+    }, [excludedRowRendererIds]);
 
     return (
       <Body
@@ -169,10 +195,11 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         columnHeaders={columnHeaders || emptyColumnHeaders}
         columnRenderers={columnRenderers}
         data={data}
+        docValueFields={docValueFields}
         eventIdToNoteIds={eventIdToNoteIds}
+        eventType={eventType}
         getNotesByIds={getNotesByIds}
-        height={height}
-        id={id}
+        graphEventId={graphEventId}
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
         loadingEventIds={loadingEventIds}
@@ -181,15 +208,18 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onColumnSorted={onColumnSorted}
         onRowSelected={onRowSelected}
         onSelectAll={onSelectAll}
-        onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onPinEvent={onPinEvent}
         onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
-        rowRenderers={showRowRenderers ? rowRenderers : [plainRowRenderer]}
+        refetch={refetch}
+        rowRenderers={enabledRowRenderers}
         selectedEventIds={selectedEventIds}
+        show={id === TimelineId.active ? show : true}
         showCheckboxes={showCheckboxes}
         sort={sort}
+        timelineId={id}
+        timelineType={timelineType}
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}
       />
@@ -199,18 +229,22 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.data, nextProps.data) &&
+    deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
+    deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+    prevProps.eventType === nextProps.eventType &&
+    prevProps.graphEventId === nextProps.graphEventId &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
-    prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
     prevProps.loadingEventIds === nextProps.loadingEventIds &&
     prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
+    prevProps.show === nextProps.show &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.showRowRenderers === nextProps.showRowRenderers &&
-    prevProps.sort === nextProps.sort
+    prevProps.sort === nextProps.sort &&
+    prevProps.timelineType === nextProps.timelineType
 );
 
 StatefulBodyComponent.displayName = 'StatefulBodyComponent';
@@ -229,26 +263,32 @@ const makeMapStateToProps = () => {
       columns,
       eventIdToNoteIds,
       eventType,
+      excludedRowRendererIds,
+      graphEventId,
       isSelectAllChecked,
       loadingEventIds,
       pinnedEventIds,
       selectedEventIds,
+      show,
       showCheckboxes,
-      showRowRenderers,
+      timelineType,
     } = timeline;
 
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       eventIdToNoteIds,
       eventType,
+      excludedRowRendererIds,
+      graphEventId,
       isSelectAllChecked,
       loadingEventIds,
       notesById: getNotesByIds(state),
       id,
       pinnedEventIds,
       selectedEventIds,
+      show,
       showCheckboxes,
-      showRowRenderers,
+      timelineType,
     };
   };
   return mapStateToProps;

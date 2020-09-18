@@ -4,96 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
+import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
+import { AlertsClientMock } from '../../../../../alerts/server/alerts_client.mock';
 
 describe('updateRules', () => {
-  let alertsClient: ReturnType<typeof alertsClientMock.create>;
-  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-
-  beforeEach(() => {
-    alertsClient = alertsClientMock.create();
-    savedObjectsClient = savedObjectsClientMock.create();
-  });
-
-  it('should call alertsClient.disable is the rule was enabled and enabled is false', async () => {
-    const rule = getResult();
-    alertsClient.get.mockResolvedValue(getResult());
-
-    await updateRules({
-      alertsClient,
-      savedObjectsClient,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      ...rule.params,
+  it('should call alertsClient.disable if the rule was enabled and enabled is false', async () => {
+    const rulesOptionsMock = getUpdateRulesOptionsMock();
+    const ruleOptions = {
+      ...rulesOptionsMock,
       enabled: false,
-      interval: '',
-      name: '',
-      tags: [],
-      actions: [],
-    });
+    };
+    ((ruleOptions.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue(getResult());
 
-    expect(alertsClient.disable).toHaveBeenCalledWith(
+    await updateRules(ruleOptions);
+
+    expect(ruleOptions.alertsClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: rulesOptionsMock.id,
       })
     );
   });
 
-  it('should call alertsClient.enable is the rule was disabled and enabled is true', async () => {
-    const rule = getResult();
-    alertsClient.get.mockResolvedValue({
+  it('should call alertsClient.enable if the rule was disabled and enabled is true', async () => {
+    const rulesOptionsMock = getUpdateRulesOptionsMock();
+    const ruleOptions = {
+      ...rulesOptionsMock,
+      enabled: true,
+    };
+
+    ((ruleOptions.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue({
       ...getResult(),
       enabled: false,
     });
 
-    await updateRules({
-      alertsClient,
-      savedObjectsClient,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      ...rule.params,
-      enabled: true,
-      interval: '',
-      name: '',
-      tags: [],
-      actions: [],
-    });
+    await updateRules(ruleOptions);
 
-    expect(alertsClient.enable).toHaveBeenCalledWith(
+    expect(ruleOptions.alertsClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: rulesOptionsMock.id,
       })
     );
   });
 
   it('calls the alertsClient with ML params', async () => {
-    alertsClient.get.mockResolvedValue(getMlResult());
-
-    const params = {
-      ...getMlResult().params,
-      anomalyThreshold: 55,
-      machineLearningJobId: 'new_job_id',
+    const rulesOptionsMock = getUpdateMlRulesOptionsMock();
+    const ruleOptions = {
+      ...rulesOptionsMock,
+      enabled: true,
     };
 
-    await updateRules({
-      alertsClient,
-      savedObjectsClient,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      ...params,
-      enabled: true,
-      interval: '',
-      name: '',
-      tags: [],
-      actions: [],
-    });
+    ((ruleOptions.alertsClient as unknown) as AlertsClientMock).get.mockResolvedValue(
+      getMlResult()
+    );
 
-    expect(alertsClient.update).toHaveBeenCalledWith(
+    await updateRules(ruleOptions);
+
+    expect(ruleOptions.alertsClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({
-            anomalyThreshold: 55,
-            machineLearningJobId: 'new_job_id',
+            anomalyThreshold: rulesOptionsMock.anomalyThreshold,
+            machineLearningJobId: rulesOptionsMock.machineLearningJobId,
           }),
         }),
       })

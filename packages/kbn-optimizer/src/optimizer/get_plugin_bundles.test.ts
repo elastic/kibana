@@ -21,7 +21,9 @@ import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { getPluginBundles } from './get_plugin_bundles';
 
-expect.addSnapshotSerializer(createAbsolutePathSerializer('/repo'));
+expect.addSnapshotSerializer(createAbsolutePathSerializer('/repo', '<repoRoot>'));
+expect.addSnapshotSerializer(createAbsolutePathSerializer('/output', '<outputRoot>'));
+expect.addSnapshotSerializer(createAbsolutePathSerializer('/outside/of/repo', '<outsideOfRepo>'));
 
 it('returns a bundle for core and each plugin', () => {
   expect(
@@ -31,36 +33,72 @@ it('returns a bundle for core and each plugin', () => {
           directory: '/repo/plugins/foo',
           id: 'foo',
           isUiPlugin: true,
+          extraPublicDirs: [],
+          manifestPath: '/repo/plugins/foo/kibana.json',
         },
         {
           directory: '/repo/plugins/bar',
           id: 'bar',
           isUiPlugin: false,
+          extraPublicDirs: [],
+          manifestPath: '/repo/plugins/bar/kibana.json',
         },
         {
           directory: '/outside/of/repo/plugins/baz',
           id: 'baz',
           isUiPlugin: true,
+          extraPublicDirs: [],
+          manifestPath: '/outside/of/repo/plugins/baz/kibana.json',
+        },
+        {
+          directory: '/repo/x-pack/plugins/box',
+          id: 'box',
+          isUiPlugin: true,
+          extraPublicDirs: [],
+          manifestPath: '/repo/x-pack/plugins/box/kibana.json',
         },
       ],
-      '/repo'
+      '/repo',
+      '/output'
     ).map((b) => b.toSpec())
   ).toMatchInlineSnapshot(`
     Array [
       Object {
-        "contextDir": <absolute path>/plugins/foo,
-        "entry": "./public/index",
+        "banner": undefined,
+        "contextDir": <repoRoot>/plugins/foo,
         "id": "foo",
-        "outputDir": <absolute path>/plugins/foo/target/public,
-        "sourceRoot": <absolute path>,
+        "manifestPath": <repoRoot>/plugins/foo/kibana.json,
+        "outputDir": <outputRoot>/plugins/foo/target/public,
+        "publicDirNames": Array [
+          "public",
+        ],
+        "sourceRoot": <repoRoot>,
         "type": "plugin",
       },
       Object {
-        "contextDir": "/outside/of/repo/plugins/baz",
-        "entry": "./public/index",
+        "banner": undefined,
+        "contextDir": <outsideOfRepo>/plugins/baz,
         "id": "baz",
-        "outputDir": "/outside/of/repo/plugins/baz/target/public",
-        "sourceRoot": <absolute path>,
+        "manifestPath": <outsideOfRepo>/plugins/baz/kibana.json,
+        "outputDir": <outsideOfRepo>/plugins/baz/target/public,
+        "publicDirNames": Array [
+          "public",
+        ],
+        "sourceRoot": <repoRoot>,
+        "type": "plugin",
+      },
+      Object {
+        "banner": "/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
+     * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
+    ",
+        "contextDir": <repoRoot>/x-pack/plugins/box,
+        "id": "box",
+        "manifestPath": <repoRoot>/x-pack/plugins/box/kibana.json,
+        "outputDir": <outputRoot>/x-pack/plugins/box/target/public,
+        "publicDirNames": Array [
+          "public",
+        ],
+        "sourceRoot": <repoRoot>,
         "type": "plugin",
       },
     ]

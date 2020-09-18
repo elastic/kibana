@@ -11,6 +11,12 @@ import {
   HOST_NAME,
   TRANSACTION_RESULT,
   SERVICE_VERSION,
+  TRANSACTION_URL,
+  USER_AGENT_NAME,
+  USER_AGENT_DEVICE,
+  USER_AGENT_OS,
+  CLIENT_GEO_COUNTRY_ISO_CODE,
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 
 const filtersByName = {
@@ -49,6 +55,42 @@ const filtersByName = {
       defaultMessage: 'Service version',
     }),
     fieldName: SERVICE_VERSION,
+  },
+  transactionUrl: {
+    title: i18n.translate('xpack.apm.localFilters.titles.transactionUrl', {
+      defaultMessage: 'Url',
+    }),
+    fieldName: TRANSACTION_URL,
+  },
+  browser: {
+    title: i18n.translate('xpack.apm.localFilters.titles.browser', {
+      defaultMessage: 'Browser',
+    }),
+    fieldName: USER_AGENT_NAME,
+  },
+  device: {
+    title: i18n.translate('xpack.apm.localFilters.titles.device', {
+      defaultMessage: 'Device',
+    }),
+    fieldName: USER_AGENT_DEVICE,
+  },
+  location: {
+    title: i18n.translate('xpack.apm.localFilters.titles.location', {
+      defaultMessage: 'Location',
+    }),
+    fieldName: CLIENT_GEO_COUNTRY_ISO_CODE,
+  },
+  os: {
+    title: i18n.translate('xpack.apm.localFilters.titles.os', {
+      defaultMessage: 'OS',
+    }),
+    fieldName: USER_AGENT_OS,
+  },
+  serviceName: {
+    title: i18n.translate('xpack.apm.localFilters.titles.serviceName', {
+      defaultMessage: 'Service name',
+    }),
+    fieldName: SERVICE_NAME,
   },
 };
 

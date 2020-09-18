@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { cloneDeep, sortByOrder } from 'lodash';
+import { cloneDeep, orderBy } from 'lodash';
 import { UIFilters } from '../../../../typings/ui_filters';
-import { Projection } from '../../../../common/projections/typings';
+import { Projection } from '../../../projections/typings';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { getLocalFilterQuery } from './get_local_filter_query';
 import { Setup } from '../../helpers/setup_request';
@@ -26,7 +26,7 @@ export async function getLocalUIFilters({
   uiFilters: UIFilters;
   localFilterNames: LocalUIFilterName[];
 }) {
-  const { client, dynamicIndexPattern } = setup;
+  const { apmEventClient } = setup;
 
   const projectionWithoutAggs = cloneDeep(projection);
 
@@ -35,28 +35,28 @@ export async function getLocalUIFilters({
   return Promise.all(
     localFilterNames.map(async (name) => {
       const query = getLocalFilterQuery({
-        indexPattern: dynamicIndexPattern,
         uiFilters,
         projection,
         localUIFilterName: name,
       });
 
-      const response = await client.search(query);
+      const response = await apmEventClient.search(query);
 
       const filter = localUIFilters[name];
 
+      const buckets = response?.aggregations?.by_terms?.buckets ?? [];
+
       return {
         ...filter,
-        options: sortByOrder(
-          response.aggregations?.by_terms.buckets.map((bucket) => {
+        options: orderBy(
+          buckets.map((bucket) => {
             return {
               name: bucket.key as string,
-              count:
-                'bucket_count' in bucket
-                  ? bucket.bucket_count.value
-                  : bucket.doc_count,
+              count: bucket.bucket_count
+                ? bucket.bucket_count.value
+                : bucket.doc_count,
             };
-          }) || [],
+          }),
           'count',
           'desc'
         ),

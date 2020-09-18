@@ -6,8 +6,48 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { applyMatrix3, distance, angle } from '../lib/vector2';
-import { Vector2, Matrix3 } from '../types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { applyMatrix3, distance, angle } from '../models/vector2';
+import { Vector2, Matrix3, EdgeLineMetadata } from '../types';
+import { useResolverTheme, calculateResolverFontSize } from './assets';
+
+interface StyledEdgeLine {
+  readonly resolverEdgeColor: string;
+  readonly magFactorX: number;
+}
+
+const StyledEdgeLine = styled.div<StyledEdgeLine>`
+  position: absolute;
+  height: ${(props) => {
+    return `${calculateResolverFontSize(props.magFactorX, 12, 8.5)}px`;
+  }};
+  background-color: ${(props) => props.resolverEdgeColor};
+`;
+
+interface StyledElapsedTime {
+  readonly backgroundColor: string;
+  readonly leftPct: number;
+  readonly scaledTypeSize: number;
+  readonly textColor: string;
+}
+
+const StyledElapsedTime = styled.div<StyledElapsedTime>`
+  background-color: ${(props) => props.backgroundColor};
+  color: ${(props) => props.textColor};
+  font-size: ${(props) => `${props.scaledTypeSize}px`};
+  font-weight: bold;
+  max-width: 75%;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  top: 50%;
+  white-space: nowrap;
+  left: ${(props) => `${props.leftPct}%`};
+  padding: 6px 8px;
+  border-radius: 999px; // generate pill shape
+  transform: translate(-50%, -50%);
+  user-select: none;
+`;
 
 /**
  * A placeholder line segment view that connects process nodes.
@@ -15,6 +55,7 @@ import { Vector2, Matrix3 } from '../types';
 const EdgeLineComponent = React.memo(
   ({
     className,
+    edgeLineMetadata,
     startPosition,
     endPosition,
     projectionMatrix,
@@ -23,6 +64,10 @@ const EdgeLineComponent = React.memo(
      * A className string provided by `styled`
      */
     className?: string;
+    /**
+     * Time elapsed betweeen process nodes
+     */
+    edgeLineMetadata?: EdgeLineMetadata;
     /**
      * The postion of first point in the line segment. In 'world' coordinates.
      */
@@ -42,12 +87,16 @@ const EdgeLineComponent = React.memo(
      */
     const screenStart = applyMatrix3(startPosition, projectionMatrix);
     const screenEnd = applyMatrix3(endPosition, projectionMatrix);
+    const [magFactorX] = projectionMatrix;
+    const { colorMap } = useResolverTheme();
+    const elapsedTime = edgeLineMetadata?.elapsedTime;
 
     /**
      * We render the line using a short, long, `div` element. The length of this `div`
      * should be the same as the distance between the start and end points.
      */
     const length = distance(screenStart, screenEnd);
+    const scaledTypeSize = calculateResolverFontSize(magFactorX, 10, 7.5);
 
     const style = {
       left: `${screenStart[0]}px`,
@@ -65,16 +114,47 @@ const EdgeLineComponent = React.memo(
        */
       transform: `translateY(-50%) rotateZ(${angle(screenStart, screenEnd)}rad)`,
     };
-    return <div role="presentation" className={className} style={style} />;
+
+    let elapsedTimeLeftPosPct = 50;
+
+    /**
+     * Calculates a fractional offset from 0 -> 5% as magFactorX decreases from 1 to a min of .5
+     */
+    if (magFactorX < 1) {
+      const fractionalOffset = (1 / magFactorX) * ((1 - magFactorX) * 10);
+      elapsedTimeLeftPosPct += fractionalOffset;
+    }
+
+    return (
+      <StyledEdgeLine
+        className={className}
+        style={style}
+        resolverEdgeColor={colorMap.resolverEdge}
+        magFactorX={magFactorX}
+        data-test-subj="resolver:graph:edgeline"
+      >
+        {elapsedTime && (
+          <StyledElapsedTime
+            backgroundColor={colorMap.resolverEdge}
+            leftPct={elapsedTimeLeftPosPct}
+            scaledTypeSize={scaledTypeSize}
+            textColor={colorMap.resolverEdgeText}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.elapsedTime"
+              defaultMessage="{duration} {durationType}"
+              values={{
+                duration: elapsedTime.duration,
+                durationType: elapsedTime.durationType,
+              }}
+            />
+          </StyledElapsedTime>
+        )}
+      </StyledEdgeLine>
+    );
   }
 );
 
 EdgeLineComponent.displayName = 'EdgeLine';
 
-export const EdgeLine = styled(EdgeLineComponent)`
-  position: absolute;
-  height: 3px;
-  background-color: #d4d4d4;
-  color: #333333;
-  contain: strict;
-`;
+export const EdgeLine = EdgeLineComponent;

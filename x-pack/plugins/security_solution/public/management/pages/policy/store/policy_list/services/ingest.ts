@@ -6,90 +6,144 @@
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
-  GetDatasourcesRequest,
+  GetPackagePoliciesRequest,
   GetAgentStatusResponse,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  DeletePackagePoliciesResponse,
+  DeletePackagePoliciesRequest,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  GetPackagesResponse,
+  GetAgentPoliciesRequest,
+  GetAgentPoliciesResponse,
 } from '../../../../../../../../ingest_manager/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
-export const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
+export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
+export const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
+export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
+const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 
 /**
- * Retrieves a list of endpoint specific datasources (those created with a `package.name` of
+ * Retrieves a list of endpoint specific package policies (those created with a `package.name` of
  * `endpoint`) from Ingest
  * @param http
  * @param options
  */
-export const sendGetEndpointSpecificDatasources = (
+export const sendGetEndpointSpecificPackagePolicies = (
   http: HttpStart,
-  options: HttpFetchOptions & Partial<GetDatasourcesRequest> = {}
+  options: HttpFetchOptions & Partial<GetPackagePoliciesRequest> = {}
 ): Promise<GetPolicyListResponse> => {
-  return http.get<GetPolicyListResponse>(INGEST_API_DATASOURCES, {
+  return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_POLICIES, {
     ...options,
     query: {
       ...options.query,
       kuery: `${
         options?.query?.kuery ? `${options.query.kuery} and ` : ''
-      }${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+      }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   });
 };
 
 /**
- * Retrieves a single datasource based on ID from ingest
+ * Retrieves a single package policy based on ID from ingest
  * @param http
- * @param datasourceId
+ * @param packagePolicyId
  * @param options
  */
-export const sendGetDatasource = (
+export const sendGetPackagePolicy = (
   http: HttpStart,
-  datasourceId: string,
+  packagePolicyId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPolicyResponse>(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
+  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, options);
 };
 
 /**
- * Updates a datasources
- *
+ * Retrieves a single package policy based on ID from ingest
  * @param http
- * @param datasourceId
- * @param datasource
+ * @param body
  * @param options
  */
-export const sendPutDatasource = (
+export const sendDeletePackagePolicy = (
   http: HttpStart,
-  datasourceId: string,
-  datasource: NewPolicyData,
-  options: Exclude<HttpFetchOptions, 'body'> = {}
-): Promise<UpdatePolicyResponse> => {
-  return http.put(`${INGEST_API_DATASOURCES}/${datasourceId}`, {
+  body: DeletePackagePoliciesRequest,
+  options?: HttpFetchOptions
+) => {
+  return http.post<DeletePackagePoliciesResponse>(INGEST_API_DELETE_PACKAGE_POLICY, {
     ...options,
-    body: JSON.stringify(datasource),
+    body: JSON.stringify(body.body),
   });
 };
 
 /**
- * Get a status summary for all Agents that are currently assigned to a given agent configuration
- *
+ * Retrieve a list of Agent Policies
  * @param http
- * @param configId
  * @param options
  */
-export const sendGetFleetAgentStatusForConfig = (
+export const sendGetAgentPolicyList = (
   http: HttpStart,
-  /** the Agent (fleet) configuration id */
-  configId: string,
+  options: HttpFetchOptions & GetAgentPoliciesRequest
+) => {
+  return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_POLICIES, options);
+};
+
+/**
+ * Updates a package policy
+ *
+ * @param http
+ * @param packagePolicyId
+ * @param packagePolicy
+ * @param options
+ */
+export const sendPutPackagePolicy = (
+  http: HttpStart,
+  packagePolicyId: string,
+  packagePolicy: NewPolicyData,
+  options: Exclude<HttpFetchOptions, 'body'> = {}
+): Promise<UpdatePolicyResponse> => {
+  return http.put(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
+    ...options,
+    body: JSON.stringify(packagePolicy),
+  });
+};
+
+/**
+ * Get a status summary for all Agents that are currently assigned to a given agent policy
+ *
+ * @param http
+ * @param policyId
+ * @param options
+ */
+export const sendGetFleetAgentStatusForPolicy = (
+  http: HttpStart,
+  /** the Agent (fleet) policy id */
+  policyId: string,
   options: Exclude<HttpFetchOptions, 'query'> = {}
 ): Promise<GetAgentStatusResponse> => {
   return http.get(INGEST_API_FLEET_AGENT_STATUS, {
     ...options,
     query: {
-      configId,
+      policyId,
     },
   });
+};
+
+/**
+ * Get Endpoint Security Package information
+ */
+export const sendGetEndpointSecurityPackage = async (
+  http: HttpStart
+): Promise<GetPackagesResponse['response'][0]> => {
+  const options = { query: { category: 'security' } };
+  const securityPackages = await http.get<GetPackagesResponse>(INGEST_API_EPM_PACKAGES, options);
+  const endpointPackageInfo = securityPackages.response.find(
+    (epmPackage) => epmPackage.name === 'endpoint'
+  );
+  if (!endpointPackageInfo) {
+    throw new Error('Endpoint package was not found.');
+  }
+  return endpointPackageInfo;
 };

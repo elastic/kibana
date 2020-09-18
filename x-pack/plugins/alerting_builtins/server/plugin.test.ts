@@ -7,6 +7,8 @@
 import { AlertingBuiltinsPlugin } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { alertsMock } from '../../alerts/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
+import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 describe('AlertingBuiltins Plugin', () => {
   describe('setup()', () => {
@@ -22,7 +24,8 @@ describe('AlertingBuiltins Plugin', () => {
 
     it('should register built-in alert types', async () => {
       const alertingSetup = alertsMock.createSetup();
-      await plugin.setup(coreSetup, { alerts: alertingSetup });
+      const featuresSetup = featuresPluginMock.createSetup();
+      await plugin.setup(coreSetup, { alerts: alertingSetup, features: featuresSetup });
 
       expect(alertingSetup.registerType).toHaveBeenCalledTimes(1);
 
@@ -40,11 +43,16 @@ describe('AlertingBuiltins Plugin', () => {
           "name": "Index threshold",
         }
       `);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith(BUILT_IN_ALERTS_FEATURE);
     });
 
     it('should return a service in the expected shape', async () => {
       const alertingSetup = alertsMock.createSetup();
-      const service = await plugin.setup(coreSetup, { alerts: alertingSetup });
+      const featuresSetup = featuresPluginMock.createSetup();
+      const service = await plugin.setup(coreSetup, {
+        alerts: alertingSetup,
+        features: featuresSetup,
+      });
 
       expect(typeof service.indexThreshold.timeSeriesQuery).toBe('function');
     });

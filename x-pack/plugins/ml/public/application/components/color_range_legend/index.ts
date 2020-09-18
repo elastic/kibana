@@ -11,4 +11,5 @@ export {
   useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
+  useCurrentEuiTheme,
 } from './use_color_range';

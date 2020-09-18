@@ -3,273 +3,332 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiSpacer, EuiButton } from '@elastic/eui';
 
-import { serializers } from '../../../shared_imports';
-import { TemplateDeserialized, CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from '../../../../common';
-import { TemplateSteps } from './template_steps';
-import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
-import { StepProps, DataGetterFunc } from './types';
+import { TemplateDeserialized } from '../../../../common';
+import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
 import { SectionError } from '../section_error';
+import {
+  SimulateTemplateFlyoutContent,
+  SimulateTemplateProps,
+  simulateTemplateFlyoutProps,
+  SimulateTemplateFilters,
+} from '../index_templates';
+import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
+import {
+  CommonWizardSteps,
+  StepSettingsContainer,
+  StepMappingsContainer,
+  StepAliasesContainer,
+} from '../shared';
+import { documentationService } from '../../services/documentation';
 
 const { stripEmptyFields } = serializers;
+const { FormWizard, FormWizardStep } = Forms;
+const { useGlobalFlyout } = GlobalFlyout;
 
 interface Props {
+  title: string | JSX.Element;
   onSave: (template: TemplateDeserialized) => void;
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
+  isLegacy?: boolean;
   defaultValue?: TemplateDeserialized;
   isEditing?: boolean;
 }
 
-interface ValidationState {
-  [key: number]: { isValid: boolean | undefined };
+export interface WizardContent extends CommonWizardSteps {
+  logistics: Omit<TemplateDeserialized, '_kbnMeta' | 'template'>;
+  components: TemplateDeserialized['composedOf'];
 }
 
-const defaultValidation = { isValid: true };
+export type WizardSection = keyof WizardContent | 'review';
 
-const stepComponentMap: { [key: number]: React.FunctionComponent<StepProps> } = {
-  1: StepLogistics,
-  2: StepSettings,
-  3: StepMappings,
-  4: StepAliases,
-  5: StepReview,
+const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
+  logistics: {
+    id: 'logistics',
+    label: i18n.translate('xpack.idxMgmt.templateForm.steps.logisticsStepName', {
+      defaultMessage: 'Logistics',
+    }),
+  },
+  components: {
+    id: 'components',
+    label: i18n.translate('xpack.idxMgmt.templateForm.steps.componentsStepName', {
+      defaultMessage: 'Component templates',
+    }),
+  },
+  settings: {
+    id: 'settings',
+    label: i18n.translate('xpack.idxMgmt.templateForm.steps.settingsStepName', {
+      defaultMessage: 'Index settings',
+    }),
+  },
+  mappings: {
+    id: 'mappings',
+    label: i18n.translate('xpack.idxMgmt.templateForm.steps.mappingsStepName', {
+      defaultMessage: 'Mappings',
+    }),
+  },
+  aliases: {
+    id: 'aliases',
+    label: i18n.translate('xpack.idxMgmt.templateForm.steps.aliasesStepName', {
+      defaultMessage: 'Aliases',
+    }),
+  },
+  review: {
+    id: 'review',
+    label: i18n.translate('xpack.idxMgmt.templateForm.steps.summaryStepName', {
+      defaultMessage: 'Review template',
+    }),
+  },
 };
 
-export const TemplateForm: React.FunctionComponent<Props> = ({
-  defaultValue = {
+export const TemplateForm = ({
+  title,
+  defaultValue,
+  isEditing,
+  isSaving,
+  isLegacy = false,
+  saveError,
+  clearSaveError,
+  onSave,
+}: Props) => {
+  const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
+  const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
+  const simulateTemplateFilters = useRef<SimulateTemplateFilters>({
+    mappings: true,
+    settings: true,
+    aliases: true,
+  });
+
+  const indexTemplate = defaultValue ?? {
     name: '',
     indexPatterns: [],
     template: {},
     _kbnMeta: {
-      isManaged: false,
-      isLegacy: CREATE_LEGACY_TEMPLATE_BY_DEFAULT,
+      type: 'default',
+      hasDatastream: false,
+      isLegacy,
     },
-  },
-  onSave,
-  isSaving,
-  saveError,
-  clearSaveError,
-  isEditing,
-}) => {
-  const [currentStep, setCurrentStep] = useState<number>(1);
-  const [validation, setValidation] = useState<ValidationState>({
-    1: defaultValidation,
-    2: defaultValidation,
-    3: defaultValidation,
-    4: defaultValidation,
-    5: defaultValidation,
-  });
+  };
 
-  const template = useRef<TemplateDeserialized>(defaultValue);
-  const stepsDataGetters = useRef<Record<number, DataGetterFunc>>({});
+  const {
+    template: { settings, mappings, aliases },
+    composedOf,
+    _kbnMeta,
+    ...logistics
+  } = indexTemplate;
 
-  const lastStep = Object.keys(stepComponentMap).length;
-  const CurrentStepComponent = stepComponentMap[currentStep];
-  const isStepValid = validation[currentStep].isValid;
+  const wizardDefaultValue: WizardContent = {
+    logistics,
+    settings,
+    mappings,
+    aliases,
+    components: indexTemplate.composedOf,
+  };
 
-  const setStepDataGetter = useCallback(
-    (stepDataGetter: DataGetterFunc) => {
-      stepsDataGetters.current[currentStep] = stepDataGetter;
-    },
-    [currentStep]
-  );
+  const i18nTexts = {
+    save: isEditing ? (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.saveButtonLabel"
+        defaultMessage="Save template"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateForm.createButtonLabel"
+        defaultMessage="Create template"
+      />
+    ),
+  };
 
-  const onStepValidityChange = useCallback(
-    (isValid: boolean | undefined) => {
-      setValidation((prev) => ({
-        ...prev,
-        [currentStep]: {
-          isValid,
-          errors: {},
-        },
-      }));
-    },
-    [currentStep]
-  );
-
-  const validateAndGetDataFromCurrentStep = async () => {
-    const validateAndGetStepData = stepsDataGetters.current[currentStep];
-
-    if (!validateAndGetStepData) {
-      throw new Error(`No data getter has been set for step "${currentStep}"`);
-    }
-
-    const { isValid, data, path } = await validateAndGetStepData();
-
-    if (isValid) {
-      // Update the template object with the current step data
-      if (path) {
-        // We only update a "slice" of the template
-        const sliceToUpdate = template.current[path as keyof TemplateDeserialized];
-
-        if (sliceToUpdate === null || typeof sliceToUpdate !== 'object') {
-          return { isValid, data };
+  const apiError = saveError ? (
+    <>
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.templateForm.saveTemplateError"
+            defaultMessage="Unable to create template"
+          />
         }
+        error={saveError}
+        data-test-subj="saveTemplateError"
+      />
+      <EuiSpacer size="m" />
+    </>
+  ) : null;
 
-        template.current = {
-          ...template.current,
-          [path]: { ...sliceToUpdate, ...data },
-        };
-      } else {
-        template.current = { ...template.current, ...data };
-      }
+  /**
+   * If no mappings, settings or aliases are defined, it is better to not send empty
+   * object for those values.
+   * This method takes care of that and other cleanup of empty fields.
+   * @param template The template object to clean up
+   */
+  const cleanupTemplateObject = (template: TemplateDeserialized) => {
+    const outputTemplate = { ...template };
+
+    if (outputTemplate.template.settings === undefined) {
+      delete outputTemplate.template.settings;
+    }
+    if (outputTemplate.template.mappings === undefined) {
+      delete outputTemplate.template.mappings;
+    }
+    if (outputTemplate.template.aliases === undefined) {
+      delete outputTemplate.template.aliases;
+    }
+    if (Object.keys(outputTemplate.template).length === 0) {
+      // @ts-expect-error
+      delete outputTemplate.template;
     }
 
-    return { isValid, data };
+    return outputTemplate;
   };
 
-  const updateCurrentStep = async (nextStep: number) => {
-    // All steps needs validation, except for the last step
-    const shouldValidate = currentStep !== lastStep;
+  const buildTemplateObject = useCallback(
+    (initialTemplate: TemplateDeserialized) => (
+      wizardData: WizardContent
+    ): TemplateDeserialized => {
+      const outputTemplate = {
+        ...wizardData.logistics,
+        _kbnMeta: initialTemplate._kbnMeta,
+        composedOf: wizardData.components,
+        template: {
+          settings: wizardData.settings,
+          mappings: wizardData.mappings,
+          aliases: wizardData.aliases,
+        },
+      };
 
-    if (shouldValidate) {
-      const isValid =
-        isStepValid === false ? false : (await validateAndGetDataFromCurrentStep()).isValid;
-
-      // If step is invalid do not let user proceed
-      if (!isValid) {
-        return;
-      }
-    }
-
-    setCurrentStep(nextStep);
-    clearSaveError();
-  };
-
-  const onBack = () => {
-    const prevStep = currentStep - 1;
-    updateCurrentStep(prevStep);
-  };
-
-  const onNext = () => {
-    const nextStep = currentStep + 1;
-    updateCurrentStep(nextStep);
-  };
-
-  const saveButtonLabel = isEditing ? (
-    <FormattedMessage
-      id="xpack.idxMgmt.templateForm.saveButtonLabel"
-      defaultMessage="Save template"
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.idxMgmt.templateForm.createButtonLabel"
-      defaultMessage="Create template"
-    />
+      return cleanupTemplateObject(outputTemplate);
+    },
+    []
   );
+
+  const onWizardContentChange = useCallback((content: Forms.Content<WizardContent>) => {
+    setWizardContent(content);
+  }, []);
+
+  const onSaveTemplate = useCallback(
+    async (wizardData: WizardContent) => {
+      const template = buildTemplateObject(indexTemplate)(wizardData);
+
+      // We need to strip empty string, otherwise if the "order" or "version"
+      // are not set, they will be empty string and ES expect a number for those parameters.
+      onSave(
+        stripEmptyFields(template, {
+          types: ['string'],
+        }) as TemplateDeserialized
+      );
+
+      clearSaveError();
+    },
+    [indexTemplate, buildTemplateObject, onSave, clearSaveError]
+  );
+
+  const getSimulateTemplate = useCallback(async () => {
+    if (!wizardContent) {
+      return;
+    }
+    const isValid = await wizardContent.validate();
+    if (!isValid) {
+      return;
+    }
+    const wizardData = wizardContent.getData();
+    const template = buildTemplateObject(indexTemplate)(wizardData);
+    return template;
+  }, [buildTemplateObject, indexTemplate, wizardContent]);
+
+  const onSimulateTemplateFiltersChange = useCallback((filters: SimulateTemplateFilters) => {
+    simulateTemplateFilters.current = filters;
+  }, []);
+
+  const showPreviewFlyout = () => {
+    addContentToGlobalFlyout<SimulateTemplateProps>({
+      id: 'simulateTemplate',
+      Component: SimulateTemplateFlyoutContent,
+      props: {
+        getTemplate: getSimulateTemplate,
+        onClose: closeFlyout,
+        filters: simulateTemplateFilters.current,
+        onFiltersChange: onSimulateTemplateFiltersChange,
+      },
+      flyoutProps: simulateTemplateFlyoutProps,
+    });
+  };
+
+  const getRightContentWizardNav = (stepId: WizardSection) => {
+    if (isLegacy) {
+      return null;
+    }
+
+    // Don't show "Preview template" button on logistics and review steps
+    if (stepId === 'logistics' || stepId === 'review') {
+      return null;
+    }
+
+    return (
+      <EuiButton size="s" onClick={showPreviewFlyout}>
+        <FormattedMessage
+          id="xpack.idxMgmt.templateForm.previewIndexTemplateButtonLabel"
+          defaultMessage="Preview index template"
+        />
+      </EuiButton>
+    );
+  };
 
   return (
-    <Fragment>
-      <TemplateSteps
-        currentStep={currentStep}
-        updateCurrentStep={updateCurrentStep}
-        isCurrentStepValid={isStepValid}
-      />
+    <>
+      {/* Form header */}
+      {title}
 
       <EuiSpacer size="l" />
 
-      {saveError ? (
-        <Fragment>
-          <SectionError
-            title={
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.saveTemplateError"
-                defaultMessage="Unable to create template"
-              />
-            }
-            error={saveError}
-            data-test-subj="saveTemplateError"
+      <FormWizard<WizardContent, WizardSection>
+        defaultValue={wizardDefaultValue}
+        onSave={onSaveTemplate}
+        isEditing={isEditing}
+        isSaving={isSaving}
+        apiError={apiError}
+        texts={i18nTexts}
+        onChange={onWizardContentChange}
+        rightContentNav={getRightContentWizardNav}
+      >
+        <FormWizardStep
+          id={wizardSections.logistics.id}
+          label={wizardSections.logistics.label}
+          isRequired
+        >
+          <StepLogisticsContainer
+            isEditing={isEditing}
+            isLegacy={indexTemplate._kbnMeta.isLegacy}
           />
-          <EuiSpacer size="m" />
-        </Fragment>
-      ) : null}
+        </FormWizardStep>
 
-      <EuiForm data-test-subj="templateForm">
-        <CurrentStepComponent
-          key={currentStep}
-          template={template.current}
-          setDataGetter={setStepDataGetter}
-          updateCurrentStep={updateCurrentStep}
-          onStepValidityChange={onStepValidityChange}
-          isEditing={isEditing}
-        />
-        <EuiSpacer size="l" />
+        {indexTemplate._kbnMeta.isLegacy !== true && (
+          <FormWizardStep id={wizardSections.components.id} label={wizardSections.components.label}>
+            <StepComponentContainer />
+          </FormWizardStep>
+        )}
 
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              {currentStep > 1 ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="arrowLeft" onClick={onBack} data-test-subj="backButton">
-                    <FormattedMessage
-                      id="xpack.idxMgmt.templateForm.backButtonLabel"
-                      defaultMessage="Back"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ) : null}
+        <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
+          <StepSettingsContainer esDocsBase={documentationService.getEsDocsBase()} />
+        </FormWizardStep>
 
-              {currentStep < lastStep ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    iconType="arrowRight"
-                    onClick={onNext}
-                    iconSide="right"
-                    disabled={isStepValid === false}
-                    data-test-subj="nextButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.idxMgmt.templateForm.nextButtonLabel"
-                      defaultMessage="Next"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
+        <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
+          <StepMappingsContainer esDocsBase={documentationService.getEsDocsBase()} />
+        </FormWizardStep>
 
-              {currentStep === lastStep ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color="secondary"
-                    iconType="check"
-                    onClick={onSave.bind(
-                      null,
-                      stripEmptyFields(template.current!, {
-                        types: ['string'],
-                      }) as TemplateDeserialized
-                    )}
-                    data-test-subj="submitButton"
-                    isLoading={isSaving}
-                  >
-                    {isSaving ? (
-                      <FormattedMessage
-                        id="xpack.idxMgmt.templateForm.savingButtonLabel"
-                        defaultMessage="Saving..."
-                      />
-                    ) : (
-                      saveButtonLabel
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiForm>
+        <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
+          <StepAliasesContainer esDocsBase={documentationService.getEsDocsBase()} />
+        </FormWizardStep>
 
-      <EuiSpacer size="m" />
-    </Fragment>
+        <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
+          <StepReviewContainer getTemplateData={buildTemplateObject(indexTemplate)} />
+        </FormWizardStep>
+      </FormWizard>
+    </>
   );
 };

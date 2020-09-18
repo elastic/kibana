@@ -64,7 +64,7 @@ The transaction overview page is customized for the JavaScript RUM Agent.
 This page highlights things like *page load times*, *transactions per minute*, and even the *average page load duration distribution by country*.
 
 [role="screenshot"]
-image::apm/images/apm-geo-ui.jpg[average page load duration distribution]
+image::apm/images/apm-geo-ui.png[average page load duration distribution]
 
 This data is available due to the geo-ip and user agent pipelines being enabled by default,
 which allows for the capture of geo-location and user agent data.

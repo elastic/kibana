@@ -18,9 +18,10 @@
  */
 
 import { Subject } from 'rxjs';
-import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CollectorOptions } from '../../../../../plugins/usage_collection/server/collector/collector';
+import {
+  CollectorOptions,
+  createUsageCollectionSetupMock,
+} from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerOpsStatsCollector } from './';
 import { OpsMetrics } from '../../../../../core/server';
@@ -28,15 +29,17 @@ import { OpsMetrics } from '../../../../../core/server';
 describe('telemetry_ops_stats', () => {
   let collector: CollectorOptions;
 
-  const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
-    makeStatsCollector: jest.fn().mockImplementation((config) => (collector = config)),
-    registerCollector: jest.fn(),
-  } as any;
+  const usageCollectionMock = createUsageCollectionSetupMock();
+  usageCollectionMock.makeStatsCollector.mockImplementation((config) => {
+    collector = config;
+    return createUsageCollectionSetupMock().makeStatsCollector(config);
+  });
 
   const metrics$ = new Subject<OpsMetrics>();
   const callCluster = jest.fn();
 
   const metric: OpsMetrics = {
+    collected_at: new Date('2020-01-01 01:00:00'),
     process: {
       memory: {
         heap: {

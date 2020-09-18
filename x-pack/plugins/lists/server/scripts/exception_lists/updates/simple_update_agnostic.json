@@ -10,7 +10,8 @@
     {
       "field": "event.category",
       "operator": "included",
-      "match_any": ["process", "malware"]
+      "type": "match_any",
+      "value": ["process", "malware"]
     }
   ]
 }

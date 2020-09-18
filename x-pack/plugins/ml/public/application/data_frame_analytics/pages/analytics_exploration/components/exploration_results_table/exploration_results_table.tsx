@@ -28,13 +28,17 @@ import {
   INDEX_STATUS,
   SEARCH_SIZE,
   defaultSearchQuery,
+  getAnalysisType,
 } from '../../../../common';
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { ExplorationTitle } from '../exploration_title';
 import { ExplorationQueryBar } from '../exploration_query_bar';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { useExplorationResults } from './use_exploration_results';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -55,27 +59,55 @@ interface Props {
   indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DATA_FRAME_TASK_STATE;
+  needsDestIndexPattern: boolean;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
   title: string;
 }
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
-  ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery, title }) => {
+  ({
+    indexPattern,
+    jobConfig,
+    jobStatus,
+    needsDestIndexPattern,
+    setEvaluateSearchQuery,
+    title,
+  }) => {
+    const {
+      services: {
+        mlServices: { mlApiServices },
+      },
+    } = useMlKibana();
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
 
     useEffect(() => {
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
 
-    const classificationData = useExplorationResults(indexPattern, jobConfig, searchQuery);
-    const docFieldsCount = classificationData.columns.length;
-    const { columns, errorMessage, status, tableItems, visibleColumns } = classificationData;
+    const analysisType = getAnalysisType(jobConfig.analysis);
+
+    const classificationData = useExplorationResults(
+      indexPattern,
+      jobConfig,
+      searchQuery,
+      getToastNotifications(),
+      mlApiServices
+    );
+
+    const docFieldsCount = classificationData.columnsWithCharts.length;
+    const {
+      columnsWithCharts,
+      errorMessage,
+      status,
+      tableItems,
+      visibleColumns,
+    } = classificationData;
 
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
     // if it's a searchBar syntax error leave the table visible so they can try again
-    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
+    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
       return (
         <EuiPanel grow={false}>
           <EuiFlexGroup gutterSize="s">
@@ -107,6 +139,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
         id="mlDataFrameAnalyticsTableResultsPanel"
         data-test-subj="mlDFAnalyticsExplorationTablePanel"
       >
+        {needsDestIndexPattern && <IndexPatternPrompt destIndex={jobConfig.dest.index} />}
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
@@ -139,7 +172,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
+        {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) && (
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
               <EuiSpacer size="s" />
@@ -162,6 +195,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
                 {...classificationData}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}
+                analysisType={(analysisType as unknown) as DataFrameAnalysisConfigType}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

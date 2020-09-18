@@ -77,11 +77,11 @@ export function handleResponse(resp, min, max, shardStats) {
   });
 }
 
-export function getIndices(req, esIndexPattern, showSystemIndices = false, shardStats) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
-
-  const { min, max } = req.payload.timeRange;
-
+export function buildGetIndicesQuery(
+  esIndexPattern,
+  clusterUuid,
+  { start, end, size, showSystemIndices = false }
+) {
   const filters = [];
   if (!showSystemIndices) {
     filters.push({
@@ -90,14 +90,11 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
       },
     });
   }
-
-  const clusterUuid = req.params.clusterUuid;
   const metricFields = ElasticsearchMetric.getMetricFields();
-  const config = req.server.config();
-  const params = {
+
+  return {
     index: esIndexPattern,
-    // TODO: composite aggregation
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size,
     ignoreUnavailable: true,
     filterPath: [
       // only filter path can filter for inner_hits
@@ -118,8 +115,8 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
     body: {
       query: createQuery({
         type: 'index_stats',
-        start: min,
-        end: max,
+        start,
+        end,
         clusterUuid,
         metric: metricFields,
         filters,
@@ -132,12 +129,27 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
           sort: [{ timestamp: 'asc' }],
         },
       },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
   };
+}
+
+export function getIndices(req, esIndexPattern, showSystemIndices = false, shardStats) {
+  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
+
+  const { min: start, max: end } = req.payload.timeRange;
+
+  const clusterUuid = req.params.clusterUuid;
+  const config = req.server.config();
+  const params = buildGetIndicesQuery(esIndexPattern, clusterUuid, {
+    start,
+    end,
+    showSystemIndices,
+    size: config.get('monitoring.ui.max_bucket_size'),
+  });
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((resp) =>
-    handleResponse(resp, min, max, shardStats)
+    handleResponse(resp, start, end, shardStats)
   );
 }

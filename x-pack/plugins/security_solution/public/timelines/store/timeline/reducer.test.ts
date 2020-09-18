@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { cloneDeep } from 'lodash/fp';
 
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import {
   IS_OPERATOR,
   DataProvider,
+  DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -35,6 +37,7 @@ import {
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
   updateTimelineProviderExcluded,
+  updateTimelineProviderType,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineShowTimeline,
@@ -45,6 +48,8 @@ import {
 import { ColumnHeaderOptions } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
+
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
 const timelineByIdMock: TimelineById = {
   foo: {
@@ -68,6 +73,7 @@ const timelineByIdMock: TimelineById = {
     description: '',
     deletedEventIds: [],
     eventIdToNoteIds: {},
+    excludedRowRendererIds: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
     id: 'foo',
@@ -89,13 +95,12 @@ const timelineByIdMock: TimelineById = {
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
     dateRange: {
-      start: 0,
-      end: 0,
+      start: '2020-07-07T08:20:18.966Z',
+      end: '2020-07-08T08:20:18.966Z',
     },
     selectedEventIds: {},
     show: true,
     showCheckboxes: false,
-    showRowRenderers: true,
     sort: {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
@@ -104,6 +109,14 @@ const timelineByIdMock: TimelineById = {
     width: DEFAULT_TIMELINE_WIDTH,
     isSaving: false,
     version: null,
+  },
+};
+
+const timelineByIdTemplateMock: TimelineById = {
+  ...timelineByIdMock,
+  foo: {
+    ...timelineByIdMock.foo,
+    timelineType: TimelineType.template,
   },
 };
 
@@ -139,6 +152,7 @@ describe('Timeline', () => {
         id: 'bar',
         columns: defaultHeaders,
         timelineById: timelineByIdMock,
+        timelineType: TimelineType.default,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
@@ -148,6 +162,7 @@ describe('Timeline', () => {
         id: 'bar',
         columns: timelineDefaults.columns,
         timelineById: timelineByIdMock,
+        timelineType: TimelineType.default,
       });
       expect(update).toEqual({
         foo: timelineByIdMock.foo,
@@ -163,6 +178,7 @@ describe('Timeline', () => {
         id: 'bar',
         columns: defaultHeaders,
         timelineById: timelineByIdMock,
+        timelineType: TimelineType.default,
       });
       expect(update).toEqual({
         foo: timelineByIdMock.foo,
@@ -790,6 +806,7 @@ describe('Timeline', () => {
       };
       // temporary, we will have to decouple DataProvider & DataProvidersAnd
       // that's bigger a refactor than just fixing a bug
+      // @ts-expect-error
       delete andProviderToAdd.and;
       const update = addTimelineProvider({
         id: 'foo',
@@ -996,8 +1013,8 @@ describe('Timeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        start: 23,
-        end: 33,
+        start: '2020-07-07T08:20:18.966Z',
+        end: '2020-07-08T08:20:18.966Z',
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
@@ -1006,16 +1023,16 @@ describe('Timeline', () => {
     test('should update the timeline range', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        start: 23,
-        end: 33,
+        start: '2020-07-07T08:20:18.966Z',
+        end: '2020-07-08T08:20:18.966Z',
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(
         set(
           'foo.dateRange',
           {
-            start: 23,
-            end: 33,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           timelineByIdMock
         )
@@ -1106,6 +1123,7 @@ describe('Timeline', () => {
           deletedEventIds: [],
           description: '',
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1121,12 +1139,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1202,6 +1219,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1217,12 +1235,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1408,6 +1425,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1423,12 +1441,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1504,6 +1521,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1519,12 +1537,216 @@ describe('Timeline', () => {
           templateTimelineVersion: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
+          showCheckboxes: false,
+          sort: {
+            columnId: '@timestamp',
+            sortDirection: Direction.desc,
+          },
+          status: TimelineStatus.active,
+          pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
+          itemsPerPage: 25,
+          itemsPerPageOptions: [10, 25, 50],
+          width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
+        },
+      };
+      expect(update).toEqual(expected);
+    });
+  });
+
+  describe('#updateTimelineProviderType', () => {
+    test('should return the same reference if run on timelineType default', () => {
+      const update = updateTimelineProviderType({
+        id: 'foo',
+        providerId: '123',
+        type: DataProviderType.template, // value we are updating from default to template
+        timelineById: timelineByIdMock,
+      });
+      expect(update).toBe(timelineByIdMock);
+    });
+
+    test('should return a new reference and not the same reference', () => {
+      const update = updateTimelineProviderType({
+        id: 'foo',
+        providerId: '123',
+        type: DataProviderType.template, // value we are updating from default to template
+        timelineById: timelineByIdTemplateMock,
+      });
+      expect(update).not.toBe(timelineByIdTemplateMock);
+    });
+
+    test('should return a new reference for data provider and not the same reference of data provider', () => {
+      const update = updateTimelineProviderType({
+        id: 'foo',
+        providerId: '123',
+        type: DataProviderType.template, // value we are updating from default to template
+        timelineById: timelineByIdTemplateMock,
+      });
+      expect(update.foo.dataProviders).not.toBe(timelineByIdTemplateMock.foo.dataProviders);
+    });
+
+    test('should update the timeline provider type from default to template', () => {
+      const update = updateTimelineProviderType({
+        id: 'foo',
+        providerId: '123',
+        type: DataProviderType.template, // value we are updating from default to template
+        timelineById: timelineByIdTemplateMock,
+      });
+      const expected: TimelineById = {
+        foo: {
+          id: 'foo',
+          savedObjectId: null,
+          columns: [],
+          dataProviders: [
+            {
+              and: [],
+              id: '123',
+              name: '', // This value changed
+              enabled: true,
+              excluded: false,
+              kqlQuery: '',
+              type: DataProviderType.template, // value we are updating from default to template
+              queryMatch: {
+                field: '',
+                value: '{}', // This value changed
+                operator: IS_OPERATOR,
+              },
+            },
+          ],
+          description: '',
+          deletedEventIds: [],
+          eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
+          highlightedDropAndProviderId: '',
+          historyIds: [],
+          isFavorite: false,
+          isLive: false,
+          isSelectAllChecked: false,
+          isLoading: false,
+          kqlMode: 'filter',
+          kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
+          title: '',
+          timelineType: TimelineType.template,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
+          noteIds: [],
+          dateRange: {
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
+          },
+          selectedEventIds: {},
+          show: true,
+          showCheckboxes: false,
+          sort: {
+            columnId: '@timestamp',
+            sortDirection: Direction.desc,
+          },
+          status: TimelineStatus.active,
+          pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
+          itemsPerPage: 25,
+          itemsPerPageOptions: [10, 25, 50],
+          width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
+        },
+      };
+      expect(update).toEqual(expected);
+    });
+
+    test('should update only one data provider and not two data providers', () => {
+      const multiDataProvider = timelineByIdTemplateMock.foo.dataProviders.concat({
+        and: [],
+        id: '456',
+        name: 'data provider 1',
+        enabled: true,
+        excluded: false,
+        type: DataProviderType.template,
+        kqlQuery: '',
+        queryMatch: {
+          field: '',
+          value: '',
+          operator: IS_OPERATOR,
+        },
+      });
+      const multiDataProviderMock = set(
+        'foo.dataProviders',
+        multiDataProvider,
+        timelineByIdTemplateMock
+      );
+      const update = updateTimelineProviderType({
+        id: 'foo',
+        providerId: '123',
+        type: DataProviderType.template, // value we are updating from default to template
+        timelineById: multiDataProviderMock,
+      });
+      const expected: TimelineById = {
+        foo: {
+          id: 'foo',
+          savedObjectId: null,
+          columns: [],
+          dataProviders: [
+            {
+              and: [],
+              id: '123',
+              name: '',
+              enabled: true,
+              excluded: false,
+              type: DataProviderType.template, // value we are updating from default to template
+              kqlQuery: '',
+              queryMatch: {
+                field: '',
+                value: '{}',
+                operator: IS_OPERATOR,
+              },
+            },
+            {
+              and: [],
+              id: '456',
+              name: 'data provider 1',
+              enabled: true,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: '',
+                value: '',
+                operator: IS_OPERATOR,
+              },
+              type: DataProviderType.template,
+            },
+          ],
+          description: '',
+          deletedEventIds: [],
+          eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
+          highlightedDropAndProviderId: '',
+          historyIds: [],
+          isFavorite: false,
+          isLive: false,
+          isSelectAllChecked: false,
+          isLoading: false,
+          kqlMode: 'filter',
+          kqlQuery: { filterQuery: null, filterQueryDraft: null },
+          loadingEventIds: [],
+          title: '',
+          timelineType: TimelineType.template,
+          templateTimelineId: null,
+          templateTimelineVersion: null,
+          noteIds: [],
+          dateRange: {
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
+          },
+          selectedEventIds: {},
+          show: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1699,6 +1921,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1714,12 +1937,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1777,6 +1999,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1794,12 +2017,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1881,6 +2103,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           id: 'foo',
@@ -1898,12 +2121,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',

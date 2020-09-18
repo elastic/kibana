@@ -20,27 +20,16 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   describe('Kibana browser back navigation should work', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
-      if (browser.isInternetExplorer) {
-        await kibanaServer.uiSettings.replace({ 'state:storeInSessionStorage': false });
-      }
-    });
-
-    after(async () => {
-      if (browser.isInternetExplorer) {
-        await kibanaServer.uiSettings.replace({ 'state:storeInSessionStorage': true });
-      }
     });
 
     it('detect navigate back issues', async () => {

@@ -5,10 +5,11 @@
  */
 
 import { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
+import { featuresPluginMock } from '../../../features/server/mocks';
 import { initAppAuthorization } from './app_authorization';
 
 import {
-  loggingServiceMock,
+  loggingSystemMock,
   coreMock,
   httpServerMock,
   httpServiceMock,
@@ -16,9 +17,11 @@ import {
 import { authorizationMock } from './index.mock';
 
 const createFeaturesSetupContractMock = (): FeaturesSetupContract => {
-  return {
-    getFeatures: () => [{ id: 'foo', name: 'Foo', app: ['foo'], privileges: {} }],
-  } as FeaturesSetupContract;
+  const mock = featuresPluginMock.createSetup();
+  mock.getKibanaFeatures.mockReturnValue([
+    { id: 'foo', name: 'Foo', app: ['foo'], privileges: {} } as any,
+  ]);
+  return mock;
 };
 
 describe('initAppAuthorization', () => {
@@ -27,7 +30,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       authorizationMock.create(),
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -49,7 +52,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -74,7 +77,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -100,7 +103,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -129,7 +132,7 @@ describe('initAppAuthorization', () => {
 
     expect(mockResponse.notFound).not.toHaveBeenCalled();
     expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
-    expect(mockCheckPrivileges).toHaveBeenCalledWith(mockAuthz.actions.app.get('foo'));
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({ kibana: mockAuthz.actions.app.get('foo') });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
@@ -140,7 +143,7 @@ describe('initAppAuthorization', () => {
     initAppAuthorization(
       mockHTTPSetup,
       mockAuthz,
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       createFeaturesSetupContractMock()
     );
 
@@ -169,7 +172,7 @@ describe('initAppAuthorization', () => {
 
     expect(mockResponse.notFound).toHaveBeenCalledTimes(1);
     expect(mockPostAuthToolkit.next).not.toHaveBeenCalled();
-    expect(mockCheckPrivileges).toHaveBeenCalledWith(mockAuthz.actions.app.get('foo'));
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({ kibana: mockAuthz.actions.app.get('foo') });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 });

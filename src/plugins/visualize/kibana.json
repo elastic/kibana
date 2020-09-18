@@ -5,11 +5,19 @@
   "ui": true,
   "requiredPlugins": [
     "data",
-    "kibanaLegacy",
+    "urlForwarding",
     "navigation",
     "savedObjects",
     "visualizations",
-    "dashboard"
+    "embeddable",
+    "dashboard",
+    "uiActions"
   ],
-  "optionalPlugins": ["home", "share"]
+  "optionalPlugins": ["home", "share"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "home",
+    "discover"
+  ]
 }

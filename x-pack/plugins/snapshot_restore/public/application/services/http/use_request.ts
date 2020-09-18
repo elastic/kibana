@@ -18,6 +18,6 @@ export const sendRequest = (config: SendRequestConfig) => {
   return _sendRequest<any, CustomError>(httpService.httpClient, config);
 };
 
-export const useRequest = (config: UseRequestConfig) => {
-  return _useRequest<any, CustomError>(httpService.httpClient, config);
+export const useRequest = <D = any>(config: UseRequestConfig) => {
+  return _useRequest<D, CustomError>(httpService.httpClient, config);
 };

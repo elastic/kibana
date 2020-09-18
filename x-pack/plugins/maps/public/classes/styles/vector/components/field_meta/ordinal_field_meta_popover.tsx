@@ -11,7 +11,6 @@ import { EuiFormRow, EuiRange, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
-import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 
@@ -38,21 +37,23 @@ function getIsEnableToggleLabel(styleName: string) {
 }
 
 type Props = {
-  styleProperty: IDynamicStyleProperty;
+  fieldMetaOptions: FieldMetaOptions;
+  styleName: VECTOR_STYLES;
   onChange: (fieldMetaOptions: FieldMetaOptions) => void;
+  switchDisabled: boolean;
 };
 
 export function OrdinalFieldMetaPopover(props: Props) {
   const onIsEnabledChange = (event: EuiSwitchEvent) => {
     props.onChange({
-      ...props.styleProperty.getFieldMetaOptions(),
+      ...props.fieldMetaOptions,
       isEnabled: event.target.checked,
     });
   };
 
   const onSigmaChange = (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
     props.onChange({
-      ...props.styleProperty.getFieldMetaOptions(),
+      ...props.fieldMetaOptions,
       sigma: parseInt(event.currentTarget.value, 10),
     });
   };
@@ -62,10 +63,11 @@ export function OrdinalFieldMetaPopover(props: Props) {
       <Fragment>
         <EuiFormRow display="columnCompressedSwitch">
           <EuiSwitch
-            label={getIsEnableToggleLabel(props.styleProperty.getStyleName())}
-            checked={props.styleProperty.getFieldMetaOptions().isEnabled}
+            label={getIsEnableToggleLabel(props.styleName)}
+            checked={props.fieldMetaOptions.isEnabled}
             onChange={onIsEnabledChange}
             compressed
+            disabled={props.switchDisabled}
           />
         </EuiFormRow>
 
@@ -79,9 +81,9 @@ export function OrdinalFieldMetaPopover(props: Props) {
             min={1}
             max={5}
             step={0.25}
-            value={_.get(props.styleProperty.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA)}
+            value={_.get(props.fieldMetaOptions, 'sigma', DEFAULT_SIGMA)}
             onChange={onSigmaChange}
-            disabled={!props.styleProperty.getFieldMetaOptions().isEnabled}
+            disabled={!props.fieldMetaOptions.isEnabled}
             showTicks
             tickInterval={1}
             compressed

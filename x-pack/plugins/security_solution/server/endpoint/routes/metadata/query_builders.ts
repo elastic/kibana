@@ -5,47 +5,39 @@
  */
 import { KibanaRequest } from 'kibana/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
-import { EndpointAppContext } from '../../types';
+import { EndpointAppContext, MetadataQueryStrategy } from '../../types';
 
-export const kibanaRequestToMetadataListESQuery = async (
+export interface QueryBuilderOptions {
+  unenrolledAgentIds?: string[];
+  statusAgentIDs?: string[];
+}
+
+export async function kibanaRequestToMetadataListESQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext,
-  index: string
+  metadataQueryStrategy: MetadataQueryStrategy,
+  queryBuilderOptions?: QueryBuilderOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<Record<string, any>> => {
+): Promise<Record<string, any>> {
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
+
   return {
     body: {
-      query: buildQueryBody(request),
-      collapse: {
-        field: 'host.id',
-        inner_hits: {
-          name: 'most_recent',
-          size: 1,
-          sort: [{ 'event.created': 'desc' }],
-        },
-      },
-      aggs: {
-        total: {
-          cardinality: {
-            field: 'host.id',
-          },
-        },
-      },
-      sort: [
-        {
-          'event.created': {
-            order: 'desc',
-          },
-        },
-      ],
+      query: buildQueryBody(
+        request,
+        metadataQueryStrategy,
+        queryBuilderOptions?.unenrolledAgentIds!,
+        queryBuilderOptions?.statusAgentIDs!
+      ),
+      ...metadataQueryStrategy.extraBodyProperties,
+      sort: metadataQueryStrategy.sortProperty,
     },
     from: pagingProperties.pageIndex * pagingProperties.pageSize,
     size: pagingProperties.pageSize,
-    index,
+    index: metadataQueryStrategy.index,
   };
-};
+}
 
 async function getPagingProperties(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,33 +60,75 @@ async function getPagingProperties(
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, any> {
-  if (typeof request?.body?.filter === 'string') {
-    return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(request.body.filter));
-  }
-  return {
-    match_all: {},
+function buildQueryBody(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  request: KibanaRequest<any, any, any>,
+  metadataQueryStrategy: MetadataQueryStrategy,
+  unerolledAgentIds: string[] | undefined,
+  statusAgentIDs: string[] | undefined
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Record<string, any> {
+  const filterUnenrolledAgents =
+    unerolledAgentIds && unerolledAgentIds.length > 0
+      ? {
+          must_not: {
+            terms: {
+              [metadataQueryStrategy.elasticAgentIdProperty]: unerolledAgentIds,
+            },
+          },
+        }
+      : null;
+  const filterStatusAgents = statusAgentIDs
+    ? {
+        must: {
+          terms: {
+            [metadataQueryStrategy.elasticAgentIdProperty]: statusAgentIDs,
+          },
+        },
+      }
+    : null;
+
+  const idFilter = {
+    bool: {
+      ...filterUnenrolledAgents,
+      ...filterStatusAgents,
+    },
   };
+
+  if (request?.body?.filters?.kql) {
+    const kqlQuery = esKuery.toElasticsearchQuery(
+      esKuery.fromKueryExpression(request.body.filters.kql)
+    );
+    const q = [];
+    if (filterUnenrolledAgents || filterStatusAgents) {
+      q.push(idFilter);
+    }
+    q.push({ ...kqlQuery });
+    return {
+      bool: { must: q },
+    };
+  }
+  return filterUnenrolledAgents || filterStatusAgents
+    ? idFilter
+    : {
+        match_all: {},
+      };
 }
 
-export function getESQueryHostMetadataByID(hostID: string, index: string) {
+export function getESQueryHostMetadataByID(
+  hostID: string,
+  metadataQueryStrategy: MetadataQueryStrategy
+) {
   return {
     body: {
       query: {
         match: {
-          'host.id': hostID,
+          [metadataQueryStrategy.hostIdProperty]: hostID,
         },
       },
-      sort: [
-        {
-          'event.created': {
-            order: 'desc',
-          },
-        },
-      ],
+      sort: metadataQueryStrategy.sortProperty,
       size: 1,
     },
-    index,
+    index: metadataQueryStrategy.index,
   };
 }

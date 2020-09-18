@@ -6,7 +6,7 @@
 
 jest.mock('crypto', () => ({ randomBytes: jest.fn() }));
 
-import { loggingServiceMock } from '../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
 import { createConfig, ConfigSchema } from './config';
 
 describe('config schema', () => {
@@ -50,6 +50,7 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "secureCookies": false,
         "session": Object {
+          "cleanupInterval": "PT1H",
           "idleTimeout": null,
           "lifespan": null,
         },
@@ -95,6 +96,7 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "secureCookies": false,
         "session": Object {
+          "cleanupInterval": "PT1H",
           "idleTimeout": null,
           "lifespan": null,
         },
@@ -139,6 +141,7 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "secureCookies": false,
         "session": Object {
+          "cleanupInterval": "PT1H",
           "idleTimeout": null,
           "lifespan": null,
         },
@@ -272,9 +275,6 @@ describe('config schema', () => {
             "saml",
           ],
           "saml": Object {
-            "maxRedirectURLSize": ByteSizeValue {
-              "valueInBytes": 2048,
-            },
             "realm": "realm-1",
           },
           "selector": Object {},
@@ -294,13 +294,10 @@ describe('config schema', () => {
           authc: { providers: ['saml'], saml: { realm: 'realm-1' } },
         }).authc.saml
       ).toMatchInlineSnapshot(`
-                        Object {
-                          "maxRedirectURLSize": ByteSizeValue {
-                            "valueInBytes": 2048,
-                          },
-                          "realm": "realm-1",
-                        }
-                  `);
+        Object {
+          "realm": "realm-1",
+        }
+      `);
 
       expect(
         ConfigSchema.validate({
@@ -655,6 +652,7 @@ describe('config schema', () => {
                 saml: {
                   saml1: { order: 0, realm: 'saml1' },
                   saml2: { order: 1, realm: 'saml2', maxRedirectURLSize: '1kb' },
+                  saml3: { order: 2, realm: 'saml3', useRelayStateDeepLink: true },
                 },
               },
             },
@@ -664,12 +662,10 @@ describe('config schema', () => {
             "saml": Object {
               "saml1": Object {
                 "enabled": true,
-                "maxRedirectURLSize": ByteSizeValue {
-                  "valueInBytes": 2048,
-                },
                 "order": 0,
                 "realm": "saml1",
                 "showInSelector": true,
+                "useRelayStateDeepLink": false,
               },
               "saml2": Object {
                 "enabled": true,
@@ -679,6 +675,14 @@ describe('config schema', () => {
                 "order": 1,
                 "realm": "saml2",
                 "showInSelector": true,
+                "useRelayStateDeepLink": false,
+              },
+              "saml3": Object {
+                "enabled": true,
+                "order": 2,
+                "realm": "saml3",
+                "showInSelector": true,
+                "useRelayStateDeepLink": true,
               },
             },
           }
@@ -761,34 +765,38 @@ describe('config schema', () => {
           "saml": Object {
             "basic1": Object {
               "enabled": false,
-              "maxRedirectURLSize": ByteSizeValue {
-                "valueInBytes": 2048,
-              },
               "order": 3,
               "realm": "saml3",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
             "saml1": Object {
               "enabled": true,
-              "maxRedirectURLSize": ByteSizeValue {
-                "valueInBytes": 2048,
-              },
               "order": 1,
               "realm": "saml1",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
             "saml2": Object {
               "enabled": true,
-              "maxRedirectURLSize": ByteSizeValue {
-                "valueInBytes": 2048,
-              },
               "order": 2,
               "realm": "saml2",
               "showInSelector": true,
+              "useRelayStateDeepLink": false,
             },
           },
         }
       `);
+    });
+  });
+
+  describe('session', () => {
+    it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
+      expect(() =>
+        ConfigSchema.validate({ session: { cleanupInterval: '9s' } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[session.cleanupInterval]: the value must be greater or equal to 10 seconds."`
+      );
     });
   });
 });
@@ -798,13 +806,13 @@ describe('createConfig()', () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({}, { dist: true }), logger, {
       isTLSEnabled: true,
     });
     expect(config.encryptionKey).toEqual('ab'.repeat(16));
 
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
@@ -814,11 +822,11 @@ describe('createConfig()', () => {
   });
 
   it('should log a warning if SSL is not configured', async () => {
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: false });
     expect(config.secureCookies).toEqual(false);
 
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Session cookies will be transmitted over insecure connections. This is not recommended.",
@@ -828,13 +836,13 @@ describe('createConfig()', () => {
   });
 
   it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({ secureCookies: true }), logger, {
       isTLSEnabled: false,
     });
     expect(config.secureCookies).toEqual(true);
 
-    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
@@ -844,15 +852,15 @@ describe('createConfig()', () => {
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: true });
     expect(config.secureCookies).toEqual(true);
 
-    expect(loggingServiceMock.collect(logger).warn).toEqual([]);
+    expect(loggingSystemMock.collect(logger).warn).toEqual([]);
   });
 
   it('transforms legacy `authc.providers` into new format', () => {
-    const logger = loggingServiceMock.create().get();
+    const logger = loggingSystemMock.create().get();
 
     expect(
       createConfig(
@@ -885,9 +893,6 @@ describe('createConfig()', () => {
           "saml": Object {
             "saml": Object {
               "enabled": true,
-              "maxRedirectURLSize": ByteSizeValue {
-                "valueInBytes": 2048,
-              },
               "order": 0,
               "realm": "saml-realm",
               "showInSelector": true,
@@ -899,11 +904,13 @@ describe('createConfig()', () => {
         },
         "sortedProviders": Array [
           Object {
+            "hasAccessAgreement": false,
             "name": "saml",
             "order": 0,
             "type": "saml",
           },
           Object {
+            "hasAccessAgreement": false,
             "name": "basic",
             "order": 1,
             "type": "basic",
@@ -919,7 +926,7 @@ describe('createConfig()', () => {
         ConfigSchema.validate({
           authc: { providers: ['saml', 'basic'], saml: { realm: 'saml-realm' } },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.selector.enabled
     ).toBe(false);
@@ -934,7 +941,7 @@ describe('createConfig()', () => {
             saml: { realm: 'saml-realm' },
           },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.selector.enabled
     ).toBe(true);
@@ -954,7 +961,7 @@ describe('createConfig()', () => {
             },
           },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.selector.enabled
     ).toBe(false);
@@ -971,10 +978,67 @@ describe('createConfig()', () => {
             },
           },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.selector.enabled
     ).toBe(true);
+  });
+
+  it('indicates which providers have the access agreement enabled', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 3 } },
+              saml: {
+                saml1: { order: 2, realm: 'saml1', accessAgreement: { message: 'foo' } },
+                saml2: { order: 1, realm: 'saml2' },
+              },
+              oidc: {
+                oidc1: { order: 0, realm: 'oidc1', accessAgreement: { message: 'foo' } },
+                oidc2: { order: 4, realm: 'oidc2' },
+              },
+            },
+          },
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.sortedProviders
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "hasAccessAgreement": true,
+          "name": "oidc1",
+          "order": 0,
+          "type": "oidc",
+        },
+        Object {
+          "hasAccessAgreement": false,
+          "name": "saml2",
+          "order": 1,
+          "type": "saml",
+        },
+        Object {
+          "hasAccessAgreement": true,
+          "name": "saml1",
+          "order": 2,
+          "type": "saml",
+        },
+        Object {
+          "hasAccessAgreement": false,
+          "name": "basic1",
+          "order": 3,
+          "type": "basic",
+        },
+        Object {
+          "hasAccessAgreement": false,
+          "name": "oidc2",
+          "order": 4,
+          "type": "oidc",
+        },
+      ]
+    `);
   });
 
   it('correctly sorts providers based on the `order`', () => {
@@ -989,32 +1053,37 @@ describe('createConfig()', () => {
             },
           },
         }),
-        loggingServiceMock.create().get(),
+        loggingSystemMock.create().get(),
         { isTLSEnabled: true }
       ).authc.sortedProviders
     ).toMatchInlineSnapshot(`
       Array [
         Object {
+          "hasAccessAgreement": false,
           "name": "oidc1",
           "order": 0,
           "type": "oidc",
         },
         Object {
+          "hasAccessAgreement": false,
           "name": "saml2",
           "order": 1,
           "type": "saml",
         },
         Object {
+          "hasAccessAgreement": false,
           "name": "saml1",
           "order": 2,
           "type": "saml",
         },
         Object {
+          "hasAccessAgreement": false,
           "name": "basic1",
           "order": 3,
           "type": "basic",
         },
         Object {
+          "hasAccessAgreement": false,
           "name": "oidc2",
           "order": 4,
           "type": "oidc",

@@ -108,6 +108,7 @@ export const useUpdateCases = (): UseUpdateCases => {
       cancel = true;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dispatchResetIsUpdated = useCallback(() => {
@@ -121,6 +122,7 @@ export const useUpdateCases = (): UseUpdateCases => {
       version: theCase.version,
     }));
     dispatchUpdateCases(updateCasesStatus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return { ...state, updateBulkStatus, dispatchResetIsUpdated };
 };

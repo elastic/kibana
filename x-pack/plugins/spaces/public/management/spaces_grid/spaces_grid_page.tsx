@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
-import { Feature, FeaturesPluginStart } from '../../../../features/public';
+import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
@@ -46,7 +46,7 @@ interface Props {
 
 interface State {
   spaces: Space[];
-  features: Feature[];
+  features: KibanaFeature[];
   loading: boolean;
   showConfirmDeleteModal: boolean;
   selectedSpace: Space | null;
@@ -140,7 +140,11 @@ export class SpacesGridPage extends Component<Props, State> {
 
   public getPrimaryActionButton() {
     return (
-      <EuiButton fill {...reactRouterNavigate(this.props.history, '/create')}>
+      <EuiButton
+        fill
+        {...reactRouterNavigate(this.props.history, '/create')}
+        data-test-subj="createSpace"
+      >
         <FormattedMessage
           id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
           defaultMessage="Create a space"
@@ -334,6 +338,7 @@ export class SpacesGridPage extends Component<Props, State> {
           {
             render: (record: Space) => (
               <EuiButtonIcon
+                data-test-subj={`${record.name}-editSpace`}
                 aria-label={i18n.translate(
                   'xpack.spaces.management.spacesGridPage.editSpaceActionName',
                   {
@@ -351,6 +356,7 @@ export class SpacesGridPage extends Component<Props, State> {
             available: (record: Space) => !isReservedSpace(record),
             render: (record: Space) => (
               <EuiButtonIcon
+                data-test-subj={`${record.name}-deleteSpace`}
                 aria-label={i18n.translate(
                   'xpack.spaces.management.spacesGridPage.deleteActionName',
                   {

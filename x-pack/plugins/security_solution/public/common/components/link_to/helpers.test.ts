@@ -14,6 +14,6 @@ describe('appendSearch', () => {
     expect(appendSearch(undefined)).toEqual('');
   });
   test('should return parameter if  parameter is defined', () => {
-    expect(appendSearch('helloWorld')).toEqual('helloWorld');
+    expect(appendSearch('helloWorld')).toEqual('?helloWorld');
   });
 });

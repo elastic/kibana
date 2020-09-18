@@ -4,7 +4,7 @@
 
 :beat_default_index_prefix: apm
 :beat_kib_app: APM app
-:annotation_index: `observability-annotations`
+:annotation_index: observability-annotations
 
 ++++
 <titleabbrev>Users and privileges</titleabbrev>
@@ -84,7 +84,7 @@ Here are two examples:
 | Allow the use of the the {beat_kib_app}
 
 | Spaces
-| `Read` or `All` on Dashboards, Visualize, and Discover
+| `Read` or `All` on Dashboards and Discover
 | Allow the user to view, edit, and create dashboards, as well as browse data.
 |====
 
@@ -97,6 +97,54 @@ Here are two examples:
 |`machine_learning_admin`
 |Grants the privileges required to create, update, and view machine learning jobs
 |====
+
+////
+***********************************  ***********************************
+////
+
+[role="xpack"]
+[[apm-app-annotation-user-create]]
+=== APM app annotation user
+
+++++
+<titleabbrev>Create an annotation user</titleabbrev>
+++++
+
+NOTE: By default, the `apm_user` built-in role provides access to Observability annotations.
+You only need to create an annotation user if the default annotation index
+defined in <<apm-settings-kb,`xpack.observability.annotations.index`>> has been customized.
+
+[[apm-app-annotation-user]]
+==== Annotation user
+
+View deployment annotations in the APM app.
+
+. Create a new role, named something like `annotation_user`,
+and assign the following privileges:
++
+[options="header"]
+|====
+|Type | Privilege | Purpose
+
+|Index
+|`read` on +\{ANNOTATION_INDEX\}+^1^
+|Read-only access to the observability annotation index
+
+|Index
+|`view_index_metadata` on +\{ANNOTATION_INDEX\}+^1^
+|Read-only access to observability annotation index metadata
+|====
++
+^1^ +\{ANNOTATION_INDEX\}+ should be the index name you've defined in
+<<apm-settings-kb,`xpack.observability.annotations.index`>>.
+
+. Assign the `annotation_user` created previously, and the built-in roles necessary to create
+a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view annotations in the APM app
+
+[[apm-app-annotation-api]]
+==== Annotation API
+
+See <<apm-app-api-user>>.
 
 ////
 ***********************************  ***********************************

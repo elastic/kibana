@@ -6,45 +6,19 @@
 import Boom from 'boom';
 import { SavedObjectsBulkResponse } from 'kibana/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 
 import {
   Agent,
-  AgentAction,
   AgentActionSOAttributes,
+  BaseAgentActionSOAttributes,
   AgentEvent,
 } from '../../../common/types/models';
 import { AGENT_TYPE_PERMANENT, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { acknowledgeAgentActions } from './acks';
-import { appContextService } from '../app_context';
-import { IngestManagerAppContext } from '../../plugin';
 
 describe('test agent acks services', () => {
   it('should succeed on valid and matched actions', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
-    const mockStartEncryptedSOPlugin = encryptedSavedObjectsMock.createStart();
-    appContextService.start(({
-      encryptedSavedObjects: mockStartEncryptedSOPlugin,
-    } as unknown) as IngestManagerAppContext);
-
-    const [
-      { value: mockStartEncryptedSOClient },
-    ] = mockStartEncryptedSOPlugin.getClient.mock.results;
-
-    mockStartEncryptedSOClient.getDecryptedAsInternalUser.mockReturnValue(
-      Promise.resolve({
-        id: 'action1',
-        references: [],
-        type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-        attributes: {
-          type: 'CONFIG_CHANGE',
-          agent_id: 'id',
-          sent_at: '2020-03-14T19:45:02.620Z',
-          timestamp: '2019-01-04T14:32:03.36764-05:00',
-          created_at: '2020-03-14T19:45:02.620Z',
-        },
-      })
-    );
 
     mockSavedObjectsClient.bulkGet.mockReturnValue(
       Promise.resolve({
@@ -65,7 +39,7 @@ describe('test agent acks services', () => {
       } as SavedObjectsBulkResponse<AgentActionSOAttributes>)
     );
 
-    const agentActions = await acknowledgeAgentActions(
+    await acknowledgeAgentActions(
       mockSavedObjectsClient,
       ({
         id: 'id',
@@ -81,16 +55,110 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(agentActions).toEqual([
+  });
+
+  it('should update config field on the agent if a policy change is acknowledged', async () => {
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
+
+    const actionAttributes = {
+      type: 'CONFIG_CHANGE',
+      policy_id: 'policy1',
+      policy_revision: 4,
+      sent_at: '2020-03-14T19:45:02.620Z',
+      timestamp: '2019-01-04T14:32:03.36764-05:00',
+      created_at: '2020-03-14T19:45:02.620Z',
+      ack_data: JSON.stringify({ packages: ['system'] }),
+    };
+
+    mockSavedObjectsClient.bulkGet.mockReturnValue(
+      Promise.resolve({
+        saved_objects: [
+          {
+            id: 'action2',
+            references: [],
+            type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+            attributes: actionAttributes,
+          },
+        ],
+      } as SavedObjectsBulkResponse<BaseAgentActionSOAttributes>)
+    );
+
+    await acknowledgeAgentActions(
+      mockSavedObjectsClient,
       ({
-        type: 'CONFIG_CHANGE',
-        id: 'action1',
-        agent_id: 'id',
-        sent_at: '2020-03-14T19:45:02.620Z',
-        timestamp: '2019-01-04T14:32:03.36764-05:00',
-        created_at: '2020-03-14T19:45:02.620Z',
-      } as unknown) as AgentAction,
-    ]);
+        id: 'id',
+        type: AGENT_TYPE_PERMANENT,
+        policy_id: 'policy1',
+      } as unknown) as Agent,
+      [
+        {
+          type: 'ACTION_RESULT',
+          subtype: 'CONFIG',
+          timestamp: '2019-01-04T14:32:03.36764-05:00',
+          action_id: 'action2',
+          agent_id: 'id',
+        } as AgentEvent,
+      ]
+    );
+    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
+    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(1);
+    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "packages": Array [
+            "system",
+          ],
+          "policy_revision": 4,
+        },
+        "id": "id",
+        "type": "fleet-agents",
+      }
+    `);
+  });
+
+  it('should not update config field on the agent if a policy change for an old revision is acknowledged', async () => {
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
+
+    mockSavedObjectsClient.bulkGet.mockReturnValue(
+      Promise.resolve({
+        saved_objects: [
+          {
+            id: 'action3',
+            references: [],
+            type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+            attributes: {
+              type: 'CONFIG_CHANGE',
+              sent_at: '2020-03-14T19:45:02.620Z',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              created_at: '2020-03-14T19:45:02.620Z',
+              policy_id: 'policy1',
+              policy_revision: 99,
+            },
+          },
+        ],
+      } as SavedObjectsBulkResponse<BaseAgentActionSOAttributes>)
+    );
+
+    await acknowledgeAgentActions(
+      mockSavedObjectsClient,
+      ({
+        id: 'id',
+        type: AGENT_TYPE_PERMANENT,
+        policy_id: 'policy1',
+        policy_revision: 100,
+      } as unknown) as Agent,
+      [
+        {
+          type: 'ACTION_RESULT',
+          subtype: 'CONFIG',
+          timestamp: '2019-01-04T14:32:03.36764-05:00',
+          action_id: 'action3',
+          agent_id: 'id',
+        } as AgentEvent,
+      ]
+    );
+    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
+    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(0);
   });
 
   it('should fail for actions that cannot be found on agent actions list', async () => {
@@ -99,7 +167,7 @@ describe('test agent acks services', () => {
       Promise.resolve({
         saved_objects: [
           {
-            id: 'action1',
+            id: 'action4',
             error: {
               message: 'Not found',
               statusCode: 404,
@@ -121,7 +189,7 @@ describe('test agent acks services', () => {
             type: 'ACTION_RESULT',
             subtype: 'CONFIG',
             timestamp: '2019-01-04T14:32:03.36764-05:00',
-            action_id: 'action2',
+            action_id: 'action4',
             agent_id: 'id',
           } as unknown) as AgentEvent,
         ]
@@ -139,7 +207,7 @@ describe('test agent acks services', () => {
       Promise.resolve({
         saved_objects: [
           {
-            id: 'action1',
+            id: 'action5',
             references: [],
             type: AGENT_ACTION_SAVED_OBJECT_TYPE,
             attributes: {
@@ -166,7 +234,7 @@ describe('test agent acks services', () => {
             type: 'ACTION',
             subtype: 'FAILED',
             timestamp: '2019-01-04T14:32:03.36764-05:00',
-            action_id: 'action1',
+            action_id: 'action5',
             agent_id: 'id',
           } as unknown) as AgentEvent,
         ]

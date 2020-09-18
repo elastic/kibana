@@ -7,23 +7,40 @@
 import moment from 'moment';
 import sinon from 'sinon';
 
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { listMock } from '../../../../../lists/server/mocks';
+import { buildRuleMessageFactory } from './rule_messages';
+import { ExceptionListClient } from '../../../../../lists/server';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
+
 import {
   generateId,
   parseInterval,
-  parseScheduleDates,
   getDriftTolerance,
   getGapBetweenRuns,
+  getGapMaxCatchupRatio,
   errorAggregator,
+  getListsClient,
+  getSignalTimeTuples,
+  getExceptions,
 } from './utils';
-
 import { BulkResponseErrorAggregation } from './types';
-
 import {
   sampleBulkResponse,
   sampleEmptyBulkResponse,
   sampleBulkError,
   sampleBulkErrorItem,
+  mockLogger,
 } from './__mocks__/es_results';
+
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -38,6 +55,9 @@ describe('utils', () => {
 
   afterEach(() => {
     clock.restore();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('generateId', () => {
@@ -527,6 +547,232 @@ describe('utils', () => {
       const aggregated = errorAggregator(bulkResponse, [409, 502]);
       const expected: BulkResponseErrorAggregation = {};
       expect(aggregated).toEqual(expected);
+    });
+  });
+
+  describe('#getListsClient', () => {
+    let alertServices: AlertServicesMock;
+
+    beforeEach(() => {
+      alertServices = alertsMock.createAlertServices();
+    });
+
+    test('it successfully returns list and exceptions list client', async () => {
+      const { listClient, exceptionsClient } = getListsClient({
+        services: alertServices,
+        savedObjectClient: alertServices.savedObjectsClient,
+        updatedByUser: 'some_user',
+        spaceId: '',
+        lists: listMock.createSetup(),
+      });
+
+      expect(listClient).toBeDefined();
+      expect(exceptionsClient).toBeDefined();
+    });
+  });
+
+  describe('getSignalTimeTuples', () => {
+    test('should return a single tuple if no gap', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: null,
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        interval: '30s',
+        ruleParamsFrom: 'now-30s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+        buildRuleMessage,
+      });
+      const someTuple = someTuples[0];
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
+    });
+
+    test('should return two tuples if gap and previouslyStartedAt', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: moment.duration(10, 's'),
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        interval: '50s',
+        ruleParamsFrom: 'now-55s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+        buildRuleMessage,
+      });
+      const someTuple = someTuples[1];
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(10);
+    });
+
+    test('should return five tuples when give long gap', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: moment.duration(65, 's'), // 64 is 5 times the interval + lookback, which will trigger max lookback
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+        buildRuleMessage,
+      });
+      expect(someTuples.length).toEqual(5);
+      someTuples.forEach((item, index) => {
+        if (index === 0) {
+          return;
+        }
+        expect(moment(item.to).diff(moment(item.from), 's')).toEqual(10);
+      });
+    });
+
+    // this tests if calculatedFrom in utils.ts:320 parses an int and not a float
+    // if we don't parse as an int, then dateMath.parse will fail
+    // as it doesn't support parsing `now-67.549`, it only supports ints like `now-67`.
+    test('should return five tuples when given a gap with a decimal to ensure no parsing errors', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: moment.duration(67549, 'ms'), // 64 is 5 times the interval + lookback, which will trigger max lookback
+        previousStartedAt: moment().subtract(67549, 'ms').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+        buildRuleMessage,
+      });
+      expect(someTuples.length).toEqual(5);
+    });
+
+    test('should return single tuples when give a negative gap (rule ran sooner than expected)', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: moment.duration(-15, 's'), // 64 is 5 times the interval + lookback, which will trigger max lookback
+        previousStartedAt: moment().subtract(-15, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+        buildRuleMessage,
+      });
+      expect(someTuples.length).toEqual(1);
+      const someTuple = someTuples[0];
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
+    });
+  });
+
+  describe('getMaxCatchupRatio', () => {
+    test('should return null if rule has never run before', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: null,
+        interval: '30s',
+        ruleParamsFrom: 'now-30s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
+    });
+
+    test('should should have non-null values when gap is present', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        interval: '50s',
+        ruleParamsFrom: 'now-55s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toEqual(0.2);
+      expect(ratio).toEqual(0.2);
+      expect(gapDiffInUnits).toEqual(10);
+    });
+
+    // when a rule runs sooner than expected we don't
+    // consider that a gap as that is a very rare circumstance
+    test('should return null when given a negative gap (rule ran sooner than expected)', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(-15, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
+    });
+  });
+
+  describe('#getExceptions', () => {
+    test('it successfully returns array of exception list items', async () => {
+      listMock.getExceptionListClient = () =>
+        (({
+          findExceptionListsItem: jest.fn().mockResolvedValue({
+            data: [getExceptionListItemSchemaMock()],
+            page: 1,
+            per_page: 10000,
+            total: 1,
+          }),
+        } as unknown) as ExceptionListClient);
+      const client = listMock.getExceptionListClient();
+      const exceptions = await getExceptions({
+        client,
+        lists: getListArrayMock(),
+      });
+
+      expect(client.findExceptionListsItem).toHaveBeenCalledWith({
+        listId: ['list_id_single', 'endpoint_list'],
+        namespaceType: ['single', 'agnostic'],
+        page: 1,
+        perPage: 10000,
+        filter: [],
+        sortOrder: undefined,
+        sortField: undefined,
+      });
+      expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
+    });
+
+    test('it throws if "getExceptionListClient" fails', async () => {
+      const err = new Error('error fetching list');
+      listMock.getExceptionListClient = () =>
+        (({
+          getExceptionList: jest.fn().mockRejectedValue(err),
+        } as unknown) as ExceptionListClient);
+
+      await expect(() =>
+        getExceptions({
+          client: listMock.getExceptionListClient(),
+          lists: getListArrayMock(),
+        })
+      ).rejects.toThrowError('unable to fetch exception list items');
+    });
+
+    test('it throws if "findExceptionListsItem" fails', async () => {
+      const err = new Error('error fetching list');
+      listMock.getExceptionListClient = () =>
+        (({
+          findExceptionListsItem: jest.fn().mockRejectedValue(err),
+        } as unknown) as ExceptionListClient);
+
+      await expect(() =>
+        getExceptions({
+          client: listMock.getExceptionListClient(),
+          lists: getListArrayMock(),
+        })
+      ).rejects.toThrowError('unable to fetch exception list items');
+    });
+
+    test('it returns empty array if "findExceptionListsItem" returns null', async () => {
+      listMock.getExceptionListClient = () =>
+        (({
+          findExceptionListsItem: jest.fn().mockResolvedValue(null),
+        } as unknown) as ExceptionListClient);
+
+      const exceptions = await getExceptions({
+        client: listMock.getExceptionListClient(),
+        lists: [],
+      });
+
+      expect(exceptions).toEqual([]);
     });
   });
 });

@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { createListStream } from '../../../../legacy/utils/streams';
+import { createListStream } from '../../utils/streams';
 import { SavedObjectsClientContract, SavedObject } from '../types';
 import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
@@ -109,15 +109,18 @@ async function fetchObjectsToExport({
       type: types,
       search,
       perPage: exportSizeLimit,
-      namespace,
+      namespaces: namespace ? [namespace] : undefined,
     });
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
 
     // sorts server-side by _id, since it's only available in fielddata
-    return findResponse.saved_objects.sort((a: SavedObject, b: SavedObject) =>
-      a.id > b.id ? 1 : -1
+    return (
+      findResponse.saved_objects
+        // exclude the find-specific `score` property from the exported objects
+        .map(({ score, ...obj }) => obj)
+        .sort((a: SavedObject, b: SavedObject) => (a.id > b.id ? 1 : -1))
     );
   } else {
     throw Boom.badRequest('Either `type` or `objects` are required.');
@@ -148,7 +151,7 @@ export async function exportSavedObjectsToStream({
     exportSizeLimit,
     namespace,
   });
-  let exportedObjects = [];
+  let exportedObjects: Array<SavedObject<unknown>> = [];
   let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
   if (includeReferencesDeep) {
@@ -159,10 +162,15 @@ export async function exportSavedObjectsToStream({
     exportedObjects = sortObjects(rootObjects);
   }
 
+  // redact attributes that should not be exported
+  const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
+    ({ namespaces, ...object }) => object
+  );
+
   const exportDetails: SavedObjectsExportResultDetails = {
     exportedCount: exportedObjects.length,
     missingRefCount: missingReferences.length,
     missingReferences,
   };
-  return createListStream([...exportedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
+  return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
 }

@@ -7,10 +7,19 @@
 import gql from 'graphql-tag';
 
 export const HostFirstLastSeenGqlQuery = gql`
-  query GetHostFirstLastSeenQuery($sourceId: ID!, $hostName: String!, $defaultIndex: [String!]!) {
+  query GetHostFirstLastSeenQuery(
+    $sourceId: ID!
+    $hostName: String!
+    $defaultIndex: [String!]!
+    $docValueFields: [docValueFieldsInput!]!
+  ) {
     source(id: $sourceId) {
       id
-      HostFirstLastSeen(hostName: $hostName, defaultIndex: $defaultIndex) {
+      HostFirstLastSeen(
+        hostName: $hostName
+        defaultIndex: $defaultIndex
+        docValueFields: $docValueFields
+      ) {
         firstSeen
         lastSeen
       }

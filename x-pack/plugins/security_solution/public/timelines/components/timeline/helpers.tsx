@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isNumber, get } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
-import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
+import {
+  DataProvider,
+  DataProviderType,
+  DataProvidersAnd,
+  EXISTS_OPERATOR,
+} from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
 import {
   IIndexPattern,
@@ -17,6 +22,8 @@ import {
   EsQueryConfig,
   Filter,
 } from '../../../../../../../src/plugins/data/public';
+
+const isNumber = (value: string | number) => !isNaN(Number(value));
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
@@ -52,7 +59,8 @@ const buildQueryMatch = (
   browserFields: BrowserFields
 ) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch.operator !== EXISTS_OPERATOR
+    dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
+    dataProvider.type !== DataProviderType.template
       ? checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
@@ -63,35 +71,30 @@ const buildQueryMatch = (
       : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 
-const buildQueryForAndProvider = (
-  dataAndProviders: DataProvidersAnd[],
-  browserFields: BrowserFields
-) =>
-  dataAndProviders
-    .reduce((andQuery, andDataProvider) => {
-      const prepend = (q: string) => `${q !== '' ? `${q} and ` : ''}`;
-      return andDataProvider.enabled
-        ? `${prepend(andQuery)} ${buildQueryMatch(andDataProvider, browserFields)}`
-        : andQuery;
-    }, '')
-    .trim();
-
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
-    .reduce((query, dataProvider: DataProvider, i) => {
-      const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
-      const openParen = i >= 0 && dataProviders.length > 1 ? '(' : '';
-      const closeParen = i >= 0 && dataProviders.length > 1 ? ')' : '';
-      return dataProvider.enabled
-        ? `${prepend(query)}${openParen}${buildQueryMatch(dataProvider, browserFields)}
-        ${
-          dataProvider.and.length > 0
-            ? ` and ${buildQueryForAndProvider(dataProvider.and, browserFields)}`
-            : ''
-        }${closeParen}`.trim()
-        : query;
-    }, '')
-    .trim();
+    .reduce((queries: string[], dataProvider: DataProvider) => {
+      const flatDataProviders = [dataProvider, ...dataProvider.and];
+      const activeDataProviders = flatDataProviders.filter(
+        (flatDataProvider) => flatDataProvider.enabled
+      );
+
+      if (!activeDataProviders.length) return queries;
+
+      const activeDataProvidersQueries = activeDataProviders.map((activeDataProvider) =>
+        buildQueryMatch(activeDataProvider, browserFields)
+      );
+
+      const activeDataProvidersQueryMatch = activeDataProvidersQueries.join(' and ');
+
+      return [...queries, activeDataProvidersQueryMatch];
+    }, [])
+    .filter((queriesItem) => !isEmpty(queriesItem))
+    .reduce((globalQuery: string, queryMatch: string, index: number, queries: string[]) => {
+      if (queries.length <= 1) return queryMatch;
+
+      return !index ? `(${queryMatch})` : `${globalQuery} or (${queryMatch})`;
+    }, '');
 
 export const combineQueries = ({
   config,
@@ -112,33 +115,28 @@ export const combineQueries = ({
   filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
-  start: number;
-  end: number;
+  start: string;
+  end: string;
   isEventViewer?: boolean;
 }): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
-    kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
-    kuery.query = `(${kqlQuery.query}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+    kuery.query = `(${kqlQuery.query})`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery.query = `(${buildGlobalQuery(
-      dataProviders,
-      browserFields
-    )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+    kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
@@ -147,7 +145,7 @@ export const combineQueries = ({
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
   kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery.query as string
-  )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+  )})`;
   return {
     filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
   };
@@ -158,3 +156,16 @@ export const combineQueries = ({
  * the `Timeline` and the `Events Viewer` widget
  */
 export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
+
+export const DEFAULT_ICON_BUTTON_WIDTH = 24;
+
+export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
+  graphEventId != null && graphEventId !== '';
+
+export const showGlobalFilters = ({
+  globalFullScreen,
+  graphEventId,
+}: {
+  globalFullScreen: boolean;
+  graphEventId: string | undefined;
+}): boolean => (globalFullScreen && resolverIsShowing(graphEventId) ? false : true);

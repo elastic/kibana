@@ -10,7 +10,7 @@ import { RequestHandler } from 'src/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
 export const register = (deps: RouteDependencies): void => {

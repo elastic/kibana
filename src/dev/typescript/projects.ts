@@ -19,11 +19,13 @@
 
 import glob from 'glob';
 import { resolve } from 'path';
-import { REPO_ROOT } from '../constants';
+import { REPO_ROOT } from '@kbn/utils';
 import { Project } from './project';
 
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
@@ -32,6 +34,10 @@ export const PROJECTS = [
   }),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/e2e/tsconfig.json'), {
     name: 'apm/cypress',
+    disableTypeCheck: true,
+  }),
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/scripts/tsconfig.json'), {
+    name: 'apm/scripts',
     disableTypeCheck: true,
   }),
 

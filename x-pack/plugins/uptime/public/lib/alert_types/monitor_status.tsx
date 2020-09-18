@@ -5,54 +5,45 @@
  */
 
 import React from 'react';
-import { isRight } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
-import { AtomicStatusCheckParamsType } from '../../../common/runtime_types';
-import { MonitorStatusTitle } from './monitor_status_title';
-import { CLIENT_ALERT_TYPES } from '../../../common/constants';
-import { MonitorStatusTranslations } from './translations';
 
-export const validate = (alertParams: unknown) => {
-  const errors: Record<string, any> = {};
-  const decoded = AtomicStatusCheckParamsType.decode(alertParams);
-
-  if (!isRight(decoded)) {
-    errors.typeCheckFailure = 'Provided parameters do not conform to the expected type.';
-    errors.typeCheckParsingMessage = PathReporter.report(decoded);
-  } else {
-    const { numTimes, timerangeCount } = decoded.right;
-    if (numTimes < 1) {
-      errors.invalidNumTimes = 'Number of alert check down times must be an integer greater than 0';
-    }
-    if (isNaN(timerangeCount)) {
-      errors.timeRangeStartValueNaN = 'Specified time range value must be a number';
-    }
-    if (timerangeCount <= 0) {
-      errors.invalidTimeRangeValue = 'Time range value must be greater than 0';
-    }
-  }
-
-  return { errors };
-};
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
+import { MonitorStatusTranslations } from '../../../common/translations';
 
 const { defaultActionMessage } = MonitorStatusTranslations;
 
-const AlertMonitorStatus = React.lazy(() =>
-  import('../../components/overview/alerts/alerts_containers/alert_monitor_status')
-);
+const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status'));
+
+let validateFunc: (alertParams: any) => ValidationResult;
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
-  autocomplete,
+  core,
+  plugins,
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
-  name: <MonitorStatusTitle />,
+  name: (
+    <FormattedMessage
+      id="xpack.uptime.alerts.monitorStatus.title.label"
+      defaultMessage="Uptime monitor status"
+    />
+  ),
   iconClass: 'uptimeApp',
   alertParamsExpression: (params: any) => (
-    <AlertMonitorStatus {...params} autocomplete={autocomplete} />
+    <MonitorStatusAlert core={core} plugins={plugins} params={params} />
   ),
-  validate,
+  validate: (alertParams: any) => {
+    if (!validateFunc) {
+      (async function loadValidate() {
+        const { validateMonitorStatusParams } = await import(
+          './lazy_wrapper/validate_monitor_status'
+        );
+        validateFunc = validateMonitorStatusParams;
+      })();
+    }
+    return validateFunc ? validateFunc(alertParams) : ({} as ValidationResult);
+  },
   defaultActionMessage,
-  requiresAppContext: true,
+  requiresAppContext: false,
 });

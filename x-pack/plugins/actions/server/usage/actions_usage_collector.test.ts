@@ -22,12 +22,18 @@ describe('registerActionsUsageCollector', () => {
   });
 
   it('should call registerCollector', () => {
-    registerActionsUsageCollector(usageCollectionMock, mockTaskManagerStart);
+    registerActionsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      mockTaskManagerStart
+    );
     expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = actions', () => {
-    registerActionsUsageCollector(usageCollectionMock, mockTaskManagerStart);
+    registerActionsUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      mockTaskManagerStart
+    );
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
     expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('actions');
   });

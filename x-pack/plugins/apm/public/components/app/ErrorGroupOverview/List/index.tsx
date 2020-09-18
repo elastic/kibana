@@ -51,16 +51,12 @@ const Culprit = styled.div`
 
 interface Props {
   items: ErrorGroupListAPIResponse;
+  serviceName: string;
 }
 
-const ErrorGroupList: React.FC<Props> = (props) => {
-  const { items } = props;
+function ErrorGroupList({ items, serviceName }: Props) {
   const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
 
-  if (!serviceName) {
-    throw new Error('Service name is required');
-  }
   const columns = useMemo(
     () => [
       {
@@ -103,7 +99,7 @@ const ErrorGroupList: React.FC<Props> = (props) => {
         }),
         field: 'type',
         sortable: false,
-        render: (type: string, item: ErrorGroupListAPIResponse[0]) => {
+        render: (type: string) => {
           return (
             <ErrorLink
               title={type}
@@ -213,6 +209,6 @@ const ErrorGroupList: React.FC<Props> = (props) => {
       sortItems={false}
     />
   );
-};
+}
 
 export { ErrorGroupList };

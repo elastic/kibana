@@ -80,19 +80,33 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### API integration tests
 
-**Start server**
+Our tests are separated in two suites: one suite runs with a basic license, and the other
+with a trial license (the equivalent of gold+). This requires separate test servers and test runners.
+
+**Basic**
 
 ```
-node scripts/functional_tests_server --config x-pack/test/api_integration/config.ts
+# Start server
+node scripts/functional_tests_server --config x-pack/test/apm_api_integration/basic/config.ts
+
+# Run tests
+node scripts/functional_test_runner --config x-pack/test/apm_api_integration/basic/config.ts
 ```
 
-**Run tests**
+The API tests for "basic" are located in `x-pack/test/apm_api_integration/basic/tests`.
+
+**Trial**
 
 ```
-node scripts/functional_test_runner --config x-pack/test/api_integration/config.ts --grep='APM specs'
+# Start server
+node scripts/functional_tests_server --config x-pack/test/apm_api_integration/trial/config.ts
+
+# Run tests
+node scripts/functional_test_runner --config x-pack/test/apm_api_integration/trial/config.ts
 ```
 
-APM tests are located in `x-pack/test/api_integration/apis/apm`.
+The API tests for "trial" are located in `x-pack/test/apm_api_integration/trial/tests`.
+
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### Linting
@@ -148,3 +162,5 @@ You can access the development environment at http://localhost:9001.
 - [Cypress integration tests](./e2e/README.md)
 - [VSCode setup instructions](./dev_docs/vscode_setup.md)
 - [Github PR commands](./dev_docs/github_commands.md)
+- [Routing and Linking](./dev_docs/routing_and_linking.md)
+- [Telemetry](./dev_docs/telemetry.md)

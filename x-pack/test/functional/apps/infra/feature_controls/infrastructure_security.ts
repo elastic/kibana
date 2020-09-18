@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -177,7 +177,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows metrics navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Metrics', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -423,19 +423,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.not.contain(['Metrics']);
       });
 
-      it(`metrics app is inaccessible and Application Not Found message is rendered`, async () => {
-        await PageObjects.common.navigateToApp('infraOps');
-        await testSubjects.existOrFail('~appNotFoundPageContent');
-        await PageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraOps',
-          '/inventory',
-          undefined,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
+      it(`metrics app is inaccessible and returns a 404`, async () => {
+        await PageObjects.common.navigateToActualUrl('infraOps', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        const messageText = await PageObjects.common.getBodyText();
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
         );
-        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

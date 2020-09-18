@@ -4,55 +4,91 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import { mount } from 'enzyme';
-import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { act, renderHook } from '@testing-library/react-hooks';
 
-import { wait } from '../../lib/helpers';
-
-import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
+import { useWithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
+import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
 jest.mock('../../lib/kibana');
+jest.mock('../../utils/apollo_context', () => ({
+  useApolloClient: jest.fn().mockReturnValue({
+    query: jest.fn().mockImplementation(() => Promise.resolve(mocksSource[0].result)),
+  }),
+}));
 
 describe('Index Fields & Browser Fields', () => {
-  test('Index Fields', async () => {
-    mount(
-      <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default">
-          {({ indexPattern }) => {
-            if (!isEqual(indexPattern.fields, [])) {
-              expect(indexPattern.fields).toEqual(mockIndexFields);
-            }
+  test('At initialization the value of indicesExists should be true', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useWithSource());
+    const initialResult = result.current;
 
-            return null;
-          }}
-        </WithSource>
-      </MockedProvider>
-    );
+    await waitForNextUpdate();
 
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
+    return expect(initialResult).toEqual({
+      browserFields: {},
+      docValueFields: [],
+      errorMessage: null,
+      indexPattern: {
+        fields: [],
+        title:
+          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+      },
+      indicesExist: true,
+      loading: true,
+    });
   });
 
-  test('Browser Fields', async () => {
-    mount(
-      <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default">
-          {({ browserFields }) => {
-            if (!isEqual(browserFields, {})) {
-              expect(browserFields).toEqual(mockBrowserFields);
-            }
+  test('returns memoized value', async () => {
+    const { result, waitForNextUpdate, rerender } = renderHook(() => useWithSource());
+    await waitForNextUpdate();
 
-            return null;
-          }}
-        </WithSource>
-      </MockedProvider>
+    const result1 = result.current;
+    act(() => rerender());
+    const result2 = result.current;
+
+    return expect(result1).toBe(result2);
+  });
+
+  test('Index Fields', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useWithSource());
+
+    await waitForNextUpdate();
+
+    return expect(result).toEqual({
+      current: {
+        indicesExist: true,
+        browserFields: mockBrowserFields,
+        docValueFields: [
+          {
+            field: '@timestamp',
+            format: 'date_time',
+          },
+          {
+            field: 'event.end',
+            format: 'date_time',
+          },
+        ],
+        indexPattern: {
+          fields: mockIndexFields,
+          title:
+            'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+        },
+        loading: false,
+        errorMessage: null,
+      },
+      error: undefined,
+    });
+  });
+
+  test('Make sure we are not querying for NO_ALERT_INDEX and it is not includes in the index pattern', async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useWithSource('default', [NO_ALERT_INDEX])
     );
 
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
+    await waitForNextUpdate();
+    return expect(result.current.indexPattern.title).toEqual(
+      'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*'
+    );
   });
 
   describe('indicesExistOrDataTemporarilyUnavailable', () => {

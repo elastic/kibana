@@ -2,7 +2,7 @@
 [[index-action-type]]
 === Index action
 
-The index action type will index a document into {es}.
+The index action type will index a document into {es}. See also the {ref}/indices-create-index.html[create index API].
 
 [float]
 [[index-connector-configuration]]
@@ -53,4 +53,38 @@ Execution time field::  This field will be automatically set to the time the ale
 
 Index actions have the following properties:
 
-Document::  The document to index in json format.
+Document::  The document to index in JSON format.
+
+Example of the index document for Index Threshold alert:
+
+[source,text]
+--------------------------------------------------
+{
+    "alert_id": "{{alertId}}",
+    "alert_name": "{{alertName}}",
+    "alert_instance_id": "{{alertInstanceId}}",
+    "context_message": "{{context.message}}"
+} 
+--------------------------------------------------
+
+Example of create test index using the API.
+
+[source,text]
+--------------------------------------------------
+PUT test
+{
+    "settings" : {
+        "number_of_shards" : 1
+    },
+    "mappings" : {
+        "_doc" : {
+            "properties" : {
+                "alert_id" : { "type" : "text" },
+                "alert_name" : { "type" : "text" },
+                "alert_instance_id" : { "type" : "text" },
+                "context_message": { "type" : "text" }
+            }
+        }
+    }
+}
+--------------------------------------------------

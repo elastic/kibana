@@ -15,18 +15,31 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   SeriesNameFn,
+  Fit,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import { KibanaDatatable, KibanaDatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
+import {
+  XYArgs,
+  LegendConfig,
+  legendConfig,
+  layerConfig,
+  LayerArgs,
+  AxesSettingsConfig,
+  tickLabelsConfig,
+  gridlinesConfig,
+} from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
+
+const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 const dateHistogramData: LensMultiTable = {
   type: 'lens_multitable',
@@ -202,10 +215,29 @@ const sampleLayer: LayerArgs = {
 const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
   xTitle: '',
   yTitle: '',
+  yRightTitle: '',
   legend: {
     type: 'lens_xy_legendConfig',
     isVisible: false,
     position: Position.Top,
+  },
+  axisTitlesVisibilitySettings: {
+    type: 'lens_xy_axisTitlesVisibilityConfig',
+    x: true,
+    yLeft: true,
+    yRight: true,
+  },
+  tickLabelsVisibilitySettings: {
+    type: 'lens_xy_tickLabelsConfig',
+    x: true,
+    yLeft: false,
+    yRight: false,
+  },
+  gridlinesVisibilitySettings: {
+    type: 'lens_xy_gridlinesConfig',
+    x: true,
+    yLeft: false,
+    yRight: false,
   },
   layers,
 });
@@ -263,6 +295,36 @@ describe('xy_expression', () => {
     });
   });
 
+  test('tickLabelsConfig produces the correct arguments', () => {
+    const args: AxesSettingsConfig = {
+      x: true,
+      yLeft: false,
+      yRight: false,
+    };
+
+    const result = tickLabelsConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_tickLabelsConfig',
+      ...args,
+    });
+  });
+
+  test('gridlinesConfig produces the correct arguments', () => {
+    const args: AxesSettingsConfig = {
+      x: true,
+      yLeft: false,
+      yRight: false,
+    };
+
+    const result = gridlinesConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_gridlinesConfig',
+      ...args,
+    });
+  });
+
   describe('xyChart', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
@@ -280,6 +342,58 @@ describe('xy_expression', () => {
     let getFormatSpy: jest.Mock;
     let convertSpy: jest.Mock;
 
+    const dataWithoutFormats: LensMultiTable = {
+      type: 'lens_multitable',
+      tables: {
+        first: {
+          type: 'kibana_datatable',
+          columns: [
+            { id: 'a', name: 'a' },
+            { id: 'b', name: 'b' },
+            { id: 'c', name: 'c' },
+            { id: 'd', name: 'd' },
+          ],
+          rows: [
+            { a: 1, b: 2, c: 'I', d: 'Row 1' },
+            { a: 1, b: 5, c: 'J', d: 'Row 2' },
+          ],
+        },
+      },
+    };
+    const dataWithFormats: LensMultiTable = {
+      type: 'lens_multitable',
+      tables: {
+        first: {
+          type: 'kibana_datatable',
+          columns: [
+            { id: 'a', name: 'a' },
+            { id: 'b', name: 'b' },
+            { id: 'c', name: 'c' },
+            { id: 'd', name: 'd', formatHint: { id: 'custom' } },
+          ],
+          rows: [
+            { a: 1, b: 2, c: 'I', d: 'Row 1' },
+            { a: 1, b: 5, c: 'J', d: 'Row 2' },
+          ],
+        },
+      },
+    };
+
+    const getRenderedComponent = (data: LensMultiTable, args: XYArgs) => {
+      return shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+    };
+
     beforeEach(() => {
       convertSpy = jest.fn((x) => x);
       getFormatSpy = jest.fn();
@@ -295,14 +409,16 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(LineSeries)).toHaveLength(1);
+      expect(component.find(LineSeries)).toHaveLength(2);
+      expect(component.find(LineSeries).at(0).prop('yAccessors')).toEqual(['a']);
+      expect(component.find(LineSeries).at(1).prop('yAccessors')).toEqual(['b']);
     });
 
     describe('date range', () => {
@@ -344,7 +460,7 @@ describe('xy_expression', () => {
             }}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -380,7 +496,7 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -417,7 +533,7 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -455,7 +571,7 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -500,7 +616,7 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -535,7 +651,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -552,14 +668,16 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(BarSeries)).toHaveLength(2);
+      expect(component.find(BarSeries).at(0).prop('yAccessors')).toEqual(['a']);
+      expect(component.find(BarSeries).at(1).prop('yAccessors')).toEqual(['b']);
     });
 
     test('it renders area', () => {
@@ -570,14 +688,16 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(AreaSeries)).toHaveLength(1);
+      expect(component.find(AreaSeries)).toHaveLength(2);
+      expect(component.find(AreaSeries).at(0).prop('yAccessors')).toEqual(['a']);
+      expect(component.find(AreaSeries).at(1).prop('yAccessors')).toEqual(['b']);
     });
 
     test('it renders horizontal bar', () => {
@@ -588,14 +708,16 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_horizontal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(BarSeries)).toHaveLength(2);
+      expect(component.find(BarSeries).at(0).prop('yAccessors')).toEqual(['a']);
+      expect(component.find(BarSeries).at(1).prop('yAccessors')).toEqual(['b']);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
@@ -611,7 +733,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -661,7 +783,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -698,15 +820,16 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(BarSeries)).toHaveLength(1);
-      expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(BarSeries)).toHaveLength(2);
+      expect(component.find(BarSeries).at(0).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(BarSeries).at(1).prop('stackAccessors')).toHaveLength(1);
     });
 
     test('it renders stacked area', () => {
@@ -717,15 +840,16 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(AreaSeries)).toHaveLength(1);
-      expect(component.find(AreaSeries).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(AreaSeries)).toHaveLength(2);
+      expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toHaveLength(1);
     });
 
     test('it renders stacked horizontal bar', () => {
@@ -739,15 +863,16 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(BarSeries)).toHaveLength(1);
-      expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(BarSeries)).toHaveLength(2);
+      expect(component.find(BarSeries).at(0).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(BarSeries).at(1).prop('stackAccessors')).toHaveLength(1);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
@@ -759,13 +884,14 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="CEST"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(LineSeries).prop('timeZone')).toEqual('CEST');
+      expect(component.find(LineSeries).at(0).prop('timeZone')).toEqual('CEST');
+      expect(component.find(LineSeries).at(1).prop('timeZone')).toEqual('CEST');
     });
 
     test('it applies histogram mode to the series for single series', () => {
@@ -778,13 +904,14 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [firstLayer] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(true);
     });
 
     test('it applies histogram mode to the series for stacked series', () => {
@@ -804,13 +931,14 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(true);
     });
 
     test('it does not apply histogram mode for splitted series', () => {
@@ -824,74 +952,185 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
+      expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
+      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(false);
+    });
+
+    describe('y axes', () => {
+      test('single axis if possible', () => {
+        const args = createArgsWithLayers();
+
+        const component = getRenderedComponent(dataWithoutFormats, args);
+        const axes = component.find(Axis);
+        expect(axes).toHaveLength(2);
+      });
+
+      test('multiple axes because of config', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a', 'b'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  axisMode: 'left',
+                },
+                {
+                  forAccessor: 'b',
+                  axisMode: 'right',
+                },
+              ],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const axes = component.find(Axis);
+        expect(axes).toHaveLength(3);
+        expect(component.find(LineSeries).at(0).prop('groupId')).toEqual(
+          axes.at(1).prop('groupId')
+        );
+        expect(component.find(LineSeries).at(1).prop('groupId')).toEqual(
+          axes.at(2).prop('groupId')
+        );
+      });
+
+      test('multiple axes because of incompatible formatters', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['c', 'd'],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithFormats, newArgs);
+        const axes = component.find(Axis);
+        expect(axes).toHaveLength(3);
+        expect(component.find(LineSeries).at(0).prop('groupId')).toEqual(
+          axes.at(1).prop('groupId')
+        );
+        expect(component.find(LineSeries).at(1).prop('groupId')).toEqual(
+          axes.at(2).prop('groupId')
+        );
+      });
+
+      test('single axis despite different formatters if enforced', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['c', 'd'],
+              yConfig: [
+                {
+                  forAccessor: 'c',
+                  axisMode: 'left',
+                },
+                {
+                  forAccessor: 'd',
+                  axisMode: 'left',
+                },
+              ],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const axes = component.find(Axis);
+        expect(axes).toHaveLength(2);
+      });
+    });
+
+    describe('y series coloring', () => {
+      test('color is applied to chart for multiple series', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['a', 'b'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  color: '#550000',
+                },
+                {
+                  forAccessor: 'b',
+                  color: '#FFFF00',
+                },
+              ],
+            },
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['c'],
+              yConfig: [
+                {
+                  forAccessor: 'c',
+                  color: '#FEECDF',
+                },
+              ],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual('#550000');
+        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual('#FFFF00');
+        expect((component.find(LineSeries).at(2).prop('color') as Function)!()).toEqual('#FEECDF');
+      });
+      test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  color: '#550000',
+                },
+              ],
+            },
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['c'],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual(null);
+        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual(null);
+      });
     });
 
     describe('provides correct series naming', () => {
-      const dataWithoutFormats: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          first: {
-            type: 'kibana_datatable',
-            columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
-              { id: 'd', name: 'd' },
-            ],
-            rows: [
-              { a: 1, b: 2, c: 'I', d: 'Row 1' },
-              { a: 1, b: 5, c: 'J', d: 'Row 2' },
-            ],
-          },
-        },
-      };
-      const dataWithFormats: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          first: {
-            type: 'kibana_datatable',
-            columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
-              { id: 'd', name: 'd', formatHint: { id: 'custom' } },
-            ],
-            rows: [
-              { a: 1, b: 2, c: 'I', d: 'Row 1' },
-              { a: 1, b: 5, c: 'J', d: 'Row 2' },
-            ],
-          },
-        },
-      };
-
       const nameFnArgs = {
         seriesKeys: [],
         key: '',
         specId: 'a',
         yAccessor: '',
         splitAccessors: new Map(),
-      };
-
-      const getRenderedComponent = (data: LensMultiTable, args: XYArgs) => {
-        return shallow(
-          <XYChart
-            data={data}
-            args={args}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartTheme={{}}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-          />
-        );
       };
 
       test('simplest xy chart without human-readable name', () => {
@@ -973,13 +1212,14 @@ describe('xy_expression', () => {
         };
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+        const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
+        const nameFn2 = component.find(LineSeries).at(1).prop('name') as SeriesNameFn;
 
         // This accessor has a human-readable name
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
+        expect(nameFn1({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
         // This accessor does not
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('');
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+        expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('');
+        expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
       });
 
       test('split series without formatting and single y accessor', () => {
@@ -1039,9 +1279,13 @@ describe('xy_expression', () => {
         };
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+        const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
+        const nameFn2 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
 
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
+        expect(nameFn1({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
+          'split1 - Label A'
+        );
+        expect(nameFn2({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
           'split1 - Label B'
         );
       });
@@ -1061,13 +1305,14 @@ describe('xy_expression', () => {
         };
 
         const component = getRenderedComponent(dataWithFormats, newArgs);
-        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+        const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
+        const nameFn2 = component.find(LineSeries).at(1).prop('name') as SeriesNameFn;
 
         convertSpy.mockReturnValueOnce('formatted1').mockReturnValueOnce('formatted2');
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
+        expect(nameFn1({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
           'formatted1 - Label A'
         );
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
+        expect(nameFn2({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
           'formatted2 - Label B'
         );
       });
@@ -1082,13 +1327,14 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], xScaleType: 'ordinal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
+      expect(component.find(LineSeries).at(0).prop('xScaleType')).toEqual(ScaleType.Ordinal);
+      expect(component.find(LineSeries).at(1).prop('xScaleType')).toEqual(ScaleType.Ordinal);
     });
 
     test('it set the scale of the y axis according to the args prop', () => {
@@ -1100,13 +1346,14 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], yScaleType: 'sqrt' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(LineSeries).prop('yScaleType')).toEqual(ScaleType.Sqrt);
+      expect(component.find(LineSeries).at(0).prop('yScaleType')).toEqual(ScaleType.Sqrt);
+      expect(component.find(LineSeries).at(1).prop('yScaleType')).toEqual(ScaleType.Sqrt);
     });
 
     test('it gets the formatter for the x axis', () => {
@@ -1118,7 +1365,7 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1126,25 +1373,6 @@ describe('xy_expression', () => {
       );
 
       expect(getFormatSpy).toHaveBeenCalledWith({ id: 'string' });
-    });
-
-    test('it gets a default formatter for y if there are multiple y accessors', () => {
-      const { data, args } = sampleArgs();
-
-      shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartTheme={{}}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
-
-      expect(getFormatSpy).toHaveBeenCalledWith({ id: 'number' });
     });
 
     test('it gets the formatter for the y axis if there is only one accessor', () => {
@@ -1155,7 +1383,7 @@ describe('xy_expression', () => {
           data={{ ...data }}
           args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
           formatFactory={getFormatSpy}
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           timeZone="UTC"
           onClickValue={onClickValue}
@@ -1177,7 +1405,7 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1193,6 +1421,134 @@ describe('xy_expression', () => {
       tickFormatter('I');
 
       expect(convertSpy).toHaveBeenCalledWith('I');
+    });
+
+    test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
+      const { data, args } = sampleArgs();
+
+      args.tickLabelsVisibilitySettings = {
+        x: false,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_tickLabelsConfig',
+      };
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const axisStyle = instance.find(Axis).first().prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          visible: false,
+        },
+      });
+    });
+
+    test('it should set the tickLabel visibility on the y axis if the tick labels is hidden', () => {
+      const { data, args } = sampleArgs();
+
+      args.tickLabelsVisibilitySettings = {
+        x: true,
+        yLeft: false,
+        yRight: false,
+        type: 'lens_xy_tickLabelsConfig',
+      };
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const axisStyle = instance.find(Axis).at(1).prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          visible: false,
+        },
+      });
+    });
+
+    test('it should set the tickLabel visibility on the x axis if the tick labels is shown', () => {
+      const { data, args } = sampleArgs();
+
+      args.tickLabelsVisibilitySettings = {
+        x: true,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_tickLabelsConfig',
+      };
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const axisStyle = instance.find(Axis).first().prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          visible: true,
+        },
+      });
+    });
+
+    test('it should set the tickLabel visibility on the y axis if the tick labels is shown', () => {
+      const { data, args } = sampleArgs();
+
+      args.tickLabelsVisibilitySettings = {
+        x: false,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_tickLabelsConfig',
+      };
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const axisStyle = instance.find(Axis).at(1).prop('style');
+
+      expect(axisStyle).toMatchObject({
+        tickLabel: {
+          visible: true,
+        },
+      });
     });
 
     test('it should remove invalid rows', () => {
@@ -1229,7 +1585,20 @@ describe('xy_expression', () => {
       const args: XYArgs = {
         xTitle: '',
         yTitle: '',
+        yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          yLeft: true,
+          yRight: true,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          yLeft: false,
+          yRight: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1262,7 +1631,7 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1298,7 +1667,20 @@ describe('xy_expression', () => {
       const args: XYArgs = {
         xTitle: '',
         yTitle: '',
+        yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          yLeft: false,
+          yRight: false,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          yLeft: false,
+          yRight: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1320,7 +1702,7 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1354,7 +1736,20 @@ describe('xy_expression', () => {
       const args: XYArgs = {
         xTitle: '',
         yTitle: '',
+        yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          yLeft: false,
+          yRight: false,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          yLeft: false,
+          yRight: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1376,7 +1771,7 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1384,6 +1779,214 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it should always show legend if showSingleSeries is set', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], accessors: ['a'], splitAccessor: undefined }],
+            legend: { ...args.legend, isVisible: true, showSingleSeries: true },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it not show legend if isVisible is set to false', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            legend: { ...args.legend, isVisible: false },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    });
+
+    test('it should show legend on right side', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            legend: { ...args.legend, position: 'top' },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+    });
+
+    test('it should apply the fitting function to all non-bar series', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: createSampleDatatableWithRows([
+            { a: 1, b: 2, c: 'I', d: 'Foo' },
+            { a: 1, b: 5, c: 'J', d: 'Bar' },
+          ]),
+        },
+      };
+
+      const args: XYArgs = createArgsWithLayers([
+        { ...sampleLayer, accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'bar', accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'area', accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'area_stacked', accessors: ['a'] },
+      ]);
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args, fittingFunction: 'Carry' }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(BarSeries).prop('fit')).toEqual(undefined);
+      expect(component.find(AreaSeries).at(0).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toEqual([]);
+      expect(component.find(AreaSeries).at(1).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toEqual(['c']);
+    });
+
+    test('it should apply None fitting function if not specified', () => {
+      const { data, args } = sampleArgs();
+
+      args.layers[0].accessors = ['a'];
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
+    });
+
+    test('it should apply the xTitle if is specified', () => {
+      const { data, args } = sampleArgs();
+
+      args.xTitle = 'My custom x-axis title';
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Axis).at(0).prop('title')).toEqual('My custom x-axis title');
+    });
+
+    test('it should hide the X axis title if the corresponding switch is off', () => {
+      const { data, args } = sampleArgs();
+
+      args.axisTitlesVisibilitySettings = {
+        x: false,
+        yLeft: true,
+        yRight: true,
+        type: 'lens_xy_axisTitlesVisibilityConfig',
+      };
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const axisStyle = component.find(Axis).first().prop('style');
+
+      expect(axisStyle).toMatchObject({
+        axisTitle: {
+          visible: false,
+        },
+      });
+    });
+
+    test('it should show the X axis gridlines if the setting is on', () => {
+      const { data, args } = sampleArgs();
+
+      args.gridlinesVisibilitySettings = {
+        x: true,
+        yLeft: false,
+        yRight: false,
+        type: 'lens_xy_gridlinesConfig',
+      };
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Axis).at(0).prop('gridLine')).toMatchObject({
+        visible: true,
+      });
     });
   });
 });

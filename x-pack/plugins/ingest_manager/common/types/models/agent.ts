@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'src/core/public';
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
 
 export type AgentType =
@@ -12,27 +11,62 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
+export type AgentStatus =
+  | 'offline'
+  | 'error'
+  | 'online'
+  | 'inactive'
+  | 'warning'
+  | 'enrolling'
+  | 'unenrolling'
+  | 'degraded';
+
+export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL';
 
 export interface NewAgentAction {
-  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  type: AgentActionType;
   data?: any;
   sent_at?: string;
 }
 
 export interface AgentAction extends NewAgentAction {
+  type: AgentActionType;
+  data?: any;
+  sent_at?: string;
   id: string;
   agent_id: string;
   created_at: string;
+  ack_data?: any;
 }
 
-export interface AgentActionSOAttributes extends SavedObjectAttributes {
-  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
-  sent_at?: string;
+export interface AgentPolicyAction extends NewAgentAction {
+  id: string;
+  type: AgentActionType;
+  data?: any;
+  policy_id: string;
+  policy_revision: number;
   created_at: string;
-  agent_id: string;
-  data?: string;
+  ack_data?: any;
 }
+
+interface CommonAgentActionSOAttributes {
+  type: AgentActionType;
+  sent_at?: string;
+  timestamp?: string;
+  created_at: string;
+  data?: string;
+  ack_data?: string;
+}
+
+export type AgentActionSOAttributes = CommonAgentActionSOAttributes & {
+  agent_id: string;
+};
+export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
+  policy_id: string;
+  policy_revision: number;
+};
+
+export type BaseAgentActionSOAttributes = AgentActionSOAttributes | AgentPolicyActionSOAttributes;
 
 export interface NewAgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
@@ -44,6 +78,7 @@ export interface NewAgentEvent {
     | 'FAILED'
     | 'STOPPING'
     | 'STOPPED'
+    | 'DEGRADED'
     // Action results
     | 'DATA_DUMP'
     // Actions
@@ -54,7 +89,7 @@ export interface NewAgentEvent {
   payload?: any;
   agent_id: string;
   action_id?: string;
-  config_id?: string;
+  policy_id?: string;
   stream_id?: string;
 }
 
@@ -62,7 +97,7 @@ export interface AgentEvent extends NewAgentEvent {
   id: string;
 }
 
-export interface AgentEventSOAttributes extends NewAgentEvent, SavedObjectAttributes {}
+export type AgentEventSOAttributes = NewAgentEvent;
 
 type MetadataValue = string | AgentMetadata;
 
@@ -73,14 +108,16 @@ interface AgentBase {
   type: AgentType;
   active: boolean;
   enrolled_at: string;
+  unenrolled_at?: string;
+  unenrollment_started_at?: string;
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
-  config_id?: string;
-  config_revision?: number | null;
-  config_newest_revision?: number;
+  policy_id?: string;
+  policy_revision?: number | null;
   last_checkin?: string;
+  last_checkin_status?: 'error' | 'online' | 'degraded';
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
 }
@@ -90,8 +127,10 @@ export interface Agent extends AgentBase {
   current_error_events: AgentEvent[];
   access_api_key?: string;
   status?: string;
+  packages: string[];
 }
 
-export interface AgentSOAttributes extends AgentBase, SavedObjectAttributes {
+export interface AgentSOAttributes extends AgentBase {
   current_error_events?: string;
+  packages?: string[];
 }

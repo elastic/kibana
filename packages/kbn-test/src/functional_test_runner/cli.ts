@@ -19,7 +19,10 @@
 
 import { resolve } from 'path';
 import { inspect } from 'util';
+
 import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import exitHook from 'exit-hook';
+
 import { FunctionalTestRunner } from './functional_test_runner';
 
 const makeAbsolutePath = (v: string) => resolve(process.cwd(), v);
@@ -92,8 +95,7 @@ export function runFtrCli() {
           err instanceof Error ? err : new Error(`non-Error type rejection value: ${inspect(err)}`)
         )
       );
-      process.on('SIGTERM', () => teardown());
-      process.on('SIGINT', () => teardown());
+      exitHook(teardown);
 
       try {
         if (flags['test-stats']) {
@@ -111,6 +113,9 @@ export function runFtrCli() {
       }
     },
     {
+      log: {
+        defaultLevel: 'debug',
+      },
       flags: {
         string: [
           'config',
@@ -124,7 +129,6 @@ export function runFtrCli() {
         boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'throttle', 'headless'],
         default: {
           config: 'test/functional/config.js',
-          debug: true,
         },
         help: `
         --config=path      path to a config file

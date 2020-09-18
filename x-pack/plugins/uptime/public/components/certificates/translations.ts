@@ -18,6 +18,10 @@ export const EXPIRES_SOON = i18n.translate('xpack.uptime.certs.expireSoon', {
   defaultMessage: 'Expires soon',
 });
 
+export const EXPIRES = i18n.translate('xpack.uptime.certs.expires', {
+  defaultMessage: 'Expires',
+});
+
 export const SEARCH_CERTS = i18n.translate('xpack.uptime.certs.searchCerts', {
   defaultMessage: 'Search certificates',
 });

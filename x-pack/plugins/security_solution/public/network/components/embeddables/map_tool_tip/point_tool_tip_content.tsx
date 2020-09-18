@@ -11,10 +11,11 @@ import {
   getOrEmptyTagFromValue,
 } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
-import { HostDetailsLink, IPDetailsLink } from '../../../../common/components/links';
+import { HostDetailsLink, NetworkDetailsLink } from '../../../../common/components/links';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import { FlowTarget } from '../../../../graphql/types';
-import { ITooltipProperty } from '../../../../../../maps/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 interface PointToolTipContentProps {
   contextId: string;
@@ -66,7 +67,7 @@ export const getRenderedFieldValue = (field: string, value: string) => {
     return <HostDetailsLink hostName={value} />;
   } else if (['source.ip', 'destination.ip'].includes(field)) {
     const flowTarget = field.split('.')[0] as FlowTarget;
-    return <IPDetailsLink ip={value} flowTarget={flowTarget} />;
+    return <NetworkDetailsLink ip={value} flowTarget={flowTarget} />;
   }
   return <>{value}</>;
 };

@@ -5,10 +5,10 @@
  */
 
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-import { sortByOrder } from 'lodash';
-import React, { useMemo, useCallback, ReactNode } from 'react';
+import { orderBy } from 'lodash';
+import React, { ReactNode, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 // TODO: this should really be imported from EUI
@@ -33,9 +33,24 @@ interface Props<T> {
   hidePerPageOptions?: boolean;
   noItemsMessage?: React.ReactNode;
   sortItems?: boolean;
+  sortFn?: (
+    items: T[],
+    sortField: string,
+    sortDirection: 'asc' | 'desc'
+  ) => T[];
+  pagination?: boolean;
+}
+
+function defaultSortFn<T extends any>(
+  items: T[],
+  sortField: string,
+  sortDirection: 'asc' | 'desc'
+) {
+  return orderBy(items, sortField, sortDirection);
 }
 
 function UnoptimizedManagedTable<T>(props: Props<T>) {
+  const history = useHistory();
   const {
     items,
     columns,
@@ -46,6 +61,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     hidePerPageOptions = true,
     noItemsMessage,
     sortItems = true,
+    sortFn = defaultSortFn,
+    pagination = true,
   } = props;
 
   const {
@@ -58,13 +75,12 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   } = useUrlParams();
 
   const renderedItems = useMemo(() => {
-    // TODO: Use _.orderBy once we upgrade to lodash 4+
     const sortedItems = sortItems
-      ? sortByOrder(items, sortField, sortDirection)
+      ? sortFn(items, sortField, sortDirection as 'asc' | 'desc')
       : items;
 
     return sortedItems.slice(page * pageSize, (page + 1) * pageSize);
-  }, [page, pageSize, sortField, sortDirection, items, sortItems]);
+  }, [page, pageSize, sortField, sortDirection, items, sortItems, sortFn]);
 
   const sort = useMemo(() => {
     return {
@@ -91,26 +107,29 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
         }),
       });
     },
-    []
+    [history]
   );
 
-  const pagination = useMemo(() => {
+  const paginationProps = useMemo(() => {
+    if (!pagination) {
+      return;
+    }
     return {
       hidePerPageOptions,
       totalItemCount: items.length,
       pageIndex: page,
       pageSize,
     };
-  }, [hidePerPageOptions, items, page, pageSize]);
+  }, [hidePerPageOptions, items, page, pageSize, pagination]);
 
   return (
     <EuiBasicTable
       noItemsMessage={noItemsMessage}
       items={renderedItems}
       columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
-      pagination={pagination}
       sorting={sort}
       onChange={onTableChange}
+      {...(paginationProps ? { pagination: paginationProps } : {})}
     />
   );
 }

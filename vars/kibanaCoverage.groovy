@@ -1,3 +1,46 @@
+def downloadPrevious(title) {
+  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
+
+  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
+    kibanaPipeline.bash('''
+
+    gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt . || echo "### Previous Pointer NOT FOUND?"
+
+    if [ -e ./previous.txt ]; then
+      mv previous.txt downloaded_previous.txt
+      echo "### downloaded_previous.txt"
+      cat downloaded_previous.txt
+    fi
+
+    ''', title)
+
+    def previous = sh(script: 'cat downloaded_previous.txt', label: '### Capture Previous Sha', returnStdout: true).trim()
+
+    return previous
+  }
+}
+
+def uploadPrevious(title) {
+  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
+
+  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
+    kibanaPipeline.bash('''
+
+    collectPrevious() {
+      PREVIOUS=$(git log --pretty=format:%h -1)
+      echo "### PREVIOUS: ${PREVIOUS}"
+      echo $PREVIOUS > previous.txt
+    }
+    collectPrevious
+
+    gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/
+
+
+    ''', title)
+
+  }
+}
+
 def uploadCoverageStaticSite(timestamp) {
   def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/"
   def uploadPrefixWithTimeStamp = "${uploadPrefix}${timestamp}/"
@@ -67,6 +110,7 @@ EOF
     cat src/dev/code_coverage/www/index.html
   ''', "### Combine Index Partials")
 }
+
 def collectVcsInfo(title) {
   kibanaPipeline.bash('''
     predicate() {
@@ -98,7 +142,7 @@ def collectVcsInfo(title) {
 
 def generateReports(title) {
   kibanaPipeline.bash("""
-    source src/dev/ci_setup/setup_env.sh
+    source src/dev/ci_setup/setup_env.sh true
     # bootstrap from x-pack folder
     cd x-pack
     yarn kbn bootstrap --prefer-offline
@@ -125,31 +169,31 @@ def uploadCombinedReports() {
   )
 }
 
-def ingestData(buildNum, buildUrl, title) {
+def ingestData(jobName, buildNum, buildUrl, previousSha, title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh
     yarn kbn bootstrap --prefer-offline
     # Using existing target/kibana-coverage folder
-    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${buildNum} ${buildUrl}
+    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh '${jobName}' ${buildNum} '${buildUrl}' ${previousSha}
   """, title)
 }
 
-def ingestWithVault(buildNum, buildUrl, title) {
+def ingestWithVault(jobName, buildNum, buildUrl, previousSha, title) {
   def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-        ingestData(buildNum, buildUrl, title)
+        ingestData(jobName, buildNum, buildUrl, previousSha, title)
       }
     }
   }
 }
 
-def ingest(timestamp, title) {
+def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, title) {
   withEnv([
     "TIME_STAMP=${timestamp}",
   ]) {
-    ingestWithVault(BUILD_NUMBER, BUILD_URL, title)
+    ingestWithVault(jobName, buildNumber, buildUrl, previousSha, title)
   }
 }
 

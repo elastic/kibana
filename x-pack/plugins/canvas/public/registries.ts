@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped module
+// @ts-expect-error untyped module
 import { addRegistries, register } from '@kbn/interpreter/common';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { elementsRegistry } from './lib/elements_registry';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { templatesRegistry } from './lib/templates_registry';
 import { tagsRegistry } from './lib/tags_registry';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { transitionsRegistry } from './lib/transitions_registry';
 
 import {
@@ -20,7 +20,7 @@ import {
   modelRegistry,
   transformRegistry,
   viewRegistry,
-  // @ts-ignore untyped local
+  // @ts-expect-error untyped local
 } from './expression_types';
 import { SetupRegistries } from './plugin_api';
 

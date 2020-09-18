@@ -6,27 +6,26 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
-import { px, unit } from '../../../style/variables';
+import { px, unit, units } from '../../../style/variables';
 import { Stacktrace } from '.';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
-// @ts-ignore Styled Components has trouble inferring the types of the default props here.
 const Accordion = styled(EuiAccordion)`
-  border-top: ${theme.euiBorderThin};
+  border-top: ${({ theme }) => theme.eui.euiBorderThin};
+  margin-top: ${px(units.half)};
 `;
 
 const CausedByContainer = styled('h5')`
-  padding: ${theme.spacerSizes.s} 0;
+  padding: ${({ theme }) => theme.eui.spacerSizes.s} 0;
 `;
 
 const CausedByHeading = styled('span')`
-  color: ${theme.textColors.subdued};
+  color: ${({ theme }) => theme.eui.textColors.subdued};
   display: block;
-  font-size: ${theme.euiFontSizeXS};
-  font-weight: ${theme.euiFontWeightBold};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};
   text-transform: uppercase;
 `;
 
@@ -56,7 +55,7 @@ interface CauseStacktraceProps {
   codeLanguage?: string;
   id: string;
   message?: string;
-  stackframes?: IStackframe[];
+  stackframes?: Stackframe[];
 }
 
 export function CauseStacktrace({

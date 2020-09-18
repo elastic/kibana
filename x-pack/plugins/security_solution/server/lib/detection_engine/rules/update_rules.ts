@@ -7,20 +7,22 @@
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerts/server';
 import { readRules } from './read_rules';
-import { UpdateRuleParams } from './types';
+import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion } from './utils';
-import { hasListsFeature } from '../feature_flags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 
 export const updateRules = async ({
   alertsClient,
+  author,
+  buildingBlockType,
   savedObjectsClient,
   description,
   falsePositives,
   enabled,
   query,
   language,
+  license,
   outputIndex,
   savedId,
   timelineId,
@@ -34,30 +36,38 @@ export const updateRules = async ({
   interval,
   maxSignals,
   riskScore,
+  riskScoreMapping,
+  ruleNameOverride,
   name,
   severity,
+  severityMapping,
   tags,
   threat,
+  threshold,
+  timestampOverride,
   to,
   type,
   references,
   version,
   note,
-  exceptions_list,
+  exceptionsList,
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: UpdateRuleParams): Promise<PartialAlert | null> => {
+}: UpdateRulesOptions): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    author,
+    buildingBlockType,
     description,
     falsePositives,
     query,
     language,
+    license,
     outputIndex,
     savedId,
     timelineId,
@@ -69,10 +79,15 @@ export const updateRules = async ({
     interval,
     maxSignals,
     riskScore,
+    riskScoreMapping,
+    ruleNameOverride,
     name,
     severity,
+    severityMapping,
     tags,
     threat,
+    threshold,
+    timestampOverride,
     to,
     type,
     references,
@@ -80,10 +95,8 @@ export const updateRules = async ({
     note,
     anomalyThreshold,
     machineLearningJobId,
+    exceptionsList,
   });
-
-  // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptions_list } : {};
 
   const update = await alertsClient.update({
     id: rule.id,
@@ -94,6 +107,8 @@ export const updateRules = async ({
       actions: actions.map(transformRuleToAlertAction),
       throttle: null,
       params: {
+        author,
+        buildingBlockType,
         description,
         ruleId: rule.params.ruleId,
         falsePositives,
@@ -101,6 +116,7 @@ export const updateRules = async ({
         immutable: rule.params.immutable,
         query,
         language,
+        license,
         outputIndex,
         savedId,
         timelineId,
@@ -110,8 +126,13 @@ export const updateRules = async ({
         index,
         maxSignals,
         riskScore,
+        riskScoreMapping,
+        ruleNameOverride,
         severity,
+        severityMapping,
         threat,
+        threshold,
+        timestampOverride,
         to,
         type,
         references,
@@ -119,7 +140,7 @@ export const updateRules = async ({
         version: calculatedVersion,
         anomalyThreshold,
         machineLearningJobId,
-        ...exceptionsListParam,
+        exceptionsList,
       },
     },
   });

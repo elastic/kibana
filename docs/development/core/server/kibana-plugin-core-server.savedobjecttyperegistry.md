@@ -16,10 +16,11 @@ export declare class SavedObjectTypeRegistry
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [getAllTypes()](./kibana-plugin-core-server.savedobjecttyperegistry.getalltypes.md) |  | Return all [types](./kibana-plugin-core-server.savedobjectstype.md) currently registered. |
+|  [getAllTypes()](./kibana-plugin-core-server.savedobjecttyperegistry.getalltypes.md) |  | Return all [types](./kibana-plugin-core-server.savedobjectstype.md) currently registered, including the hidden ones.<!-- -->To only get the visible types (which is the most common use case), use <code>getVisibleTypes</code> instead. |
 |  [getImportableAndExportableTypes()](./kibana-plugin-core-server.savedobjecttyperegistry.getimportableandexportabletypes.md) |  | Return all [types](./kibana-plugin-core-server.savedobjectstype.md) currently registered that are importable/exportable. |
 |  [getIndex(type)](./kibana-plugin-core-server.savedobjecttyperegistry.getindex.md) |  | Returns the <code>indexPattern</code> property for given type, or <code>undefined</code> if the type is not registered. |
 |  [getType(type)](./kibana-plugin-core-server.savedobjecttyperegistry.gettype.md) |  | Return the [type](./kibana-plugin-core-server.savedobjectstype.md) definition for given type name. |
+|  [getVisibleTypes()](./kibana-plugin-core-server.savedobjecttyperegistry.getvisibletypes.md) |  | Returns all visible [types](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->.<!-- -->A visible type is a type that doesn't explicitly define <code>hidden=true</code> during registration. |
 |  [isHidden(type)](./kibana-plugin-core-server.savedobjecttyperegistry.ishidden.md) |  | Returns the <code>hidden</code> property for given type, or <code>false</code> if the type is not registered. |
 |  [isImportableAndExportable(type)](./kibana-plugin-core-server.savedobjecttyperegistry.isimportableandexportable.md) |  | Returns the <code>management.importableAndExportable</code> property for given type, or <code>false</code> if the type is not registered or does not define a management section. |
 |  [isMultiNamespace(type)](./kibana-plugin-core-server.savedobjecttyperegistry.ismultinamespace.md) |  | Returns whether the type is multi-namespace (shareable); resolves to <code>false</code> if the type is not registered |

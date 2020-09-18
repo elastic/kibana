@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { GetConfigFn } from '../types';
 import { FieldFormat } from './field_format';
+import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
 export type FieldFormatsContentType = 'html' | 'text';
@@ -24,6 +27,7 @@ export type FieldFormatsContentType = 'html' | 'text';
 /** @internal **/
 export interface HtmlContextTypeOptions {
   field?: any;
+  indexPattern?: any;
   hit?: Record<string, any>;
 }
 
@@ -71,7 +75,7 @@ export interface FieldFormatConfig {
   es?: boolean;
 }
 
-export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn = GetConfigFn;
 
 export type IFieldFormat = PublicMethodsOf<FieldFormat>;
 
@@ -99,3 +103,5 @@ export interface IFieldFormatMetaParams {
     basePath?: string;
   };
 }
+
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;

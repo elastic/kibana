@@ -15,6 +15,7 @@ interface ContextValue extends Omit<AppDeps, 'docLinks'> {
 
 const AppContext = createContext<ContextValue>(null as any);
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const generateDocLinks = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocLinksStart) => {
   const elasticDocLinkBase = `${ELASTIC_WEBSITE_URL}guide/en/`;
   const esBase = `${elasticDocLinkBase}elasticsearch/reference/${DOC_LINK_VERSION}`;

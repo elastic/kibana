@@ -55,6 +55,6 @@ const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> =
 };
 
 export const indexPatternSavedObjectTypeMigrations = {
-  '6.5.0': flow<SavedObjectMigrationFn>(migrateAttributeTypeAndAttributeTypeMeta),
-  '7.6.0': flow<SavedObjectMigrationFn>(migrateSubTypeAndParentFieldProperties),
+  '6.5.0': flow(migrateAttributeTypeAndAttributeTypeMeta),
+  '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
 };

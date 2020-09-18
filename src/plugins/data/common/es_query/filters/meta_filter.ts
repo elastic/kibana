@@ -107,3 +107,13 @@ export const pinFilter = (filter: Filter) =>
 
 export const unpinFilter = (filter: Filter) =>
   !isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
+
+export const isFilter = (x: unknown): x is Filter =>
+  !!x &&
+  typeof x === 'object' &&
+  !!(x as Filter).meta &&
+  typeof (x as Filter).meta === 'object' &&
+  typeof (x as Filter).meta.disabled === 'boolean';
+
+export const isFilters = (x: unknown): x is Filter[] =>
+  Array.isArray(x) && !x.find((y) => !isFilter(y));

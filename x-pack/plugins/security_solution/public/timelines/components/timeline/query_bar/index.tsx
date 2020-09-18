@@ -37,7 +37,7 @@ export interface QueryBarTimelineComponentProps {
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
-  from: number;
+  from: string;
   fromStr: string;
   kqlMode: KqlMode;
   indexPattern: IIndexPattern;
@@ -48,7 +48,7 @@ export interface QueryBarTimelineComponentProps {
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   timelineId: string;
-  to: number;
+  to: string;
   toStr: string;
   updateReduxTime: DispatchUpdateReduxTime;
 }
@@ -120,6 +120,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         isSubscribed = false;
         subscriptions.unsubscribe();
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -129,6 +130,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       if (!deepEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filters]);
 
     useEffect(() => {
@@ -188,6 +190,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       return () => {
         isSubscribed = false;
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [savedQueryId]);
 
     const onChangedQuery = useCallback(
@@ -203,6 +206,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           );
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [filterQueryDraft]
     );
 
@@ -232,6 +236,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           });
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [filterQuery, timelineId]
     );
 
@@ -274,6 +279,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           setSavedQueryId(null);
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [dataProvidersDsl, savedQueryId, savedQueryServices]
     );
 
@@ -285,6 +291,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         indexPattern={indexPattern}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
+        filterQueryDraft={filterQueryDraft}
         filterManager={filterManager}
         filters={queryBarFilters}
         onChangedQuery={onChangedQuery}

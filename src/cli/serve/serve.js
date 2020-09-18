@@ -17,14 +17,15 @@
  * under the License.
  */
 
+import { set as lodashSet } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
+import { getConfigPath } from '@kbn/utils';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { fromRoot } from '../../core/server/utils';
-import { getConfigPath } from '../../core/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
 
@@ -65,7 +66,7 @@ const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
-  const set = _.partial(_.set, rawConfig);
+  const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
@@ -76,7 +77,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     set('env', 'development');
-    set('optimize.watch', true);
 
     if (!has('elasticsearch.username')) {
       set('elasticsearch.username', 'kibana_system');
@@ -136,11 +136,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
-  if (opts.optimize) {
-    set('server.autoListen', false);
-    set('plugins.initialize', false);
-  }
-
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set(
     'plugins.paths',
@@ -154,7 +149,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   );
 
   merge(extraCliOptions);
-  merge(readKeystore(get('path.data')));
+  merge(readKeystore());
 
   return rawConfig;
 }
@@ -183,7 +178,7 @@ export default function (program) {
       'A path to scan for plugins, this can be specified multiple ' +
         'times to specify multiple directories',
       pluginDirCollector,
-      [fromRoot('plugins'), fromRoot('src/legacy/core_plugins')]
+      [fromRoot('plugins')]
     )
     .option(
       '--plugin-path <path>',
@@ -193,7 +188,7 @@ export default function (program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--optimize', 'Run the legacy plugin optimizer and then stop the server');
+    .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
@@ -219,6 +214,7 @@ export default function (program) {
         "Don't put a proxy in front of the dev server, which adds a random basePath"
       )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
@@ -254,6 +250,7 @@ export default function (program) {
         // elastic.co links.
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
+        disableOptimizer: !opts.optimizer,
         oss: !!opts.oss,
         cache: !!opts.cache,
         dist: !!opts.dist,

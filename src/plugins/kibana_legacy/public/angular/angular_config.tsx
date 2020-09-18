@@ -18,31 +18,23 @@
  */
 
 import {
-  auto,
   ICompileProvider,
   IHttpProvider,
   IHttpService,
   ILocationProvider,
-  ILocationService,
   IModule,
   IRootScopeService,
 } from 'angular';
 import $ from 'jquery';
-import { cloneDeep, forOwn, get, set } from 'lodash';
-import React, { Fragment } from 'react';
+import { set } from '@elastic/safer-lodash-set';
+import { get } from 'lodash';
 import * as Rx from 'rxjs';
 import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 import { History } from 'history';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, LegacyCoreStart } from 'kibana/public';
-import { modifyUrl } from '../../../../core/public';
-import { toMountPoint } from '../../../kibana_react/public';
-import { isSystemApiRequest, UrlOverflowService } from '../utils';
+import { CoreStart } from 'kibana/public';
+import { isSystemApiRequest } from '../utils';
 import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
-
-const URL_LIMIT_WARN_WITHIN = 1000;
 
 export interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
@@ -80,32 +72,18 @@ function isDummyRoute($route: any, isLocalAngular: boolean) {
 
 export const configureAppAngularModule = (
   angularModule: IModule,
-  newPlatform:
-    | LegacyCoreStart
-    | {
-        core: CoreStart;
-        readonly env: {
-          mode: Readonly<EnvironmentMode>;
-          packageInfo: Readonly<PackageInfo>;
-        };
-      },
+  newPlatform: {
+    core: CoreStart;
+    readonly env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
+  },
   isLocalAngular: boolean,
   getHistory?: () => History
 ) => {
   const core = 'core' in newPlatform ? newPlatform.core : newPlatform;
-  const packageInfo =
-    'env' in newPlatform
-      ? newPlatform.env.packageInfo
-      : newPlatform.injectedMetadata.getLegacyMetadata();
-
-  if ('injectedMetadata' in newPlatform) {
-    forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
-      if (name !== undefined) {
-        // The legacy platform modifies some of these values, clone to an unfrozen object.
-        angularModule.value(name, cloneDeep(val));
-      }
-    });
-  }
+  const packageInfo = newPlatform.env.packageInfo;
 
   angularModule
     .value('kbnVersion', packageInfo.version)
@@ -113,13 +91,7 @@ export const configureAppAngularModule = (
     .value('buildSha', packageInfo.buildSha)
     .value('esUrl', getEsUrl(core))
     .value('uiCapabilities', core.application.capabilities)
-    .config(
-      setupCompileProvider(
-        'injectedMetadata' in newPlatform
-          ? newPlatform.injectedMetadata.getLegacyMetadata().devMode
-          : newPlatform.env.mode.dev
-      )
-    )
+    .config(setupCompileProvider(newPlatform.env.mode.dev))
     .config(setupLocationProvider())
     .config($setupXsrfRequestInterceptor(packageInfo.version))
     .run(capture$httpLoadingCount(core))
@@ -127,7 +99,6 @@ export const configureAppAngularModule = (
     .run($setupBreadcrumbsAutoClear(core, isLocalAngular))
     .run($setupBadgeAutoClear(core, isLocalAngular))
     .run($setupHelpExtensionAutoClear(core, isLocalAngular))
-    .run($setupUrlOverflowHandling(core, isLocalAngular))
     .run($setupUICapabilityRedirect(core));
 };
 
@@ -389,69 +360,4 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart, isLocalAngular: bo
 
     newPlatform.chrome.setHelpExtension(current.helpExtension);
   });
-};
-
-const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boolean) => (
-  $location: ILocationService,
-  $rootScope: IRootScopeService,
-  $injector: auto.IInjectorService
-) => {
-  const $route = $injector.has('$route') ? $injector.get('$route') : {};
-  const urlOverflow = new UrlOverflowService();
-  const check = () => {
-    if (isDummyRoute($route, isLocalAngular)) {
-      return;
-    }
-    // disable long url checks when storing state in session storage
-    if (newPlatform.uiSettings.get('state:storeInSessionStorage')) {
-      return;
-    }
-
-    if ($location.path() === '/error/url-overflow') {
-      return;
-    }
-
-    try {
-      if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-        newPlatform.notifications.toasts.addWarning({
-          title: i18n.translate('kibana_legacy.bigUrlWarningNotificationTitle', {
-            defaultMessage: 'The URL is big and Kibana might stop working',
-          }),
-          text: toMountPoint(
-            <Fragment>
-              <FormattedMessage
-                id="kibana_legacy.bigUrlWarningNotificationMessage"
-                defaultMessage="Either enable the {storeInSessionStorageParam} option
-                  in {advancedSettingsLink} or simplify the onscreen visuals."
-                values={{
-                  storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
-                  advancedSettingsLink: (
-                    <a
-                      href={newPlatform.application.getUrlForApp('management', {
-                        path: 'kibana/settings',
-                      })}
-                    >
-                      <FormattedMessage
-                        id="kibana_legacy.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
-                        defaultMessage="advanced settings"
-                      />
-                    </a>
-                  ),
-                }}
-              />
-            </Fragment>
-          ),
-        });
-      }
-    } catch (e) {
-      window.location.href = modifyUrl(window.location.href, (parts: any) => {
-        parts.hash = '#/error/url-overflow';
-      });
-      // force the browser to reload to that Kibana's potentially unstable state is unloaded
-      window.location.reload();
-    }
-  };
-
-  $rootScope.$on('$routeUpdate', check);
-  $rootScope.$on('$routeChangeStart', check);
 };

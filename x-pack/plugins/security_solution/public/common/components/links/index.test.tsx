@@ -14,7 +14,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 import {
   GoogleLink,
   HostDetailsLink,
-  IPDetailsLink,
+  NetworkDetailsLink,
   ReputationLink,
   WhoIsLink,
   CertificateFingerprintLink,
@@ -24,11 +24,20 @@ import {
   ExternalLink,
 } from '.';
 
+jest.mock('../link_to');
+
 jest.mock('../../../overview/components/events_by_dataset');
 
 jest.mock('../../lib/kibana', () => {
   return {
     useUiSetting$: jest.fn(),
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+        },
+      },
+    }),
   };
 });
 
@@ -41,42 +50,38 @@ describe('Custom Links', () => {
   describe('HostDetailsLink', () => {
     test('should render valid link to Host Details with hostName as the display text', () => {
       const wrapper = mount(<HostDetailsLink hostName={hostName} />);
-      expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `#/link-to/hosts/${encodeURIComponent(hostName)}`
-      );
+      expect(wrapper.find('EuiLink').prop('href')).toEqual(`/${encodeURIComponent(hostName)}`);
       expect(wrapper.text()).toEqual(hostName);
     });
 
     test('should render valid link to Host Details with child text as the display text', () => {
       const wrapper = mount(<HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>);
-      expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `#/link-to/hosts/${encodeURIComponent(hostName)}`
-      );
+      expect(wrapper.find('EuiLink').prop('href')).toEqual(`/${encodeURIComponent(hostName)}`);
       expect(wrapper.text()).toEqual(hostName);
     });
   });
 
-  describe('IPDetailsLink', () => {
+  describe('NetworkDetailsLink', () => {
     test('should render valid link to IP Details with ipv4 as the display text', () => {
-      const wrapper = mount(<IPDetailsLink ip={ipv4} />);
+      const wrapper = mount(<NetworkDetailsLink ip={ipv4} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `#/link-to/network/ip/${encodeURIComponent(ipv4)}/source`
+        `/ip/${encodeURIComponent(ipv4)}/source`
       );
       expect(wrapper.text()).toEqual(ipv4);
     });
 
     test('should render valid link to IP Details with child text as the display text', () => {
-      const wrapper = mount(<IPDetailsLink ip={ipv4}>{hostName}</IPDetailsLink>);
+      const wrapper = mount(<NetworkDetailsLink ip={ipv4}>{hostName}</NetworkDetailsLink>);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `#/link-to/network/ip/${encodeURIComponent(ipv4)}/source`
+        `/ip/${encodeURIComponent(ipv4)}/source`
       );
       expect(wrapper.text()).toEqual(hostName);
     });
 
     test('should render valid link to IP Details with ipv6 as the display text', () => {
-      const wrapper = mount(<IPDetailsLink ip={ipv6} />);
+      const wrapper = mount(<NetworkDetailsLink ip={ipv6} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
-        `#/link-to/network/ip/${encodeURIComponent(ipv6Encoded)}/source`
+        `/ip/${encodeURIComponent(ipv6Encoded)}/source`
       );
       expect(wrapper.text()).toEqual(ipv6);
     });

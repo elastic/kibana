@@ -10,12 +10,15 @@ import { Filter } from '../../../../../../../src/plugins/data/public';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
   DataProvider,
+  DataProviderType,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
 
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
-import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import { TimelineTypeLiteral, RowRendererId } from '../../../../common/types/timeline';
+import { InsertTimeline } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -53,9 +56,10 @@ export const createTimeline = actionCreator<{
   id: string;
   dataProviders?: DataProvider[];
   dateRange?: {
-    start: number;
-    end: number;
+    start: string;
+    end: string;
   };
+  excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
@@ -66,7 +70,9 @@ export const createTimeline = actionCreator<{
   show?: boolean;
   sort?: Sort;
   showCheckboxes?: boolean;
-  showRowRenderers?: boolean;
+  timelineType?: TimelineTypeLiteral;
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
@@ -84,6 +90,10 @@ export const removeProvider = actionCreator<{
 
 export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
+export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
+  'UPDATE_TIMELINE_GRAPH_EVENT_ID'
+);
+
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
 
 export const updateTimeline = actionCreator<{
@@ -94,7 +104,10 @@ export const updateTimeline = actionCreator<{
 export const addTimeline = actionCreator<{
   id: string;
   timeline: TimelineModel;
+  savedTimeline?: boolean;
 }>('ADD_TIMELINE');
+
+export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{
   id: string;
@@ -144,6 +157,13 @@ export const updateDataProviderKqlQuery = actionCreator<{
   providerId: string;
 }>('PROVIDER_EDIT_KQL_QUERY');
 
+export const updateDataProviderType = actionCreator<{
+  andProviderId?: string;
+  id: string;
+  type: DataProviderType;
+  providerId: string;
+}>('UPDATE_PROVIDER_TYPE');
+
 export const updateHighlightedDropAndProviderId = actionCreator<{
   id: string;
   providerId: string;
@@ -190,7 +210,7 @@ export const updateProviders = actionCreator<{ id: string; providers: DataProvid
   'UPDATE_PROVIDERS'
 );
 
-export const updateRange = actionCreator<{ id: string; start: number; end: number }>(
+export const updateRange = actionCreator<{ id: string; start: string; end: string }>(
   'UPDATE_RANGE'
 );
 
@@ -247,3 +267,8 @@ export const clearEventsDeleted = actionCreator<{
 export const updateEventType = actionCreator<{ id: string; eventType: EventType }>(
   'UPDATE_EVENT_TYPE'
 );
+
+export const setExcludedRowRendererIds = actionCreator<{
+  id: string;
+  excludedRowRendererIds: RowRendererId[];
+}>('SET_TIMELINE_EXCLUDED_ROW_RENDERER_IDS');

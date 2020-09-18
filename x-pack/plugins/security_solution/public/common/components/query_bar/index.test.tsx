@@ -7,14 +7,13 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { QueryBar, QueryBarComponentProps } from '.';
-import { createKibanaContextProviderMock } from '../../mock/kibana_react';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 describe('QueryBar ', () => {
   // We are doing that because we need to wrapped this component with redux
@@ -185,15 +184,51 @@ describe('QueryBar ', () => {
     });
   });
 
-  describe('#onQueryChange', () => {
-    test(' is the only reference that changed when filterQueryDraft props get updated', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
+  describe('state', () => {
+    test('clears draftQuery when filterQueryDraft has been cleared', () => {
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
+          <QueryBar {...props} />
+        </TestProviders>
+      );
+
+      const wrapper = mount(
+        <Proxy
+          dateRangeFrom={DEFAULT_FROM}
+          dateRangeTo={DEFAULT_TO}
+          hideSavedQuery={false}
+          indexPattern={mockIndexPattern}
+          isRefreshPaused={true}
+          filterQuery={{ query: '', language: 'kuery' }}
+          filterQueryDraft={{ expression: 'host.name', kind: 'kuery' }}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filters={[]}
+          onChangedQuery={mockOnChangeQuery}
+          onSubmitQuery={mockOnSubmitQuery}
+          onSavedQuery={mockOnSavedQuery}
+        />
+      );
+
+      let queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
+      queryInput.simulate('change', { target: { value: 'host.name:*' } });
+
+      wrapper.update();
+      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
+      expect(queryInput.props().children).toBe('host.name:*');
+
+      wrapper.setProps({ filterQueryDraft: null });
+      wrapper.update();
+      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
+
+      expect(queryInput.props().children).toBe('');
+    });
+  });
+
+  describe('#onQueryChange', () => {
+    test(' is the only reference that changed when filterQueryDraft props get updated', () => {
+      const Proxy = (props: QueryBarComponentProps) => (
+        <TestProviders>
+          <QueryBar {...props} />
         </TestProviders>
       );
 
@@ -217,7 +252,7 @@ describe('QueryBar ', () => {
       const onSubmitQueryRef = searchBarProps.onQuerySubmit;
       const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
 
-      const queryInput = wrapper.find(QueryBar).find('input[data-test-subj="queryInput"]');
+      const queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
       queryInput.simulate('change', { target: { value: 'hello: world' } });
       wrapper.update();
 
@@ -333,6 +368,50 @@ describe('QueryBar ', () => {
       expect(onSavedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
       expect(onChangedQueryRef).toEqual(wrapper.find(SearchBar).props().onQueryChange);
       expect(onSubmitQueryRef).toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
+    });
+  });
+
+  describe('SavedQueryManagementComponent state', () => {
+    test('popover should hidden when "Save current query" button was clicked', () => {
+      const Proxy = (props: QueryBarComponentProps) => (
+        <TestProviders>
+          <QueryBar {...props} />
+        </TestProviders>
+      );
+
+      const wrapper = mount(
+        <Proxy
+          dateRangeFrom={DEFAULT_FROM}
+          dateRangeTo={DEFAULT_TO}
+          hideSavedQuery={false}
+          indexPattern={mockIndexPattern}
+          isRefreshPaused={true}
+          filterQuery={{
+            query: 'here: query',
+            language: 'kuery',
+          }}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filters={[]}
+          onChangedQuery={mockOnChangeQuery}
+          onSubmitQuery={mockOnSubmitQuery}
+          onSavedQuery={mockOnSavedQuery}
+        />
+      );
+
+      const isSavedQueryPopoverOpen = () =>
+        wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
+
+      expect(isSavedQueryPopoverOpen()).toBeFalsy();
+
+      wrapper
+        .find('button[data-test-subj="saved-query-management-popover-button"]')
+        .simulate('click');
+
+      expect(isSavedQueryPopoverOpen()).toBeTruthy();
+
+      wrapper.find('button[data-test-subj="saved-query-management-save-button"]').simulate('click');
+
+      expect(isSavedQueryPopoverOpen()).toBeFalsy();
     });
   });
 });

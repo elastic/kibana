@@ -7,22 +7,22 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 
 import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { getJobIdUrl } from '../../../../util/get_job_id_url';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsList extends Component {
@@ -71,7 +71,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl('jobs', id)}>{id}</EuiLink>;
+    return <AnomalyDetectionJobIdLink key={id} id={id} />;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
@@ -189,7 +189,9 @@ export class JobsList extends Component {
         sortable: true,
         field: 'description',
         'data-test-subj': 'mlJobListColumnDescription',
-        render: (description, item) => <JobDescription job={item} />,
+        render: (description, item) => (
+          <JobDescription job={item} isManagementTable={isManagementTable} />
+        ),
         textOnly: true,
         width: '20%',
       },
@@ -239,7 +241,7 @@ export class JobsList extends Component {
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        render: (item) => <ResultLinks jobs={[item]} />,
+        render: (item) => <ResultLinks jobs={[item]} isManagementTable={isManagementTable} />,
       },
     ];
 

@@ -32,6 +32,8 @@ describe('Header', () => {
         onQueryChanged={() => {}}
         goToNextStep={() => {}}
         isNextStepDisabled={false}
+        onChangeIncludingSystemIndices={() => {}}
+        isIncludingSystemIndices={false}
       />
     );
 
@@ -48,6 +50,8 @@ describe('Header', () => {
         onQueryChanged={() => {}}
         goToNextStep={() => {}}
         isNextStepDisabled={true}
+        onChangeIncludingSystemIndices={() => {}}
+        isIncludingSystemIndices={false}
       />
     );
 

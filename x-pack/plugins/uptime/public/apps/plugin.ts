@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   CoreSetup,
   CoreStart,
@@ -11,22 +12,34 @@ import {
   AppMountParameters,
 } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
-import { UMFrontendLibs } from '../lib/lib';
-import { PLUGIN } from '../../common/constants';
-import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
-import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../triggers_actions_ui/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../src/plugins/data/public';
+import { alertTypeInitializers } from '../lib/alert_types';
+import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
+import { PLUGIN } from '../../common/constants/plugin';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
+  observability: ObservabilityPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 
 export type ClientSetup = void;
@@ -46,35 +59,60 @@ export class UptimePlugin
         title: PLUGIN.TITLE,
         description: PLUGIN.DESCRIPTION,
         icon: 'uptimeApp',
-        path: '/app/uptime#/',
-        showOnHomePage: true,
+        path: '/app/uptime',
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }
+    const getUptimeDataHelper = async () => {
+      const [coreStart] = await core.getStartServices();
+      const { UptimeDataHelper } = await import('./uptime_overview_fetcher');
+
+      return UptimeDataHelper(coreStart);
+    };
+    plugins.observability.dashboard.register({
+      appName: 'uptime',
+      hasData: async () => {
+        const dataHelper = await getUptimeDataHelper();
+        const status = await dataHelper.indexStatus();
+        return status.docCount > 0;
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getUptimeDataHelper();
+        return await dataHelper.overviewData(params);
+      },
+    });
 
     core.application.register({
-      appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
-      euiIconType: 'uptimeApp',
-      order: 8900,
+      euiIconType: 'logoObservability',
+      order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
-        const { getKibanaFrameworkAdapter } = await import(
-          '../lib/adapters/framework/new_platform_adapter'
-        );
 
-        const { element } = params;
-        const libs: UMFrontendLibs = {
-          framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
-        };
-        return libs.framework.render(element);
+        const { renderApp } = await import('./render_app');
+
+        return renderApp(coreStart, plugins, corePlugins, params);
       },
     });
   }
 
-  public start(_start: CoreStart, _plugins: {}): void {}
+  public start(start: CoreStart, plugins: ClientPluginsStart): void {
+    alertTypeInitializers.forEach((init) => {
+      const alertInitializer = init({
+        core: start,
+        plugins,
+      });
+      if (
+        plugins.triggers_actions_ui &&
+        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
+      ) {
+        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
+      }
+    });
+  }
 
   public stop(): void {}
 }

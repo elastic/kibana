@@ -17,13 +17,14 @@
  * under the License.
  */
 
+import { withTimeout } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginName, PluginOpaqueId } from './types';
+import { DiscoveredPlugin, PluginName } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { withTimeout } from '../../utils';
+import { PluginDependencies } from '.';
 
 const Sec = 1000;
 /** @internal */
@@ -45,9 +46,19 @@ export class PluginsSystem {
    * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
    * @internal
    */
-  public getPluginDependencies(): ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]> {
-    // Return dependency map of opaque ids
-    return new Map(
+  public getPluginDependencies(): PluginDependencies {
+    const asNames = new Map(
+      [...this.plugins].map(([name, plugin]) => [
+        plugin.name,
+        [
+          ...new Set([
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter((optPlugin) => this.plugins.has(optPlugin)),
+          ]),
+        ].map((depId) => this.plugins.get(depId)!.name),
+      ])
+    );
+    const asOpaqueIds = new Map(
       [...this.plugins].map(([name, plugin]) => [
         plugin.opaqueId,
         [
@@ -58,6 +69,8 @@ export class PluginsSystem {
         ].map((depId) => this.plugins.get(depId)!.opaqueId),
       ])
     );
+
+    return { asNames, asOpaqueIds };
   }
 
   public async setupPlugins(deps: PluginsServiceSetupDeps) {
@@ -66,15 +79,16 @@ export class PluginsSystem {
       return contracts;
     }
 
-    const sortedPlugins = this.getTopologicallySortedPluginNames();
-    this.log.info(`Setting up [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
+    const sortedPlugins = new Map(
+      [...this.getTopologicallySortedPluginNames()]
+        .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
+        .filter(([pluginName, plugin]) => plugin.includesServerPlugin)
+    );
+    this.log.info(
+      `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
+    );
 
-    for (const pluginName of sortedPlugins) {
-      const plugin = this.plugins.get(pluginName)!;
-      if (!plugin.includesServerPlugin) {
-        continue;
-      }
-
+    for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
       const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
@@ -177,6 +191,7 @@ export class PluginsSystem {
             optionalPlugins: plugin.manifest.optionalPlugins.filter((p) =>
               uiPluginNames.includes(p)
             ),
+            requiredBundles: plugin.manifest.requiredBundles,
           },
         ];
       })

@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// This is a JS file because the renderers are not strongly-typed yet. Tagging for
-// visibility.
-// @ts-ignore Untyped local
-
 import { debug } from '../canvas_plugin_src/renderers/debug';
 import { error } from '../canvas_plugin_src/renderers/error';
 import { image } from '../canvas_plugin_src/renderers/image';

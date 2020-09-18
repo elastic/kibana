@@ -18,7 +18,10 @@
  */
 
 import { Observable } from 'rxjs';
+import { History } from 'history';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
+import { MountPoint } from '../types';
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
 import { IContextProvider } from '../context';
@@ -29,13 +32,68 @@ import { NotificationsStart } from '../notifications';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
-import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
 
-/** @public */
-export interface AppBase {
+/**
+ * Accessibility status of an application.
+ *
+ * @public
+ */
+export enum AppStatus {
+  /**
+   * Application is accessible.
+   */
+  accessible = 0,
+  /**
+   * Application is not accessible.
+   */
+  inaccessible = 1,
+}
+
+/**
+ * Status of the application's navLink.
+ *
+ * @public
+ */
+export enum AppNavLinkStatus {
+  /**
+   * The application navLink will be `visible` if the application's {@link AppStatus} is set to `accessible`
+   * and `hidden` if the application status is set to `inaccessible`.
+   */
+  default = 0,
+  /**
+   * The application navLink is visible and clickable in the navigation bar.
+   */
+  visible = 1,
+  /**
+   * The application navLink is visible but inactive and not clickable in the navigation bar.
+   */
+  disabled = 2,
+  /**
+   * The application navLink does not appear in the navigation bar.
+   */
+  hidden = 3,
+}
+
+/**
+ * Defines the list of fields that can be updated via an {@link AppUpdater}.
+ * @public
+ */
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+
+/**
+ * Updater for applications.
+ * see {@link ApplicationSetup}
+ * @public
+ */
+export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
+
+/**
+ * @public
+ */
+export interface App<HistoryLocationState = unknown> {
   /**
    * The unique identifier of the application
    */
@@ -135,82 +193,11 @@ export interface AppBase {
   capabilities?: Partial<Capabilities>;
 
   /**
-   * Flag to keep track of legacy applications.
-   * For internal use only. any value will be overridden when registering an App.
-   *
-   * @internal
-   */
-  legacy?: boolean;
-
-  /**
    * Hide the UI chrome when the application is mounted. Defaults to `false`.
    * Takes precedence over chrome service visibility settings.
    */
   chromeless?: boolean;
-}
 
-/**
- * Accessibility status of an application.
- *
- * @public
- */
-export enum AppStatus {
-  /**
-   * Application is accessible.
-   */
-  accessible = 0,
-  /**
-   * Application is not accessible.
-   */
-  inaccessible = 1,
-}
-
-/**
- * Status of the application's navLink.
- *
- * @public
- */
-export enum AppNavLinkStatus {
-  /**
-   * The application navLink will be `visible` if the application's {@link AppStatus} is set to `accessible`
-   * and `hidden` if the application status is set to `inaccessible`.
-   */
-  default = 0,
-  /**
-   * The application navLink is visible and clickable in the navigation bar.
-   */
-  visible = 1,
-  /**
-   * The application navLink is visible but inactive and not clickable in the navigation bar.
-   */
-  disabled = 2,
-  /**
-   * The application navLink does not appear in the navigation bar.
-   */
-  hidden = 3,
-}
-
-/**
- * Defines the list of fields that can be updated via an {@link AppUpdater}.
- * @public
- */
-export type AppUpdatableFields = Pick<
-  AppBase,
-  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'
->;
-
-/**
- * Updater for applications.
- * see {@link ApplicationSetup}
- * @public
- */
-export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
-
-/**
- * Extension of {@link AppBase | common app properties} with the mount function.
- * @public
- */
-export interface App<HistoryLocationState = unknown> extends AppBase {
   /**
    * A mount function called when the user navigates to this app's route. May have signature of {@link AppMount} or
    * {@link AppMountDeprecated}.
@@ -222,25 +209,29 @@ export interface App<HistoryLocationState = unknown> extends AppBase {
   mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 
   /**
-   * Hide the UI chrome when the application is mounted. Defaults to `false`.
-   * Takes precedence over chrome service visibility settings.
-   */
-  chromeless?: boolean;
-
-  /**
    * Override the application's routing path from `/app/${id}`.
    * Must be unique across registered applications. Should not include the
    * base path from HTTP.
    */
   appRoute?: string;
-}
 
-/** @public */
-export interface LegacyApp extends AppBase {
-  appUrl: string;
-  subUrlBase?: string;
-  linkToLastSubUrl?: boolean;
-  disableSubUrlTracking?: boolean;
+  /**
+   * If set to true, the application's route will only be checked against an exact match. Defaults to `false`.
+   *
+   * @example
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'My App'
+   *   exactRoute: true,
+   *   mount: () => { ... },
+   * })
+   *
+   * // '[basePath]/app/my_app' will be matched
+   * // '[basePath]/app/my_app/some/path' will not be matched
+   * ```
+   */
+  exactRoute?: boolean;
 }
 
 /**
@@ -249,16 +240,10 @@ export interface LegacyApp extends AppBase {
  * @public
  */
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
-  legacy: false;
-};
-
-/**
- * Information about a registered {@link LegacyApp | legacy application}
- *
- * @public
- */
-export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
-  legacy: true;
+  // remove optional on fields populated with default values
+  status: AppStatus;
+  navLinkStatus: AppNavLinkStatus;
+  appRoute: string;
 };
 
 /**
@@ -272,6 +257,12 @@ export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
 export type AppMount<HistoryLocationState = unknown> = (
   params: AppMountParameters<HistoryLocationState>
 ) => AppUnmount | Promise<AppUnmount>;
+
+/**
+ * A function called when an application should be unmounted from the page. This function should be synchronous.
+ * @public
+ */
+export type AppUnmount = () => void;
 
 /**
  * A mount function called when the user navigates to this app's route.
@@ -469,6 +460,37 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   onAppLeave: (handler: AppLeaveHandler) => void;
+
+  /**
+   * A function that can be used to set the mount point used to populate the application action container
+   * in the chrome header.
+   *
+   * Calling the handler multiple time will erase the current content of the action menu with the mount from the latest call.
+   * Calling the handler with `undefined` will unmount the current mount point.
+   * Calling the handler after the application has been unmounted will have no effect.
+   *
+   * @example
+   *
+   * ```ts
+   * // application.tsx
+   * import React from 'react';
+   * import ReactDOM from 'react-dom';
+   * import { BrowserRouter, Route } from 'react-router-dom';
+   *
+   * import { CoreStart, AppMountParameters } from 'src/core/public';
+   * import { MyPluginDepsStart } from './plugin';
+   *
+   * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
+   *    const { renderApp } = await import('./application');
+   *    const { renderActionMenu } = await import('./action_menu');
+   *    setHeaderActionMenu((element) => {
+   *      return renderActionMenu(element);
+   *    })
+   *    return renderApp({ element, history });
+   * }
+   * ```
+   */
+  setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
 
 /**
@@ -549,29 +571,20 @@ export interface AppLeaveActionFactory {
   default(): AppLeaveDefaultAction;
 }
 
-/**
- * A function called when an application should be unmounted from the page. This function should be synchronous.
- * @public
- */
-export type AppUnmount = () => void;
+/** @internal */
+export interface Mounter {
+  appRoute: string;
+  appBasePath: string;
+  mount: AppMount;
+  exactRoute: boolean;
+  unmountBeforeMounting?: boolean;
+}
 
 /** @internal */
-export type AppMounter = (params: AppMountParameters) => Promise<AppUnmount>;
-
-/** @internal */
-export type LegacyAppMounter = (params: AppMountParameters) => void;
-
-/** @internal */
-export type Mounter<T = App | LegacyApp> = SelectivePartial<
-  {
-    appRoute: string;
-    appBasePath: string;
-    mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
-    legacy: boolean;
-    unmountBeforeMounting: T extends LegacyApp ? true : boolean;
-  },
-  T extends LegacyApp ? never : 'unmountBeforeMounting'
->;
+export interface ParsedAppUrl {
+  app: string;
+  path?: string;
+}
 
 /** @public */
 export interface ApplicationSetup {
@@ -638,13 +651,6 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
   ): void;
 
   /**
-   * Register metadata about legacy applications. Legacy apps will not be mounted when navigated to.
-   * @param app
-   * @internal
-   */
-  registerLegacyApp(app: LegacyApp): void;
-
-  /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
    * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
@@ -658,6 +664,25 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
     contextName: T,
     provider: IContextProvider<AppMountDeprecated, T>
   ): void;
+}
+
+/**
+ * Options for the {@link ApplicationStart.navigateToApp | navigateToApp API}
+ */
+export interface NavigateToAppOptions {
+  /**
+   * optional path inside application to deep link to.
+   * If undefined, will use {@link App.defaultPath | the app's default path}` as default.
+   */
+  path?: string;
+  /**
+   * optional state to forward to the application
+   */
+  state?: unknown;
+  /**
+   * if true, will not create a new history entry when navigating (using `replace` instead of `push`)
+   */
+  replace?: boolean;
 }
 
 /** @public */
@@ -674,17 +699,15 @@ export interface ApplicationStart {
    * Applications disabled by {@link Capabilities} will not be present in the map. Applications manually disabled from
    * the client-side using an {@link AppUpdater | application updater} are present, with their status properly set as `inaccessible`.
    */
-  applications$: Observable<ReadonlyMap<string, PublicAppInfo | PublicLegacyAppInfo>>;
+  applications$: Observable<ReadonlyMap<string, PublicAppInfo>>;
 
   /**
    * Navigate to a given app
    *
    * @param appId
-   * @param options.path - optional path inside application to deep link to.
-   *                       If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
-   * @param options.state - optional state to forward to the application
+   * @param options - navigation options
    */
-  navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;
+  navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 
   /**
    * Navigate to given url, which can either be an absolute url or a relative path, in a SPA friendly way when possible.
@@ -766,10 +789,18 @@ export interface InternalApplicationStart extends Omit<ApplicationStart, 'regist
 
   // Internal APIs
   getComponent(): JSX.Element | null;
-}
 
-/** @internal */
-type SelectivePartial<T, K extends keyof T> = Partial<Pick<T, K>> &
-  Required<Pick<T, Exclude<keyof T, K>>> extends infer U
-  ? { [P in keyof U]: U[P] }
-  : never;
+  /**
+   * The potential action menu set by the currently mounted app.
+   * Consumed by the chrome header.
+   *
+   * @internal
+   */
+  currentActionMenu$: Observable<MountPoint | undefined>;
+
+  /**
+   * The global history instance, exposed only to Core.
+   * @internal
+   */
+  history: History<unknown>;
+}

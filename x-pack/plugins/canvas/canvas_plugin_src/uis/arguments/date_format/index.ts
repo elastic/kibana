@@ -7,7 +7,6 @@
 import { compose, withProps } from 'recompose';
 import moment from 'moment';
 import { DateFormatArgInput as Component, Props as ComponentProps } from './date_format';
-// @ts-ignore untyped local lib
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';

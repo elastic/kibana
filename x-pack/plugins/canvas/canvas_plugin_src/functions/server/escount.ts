@@ -9,7 +9,7 @@ import {
   ExpressionValueFilter,
 } from 'src/plugins/expressions/common';
 /* eslint-disable */
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
 /* eslint-enable */
 import { getFunctionHelp } from '../../../i18n';

@@ -29,6 +29,7 @@ import { ScopedHistory } from '../scoped_history';
 describe('AppContainer', () => {
   const appId = 'someApp';
   const setAppLeaveHandler = jest.fn();
+  const setAppActionMenu = jest.fn();
   const setIsMounting = jest.fn();
 
   beforeEach(() => {
@@ -54,7 +55,7 @@ describe('AppContainer', () => {
     appBasePath: '/base-path',
     appRoute: '/some-route',
     unmountBeforeMounting: false,
-    legacy: false,
+    exactRoute: false,
     mount: async ({ element }: AppMountParameters) => {
       await promise;
       const container = document.createElement('div');
@@ -75,6 +76,7 @@ describe('AppContainer', () => {
         appStatus={AppStatus.inaccessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        setAppActionMenu={setAppActionMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -115,6 +117,7 @@ describe('AppContainer', () => {
         appStatus={AppStatus.accessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        setAppActionMenu={setAppActionMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
@@ -142,7 +145,7 @@ describe('AppContainer', () => {
       appBasePath: '/base-path/some-route',
       appRoute: '/some-route',
       unmountBeforeMounting: false,
-      legacy: false,
+      exactRoute: false,
       mount: async ({ element }: AppMountParameters) => {
         await waitPromise;
         throw new Error(`Mounting failed!`);
@@ -156,6 +159,7 @@ describe('AppContainer', () => {
         appStatus={AppStatus.accessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        setAppActionMenu={setAppActionMenu}
         setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location

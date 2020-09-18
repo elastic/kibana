@@ -6,24 +6,21 @@
 
 import React, { useCallback } from 'react';
 
-import { AlertsHistogramPanel } from '../../../alerts/components/alerts_histogram_panel';
-import { alertsHistogramOptions } from '../../../alerts/components/alerts_histogram_panel/config';
-import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { AlertsHistogramPanel } from '../../../detections/components/alerts_histogram_panel';
+import { alertsHistogramOptions } from '../../../detections/components/alerts_histogram_panel/config';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { SetAbsoluteRangeDatePicker } from '../../../network/pages/types';
 import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../common/store';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import * as i18n from '../../pages/translations';
 import { UpdateDateRange } from '../../../common/components/charts/common';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const DEFAULT_STACK_BY = 'signal.rule.threat.tactic.name';
 const NO_FILTERS: Filter[] = [];
 
-interface Props {
-  deleteQuery?: ({ id }: { id: string }) => void;
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters?: Filter[];
-  from: number;
   headerChildren?: React.ReactNode;
   indexPattern: IIndexPattern;
   /** Override all defaults, and only display this field */
@@ -31,13 +28,7 @@ interface Props {
   query?: Query;
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
+  timelineId?: string;
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
@@ -50,6 +41,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
+  timelineId,
   to,
 }) => {
   const { signalIndexName } = useSignalIndex();
@@ -59,18 +51,19 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({ id: setAbsoluteRangeDatePickerTarget, from: min, to: max });
+      setAbsoluteRangeDatePicker({
+        id: setAbsoluteRangeDatePickerTarget,
+        from: new Date(min).toISOString(),
+        to: new Date(max).toISOString(),
+      });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setAbsoluteRangeDatePicker]
   );
-
-  const defaultStackByOption =
-    alertsHistogramOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? alertsHistogramOptions[0];
 
   return (
     <AlertsHistogramPanel
       deleteQuery={deleteQuery}
-      defaultStackByOption={defaultStackByOption}
       filters={filters}
       from={from}
       headerChildren={headerChildren}
@@ -82,6 +75,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       showLinkToAlerts={onlyField == null ? true : false}
       stackByOptions={onlyField == null ? alertsHistogramOptions : undefined}
       legendPosition={'right'}
+      timelineId={timelineId}
       to={to}
       title={i18n.ALERT_COUNT}
       updateDateRange={updateDateRangeCallback}

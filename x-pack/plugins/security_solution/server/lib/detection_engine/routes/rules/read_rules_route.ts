@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
+import {
+  queryRulesSchema,
+  QueryRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import { transformError, buildSiemResponse } from '../utils';
 import { readRules } from '../../rules/read_rules';
-import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { ReadRuleRequestParams } from '../../rules/types';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
@@ -20,15 +24,22 @@ export const readRulesRoute = (router: IRouter) => {
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        query: buildRouteValidation<ReadRuleRequestParams>(queryRulesSchema),
+        query: buildRouteValidation<typeof queryRulesSchema, QueryRulesSchemaDecoded>(
+          queryRulesSchema
+        ),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
-      const { id, rule_id: ruleId } = request.query;
       const siemResponse = buildSiemResponse(response);
+      const validationErrors = queryRuleValidateTypeDependents(request.query);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
+
+      const { id, rule_id: ruleId } = request.query;
 
       const alertsClient = context.alerting?.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;

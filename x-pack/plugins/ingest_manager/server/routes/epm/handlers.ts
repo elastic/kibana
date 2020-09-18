@@ -5,20 +5,25 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
-import {
-  GetPackagesRequestSchema,
-  GetFileRequestSchema,
-  GetInfoRequestSchema,
-  InstallPackageRequestSchema,
-  DeletePackageRequestSchema,
-} from '../../types';
+import { appContextService } from '../../services';
 import {
   GetInfoResponse,
   InstallPackageResponse,
+  MessageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
+  GetLimitedPackagesResponse,
 } from '../../../common';
+import {
+  GetCategoriesRequestSchema,
+  GetPackagesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
+  DeletePackageRequestSchema,
+} from '../../types';
 import {
   getCategories,
   getPackages,
@@ -26,21 +31,25 @@ import {
   getPackageInfo,
   installPackage,
   removeInstallation,
+  getLimitedPackages,
+  getInstallationObject,
 } from '../../services/epm/packages';
+import { IngestManagerError, defaultIngestErrorHandler } from '../../errors';
+import { splitPkgKey } from '../../services/epm/registry';
+import { getInstallType } from '../../services/epm/packages/install';
 
-export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
+export const getCategoriesHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetCategoriesRequestSchema.query>
+> = async (context, request, response) => {
   try {
-    const res = await getCategories();
+    const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -52,20 +61,31 @@ export const getListHandler: RequestHandler<
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
       savedObjectsClient,
-      category: request.query.category,
+      ...request.query,
     });
     const body: GetPackagesResponse = {
       response: res,
-      success: true,
     };
     return response.ok({
       body,
     });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getLimitedListHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await getLimitedPackages({ savedObjectsClient });
+    const body: GetLimitedPackagesResponse = {
+      response: res,
+    };
+    return response.ok({
+      body,
     });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -86,11 +106,8 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
       customResponseObj.headers = { 'Content-Type': contentType };
     }
     return response.custom(customResponseObj);
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -103,50 +120,80 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     // TODO: change epm API to /packageName/version so we don't need to do this
-    const [pkgName, pkgVersion] = pkgkey.split('-');
+    const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
     const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
-export const installPackageHandler: RequestHandler<TypeOf<
-  typeof InstallPackageRequestSchema.params
->> = async (context, request, response) => {
+export const installPackageFromRegistryHandler: RequestHandler<
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
+  undefined,
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
+> = async (context, request, response) => {
+  const logger = appContextService.getLogger();
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const { pkgkey } = request.params;
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installType = getInstallType({ pkgVersion, installedPkg });
   try {
-    const { pkgkey } = request.params;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const res = await installPackage({
       savedObjectsClient,
       pkgkey,
       callCluster,
+      force: request.body?.force,
     });
     const body: InstallPackageResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
   } catch (e) {
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
-      });
+    // could have also done `return defaultIngestErrorHandler({ error: e, response })` at each of the returns,
+    // but doing it this way will log the outer/install errors before any inner/rollback errors
+    const defaultResult = await defaultIngestErrorHandler({ error: e, response });
+    if (e instanceof IngestManagerError) {
+      return defaultResult;
     }
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+
+    // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
+    try {
+      if (installType === 'install' || installType === 'reinstall') {
+        logger.error(`uninstalling ${pkgkey} after error installing`);
+        await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+      }
+      if (installType === 'update') {
+        // @ts-ignore getInstallType ensures we have installedPkg
+        const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
+        logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
+        await installPackage({
+          savedObjectsClient,
+          pkgkey: prevVersion,
+          callCluster,
+        });
+      }
+    } catch (error) {
+      logger.error(`failed to uninstall or rollback package after installation error ${error}`);
+    }
+    return defaultResult;
   }
+};
+
+export const installPackageByUploadHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.body>
+> = async (context, request, response) => {
+  const body: MessageResponse = {
+    response: 'package upload was received ok, but not installed (not implemented yet)',
+  };
+  return response.ok({ body });
 };
 
 export const deletePackageHandler: RequestHandler<TypeOf<
@@ -159,19 +206,9 @@ export const deletePackageHandler: RequestHandler<TypeOf<
     const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
     const body: DeletePackageResponse = {
       response: res,
-      success: true,
     };
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
-      });
-    }
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

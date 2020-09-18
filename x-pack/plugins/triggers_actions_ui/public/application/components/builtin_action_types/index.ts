@@ -12,6 +12,9 @@ import { getPagerDutyActionType } from './pagerduty';
 import { getWebhookActionType } from './webhook';
 import { TypeRegistry } from '../../type_registry';
 import { ActionTypeModel } from '../../../types';
+import { getServiceNowActionType } from './servicenow';
+import { getJiraActionType } from './jira';
+import { getResilientActionType } from './resilient';
 
 export function registerBuiltInActionTypes({
   actionTypeRegistry,
@@ -24,4 +27,7 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getIndexActionType());
   actionTypeRegistry.register(getPagerDutyActionType());
   actionTypeRegistry.register(getWebhookActionType());
+  actionTypeRegistry.register(getServiceNowActionType());
+  actionTypeRegistry.register(getJiraActionType());
+  actionTypeRegistry.register(getResilientActionType());
 }

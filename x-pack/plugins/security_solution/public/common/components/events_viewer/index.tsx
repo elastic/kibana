@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import styled from 'styled-components';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../store';
@@ -21,15 +22,24 @@ import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/eve
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
-import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
+import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { InspectButtonContainer } from '../inspect';
+import { useFullScreen } from '../../containers/use_full_screen';
+
+const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
+
+const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
+  display: flex;
+  width: 100%;
+`;
 
 export interface OwnProps {
   defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
-  end: number;
+  end: string;
   id: string;
-  start: number;
+  start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
@@ -45,6 +55,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   defaultIndices,
   deleteEventQuery,
   end,
+  excludedRowRendererIds,
   filters,
   headerFilterGroup,
   id,
@@ -57,23 +68,37 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   removeColumn,
   start,
   showCheckboxes,
-  showRowRenderers,
   sort,
   updateItemsPerPage,
   upsertColumn,
   utilityBar,
+  // If truthy, the graph viewer (Resolver) is showing
+  graphEventId,
 }) => {
-  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
-    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
+  const [
+    { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
+  ] = useFetchIndexPatterns(
+    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+    'events_viewer'
   );
+
+  const { globalFullScreen } = useFullScreen();
 
   useEffect(() => {
     if (createTimeline != null) {
-      createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
+      createTimeline({
+        id,
+        columns,
+        excludedRowRendererIds,
+        sort,
+        itemsPerPage,
+        showCheckboxes,
+      });
     }
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
@@ -106,29 +131,34 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
   return (
-    <InspectButtonContainer>
-      <EventsViewer
-        browserFields={browserFields}
-        columns={columns}
-        id={id}
-        dataProviders={dataProviders!}
-        deletedEventIds={deletedEventIds}
-        end={end}
-        filters={globalFilters}
-        headerFilterGroup={headerFilterGroup}
-        indexPattern={indexPatterns}
-        isLive={isLive}
-        itemsPerPage={itemsPerPage!}
-        itemsPerPageOptions={itemsPerPageOptions!}
-        kqlMode={kqlMode}
-        onChangeItemsPerPage={onChangeItemsPerPage}
-        query={query}
-        start={start}
-        sort={sort!}
-        toggleColumn={toggleColumn}
-        utilityBar={utilityBar}
-      />
-    </InspectButtonContainer>
+    <FullScreenContainer $isFullScreen={globalFullScreen}>
+      <InspectButtonContainer>
+        <EventsViewer
+          browserFields={browserFields}
+          columns={columns}
+          docValueFields={docValueFields}
+          id={id}
+          dataProviders={dataProviders!}
+          deletedEventIds={deletedEventIds}
+          end={end}
+          isLoadingIndexPattern={isLoadingIndexPattern}
+          filters={globalFilters}
+          headerFilterGroup={headerFilterGroup}
+          indexPattern={indexPatterns}
+          isLive={isLive}
+          itemsPerPage={itemsPerPage!}
+          itemsPerPageOptions={itemsPerPageOptions!}
+          kqlMode={kqlMode}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          query={query}
+          start={start}
+          sort={sort}
+          toggleColumn={toggleColumn}
+          utilityBar={utilityBar}
+          graphEventId={graphEventId}
+        />
+      </InspectButtonContainer>
+    </FullScreenContainer>
   );
 };
 
@@ -137,6 +167,7 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
@@ -144,18 +175,19 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       deletedEventIds,
+      excludedRowRendererIds,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       sort,
       showCheckboxes,
-      showRowRenderers,
     } = events;
 
     return {
       columns,
       dataProviders,
       deletedEventIds,
+      excludedRowRendererIds,
       filters: getGlobalFiltersQuerySelector(state),
       id,
       isLive: input.policy.kind === 'interval',
@@ -165,7 +197,9 @@ const makeMapStateToProps = () => {
       query: getGlobalQuerySelector(state),
       sort,
       showCheckboxes,
-      showRowRenderers,
+      // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
+      // `getTimeline` actually returns `TimelineModel | undefined`
+      graphEventId: (getTimeline(state, id) as TimelineModel | undefined)?.graphEventId,
     };
   };
   return mapStateToProps;
@@ -189,7 +223,9 @@ export const StatefulEventsViewer = connector(
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.defaultIndices, nextProps.defaultIndices) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
       deepEqual(prevProps.filters, nextProps.filters) &&
@@ -202,8 +238,8 @@ export const StatefulEventsViewer = connector(
       prevProps.start === nextProps.start &&
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.showRowRenderers === nextProps.showRowRenderers &&
       prevProps.start === nextProps.start &&
-      prevProps.utilityBar === nextProps.utilityBar
+      prevProps.utilityBar === nextProps.utilityBar &&
+      prevProps.graphEventId === nextProps.graphEventId
   )
 );

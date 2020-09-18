@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, sortByOrder, last } from 'lodash';
+import { flatten, orderBy, last } from 'lodash';
+import { asPercent } from '../../../../common/utils/formatters';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -13,14 +15,13 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
   TRANSACTION_BREAKDOWN_COUNT,
-  PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../../helpers/setup_request';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
@@ -36,7 +37,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, client, start, end, indices } = setup;
+  const { uiFiltersES, apmEventClient, start, end, config } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -82,7 +83,6 @@ export async function getTransactionBreakdown({
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES,
   ];
@@ -92,7 +92,9 @@ export async function getTransactionBreakdown({
   }
 
   const params = {
-    index: indices['apm_oss.metricsIndices'],
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
@@ -103,14 +105,18 @@ export async function getTransactionBreakdown({
       aggs: {
         ...subAggs,
         by_date: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: getMetricsDateHistogramParams(
+            start,
+            end,
+            config['xpack.apm.metricsInterval']
+          ),
           aggs: subAggs,
         },
       },
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const formatBucket = (
     aggs:
@@ -138,15 +144,22 @@ export async function getTransactionBreakdown({
   };
 
   const visibleKpis = resp.aggregations
-    ? sortByOrder(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
+    ? orderBy(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
         0,
         MAX_KPIS
       )
     : [];
 
-  const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
-    return {
+  const kpis = orderBy(
+    visibleKpis.map((kpi) => ({
       ...kpi,
+      lowerCaseName: kpi.name.toLowerCase(),
+    })),
+    'lowerCaseName'
+  ).map((kpi, index) => {
+    const { lowerCaseName, ...rest } = kpi;
+    return {
+      ...rest,
       color: getVizColorForIndex(index),
     };
   });
@@ -186,8 +199,8 @@ export async function getTransactionBreakdown({
     // is drawn correctly.
     // If we set all values to 0, the chart always displays null values as 0,
     // and the chart looks weird.
-    const hasAnyValues = lastValues.some((value) => value.y !== null);
-    const hasNullValues = lastValues.some((value) => value.y === null);
+    const hasAnyValues = lastValues.some((value) => value?.y !== null);
+    const hasNullValues = lastValues.some((value) => value?.y === null);
 
     if (hasAnyValues && hasNullValues) {
       Object.values(updatedSeries).forEach((series) => {
@@ -208,11 +221,9 @@ export async function getTransactionBreakdown({
     color: kpi.color,
     type: 'areaStacked',
     data: timeseriesPerSubtype[kpi.name],
-    hideLegend: true,
+    hideLegend: false,
+    legendValue: asPercent(kpi.percentage, 1),
   }));
 
-  return {
-    kpis,
-    timeseries,
-  };
+  return { timeseries };
 }

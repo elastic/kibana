@@ -17,91 +17,42 @@
  * under the License.
  */
 
-import { ResponseObject, Server } from 'hapi';
-import { UnwrapPromise } from '@kbn/utility-types';
+import { Server } from 'hapi';
 
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
-  ConfigService,
   CoreSetup,
   CoreStart,
-  ElasticsearchServiceSetup,
   EnvironmentMode,
   LoggerFactory,
-  SavedObjectsClientContract,
-  SavedObjectsLegacyService,
-  SavedObjectsClientProviderOptions,
-  IUiSettingsClient,
   PackageInfo,
-  LegacyRequest,
   LegacyServiceSetupDeps,
-  LegacyServiceStartDeps,
   LegacyServiceDiscoverPlugins,
 } from '../../core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/server/legacy';
+import { LegacyConfig, ILegacyInternals } from '../../core/server/legacy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
-import { ApmOssPlugin } from '../core_plugins/apm_oss';
-import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
-import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
-import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
-import { HomeServerPluginSetup } from '../../plugins/home/server';
 
 // lot of legacy code was assuming this type only had these two methods
 export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;
 
-export interface UiApp {
-  getId(): string;
-}
-
 // Extend the defaults with the plugins and server methods we need.
 declare module 'hapi' {
   interface PluginProperties {
-    elasticsearch: ElasticsearchPlugin;
-    kibana: any;
     spaces: any;
-    apm_oss: ApmOssPlugin;
-    // add new plugin types here
   }
 
   interface Server {
     config: () => KibanaConfig;
-    savedObjects: SavedObjectsLegacyService;
-    injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
-    getHiddenUiAppById(appId: string): UiApp;
-    addScopedTutorialContextFactory: (
-      scopedTutorialContextFactory: (...args: any[]) => any
-    ) => void;
-    getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
-    getUiNavLinks(): Array<{ _id: string }>;
-    addMemoizedFactoryToRequest: (
-      name: string,
-      factoryFn: (request: Request) => Record<string, any>
-    ) => void;
-    uiSettingsServiceFactory: (options?: UiSettingsServiceFactoryOptions) => IUiSettingsClient;
     logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
     newPlatform: KbnServer['newPlatform'];
-  }
-
-  interface Request {
-    getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
-    getBasePath(): string;
-    getUiSettingsService(): IUiSettingsClient;
-  }
-
-  interface ResponseToolkit {
-    renderAppWithDefaultConfig(app: UiApp): ResponseObject;
   }
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
 
 export interface PluginsSetup {
-  usageCollection: UsageCollectionSetup;
-  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
-  home: HomeServerPluginSetup;
   [key: string]: object;
 }
 
@@ -109,11 +60,9 @@ export interface KibanaCore {
   __internals: {
     elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
-    kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
     legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: UiPlugins;
-    savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
   };
   env: {
     mode: Readonly<EnvironmentMode>;
@@ -172,6 +121,3 @@ export default class KbnServer {
 
 // Re-export commonly used hapi types.
 export { Server, Request, ResponseToolkit } from 'hapi';
-
-// Re-export commonly accessed api types.
-export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';

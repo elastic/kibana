@@ -11,8 +11,14 @@ import { get } from 'lodash';
 import template from './index.html';
 import { Legacy } from '../../legacy_shims';
 import { shortenPipelineHash } from '../../../common/formatting';
-import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
+import {
+  getSetupModeState,
+  initSetupModeState,
+  isSetupModeFeatureEnabled,
+} from '../../lib/setup_mode';
 import { Subscription } from 'rxjs';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
+import { SetupModeFeature } from '../../../common/enums';
 
 const setOptions = (controller) => {
   if (
@@ -104,7 +110,6 @@ export class MonitoringMainController {
     const timefilter = Legacy.shims.timefilter;
     this._licenseService = options.licenseService;
     this._breadcrumbsService = options.breadcrumbsService;
-    this._kbnUrlService = options.kbnUrlService;
     this._executorService = options.executorService;
 
     Object.assign(this, options.attributes);
@@ -132,8 +137,8 @@ export class MonitoringMainController {
     if (this.pipelineHash) {
       this.pipelineHashShort = shortenPipelineHash(this.pipelineHash);
       this.onChangePipelineHash = () => {
-        return this._kbnUrlService.changePath(
-          `/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`
+        window.location.hash = getSafeForExternalLink(
+          `#/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`
         );
       };
     }
@@ -179,7 +184,7 @@ export class MonitoringMainController {
 
   isDisabledTab(product) {
     const setupMode = getSetupModeState();
-    if (!setupMode.enabled || !setupMode.data) {
+    if (!isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       return false;
     }
 
@@ -198,8 +203,9 @@ export class MonitoringMainController {
   }
 }
 
-export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) {
+export function monitoringMainProvider(breadcrumbs, license, $injector) {
   const $executor = $injector.get('$executor');
+  const $parse = $injector.get('$parse');
 
   return {
     restrict: 'E',
@@ -216,6 +222,10 @@ export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) 
         Object.keys(setupObj.attributes).forEach((key) => {
           attributes.$observe(key, () => controller.setup(getSetupObj()));
         });
+        if (attributes.onLoaded) {
+          const onLoaded = $parse(attributes.onLoaded)(scope);
+          onLoaded();
+        }
       });
 
       initSetupModeState(scope, $injector, () => {
@@ -234,7 +244,6 @@ export function monitoringMainProvider(breadcrumbs, license, kbnUrl, $injector) 
           licenseService: license,
           breadcrumbsService: breadcrumbs,
           executorService: $executor,
-          kbnUrlService: kbnUrl,
           attributes: {
             name: attributes.name,
             product: attributes.product,

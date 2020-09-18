@@ -8,12 +8,12 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 
 import {
-  CommentOrUndefined,
+  CreateCommentsArray,
   Description,
   EntriesArray,
   ExceptionListItemSchema,
+  ExceptionListItemType,
   ExceptionListSoSchema,
-  ExceptionListType,
   ItemId,
   ListId,
   MetaOrUndefined,
@@ -23,11 +23,15 @@ import {
   _Tags,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjectToExceptionListItem } from './utils';
+import {
+  getSavedObjectType,
+  transformCreateCommentsToComments,
+  transformSavedObjectToExceptionListItem,
+} from './utils';
 
 interface CreateExceptionListItemOptions {
   _tags: _Tags;
-  comment: CommentOrUndefined;
+  comments: CreateCommentsArray;
   listId: ListId;
   itemId: ItemId;
   savedObjectsClient: SavedObjectsClientContract;
@@ -39,12 +43,12 @@ interface CreateExceptionListItemOptions {
   user: string;
   tags: Tags;
   tieBreaker?: string;
-  type: ExceptionListType;
+  type: ExceptionListItemType;
 }
 
 export const createExceptionListItem = async ({
   _tags,
-  comment,
+  comments,
   entries,
   itemId,
   listId,
@@ -60,13 +64,18 @@ export const createExceptionListItem = async ({
 }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
+  const transformedComments = transformCreateCommentsToComments({
+    incomingComments: comments,
+    user,
+  });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
-    comment,
+    comments: transformedComments,
     created_at: dateNow,
     created_by: user,
     description,
     entries,
+    immutable: undefined,
     item_id: itemId,
     list_id: listId,
     list_type: 'item',
@@ -76,6 +85,7 @@ export const createExceptionListItem = async ({
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,
     updated_by: user,
+    version: undefined,
   });
-  return transformSavedObjectToExceptionListItem({ namespaceType, savedObject });
+  return transformSavedObjectToExceptionListItem({ savedObject });
 };

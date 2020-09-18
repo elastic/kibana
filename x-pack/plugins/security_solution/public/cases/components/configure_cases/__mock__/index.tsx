@@ -8,10 +8,7 @@ import { Connector } from '../../../containers/configure/types';
 import { ReturnConnectors } from '../../../containers/configure/use_connectors';
 import { connectorsMock } from '../../../containers/configure/mock';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
-import { createUseKibanaMock } from '../../../../common/mock/kibana_react';
 export { mapping } from '../../../containers/configure/mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
 export const connectors: Connector[] = connectorsMock;
 
@@ -45,11 +42,4 @@ export const useConnectorsResponse: ReturnConnectors = {
   loading: false,
   connectors,
   refetchConnectors: jest.fn(),
-};
-
-export const kibanaMockImplementationArgs = {
-  services: {
-    ...createUseKibanaMock()().services,
-    triggers_actions_ui: { actionTypeRegistry: actionTypeRegistryMock.create() },
-  },
 };

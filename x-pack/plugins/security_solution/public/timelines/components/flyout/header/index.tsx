@@ -9,10 +9,10 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { isEmpty, get } from 'lodash/fp';
+import { TimelineType } from '../../../../../common/types/timeline';
 import { History } from '../../../../common/lib/history';
 import { Note } from '../../../../common/lib/note';
 import { appSelectors, inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { Properties } from '../../timeline/properties';
 import { appActions } from '../../../../common/store/app';
 import { inputsActions } from '../../../../common/store/inputs';
@@ -31,16 +31,17 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulFlyoutHeader = React.memo<Props>(
   ({
     associateNote,
-    createTimeline,
     description,
-    isFavorite,
+    graphEventId,
     isDataInTimeline,
     isDatepickerLocked,
-    title,
+    isFavorite,
     noteIds,
     notesById,
     status,
     timelineId,
+    timelineType,
+    title,
     toggleLock,
     updateDescription,
     updateIsFavorite,
@@ -55,21 +56,22 @@ const StatefulFlyoutHeader = React.memo<Props>(
     return (
       <Properties
         associateNote={associateNote}
-        createTimeline={createTimeline}
         description={description}
         getNotesByIds={getNotesByIds}
+        graphEventId={graphEventId}
         isDataInTimeline={isDataInTimeline}
         isDatepickerLocked={isDatepickerLocked}
         isFavorite={isFavorite}
-        title={title}
         noteIds={noteIds}
         status={status}
         timelineId={timelineId}
+        timelineType={timelineType}
+        title={title}
         toggleLock={toggleLock}
         updateDescription={updateDescription}
         updateIsFavorite={updateIsFavorite}
-        updateTitle={updateTitle}
         updateNote={updateNote}
+        updateTitle={updateTitle}
         usersViewing={usersViewing}
       />
     );
@@ -92,26 +94,30 @@ const makeMapStateToProps = () => {
     const {
       dataProviders,
       description = '',
+      graphEventId,
       isFavorite = false,
       kqlQuery,
       title = '',
       noteIds = emptyNotesId,
       status,
+      timelineType = TimelineType.default,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector
 
     return {
       description,
-      notesById: getNotesByIds(state),
+      graphEventId,
       history,
       isDataInTimeline:
         !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
       isFavorite,
       isDatepickerLocked: globalInput.linkTo.includes('timeline'),
       noteIds,
+      notesById: getNotesByIds(state),
       status,
       title,
+      timelineType,
     };
   };
   return mapStateToProps;
@@ -119,20 +125,10 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   associateNote: (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
-  createTimeline: ({ id, show }: { id: string; show?: boolean }) =>
-    dispatch(
-      timelineActions.createTimeline({
-        id,
-        columns: defaultHeaders,
-        show,
-      })
-    ),
   updateDescription: ({ id, description }: { id: string; description: string }) =>
     dispatch(timelineActions.updateDescription({ id, description })),
   updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
     dispatch(timelineActions.updateIsFavorite({ id, isFavorite })),
-  updateIsLive: ({ id, isLive }: { id: string; isLive: boolean }) =>
-    dispatch(timelineActions.updateIsLive({ id, isLive })),
   updateNote: (note: Note) => dispatch(appActions.updateNote({ note })),
   updateTitle: ({ id, title }: { id: string; title: string }) =>
     dispatch(timelineActions.updateTitle({ id, title })),

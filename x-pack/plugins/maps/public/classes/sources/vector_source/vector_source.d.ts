@@ -5,18 +5,19 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { FeatureCollection } from 'geojson';
+import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
+  MapFilters,
   MapQuery,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
@@ -35,14 +36,14 @@ export type BoundsFilters = {
 };
 
 export interface IVectorSource extends ISource {
-  filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
   ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: 'string',
-    searchFilters: unknown[],
+    searchFilters: MapFilters,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta>;
 
@@ -51,31 +52,37 @@ export interface IVectorSource extends ISource {
   getSyncMeta(): VectorSourceSyncMeta;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
+  createField({ fieldName }: { fieldName: string }): IField;
+  canFormatFeatureProperties(): boolean;
+  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
   ): MapExtent | null;
   getGeoJsonWithMeta(
-    layerName: 'string',
-    searchFilters: unknown[],
+    layerName: string,
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getSyncMeta(): VectorSourceSyncMeta;
-  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]>;
+  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   canFormatFeatureProperties(): boolean;
   getApplyGlobalQuery(): boolean;
   getFieldNames(): string[];
+  createField({ fieldName }: { fieldName: string }): IField;
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
-  getUrlTemplateWithMeta(): Promise<{
+  getUrlTemplateWithMeta(
+    searchFilters: VectorSourceRequestMeta
+  ): Promise<{
     layerName: string;
     urlTemplate: string;
     minSourceZoom: number;
@@ -83,4 +90,5 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   }>;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getLayerName(): string;
 }

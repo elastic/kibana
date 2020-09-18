@@ -91,7 +91,7 @@ export class HeatmapLayer extends VectorLayer {
       resolution: this.getSource().getGridResolution(),
     });
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
-    mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setLayerZoomRange(heatmapLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   getLayerTypeIconName() {

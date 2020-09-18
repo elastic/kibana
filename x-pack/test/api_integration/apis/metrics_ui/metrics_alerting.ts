@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getElasticsearchMetricQuery } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/metric_threshold_executor';
+import { getElasticsearchMetricQuery } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/metric_query';
 import { MetricExpressionParams } from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
 
 import { FtrProviderContext } from '../../ftr_provider_context';

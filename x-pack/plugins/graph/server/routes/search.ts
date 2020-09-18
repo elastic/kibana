@@ -42,6 +42,7 @@ export function registerSearchRoute({
         response
       ) => {
         verifyApiAccess(licenseState);
+        licenseState.notifyUsage('Graph');
         const includeFrozen = await uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
         try {
           return response.ok({

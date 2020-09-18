@@ -13,19 +13,10 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
-import { unSetFeatureFlagsForTestsOnly, setFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -91,7 +82,7 @@ describe('find_rules', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('"invalid_value" is not allowed');
+      expect(result.badRequest).toHaveBeenCalledWith('invalid keys "invalid_value"');
     });
   });
 });

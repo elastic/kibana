@@ -1,10 +1,10 @@
 [[upgrade-migrations]]
-=== Troubleshooting saved object migrations
+=== Migrate saved objects
 
 Every time {kib} is upgraded it checks to see if all saved objects, such as dashboards, visualizations, and index patterns, are compatible with the new version. If any objects need to be updated, then the automatic saved object migration process is kicked off.
 
-NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
-to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
+NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant]
+to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 
 [float]
 [[upgrade-migrations-process]]
@@ -46,11 +46,9 @@ The first instance that triggers saved object migrations will run the entire pro
 [[upgrade-migrations-rolling-back]]
 ==== Rolling back to a previous version of {kib}
 
-When rolling {kib} back to a previous version, point the `.kibana` alias to 
-the appropriate {kib} index. When you have the previous version running again, 
-delete the more recent `.kibana_N` index or indices so that future upgrades are 
+When rolling {kib} back to a previous version, point the `.kibana` alias to
+the appropriate {kib} index. When you have the previous version running again,
+delete the more recent `.kibana_N` index or indices so that future upgrades are
 based on the current {kib} index. You must restart {kib} to re-trigger the migration.
 
 WARNING: Rolling back to a previous {kib} version can result in saved object data loss if you had successfully upgraded and made changes to saved objects before rolling back.
-
-

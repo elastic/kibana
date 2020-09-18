@@ -217,38 +217,38 @@ describe('getTimeRangeSettings', () => {
     test('should return DEFAULT_FROM', () => {
       mockTimeRange();
       const { from } = getTimeRangeSettings();
-      expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
+      expect(from).toBe(new Date(DEFAULT_FROM_DATE).toISOString());
     });
 
     test('should return a custom from range', () => {
       const mockFrom = '2019-08-30T17:49:18.396Z';
       mockTimeRange({ from: mockFrom });
       const { from } = getTimeRangeSettings();
-      expect(from).toBe(new Date(mockFrom).valueOf());
+      expect(from).toBe(new Date(mockFrom).toISOString());
     });
 
     test('should return the DEFAULT_FROM when the whole object is null', () => {
       mockTimeRange(null);
       const { from } = getTimeRangeSettings();
-      expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
+      expect(from).toBe(new Date(DEFAULT_FROM_DATE).toISOString());
     });
 
     test('should return the DEFAULT_FROM when the whole object is undefined', () => {
       mockTimeRange(null);
       const { from } = getTimeRangeSettings();
-      expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
+      expect(from).toBe(new Date(DEFAULT_FROM_DATE).toISOString());
     });
 
     test('should return the DEFAULT_FROM when the from value is null', () => {
       mockTimeRange({ from: null });
       const { from } = getTimeRangeSettings();
-      expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
+      expect(from).toBe(new Date(DEFAULT_FROM_DATE).toISOString());
     });
 
     test('should return the DEFAULT_FROM when the from value is undefined', () => {
       mockTimeRange({ from: undefined });
       const { from } = getTimeRangeSettings();
-      expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
+      expect(from).toBe(new Date(DEFAULT_FROM_DATE).toISOString());
     });
 
     test('should return the DEFAULT_FROM when the from value is malformed', () => {
@@ -256,7 +256,7 @@ describe('getTimeRangeSettings', () => {
       if (isMalformedTimeRange(malformedTimeRange)) {
         mockTimeRange(malformedTimeRange);
         const { from } = getTimeRangeSettings();
-        expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
+        expect(from).toBe(new Date(DEFAULT_FROM_DATE).toISOString());
       } else {
         throw Error('Was expecting an object to be used for the malformed time range');
       }
@@ -271,7 +271,7 @@ describe('getTimeRangeSettings', () => {
 
       it('is DEFAULT_FROM in epoch', () => {
         const { from } = getTimeRangeSettings(false);
-        expect(from).toBe(new Date(DEFAULT_FROM_DATE).valueOf());
+        expect(from).toBe(new Date(DEFAULT_FROM_DATE).toISOString());
       });
     });
   });
@@ -280,38 +280,38 @@ describe('getTimeRangeSettings', () => {
     test('should return DEFAULT_TO', () => {
       mockTimeRange();
       const { to } = getTimeRangeSettings();
-      expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
+      expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
     });
 
     test('should return a custom from range', () => {
       const mockTo = '2000-08-30T17:49:18.396Z';
       mockTimeRange({ to: mockTo });
       const { to } = getTimeRangeSettings();
-      expect(to).toBe(new Date(mockTo).valueOf());
+      expect(to).toBe(new Date(mockTo).toISOString());
     });
 
     test('should return the DEFAULT_TO_DATE when the whole object is null', () => {
       mockTimeRange(null);
       const { to } = getTimeRangeSettings();
-      expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
+      expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
     });
 
     test('should return the DEFAULT_TO_DATE when the whole object is undefined', () => {
       mockTimeRange(null);
       const { to } = getTimeRangeSettings();
-      expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
+      expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
     });
 
     test('should return the DEFAULT_TO_DATE when the from value is null', () => {
       mockTimeRange({ from: null });
       const { to } = getTimeRangeSettings();
-      expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
+      expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
     });
 
     test('should return the DEFAULT_TO_DATE when the from value is undefined', () => {
       mockTimeRange({ from: undefined });
       const { to } = getTimeRangeSettings();
-      expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
+      expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
     });
 
     test('should return the DEFAULT_TO_DATE when the from value is malformed', () => {
@@ -319,7 +319,7 @@ describe('getTimeRangeSettings', () => {
       if (isMalformedTimeRange(malformedTimeRange)) {
         mockTimeRange(malformedTimeRange);
         const { to } = getTimeRangeSettings();
-        expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
+        expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
       } else {
         throw Error('Was expecting an object to be used for the malformed time range');
       }
@@ -334,7 +334,7 @@ describe('getTimeRangeSettings', () => {
 
       it('is DEFAULT_TO in epoch', () => {
         const { to } = getTimeRangeSettings(false);
-        expect(to).toBe(new Date(DEFAULT_TO_DATE).valueOf());
+        expect(to).toBe(new Date(DEFAULT_TO_DATE).toISOString());
       });
     });
   });
@@ -498,12 +498,12 @@ describe('getIntervalSettings', () => {
         '1930-05-31T13:03:54.234Z',
         moment('1950-05-31T13:03:54.234Z')
       );
-      expect(value.valueOf()).toBe(new Date('1930-05-31T13:03:54.234Z').valueOf());
+      expect(value.toISOString()).toBe(new Date('1930-05-31T13:03:54.234Z').toISOString());
     });
 
     test('should return the second value if the first is a bad string', () => {
       const value = parseDateWithDefault('trashed string', moment('1950-05-31T13:03:54.234Z'));
-      expect(value.valueOf()).toBe(new Date('1950-05-31T13:03:54.234Z').valueOf());
+      expect(value.toISOString()).toBe(new Date('1950-05-31T13:03:54.234Z').toISOString());
     });
   });
 });

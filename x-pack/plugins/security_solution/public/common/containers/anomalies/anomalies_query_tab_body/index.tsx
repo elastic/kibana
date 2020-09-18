@@ -9,13 +9,14 @@ import React, { useEffect } from 'react';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
-import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
+import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
-import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
+import { MatrixHistogram } from '../../../components/matrix_histogram';
 import { histogramConfigs } from './histogram_configs';
-const ID = 'anomaliesOverTimeQuery';
 
-export const AnomaliesQueryTabBody = ({
+const ID = 'anomaliesHistogramQuery';
+
+const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   deleteQuery,
   endDate,
   setQuery,
@@ -28,44 +29,43 @@ export const AnomaliesQueryTabBody = ({
   AnomaliesTableComponent,
   flowTarget,
   ip,
-}: AnomaliesQueryTabBodyProps) => {
+}) => {
+  const { jobs } = useInstalledSecurityJobs();
+  const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
+
+  const mergedFilterQuery = getAnomaliesFilterQuery(
+    filterQuery,
+    anomaliesFilterQuery,
+    jobs,
+    anomalyScore,
+    flowTarget,
+    ip
+  );
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
         deleteQuery({ id: ID });
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const [, siemJobs] = useSiemJobs(true);
-  const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
-
-  const mergedFilterQuery = getAnomaliesFilterQuery(
-    filterQuery,
-    anomaliesFilterQuery,
-    siemJobs,
-    anomalyScore,
-    flowTarget,
-    ip
-  );
 
   return (
     <>
-      <MatrixHistogramContainer
+      <MatrixHistogram
         endDate={endDate}
         filterQuery={mergedFilterQuery}
         id={ID}
         setQuery={setQuery}
-        sourceId="default"
         startDate={startDate}
-        type={type}
         {...histogramConfigs}
       />
       <AnomaliesTableComponent
         startDate={startDate}
         endDate={endDate}
         skip={skip}
-        type={type as never}
+        type={type}
         narrowDateRange={narrowDateRange}
         flowTarget={flowTarget}
         ip={ip}
@@ -73,5 +73,9 @@ export const AnomaliesQueryTabBody = ({
     </>
   );
 };
+
+AnomaliesQueryTabBodyComponent.displayName = 'AnomaliesQueryTabBodyComponent';
+
+export const AnomaliesQueryTabBody = React.memo(AnomaliesQueryTabBodyComponent);
 
 AnomaliesQueryTabBody.displayName = 'AnomaliesQueryTabBody';

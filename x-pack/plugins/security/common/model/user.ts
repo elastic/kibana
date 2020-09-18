@@ -8,7 +8,7 @@ export interface User {
   username: string;
   email: string;
   full_name: string;
-  roles: string[];
+  roles: readonly string[];
   enabled: boolean;
   metadata?: {
     _reserved: boolean;
@@ -18,8 +18,8 @@ export interface User {
 }
 
 export interface EditUser extends User {
-  password: string;
-  confirmPassword: string;
+  password?: string;
+  confirmPassword?: string;
 }
 
 export function getUserDisplayName(user: User) {

@@ -29,7 +29,7 @@ import { promisify } from 'util';
 const treeKillAsync = promisify((...args: [number, string, any]) => treeKill(...args));
 
 import { ToolingLog } from '../tooling_log';
-import { observeLines } from './observe_lines';
+import { observeLines } from '../stdio';
 import { createCliError } from './errors';
 
 const SECOND = 1000;

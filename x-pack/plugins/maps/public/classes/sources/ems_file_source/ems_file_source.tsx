@@ -8,12 +8,11 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import { Adapters } from 'src/plugins/inspector/public';
+import { FileLayer } from '@elastic/ems-client';
 import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { SOURCE_TYPES, FIELD_ORIGIN } from '../../../../common/constants';
-// @ts-ignore
-import { getEMSClient } from '../../../meta';
+import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { getEmsFileLayers } from '../../../meta';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
@@ -23,8 +22,7 @@ import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export interface IEmsFileSource extends IVectorSource {
-  getEMSFileLayer(): Promise<unknown>;
-  createField({ fieldName }: { fieldName: string }): IField;
+  getEmsFieldLabel(emsFieldName: string): Promise<string>;
 }
 
 export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
@@ -72,13 +70,9 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     );
   }
 
-  async getEMSFileLayer(): Promise<unknown> {
-    // @ts-ignore
-    const emsClient = getEMSClient();
-    // @ts-ignore
-    const emsFileLayers = await emsClient.getFileLayers();
+  async getEMSFileLayer(): Promise<FileLayer> {
+    const emsFileLayers = await getEmsFileLayers();
     const emsFileLayer = emsFileLayers.find(
-      // @ts-ignore
       (fileLayer) => fileLayer.getId() === this._descriptor.id
     );
     if (!emsFileLayer) {
@@ -94,19 +88,25 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return emsFileLayer;
   }
 
+  // Map EMS field name to language specific label
+  async getEmsFieldLabel(emsFieldName: string): Promise<string> {
+    const emsFileLayer = await this.getEMSFileLayer();
+    const emsFields = emsFileLayer.getFieldsInLanguage();
+
+    const emsField = emsFields.find((field) => field.name === emsFieldName);
+    return emsField ? emsField.description : emsFieldName;
+  }
+
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     const emsFileLayer = await this.getEMSFileLayer();
     // @ts-ignore
     const featureCollection = await AbstractVectorSource.getGeoJson({
-      // @ts-ignore
       format: emsFileLayer.getDefaultFormatType(),
       featureCollectionPath: 'data',
-      // @ts-ignore
       fetchUrl: emsFileLayer.getDefaultFormatUrl(),
     });
 
-    // @ts-ignore
-    const emsIdField = emsFileLayer._config.fields.find((field) => {
+    const emsIdField = emsFileLayer.getFields().find((field) => {
       return field.type === 'id';
     });
     featureCollection.features.forEach((feature: Feature, index: number) => {
@@ -123,7 +123,6 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     let emsLink;
     try {
       const emsFileLayer = await this.getEMSFileLayer();
-      // @ts-ignore
       emsLink = emsFileLayer.getEMSHotLink();
     } catch (error) {
       // ignore error if EMS layer id could not be found
@@ -147,7 +146,6 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   async getDisplayName(): Promise<string> {
     try {
       const emsFileLayer = await this.getEMSFileLayer();
-      // @ts-ignore
       return emsFileLayer.getDisplayName();
     } catch (error) {
       return this._descriptor.id;
@@ -156,15 +154,12 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
 
   async getAttributions(): Promise<Attribution[]> {
     const emsFileLayer = await this.getEMSFileLayer();
-    // @ts-ignore
     return emsFileLayer.getAttributions();
   }
 
   async getLeftJoinFields() {
     const emsFileLayer = await this.getEMSFileLayer();
-    // @ts-ignore
     const fields = emsFileLayer.getFieldsInLanguage();
-    // @ts-ignore
     return fields.map((f) => this.createField({ fieldName: f.name }));
   }
 
@@ -172,7 +167,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return this._tooltipFields.length > 0;
   }
 
-  async filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: unknown): Promise<ITooltipProperty[]> {
     const promises = this._tooltipFields.map((field) => {
       // @ts-ignore
       const value = properties[field.getName()];
@@ -182,8 +177,8 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return Promise.all(promises);
   }
 
-  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]> {
-    return [VECTOR_SHAPE_TYPES.POLYGON];
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
+    return [VECTOR_SHAPE_TYPE.POLYGON];
   }
 }
 

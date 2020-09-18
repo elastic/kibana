@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { Position } from '@elastic/charts';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translations';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import {
@@ -20,18 +19,19 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../common/store';
-import { HostsTableType, HostsType } from '../../../hosts/store/model';
+import { HostsTableType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
 import {
   alertsStackByOptions,
   histogramConfigs,
 } from '../../../common/components/alerts_viewer/histogram_configs';
-import { MatrixHisrogramConfigs } from '../../../common/components/matrix_histogram/types';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
+import { MatrixHistogramConfigs } from '../../../common/components/matrix_histogram/types';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { SecurityPageName } from '../../../app/types';
+import { useFormatUrl } from '../../../common/components/link_to';
+import { LinkButton } from '../../../common/components/links';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -39,20 +39,11 @@ const NO_FILTERS: Filter[] = [];
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.module';
 
-interface Props {
-  deleteQuery?: ({ id }: { id: string }) => void;
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters?: Filter[];
-  from: number;
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   query?: Query;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
 }
 
 const AlertsByCategoryComponent: React.FC<Props> = ({
@@ -71,25 +62,38 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
         deleteQuery({ id: ID });
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const kibana = useKibana();
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
+  const { navigateToApp } = kibana.services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const urlSearch = useGetUrlSearch(navTabs.hosts);
+
+  const goToHostAlerts = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        path: getTabsOnHostsUrl(HostsTableType.alerts, urlSearch),
+      });
+    },
+    [navigateToApp, urlSearch]
+  );
 
   const alertsCountViewAlertsButton = useMemo(
     () => (
-      <EuiButton
+      <LinkButton
         data-test-subj="view-alerts"
-        href={getTabsOnHostsUrl(HostsTableType.alerts, urlSearch)}
+        onClick={goToHostAlerts}
+        href={formatUrl(getTabsOnHostsUrl(HostsTableType.alerts))}
       >
         {i18n.VIEW_ALERTS}
-      </EuiButton>
+      </LinkButton>
     ),
-    [urlSearch]
+    [goToHostAlerts, formatUrl]
   );
 
-  const alertsByCategoryHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const alertsByCategoryHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       defaultStackByOption:
@@ -98,11 +102,12 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
         `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
       legendPosition: Position.Right,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   return (
-    <MatrixHistogramContainer
+    <MatrixHistogram
       endDate={to}
       filterQuery={convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -113,9 +118,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
       headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
       id={ID}
       setQuery={setQuery}
-      sourceId="default"
       startDate={from}
-      type={HostsType.page}
       {...alertsByCategoryHistogramConfigs}
     />
   );

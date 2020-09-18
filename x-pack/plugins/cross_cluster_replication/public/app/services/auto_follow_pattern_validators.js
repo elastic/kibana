@@ -8,8 +8,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { indices } from '../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { indices } from '../../shared_imports';
 
 const {
   indexNameBeginsWithPeriod,

@@ -1,5 +1,8 @@
 [[brew]]
 === Install {kib} on macOS with Homebrew
+++++
+<titleabbrev>Install on macOS with Homebrew</titleabbrev>
+++++
 
 Elastic publishes Homebrew formulae so you can install {kib} with the https://brew.sh/[Homebrew] package manager.
 
@@ -44,7 +47,7 @@ and data directory are stored in the following locations.
 | conf
   | Configuration files including `kibana.yml`
   | /usr/local/etc/kibana
- d|  
+ d|
 
 | data
   | The location of the data files of each index / shard allocated

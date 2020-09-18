@@ -1,0 +1,71 @@
+.monClusterTitle {
+  font-size: $euiFontSizeL;
+  margin: 0;
+}
+
+// SASSTODO: This needs a full rewrite / redesign
+.monCluster {
+  .monUnassigned {
+    vertical-align: middle;
+    width: $euiSize * 10;
+  }
+
+  .monUnassigned__children,
+  .monAssigned__children {
+    padding-top: $euiSizeL;
+  }
+
+  .monChild {
+    float: left;
+    align-self: center;
+    background-color: $euiColorLightestShade;
+    margin: $euiSizeS;
+    border: 1px solid $euiColorMediumShade;
+    border-radius: $euiSizeXS;
+    padding: $euiSizeXS / 2 0;
+
+    &.monChild--index {
+      border-left: $euiSizeXS solid $euiColorSuccess;
+
+      &.monChild--danger {
+        border-left: $euiSizeXS solid $euiColorDanger;
+      }
+
+      &.monChild--warning {
+        border-left: $euiSizeXS solid $euiColorWarning;
+      }
+    }
+
+    .monChild__title {
+      padding: $euiSizeXS $euiSizeS;
+      text-align: center;
+      font-size: $euiFontSizeXS;
+      color: $euiColorGhost;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    &.monClusterUnassigned {
+      .title {
+        display: none;
+      }
+    }
+  }
+
+  th {
+    text-align: left;
+  }
+
+  td:first-child {
+    width: $euiSize * 12.5;
+  }
+
+  .monShard {
+    align-self: center;
+    padding: $euiSizeXS $euiSizeS;
+    font-size: $euiFontSizeXS;
+    position: relative;
+    display: inline-block;
+  }
+}

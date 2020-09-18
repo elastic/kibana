@@ -6,33 +6,33 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
+import uuid from 'uuid';
 import { Filter } from '../../../../../../../src/plugins/data/public';
+
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
   DataProvider,
   QueryOperator,
   QueryMatch,
+  DataProviderType,
+  IS_OPERATOR,
+  EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineType,
+  RowRendererId,
+} from '../../../../common/types/timeline';
+import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
-import { TimelineById, TimelineState } from './types';
-import { TimelineNonEcsData } from '../../../graphql/types';
-
-const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
+import { TimelineById } from './types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
-
-export const initialTimelineState: TimelineState = {
-  timelineById: EMPTY_TIMELINE_BY_ID,
-  autoSavedWarningMsg: {
-    timelineId: null,
-    newTimelineModel: null,
-  },
-  showCallOutUnauthorizedMsg: false,
-};
 
 interface AddTimelineHistoryParams {
   id: string;
@@ -132,9 +132,10 @@ interface AddNewTimelineParams {
   columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
   dateRange?: {
-    start: number;
-    end: number;
+    start: string;
+    end: string;
   };
+  excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -145,15 +146,16 @@ interface AddNewTimelineParams {
   show?: boolean;
   sort?: Sort;
   showCheckboxes?: boolean;
-  showRowRenderers?: boolean;
   timelineById: TimelineById;
+  timelineType: TimelineTypeLiteral;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
   columns,
   dataProviders = [],
-  dateRange = { start: 0, end: 0 },
+  dateRange: maybeDateRange,
+  excludedRowRendererIds = [],
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -161,29 +163,42 @@ export const addNewTimeline = ({
   sort = timelineDefaults.sort,
   show = false,
   showCheckboxes = false,
-  showRowRenderers = true,
   timelineById,
-}: AddNewTimelineParams): TimelineById => ({
-  ...timelineById,
-  [id]: {
-    id,
-    ...timelineDefaults,
-    columns,
-    dataProviders,
-    dateRange,
-    filters,
-    itemsPerPage,
-    kqlQuery,
-    sort,
-    show,
-    savedObjectId: null,
-    version: null,
-    isSaving: false,
-    isLoading: false,
-    showCheckboxes,
-    showRowRenderers,
-  },
-});
+  timelineType,
+}: AddNewTimelineParams): TimelineById => {
+  const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
+  const dateRange = maybeDateRange ?? { start: startDateRange, end: endDateRange };
+  const templateTimelineInfo =
+    timelineType === TimelineType.template
+      ? {
+          templateTimelineId: uuid.v4(),
+          templateTimelineVersion: 1,
+        }
+      : {};
+  return {
+    ...timelineById,
+    [id]: {
+      id,
+      ...timelineDefaults,
+      columns,
+      dataProviders,
+      dateRange,
+      excludedRowRendererIds,
+      filters,
+      itemsPerPage,
+      kqlQuery,
+      sort,
+      show,
+      savedObjectId: null,
+      version: null,
+      isSaving: false,
+      isLoading: false,
+      showCheckboxes,
+      timelineType,
+      ...templateTimelineInfo,
+    },
+  };
+};
 
 interface PinTimelineEventParams {
   id: string;
@@ -228,6 +243,26 @@ export const updateTimelineShowTimeline = ({
     [id]: {
       ...timeline,
       show,
+    },
+  };
+};
+
+export const updateGraphEventId = ({
+  id,
+  graphEventId,
+  timelineById,
+}: {
+  id: string;
+  graphEventId: string;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      graphEventId,
     },
   };
 };
@@ -720,8 +755,8 @@ export const updateTimelineProviders = ({
 
 interface UpdateTimelineRangeParams {
   id: string;
-  start: number;
-  end: number;
+  start: string;
+  end: string;
   timelineById: TimelineById;
 }
 
@@ -1015,6 +1050,92 @@ export const updateTimelineProviderKqlQuery = ({
       dataProviders: timeline.dataProviders.map((provider) =>
         provider.id === providerId ? { ...provider, ...{ kqlQuery } } : provider
       ),
+    },
+  };
+};
+
+interface UpdateTimelineProviderTypeParams {
+  andProviderId?: string;
+  id: string;
+  providerId: string;
+  type: DataProviderType;
+  timelineById: TimelineById;
+}
+
+const updateTypeAndProvider = (
+  andProviderId: string,
+  type: DataProviderType,
+  providerId: string,
+  timeline: TimelineModel
+) =>
+  timeline.dataProviders.map((provider) =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          and: provider.and.map((andProvider) =>
+            andProvider.id === andProviderId
+              ? {
+                  ...andProvider,
+                  type,
+                  name: type === DataProviderType.template ? `${andProvider.queryMatch.field}` : '',
+                  queryMatch: {
+                    ...andProvider.queryMatch,
+                    displayField: undefined,
+                    displayValue: undefined,
+                    value:
+                      type === DataProviderType.template ? `{${andProvider.queryMatch.field}}` : '',
+                    operator: (type === DataProviderType.template
+                      ? IS_OPERATOR
+                      : EXISTS_OPERATOR) as QueryOperator,
+                  },
+                }
+              : andProvider
+          ),
+        }
+      : provider
+  );
+
+const updateTypeProvider = (type: DataProviderType, providerId: string, timeline: TimelineModel) =>
+  timeline.dataProviders.map((provider) =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          type,
+          name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
+          queryMatch: {
+            ...provider.queryMatch,
+            displayField: undefined,
+            displayValue: undefined,
+            value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
+            operator: (type === DataProviderType.template
+              ? IS_OPERATOR
+              : EXISTS_OPERATOR) as QueryOperator,
+          },
+        }
+      : provider
+  );
+
+export const updateTimelineProviderType = ({
+  andProviderId,
+  id,
+  providerId,
+  type,
+  timelineById,
+}: UpdateTimelineProviderTypeParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  if (timeline.timelineType !== TimelineType.template && type === DataProviderType.template) {
+    // Not supported, timeline template cannot have template type providers
+    return timelineById;
+  }
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: andProviderId
+        ? updateTypeAndProvider(andProviderId, type, providerId, timeline)
+        : updateTypeProvider(type, providerId, timeline),
     },
   };
 };
@@ -1319,6 +1440,28 @@ export const updateFilters = ({ id, filters, timelineById }: UpdateFiltersParams
     [id]: {
       ...timeline,
       filters,
+    },
+  };
+};
+
+interface UpdateExcludedRowRenderersIds {
+  id: string;
+  excludedRowRendererIds: RowRendererId[];
+  timelineById: TimelineById;
+}
+
+export const updateExcludedRowRenderersIds = ({
+  id,
+  excludedRowRendererIds,
+  timelineById,
+}: UpdateExcludedRowRenderersIds): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      excludedRowRendererIds,
     },
   };
 };

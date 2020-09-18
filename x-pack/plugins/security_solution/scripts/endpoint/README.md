@@ -5,64 +5,14 @@ The default behavior is to create 1 endpoint with 1 alert and a moderate number 
 A seed value can be provided as a string for the random number generator for repeatable behavior, useful for demos etc.
 Use the `-d` option if you want to delete and remake the indices, otherwise it will add documents to existing indices.
 
-The sample data generator script depends on ts-node, install with npm:
-
-`npm install -g ts-node`
-
 Example command sequence to get ES and kibana running with sample data after installing ts-node:
 
 `yarn es snapshot` -> starts ES
 
-`npx yarn start --xpack.securitySolution.endpoint.enabled=true --no-base-path` -> starts kibana
+`npx yarn start --no-base-path` -> starts kibana. Note: you may need other configurations steps to start the security solution with endpoint support.
 
-`cd ~/path/to/kibana/x-pack/plugins/endpoint`
+`cd x-pack/plugins/security_solution/scripts/endpoint`
 
-`yarn test:generate --auth elastic:changeme` -> run the resolver_generator.ts script
+`yarn test:generate` -> run the resolver_generator.ts script
 
-Resolver generator CLI options:
-
-```bash
-Options:
-  --help                         Show help                             [boolean]
-  --seed, -s                     random seed to use for document generator
-                                                                        [string]
-  --node, -n                     elasticsearch node url
-                                     [string] [default: "http://localhost:9200"]
-  --alertIndex, --ai             index to store alerts in
-                                         [string] [default: "events-endpoint-1"]
-  --eventIndex, --ei             index to store events in
-                                         [string] [default: "events-endpoint-1"]
-  --metadataIndex, --mi          index to store host metadata in
-                                [string] [default: "metrics-endpoint-default-1"]
-  --policyIndex, --pi            index to store host policy in
-                         [string] [default: "metrics-endpoint.policy-default-1"]
-  --auth                         elasticsearch username and password, separated
-                                 by a colon                             [string]
-  --ancestors, --anc             number of ancestors of origin to create
-                                                           [number] [default: 3]
-  --generations, --gen           number of child generations to create
-                                                           [number] [default: 3]
-  --children, --ch               maximum number of children per node
-                                                           [number] [default: 3]
-  --relatedEvents, --related     number of related events to create for each
-                                 process event             [number] [default: 5]
-  --percentWithRelated, --pr     percent of process events to add related events
-                                 to                       [number] [default: 30]
-  --percentTerminated, --pt      percent of process events to add termination
-                                 event for                [number] [default: 30]
-  --maxChildrenPerNode, --maxCh  always generate the max number of children per
-                                 node instead of it being random up to the max
-                                 children             [boolean] [default: false]
-  --numHosts, --ne               number of different hosts to generate alerts
-                                 for                       [number] [default: 1]
-  --numDocs, --nd                number of metadata and policy response doc to
-                                 generate per host         [number] [default: 5]
-  --alertsPerHost, --ape         number of resolver trees to make for each host
-                                                           [number] [default: 1]
-  --delete, -d                   delete indices and remake them
-                                                      [boolean] [default: false]
-  --setupOnly, --so              Run only the index and pipeline creation then
-                                 exit. This is intended to be used to set up the
-                                 Endpoint App for use with the real Elastic
-                                 Endpoint.            [boolean] [default: false]
-```
+To see Resolver generator CLI options, run `yarn test:generate --help`.

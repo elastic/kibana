@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '../../../common';
-import { JobParamPostPayload, JobDocPayload, ScrollConfig } from '../../types';
+import { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
@@ -19,20 +18,26 @@ interface SortOptions {
   unmapped_type: string;
 }
 
-export interface JobParamPostPayloadDiscoverCsv extends JobParamPostPayload {
-  state?: {
-    query: any;
-    sort: Array<Record<string, SortOptions>>;
-    docvalue_fields: DocValueField[];
+export interface IndexPatternSavedObject {
+  title: string;
+  timeFieldName: string;
+  fields?: any[];
+  attributes: {
+    fields: string;
+    fieldFormatMap: string;
   };
 }
 
-export interface JobParamsDiscoverCsv {
-  indexPatternId?: string;
-  post?: JobParamPostPayloadDiscoverCsv;
+export interface JobParamsDiscoverCsv extends BaseParams {
+  indexPatternId: string;
+  title: string;
+  searchRequest: SearchRequest;
+  fields: string[];
+  metaFields: string[];
+  conflictedTypesFields: string[];
 }
 
-export interface JobDocPayloadDiscoverCsv extends JobDocPayload<JobParamsDiscoverCsv> {
+export interface TaskPayloadCSV extends BasePayload<JobParamsDiscoverCsv> {
   basePath: string;
   searchRequest: any;
   fields: any;
@@ -71,8 +76,6 @@ export interface SearchRequest {
     | any;
 }
 
-type EndpointCaller = (method: string, params: any) => Promise<any>;
-
 type FormatsMap = Map<
   string,
   {
@@ -94,23 +97,4 @@ export interface SavedSearchGeneratorResult {
 export interface CsvResultFromSearch {
   type: string;
   result: SavedSearchGeneratorResult;
-}
-
-export interface GenerateCsvParams {
-  searchRequest: SearchRequest;
-  callEndpoint: EndpointCaller;
-  fields: string[];
-  formatsMap: FormatsMap;
-  metaFields: string[];
-  conflictedTypesFields: string[];
-  cancellationToken: CancellationToken;
-  settings: {
-    separator: string;
-    quoteValues: boolean;
-    timezone: string | null;
-    maxSizeBytes: number;
-    scroll: ScrollConfig;
-    checkForFormulas?: boolean;
-    escapeFormulaValues: boolean;
-  };
 }

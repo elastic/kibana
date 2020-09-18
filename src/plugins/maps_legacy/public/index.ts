@@ -18,12 +18,10 @@
  */
 
 // @ts-ignore
-import { CoreSetup, PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from 'kibana/public';
 // @ts-ignore
 import { L } from './leaflet';
-// @ts-ignore
-import { KibanaMap } from './map/kibana_map';
-import { bindSetupCoreAndPlugins, MapsLegacyPlugin } from './plugin';
+import { MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
 // @ts-ignore
@@ -32,8 +30,6 @@ import { KibanaMapLayer } from './map/kibana_map_layer';
 import { convertToGeoJson } from './map/convert_to_geojson';
 // @ts-ignore
 import { scaleBounds, getPrecision, geoContains } from './map/decode_geo_hash';
-// @ts-ignore
-import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
 import {
   VectorLayer,
   FileLayerField,
@@ -44,13 +40,7 @@ import {
 // @ts-ignore
 import { mapTooltipProvider } from './tooltip_provider';
 
-export interface MapsLegacyConfigType {
-  regionmap: any;
-  emsTileLayerId: string;
-  includeElasticMapsService: boolean;
-  proxyElasticMapsServiceInMaps: boolean;
-  tilemap: any;
-}
+import './map/index.scss';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsLegacyPlugin(initializerContext);
@@ -72,20 +62,6 @@ export {
   mapTooltipProvider,
   L,
 };
-
-// Due to a leaflet/leaflet-draw bug, it's not possible to consume leaflet maps w/ draw control
-// through a pipeline leveraging angular. For this reason, client plugins need to
-// init kibana map and the basemaps visualization directly rather than consume through
-// the usual plugin interface
-export function getKibanaMapFactoryProvider(core: CoreSetup) {
-  bindSetupCoreAndPlugins(core);
-  return (...args: any) => new KibanaMap(...args);
-}
-
-export function getBaseMapsVis(core: CoreSetup, serviceSettings: IServiceSettings) {
-  const getKibanaMap = getKibanaMapFactoryProvider(core);
-  return new BaseMapsVisualizationProvider(getKibanaMap, serviceSettings);
-}
 
 export * from './common/types';
 export { ORIGIN } from './common/constants/origin';

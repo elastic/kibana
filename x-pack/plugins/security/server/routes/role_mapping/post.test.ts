@@ -13,7 +13,7 @@ describe('POST role mappings', () => {
   it('allows a role mapping to be created', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
     mockScopedClusterClient.callAsCurrentUser.mockResolvedValue({ created: true });
 

@@ -87,6 +87,11 @@ export function changeColumn<C extends IndexPatternColumn>({
       ? { ...newColumn, params: oldColumn.params }
       : newColumn;
 
+  if (oldColumn && oldColumn.customLabel) {
+    updatedColumn.customLabel = true;
+    updatedColumn.label = oldColumn.label;
+  }
+
   const newColumns = adjustColumnReferencesForChangedColumn(
     {
       ...state.layers[layerId].columns,
@@ -156,7 +161,7 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const keptColumns: IndexPatternLayer['columns'] = _.pick(layer.columns, (column) =>
+  const keptColumns: IndexPatternLayer['columns'] = _.pickBy(layer.columns, (column) =>
     isColumnTransferable(column, newIndexPattern)
   );
   const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {

@@ -6,17 +6,24 @@
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
+import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
+import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
-import { IndexPatternDatasource } from './indexpattern_datasource';
-import { XyVisualization } from './xy_visualization';
-import { MetricVisualization } from './metric_visualization';
-import { DatatableVisualization } from './datatable_visualization';
-import { PieVisualization } from './pie_visualization';
+import {
+  IndexPatternDatasource,
+  IndexPatternDatasourceSetupPlugins,
+} from './indexpattern_datasource';
+import { XyVisualization, XyVisualizationPluginSetupPlugins } from './xy_visualization';
+import { MetricVisualization, MetricVisualizationPluginSetupPlugins } from './metric_visualization';
+import {
+  DatatableVisualization,
+  DatatableVisualizationPluginSetupPlugins,
+} from './datatable_visualization';
+import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
 import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
 
@@ -26,14 +33,14 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface LensPluginSetupDependencies {
-  kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -41,7 +48,7 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  dashboard: DashboardStart;
+  embeddable: EmbeddableStart;
 }
 
 export class LensPlugin {
@@ -64,16 +71,28 @@ export class LensPlugin {
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
-    { kibanaLegacy, expressions, data, embeddable, visualizations }: LensPluginSetupDependencies
+    {
+      urlForwarding,
+      expressions,
+      data,
+      embeddable,
+      visualizations,
+      charts,
+    }: LensPluginSetupDependencies
   ) {
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
       data,
       embeddable,
       expressions,
     });
-    const dependencies = {
+    const dependencies: IndexPatternDatasourceSetupPlugins &
+      XyVisualizationPluginSetupPlugins &
+      DatatableVisualizationPluginSetupPlugins &
+      MetricVisualizationPluginSetupPlugins &
+      PieVisualizationPluginSetupPlugins = {
       expressions,
       data,
+      charts,
       editorFrame: editorFrameSetupInterface,
       formatFactory: core
         .getStartServices()
@@ -97,7 +116,7 @@ export class LensPlugin {
       },
     });
 
-    kibanaLegacy.forwardApp('lens', 'lens');
+    urlForwarding.forwardApp('lens', 'lens');
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {

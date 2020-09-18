@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import { loggingServiceMock } from '../logging/logging_service.mock';
-export const logger = loggingServiceMock.create();
-jest.doMock('../logging/logging_service', () => ({
-  LoggingService: jest.fn(() => logger),
+import { loggingSystemMock } from '../logging/logging_system.mock';
+export const logger = loggingSystemMock.create();
+jest.doMock('../logging/logging_system', () => ({
+  LoggingSystem: jest.fn(() => logger),
 }));
 
-import { configServiceMock } from '../config/config_service.mock';
+const realKbnConfig = jest.requireActual('@kbn/config');
+
+import { configServiceMock, rawConfigServiceMock } from '../config/mocks';
 export const configService = configServiceMock.create();
-jest.doMock('../config/config_service', () => ({
-  ConfigService: jest.fn(() => configService),
-}));
-
-import { rawConfigServiceMock } from '../config/raw_config_service.mock';
 export const rawConfigService = rawConfigServiceMock.create();
-jest.doMock('../config/raw_config_service', () => ({
+jest.doMock('@kbn/config', () => ({
+  ...realKbnConfig,
+  ConfigService: jest.fn(() => configService),
   RawConfigService: jest.fn(() => rawConfigService),
 }));
 

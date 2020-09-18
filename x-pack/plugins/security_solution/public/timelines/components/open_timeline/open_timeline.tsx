@@ -7,14 +7,9 @@
 import { EuiPanel, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
-import { SearchRow } from './search_row';
-import { TimelinesTable } from './timelines_table';
-import { ImportDataModal } from '../../../common/components/import_data_modal';
-import * as i18n from './translations';
-import { importTimelines } from '../../containers/api';
 
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
   UtilityBarGroup,
   UtilityBarText,
@@ -22,18 +17,26 @@ import {
   UtilityBarSection,
   UtilityBarAction,
 } from '../../../common/components/utility_bar';
+
+import { importTimelines } from '../../containers/api';
+
 import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { EditOneTimelineAction } from './export_timeline';
+import { SearchRow } from './search_row';
+import { TimelinesTable } from './timelines_table';
+import * as i18n from './translations';
+import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
+import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
 
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
+    favoriteCount,
     isLoading,
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
-    onAddTimelinesToFavorites,
     onDeleteSelected,
     onlyFavorites,
     onOpenTimeline,
@@ -51,11 +54,13 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     sortDirection,
     setImportDataModalToggle,
     sortField,
-    tabs,
+    timelineType = TimelineType.default,
+    timelineStatus,
+    timelineFilter,
+    templateTimelineFilter,
     totalSearchResultsCount,
   }) => {
     const tableRef = useRef<EuiBasicTable<OpenTimelineResult>>();
-
     const {
       actionItem,
       enableExportTimelineDownloader,
@@ -69,7 +74,26 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       deleteTimelines,
       selectedItems,
       tableRef,
+      timelineType,
     });
+
+    const nTemplates = useMemo(
+      () => (
+        <FormattedMessage
+          id="xpack.securitySolution.open.timeline.showingNTemplatesLabel"
+          defaultMessage="{totalSearchResultsCount} {totalSearchResultsCount, plural, one {template} other {templates}} {with}"
+          values={{
+            totalSearchResultsCount,
+            with: (
+              <span data-test-subj="selectable-query-text">
+                {query.trim().length ? `${i18n.WITH} "${query.trim()}"` : ''}
+              </span>
+            ),
+          }}
+        />
+      ),
+      [totalSearchResultsCount, query]
+    );
 
     const nTimelines = useMemo(
       () => (
@@ -116,14 +140,26 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
     }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
 
-    const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(
-      () =>
-        onDeleteSelected != null && deleteTimelines != null
-          ? ['delete', 'duplicate', 'export', 'selectable']
-          : ['duplicate', 'export', 'selectable'],
-      [onDeleteSelected, deleteTimelines]
-    );
+    const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
+      const timelineActions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
 
+      if (timelineStatus !== TimelineStatus.immutable) {
+        timelineActions.push('export');
+        timelineActions.push('selectable');
+      }
+
+      if (
+        onDeleteSelected != null &&
+        deleteTimelines != null &&
+        timelineStatus !== TimelineStatus.immutable
+      ) {
+        timelineActions.push('delete');
+      }
+
+      return timelineActions;
+    }, [onDeleteSelected, deleteTimelines, timelineStatus]);
+
+    const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
     return (
       <>
         <EditOneTimelineAction
@@ -151,35 +187,47 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          {!!tabs && tabs}
+          {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"
+            favoriteCount={favoriteCount}
             onlyFavorites={onlyFavorites}
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
             query={query}
-            totalSearchResultsCount={totalSearchResultsCount}
-          />
+            timelineType={timelineType}
+          >
+            {SearchRowContent}
+          </SearchRow>
 
           <UtilityBar border>
             <UtilityBarSection>
               <UtilityBarGroup>
                 <UtilityBarText data-test-subj="query-message">
                   <>
-                    {i18n.SHOWING} {nTimelines}
+                    {i18n.SHOWING}{' '}
+                    {timelineType === TimelineType.template ? nTemplates : nTimelines}
                   </>
                 </UtilityBarText>
               </UtilityBarGroup>
-
               <UtilityBarGroup>
-                <UtilityBarText>{i18n.SELECTED_TIMELINES(selectedItems.length)}</UtilityBarText>
-                <UtilityBarAction
-                  iconSide="right"
-                  iconType="arrowDown"
-                  popoverContent={getBatchItemsPopoverContent}
-                >
-                  {i18n.BATCH_ACTIONS}
-                </UtilityBarAction>
+                {timelineStatus !== TimelineStatus.immutable && (
+                  <>
+                    <UtilityBarText data-test-subj="selected-count">
+                      {timelineType === TimelineType.template
+                        ? i18n.SELECTED_TEMPLATES(selectedItems.length)
+                        : i18n.SELECTED_TIMELINES(selectedItems.length)}
+                    </UtilityBarText>
+                    <UtilityBarAction
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverContent={getBatchItemsPopoverContent}
+                      data-test-subj="utility-bar-action"
+                    >
+                      <span data-test-subj="utility-bar-action-button">{i18n.BATCH_ACTIONS}</span>
+                    </UtilityBarAction>
+                  </>
+                )}
                 <UtilityBarAction iconSide="right" iconType="refresh" onClick={onRefreshBtnClick}>
                   {i18n.REFRESH}
                 </UtilityBarAction>
@@ -206,6 +254,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             showExtendedColumns={true}
             sortDirection={sortDirection}
             sortField={sortField}
+            timelineType={timelineType}
             tableRef={tableRef}
             totalSearchResultsCount={totalSearchResultsCount}
           />

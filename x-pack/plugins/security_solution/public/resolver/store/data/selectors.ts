@@ -4,558 +4,740 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSelector } from 'reselect';
+import rbush from 'rbush';
+import { createSelector, defaultMemoize } from 'reselect';
 import {
   DataState,
-  IndexedProcessTree,
-  ProcessWidths,
-  ProcessPositions,
-  EdgeLineSegment,
-  ProcessWithWidthMetadata,
-  Matrix3,
-  AdjacentProcessMap,
   Vector2,
-  RelatedEventData,
-  RelatedEventDataEntryWithStats,
+  IndexedEntity,
+  IndexedEdgeLineSegment,
+  IndexedProcessNode,
+  AABB,
+  VisibleEntites,
+  SectionData,
+  TreeFetcherParameters,
 } from '../../types';
-import { ResolverEvent } from '../../../../common/endpoint/types';
-
-import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
-import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
 import {
-  factory as indexedProcessTreeFactory,
-  children as indexedProcessTreeChildren,
-  parent as indexedProcessTreeParent,
-  size,
-  levelOrder,
-} from '../../models/indexed_process_tree';
+  isGraphableProcess,
+  isTerminatedProcess,
+  uniquePidForProcess,
+  uniqueParentPidForProcess,
+} from '../../models/process_event';
+import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 
-const unit = 100;
-const distanceBetweenNodesInUnits = 2;
+import {
+  ResolverEvent,
+  ResolverTree,
+  ResolverNodeStats,
+  ResolverRelatedEvents,
+  SafeResolverEvent,
+  EndpointEvent,
+  LegacyEndpointEvent,
+} from '../../../../common/endpoint/types';
+import * as resolverTreeModel from '../../models/resolver_tree';
+import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
+import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
+import * as eventModel from '../../../../common/endpoint/models/event';
+import * as vector2 from '../../models/vector2';
+import { formatDate } from '../../view/panels/panel_content_utilities';
 
-export function isLoading(state: DataState) {
-  return state.isLoading;
+/**
+ * If there is currently a request.
+ */
+export function isTreeLoading(state: DataState): boolean {
+  return state.tree.pendingRequestParameters !== undefined;
 }
 
-export function hasError(state: DataState) {
-  return state.hasError;
+/**
+ * If a request was made and it threw an error or returned a failure response code.
+ */
+export function hadErrorLoadingTree(state: DataState): boolean {
+  if (state.tree.lastResponse) {
+    return !state.tree.lastResponse.successful;
+  }
+  return false;
 }
 
 /**
- * An isometric projection is a method for representing three dimensional objects in 2 dimensions.
- * More information about isometric projections can be found here https://en.wikipedia.org/wiki/Isometric_projection.
- * In our case, we obtain the isometric projection by rotating the objects 45 degrees in the plane of the screen
- * and arctan(1/sqrt(2)) (~35.3 degrees) through the horizontal axis.
- *
- * A rotation by 45 degrees in the plane of the screen is given by:
- * [ sqrt(2)/2   -sqrt(2)/2   0
- *   sqrt(2)/2    sqrt(2)/2   0
- *   0            0           1]
- *
- * A rotation by arctan(1/sqrt(2)) through the horizantal axis is given by:
- * [ 1      0          0
- *   0      sqrt(3)/3  -sqrt(6)/3
- *   0      sqrt(6)/3  sqrt(3)/3]
- *
- * We can multiply both of these matrices to get the final transformation below.
+ * A string for uniquely identifying the instance of resolver within the app.
  */
-/* prettier-ignore */
-const isometricTransformMatrix: Matrix3 = [
-  Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
-  Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
-  0,                  0,                    1,
-]
+export function resolverComponentInstanceID(state: DataState): string {
+  return state.resolverComponentInstanceID ? state.resolverComponentInstanceID : '';
+}
 
 /**
- * The distance in pixels (at scale 1) between nodes. Change this to space out nodes more
+ * The last ResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
+ * we're currently interested in.
  */
-const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
+const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
+  return state.tree.lastResponse?.successful ? state.tree.lastResponse.result : undefined;
+};
 
 /**
- * Process events that will be graphed.
+ * the node ID of the node representing the databaseDocumentID.
+ * NB: this could be stale if the last response is stale
  */
-export const graphableProcesses = createSelector(
-  ({ results }: DataState) => results,
-  function (results: DataState['results']) {
-    return results.filter(isGraphableProcess);
+export const originID: (state: DataState) => string | undefined = createSelector(
+  resolverTreeResponse,
+  function (resolverTree?) {
+    if (resolverTree) {
+      // This holds the entityID (aka nodeID) of the node related to the last fetched `_id`
+      return resolverTree.entityID;
+    }
+    return undefined;
   }
 );
 
 /**
- * In laying out the graph, we precalculate the 'width' of each subtree. The 'width' of the subtree is determined by its
- * descedants and the rule that each process node must be at least 1 unit apart. Enforcing that all nodes are at least
- * 1 unit apart on the x axis makes it easy to prevent the UI components from overlapping. There will always be space.
- *
- * Example widths:
- *
- *    A and B each have a width of 0
- *
- *          A
- *          |
- *          B
- *
- *    A has a width of 1. B and C have a width of 0.
- *    B and C must be 1 unit apart, so the A subtree has a width of 1.
- *
- *          A
- *      ____|____
- *     |         |
- *     B         C
- *
- *
- *    D, E, F, G, H all have a width of 0.
- *    B has a width of 1 since D->E must be 1 unit apart.
- *    Similarly, C has a width of 1 since F->G must be 1 unit apart.
- *    A has width of 3, since B has a width of 1, and C has a width of 1, and E->F must be at least
- *    1 unit apart.
- *          A
- *      ____|____
- *     |         |
- *     B         C
- *  ___|___   ___|___
- * |       | |       |
- * D       E F       G
- *                   |
- *                   H
- *
+ * Process events that will be displayed as terminated.
  */
-function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
-  const widths = new Map<ResolverEvent, number>();
-
-  if (size(indexedProcessTree) === 0) {
-    return widths;
+export const terminatedProcesses = createSelector(resolverTreeResponse, function (
+  tree?: ResolverTree
+) {
+  if (!tree) {
+    return new Set();
   }
+  return new Set(
+    resolverTreeModel
+      .lifecycleEvents(tree)
+      .filter(isTerminatedProcess)
+      .map((terminatedEvent) => {
+        return uniquePidForProcess(terminatedEvent);
+      })
+  );
+});
 
-  const processesInReverseLevelOrder = [...levelOrder(indexedProcessTree)].reverse();
+/**
+ * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
+ */
+export const isProcessTerminated = createSelector(terminatedProcesses, function (
+  /* eslint-disable no-shadow */
+  terminatedProcesses
+  /* eslint-enable no-shadow */
+) {
+  return (entityId: string) => {
+    return terminatedProcesses.has(entityId);
+  };
+});
 
-  for (const process of processesInReverseLevelOrder) {
-    const children = indexedProcessTreeChildren(indexedProcessTree, process);
-
-    const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
-      return children.reduce(function sum(currentValue, child) {
-        /**
-         * `widths.get` will always return a number in this case.
-         * This loop sequences a tree in reverse level order. Width values are set for each node.
-         * Therefore a parent can always find a width for its children, since all of its children
-         * will have been handled already.
-         */
-        return currentValue + widths.get(child)!;
-      }, 0);
-    };
-
-    const width = sumOfWidthOfChildren() + Math.max(0, children.length - 1) * distanceBetweenNodes;
-    widths.set(process, width);
-  }
-
-  return widths;
-}
-
-function processEdgeLineSegments(
-  indexedProcessTree: IndexedProcessTree,
-  widths: ProcessWidths,
-  positions: ProcessPositions
-): EdgeLineSegment[] {
-  const edgeLineSegments: EdgeLineSegment[] = [];
-  for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-    /**
-     * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
-     */
-    if (metadata.parent === null) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    const { process, parent, parentWidth } = metadata;
-    const position = positions.get(process);
-    const parentPosition = positions.get(parent);
-
-    if (position === undefined || parentPosition === undefined) {
-      /**
-       * All positions have been precalculated, so if any are missing, it's an error. This will never happen.
-       */
-      throw new Error();
-    }
-
-    /**
-     * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
-     */
-    const midwayY = parentPosition[1] + (position[1] - parentPosition[1]) / 2;
-
-    /**
-     * When drawing edge lines between a parent and children (when there are multiple children) we draw a pitchfork type
-     * design. The 'midway' line, runs along the x axis and joins all the children with a single descendant line from the parent.
-     * See the ascii diagram below. The underscore characters would be the midway line.
-     *
-     *          A
-     *      ____|____
-     *     |         |
-     *     B         C
-     */
-    const lineFromProcessToMidwayLine: EdgeLineSegment = [[position[0], midwayY], position];
-
-    const siblings = indexedProcessTreeChildren(indexedProcessTree, parent);
-    const isFirstChild = process === siblings[0];
-
-    if (metadata.isOnlyChild) {
-      // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
-      edgeLineSegments.push([parentPosition, position]);
-    } else if (isFirstChild) {
-      /**
-       * If the parent has multiple children, we draw the 'midway' line, and the line from the
-       * parent to the midway line, while handling the first child.
-       *
-       * Consider A the parent, and B the first child. We would draw somemthing like what's in the below diagram. The line from the
-       * midway line to C would be drawn when we handle C.
-       *
-       *          A
-       *      ____|____
-       *     |
-       *     B         C
-       */
-      const { firstChildWidth, lastChildWidth } = metadata;
-
-      const lineFromParentToMidwayLine: EdgeLineSegment = [
-        parentPosition,
-        [parentPosition[0], midwayY],
-      ];
-
-      const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
-
-      const minX = parentWidth / -2 + firstChildWidth / 2;
-      const maxX = minX + widthOfMidline;
-
-      const midwayLine: EdgeLineSegment = [
-        [
-          // Position line relative to the parent's x component
-          parentPosition[0] + minX,
-          midwayY,
-        ],
-        [
-          // Position line relative to the parent's x component
-          parentPosition[0] + maxX,
-          midwayY,
-        ],
-      ];
-
-      edgeLineSegments.push(
-        /* line from parent to midway line */
-        lineFromParentToMidwayLine,
-        midwayLine,
-        lineFromProcessToMidwayLine
-      );
-    } else {
-      // If this isn't the first child, it must have siblings (the first of which drew the midway line and line
-      // from the parent to the midway line
-      edgeLineSegments.push(lineFromProcessToMidwayLine);
-    }
-  }
-  return edgeLineSegments;
-}
-
-function* levelOrderWithWidths(
-  tree: IndexedProcessTree,
-  widths: ProcessWidths
-): Iterable<ProcessWithWidthMetadata> {
-  for (const process of levelOrder(tree)) {
-    const parent = indexedProcessTreeParent(tree, process);
-    const width = widths.get(process);
-
-    if (width === undefined) {
-      /**
-       * All widths have been precalcluated, so this will not happen.
-       */
-      throw new Error();
-    }
-
-    /** If the parent is undefined, we are processing the root. */
-    if (parent === undefined) {
-      yield {
-        process,
-        width,
-        parent: null,
-        parentWidth: null,
-        isOnlyChild: null,
-        firstChildWidth: null,
-        lastChildWidth: null,
-      };
-    } else {
-      const parentWidth = widths.get(parent);
-
-      if (parentWidth === undefined) {
-        /**
-         * All widths have been precalcluated, so this will not happen.
-         */
-        throw new Error();
+/**
+ * Process events that will be graphed.
+ */
+export const graphableProcesses = createSelector(resolverTreeResponse, function (tree?) {
+  // Keep track of the last process event (in array order) for each entity ID
+  const events: Map<string, ResolverEvent> = new Map();
+  if (tree) {
+    for (const event of resolverTreeModel.lifecycleEvents(tree)) {
+      if (isGraphableProcess(event)) {
+        const entityID = uniquePidForProcess(event);
+        events.set(entityID, event);
       }
-
-      const metadata: Partial<ProcessWithWidthMetadata> = {
-        process,
-        width,
-        parent,
-        parentWidth,
-      };
-
-      const siblings = indexedProcessTreeChildren(tree, parent);
-      if (siblings.length === 1) {
-        metadata.isOnlyChild = true;
-        metadata.lastChildWidth = width;
-        metadata.firstChildWidth = width;
-      } else {
-        const firstChildWidth = widths.get(siblings[0]);
-        const lastChildWidth = widths.get(siblings[siblings.length - 1]);
-        if (firstChildWidth === undefined || lastChildWidth === undefined) {
-          /**
-           * All widths have been precalcluated, so this will not happen.
-           */
-          throw new Error();
-        }
-        metadata.isOnlyChild = false;
-        metadata.firstChildWidth = firstChildWidth;
-        metadata.lastChildWidth = lastChildWidth;
-      }
-
-      yield metadata as ProcessWithWidthMetadata;
     }
+    return [...events.values()];
+  } else {
+    return [];
   }
-}
+});
 
-function processPositions(
-  indexedProcessTree: IndexedProcessTree,
-  widths: ProcessWidths
-): ProcessPositions {
-  const positions = new Map<ResolverEvent, Vector2>();
-  /**
-   * This algorithm iterates the tree in level order. It keeps counters that are reset for each parent.
-   * By keeping track of the last parent node, we can know when we are dealing with a new set of siblings and
-   * reset the counters.
-   */
-  let lastProcessedParentNode: ResolverEvent | undefined;
-  /**
-   * Nodes are positioned relative to their siblings. We walk this in level order, so we handle
-   * children left -> right.
-   *
-   * The width of preceding siblings is used to left align the node.
-   * The number of preceding siblings is important because each sibling must be 1 unit apart
-   * on the x axis.
-   */
-  let numberOfPrecedingSiblings = 0;
-  let runningWidthOfPrecedingSiblings = 0;
-
-  for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-    // Handle root node
-    if (metadata.parent === null) {
-      const { process } = metadata;
-      /**
-       * Place the root node at (0, 0) for now.
-       */
-      positions.set(process, [0, 0]);
-    } else {
-      const { process, parent, width, parentWidth } = metadata;
-
-      // Reinit counters when parent changes
-      if (lastProcessedParentNode !== parent) {
-        numberOfPrecedingSiblings = 0;
-        runningWidthOfPrecedingSiblings = 0;
-
-        // keep track of this so we know when to reinitialize
-        lastProcessedParentNode = parent;
-      }
-
-      const parentPosition = positions.get(parent);
-
-      if (parentPosition === undefined) {
-        /**
-         * Since this algorithm populates the `positions` map in level order,
-         * the parent node will have been processed already and the parent position
-         * will always be available.
-         *
-         * This will never happen.
-         */
-        throw new Error();
-      }
-
-      /**
-       * The x 'offset' is added to the x value of the parent to determine the position of the node.
-       * We add `parentWidth / -2` in order to align the left side of this node with the left side of its parent.
-       * We add `numberOfPrecedingSiblings * distanceBetweenNodes` in order to keep each node 1 apart on the x axis.
-       * We add `runningWidthOfPrecedingSiblings` so that we don't overlap with our preceding siblings. We stack em up.
-       * We add `width / 2` so that we center the node horizontally (in case it has non-0 width.)
-       */
-      const xOffset =
-        parentWidth / -2 +
-        numberOfPrecedingSiblings * distanceBetweenNodes +
-        runningWidthOfPrecedingSiblings +
-        width / 2;
-
-      /**
-       * The y axis gains `-distanceBetweenNodes` as we move down the screen 1 unit at a time.
-       */
-      const position = vector2Add([xOffset, -distanceBetweenNodes], parentPosition);
-
-      positions.set(process, position);
-
-      numberOfPrecedingSiblings += 1;
-      runningWidthOfPrecedingSiblings += width;
-    }
-  }
-
-  return positions;
-}
-
-export const indexedProcessTree = createSelector(graphableProcesses, function indexedTree(
+/**
+ * The 'indexed process tree' contains the tree data, indexed in helpful ways. Used for O(1) access to stuff during graph layout.
+ */
+export const tree = createSelector(graphableProcesses, function indexedTree(
   /* eslint-disable no-shadow */
   graphableProcesses
   /* eslint-enable no-shadow */
 ) {
-  return indexedProcessTreeFactory(graphableProcesses);
+  return indexedProcessTreeModel.factory(graphableProcesses as SafeResolverEvent[]);
 });
 
 /**
- * Process events that will be graphed.
+ * This returns a map of entity_ids to stats about the related events and alerts.
+ * @deprecated
  */
-export const relatedEventResults = function (data: DataState) {
-  return data.resultsEnrichedWithRelatedEventInfo;
+export const relatedEventsStats: (
+  state: DataState
+) => (nodeID: string) => ResolverNodeStats | undefined = createSelector(
+  resolverTreeResponse,
+  (resolverTree?: ResolverTree) => {
+    if (resolverTree) {
+      const map = resolverTreeModel.relatedEventsStats(resolverTree);
+      return (nodeID: string) => map.get(nodeID);
+    } else {
+      return () => undefined;
+    }
+  }
+);
+
+/**
+ * This returns the "aggregate total" for related events, tallied as the sum
+ * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
+ * towards the aggregate total.
+ */
+export const relatedEventAggregateTotalByEntityId: (
+  state: DataState
+) => (entityId: string) => number = createSelector(relatedEventsStats, (relatedStats) => {
+  return (entityId) => {
+    const statsForEntity = relatedStats(entityId);
+    if (statsForEntity === undefined) {
+      return 0;
+    }
+    return Object.values(statsForEntity?.events?.byCategory || {}).reduce(
+      (sum, val) => sum + val,
+      0
+    );
+  };
+});
+
+/**
+ * returns a map of entity_ids to related event data.
+ * @deprecated
+ */
+export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
+  return data.relatedEvents;
+}
+
+/**
+ * A helper function to turn objects into EuiDescriptionList entries.
+ * This reflects the strategy of more or less "dumping" metadata for related processes
+ * in description lists with little/no 'prettification'. This has the obvious drawback of
+ * data perhaps appearing inscrutable/daunting, but the benefit of presenting these fields
+ * to the user "as they occur" in ECS, which may help them with e.g. EQL queries.
+ *
+ * Given an object like: {a:{b: 1}, c: 'd'} it will yield title/description entries like so:
+ * {title: "a.b", description: "1"}, {title: "c", description: "d"}
+ *
+ * @param {object} obj The object to turn into `<dt><dd>` entries
+ * @deprecated
+ */
+const objectToDescriptionListEntries = function* (
+  obj: object,
+  prefix = ''
+): Generator<{ title: string; description: string }> {
+  const nextPrefix = prefix.length ? `${prefix}.` : '';
+  for (const [metaKey, metaValue] of Object.entries(obj)) {
+    if (typeof metaValue === 'number' || typeof metaValue === 'string') {
+      yield { title: nextPrefix + metaKey, description: `${metaValue}` };
+    } else if (metaValue instanceof Array) {
+      yield {
+        title: nextPrefix + metaKey,
+        description: metaValue
+          .filter((arrayEntry) => {
+            return typeof arrayEntry === 'number' || typeof arrayEntry === 'string';
+          })
+          .join(','),
+      };
+    } else if (typeof metaValue === 'object') {
+      yield* objectToDescriptionListEntries(metaValue, nextPrefix + metaKey);
+    }
+  }
 };
 
 /**
- * This selector compiles the related event data attached in `relatedEventResults`
- * into a `RelatedEventData` map of ResolverEvents to statistics about their related events
+ * Returns a function that returns the information needed to display related event details based on
+ * the related event's entityID and its own ID.
+ * @deprecated
  */
-export const relatedEventStats = createSelector(relatedEventResults, function getRelatedEvents(
+export const relatedEventDisplayInfoByEntityAndSelfID: (
+  state: DataState
+) => (
+  entityId: string,
+  relatedEventId: string | number
+) => [
+  EndpointEvent | LegacyEndpointEvent | undefined,
+  number,
+  string | undefined,
+  SectionData,
+  string
+] = createSelector(relatedEventsByEntityId, function relatedEventDetails(
   /* eslint-disable no-shadow */
-  relatedEventResults
+  relatedEventsByEntityId
   /* eslint-enable no-shadow */
 ) {
-  /* eslint-disable no-shadow */
-  const relatedEventStats: RelatedEventData = new Map();
-  /* eslint-enable no-shadow */
-  if (!relatedEventResults) {
-    return relatedEventStats;
-  }
-
-  for (const updatedEvent of relatedEventResults.keys()) {
-    const newStatsEntry = relatedEventResults.get(updatedEvent);
-    if (newStatsEntry === 'error') {
-      // If the entry is an error, return it as is
-      relatedEventStats.set(updatedEvent, newStatsEntry);
-      // eslint-disable-next-line no-continue
-      continue;
+  return defaultMemoize((entityId: string, relatedEventId: string | number) => {
+    const relatedEventsForThisProcess = relatedEventsByEntityId.get(entityId);
+    if (!relatedEventsForThisProcess) {
+      return [undefined, 0, undefined, [], ''];
     }
-    if (typeof newStatsEntry === 'object') {
-      /**
-       * Otherwise, it should be a valid stats entry.
-       * Do the work to compile the stats.
-       * Folowing reduction, this will be a record like
-       * {DNS: 10, File: 2} etc.
-       */
-      const statsForEntry = newStatsEntry?.relatedEvents.reduce(
-        (compiledStats: Record<string, number>, relatedEvent: { relatedEventType: string }) => {
-          compiledStats[relatedEvent.relatedEventType] =
-            (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
-          return compiledStats;
-        },
-        {}
-      );
+    const specificEvent = relatedEventsForThisProcess.events.find(
+      (evt) => eventModel.eventId(evt) === relatedEventId
+    );
+    // For breadcrumbs:
+    const specificCategory = specificEvent && eventModel.primaryEventCategory(specificEvent);
+    const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
+      return eventModel.primaryEventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
+    }, 0);
+    // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
+    const { agent, ecs, process, ...relevantData } = specificEvent as SafeResolverEvent & {
+      // Type this with various unknown keys so that ts will let us delete those keys
+      ecs: unknown;
+      process: unknown;
+    };
 
-      const newRelatedEventStats: RelatedEventDataEntryWithStats = Object.assign(newStatsEntry, {
-        stats: statsForEntry,
-      });
-      relatedEventStats.set(updatedEvent, newRelatedEventStats);
-    }
-  }
-  return relatedEventStats;
+    let displayDate = '';
+    const sectionData: SectionData = Object.entries(relevantData)
+      .map(([sectionTitle, val]) => {
+        if (sectionTitle === '@timestamp') {
+          displayDate = formatDate(val);
+          return { sectionTitle: '', entries: [] };
+        }
+        if (typeof val !== 'object') {
+          return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
+        }
+        return { sectionTitle, entries: [...objectToDescriptionListEntries(val)] };
+      })
+      .filter((v) => v.sectionTitle !== '' && v.entries.length);
+
+    return [specificEvent, countOfCategory, specificCategory, sectionData, displayDate];
+  });
 });
 
 /**
- * This selects `RelatedEventData` maps specifically for graphable processes
+ * Returns a function that returns a function (when supplied with an entity id for a node)
+ * that returns related events for a node that match an event.category (when supplied with the category)
+ * @deprecated
  */
-export const relatedEvents = createSelector(
-  graphableProcesses,
-  relatedEventStats,
-  function getRelatedEvents(
+export const relatedEventsByCategory: (
+  state: DataState
+) => (entityID: string) => (ecsCategory: string) => ResolverEvent[] = createSelector(
+  relatedEventsByEntityId,
+  function (
     /* eslint-disable no-shadow */
-    graphableProcesses,
-    relatedEventStats
+    relatedEventsByEntityId
     /* eslint-enable no-shadow */
   ) {
-    const eventsRelatedByProcess: RelatedEventData = new Map();
+    return defaultMemoize((entityId: string) => {
+      return defaultMemoize((ecsCategory: string) => {
+        const relatedById = relatedEventsByEntityId.get(entityId);
+        // With no related events, we can't return related by category
+        if (!relatedById) {
+          return [];
+        }
+        return relatedById.events.reduce(
+          (eventsByCategory: ResolverEvent[], candidate: ResolverEvent) => {
+            if (
+              [candidate && eventModel.allEventCategories(candidate)].flat().includes(ecsCategory)
+            ) {
+              eventsByCategory.push(candidate);
+            }
+            return eventsByCategory;
+          },
+          []
+        );
+      });
+    });
+  }
+);
+
+/**
+ * returns a map of entity_ids to booleans indicating if it is waiting on related event
+ * A value of `undefined` can be interpreted as `not yet requested`
+ * @deprecated
+ */
+export function relatedEventsReady(data: DataState): Map<string, boolean> {
+  return data.relatedEventsReady;
+}
+
+/**
+ * `true` if there were more children than we got in the last request.
+ * @deprecated
+ */
+export function hasMoreChildren(state: DataState): boolean {
+  const resolverTree = resolverTreeResponse(state);
+  return resolverTree ? resolverTreeModel.hasMoreChildren(resolverTree) : false;
+}
+
+/**
+ * `true` if there were more ancestors than we got in the last request.
+ * @deprecated
+ */
+export function hasMoreAncestors(state: DataState): boolean {
+  const resolverTree = resolverTreeResponse(state);
+  return resolverTree ? resolverTreeModel.hasMoreAncestors(resolverTree) : false;
+}
+
+interface RelatedInfoFunctions {
+  shouldShowLimitForCategory: (category: string) => boolean;
+  numberNotDisplayedForCategory: (category: string) => number;
+  numberActuallyDisplayedForCategory: (category: string) => number;
+}
+/**
+ * A map of `entity_id`s to functions that provide information about
+ * related events by ECS `.category` Primarily to avoid having business logic
+ * in UI components.
+ * @deprecated
+ */
+export const relatedEventInfoByEntityId: (
+  state: DataState
+) => (entityID: string) => RelatedInfoFunctions | null = createSelector(
+  relatedEventsByEntityId,
+  relatedEventsStats,
+  function selectLineageLimitInfo(
     /* eslint-disable no-shadow */
-    return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
-      /* eslint-enable no-shadow */
-      const relatedEventDataEntry = relatedEventStats?.get(graphableProcess);
-      if (relatedEventDataEntry) {
-        relatedEvents.set(graphableProcess, relatedEventDataEntry);
+    relatedEventsByEntityId,
+    relatedEventsStats
+    /* eslint-enable no-shadow */
+  ) {
+    return (entityId) => {
+      const stats = relatedEventsStats(entityId);
+      if (!stats) {
+        return null;
       }
-      return relatedEvents;
-    }, eventsRelatedByProcess);
+      const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityId);
+      const hasMoreEvents =
+        eventsResponseForThisEntry && eventsResponseForThisEntry.nextEvent !== null;
+      /**
+       * Get the "aggregate" total for the event category (i.e. _all_ events that would qualify as being "in category")
+       * For a set like `[DNS,File][File,DNS][Registry]` The first and second events would contribute to the aggregate total for DNS being 2.
+       * This is currently aligned with how the backed provides this information.
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const aggregateTotalForCategory = (eventCategory: string): number => {
+        return stats.events.byCategory[eventCategory] || 0;
+      };
+
+      /**
+       * Get all the related events in the category provided.
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const unmemoizedMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
+        if (!eventsResponseForThisEntry) {
+          return [];
+        }
+        return eventsResponseForThisEntry.events.filter((resolverEvent) => {
+          for (const category of [eventModel.allEventCategories(resolverEvent)].flat()) {
+            if (category === eventCategory) {
+              return true;
+            }
+          }
+          return false;
+        });
+      };
+
+      const matchingEventsForCategory = unmemoizedMatchingEventsForCategory;
+
+      /**
+       * The number of events that occurred before the API limit was reached.
+       * The number of events that came back form the API that have `eventCategory` in their list of categories.
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const numberActuallyDisplayedForCategory = (eventCategory: string): number => {
+        return matchingEventsForCategory(eventCategory)?.length || 0;
+      };
+
+      /**
+       * The total number counted by the backend - the number displayed
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const numberNotDisplayedForCategory = (eventCategory: string): number => {
+        return (
+          aggregateTotalForCategory(eventCategory) -
+          numberActuallyDisplayedForCategory(eventCategory)
+        );
+      };
+
+      /**
+       * `true` when the `nextEvent` cursor appeared in the results and we are short on the number needed to
+       * fullfill the aggregate count.
+       *
+       * @param eventCategory {string} The ECS category like 'file','dns',etc.
+       */
+      const shouldShowLimitForCategory = (eventCategory: string): boolean => {
+        if (hasMoreEvents && numberNotDisplayedForCategory(eventCategory) > 0) {
+          return true;
+        }
+        return false;
+      };
+
+      const entryValue = {
+        shouldShowLimitForCategory,
+        numberNotDisplayedForCategory,
+        numberActuallyDisplayedForCategory,
+      };
+      return entryValue;
+    };
   }
 );
 
-export const processAdjacencies = createSelector(
-  indexedProcessTree,
-  graphableProcesses,
-  function selectProcessAdjacencies(
-    /* eslint-disable no-shadow */
-    indexedProcessTree,
-    graphableProcesses
-    /* eslint-enable no-shadow */
+/**
+ * If the tree resource needs to be fetched then these are the parameters that should be used.
+ */
+export function treeParametersToFetch(state: DataState): TreeFetcherParameters | null {
+  /**
+   * If there are current tree parameters that don't match the parameters used in the pending request (if there is a pending request) and that don't match the parameters used in the last completed request (if there was a last completed request) then we need to fetch the tree resource using the current parameters.
+   */
+  if (
+    state.tree.currentParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree.currentParameters,
+      state.tree.lastResponse?.parameters
+    ) &&
+    !treeFetcherParametersModel.equal(
+      state.tree.currentParameters,
+      state.tree.pendingRequestParameters
+    )
   ) {
-    const processToAdjacencyMap = new Map<ResolverEvent, AdjacentProcessMap>();
-    const { idToAdjacent } = indexedProcessTree;
-
-    for (const graphableProcess of graphableProcesses) {
-      const processPid = uniquePidForProcess(graphableProcess);
-      const adjacencyMap = idToAdjacent.get(processPid)!;
-      processToAdjacencyMap.set(graphableProcess, adjacencyMap);
-    }
-    return { processToAdjacencyMap };
+    return state.tree.currentParameters;
+  } else {
+    return null;
   }
-);
+}
 
-export const processNodePositionsAndEdgeLineSegments = createSelector(
-  indexedProcessTree,
+export const layout = createSelector(
+  tree,
+  originID,
   function processNodePositionsAndEdgeLineSegments(
     /* eslint-disable no-shadow */
-    indexedProcessTree
+    indexedProcessTree,
+    originID
     /* eslint-enable no-shadow */
   ) {
-    /**
-     * Walk the tree in reverse level order, calculating the 'width' of subtrees.
-     */
-    const widths = widthsOfProcessSubtrees(indexedProcessTree);
+    // use the isometric taxi layout as a base
+    const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
 
-    /**
-     * Walk the tree in level order. Using the precalculated widths, calculate the position of nodes.
-     * Nodes are positioned relative to their parents and preceding siblings.
-     */
-    const positions = processPositions(indexedProcessTree, widths);
-
-    /**
-     * With the widths and positions precalculated, we calculate edge line segments (arrays of vector2s)
-     * which connect them in a 'pitchfork' design.
-     */
-    const edgeLineSegments = processEdgeLineSegments(indexedProcessTree, widths, positions);
-
-    /**
-     * Transform the positions of nodes and edges so they seem like they are on an isometric grid.
-     */
-    const transformedEdgeLineSegments: EdgeLineSegment[] = [];
-    const transformedPositions = new Map<ResolverEvent, Vector2>();
-
-    for (const [processEvent, position] of positions) {
-      transformedPositions.set(processEvent, applyMatrix3(position, isometricTransformMatrix));
+    if (!originID) {
+      // no data has loaded.
+      return taxiLayout;
     }
 
-    for (const edgeLineSegment of edgeLineSegments) {
-      const transformedSegment = [];
-      for (const point of edgeLineSegment) {
-        transformedSegment.push(applyMatrix3(point, isometricTransformMatrix));
+    // find the origin node
+    const originNode = indexedProcessTreeModel.processEvent(indexedProcessTree, originID);
+
+    if (originNode === null) {
+      // If a tree is returned that has no process events for the origin, this can happen.
+      return taxiLayout;
+    }
+
+    // Find the position of the origin, we'll center the map on it intrinsically
+    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originNode);
+    // adjust the position of everything so that the origin node is at `(0, 0)`
+
+    if (originPosition === undefined) {
+      // not sure how this could happen.
+      return taxiLayout;
+    }
+
+    // Take the origin position, and multipy it by -1, then move the layout by that amount.
+    // This should center the layout around the origin.
+    return isometricTaxiLayoutModel.translated(taxiLayout, vector2.scale(originPosition, -1));
+  }
+);
+
+/**
+ * Given a nodeID (aka entity_id) get the indexed process event.
+ * Legacy functions take process events instead of nodeID, use this to get
+ * process events for them.
+ */
+export const processEventForID: (
+  state: DataState
+) => (nodeID: string) => ResolverEvent | null = createSelector(
+  tree,
+  (indexedProcessTree) => (nodeID: string) =>
+    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID) as ResolverEvent
+);
+
+/**
+ * Takes a nodeID (aka entity_id) and returns the associated aria level as a number or null if the node ID isn't in the tree.
+ */
+export const ariaLevel: (state: DataState) => (nodeID: string) => number | null = createSelector(
+  layout,
+  processEventForID,
+  ({ ariaLevels }, processEventGetter) => (nodeID: string) => {
+    const node = processEventGetter(nodeID);
+    return node ? ariaLevels.get(node as SafeResolverEvent) ?? null : null;
+  }
+);
+
+/**
+ * Returns the following sibling if there is one, or `null` if there isn't.
+ * For root nodes, other root nodes are treated as siblings.
+ * This is used to calculate the `aria-flowto` attribute.
+ */
+export const ariaFlowtoCandidate: (
+  state: DataState
+) => (nodeID: string) => string | null = createSelector(
+  tree,
+  processEventForID,
+  (indexedProcessTree, eventGetter) => {
+    // A map of preceding sibling IDs to following sibling IDs or `null`, if there is no following sibling
+    const memo: Map<string, string | null> = new Map();
+
+    return function memoizedGetter(/** the unique ID of a node. **/ nodeID: string): string | null {
+      // Previous calculations are memoized. Check for a value in the memo.
+      const existingValue = memo.get(nodeID);
+
+      /**
+       * `undefined` means the key wasn't in the map.
+       * Note: the value may be null, meaning that we checked and there is no following sibling.
+       * If there is a value in the map, return it.
+       */
+      if (existingValue !== undefined) {
+        return existingValue;
       }
-      transformedEdgeLineSegments.push(transformedSegment);
-    }
 
+      /**
+       * Getting the following sibling of a node has an `O(n)` time complexity where `n` is the number of children the parent of the node has.
+       * For this reason, we calculate the following siblings of the node and all of its siblings at once and cache them.
+       */
+      const nodeEvent: ResolverEvent | null = eventGetter(nodeID);
+
+      if (!nodeEvent) {
+        // this should never happen.
+        throw new Error('could not find child event in process tree.');
+      }
+
+      // nodes with the same parent ID
+      const children = indexedProcessTreeModel.children(
+        indexedProcessTree,
+        uniqueParentPidForProcess(nodeEvent)
+      );
+
+      let previousChild: ResolverEvent | null = null;
+      // Loop over all nodes that have the same parent ID (even if the parent ID is undefined or points to a node that isn't in the tree.)
+      for (const child of children) {
+        if (previousChild !== null) {
+          // Set the `child` as the following sibling of `previousChild`.
+          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child as ResolverEvent));
+        }
+        // Set the child as the previous child.
+        previousChild = child as ResolverEvent;
+      }
+
+      if (previousChild) {
+        // if there is a previous child, it has no following sibling.
+        memo.set(uniquePidForProcess(previousChild), null);
+      }
+
+      return memoizedGetter(nodeID);
+    };
+  }
+);
+
+const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
+  layout,
+  function ({ processNodePositions, edgeLineSegments }) {
+    const spatialIndex: rbush<IndexedEntity> = new rbush();
+    const processesToIndex: IndexedProcessNode[] = [];
+    const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
+
+    // Make sure these numbers are big enough to cover the process nodes at all zoom levels.
+    // The process nodes don't extend equally in all directions from their center point.
+    const processNodeViewWidth = 720;
+    const processNodeViewHeight = 240;
+    const lineSegmentPadding = 30;
+    for (const [processEvent, position] of processNodePositions) {
+      const [nodeX, nodeY] = position;
+      const indexedEvent: IndexedProcessNode = {
+        minX: nodeX - 0.5 * processNodeViewWidth,
+        minY: nodeY - 0.5 * processNodeViewHeight,
+        maxX: nodeX + 0.5 * processNodeViewWidth,
+        maxY: nodeY + 0.5 * processNodeViewHeight,
+        position,
+        entity: processEvent,
+        type: 'processNode',
+      };
+      processesToIndex.push(indexedEvent);
+    }
+    for (const edgeLineSegment of edgeLineSegments) {
+      const {
+        points: [[x1, y1], [x2, y2]],
+      } = edgeLineSegment;
+      const indexedLineSegment: IndexedEdgeLineSegment = {
+        minX: Math.min(x1, x2) - lineSegmentPadding,
+        minY: Math.min(y1, y2) - lineSegmentPadding,
+        maxX: Math.max(x1, x2) + lineSegmentPadding,
+        maxY: Math.max(y1, y2) + lineSegmentPadding,
+        entity: edgeLineSegment,
+        type: 'edgeLine',
+      };
+      edgeLineSegmentsToIndex.push(indexedLineSegment);
+    }
+    spatialIndex.load([...processesToIndex, ...edgeLineSegmentsToIndex]);
+    return spatialIndex;
+  }
+);
+
+/**
+ * Returns nodes and edge lines that could be visible in the `query`.
+ */
+export const nodesAndEdgelines: (
+  state: DataState
+) => (
+  /**
+   * An axis aligned bounding box (in world corrdinates) to search in. Any entities that might collide with this box will be returned.
+   */
+  query: AABB
+) => VisibleEntites = createSelector(spatiallyIndexedLayout, function (spatialIndex) {
+  /**
+   * Memoized for performance and object reference equality.
+   */
+  return defaultMemoize((boundingBox: AABB) => {
+    const {
+      minimum: [minX, minY],
+      maximum: [maxX, maxY],
+    } = boundingBox;
+    const entities = spatialIndex.search({
+      minX,
+      minY,
+      maxX,
+      maxY,
+    });
+    const visibleProcessNodePositions = new Map<SafeResolverEvent, Vector2>(
+      entities
+        .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
+        .map((node) => [node.entity, node.position])
+    );
+    const connectingEdgeLineSegments = entities
+      .filter((entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine')
+      .map((node) => node.entity);
     return {
-      processNodePositions: transformedPositions,
-      edgeLineSegments: transformedEdgeLineSegments,
+      processNodePositions: visibleProcessNodePositions,
+      connectingEdgeLineSegments,
+    };
+  });
+});
+
+/**
+ * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
+ */
+export function treeRequestParametersToAbort(state: DataState): TreeFetcherParameters | null {
+  /**
+   * If there is a pending request, and its not for the current parameters (even, if the current parameters are undefined) then we should abort the request.
+   */
+  if (
+    state.tree.pendingRequestParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree.pendingRequestParameters,
+      state.tree.currentParameters
+    )
+  ) {
+    return state.tree.pendingRequestParameters;
+  } else {
+    return null;
+  }
+}
+
+/**
+ * The sum of all related event categories for a process.
+ */
+export const relatedEventTotalForProcess: (
+  state: DataState
+) => (event: ResolverEvent) => number | null = createSelector(
+  relatedEventsStats,
+  (statsForProcess) => {
+    return (event: ResolverEvent) => {
+      const stats = statsForProcess(uniquePidForProcess(event));
+      if (!stats) {
+        return null;
+      }
+      let total = 0;
+      for (const value of Object.values(stats.events.byCategory)) {
+        total += value;
+      }
+      return total;
     };
   }
 );

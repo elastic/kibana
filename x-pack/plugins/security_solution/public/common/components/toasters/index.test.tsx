@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React, { useEffect } from 'react';
 
@@ -69,6 +70,7 @@ describe('Toaster', () => {
           if (toasts.length === 0) {
             dispatch({ type: 'addToaster', toast: mockToast });
           }
+          // eslint-disable-next-line react-hooks/exhaustive-deps
         }, []);
         return (
           <>

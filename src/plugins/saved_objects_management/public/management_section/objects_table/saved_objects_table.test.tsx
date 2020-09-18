@@ -41,6 +41,7 @@ import {
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { serviceRegistryMock } from '../../services/service_registry.mock';
 import { actionServiceMock } from '../../services/action_service.mock';
+import { columnServiceMock } from '../../services/column_service.mock';
 import {
   SavedObjectsTable,
   SavedObjectsTableProps,
@@ -134,6 +135,7 @@ describe('SavedObjectsTable', () => {
       allowedTypes,
       serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
+      columnRegistry: columnServiceMock.createStart(),
       savedObjectsClient: savedObjects.client,
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       http,
@@ -158,7 +160,7 @@ describe('SavedObjectsTable', () => {
             editUrl: '#/management/kibana/indexPatterns/patterns/1',
             inAppUrl: {
               path: '/management/kibana/indexPatterns/patterns/1',
-              uiCapabilitiesPath: 'management.kibana.index_patterns',
+              uiCapabilitiesPath: 'management.kibana.indexPatterns',
             },
           },
         },
@@ -395,7 +397,7 @@ describe('SavedObjectsTable', () => {
       component.instance().showImportFlyout();
       component.update();
 
-      expect(component.find(Flyout)).toMatchSnapshot();
+      expect(component.find(Flyout).length).toBe(1);
     });
 
     it('should hide the flyout', async () => {
@@ -450,7 +452,7 @@ describe('SavedObjectsTable', () => {
       } as SavedObjectWithMetadata);
       component.update();
 
-      expect(component.find(Relationships)).toMatchSnapshot();
+      expect(component.find(Relationships).length).toBe(1);
       expect(component.state('relationshipObject')).toEqual({
         id: '2',
         type: 'search',

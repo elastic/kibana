@@ -4,35 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-import React from 'react';
-import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+import { noop } from 'lodash/fp';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { shallowEqual, useSelector } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
+
+import { AbortError } from '../../../../../../../src/plugins/data/common';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
+  HostAuthenticationsRequestOptions,
+  HostAuthenticationsStrategyResponse,
   AuthenticationsEdges,
-  GetAuthenticationsQuery,
   PageInfoPaginated,
-} from '../../../graphql/types';
-import { inputsModel, State, inputsSelectors } from '../../../common/store';
-import { createFilter, getDefaultFetchPolicy } from '../../../common/containers/helpers';
+  DocValueFields,
+  SortField,
+} from '../../../../common/search_strategy';
+import { ESTermQuery } from '../../../../common/typed_json';
+
+import { inputsModel, State } from '../../../common/store';
+import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import { withKibana, WithKibanaProps } from '../../../common/lib/kibana';
-import {
-  QueryTemplatePaginated,
-  QueryTemplatePaginatedProps,
-} from '../../../common/containers/query_template_paginated';
+import { useKibana } from '../../../common/lib/kibana';
+import { getInspectResponse } from '../../../helpers';
+import { InspectResponse } from '../../../types';
+
 import { hostsModel, hostsSelectors } from '../../store';
-import { authenticationsQuery } from './index.gql_query';
+
+import * as i18n from './translations';
 
 const ID = 'authenticationQuery';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
   id: string;
-  inspect: inputsModel.InspectQuery;
+  inspect: InspectResponse;
   isInspected: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -41,113 +48,160 @@ export interface AuthenticationArgs {
   totalCount: number;
 }
 
-export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: AuthenticationArgs) => React.ReactNode;
+interface UseAuthentications {
+  docValueFields?: DocValueFields[];
+  filterQuery?: ESTermQuery | string;
+  endDate: string;
+  startDate: string;
   type: hostsModel.HostsType;
+  skip: boolean;
 }
 
-export interface AuthenticationsComponentReduxProps {
-  activePage: number;
-  isInspected: boolean;
-  limit: number;
-}
-
-type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps & WithKibanaProps;
-
-class AuthenticationsComponentQuery extends QueryTemplatePaginated<
-  AuthenticationsProps,
-  GetAuthenticationsQuery.Query,
-  GetAuthenticationsQuery.Variables
-> {
-  public render() {
-    const {
-      activePage,
-      children,
-      endDate,
-      filterQuery,
-      id = ID,
-      isInspected,
-      kibana,
-      limit,
-      skip,
-      sourceId,
-      startDate,
-    } = this.props;
-    const variables: GetAuthenticationsQuery.Variables = {
-      sourceId,
-      timerange: {
-        interval: '12h',
-        from: startDate!,
-        to: endDate!,
-      },
-      pagination: generateTablePaginationOptions(activePage, limit),
-      filterQuery: createFilter(filterQuery),
-      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
-      inspect: isInspected,
-    };
-    return (
-      <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
-        query={authenticationsQuery}
-        fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
-        skip={skip}
-        variables={variables}
-      >
-        {({ data, loading, fetchMore, networkStatus, refetch }) => {
-          const authentications = getOr([], 'source.Authentications.edges', data);
-          this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => ({
-            variables: {
-              pagination: generateTablePaginationOptions(newActivePage, limit),
-            },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
-                return prev;
-              }
-              return {
-                ...fetchMoreResult,
-                source: {
-                  ...fetchMoreResult.source,
-                  Authentications: {
-                    ...fetchMoreResult.source.Authentications,
-                    edges: [...fetchMoreResult.source.Authentications.edges],
-                  },
-                },
-              };
-            },
-          }));
-          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
-          return children({
-            authentications,
-            id,
-            inspect: getOr(null, 'source.Authentications.inspect', data),
-            isInspected,
-            loading: isLoading,
-            loadPage: this.wrappedLoadMore,
-            pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
-            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
-            totalCount: getOr(-1, 'source.Authentications.totalCount', data),
-          });
-        }}
-      </Query>
-    );
-  }
-}
-
-const makeMapStateToProps = () => {
+export const useAuthentications = ({
+  docValueFields,
+  filterQuery,
+  endDate,
+  startDate,
+  type,
+  skip,
+}: UseAuthentications): [boolean, AuthenticationArgs] => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      ...getAuthenticationsSelector(state, type),
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
+  const { activePage, limit } = useSelector(
+    (state: State) => getAuthenticationsSelector(state, type),
+    shallowEqual
+  );
+  const { data, notifications, uiSettings } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+  const [loading, setLoading] = useState(false);
+  const [authenticationsRequest, setAuthenticationsRequest] = useState<
+    HostAuthenticationsRequestOptions
+  >({
+    defaultIndex,
+    docValueFields: docValueFields ?? [],
+    factoryQueryType: HostsQueries.authentications,
+    filterQuery: createFilter(filterQuery),
+    pagination: generateTablePaginationOptions(activePage, limit),
+    timerange: {
+      interval: '12h',
+      from: startDate,
+      to: endDate,
+    },
+    sort: {} as SortField,
+  });
 
-export const AuthenticationsQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
-)(AuthenticationsComponentQuery);
+  const wrappedLoadMore = useCallback(
+    (newActivePage: number) => {
+      setAuthenticationsRequest((prevRequest) => {
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
+    },
+    [limit]
+  );
+
+  const [authenticationsResponse, setAuthenticationsResponse] = useState<AuthenticationArgs>({
+    authentications: [],
+    id: ID,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    isInspected: false,
+    loading: true,
+    loadPage: wrappedLoadMore,
+    pageInfo: {
+      activePage: 0,
+      fakeTotalCount: 0,
+      showMorePagesIndicator: false,
+    },
+    refetch: refetch.current,
+    totalCount: -1,
+  });
+
+  const authenticationsSearch = useCallback(
+    (request: HostAuthenticationsRequestOptions) => {
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        const searchSubscription$ = data.search
+          .search<HostAuthenticationsRequestOptions, HostAuthenticationsStrategyResponse>(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
+          .subscribe({
+            next: (response) => {
+              if (!response.isPartial && !response.isRunning) {
+                if (!didCancel) {
+                  setLoading(false);
+                  setAuthenticationsResponse((prevResponse) => ({
+                    ...prevResponse,
+                    authentications: response.edges,
+                    inspect: getInspectResponse(response, prevResponse.inspect),
+                    pageInfo: response.pageInfo,
+                    refetch: refetch.current,
+                    totalCount: response.totalCount,
+                  }));
+                }
+                searchSubscription$.unsubscribe();
+              } else if (response.isPartial && !response.isRunning) {
+                if (!didCancel) {
+                  setLoading(false);
+                }
+                notifications.toasts.addWarning(i18n.ERROR_AUTHENTICATIONS);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger({
+                  title: i18n.FAIL_AUTHENTICATIONS,
+                  text: msg.message,
+                });
+              }
+            },
+          });
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, notifications.toasts]
+  );
+
+  useEffect(() => {
+    setAuthenticationsRequest((prevRequest) => {
+      const myRequest = {
+        ...prevRequest,
+        defaultIndex,
+        docValueFields: docValueFields ?? [],
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+      };
+      if (!skip && !deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [activePage, defaultIndex, docValueFields, endDate, filterQuery, limit, skip, startDate]);
+
+  useEffect(() => {
+    authenticationsSearch(authenticationsRequest);
+  }, [authenticationsRequest, authenticationsSearch]);
+
+  return [loading, authenticationsResponse];
+};

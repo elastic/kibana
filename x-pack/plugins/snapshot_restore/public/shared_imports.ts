@@ -5,17 +5,18 @@
  */
 
 export {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig,
-  sendRequest,
-  useRequest,
+  AuthorizationProvider,
   CronEditor,
   DAY,
-  SectionError,
   Error,
-  WithPrivileges,
-  useAuthorizationContext,
   NotAuthorizedSection,
-  AuthorizationProvider,
+  SectionError,
+  sendRequest,
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestResponse,
+  useAuthorizationContext,
+  useRequest,
+  UseRequestConfig,
+  WithPrivileges,
 } from '../../../../src/plugins/es_ui_shared/public';

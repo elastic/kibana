@@ -74,6 +74,7 @@ export function createTopNavDirective() {
 export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
   return reactDirective(TopNavMenu, [
     ['config', { watchDepth: 'value' }],
+    ['setMenuMountPoint', { watchDepth: 'reference' }],
     ['disabledButtons', { watchDepth: 'reference' }],
 
     ['query', { watchDepth: 'reference' }],
@@ -94,11 +95,11 @@ export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
     // All modifiers default to true.
     // Set to false to hide subcomponents.
     'showSearchBar',
-    'showFilterBar',
     'showQueryBar',
     'showQueryInput',
-    'showDatePicker',
     'showSaveQuery',
+    'showDatePicker',
+    'showFilterBar',
 
     'appName',
     'screenTitle',

@@ -26,15 +26,16 @@ import {
   RefreshInterval,
 } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
+import { UrlGeneratorsDefinition } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
+import { ViewMode } from '../../embeddable/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const DASHBOARD_APP_URL_GENERATOR = 'DASHBOARD_APP_URL_GENERATOR';
 
-export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
+export interface DashboardUrlGeneratorState {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -73,7 +74,12 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * true is default
    */
   preserveSavedFilters?: boolean;
-}>;
+
+  /**
+   * View mode of the dashboard.
+   */
+  viewMode?: ViewMode;
+}
 
 export const createDashboardUrlGenerator = (
   getStartServices: () => Promise<{
@@ -123,6 +129,7 @@ export const createDashboardUrlGenerator = (
       cleanEmptyKeys({
         query: state.query,
         filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        viewMode: state.viewMode,
       }),
       { useHash },
       `${appBasePath}#/${hash}`

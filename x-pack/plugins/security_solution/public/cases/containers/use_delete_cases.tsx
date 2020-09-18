@@ -110,6 +110,7 @@ export const useDeleteCases = (): UseDeleteCase => {
       abortCtrl.abort();
       cancel = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dispatchToggleDeleteModal = useCallback(() => {
@@ -118,6 +119,7 @@ export const useDeleteCases = (): UseDeleteCase => {
 
   const dispatchResetIsDeleted = useCallback(() => {
     dispatch({ type: 'RESET_IS_DELETED' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isDisplayConfirmDeleteModal]);
 
   const handleOnDeleteConfirm = useCallback(
@@ -125,10 +127,12 @@ export const useDeleteCases = (): UseDeleteCase => {
       dispatchDeleteCases(cases);
       dispatchToggleDeleteModal();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [state.isDisplayConfirmDeleteModal]
   );
   const handleToggleModal = useCallback(() => {
     dispatchToggleDeleteModal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isDisplayConfirmDeleteModal]);
 
   return { ...state, dispatchResetIsDeleted, handleOnDeleteConfirm, handleToggleModal };

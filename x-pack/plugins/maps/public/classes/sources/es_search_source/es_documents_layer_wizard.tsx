@@ -13,19 +13,25 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer } from '../../layers/blended_vector_layer/blended_vector_layer';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-import { SCALING_TYPES } from '../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../common/constants';
+import { TiledVectorLayer } from '../../layers/tiled_vector_layer/tiled_vector_layer';
 
 export function createDefaultLayerDescriptor(sourceConfig: unknown, mapColors: string[]) {
   const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
 
-  return sourceDescriptor.scalingType === SCALING_TYPES.CLUSTERS
-    ? BlendedVectorLayer.createDescriptor({ sourceDescriptor }, mapColors)
-    : VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+  if (sourceDescriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+    return BlendedVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+  } else if (sourceDescriptor.scalingType === SCALING_TYPES.MVT) {
+    return TiledVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+  } else {
+    return VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+  }
 }
 
 export const esDocumentsLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
-    defaultMessage: 'Vector data from a Kibana index pattern',
+    defaultMessage: 'Points, lines, and polygons from Elasticsearch',
   }),
   icon: 'logoElasticsearch',
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {

@@ -8,21 +8,22 @@ export * from './rest_spec';
 
 export interface IngestManagerConfigType {
   enabled: boolean;
-  epm: {
-    enabled: boolean;
-    registryUrl?: string;
-  };
+  registryUrl?: string;
   fleet: {
     enabled: boolean;
     tlsCheckDisabled: boolean;
+    pollingRequestTimeout: number;
+    maxConcurrentConnections: number;
     kibana: {
-      host?: string;
+      host?: string[] | string;
       ca_sha256?: string;
     };
     elasticsearch: {
       host?: string;
       ca_sha256?: string;
     };
+    agentPolicyRolloutRateLimitIntervalMs: number;
+    agentPolicyRolloutRateLimitRequestPerInterval: number;
   };
 }
 

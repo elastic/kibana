@@ -4,7 +4,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
 <EuiPopover
   anchorPosition="downRight"
   button={
-    <ForwardRef
+    <EuiHeaderSectionItemButton
       aria-controls="headerSpacesMenuContent"
       aria-expanded={false}
       aria-haspopup="true"
@@ -15,7 +15,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
       <EuiLoadingSpinner
         size="m"
       />
-    </ForwardRef>
+    </EuiHeaderSectionItemButton>
   }
   closePopover={[Function]}
   data-test-subj="spacesNavSelector"

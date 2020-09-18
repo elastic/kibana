@@ -127,7 +127,7 @@ export function createOptimizerStateSummarizer(
     }
 
     if (event.type === 'worker stdio' || event.type === 'worker started') {
-      // same state, but updated to the event is shared externally
+      // same state, but updated so the event is shared externally
       return createOptimizerState(state);
     }
 

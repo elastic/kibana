@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { encode } from 'rison-node';
-import { createMemoryHistory } from 'history';
 import { renderHook } from '@testing-library/react-hooks';
+import { createMemoryHistory } from 'history';
 import React from 'react';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { HistoryContext } from '../utils/history_context';
+import { Router } from 'react-router-dom';
+import { encode } from 'rison-node';
 import { coreMock } from 'src/core/public/mocks';
-import { useLinkProps, LinkDescriptor } from './use_link_props';
 import { ScopedHistory } from '../../../../../src/core/public';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { LinkDescriptor, useLinkProps } from './use_link_props';
 
 const PREFIX = '/test-basepath/s/test-space/app/';
 
@@ -30,9 +30,9 @@ const scopedHistory = new ScopedHistory(history, `${PREFIX}${INTERNAL_APP}`);
 
 const ProviderWrapper: React.FC = ({ children }) => {
   return (
-    <HistoryContext.Provider value={scopedHistory}>
+    <Router history={scopedHistory}>
       <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
-    </HistoryContext.Provider>
+    </Router>
   );
 };
 

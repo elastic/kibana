@@ -46,6 +46,7 @@ interface GroupByExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const GroupByExpression = ({
@@ -54,6 +55,7 @@ export const GroupByExpression = ({
   onChangeSelectedTermSize,
   onChangeSelectedTermField,
   onChangeSelectedGroupBy,
+  display = 'inline',
   fields,
   termSize,
   termField,
@@ -102,7 +104,8 @@ export const GroupByExpression = ({
           onClick={() => {
             setGroupByPopoverOpen(true);
           }}
-          color={groupBy === 'all' || (termSize && termField) ? 'secondary' : 'danger'}
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={!(groupBy === 'all' || (termSize && termField))}
         />
       }
       isOpen={groupByPopoverOpen}
@@ -111,6 +114,7 @@ export const GroupByExpression = ({
       }}
       ownFocus
       withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
     >
       <div>

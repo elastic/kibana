@@ -6,31 +6,32 @@
 
 import { findRulesSchema, FindRulesSchema } from './find_rules_schema';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getFindResponseSingle, getBaseResponsePayload } from './__mocks__/utils';
 import { left } from 'fp-ts/lib/Either';
 import { RulesSchema } from './rules_schema';
 import { exactCheck } from '../../../exact_check';
 import { foldLeftRight, getPaths } from '../../../test_utils';
+import { getRulesSchemaMock } from './rules_schema.mocks';
+import { getFindRulesSchemaMock } from './find_rules_schema.mocks';
 
 describe('find_rules_schema', () => {
   test('it should validate a typical single find rules response', () => {
-    const payload = getFindResponseSingle();
+    const payload = getFindRulesSchemaMock();
     const decoded = findRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(getFindResponseSingle());
+    expect(message.schema).toEqual(getFindRulesSchemaMock());
   });
 
   test('it should validate an empty find rules response', () => {
-    const payload = getFindResponseSingle();
+    const payload = getFindRulesSchemaMock();
     payload.data = [];
     const decoded = findRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    const expected = getFindResponseSingle();
+    const expected = getFindRulesSchemaMock();
     expected.data = [];
 
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -38,7 +39,7 @@ describe('find_rules_schema', () => {
   });
 
   test('it should invalidate a typical single find rules response if it is has an extra property on it', () => {
-    const payload: FindRulesSchema & { invalid_data?: 'invalid' } = getFindResponseSingle();
+    const payload: FindRulesSchema & { invalid_data?: 'invalid' } = getFindRulesSchemaMock();
     payload.invalid_data = 'invalid';
     const decoded = findRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -49,8 +50,8 @@ describe('find_rules_schema', () => {
   });
 
   test('it should invalidate a typical single find rules response if the rules are invalid within it', () => {
-    const payload = getFindResponseSingle();
-    const invalidRule: RulesSchema & { invalid_extra_data?: string } = getBaseResponsePayload();
+    const payload = getFindRulesSchemaMock();
+    const invalidRule: RulesSchema & { invalid_extra_data?: string } = getRulesSchemaMock();
     invalidRule.invalid_extra_data = 'invalid_data';
     payload.data = [invalidRule];
     const decoded = findRulesSchema.decode(payload);
@@ -62,8 +63,9 @@ describe('find_rules_schema', () => {
   });
 
   test('it should invalidate a typical single find rules response if the rule is missing a required field such as name', () => {
-    const payload = getFindResponseSingle();
-    const invalidRule = getBaseResponsePayload();
+    const payload = getFindRulesSchemaMock();
+    const invalidRule = getRulesSchemaMock();
+    // @ts-expect-error
     delete invalidRule.name;
     payload.data = [invalidRule];
     const decoded = findRulesSchema.decode(payload);
@@ -77,7 +79,8 @@ describe('find_rules_schema', () => {
   });
 
   test('it should invalidate a typical single find rules response if it is missing perPage', () => {
-    const payload = getFindResponseSingle();
+    const payload = getFindRulesSchemaMock();
+    // @ts-expect-error
     delete payload.perPage;
     const decoded = findRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -90,7 +93,7 @@ describe('find_rules_schema', () => {
   });
 
   test('it should invalidate a typical single find rules response if it has a negative perPage number', () => {
-    const payload = getFindResponseSingle();
+    const payload = getFindRulesSchemaMock();
     payload.perPage = -1;
     const decoded = findRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -101,7 +104,7 @@ describe('find_rules_schema', () => {
   });
 
   test('it should invalidate a typical single find rules response if it has a negative page number', () => {
-    const payload = getFindResponseSingle();
+    const payload = getFindRulesSchemaMock();
     payload.page = -1;
     const decoded = findRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -112,7 +115,7 @@ describe('find_rules_schema', () => {
   });
 
   test('it should invalidate a typical single find rules response if it has a negative total', () => {
-    const payload = getFindResponseSingle();
+    const payload = getFindRulesSchemaMock();
     payload.total = -1;
     const decoded = findRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

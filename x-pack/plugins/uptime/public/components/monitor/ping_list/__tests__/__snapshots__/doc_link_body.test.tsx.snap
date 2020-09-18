@@ -7,7 +7,7 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
     id="xpack.uptime.pingList.expandedRow.response_body.notRecorded"
     values={
       Object {
-        "docsLink": <ForwardRef
+        "docsLink": <EuiLink
           href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
           target="_blank"
         >
@@ -17,7 +17,7 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
             size="s"
             type="popout"
           />
-        </ForwardRef>,
+        </EuiLink>,
       }
     }
   />

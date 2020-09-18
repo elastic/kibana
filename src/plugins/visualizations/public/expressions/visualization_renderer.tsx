@@ -33,6 +33,7 @@ export const visualization = () => ({
     const visType = config.visType || visConfig.type;
 
     const vis = new ExprVis({
+      title: config.title,
       type: visType as string,
       params: visConfig as VisParams,
     });

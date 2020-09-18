@@ -4,19 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
-import { LicenseCheck } from '../license_checks';
+import { KibanaRequest } from 'kibana/server';
 import { resultsServiceProvider } from '../../models/results_service';
+import { GetGuards } from '../shared_services';
+
+type OrigResultsServiceProvider = ReturnType<typeof resultsServiceProvider>;
 
 export interface ResultsServiceProvider {
-  resultsServiceProvider(callAsCurrentUser: APICaller): ReturnType<typeof resultsServiceProvider>;
+  resultsServiceProvider(
+    request: KibanaRequest
+  ): {
+    getAnomaliesTableData: OrigResultsServiceProvider['getAnomaliesTableData'];
+  };
 }
 
-export function getResultsServiceProvider(isFullLicense: LicenseCheck): ResultsServiceProvider {
+export function getResultsServiceProvider(getGuards: GetGuards): ResultsServiceProvider {
   return {
-    resultsServiceProvider(callAsCurrentUser: APICaller) {
-      isFullLicense();
-      return resultsServiceProvider(callAsCurrentUser);
+    resultsServiceProvider(request: KibanaRequest) {
+      return {
+        async getAnomaliesTableData(...args) {
+          return await getGuards(request)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(async ({ scopedClient }) => {
+              const { getAnomaliesTableData } = resultsServiceProvider(scopedClient);
+              return getAnomaliesTableData(...args);
+            });
+        },
+      };
     },
   };
 }

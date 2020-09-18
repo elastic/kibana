@@ -16,11 +16,12 @@ import { MenuItem } from './menu_item';
 import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
 export interface FlyoutEditDrilldownParams {
-  start: StartServicesGetter<Pick<StartDependencies, 'drilldowns'>>;
+  start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
@@ -58,10 +59,12 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
 
     const handle = core.overlays.openFlyout(
       toMountPoint(
-        <plugins.drilldowns.FlyoutManageDrilldowns
+        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
           onClose={() => handle.close()}
           viewMode={'manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
+          supportedTriggers={ensureNestedTriggers(embeddable.supportedTriggers())}
+          placeContext={{ embeddable }}
         />
       ),
       {

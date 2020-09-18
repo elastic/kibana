@@ -10,7 +10,7 @@ import '../views/all';
 import 'angular-sanitize';
 import 'angular-route';
 import '../index.scss';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { AppMountContext } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -18,18 +18,16 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../src/plugins/kibana_legacy/public';
-import { MonitoringPluginDependencies } from '../types';
+import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalState } from '../url_state';
 import { getSafeForExternalLink } from '../lib/get_safe_for_external_link';
 
 // @ts-ignore
-import { formatNumber, formatMetric } from '../lib/format_number';
+import { formatMetric, formatNumber } from '../lib/format_number';
 // @ts-ignore
 import { extractIp } from '../lib/extract_ip';
 // @ts-ignore
 import { PrivateProvider } from './providers/private';
-// @ts-ignore
-import { KbnUrlProvider } from './providers/url';
 // @ts-ignore
 import { breadcrumbsProvider } from '../services/breadcrumbs';
 // @ts-ignore
@@ -62,13 +60,12 @@ export const localAppModule = ({
   data: { query },
   navigation,
   externalConfig,
-}: MonitoringPluginDependencies) => {
+}: MonitoringStartPluginDependencies) => {
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalStorage();
   createLocalConfigModule(core);
-  createLocalKbnUrlModule();
-  createLocalStateModule(query);
+  createLocalStateModule(query, core.notifications.toasts);
   createLocalTopNavModule(navigation);
   createHrefModule(core);
   createMonitoringAppServices();
@@ -80,7 +77,6 @@ export const localAppModule = ({
     ...thirdPartyAngularDependencies,
     'monitoring/I18n',
     'monitoring/Private',
-    'monitoring/KbnUrl',
     'monitoring/Storage',
     'monitoring/Config',
     'monitoring/State',
@@ -94,12 +90,17 @@ export const localAppModule = ({
   return appModule;
 };
 
-function createMonitoringAppConfigConstants(keys: MonitoringPluginDependencies['externalConfig']) {
+function createMonitoringAppConfigConstants(
+  keys: MonitoringStartPluginDependencies['externalConfig']
+) {
   let constantsModule = angular.module('monitoring/constants', []);
   keys.map(([key, value]) => (constantsModule = constantsModule.constant(key as string, value)));
 }
 
-function createLocalStateModule(query: any) {
+function createLocalStateModule(
+  query: MonitoringStartPluginDependencies['data']['query'],
+  toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts']
+) {
   angular
     .module('monitoring/State', ['monitoring/Private'])
     .service('globalState', function (
@@ -108,7 +109,7 @@ function createLocalStateModule(query: any) {
       $location: ng.ILocationService
     ) {
       function GlobalStateProvider(this: any) {
-        const state = new GlobalState(query, $rootScope, $location, this);
+        const state = new GlobalState(query, toasts, $rootScope, $location, this);
         const initialState: any = state.getState();
         for (const key in initialState) {
           if (!initialState.hasOwnProperty(key)) {
@@ -123,14 +124,6 @@ function createLocalStateModule(query: any) {
         };
       }
       return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalKbnUrlModule() {
-  angular
-    .module('monitoring/KbnUrl', ['monitoring/Private', 'ngRoute'])
-    .service('kbnUrl', function (Private: IPrivate) {
-      return Private(KbnUrlProvider);
     });
 }
 
@@ -171,7 +164,7 @@ function createMonitoringAppFilters() {
     .module('monitoring/filters', [])
     .filter('capitalize', function () {
       return function (input: string) {
-        return capitalize(input?.toLowerCase());
+        return upperFirst(input?.toLowerCase());
       };
     })
     .filter('formatNumber', function () {
@@ -185,7 +178,7 @@ function createMonitoringAppFilters() {
     });
 }
 
-function createLocalConfigModule(core: MonitoringPluginDependencies['core']) {
+function createLocalConfigModule(core: MonitoringStartPluginDependencies['core']) {
   angular.module('monitoring/Config', []).provider('config', function () {
     return {
       $get: () => ({
@@ -213,7 +206,7 @@ function createLocalPrivateModule() {
   angular.module('monitoring/Private', []).provider('Private', PrivateProvider);
 }
 
-function createLocalTopNavModule({ ui }: MonitoringPluginDependencies['navigation']) {
+function createLocalTopNavModule({ ui }: MonitoringStartPluginDependencies['navigation']) {
   angular
     .module('monitoring/TopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)

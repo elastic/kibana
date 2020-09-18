@@ -6,7 +6,8 @@
 import {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
-  RendererFactory,
+  AnyExpressionRenderDefinition,
+  AnyRendererFactory,
 } from '../types';
 import { ElementFactory } from '../types';
 import { ExpressionsSetup } from '../../../../src/plugins/expressions/public';
@@ -19,9 +20,8 @@ export interface CanvasApi {
   addElements: AddToRegistry<ElementFactory>;
   addFunctions: AddToRegistry<() => AnyExpressionFunctionDefinition>;
   addModelUIs: AddToRegistry<any>;
-  addRenderers: AddToRegistry<RendererFactory>;
+  addRenderers: AddToRegistry<AnyRendererFactory>;
   addTagUIs: AddToRegistry<any>;
-  addTemplates: AddToRegistry<any>;
   addTransformUIs: AddToRegistry<any>;
   addTransitions: AddToRegistry<any>;
   addTypes: AddToRegistry<() => AnyExpressionTypeDefinition>;
@@ -35,7 +35,6 @@ export interface SetupRegistries {
   modelUIs: any[];
   viewUIs: any[];
   argumentUIs: any[];
-  templates: any[];
   tagUIs: any[];
   transitions: any[];
 }
@@ -50,7 +49,6 @@ export function getPluginApi(
     modelUIs: [],
     viewUIs: [],
     argumentUIs: [],
-    templates: [],
     tagUIs: [],
     transitions: [],
   };
@@ -68,8 +66,11 @@ export function getPluginApi(
       });
     },
     addRenderers: (renderers) => {
-      renderers.forEach((r: any) => {
-        expressionsPluginSetup.registerRenderer(r);
+      renderers.forEach((r) => {
+        // There is an issue of the canvas render definition not matching the expression render definition
+        // due to our handlers needing additional methods.  For now, we are going to cast to get to the proper
+        // type, but we should work with AppArch to figure out how the Handlers can be genericized
+        expressionsPluginSetup.registerRenderer((r as unknown) as AnyExpressionRenderDefinition);
       });
     },
 
@@ -80,7 +81,6 @@ export function getPluginApi(
     addModelUIs: (models) => registries.modelUIs.push(...models),
     addViewUIs: (views) => registries.viewUIs.push(...views),
     addArgumentUIs: (args) => registries.argumentUIs.push(...args),
-    addTemplates: (templates) => registries.templates.push(...templates),
     addTagUIs: (tags) => registries.tagUIs.push(...tags),
     addTransitions: (transitions) => registries.transitions.push(...transitions),
   };

@@ -36,6 +36,7 @@ export interface HeaderProps {
   rightColumn?: JSX.Element;
   rightColumnGrow?: EuiFlexItemProps['grow'];
   tabs?: EuiTabProps[];
+  'data-test-subj'?: string;
 }
 
 const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
@@ -53,8 +54,9 @@ export const Header: React.FC<HeaderProps> = ({
   rightColumnGrow,
   tabs,
   maxWidth,
+  'data-test-subj': dataTestSubj,
 }) => (
-  <Container>
+  <Container data-test-subj={dataTestSubj}>
     <Wrapper maxWidth={maxWidth}>
       <HeaderColumns
         leftColumn={leftColumn}

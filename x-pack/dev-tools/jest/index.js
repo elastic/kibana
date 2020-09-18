@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import jest from 'jest';
+import { run } from 'jest';
 import { resolve } from 'path';
 
 import { createJestConfig } from './create_jest_config';
@@ -21,5 +21,5 @@ export function runJest() {
 
   const argv = [...process.argv.slice(2), '--config', config];
 
-  return jest.run(argv);
+  return run(argv);
 }

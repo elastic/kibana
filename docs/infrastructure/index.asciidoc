@@ -1,10 +1,9 @@
+[chapter]
 [role="xpack"]
 [[xpack-infra]]
 = Metrics
 
-[partintro]
---
-The Metrics app enables you to monitor your infrastructure metrics and identify problems in real time.
+The {metrics-app} in {kib} enables you to monitor your infrastructure metrics and identify problems in real time.
 You start with a visual summary of your infrastructure where you can view basic metrics for common servers, containers, and services.
 Then you can drill down to view more detailed metrics or other information for that component.
 
@@ -23,14 +22,11 @@ You can optionally save these views and add them to {kibana-ref}/dashboard.html[
 
 * Create alerts based on metric thresholds for one or more components.
 
-To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Metrics application to inspect and analyze your data>>.
-
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
---
+[float]
+=== Get started
 
-include::getting-started.asciidoc[]
-include::infra-ui.asciidoc[]
-include::view-metrics.asciidoc[]
-include::metrics-explorer.asciidoc[]
+To get started with Metrics, refer to {metrics-guide}/install-metrics-monitoring.html[Install Metrics].
+

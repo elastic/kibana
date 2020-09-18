@@ -7,8 +7,8 @@
 import React from 'react';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 
-import { getEMSClient } from '../../../meta';
-import { getEmsUnavailableMessage } from '../ems_unavailable_message';
+import { getEmsTmsServices } from '../../../meta';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
 
 export const AUTO_SELECT = 'auto_select';
@@ -29,8 +29,7 @@ export class TileServiceSelect extends React.Component {
   }
 
   _loadTmsOptions = async () => {
-    const emsClient = getEMSClient();
-    const emsTMSServices = await emsClient.getTMSServices();
+    const emsTMSServices = await getEmsTmsServices();
 
     if (!this._isMounted) {
       return;

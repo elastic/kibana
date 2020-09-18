@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty, union } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { BrowserFields } from '../../containers/source';
-import { TimelineQuery } from '../../../timelines/containers';
-import { Direction } from '../../../graphql/types';
+import { Direction } from '../../../../common/search_strategy';
+import { BrowserFields, DocValueFields } from '../../containers/source';
+import { useTimelineEvents } from '../../../timelines/containers';
 import { useKibana } from '../../lib/kibana';
 import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
@@ -22,7 +22,7 @@ import { StatefulBody } from '../../../timelines/components/timeline/body/statef
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
 import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import { combineQueries, resolverIsShowing } from '../../../timelines/components/timeline/helpers';
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
@@ -34,16 +34,54 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { ExitFullScreen } from '../exit_full_screen';
+import { useFullScreen } from '../../containers/use_full_screen';
+import { TimelineId } from '../../../../common/types/timeline';
 
-const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
+export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
+const UTILITY_BAR_HEIGHT = 19; // px
+const COMPACT_HEADER_HEIGHT = EVENTS_VIEWER_HEADER_HEIGHT - UTILITY_BAR_HEIGHT; // px
 
-const StyledEuiPanel = styled(EuiPanel)`
-  max-width: 100%;
+const UtilityBar = styled.div`
+  height: ${UTILITY_BAR_HEIGHT}px;
+`;
+
+const TitleText = styled.span`
+  margin-right: 12px;
+`;
+
+const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
+  display: flex;
+  flex-direction: column;
+
+  ${({ $isFullScreen }) =>
+    $isFullScreen &&
+    `
+      border: 0;
+      box-shadow: none;
+      padding-top: 0;
+      padding-bottom: 0;
+  `}
+`;
+
+const TitleFlexGroup = styled(EuiFlexGroup)`
+  margin-top: 8px;
 `;
 
 const EventsContainerLoading = styled.div`
   width: 100%;
-  overflow: auto;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+/**
+ * Hides stateful headerFilterGroup implementations, but prevents the component
+ * from being unmounted, to preserve the state of the component
+ */
+const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
+  ${({ show }) => (show ? '' : 'visibility: hidden;')}
 `;
 
 interface Props {
@@ -51,22 +89,26 @@ interface Props {
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
-  end: number;
+  docValueFields: DocValueFields[];
+  end: string;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
   id: string;
   indexPattern: IIndexPattern;
   isLive: boolean;
+  isLoadingIndexPattern: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
-  start: number;
+  start: string;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
+  // If truthy, the graph viewer (Resolver) is showing
+  graphEventId: string | undefined;
 }
 
 const EventsViewerComponent: React.FC<Props> = ({
@@ -74,13 +116,14 @@ const EventsViewerComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   deletedEventIds,
+  docValueFields,
   end,
   filters,
   headerFilterGroup,
-  height = DEFAULT_EVENTS_VIEWER_HEIGHT,
   id,
   indexPattern,
   isLive,
+  isLoadingIndexPattern,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
@@ -90,28 +133,37 @@ const EventsViewerComponent: React.FC<Props> = ({
   sort,
   toggleColumn,
   utilityBar,
+  graphEventId,
 }) => {
+  const { globalFullScreen } = useFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
-  const { filterManager } = useKibana().services.data.query;
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
-  const {
-    getManageTimelineById,
-    setIsTimelineLoading,
-    setTimelineFilterManager,
-  } = useManageTimeline();
+  const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
+
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading });
-  }, [isQueryLoading]);
-  useEffect(() => {
-    setTimelineFilterManager({ id, filterManager });
-  }, [filterManager]);
+  }, [id, isQueryLoading, setIsTimelineLoading]);
 
   const { queryFields, title, unit } = useMemo(() => getManageTimelineById(id), [
     getManageTimelineById,
     id,
   ]);
+
+  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+
+  const titleWithExitFullScreen = useMemo(
+    () => (
+      <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
+        <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ExitFullScreen />
+        </EuiFlexItem>
+      </TitleFlexGroup>
+    ),
+    [justTitle]
+  );
 
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -125,6 +177,17 @@ const EventsViewerComponent: React.FC<Props> = ({
     end,
     isEventViewer: true,
   });
+
+  const canQueryTimeline = useMemo(
+    () =>
+      combinedQueries != null &&
+      isLoadingIndexPattern != null &&
+      !isLoadingIndexPattern &&
+      !isEmpty(start) &&
+      !isEmpty(end),
+    [isLoadingIndexPattern, combinedQueries, start, end]
+  );
+
   const fields = useMemo(
     () =>
       union(
@@ -133,93 +196,120 @@ const EventsViewerComponent: React.FC<Props> = ({
       ),
     [columnsHeader, queryFields]
   );
+
   const sortField = useMemo(
     () => ({
-      sortFieldId: sort.columnId,
+      field: sort.columnId,
       direction: sort.sortDirection as Direction,
     }),
     [sort.columnId, sort.sortDirection]
   );
 
+  const [
+    loading,
+    { events, updatedAt, inspect, loadPage, pageInfo, refetch, totalCount = 0 },
+  ] = useTimelineEvents({
+    docValueFields,
+    fields,
+    filterQuery: combinedQueries!.filterQuery,
+    id,
+    indexPattern,
+    limit: itemsPerPage,
+    sort: sortField,
+    startDate: start,
+    endDate: end,
+    skip: !canQueryTimeline,
+  });
+
+  const totalCountMinusDeleted = useMemo(
+    () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
+    [deletedEventIds.length, totalCount]
+  );
+
+  const subtitle = useMemo(
+    () =>
+      `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${unit(totalCountMinusDeleted)}`,
+    [totalCountMinusDeleted, unit]
+  );
+
+  const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
+    deletedEventIds,
+    events,
+  ]);
+
+  useEffect(() => {
+    setIsQueryLoading(loading);
+  }, [loading]);
+
   return (
-    <StyledEuiPanel data-test-subj="events-viewer-panel">
-      {combinedQueries != null ? (
+    <StyledEuiPanel
+      data-test-subj="events-viewer-panel"
+      $isFullScreen={globalFullScreen && id !== TimelineId.active}
+    >
+      {canQueryTimeline ? (
         <EventDetailsWidthProvider>
-          <TimelineQuery
-            fields={fields}
-            filterQuery={combinedQueries.filterQuery}
-            id={id}
-            indexPattern={indexPattern}
-            limit={itemsPerPage}
-            sortField={sortField}
-            sourceId="default"
-          >
-            {({
-              events,
-              getUpdatedAt,
-              inspect,
-              loading,
-              loadMore,
-              pageInfo,
-              refetch,
-              totalCount = 0,
-            }) => {
-              setIsQueryLoading(loading);
-              const totalCountMinusDeleted =
-                totalCount > 0 ? totalCount - deletedEventIds.length : 0;
+          <>
+            <HeaderSection
+              id={!resolverIsShowing(graphEventId) ? id : undefined}
+              height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
+              subtitle={utilityBar ? undefined : subtitle}
+              title={inspect ? justTitle : titleWithExitFullScreen}
+            >
+              {headerFilterGroup && (
+                <HeaderFilterGroupWrapper
+                  data-test-subj="header-filter-group-wrapper"
+                  show={!resolverIsShowing(graphEventId)}
+                >
+                  {headerFilterGroup}
+                </HeaderFilterGroupWrapper>
+              )}
+            </HeaderSection>
+            {utilityBar && !resolverIsShowing(graphEventId) && (
+              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
+            )}
+            <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
+              <TimelineRefetch
+                id={id}
+                inputId="global"
+                inspect={inspect}
+                loading={loading}
+                refetch={refetch}
+              />
 
-              const subtitle = `${i18n.SHOWING}: ${totalCountMinusDeleted.toLocaleString()} ${unit(
-                totalCountMinusDeleted
-              )}`;
+              <StatefulBody
+                browserFields={browserFields}
+                data={nonDeletedEvents}
+                docValueFields={docValueFields}
+                id={id}
+                isEventViewer={true}
+                refetch={refetch}
+                sort={sort}
+                toggleColumn={toggleColumn}
+              />
 
-              return (
-                <>
-                  <HeaderSection id={id} subtitle={utilityBar ? undefined : subtitle} title={title}>
-                    {headerFilterGroup}
-                  </HeaderSection>
-
-                  {utilityBar?.(refetch, totalCountMinusDeleted)}
-
-                  <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
-                    <TimelineRefetch
-                      id={id}
-                      inputId="global"
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                    />
-
-                    <StatefulBody
-                      browserFields={browserFields}
-                      data={events.filter((e) => !deletedEventIds.includes(e._id))}
-                      id={id}
-                      isEventViewer={true}
-                      height={height}
-                      sort={sort}
-                      toggleColumn={toggleColumn}
-                    />
-
-                    <Footer
-                      getUpdatedAt={getUpdatedAt}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      height={footerHeight}
-                      id={id}
-                      isLive={isLive}
-                      isLoading={loading}
-                      itemsCount={events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
-                      onLoadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      serverSideEventCount={totalCountMinusDeleted}
-                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                    />
-                  </EventsContainerLoading>
-                </>
-              );
-            }}
-          </TimelineQuery>
+              {
+                /** Hide the footer if Resolver is showing. */
+                !graphEventId && (
+                  <Footer
+                    activePage={getOr(0, 'activePage', pageInfo)}
+                    data-test-subj="events-viewer-footer"
+                    updatedAt={updatedAt}
+                    height={footerHeight}
+                    id={id}
+                    isLive={isLive}
+                    isLoading={loading}
+                    itemsCount={nonDeletedEvents.length}
+                    itemsPerPage={itemsPerPage}
+                    itemsPerPageOptions={itemsPerPageOptions}
+                    onChangeItemsPerPage={onChangeItemsPerPage}
+                    onChangePage={loadPage}
+                    serverSideEventCount={totalCountMinusDeleted}
+                    totalPages={getOr(0, 'totalPages', pageInfo)}
+                  />
+                )
+              }
+            </EventsContainerLoading>
+          </>
         </EventDetailsWidthProvider>
       ) : null}
     </StyledEuiPanel>
@@ -231,11 +321,12 @@ export const EventsViewer = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
+    deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.dataProviders === nextProps.dataProviders &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     deepEqual(prevProps.filters, nextProps.filters) &&
-    prevProps.height === nextProps.height &&
+    prevProps.headerFilterGroup === nextProps.headerFilterGroup &&
     prevProps.id === nextProps.id &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     prevProps.isLive === nextProps.isLive &&
@@ -245,5 +336,6 @@ export const EventsViewer = React.memo(
     deepEqual(prevProps.query, nextProps.query) &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort &&
-    prevProps.utilityBar === nextProps.utilityBar
+    prevProps.utilityBar === nextProps.utilityBar &&
+    prevProps.graphEventId === nextProps.graphEventId
 );

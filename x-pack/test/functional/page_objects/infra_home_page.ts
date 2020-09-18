@@ -33,6 +33,29 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.find('waffleMap');
     },
 
+    async openInvenotrySwitcher() {
+      await testSubjects.click('openInventorySwitcher');
+      return await testSubjects.find('goToHost');
+    },
+
+    async goToHost() {
+      await testSubjects.click('openInventorySwitcher');
+      await testSubjects.find('goToHost');
+      return await testSubjects.click('goToHost');
+    },
+
+    async goToPods() {
+      await testSubjects.click('openInventorySwitcher');
+      await testSubjects.find('goToHost');
+      return await testSubjects.click('goToPods');
+    },
+
+    async goToDocker() {
+      await testSubjects.click('openInventorySwitcher');
+      await testSubjects.find('goToHost');
+      return await testSubjects.click('goToDocker');
+    },
+
     async goToMetricExplorer() {
       return await testSubjects.click('infrastructureNavLink_/infrastructure/metrics-explorer');
     },

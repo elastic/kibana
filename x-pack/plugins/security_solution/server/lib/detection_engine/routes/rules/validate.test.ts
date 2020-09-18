@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
-
 import {
-  validate,
   transformValidate,
   transformValidateFindAlerts,
   transformValidateBulkError,
@@ -15,11 +12,12 @@ import {
 import { getResult } from '../__mocks__/request_responses';
 import { FindResult } from '../../../../../../alerts/server';
 import { BulkError } from '../utils';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 export const ruleOutput: RulesSchema = {
   actions: [],
+  author: ['Elastic'],
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
   created_by: 'elastic',
@@ -32,13 +30,16 @@ export const ruleOutput: RulesSchema = {
   interval: '5m',
   rule_id: 'rule-1',
   language: 'kuery',
+  license: 'Elastic License',
   output_index: '.siem-signals',
   max_signals: 100,
   risk_score: 50,
+  risk_score_mapping: [],
   name: 'Detect Root/Admin Users',
   query: 'user.name: root or user.name: admin',
   references: ['http://www.example.com', 'https://ww.example.com'],
   severity: 'high',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',
@@ -71,38 +72,7 @@ export const ruleOutput: RulesSchema = {
       },
     },
   ],
-  exceptions_list: [
-    {
-      field: 'source.ip',
-      values_operator: 'included',
-      values_type: 'exists',
-    },
-    {
-      field: 'host.name',
-      values_operator: 'excluded',
-      values_type: 'match',
-      values: [
-        {
-          name: 'rock01',
-        },
-      ],
-      and: [
-        {
-          field: 'host.id',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: '123',
-            },
-            {
-              name: '678',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  exceptions_list: getListArrayMock(),
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   meta: {
     someMeta: 'someField',
@@ -113,34 +83,6 @@ export const ruleOutput: RulesSchema = {
 };
 
 describe('validate', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
-  describe('validate', () => {
-    test('it should do a validation correctly', () => {
-      const schema = t.exact(t.type({ a: t.number }));
-      const payload = { a: 1 };
-      const [validated, errors] = validate(payload, schema);
-
-      expect(validated).toEqual(payload);
-      expect(errors).toEqual(null);
-    });
-
-    test('it should do an in-validation correctly', () => {
-      const schema = t.exact(t.type({ a: t.number }));
-      const payload = { a: 'some other value' };
-      const [validated, errors] = validate(payload, schema);
-
-      expect(validated).toEqual(null);
-      expect(errors).toEqual('Invalid value "some other value" supplied to "a"');
-    });
-  });
-
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getResult();
@@ -151,6 +93,7 @@ describe('validate', () => {
 
     test('it should do an in-validation correctly of a partial alert', () => {
       const ruleAlert = getResult();
+      // @ts-expect-error
       delete ruleAlert.name;
       const [validated, errors] = transformValidate(ruleAlert);
       expect(validated).toEqual(null);
@@ -168,6 +111,7 @@ describe('validate', () => {
 
     test('it should do an in-validation correctly of a partial alert', () => {
       const findResult: FindResult = { data: [getResult()], page: 1, perPage: 0, total: 0 };
+      // @ts-expect-error
       delete findResult.page;
       const [validated, errors] = transformValidateFindAlerts(findResult, []);
       expect(validated).toEqual(null);
@@ -184,6 +128,7 @@ describe('validate', () => {
 
     test('it should do an in-validation correctly of a rule id', () => {
       const ruleAlert = getResult();
+      // @ts-expect-error
       delete ruleAlert.name;
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
       const expected: BulkError = {

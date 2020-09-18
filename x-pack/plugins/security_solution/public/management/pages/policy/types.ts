@@ -5,18 +5,19 @@
  */
 
 import {
-  PolicyData,
+  AppLocation,
   Immutable,
   MalwareFields,
+  PolicyData,
   UIPolicyConfig,
-  AppLocation,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
   GetAgentStatusResponse,
-  GetDatasourcesResponse,
-  GetOneDatasourceResponse,
-  UpdateDatasourceResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  GetPackagesResponse,
+  UpdatePackagePolicyResponse,
 } from '../../../../../ingest_manager/common';
 
 /**
@@ -25,6 +26,8 @@ import {
 export interface PolicyListState {
   /** Array of policy items  */
   policyItems: PolicyData[];
+  /** Information about the latest endpoint package */
+  endpointPackageInfo?: GetPackagesResponse['response'][0];
   /** API error if loading data failed */
   apiError?: ServerApiError;
   /** total number of policies */
@@ -37,6 +40,12 @@ export interface PolicyListState {
   isLoading: boolean;
   /** current location information */
   location?: Immutable<AppLocation>;
+  /** policy is being deleted */
+  isDeleting: boolean;
+  /** Deletion status */
+  deleteStatus?: boolean;
+  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
+  agentStatusSummary?: GetAgentStatusResponse['results'];
 }
 
 /**
@@ -50,7 +59,7 @@ export interface PolicyDetailsState {
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<AppLocation>;
-  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
   agentStatusSummary?: GetAgentStatusResponse['results'];
   /** Status of an update to the policy  */
   updateStatus?: {
@@ -160,14 +169,14 @@ export type KeysByValueCriteria<O, Criteria> = {
 /** Returns an array of the policy OSes that have a malware protection field */
 export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
 
-export interface GetPolicyListResponse extends GetDatasourcesResponse {
+export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];
 }
 
-export interface GetPolicyResponse extends GetOneDatasourceResponse {
+export interface GetPolicyResponse extends GetOnePackagePolicyResponse {
   item: PolicyData;
 }
 
-export interface UpdatePolicyResponse extends UpdateDatasourceResponse {
+export interface UpdatePolicyResponse extends UpdatePackagePolicyResponse {
   item: PolicyData;
 }

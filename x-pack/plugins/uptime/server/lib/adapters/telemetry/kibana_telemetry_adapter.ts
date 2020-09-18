@@ -7,8 +7,8 @@
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PageViewParams, UptimeTelemetry } from './types';
-import { APICaller } from '../framework';
+import { PageViewParams, UptimeTelemetry, Usage } from './types';
+import { ESAPICaller } from '../framework';
 import { savedObjectsAdapter } from '../../saved_objects';
 
 interface UptimeTelemetryCollector {
@@ -39,9 +39,37 @@ export class KibanaTelemetryAdapter {
     usageCollector: UsageCollectionSetup,
     getSavedObjectsClient: () => ISavedObjectsRepository | undefined
   ) {
-    return usageCollector.makeUsageCollector({
+    return usageCollector.makeUsageCollector<Usage>({
       type: 'uptime',
-      fetch: async (callCluster: APICaller) => {
+      schema: {
+        last_24_hours: {
+          hits: {
+            autoRefreshEnabled: {
+              type: 'boolean',
+            },
+            autorefreshInterval: { type: 'long' },
+            dateRangeEnd: { type: 'date' },
+            dateRangeStart: { type: 'date' },
+            monitor_frequency: { type: 'long' },
+            monitor_name_stats: {
+              avg_length: { type: 'float' },
+              max_length: { type: 'long' },
+              min_length: { type: 'long' },
+            },
+            monitor_page: { type: 'long' },
+            no_of_unique_monitors: { type: 'long' },
+            no_of_unique_observer_locations: { type: 'long' },
+            observer_location_name_stats: {
+              avg_length: { type: 'float' },
+              max_length: { type: 'long' },
+              min_length: { type: 'long' },
+            },
+            overview_page: { type: 'long' },
+            settings_page: { type: 'long' },
+          },
+        },
+      },
+      fetch: async (callCluster: ESAPICaller) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
           await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
@@ -97,7 +125,7 @@ export class KibanaTelemetryAdapter {
   }
 
   public static async countNoOfUniqueMonitorAndLocations(
-    callCluster: APICaller,
+    callCluster: ESAPICaller,
     savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);

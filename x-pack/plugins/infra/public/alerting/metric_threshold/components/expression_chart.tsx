@@ -28,7 +28,7 @@ import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
-import { MetricsExplorerColor, colorTransformer } from '../../../../common/color_palette';
+import { Color, colorTransformer } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricExpression, AlertContextMeta } from '../types';
@@ -45,7 +45,7 @@ interface Props {
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
   filterQuery?: string;
-  groupBy?: string;
+  groupBy?: string | string[];
 }
 
 const tooltipProps = {
@@ -80,15 +80,20 @@ export const ExpressionChart: React.FC<Props> = ({
   const metric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
-    color: MetricsExplorerColor.color0,
+    color: Color.color0,
   };
   const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
-    const firstSeries = data ? first(data.series) : null;
-    return firstSeries && firstSeries.rows.length > 0
-      ? niceTimeFormatter([first(firstSeries.rows).timestamp, last(firstSeries.rows).timestamp])
-      : (value: number) => `${value}`;
-  }, [data]);
+    const firstSeries = first(data?.series);
+    const firstTimestamp = first(firstSeries?.rows)?.timestamp;
+    const lastTimestamp = last(firstSeries?.rows)?.timestamp;
+
+    if (firstTimestamp == null || lastTimestamp == null) {
+      return (value: number) => `${value}`;
+    }
+
+    return niceTimeFormatter([firstTimestamp, lastTimestamp]);
+  }, [data?.series]);
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);
@@ -111,10 +116,15 @@ export const ExpressionChart: React.FC<Props> = ({
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domian
   const firstSeries = first(data.series);
-  if (!firstSeries) {
+  if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return (
       <EmptyContainer>
-        <EuiText color="subdued">Oops, no chart data available</EuiText>
+        <EuiText color="subdued" data-test-subj="noChartData">
+          <FormattedMessage
+            id="xpack.infra.metrics.alerts.noDataMessage"
+            defaultMessage="Oops, no chart data available"
+          />
+        </EuiText>
       </EmptyContainer>
     );
   }
@@ -130,8 +140,8 @@ export const ExpressionChart: React.FC<Props> = ({
     }),
   };
 
-  const firstTimestamp = first(firstSeries.rows).timestamp;
-  const lastTimestamp = last(firstSeries.rows).timestamp;
+  const firstTimestamp = first(firstSeries.rows)!.timestamp;
+  const lastTimestamp = last(firstSeries.rows)!.timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
     max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
@@ -146,7 +156,7 @@ export const ExpressionChart: React.FC<Props> = ({
   const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(expression.comparator);
   const opacity = 0.3;
   const { timeSize, timeUnit } = expression;
-  const timeLabel = TIME_LABELS[timeUnit];
+  const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
   return (
     <>
@@ -168,7 +178,7 @@ export const ExpressionChart: React.FC<Props> = ({
             style={{
               line: {
                 strokeWidth: 2,
-                stroke: colorTransformer(MetricsExplorerColor.color1),
+                stroke: colorTransformer(Color.color1),
                 opacity: 1,
               },
             }}
@@ -178,7 +188,7 @@ export const ExpressionChart: React.FC<Props> = ({
               <RectAnnotation
                 id="lower-threshold"
                 style={{
-                  fill: colorTransformer(MetricsExplorerColor.color1),
+                  fill: colorTransformer(Color.color1),
                   opacity,
                 }}
                 dataValues={[
@@ -199,7 +209,7 @@ export const ExpressionChart: React.FC<Props> = ({
               <RectAnnotation
                 id="lower-threshold"
                 style={{
-                  fill: colorTransformer(MetricsExplorerColor.color1),
+                  fill: colorTransformer(Color.color1),
                   opacity,
                 }}
                 dataValues={[
@@ -216,7 +226,7 @@ export const ExpressionChart: React.FC<Props> = ({
               <RectAnnotation
                 id="upper-threshold"
                 style={{
-                  fill: colorTransformer(MetricsExplorerColor.color1),
+                  fill: colorTransformer(Color.color1),
                   opacity,
                 }}
                 dataValues={[
@@ -236,7 +246,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <RectAnnotation
               id="upper-threshold"
               style={{
-                fill: colorTransformer(MetricsExplorerColor.color1),
+                fill: colorTransformer(Color.color1),
                 opacity,
               }}
               dataValues={[
@@ -255,7 +265,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <RectAnnotation
               id="upper-threshold"
               style={{
-                fill: colorTransformer(MetricsExplorerColor.color1),
+                fill: colorTransformer(Color.color1),
                 opacity,
               }}
               dataValues={[

@@ -17,7 +17,6 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
-import { ScopedHistory } from 'src/core/public';
 import { spacesManagementApp } from './spaces_management_app';
 
 import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
@@ -58,7 +57,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       basePath,
       element: container,
       setBreadcrumbs,
-      history: (scopedHistoryMock.create({ pathname }) as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create({ pathname }),
     });
 
   return { unmount, container, setBreadcrumbs };

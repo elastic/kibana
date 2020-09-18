@@ -28,6 +28,7 @@ export const oneTimelineQuery = gql`
         enabled
         excluded
         kqlQuery
+        type
         queryMatch {
           field
           displayField
@@ -41,6 +42,7 @@ export const oneTimelineQuery = gql`
           enabled
           excluded
           kqlQuery
+          type
           queryMatch {
             field
             displayField
@@ -68,6 +70,7 @@ export const oneTimelineQuery = gql`
         updatedBy
         version
       }
+      excludedRowRendererIds
       favorite {
         fullName
         userName

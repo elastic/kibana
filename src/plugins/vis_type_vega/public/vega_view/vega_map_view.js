@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import * as vega from 'vega-lib';
 import { i18n } from '@kbn/i18n';
+import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
 import { getEmsTileLayerId, getUISettings, getKibanaMapFactory } from '../services';
@@ -142,7 +142,7 @@ export class VegaMapView extends VegaBaseView {
     });
 
     const vegaView = vegaMapLayer.getVegaView();
-    this.setDebugValues(vegaView, this._parser.spec, this._parser.vlspec);
     await this.setView(vegaView);
+    this.setDebugValues(vegaView, this._parser.spec, this._parser.vlspec);
   }
 }

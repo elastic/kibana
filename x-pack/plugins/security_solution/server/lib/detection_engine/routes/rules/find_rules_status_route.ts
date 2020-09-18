@@ -4,28 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
-import {
-  FindRulesStatusesRequestParams,
-  RuleStatusResponse,
-  IRuleStatusAttributes,
-} from '../../rules/types';
-import {
-  buildRouteValidation,
-  transformError,
-  convertToSnakeCase,
-  buildSiemResponse,
-} from '../utils';
+import { RuleStatusResponse, IRuleStatusAttributes } from '../../rules/types';
+import { transformError, convertToSnakeCase, buildSiemResponse } from '../utils';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import {
+  findRulesStatusesSchema,
+  FindRulesStatusesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request/find_rule_statuses_schema';
 
 export const findRulesStatusesRoute = (router: IRouter) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
       validate: {
-        body: buildRouteValidation<FindRulesStatusesRequestParams>(findRulesStatusesSchema),
+        body: buildRouteValidation<typeof findRulesStatusesSchema, FindRulesStatusesSchemaDecoded>(
+          findRulesStatusesSchema
+        ),
       },
       options: {
         tags: ['access:securitySolution'],

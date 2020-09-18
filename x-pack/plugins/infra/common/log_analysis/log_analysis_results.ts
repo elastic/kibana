@@ -41,6 +41,10 @@ export const formatAnomalyScore = (score: number) => {
   return Math.round(score);
 };
 
+export const formatOneDecimalPlace = (number: number) => {
+  return Math.round(number * 10) / 10;
+};
+
 export const getFriendlyNameForPartitionId = (partitionId: string) => {
   return partitionId !== '' ? partitionId : 'unknown';
 };

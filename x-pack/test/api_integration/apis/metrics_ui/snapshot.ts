@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'container' as InfraNodeType,
           groupBy: [],
         });
@@ -60,21 +60,22 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(5);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property(
               'value',
               '242fddb9d376bbf0e38025d81764847ee5ec0308adfa095918fd3266f9d06c6a'
             );
-            expect(first(firstNode.path)).to.have.property('label', 'docker-autodiscovery_nginx_1');
-            expect(firstNode).to.have.property('metric');
-            expect(firstNode.metric).to.eql({
-              name: 'cpu',
-              value: 0,
-              max: 0,
-              avg: 0,
-            });
+            expect(firstNode).to.have.property('metrics');
+            expect(firstNode.metrics).to.eql([
+              {
+                name: 'cpu',
+                value: 0,
+                max: 0,
+                avg: 0,
+              },
+            ]);
           }
         });
       });
@@ -93,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'pod' as InfraNodeType,
           groupBy: [],
         });
@@ -103,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(65);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property(
@@ -125,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'container' as InfraNodeType,
           groupBy: [],
         });
@@ -134,8 +135,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(snapshot).to.have.property('nodes');
           if (snapshot) {
             const { nodes } = snapshot;
-            expect(nodes.length).to.equal(136);
-            const firstNode = first(nodes);
+            expect(nodes.length).to.equal(135);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property(
@@ -164,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
           groupBy: [],
         });
@@ -174,18 +175,20 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
             expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
-            expect(firstNode).to.have.property('metric');
-            expect(firstNode.metric).to.eql({
-              name: 'cpu',
-              value: 0.0032,
-              max: 0.0038333333333333336,
-              avg: 0.0027944444444444444,
-            });
+            expect(firstNode).to.have.property('metrics');
+            expect(firstNode.metrics).to.eql([
+              {
+                name: 'cpu',
+                value: 0.0032,
+                max: 0.0038333333333333336,
+                avg: 0.002794444444444445,
+              },
+            ]);
           }
         });
       });
@@ -200,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
             forceInterval: true,
             ignoreLookback: true,
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
           groupBy: [],
           includeTimeseries: true,
@@ -211,15 +214,15 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
             expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
-            expect(firstNode).to.have.property('metric');
-            expect(firstNode.metric).to.have.property('timeseries');
-            expect(firstNode.metric.timeseries?.rows.length).to.equal(58);
-            const rows = firstNode.metric.timeseries?.rows;
+            expect(firstNode).to.have.property('metrics');
+            expect(firstNode.metrics[0]).to.have.property('timeseries');
+            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(58);
+            const rows = firstNode.metrics[0].timeseries?.rows;
             const rowInterval = (rows?.[1]?.timestamp || 0) - (rows?.[0]?.timestamp || 0);
             expect(rowInterval).to.equal(10000);
           }
@@ -235,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
             interval: '1m',
             lookbackSize: 6,
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
           groupBy: [],
           includeTimeseries: true,
@@ -246,14 +249,14 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
             expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
             expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
-            expect(firstNode).to.have.property('metric');
-            expect(firstNode.metric).to.have.property('timeseries');
-            expect(firstNode.metric.timeseries?.rows.length).to.equal(7);
+            expect(firstNode).to.have.property('metrics');
+            expect(firstNode.metrics[0]).to.have.property('timeseries');
+            expect(firstNode.metrics[0].timeseries?.rows.length).to.equal(7);
           }
         });
       });
@@ -266,12 +269,14 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metric: {
-            type: 'custom',
-            field: 'system.cpu.user.pct',
-            aggregation: 'avg',
-            id: '1',
-          } as SnapshotMetricInput,
+          metrics: [
+            {
+              type: 'custom',
+              field: 'system.cpu.user.pct',
+              aggregation: 'avg',
+              id: '1',
+            },
+          ] as SnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
           groupBy: [],
         });
@@ -281,18 +286,20 @@ export default function ({ getService }: FtrProviderContext) {
         if (snapshot) {
           const { nodes } = snapshot;
           expect(nodes.length).to.equal(1);
-          const firstNode = first(nodes);
+          const firstNode = first(nodes) as any;
           expect(firstNode).to.have.property('path');
           expect(firstNode.path.length).to.equal(1);
           expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
           expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
-          expect(firstNode).to.have.property('metric');
-          expect(firstNode.metric).to.eql({
-            name: 'custom',
-            value: 0.0016,
-            max: 0.0018333333333333333,
-            avg: 0.0013666666666666669,
-          });
+          expect(firstNode).to.have.property('metrics');
+          expect(firstNode.metrics).to.eql([
+            {
+              name: 'custom_0',
+              value: 0.0016,
+              max: 0.0018333333333333333,
+              avg: 0.0013666666666666669,
+            },
+          ]);
         }
       });
 
@@ -304,7 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
           groupBy: [{ field: 'cloud.availability_zone' }],
         });
@@ -314,7 +321,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(2);
             expect(first(firstNode.path)).to.have.property('value', 'virtualbox');
@@ -331,7 +338,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
           groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
         });
@@ -342,7 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(1);
-            const firstNode = first(nodes);
+            const firstNode = first(nodes) as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(3);
             expect(first(firstNode.path)).to.have.property('value', 'vagrant');
@@ -360,7 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metric: { type: 'cpu' } as InfraSnapshotMetricInput,
+          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
           groupBy: [{ field: 'service.type' }],
         });
@@ -370,30 +377,34 @@ export default function ({ getService }: FtrProviderContext) {
           if (snapshot) {
             const { nodes } = snapshot;
             expect(nodes.length).to.equal(2);
-            const firstNode = nodes[0];
+            const firstNode = nodes[0] as any;
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(2);
             expect(firstNode.path[0]).to.have.property('value', 'mysql');
             expect(firstNode.path[1]).to.have.property('value', 'demo-stack-mysql-01');
-            expect(firstNode).to.have.property('metric');
-            expect(firstNode.metric).to.eql({
-              name: 'cpu',
-              value: 0.0032,
-              max: 0.0038333333333333336,
-              avg: 0.0027944444444444444,
-            });
-            const secondNode = nodes[1];
+            expect(firstNode).to.have.property('metrics');
+            expect(firstNode.metrics).to.eql([
+              {
+                name: 'cpu',
+                value: 0.0032,
+                max: 0.0038333333333333336,
+                avg: 0.002794444444444445,
+              },
+            ]);
+            const secondNode = nodes[1] as any;
             expect(secondNode).to.have.property('path');
             expect(secondNode.path.length).to.equal(2);
             expect(secondNode.path[0]).to.have.property('value', 'system');
             expect(secondNode.path[1]).to.have.property('value', 'demo-stack-mysql-01');
-            expect(secondNode).to.have.property('metric');
-            expect(secondNode.metric).to.eql({
-              name: 'cpu',
-              value: 0.0032,
-              max: 0.0038333333333333336,
-              avg: 0.0027944444444444444,
-            });
+            expect(secondNode).to.have.property('metrics');
+            expect(secondNode.metrics).to.eql([
+              {
+                name: 'cpu',
+                value: 0.0032,
+                max: 0.0038333333333333336,
+                avg: 0.002794444444444445,
+              },
+            ]);
           }
         });
       });

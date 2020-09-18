@@ -10,17 +10,6 @@ import { useUrlParams } from '../../hooks';
 import { CLIENT_DEFAULTS } from '../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../contexts';
 
-// TODO: when EUI exports types for this, this should be replaced
-interface SuperDateRangePickerRangeChangedEvent {
-  start: string;
-  end: string;
-}
-
-interface SuperDateRangePickerRefreshChangedEvent {
-  isPaused: boolean;
-  refreshInterval?: number;
-}
-
 export interface CommonlyUsedRange {
   from: string;
   to: string;
@@ -52,12 +41,12 @@ export const UptimeDatePicker = () => {
       commonlyUsedRanges={euiCommonlyUsedRanges}
       isPaused={autorefreshIsPaused}
       refreshInterval={autorefreshInterval}
-      onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
+      onTimeChange={({ start, end }) => {
         updateUrl({ dateRangeStart: start, dateRangeEnd: end });
         refreshApp();
       }}
       onRefresh={refreshApp}
-      onRefreshChange={({ isPaused, refreshInterval }: SuperDateRangePickerRefreshChangedEvent) => {
+      onRefreshChange={({ isPaused, refreshInterval }) => {
         updateUrl({
           autorefreshInterval:
             refreshInterval === undefined ? autorefreshInterval : refreshInterval,

@@ -5,9 +5,7 @@
  */
 
 import { camelCase } from 'lodash';
-// @ts-ignore unconverted local file
 import { getClipboardData, setClipboardData } from './clipboard';
-// @ts-ignore unconverted local file
 import { cloneSubgraphs } from './clone_subgraphs';
 import { notifyService } from '../services';
 import * as customElementService from './custom_element_service';
@@ -37,7 +35,7 @@ export interface Props {
   /**
    * selects elements on the page
    */
-  selectToplevelNodes: (elements: PositionedElement) => void;
+  selectToplevelNodes: (elements: PositionedElement[]) => void;
   /**
    * deletes elements from the page
    */

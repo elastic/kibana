@@ -26,10 +26,14 @@ import { EuiButtonGroup } from '@elastic/eui';
 import { VisLegend, VisLegendProps } from './legend';
 import { legendColors } from './models';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  htmlIdGenerator: jest.fn().mockReturnValue(() => 'legendId'),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: jest.fn().mockReturnValue(() => 'legendId'),
+  };
+});
 
 jest.mock('../../../services', () => ({
   getDataActions: () => ({

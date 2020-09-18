@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiHorizontalRule, EuiRadio, EuiSelect, htmlIdGenerator } from '@elastic/eui';
-import { IndexPatternLayer } from '../types';
+import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
 
 const generator = htmlIdGenerator('lens-nesting');
@@ -26,10 +25,12 @@ export function BucketNestingEditor({
   columnId,
   layer,
   setColumns,
+  fieldMap,
 }: {
   columnId: string;
   layer: IndexPatternLayer;
   setColumns: (columns: string[]) => void;
+  fieldMap: Record<string, IndexPatternField>;
 }) {
   const column = layer.columns[columnId];
   const columns = Object.entries(layer.columns);
@@ -38,14 +39,15 @@ export function BucketNestingEditor({
     .map(([value, c]) => ({
       value,
       text: c.label,
-      fieldName: hasField(c) ? c.sourceField : '',
+      fieldName: hasField(c) ? fieldMap[c.sourceField].displayName : '',
+      operationType: c.operationType,
     }));
 
   if (!column || !column.isBucketed || !aggColumns.length) {
     return null;
   }
 
-  const fieldName = hasField(column) ? column.sourceField : '';
+  const fieldName = hasField(column) ? fieldMap[column.sourceField].displayName : '';
 
   const prevColumn = layer.columnOrder[layer.columnOrder.indexOf(columnId) - 1];
 
@@ -60,6 +62,36 @@ export function BucketNestingEditor({
       }
     }
 
+    // todo: move the copy to operations
+    const topLevelCopy: Record<string, string> = {
+      terms: i18n.translate('xpack.lens.indexPattern.groupingOverallTerms', {
+        defaultMessage: 'Overall top {field}',
+        values: { field: fieldName },
+      }),
+      filters: i18n.translate('xpack.lens.indexPattern.groupingOverallFilters', {
+        defaultMessage: 'Top values for each filter',
+      }),
+      date_histogram: i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
+        defaultMessage: 'Top values for each {field}',
+        values: { field: fieldName },
+      }),
+    };
+
+    const bottomLevelCopy: Record<string, string> = {
+      terms: i18n.translate('xpack.lens.indexPattern.groupingSecondTerms', {
+        defaultMessage: 'Top values for each {target}',
+        values: { target: target.fieldName },
+      }),
+      filters: i18n.translate('xpack.lens.indexPattern.groupingSecondFilters', {
+        defaultMessage: 'Overall top {target}',
+        values: { target: target.fieldName },
+      }),
+      date_histogram: i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
+        defaultMessage: 'Overall top {target}',
+        values: { target: target.fieldName },
+      }),
+    };
+
     return (
       <>
         <EuiHorizontalRule margin="m" />
@@ -67,38 +99,20 @@ export function BucketNestingEditor({
           label={i18n.translate('xpack.lens.indexPattern.groupingControlLabel', {
             defaultMessage: 'Grouping',
           })}
+          labelType="legend"
         >
           <>
             <EuiRadio
               id={generator('topLevel')}
               data-test-subj="indexPattern-nesting-topLevel"
-              label={
-                column.operationType === 'terms'
-                  ? i18n.translate('xpack.lens.indexPattern.groupingOverallTerms', {
-                      defaultMessage: 'Overall top {field}',
-                      values: { field: fieldName },
-                    })
-                  : i18n.translate('xpack.lens.indexPattern.groupingOverallDateHistogram', {
-                      defaultMessage: 'Dates overall',
-                    })
-              }
+              label={topLevelCopy[column.operationType]}
               checked={!prevColumn}
               onChange={toggleNesting}
             />
             <EuiRadio
               id={generator('bottomLevel')}
               data-test-subj="indexPattern-nesting-bottomLevel"
-              label={
-                column.operationType === 'terms'
-                  ? i18n.translate('xpack.lens.indexPattern.groupingSecondTerms', {
-                      defaultMessage: 'Top values for each {target}',
-                      values: { target: target.fieldName },
-                    })
-                  : i18n.translate('xpack.lens.indexPattern.groupingSecondDateHistogram', {
-                      defaultMessage: 'Dates for each {target}',
-                      values: { target: target.fieldName },
-                    })
-              }
+              label={bottomLevelCopy[column.operationType]}
               checked={!!prevColumn}
               onChange={toggleNesting}
             />

@@ -59,4 +59,27 @@ export const metricSet = [
     ],
     name: 'apm_transformations',
   },
+  {
+    keys: [
+      'apm_acm_response_count',
+      'apm_acm_response_errors_count',
+      'apm_acm_response_valid_ok',
+      'apm_acm_response_valid_notmodified',
+    ],
+    name: 'apm_acm_response',
+  },
+  {
+    keys: [
+      'apm_acm_response_errors_forbidden',
+      'apm_acm_response_errors_unauthorized',
+      'apm_acm_response_errors_unavailable',
+      'apm_acm_response_errors_method',
+      'apm_acm_response_errors_invalidquery',
+    ],
+    name: 'apm_acm_response_errors',
+  },
+  {
+    keys: ['apm_acm_request_count'],
+    name: 'apm_acm_request_count',
+  },
 ];

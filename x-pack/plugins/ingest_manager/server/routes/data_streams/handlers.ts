@@ -31,12 +31,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
             must: [
               {
                 exists: {
-                  field: 'stream.namespace',
+                  field: 'data_stream.namespace',
                 },
               },
               {
                 exists: {
-                  field: 'stream.dataset',
+                  field: 'data_stream.dataset',
                 },
               },
             ],
@@ -54,19 +54,19 @@ export const getListHandler: RequestHandler = async (context, request, response)
             aggs: {
               dataset: {
                 terms: {
-                  field: 'stream.dataset',
+                  field: 'data_stream.dataset',
                   size: 1,
                 },
               },
               namespace: {
                 terms: {
-                  field: 'stream.namespace',
+                  field: 'data_stream.namespace',
                   size: 1,
                 },
               },
               type: {
                 terms: {
-                  field: 'stream.type',
+                  field: 'data_stream.type',
                   size: 1,
                 },
               },
@@ -122,7 +122,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       if (pkg !== '' && pkgSavedObject.length > 0 && !packageMetadata[pkg]) {
         // then pick the dashboards from the package saved object
         const dashboards =
-          pkgSavedObject[0].attributes?.installed?.filter(
+          pkgSavedObject[0].attributes?.installed_kibana?.filter(
             (o) => o.type === KibanaAssetType.dashboard
           ) || [];
         // and then pick the human-readable titles from the dashboard saved objects

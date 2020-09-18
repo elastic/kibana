@@ -27,15 +27,16 @@ const { promisify } = require('util');
 const watch = require('glob-watcher');
 const mkdirp = require('mkdirp'); // eslint-disable-line
 const glob = require('fast-glob');
+const { REPO_ROOT } = require('@kbn/utils');
 
 const mkdirpAsync = promisify(mkdirp);
 const writeFileAsync = promisify(Fs.writeFile);
 
-const { REPO_ROOT, STORY_ENTRY_PATH } = require('./constants');
+const { STORY_ENTRY_PATH } = require('./constants');
 const STORE_ENTRY_DIR = dirname(STORY_ENTRY_PATH);
 
 exports.generateStorybookEntry = ({ log, storyGlobs }) => {
-  const globs = ['built_assets/css/**/*.light.css', ...storyGlobs];
+  const globs = [...storyGlobs];
   log.info('Storybook globs:\n', globs);
   const norm = (p) => normalize(relative(STORE_ENTRY_DIR, p));
 

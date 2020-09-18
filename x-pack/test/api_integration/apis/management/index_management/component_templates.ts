@@ -16,11 +16,19 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  const { createComponentTemplate, deleteComponentTemplate } = initElasticsearchHelpers(es);
+  const {
+    createComponentTemplate,
+    cleanUpComponentTemplates,
+    deleteComponentTemplate,
+  } = initElasticsearchHelpers(es);
 
   describe('Component templates', function () {
+    after(async () => {
+      await cleanUpComponentTemplates();
+    });
+
     describe('Get', () => {
-      const COMPONENT_NAME = 'test_component_template';
+      const COMPONENT_NAME = 'test_get_component_template';
       const COMPONENT = {
         template: {
           settings: {
@@ -45,8 +53,16 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      before(() => createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }));
-      after(() => deleteComponentTemplate(COMPONENT_NAME));
+      // Create component template to verify GET requests
+      before(async () => {
+        try {
+          await createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, true);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating component template');
+          throw err;
+        }
+      });
 
       describe('all component templates', () => {
         it('should return an array of component templates', async () => {
@@ -61,7 +77,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(testComponentTemplate).to.eql({
             name: COMPONENT_NAME,
-            component_template: COMPONENT,
+            usedBy: [],
+            isManaged: false,
+            hasSettings: true,
+            hasMappings: true,
+            hasAliases: false,
           });
         });
       });
@@ -74,8 +94,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(body).to.eql({
             name: COMPONENT_NAME,
-            component_template: {
-              ...COMPONENT,
+            ...COMPONENT,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
             },
           });
         });
@@ -86,9 +108,15 @@ export default function ({ getService }: FtrProviderContext) {
       const COMPONENT_NAME = 'test_create_component_template';
       const REQUIRED_FIELDS_COMPONENT_NAME = 'test_create_required_fields_component_template';
 
-      after(() => {
-        deleteComponentTemplate(COMPONENT_NAME);
-        deleteComponentTemplate(REQUIRED_FIELDS_COMPONENT_NAME);
+      after(async () => {
+        // Clean up any component templates created in test cases
+        await Promise.all(
+          [COMPONENT_NAME, REQUIRED_FIELDS_COMPONENT_NAME].map(deleteComponentTemplate)
+        ).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.log(`[Cleanup error] Error deleting component templates: ${err.message}`);
+          throw err;
+        });
       });
 
       it('should create a component template', async () => {
@@ -120,6 +148,10 @@ export default function ({ getService }: FtrProviderContext) {
                 id: 10,
               },
             },
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(200);
 
@@ -136,6 +168,10 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             name: REQUIRED_FIELDS_COMPONENT_NAME,
             template: {},
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(200);
 
@@ -151,6 +187,10 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             name: COMPONENT_NAME,
             template: {},
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(409);
 
@@ -163,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Update', () => {
-      const COMPONENT_NAME = 'test_component_template';
+      const COMPONENT_NAME = 'test_update_component_template';
       const COMPONENT = {
         template: {
           settings: {
@@ -188,8 +228,16 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      before(() => createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }));
-      after(() => deleteComponentTemplate(COMPONENT_NAME));
+      before(async () => {
+        // Create component template that can be used to test PUT request
+        try {
+          await createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, true);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating component template');
+          throw err;
+        }
+      });
 
       it('should allow an existing component template to be updated', async () => {
         const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
@@ -199,7 +247,12 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             ...COMPONENT,
+            name: COMPONENT_NAME,
             version: 1,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(200);
 
@@ -216,7 +269,12 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             ...COMPONENT,
+            name: 'component_does_not_exist',
             version: 1,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(404);
 
@@ -240,29 +298,44 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      it('should delete a component template', async () => {
-        // Create component template to be deleted
-        const COMPONENT_NAME = 'test_delete_component_template';
-        createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME });
+      const componentTemplateA = { body: COMPONENT, name: 'test_delete_component_template_a' };
+      const componentTemplateB = { body: COMPONENT, name: 'test_delete_component_template_b' };
+      const componentTemplateC = { body: COMPONENT, name: 'test_delete_component_template_c' };
+      const componentTemplateD = { body: COMPONENT, name: 'test_delete_component_template_d' };
 
-        const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
+      before(async () => {
+        // Create several component templates that can be used to test deletion
+        await Promise.all(
+          [
+            componentTemplateA,
+            componentTemplateB,
+            componentTemplateC,
+            componentTemplateD,
+          ].map((template) => createComponentTemplate(template, false))
+        ).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.log(`[Setup error] Error creating component templates: ${err.message}`);
+          throw err;
+        });
+      });
+
+      it('should delete a component template', async () => {
+        const { name } = componentTemplateA;
+        const uri = `${API_BASE_PATH}/component_templates/${name}`;
 
         const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
-          itemsDeleted: [COMPONENT_NAME],
+          itemsDeleted: [name],
           errors: [],
         });
       });
 
       it('should delete multiple component templates', async () => {
-        // Create component templates to be deleted
-        const COMPONENT_ONE_NAME = 'test_delete_component_1';
-        const COMPONENT_TWO_NAME = 'test_delete_component_2';
-        createComponentTemplate({ body: COMPONENT, name: COMPONENT_ONE_NAME });
-        createComponentTemplate({ body: COMPONENT, name: COMPONENT_TWO_NAME });
+        const { name: componentTemplate1Name } = componentTemplateB;
+        const { name: componentTemplate2Name } = componentTemplateC;
 
-        const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_ONE_NAME},${COMPONENT_TWO_NAME}`;
+        const uri = `${API_BASE_PATH}/component_templates/${componentTemplate1Name},${componentTemplate2Name}`;
 
         const {
           body: { itemsDeleted, errors },
@@ -271,25 +344,37 @@ export default function ({ getService }: FtrProviderContext) {
         expect(errors).to.eql([]);
 
         // The itemsDeleted array order isn't guaranteed, so we assert against each name instead
-        [COMPONENT_ONE_NAME, COMPONENT_TWO_NAME].forEach((componentName) => {
+        [componentTemplate1Name, componentTemplate2Name].forEach((componentName) => {
           expect(itemsDeleted.includes(componentName)).to.be(true);
         });
       });
 
       it('should return an error for any component templates not sucessfully deleted', async () => {
         const COMPONENT_DOES_NOT_EXIST = 'component_does_not_exist';
+        const { name: componentTemplateName } = componentTemplateD;
 
-        // Create component template to be deleted
-        const COMPONENT_ONE_NAME = 'test_delete_component_1';
-        createComponentTemplate({ body: COMPONENT, name: COMPONENT_ONE_NAME });
-
-        const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_ONE_NAME},${COMPONENT_DOES_NOT_EXIST}`;
+        const uri = `${API_BASE_PATH}/component_templates/${componentTemplateName},${COMPONENT_DOES_NOT_EXIST}`;
 
         const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
-        expect(body.itemsDeleted).to.eql([COMPONENT_ONE_NAME]);
+        expect(body.itemsDeleted).to.eql([componentTemplateName]);
         expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
         expect(body.errors[0].error.msg).to.contain('index_template_missing_exception');
+      });
+    });
+
+    describe('Privileges', () => {
+      it('should return privileges result', async () => {
+        const uri = `${API_BASE_PATH}/component_templates/privileges`;
+
+        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+
+        expect(body).to.eql({
+          hasAllPrivileges: true,
+          missingPrivileges: {
+            cluster: [],
+          },
+        });
       });
     });
   });

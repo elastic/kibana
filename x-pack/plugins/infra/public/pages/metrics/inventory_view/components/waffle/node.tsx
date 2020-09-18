@@ -9,6 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { first } from 'lodash';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { euiStyled } from '../../../../../../../observability/public';
 import {
@@ -41,7 +42,7 @@ export const Node = class extends React.PureComponent<Props, State> {
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
     const { isPopoverOpen } = this.state;
-    const { metric } = node;
+    const metric = first(node.metrics);
     const valueMode = squareSize > 70;
     const ellipsisMode = squareSize > 30;
     const rawValue = (metric && metric.value) || 0;
@@ -62,10 +63,12 @@ export const Node = class extends React.PureComponent<Props, State> {
         popoverPosition="downCenter"
       >
         <ConditionalToolTip
-          delay="regular"
+          currentTime={currentTime}
+          formatter={formatter}
           hidden={isPopoverOpen}
-          position="top"
-          content={`${node.name} | ${value}`}
+          node={node}
+          options={options}
+          nodeType={nodeType}
         >
           <NodeContainer
             data-test-subj="nodeContainer"
@@ -152,8 +155,8 @@ const ValueInner = euiStyled.button`
   border: none;
   &:focus {
     outline: none !important;
-    border: ${(params) => params.theme.eui.euiFocusRingSize} solid
-      ${(params) => params.theme.eui.euiFocusRingColor};
+    border: ${(params) => params.theme?.eui.euiFocusRingSize} solid
+      ${(params) => params.theme?.eui.euiFocusRingColor};
     box-shadow: none;
   }
 `;

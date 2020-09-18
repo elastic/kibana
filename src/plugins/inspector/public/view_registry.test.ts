@@ -20,7 +20,7 @@
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorViewDescription } from './types';
 
-import { Adapters } from './types';
+import { Adapters } from '../common';
 
 function createMockView(
   params: {

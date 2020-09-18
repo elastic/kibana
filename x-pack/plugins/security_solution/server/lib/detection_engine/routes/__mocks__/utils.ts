@@ -6,70 +6,9 @@
 
 import { Readable } from 'stream';
 
-import { OutputRuleAlertRest } from '../../types';
 import { HapiReadableStream } from '../../rules/types';
-
-/**
- * This is a typical simple rule for testing that is easy for most basic testing
- * @param ruleId
- */
-export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
-  name: 'Simple Rule Query',
-  description: 'Simple Rule Query',
-  risk_score: 1,
-  rule_id: ruleId,
-  severity: 'high',
-  type: 'query',
-  query: 'user.name: root or user.name: admin',
-});
-
-/**
- * This is a typical ML rule for testing
- * @param ruleId
- */
-export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
-  name: 'Simple Rule Query',
-  description: 'Simple Rule Query',
-  risk_score: 1,
-  rule_id: ruleId,
-  severity: 'high',
-  type: 'machine_learning',
-  anomaly_threshold: 44,
-  machine_learning_job_id: 'some_job_id',
-});
-
-/**
- * This is a typical simple rule for testing that is easy for most basic testing
- * @param ruleId
- */
-export const getSimpleRuleWithId = (id = 'rule-1'): Partial<OutputRuleAlertRest> => ({
-  name: 'Simple Rule Query',
-  description: 'Simple Rule Query',
-  risk_score: 1,
-  id,
-  severity: 'high',
-  type: 'query',
-  query: 'user.name: root or user.name: admin',
-});
-
-/**
- * Given an array of rules, builds an NDJSON string of rules
- * as we might import/export
- * @param rules Array of rule objects with which to generate rule JSON
- */
-export const rulesToNdJsonString = (rules: Array<Partial<OutputRuleAlertRest>>) => {
-  return rules.map((rule) => JSON.stringify(rule)).join('\r\n');
-};
-
-/**
- * Given an array of rule IDs, builds an NDJSON string of rules
- * as we might import/export
- * @param ruleIds Array of ruleIds with which to generate rule JSON
- */
-export const ruleIdsToNdJsonString = (ruleIds: string[]) => {
-  const rules = ruleIds.map((ruleId) => getSimpleRule(ruleId));
-  return rulesToNdJsonString(rules);
-};
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 /**
  * Given a string, builds a hapi stream as our
@@ -94,9 +33,10 @@ export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiR
 };
 
 export const getOutputRuleAlertForRest = (): Omit<
-  OutputRuleAlertRest,
+  RulesSchema,
   'machine_learning_job_id' | 'anomaly_threshold'
 > => ({
+  author: ['Elastic'],
   actions: [],
   created_by: 'elastic',
   created_at: '2019-12-13T16:40:33.400Z',
@@ -110,14 +50,17 @@ export const getOutputRuleAlertForRest = (): Omit<
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   interval: '5m',
   risk_score: 50,
+  risk_score_mapping: [],
   rule_id: 'rule-1',
   language: 'kuery',
+  license: 'Elastic License',
   max_signals: 100,
   name: 'Detect Root/Admin Users',
   output_index: '.siem-signals',
   query: 'user.name: root or user.name: admin',
   references: ['http://www.example.com', 'https://ww.example.com'],
   severity: 'high',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   throttle: 'no_actions',
@@ -138,38 +81,7 @@ export const getOutputRuleAlertForRest = (): Omit<
       ],
     },
   ],
-  exceptions_list: [
-    {
-      field: 'source.ip',
-      values_operator: 'included',
-      values_type: 'exists',
-    },
-    {
-      field: 'host.name',
-      values_operator: 'excluded',
-      values_type: 'match',
-      values: [
-        {
-          name: 'rock01',
-        },
-      ],
-      and: [
-        {
-          field: 'host.id',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: '123',
-            },
-            {
-              name: '678',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  exceptions_list: getListArrayMock(),
   filters: [
     {
       query: {

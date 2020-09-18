@@ -7,12 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/shared_imports';
 import {
   ReadExceptionListSchemaDecoded,
   exceptionListSchema,
@@ -25,7 +21,7 @@ export const readExceptionListRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: EXCEPTION_LIST_URL,
       validate: {

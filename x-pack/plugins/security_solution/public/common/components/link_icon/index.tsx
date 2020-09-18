@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiLink, IconSize, IconType } from '@elastic/eui';
 import { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 
 interface LinkProps {
@@ -18,9 +18,9 @@ interface LinkProps {
   ariaLabel?: string;
 }
 
-const Link = styled(({ iconSide, children, ...rest }) => <EuiLink {...rest}>{children}</EuiLink>)<
-  LinkProps
->`
+export const Link = styled(({ iconSide, children, ...rest }) => (
+  <EuiLink {...rest}>{children}</EuiLink>
+))<LinkProps>`
   ${({ iconSide, theme }) => css`
     align-items: center;
     display: inline-flex;
@@ -47,7 +47,7 @@ const Link = styled(({ iconSide, children, ...rest }) => <EuiLink {...rest}>{chi
 Link.displayName = 'Link';
 
 export interface LinkIconProps extends LinkProps {
-  children: string;
+  children: string | ReactNode;
   iconSize?: IconSize;
   iconType: IconType;
   dataTestSubj?: string;

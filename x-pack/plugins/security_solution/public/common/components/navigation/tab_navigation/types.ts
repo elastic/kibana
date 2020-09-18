@@ -30,4 +30,6 @@ export interface TabNavigationItemProps {
   disabled: boolean;
   name: string;
   isSelected: boolean;
+  urlSearch: string;
+  pageId?: string;
 }

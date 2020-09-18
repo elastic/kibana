@@ -19,7 +19,7 @@ export const mockOptions: RequestBasicOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
+  timerange: { interval: '12h', to: '2019-02-11T02:26:46.071Z', from: '2019-02-10T02:26:46.071Z' },
   filterQuery: {},
 };
 
@@ -28,7 +28,11 @@ export const mockRequest = {
     operationName: 'GetKpiNetworkQuery',
     variables: {
       sourceId: 'default',
-      timerange: { interval: '12h', from: 1557445721842, to: 1557532121842 },
+      timerange: {
+        interval: '12h',
+        from: '2019-05-09T23:48:41.842Z',
+        to: '2019-05-10T23:48:41.842Z',
+      },
       filterQuery: '',
     },
     query:

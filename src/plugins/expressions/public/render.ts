@@ -20,7 +20,7 @@
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { RenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
+import { ExpressionRenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
 import { IInterpreterRenderHandlers, ExpressionAstExpression } from '../common';
 
@@ -140,7 +140,7 @@ export class ExpressionRenderHandler {
     return this.element;
   };
 
-  handleRenderError = (error: RenderError) => {
+  handleRenderError = (error: ExpressionRenderError) => {
     this.onRenderError(this.element, error, this.handlers);
   };
 }

@@ -20,7 +20,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-
+import { createHashHistory } from 'history';
 import {
   AppMountParameters,
   AppUpdater,
@@ -31,33 +31,52 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 
-import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
+import {
+  Storage,
+  createKbnUrlTracker,
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { SharePluginStart } from '../../share/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
+import { SharePluginStart, SharePluginSetup } from '../../share/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
-import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { DashboardStart } from '../../dashboard/public';
+import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
+import { EmbeddableStart } from '../../embeddable/public';
+import { DashboardStart } from '../../dashboard/public';
+import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import {
+  setUISettings,
+  setApplication,
+  setIndexPatterns,
+  setQueryService,
+  setShareService,
+} from './services';
+import { visualizeFieldAction } from './actions/visualize_field_action';
+import { createVisualizeUrlGenerator } from './url_generator';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
-  dashboard: DashboardStart;
-  kibanaLegacy: KibanaLegacyStart;
+  embeddable: EmbeddableStart;
+  urlForwarding: UrlForwardingStart;
   savedObjects: SavedObjectsStart;
+  dashboard: DashboardStart;
+  uiActions: UiActionsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
   home?: HomePublicPluginSetup;
-  kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   data: DataPublicPluginSetup;
+  share?: SharePluginSetup;
 }
 
 export class VisualizePlugin
@@ -71,9 +90,15 @@ export class VisualizePlugin
 
   public async setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
+    { home, urlForwarding, data, share }: VisualizePluginSetupDependencies
   ) {
-    const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      setActiveUrl,
+      restorePreviousUrl,
+    } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/visualize'),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
@@ -98,12 +123,24 @@ export class VisualizePlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
+    if (share) {
+      share.urlGenerators.registerUrlGenerator(
+        createVisualizeUrlGenerator(async () => {
+          const [coreStart] = await core.getStartServices();
+          return {
+            appBasePath: coreStart.application.getUrlForApp('visualize'),
+            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
+          };
+        })
+      );
+    }
+    setUISettings(core.uiSettings);
 
     core.application.register({
       id: 'visualize',
       title: 'Visualize',
       order: 8000,
-      euiIconType: 'visualizeApp',
+      euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appStateUpdater.asObservable(),
@@ -112,46 +149,69 @@ export class VisualizePlugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         this.currentHistory = params.history;
 
+        // make sure the index pattern list is up to date
+        pluginsStart.data.indexPatterns.clearCache();
+        // make sure a default index pattern exists
+        // if not, the page will be redirected to management and visualize won't be rendered
+        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
+
         appMounted();
 
-        const deps: VisualizeKibanaServices = {
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+        /**
+         * current implementation uses 2 history objects:
+         * 1. the hash history (used for the react hash router)
+         * 2. and the scoped history (used for url tracking)
+         * this should be replaced to use only scoped history after moving legacy apps to browser routing
+         */
+        const history = createHashHistory();
+        const services: VisualizeServices = {
+          ...coreStart,
+          history,
+          kbnUrlStateStorage: createKbnUrlStateStorage({
+            history,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          }),
+          urlForwarding: pluginsStart.urlForwarding,
           pluginInitializerContext: this.initializerContext,
-          addBasePath: coreStart.http.basePath.prepend,
-          core: coreStart,
-          kibanaLegacy: pluginsStart.kibanaLegacy,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
-          savedObjectsClient: coreStart.savedObjects.client,
           savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
-          I18nContext: coreStart.i18n.Context,
+          embeddable: pluginsStart.embeddable,
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
+          savedObjectsPublic: pluginsStart.savedObjects,
+          scopedHistory: params.history,
+          restorePreviousUrl,
           dashboard: pluginsStart.dashboard,
-          scopedHistory: () => this.currentHistory!,
-          savedObjects: pluginsStart.savedObjects,
+          setHeaderActionMenu: params.setHeaderActionMenu,
         };
-        setServices(deps);
 
-        // make sure the index pattern list is up to date
-        await pluginsStart.data.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
         params.element.classList.add('visAppWrapper');
-        const unmount = renderApp(params.element, params.appBasePath, deps);
+        const { renderApp } = await import('./application');
+        const unmount = renderApp(params, services);
         return () => {
+          params.element.classList.remove('visAppWrapper');
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };
       },
     });
 
-    kibanaLegacy.forwardApp('visualize', 'visualize');
+    urlForwarding.forwardApp('visualize', 'visualize');
 
     if (home) {
       home.featureCatalogue.register({
@@ -163,13 +223,21 @@ export class VisualizePlugin
         }),
         icon: 'visualizeApp',
         path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }
   }
 
-  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {}
+  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
+    setApplication(core.application);
+    setIndexPatterns(plugins.data.indexPatterns);
+    setQueryService(plugins.data.query);
+    if (plugins.share) {
+      setShareService(plugins.share);
+    }
+    plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
+  }
 
   stop() {
     if (this.stopUrlTracking) {

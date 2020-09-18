@@ -60,6 +60,10 @@ export class TopTermPercentageField implements IESAggField {
     return 0;
   }
 
+  supportsAutoDomain(): boolean {
+    return true;
+  }
+
   supportsFieldMeta(): boolean {
     return false;
   }
@@ -74,5 +78,9 @@ export class TopTermPercentageField implements IESAggField {
 
   canValueBeFormatted(): boolean {
     return false;
+  }
+
+  canReadFromGeoJson(): boolean {
+    return true;
   }
 }

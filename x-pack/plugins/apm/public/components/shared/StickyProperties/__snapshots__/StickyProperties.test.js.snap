@@ -24,9 +24,9 @@ exports[`StickyProperties should render entire component 1`] = `
     <PropertyLabel>
       <EuiToolTip
         content={
-          <ForwardRef(styled.span)>
+          <styled.span>
             url.full
-          </ForwardRef(styled.span)>
+          </styled.span>
         }
         delay="regular"
         position="top"
@@ -59,9 +59,9 @@ exports[`StickyProperties should render entire component 1`] = `
     <PropertyLabel>
       <EuiToolTip
         content={
-          <ForwardRef(styled.span)>
+          <styled.span>
             http.request.method
-          </ForwardRef(styled.span)>
+          </styled.span>
         }
         delay="regular"
         position="top"
@@ -88,9 +88,9 @@ exports[`StickyProperties should render entire component 1`] = `
     <PropertyLabel>
       <EuiToolTip
         content={
-          <ForwardRef(styled.span)>
+          <styled.span>
             error.exception.handled
-          </ForwardRef(styled.span)>
+          </styled.span>
         }
         delay="regular"
         position="top"
@@ -117,9 +117,9 @@ exports[`StickyProperties should render entire component 1`] = `
     <PropertyLabel>
       <EuiToolTip
         content={
-          <ForwardRef(styled.span)>
+          <styled.span>
             user.id
-          </ForwardRef(styled.span)>
+          </styled.span>
         }
         delay="regular"
         position="top"

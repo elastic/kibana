@@ -8,9 +8,9 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { interpretAst } from '../lib/run_interpreter';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getState } from '../state/store';
-import { getGlobalFilters } from '../state/selectors/workpad';
+import { getGlobalFilters, getWorkpadVariablesAsObject } from '../state/selectors/workpad';
 import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from '.';
@@ -36,7 +36,7 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
 
   return allFilters.filter((filter: string) => {
     const ast = fromExpression(filter);
-    const expGroups = get(ast, 'chain[0].arguments.filterGroup', []);
+    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
     return expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup));
   });
 }
@@ -79,9 +79,9 @@ export function filtersFunctionFactory(initialize: InitializeArguments): () => F
         if (filterList && filterList.length) {
           const filterExpression = filterList.join(' | ');
           const filterAST = fromExpression(filterExpression);
-          return interpretAst(filterAST);
+          return interpretAst(filterAST, getWorkpadVariablesAsObject(getState()));
         } else {
-          const filterType = initialize.typesRegistry.get('filter');
+          const filterType = initialize.types.filter;
           return filterType?.from(null, {});
         }
       },

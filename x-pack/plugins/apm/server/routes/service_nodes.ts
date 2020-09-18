@@ -9,7 +9,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNodes } from '../lib/service_nodes';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 
-export const serviceNodesRoute = createRoute((core) => ({
+export const serviceNodesRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/serviceNodes',
   params: {
     path: t.type({

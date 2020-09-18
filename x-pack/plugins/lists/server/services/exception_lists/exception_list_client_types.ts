@@ -6,16 +6,22 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
+import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
+import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
 import {
-  CommentOrUndefined,
+  CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
   EntriesArray,
-  EntriesArrayOrUndefined,
+  ExceptionListItemType,
+  ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   FilterOrUndefined,
+  Id,
   IdOrUndefined,
+  Immutable,
   ItemId,
   ItemIdOrUndefined,
   ListId,
@@ -30,8 +36,12 @@ import {
   SortOrderOrUndefined,
   Tags,
   TagsOrUndefined,
+  UpdateCommentsArray,
+  Version,
+  VersionOrUndefined,
   _Tags,
   _TagsOrUndefined,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 
 export interface ConstructorOptions {
@@ -54,10 +64,13 @@ export interface CreateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: Tags;
   type: ExceptionListType;
+  immutable: Immutable;
+  version: Version;
 }
 
 export interface UpdateExceptionListOptions {
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   id: IdOrUndefined;
   listId: ListIdOrUndefined;
   namespaceType: NamespaceType;
@@ -66,6 +79,7 @@ export interface UpdateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
   type: ExceptionListTypeOrUndefined;
+  version: VersionOrUndefined;
 }
 
 export interface DeleteExceptionListOptions {
@@ -80,15 +94,30 @@ export interface DeleteExceptionListItemOptions {
   namespaceType: NamespaceType;
 }
 
+export interface DeleteExceptionListItemByIdOptions {
+  id: Id;
+  namespaceType: NamespaceType;
+}
+
+export interface DeleteEndpointListItemOptions {
+  id: IdOrUndefined;
+  itemId: ItemIdOrUndefined;
+}
+
 export interface GetExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   id: IdOrUndefined;
   namespaceType: NamespaceType;
 }
 
+export interface GetEndpointListItemOptions {
+  itemId: ItemIdOrUndefined;
+  id: IdOrUndefined;
+}
+
 export interface CreateExceptionListItemOptions {
   _tags: _Tags;
-  comment: CommentOrUndefined;
+  comments: CreateCommentsArray;
   entries: EntriesArray;
   itemId: ItemId;
   listId: ListId;
@@ -97,13 +126,26 @@ export interface CreateExceptionListItemOptions {
   description: Description;
   meta: MetaOrUndefined;
   tags: Tags;
-  type: ExceptionListType;
+  type: ExceptionListItemType;
+}
+
+export interface CreateEndpointListItemOptions {
+  _tags: _Tags;
+  comments: CreateCommentsArray;
+  entries: EntriesArray;
+  itemId: ItemId;
+  name: Name;
+  description: Description;
+  meta: MetaOrUndefined;
+  tags: Tags;
+  type: ExceptionListItemType;
 }
 
 export interface UpdateExceptionListItemOptions {
   _tags: _TagsOrUndefined;
-  comment: CommentOrUndefined;
-  entries: EntriesArrayOrUndefined;
+  _version: _VersionOrUndefined;
+  comments: UpdateCommentsArray;
+  entries: EntriesArray;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   namespaceType: NamespaceType;
@@ -111,13 +153,45 @@ export interface UpdateExceptionListItemOptions {
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
-  type: ExceptionListTypeOrUndefined;
+  type: ExceptionListItemTypeOrUndefined;
+}
+
+export interface UpdateEndpointListItemOptions {
+  _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
+  comments: UpdateCommentsArray;
+  entries: EntriesArray;
+  id: IdOrUndefined;
+  itemId: ItemIdOrUndefined;
+  name: NameOrUndefined;
+  description: DescriptionOrUndefined;
+  meta: MetaOrUndefined;
+  tags: TagsOrUndefined;
+  type: ExceptionListItemTypeOrUndefined;
 }
 
 export interface FindExceptionListItemOptions {
   listId: ListId;
   namespaceType: NamespaceType;
   filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindEndpointListItemOptions {
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindExceptionListsItemOptions {
+  listId: NonEmptyStringArrayDecoded;
+  namespaceType: NamespaceTypeArray;
+  filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;

@@ -77,7 +77,7 @@ describe('Relationships', () => {
           editUrl: '#/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
             path: '/management/kibana/indexPatterns/patterns/1',
-            uiCapabilitiesPath: 'management.kibana.index_patterns',
+            uiCapabilitiesPath: 'management.kibana.indexPatterns',
           },
         },
       },
@@ -87,7 +87,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingKibana').length).toBe(1);
+    expect(component.find('EuiLoadingElastic').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -113,7 +113,7 @@ describe('Relationships', () => {
             icon: 'indexPatternApp',
             inAppUrl: {
               path: '/app/management/kibana/indexPatterns/patterns/1',
-              uiCapabilitiesPath: 'management.kibana.index_patterns',
+              uiCapabilitiesPath: 'management.kibana.indexPatterns',
             },
             title: 'My Index Pattern',
           },
@@ -154,7 +154,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingKibana').length).toBe(1);
+    expect(component.find('EuiLoadingElastic').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -221,7 +221,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingKibana').length).toBe(1);
+    expect(component.find('EuiLoadingElastic').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -288,7 +288,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Make sure we are showing loading
-    expect(component.find('EuiLoadingKibana').length).toBe(1);
+    expect(component.find('EuiLoadingElastic').length).toBe(1);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

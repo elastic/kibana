@@ -9,9 +9,12 @@ import React from 'react';
 
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { mockTimelineData } from '../../../../../../common/mock';
+import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { SuricataDetails } from './suricata_details';
+
+jest.mock('../../../../../../common/components/link_to');
 
 describe('SuricataDetails', () => {
   const mount = useMountAppended();

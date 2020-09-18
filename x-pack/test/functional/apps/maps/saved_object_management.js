@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }) {
   const filterBar = getService('filterBar');
   const browser = getService('browser');
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('map saved object management', () => {
     const MAP_NAME_PREFIX = 'saved_object_management_test_';
@@ -20,7 +21,15 @@ export default function ({ getPageObjects, getService }) {
 
     describe('read', () => {
       before(async () => {
+        await security.testUser.setRoles([
+          'global_maps_all',
+          'geoshape_data_reader',
+          'test_logstash_reader',
+        ]);
         await PageObjects.maps.loadSavedMap('join example');
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('should update global Kibana time to value stored with map', async () => {
@@ -77,9 +86,9 @@ export default function ({ getPageObjects, getService }) {
 
         it('should override query stored with map when query is provided in app state', async () => {
           const currentUrl = await browser.getCurrentUrl();
-          const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+          const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('/maps/'));
           const appState = `_a=(query:(language:kuery,query:'machine.os.raw%20:%20"win%208"'))`;
-          const urlWithQueryInAppState = `${kibanaBaseUrl}#/map/8eabdab0-144f-11e9-809f-ad25bb78262c?${appState}`;
+          const urlWithQueryInAppState = `${kibanaBaseUrl}/maps/map/8eabdab0-144f-11e9-809f-ad25bb78262c#?${appState}`;
 
           await browser.get(urlWithQueryInAppState, true);
           await PageObjects.maps.waitForLayersToLoad();

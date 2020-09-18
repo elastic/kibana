@@ -16,6 +16,25 @@ exports[`should render 1`] = `
   <EuiSpacer
     size="m"
   />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <ValidatedDualRange
     allowEmptyRange={false}
     compressed={true}
@@ -35,6 +54,9 @@ exports[`should render 1`] = `
       ]
     }
   />
+  <EuiSpacer
+    size="m"
+  />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -52,6 +74,10 @@ exports[`should render 1`] = `
           Object {
             "id": "LAST_SAVED_LOCATION",
             "label": "Map location at save",
+          },
+          Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
           },
           Object {
             "id": "FIXED_LOCATION",
@@ -84,6 +110,25 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
   <EuiSpacer
     size="m"
   />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <ValidatedDualRange
     allowEmptyRange={false}
     compressed={true}
@@ -103,6 +148,9 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
       ]
     }
   />
+  <EuiSpacer
+    size="m"
+  />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -120,6 +168,10 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
           Object {
             "id": "LAST_SAVED_LOCATION",
             "label": "Map location at save",
+          },
+          Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
           },
           Object {
             "id": "FIXED_LOCATION",
@@ -172,6 +224,25 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
   <EuiSpacer
     size="m"
   />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <ValidatedDualRange
     allowEmptyRange={false}
     compressed={true}
@@ -191,6 +262,9 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
       ]
     }
   />
+  <EuiSpacer
+    size="m"
+  />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -208,6 +282,10 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
           Object {
             "id": "LAST_SAVED_LOCATION",
             "label": "Map location at save",
+          },
+          Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
           },
           Object {
             "id": "FIXED_LOCATION",

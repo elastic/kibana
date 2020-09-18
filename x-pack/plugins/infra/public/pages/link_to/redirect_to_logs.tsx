@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from 'lodash';
+import { flowRight } from 'lodash';
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
 
@@ -24,7 +24,7 @@ interface RedirectToLogsProps extends RedirectToLogsType {
 export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
   const sourceId = match.params.sourceId || 'default';
   const filter = getFilterFromLocation(location);
-  const searchString = compose(
+  const searchString = flowRight(
     replaceLogFilterInQueryString(filter),
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)

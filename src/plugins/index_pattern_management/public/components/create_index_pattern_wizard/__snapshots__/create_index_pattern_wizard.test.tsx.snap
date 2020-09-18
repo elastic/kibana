@@ -1,41 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
-<EuiPanel
-  paddingSize="l"
->
-  <div>
-    <Header
-      indexPatternName="name"
-      isBeta={false}
-      isIncludingSystemIndices={false}
-      onChangeIncludingSystemIndices={[Function]}
-      prompt={null}
-      showSystemIndices={true}
-    />
-    <LoadingState />
-  </div>
+<Fragment>
+  <LoadingState />
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`CreateIndexPatternWizard renders index pattern step when there are indices 1`] = `
-<EuiPanel
-  paddingSize="l"
->
-  <div>
+<Fragment>
+  <EuiPageContent>
     <Header
+      docLinks={
+        Object {
+          "links": Object {
+            "indexPatterns": Object {},
+            "scriptedFields": Object {},
+          },
+        }
+      }
       indexPatternName="name"
       isBeta={false}
-      isIncludingSystemIndices={false}
-      onChangeIncludingSystemIndices={[Function]}
       prompt={null}
-      showSystemIndices={true}
     />
+    <EuiHorizontalRule />
     <StepIndexPattern
       allIndices={
         Array [
@@ -55,56 +48,77 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
           "type": "default",
         }
       }
-      isIncludingSystemIndices={false}
+      showSystemIndices={true}
     />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
-<EuiPanel
-  paddingSize="l"
->
-  <div>
+<Fragment>
+  <EuiPageContent>
     <Header
+      docLinks={
+        Object {
+          "links": Object {
+            "indexPatterns": Object {},
+            "scriptedFields": Object {},
+          },
+        }
+      }
       indexPatternName="name"
       isBeta={false}
-      isIncludingSystemIndices={false}
-      onChangeIncludingSystemIndices={[Function]}
       prompt={null}
+    />
+    <EuiHorizontalRule />
+    <StepIndexPattern
+      allIndices={Array []}
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        IndexPatternCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
       showSystemIndices={true}
     />
-    <EmptyState
-      onRefresh={[Function]}
-      prependBasePath={[Function]}
-    />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
-<EuiPanel
-  paddingSize="l"
->
-  <div>
+<Fragment>
+  <EuiPageContent>
     <Header
+      docLinks={
+        Object {
+          "links": Object {
+            "indexPatterns": Object {},
+            "scriptedFields": Object {},
+          },
+        }
+      }
       indexPatternName="name"
       isBeta={false}
-      isIncludingSystemIndices={false}
-      onChangeIncludingSystemIndices={[Function]}
       prompt={null}
-      showSystemIndices={true}
     />
+    <EuiHorizontalRule />
     <StepTimeField
       createIndexPattern={[Function]}
       goToPreviousStep={[Function]}
@@ -120,28 +134,33 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
         }
       }
     />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`CreateIndexPatternWizard renders when there are no indices but there are remote clusters 1`] = `
-<EuiPanel
-  paddingSize="l"
->
-  <div>
+<Fragment>
+  <EuiPageContent>
     <Header
+      docLinks={
+        Object {
+          "links": Object {
+            "indexPatterns": Object {},
+            "scriptedFields": Object {},
+          },
+        }
+      }
       indexPatternName="name"
       isBeta={false}
-      isIncludingSystemIndices={false}
-      onChangeIncludingSystemIndices={[Function]}
       prompt={null}
-      showSystemIndices={true}
     />
+    <EuiHorizontalRule />
     <StepIndexPattern
       allIndices={Array []}
       goToNextStep={[Function]}
@@ -155,30 +174,35 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
           "type": "default",
         }
       }
-      isIncludingSystemIndices={false}
+      showSystemIndices={true}
     />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
-<EuiPanel
-  paddingSize="l"
->
-  <div>
+<Fragment>
+  <EuiPageContent>
     <Header
+      docLinks={
+        Object {
+          "links": Object {
+            "indexPatterns": Object {},
+            "scriptedFields": Object {},
+          },
+        }
+      }
       indexPatternName="name"
       isBeta={false}
-      isIncludingSystemIndices={true}
-      onChangeIncludingSystemIndices={[Function]}
       prompt={null}
-      showSystemIndices={true}
     />
+    <EuiHorizontalRule />
     <StepIndexPattern
       allIndices={
         Array [
@@ -198,13 +222,14 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
           "type": "default",
         }
       }
-      isIncludingSystemIndices={true}
+      showSystemIndices={true}
     />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
+    side="right"
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</EuiPanel>
+</Fragment>
 `;

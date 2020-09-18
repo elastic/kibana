@@ -4,13 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Transform } from 'stream';
-import { ImportRuleAlertRest } from '../types';
+import * as t from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { formatErrors } from '../../../../common/format_errors';
+import { importRuleValidateTypeDependents } from '../../../../common/detection_engine/schemas/request/import_rules_type_dependents';
+import { exactCheck } from '../../../../common/exact_check';
+import {
+  importRulesSchema,
+  ImportRulesSchema,
+  ImportRulesSchemaDecoded,
+} from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   createSplitStream,
   createMapStream,
   createConcatStream,
-} from '../../../../../../../src/legacy/utils/streams';
-import { importRulesSchema } from '../routes/schemas/import_rules_schema';
+} from '../../../../../../../src/core/server/utils';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
   parseNdjsonStrings,
@@ -19,14 +28,22 @@ import {
 } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const validateRules = (): Transform => {
-  return createMapStream((obj: ImportRuleAlertRest) => {
+  return createMapStream((obj: ImportRulesSchema) => {
     if (!(obj instanceof Error)) {
-      const validated = importRulesSchema.validate(obj);
-      if (validated.error != null) {
-        return new BadRequestError(validated.error.message);
-      } else {
-        return validated.value;
-      }
+      const decoded = importRulesSchema.decode(obj);
+      const checked = exactCheck(obj, decoded);
+      const onLeft = (errors: t.Errors): BadRequestError | ImportRulesSchemaDecoded => {
+        return new BadRequestError(formatErrors(errors).join());
+      };
+      const onRight = (schema: ImportRulesSchema): BadRequestError | ImportRulesSchemaDecoded => {
+        const validationErrors = importRuleValidateTypeDependents(schema);
+        if (validationErrors.length) {
+          return new BadRequestError(validationErrors.join());
+        } else {
+          return schema as ImportRulesSchemaDecoded;
+        }
+      };
+      return pipe(checked, fold(onLeft, onRight));
     } else {
       return obj;
     }

@@ -8,6 +8,9 @@ import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import uuid from 'uuid';
 
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
@@ -19,7 +22,6 @@ import {
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
 } from '../../rules/types';
-import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
 import {
   createBulkErrorObject,
   BulkError,
@@ -28,11 +30,9 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
-import { hasListsFeature } from '../../feature_flags';
-// import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 import { RuleActions } from '../../rule_actions/types';
 
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 export const getIdError = ({
   id,
@@ -103,12 +103,14 @@ export const transformAlertToRule = (
   alert: RuleAlertType,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
-): Partial<OutputRuleAlertRest> => {
-  return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+): Partial<RulesSchema> => {
+  return pickBy<RulesSchema>((value: unknown) => value != null, {
+    author: alert.params.author ?? [],
     actions: ruleActions?.actions ?? [],
+    building_block_type: alert.params.buildingBlockType,
     created_at: alert.createdAt.toISOString(),
     updated_at: alert.updatedAt.toISOString(),
-    created_by: alert.createdBy,
+    created_by: alert.createdBy ?? 'elastic',
     description: alert.params.description,
     enabled: alert.enabled,
     anomaly_threshold: alert.params.anomalyThreshold,
@@ -121,10 +123,13 @@ export const transformAlertToRule = (
     interval: alert.schedule.interval,
     rule_id: alert.params.ruleId,
     language: alert.params.language,
+    license: alert.params.license,
     output_index: alert.params.outputIndex,
     max_signals: alert.params.maxSignals,
     machine_learning_job_id: alert.params.machineLearningJobId,
     risk_score: alert.params.riskScore,
+    risk_score_mapping: alert.params.riskScoreMapping ?? [],
+    rule_name_override: alert.params.ruleNameOverride,
     name: alert.name,
     query: alert.params.query,
     references: alert.params.references,
@@ -133,28 +138,28 @@ export const transformAlertToRule = (
     timeline_title: alert.params.timelineTitle,
     meta: alert.params.meta,
     severity: alert.params.severity,
-    updated_by: alert.updatedBy,
+    severity_mapping: alert.params.severityMapping ?? [],
+    updated_by: alert.updatedBy ?? 'elastic',
     tags: transformTags(alert.tags),
     to: alert.params.to,
     type: alert.params.type,
-    threat: alert.params.threat,
+    threat: alert.params.threat ?? [],
+    threshold: alert.params.threshold,
     throttle: ruleActions?.ruleThrottle || 'no_actions',
+    timestamp_override: alert.params.timestampOverride,
     note: alert.params.note,
     version: alert.params.version,
-    status: ruleStatus?.attributes.status,
+    status: ruleStatus?.attributes.status ?? undefined,
     status_date: ruleStatus?.attributes.statusDate,
-    last_failure_at: ruleStatus?.attributes.lastFailureAt,
-    last_success_at: ruleStatus?.attributes.lastSuccessAt,
-    last_failure_message: ruleStatus?.attributes.lastFailureMessage,
-    last_success_message: ruleStatus?.attributes.lastSuccessMessage,
-    // TODO: (LIST-FEATURE) Remove hasListsFeature() check once we have lists available for a release
-    exceptions_list: hasListsFeature() ? alert.params.exceptions_list : null,
+    last_failure_at: ruleStatus?.attributes.lastFailureAt ?? undefined,
+    last_success_at: ruleStatus?.attributes.lastSuccessAt ?? undefined,
+    last_failure_message: ruleStatus?.attributes.lastFailureMessage ?? undefined,
+    last_success_message: ruleStatus?.attributes.lastSuccessMessage ?? undefined,
+    exceptions_list: alert.params.exceptionsList ?? [],
   });
 };
 
-export const transformAlertsToRules = (
-  alerts: RuleAlertType[]
-): Array<Partial<OutputRuleAlertRest>> => {
+export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
   return alerts.map((alert) => transformAlertToRule(alert));
 };
 
@@ -166,7 +171,7 @@ export const transformFindAlerts = (
   page: number;
   perPage: number;
   total: number;
-  data: Array<Partial<OutputRuleAlertRest>>;
+  data: Array<Partial<RulesSchema>>;
 } | null => {
   if (!ruleStatuses && isAlertTypes(findResults.data)) {
     return {
@@ -193,7 +198,7 @@ export const transform = (
   alert: PartialAlert,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
-): Partial<OutputRuleAlertRest> | null => {
+): Partial<RulesSchema> | null => {
   if (isAlertType(alert)) {
     return transformAlertToRule(
       alert,
@@ -210,7 +215,7 @@ export const transformOrBulkError = (
   alert: PartialAlert,
   ruleActions: RuleActions,
   ruleStatus?: unknown
-): Partial<OutputRuleAlertRest> | BulkError => {
+): Partial<RulesSchema> | BulkError => {
   if (isAlertType(alert)) {
     if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleActions, ruleStatus?.saved_objects[0] ?? ruleStatus);
@@ -243,7 +248,10 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (ruleDefinitions: RuleAlertParamsRest[], by: 'rule_id'): string[] => {
+export const getDuplicates = (
+  ruleDefinitions: CreateRulesBulkSchemaDecoded,
+  by: 'rule_id'
+): string[] => {
   const mappedDuplicates = countBy(
     by,
     ruleDefinitions.filter((r) => r[by] != null)
@@ -265,21 +273,17 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
         acc.rulesAcc.set(uuid.v4(), parsedRule);
       } else {
         const { rule_id: ruleId } = parsedRule;
-        if (ruleId != null) {
-          if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
-            acc.errors.set(
-              uuid.v4(),
-              createBulkErrorObject({
-                ruleId,
-                statusCode: 400,
-                message: `More than one rule with rule-id: "${ruleId}" found`,
-              })
-            );
-          }
-          acc.rulesAcc.set(ruleId, parsedRule);
-        } else {
-          acc.rulesAcc.set(uuid.v4(), parsedRule);
+        if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
+          acc.errors.set(
+            uuid.v4(),
+            createBulkErrorObject({
+              ruleId,
+              statusCode: 400,
+              message: `More than one rule with rule-id: "${ruleId}" found`,
+            })
+          );
         }
+        acc.rulesAcc.set(ruleId, parsedRule);
       }
 
       return acc;

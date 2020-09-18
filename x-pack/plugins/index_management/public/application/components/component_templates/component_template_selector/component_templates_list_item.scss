@@ -1,0 +1,31 @@
+.componentTemplatesListItem {
+  background-color: white;
+  padding: $euiSizeM;
+  border-bottom: $euiBorderThin;
+  position: relative;
+  height: $euiSizeL * 2;
+
+  &--selected {
+    &::before {
+      content: '';
+      background-color: rgba(255, 255, 255, 0.7);
+      height: 100%;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      z-index: 1;
+    }
+  }
+
+  &__contentIndicator {
+    flex-direction: row;
+  }
+
+  &__checkIcon {
+    position: absolute;
+    right: $euiSize;
+    top: $euiSize;
+    z-index: 2;
+  }
+}

@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getReadListSchemaMock } from './read_list_schema.mock';
 import { ReadListSchema, readListSchema } from './read_list_schema';
@@ -25,6 +25,7 @@ describe('read_list_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getReadListSchemaMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = readListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

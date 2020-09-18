@@ -7,7 +7,7 @@
 import { ActionCreator } from 'typescript-fsa';
 import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
 import { navTabs } from '../../../app/home/home_navigations';
-import { SiemPageName } from '../../../app/types';
+import { SecurityPageName } from '../../../app/types';
 import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
@@ -71,7 +71,7 @@ export const mockHistory = {
 };
 
 export const defaultProps: UrlStateContainerPropTypes = {
-  pageName: SiemPageName.network,
+  pageName: SecurityPageName.network,
   detailName: undefined,
   tabName: HostsTableType.authentications,
   search: '',
@@ -92,20 +92,20 @@ export const defaultProps: UrlStateContainerPropTypes = {
     [CONSTANTS.timerange]: {
       global: {
         [CONSTANTS.timerange]: {
-          from: 1558048243696,
+          from: '2019-05-16T23:10:43.696Z',
           fromStr: 'now-24h',
           kind: 'relative',
-          to: 1558134643697,
+          to: '2019-05-17T23:10:43.697Z',
           toStr: 'now',
         },
         linkTo: ['timeline'],
       },
       timeline: {
         [CONSTANTS.timerange]: {
-          from: 1558048243696,
+          from: '2019-05-16T23:10:43.696Z',
           fromStr: 'now-24h',
           kind: 'relative',
-          to: 1558134643697,
+          to: '2019-05-17T23:10:43.697Z',
           toStr: 'now',
         },
         linkTo: ['global'],
@@ -292,7 +292,7 @@ export const testCases: Array<[
     /* namespaceUpper */ 'Network',
     /* pathName */ '/network',
     /* type */ networkModel.NetworkType.page,
-    /* pageName */ SiemPageName.network,
+    /* pageName */ SecurityPageName.network,
     /* detailName */ undefined,
   ],
   [
@@ -301,7 +301,7 @@ export const testCases: Array<[
     /* namespaceUpper */ 'Hosts',
     /* pathName */ '/hosts',
     /* type */ hostsModel.HostsType.page,
-    /* pageName */ SiemPageName.hosts,
+    /* pageName */ SecurityPageName.hosts,
     /* detailName */ undefined,
   ],
   [
@@ -310,7 +310,7 @@ export const testCases: Array<[
     /* namespaceUpper */ 'Hosts',
     /* pathName */ '/hosts/siem-es',
     /* type */ hostsModel.HostsType.details,
-    /* pageName */ SiemPageName.hosts,
+    /* pageName */ SecurityPageName.hosts,
     /* detailName */ 'host-test',
   ],
   [
@@ -319,7 +319,7 @@ export const testCases: Array<[
     /* namespaceUpper */ 'Network',
     /* pathName */ '/network/ip/100.90.80',
     /* type */ networkModel.NetworkType.details,
-    /* pageName */ SiemPageName.network,
+    /* pageName */ SecurityPageName.network,
     /* detailName */ '100.90.80',
   ],
   [
@@ -328,7 +328,7 @@ export const testCases: Array<[
     /* namespaceUpper */ 'Overview',
     /* pathName */ '/overview',
     /* type */ null,
-    /* pageName */ SiemPageName.overview,
+    /* pageName */ SecurityPageName.overview,
     /* detailName */ undefined,
   ],
   [
@@ -337,7 +337,7 @@ export const testCases: Array<[
     /* namespaceUpper */ 'Timeline',
     /* pathName */ '/timeline',
     /* type */ null,
-    /* pageName */ SiemPageName.timelines,
+    /* pageName */ SecurityPageName.timelines,
     /* detailName */ undefined,
   ],
 ];

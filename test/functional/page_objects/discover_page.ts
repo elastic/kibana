@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function DiscoverPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -45,10 +43,22 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await fieldSearch.type(name);
     }
 
+    public async clearFieldSearchInput() {
+      const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
+      await fieldSearch.clearValue();
+    }
+
     public async saveSearch(searchName: string) {
-      log.debug('saveSearch');
       await this.clickSaveSearchButton();
-      await testSubjects.setValue('savedObjectTitle', searchName);
+      // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
+      await retry.waitFor(
+        `saved search title is set to ${searchName} and save button is clickable`,
+        async () => {
+          const saveButton = await testSubjects.find('confirmSaveSavedObjectButton');
+          await testSubjects.setValue('savedObjectTitle', searchName);
+          return (await saveButton.getAttribute('disabled')) !== 'true';
+        }
+      );
       await testSubjects.click('confirmSaveSavedObjectButton');
       await header.waitUntilLoadingHasFinished();
       // LeeDr - this additional checking for the saved search name was an attempt
@@ -56,9 +66,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       // that the next action wouldn't have to retry.  But it doesn't really solve
       // that issue.  But it does typically take about 3 retries to
       // complete with the expected searchName.
-      await retry.try(async () => {
-        const name = await this.getCurrentQueryName();
-        expect(name).to.be(searchName);
+      await retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+        return (await this.getCurrentQueryName()) === searchName;
       });
     }
 
@@ -91,11 +100,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
       // We need this try loop here because previous actions in Discover like
       // saving a search cause reloading of the page and the "Open" menu item goes stale.
-      await retry.try(async () => {
+      await retry.waitFor('saved search panel is opened', async () => {
         await this.clickLoadSavedSearchButton();
         await header.waitUntilLoadingHasFinished();
         isOpen = await testSubjects.exists('loadSearchForm');
-        expect(isOpen).to.be(true);
+        return isOpen === true;
       });
     }
 
@@ -185,6 +194,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await docHeader.getVisibleText();
     }
 
+    public async getDocTableRows() {
+      await header.waitUntilLoadingHasFinished();
+      const rows = await testSubjects.findAll('docTableRow');
+      return rows;
+    }
+
     public async getDocTableIndex(index: number) {
       const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();
@@ -195,6 +210,19 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
       );
       return await field.getVisibleText();
+    }
+
+    public async skipToEndOfDocTable() {
+      // add the focus to the button to make it appear
+      const skipButton = await testSubjects.find('discoverSkipTableButton');
+      // force focus on it, to make it interactable
+      skipButton.focus();
+      // now click it!
+      return skipButton.click();
+    }
+
+    public async getDocTableFooter() {
+      return await testSubjects.find('discoverDocTableFooter');
     }
 
     public async clickDocSortDown() {
@@ -226,7 +254,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getSidebarWidth() {
-      const sidebar = await find.byCssSelector('.sidebar-list');
+      const sidebar = await testSubjects.find('discover-sidebar');
       return await sidebar.getAttribute('clientWidth');
     }
 
@@ -242,9 +270,26 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`field-${field}`);
     }
 
-    public async clickFieldListItemAdd(field: string) {
+    public async clickFieldSort(field: string) {
+      return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
+    }
+
+    public async clickFieldListItemToggle(field: string) {
       await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
+    }
+
+    public async clickFieldListItemAdd(field: string) {
+      // a filter check may make sense here, but it should be properly handled to make
+      // it work with the _score and _source fields as well
+      await this.clickFieldListItemToggle(field);
+    }
+
+    public async clickFieldListItemRemove(field: string) {
+      const selectedList = await testSubjects.find('fieldList-selected');
+      if (await testSubjects.descendantExists(`field-${field}`, selectedList)) {
+        await this.clickFieldListItemToggle(field);
+      }
     }
 
     public async clickFieldListItemVisualize(fieldName: string) {
@@ -287,6 +332,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async selectIndexPattern(indexPattern: string) {
       await testSubjects.click('indexPattern-switch-link');
+      await find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
       await find.clickByCssSelector(
         `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
       );
@@ -323,6 +369,23 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const el = await find.byCssSelector('[data-fetch-counter]');
       const nr = await el.getAttribute('data-fetch-counter');
       return Number(nr);
+    }
+
+    /**
+     * Check if Discover app is currently rendered on the screen.
+     */
+    public async isDiscoverAppOnScreen(): Promise<boolean> {
+      const result = await find.allByCssSelector('discover-app');
+      return result.length === 1;
+    }
+
+    /**
+     * Wait until Discover app is rendered on the screen.
+     */
+    public async waitForDiscoverAppOnScreen() {
+      await retry.waitFor('Discover app on screen', async () => {
+        return await this.isDiscoverAppOnScreen();
+      });
     }
   }
 

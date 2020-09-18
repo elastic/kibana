@@ -1,0 +1,13 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "include": [
+    "./**/*",
+    "../observability"
+  ],
+  "exclude": [],
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  }
+}

@@ -57,6 +57,7 @@ const EditableTitleComponent: React.FC<Props> = ({
       onSubmit(changedTitle);
     }
     setEditMode(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changedTitle, title]);
 
   const handleOnChange = useCallback(

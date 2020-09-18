@@ -11,6 +11,8 @@
 
 import React, { FC } from 'react';
 
+import { NavigateToPath } from '../../../contexts/kibana';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
@@ -21,32 +23,44 @@ import {
   checkPermission,
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { Settings } from '../../../settings';
-import { ML_BREADCRUMB, SETTINGS } from '../../breadcrumbs';
+import { AnomalyDetectionSettingsContext, Settings } from '../../../settings';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-const breadcrumbs = [ML_BREADCRUMB, SETTINGS];
-
-export const settingsRoute: MlRoute = {
+export const settingsRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/settings',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { redirectToMlAccessDeniedPage } = deps;
+
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
+    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     getMlNodeCount,
   });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canGetFilters = checkPermission('canGetFilters');
+  const canCreateFilter = checkPermission('canCreateFilter');
   const canGetCalendars = checkPermission('canGetCalendars');
+  const canCreateCalendar = checkPermission('canCreateCalendar');
 
   return (
     <PageLoader context={context}>
-      <Settings canGetCalendars={canGetCalendars} canGetFilters={canGetFilters} />
+      <AnomalyDetectionSettingsContext.Provider
+        value={{ canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar }}
+      >
+        <Settings />
+      </AnomalyDetectionSettingsContext.Provider>
     </PageLoader>
   );
 };

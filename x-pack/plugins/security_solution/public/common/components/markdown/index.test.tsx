@@ -157,7 +157,19 @@ describe('Markdown', () => {
         );
         wrapper.find('[data-test-subj="markdown-timeline-link"]').first().simulate('click');
 
-        expect(onClickTimeline).toHaveBeenCalledWith(timelineId);
+        expect(onClickTimeline).toHaveBeenCalledWith(timelineId, '');
+      });
+
+      test('timeline link onClick calls onClickTimeline with timelineId and graphEventId', () => {
+        const graphEventId = '2bc51864784c';
+        const markdownWithTimelineAndGraphEventLink = `A link to a timeline [timeline](http://localhost:5601/app/siem#/timelines?timeline=(id:'${timelineId}',isOpen:!t,graphEventId:'${graphEventId}'))`;
+
+        const wrapper = mount(
+          <Markdown raw={markdownWithTimelineAndGraphEventLink} onClickTimeline={onClickTimeline} />
+        );
+        wrapper.find('[data-test-subj="markdown-timeline-link"]').first().simulate('click');
+
+        expect(onClickTimeline).toHaveBeenCalledWith(timelineId, graphEventId);
       });
     });
   });

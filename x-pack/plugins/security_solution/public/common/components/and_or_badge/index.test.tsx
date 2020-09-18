@@ -20,8 +20,20 @@ describe('AndOrBadge', () => {
     );
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('AND');
-    expect(wrapper.find('EuiFlexItem[data-test-subj="andOrBadgeBarTop"]')).toHaveLength(1);
-    expect(wrapper.find('EuiFlexItem[data-test-subj="andOrBadgeBarBottom"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="andOrBadgeBarTop"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="andOrBadgeBarBottom"]').exists()).toBeTruthy();
+  });
+
+  test('it does not render top and bottom antenna bars when "includeAntennas" is false', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <AndOrBadge type="or" />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('OR');
+    expect(wrapper.find('[data-test-subj="andOrBadgeBarTop"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="andOrBadgeBarBottom"]').exists()).toBeFalsy();
   });
 
   test('it renders "and" when "type" is "and"', () => {
@@ -32,7 +44,6 @@ describe('AndOrBadge', () => {
     );
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('AND');
-    expect(wrapper.find('EuiFlexItem[data-test-subj="and-or-badge-bar"]')).toHaveLength(0);
   });
 
   test('it renders "or" when "type" is "or"', () => {
@@ -43,6 +54,5 @@ describe('AndOrBadge', () => {
     );
 
     expect(wrapper.find('[data-test-subj="and-or-badge"]').at(0).text()).toEqual('OR');
-    expect(wrapper.find('EuiFlexItem[data-test-subj="and-or-badge-bar"]')).toHaveLength(0);
   });
 });

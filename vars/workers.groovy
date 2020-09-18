@@ -3,16 +3,20 @@
 
 def label(size) {
   switch(size) {
+    case 'flyweight':
+      return 'flyweight'
     case 's':
-      return 'linux && immutable'
+      return 'docker && linux && immutable'
     case 's-highmem':
-      return 'tests-s'
+      return 'docker && tests-s'
     case 'l':
-      return 'tests-l'
+      return 'docker && tests-l'
     case 'xl':
-      return 'tests-xl'
+      return 'docker && tests-xl'
+    case 'xl-highmem':
+      return 'docker && tests-xl-highmem'
     case 'xxl':
-      return 'tests-xxl'
+      return 'docker && tests-xxl'
   }
 
   error "unknown size '${size}'"
@@ -53,6 +57,11 @@ def base(Map params, Closure closure) {
       }
     }
 
+    sh(
+      script: "mkdir -p ${env.WORKSPACE}/tmp",
+      label: "Create custom temp directory"
+    )
+
     def checkoutInfo = [:]
 
     if (config.scm) {
@@ -63,6 +72,12 @@ def base(Map params, Closure closure) {
 
       dir("kibana") {
         checkoutInfo = getCheckoutInfo()
+
+        // use `checkoutInfo` as a flag to indicate that we've already reported the pending commit status
+        if (buildState.get('shouldSetCommitStatus') && !buildState.has('checkoutInfo')) {
+          buildState.set('checkoutInfo', checkoutInfo)
+          githubCommitStatus.onStart()
+        }
       }
 
       ciStats.reportGitInfo(
@@ -81,6 +96,7 @@ def base(Map params, Closure closure) {
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
       "GIT_BRANCH=${checkoutInfo.branch}",
+      "TMPDIR=${env.WORKSPACE}/tmp", // For Chrome and anything else that respects it
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
@@ -102,11 +118,11 @@ def base(Map params, Closure closure) {
 
 // Worker for ci processes. Extends the base worker and adds GCS artifact upload, error reporting, junit processing
 def ci(Map params, Closure closure) {
-  def config = [ramDisk: true, bootstrapped: true] + params
+  def config = [ramDisk: true, bootstrapped: true, runErrorReporter: true] + params
 
   return base(config) {
     kibanaPipeline.withGcsArtifactUpload(config.name) {
-      kibanaPipeline.withPostBuildReporting {
+      kibanaPipeline.withPostBuildReporting(config) {
         closure()
       }
     }
@@ -118,7 +134,9 @@ def intake(jobName, String script) {
   return {
     ci(name: jobName, size: 's-highmem', ramDisk: true) {
       withEnv(["JOB=${jobName}"]) {
-        runbld(script, "Execute ${jobName}")
+        kibanaPipeline.notifyOnError {
+          runbld(script, "Execute ${jobName}")
+        }
       }
     }
   }
@@ -159,7 +177,9 @@ def parallelProcesses(Map params) {
           sleep(delay)
         }
 
-        processClosure(processNumber)
+        withEnv(["CI_PARALLEL_PROCESS_NUMBER=${processNumber}"]) {
+          processClosure()
+        }
       }
     }
 

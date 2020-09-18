@@ -74,7 +74,8 @@ function DefaultEditorDataTab({
       ),
     [metricAggs]
   );
-  const lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
+  const lastParentPipelineAggTitle =
+    lastParentPipelineAgg && (lastParentPipelineAgg as IAggConfig).type.title;
 
   const addSchema: AddSchema = useCallback((schema) => dispatch(addNewAgg(schema)), [dispatch]);
 
@@ -116,7 +117,7 @@ function DefaultEditorDataTab({
     setValidity,
     setTouched,
     removeAgg: onAggRemove,
-  };
+  } as any;
 
   return (
     <>

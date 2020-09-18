@@ -22,6 +22,7 @@ import { DocumentCount } from './document_count';
 import { Criteria } from './criteria';
 import { useSourceId } from '../../../../containers/source_id';
 import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
+import { GroupByExpression } from '../../shared/group_by_expression/group_by_expression';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -33,12 +34,14 @@ interface LogsContextMeta {
   isInternal?: boolean;
 }
 
+export type AlertsContext = AlertsContextValue<LogsContextMeta>;
 interface Props {
   errors: IErrorObject;
   alertParams: Partial<LogDocumentCountAlertParams>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
-  alertsContext: AlertsContextValue<LogsContextMeta>;
+  alertsContext: AlertsContext;
+  sourceId: string;
 }
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
@@ -61,12 +64,12 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
     <>
       {isInternal ? (
         <SourceStatusWrapper {...props}>
-          <Editor {...props} />
+          <Editor {...props} sourceId={sourceId} />
         </SourceStatusWrapper>
       ) : (
         <LogSourceProvider sourceId={sourceId} fetch={props.alertsContext.http.fetch}>
           <SourceStatusWrapper {...props}>
-            <Editor {...props} />
+            <Editor {...props} sourceId={sourceId} />
           </SourceStatusWrapper>
         </LogSourceProvider>
       )}
@@ -118,10 +121,9 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
 };
 
 export const Editor: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors } = props;
+  const { setAlertParams, alertParams, errors, alertsContext, sourceId } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
-
   useMount(() => {
     for (const [key, value] of Object.entries({ ...DEFAULT_EXPRESSION, ...alertParams })) {
       setAlertParams(key, value);
@@ -133,6 +135,17 @@ export const Editor: React.FC<Props> = (props) => {
     if (sourceStatus?.logIndexFields) {
       return sourceStatus.logIndexFields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
+      });
+    } else {
+      return [];
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [sourceStatus]);
+
+  const groupByFields = useMemo(() => {
+    if (sourceStatus?.logIndexFields) {
+      return sourceStatus.logIndexFields.filter((field) => {
+        return field.type === 'string' && field.aggregatable;
       });
     } else {
       return [];
@@ -168,6 +181,13 @@ export const Editor: React.FC<Props> = (props) => {
   const updateTimeUnit = useCallback(
     (tu: string) => {
       setAlertParams('timeUnit', tu);
+    },
+    [setAlertParams]
+  );
+
+  const updateGroupBy = useCallback(
+    (groups: string[]) => {
+      setAlertParams('groupBy', groups);
     },
     [setAlertParams]
   );
@@ -209,6 +229,9 @@ export const Editor: React.FC<Props> = (props) => {
         updateCriterion={updateCriterion}
         removeCriterion={removeCriterion}
         errors={errors.criteria as IErrorObject}
+        alertParams={alertParams}
+        context={alertsContext}
+        sourceId={sourceId}
       />
 
       <ForLastExpression
@@ -217,6 +240,12 @@ export const Editor: React.FC<Props> = (props) => {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         errors={errors as { [key: string]: string[] }}
+      />
+
+      <GroupByExpression
+        selectedGroups={alertParams.groupBy}
+        onChange={updateGroupBy}
+        fields={groupByFields}
       />
 
       <div>
@@ -236,3 +265,7 @@ export const Editor: React.FC<Props> = (props) => {
     </>
   );
 };
+
+// required for dynamic import
+// eslint-disable-next-line import/no-default-export
+export default ExpressionEditor;

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ComponentType } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 
 /**
@@ -54,7 +55,7 @@ export interface ShareContext {
  * */
 export interface ShareContextMenuPanelItem extends Omit<EuiContextMenuPanelItemDescriptor, 'name'> {
   name: string; // EUI will accept a `ReactNode` for the `name` prop, but `ShareContentMenu` assumes a `string`.
-  sortOrder: number;
+  sortOrder?: number;
 }
 
 /**
@@ -80,9 +81,19 @@ export interface ShareMenuProvider {
   getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 }
 
+interface UrlParamExtensionProps {
+  setParamValue: (values: {}) => void;
+}
+
+export interface UrlParamExtension {
+  paramName: string;
+  component: ComponentType<UrlParamExtensionProps>;
+}
+
 /** @public */
 export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   anchorElement: HTMLElement;
   allowEmbed: boolean;
   allowShortUrl: boolean;
+  embedUrlParamExtensions?: UrlParamExtension[];
 }

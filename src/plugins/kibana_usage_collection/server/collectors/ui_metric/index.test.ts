@@ -17,20 +17,22 @@
  * under the License.
  */
 
-import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/server';
 import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CollectorOptions } from '../../../../../plugins/usage_collection/server/collector/collector';
+import {
+  CollectorOptions,
+  createUsageCollectionSetupMock,
+} from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerUiMetricUsageCollector } from './';
 
 describe('telemetry_ui_metric', () => {
   let collector: CollectorOptions;
 
-  const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
-    makeUsageCollector: jest.fn().mockImplementation((config) => (collector = config)),
-    registerCollector: jest.fn(),
-  } as any;
+  const usageCollectionMock = createUsageCollectionSetupMock();
+  usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+    collector = config;
+    return createUsageCollectionSetupMock().makeUsageCollector(config);
+  });
 
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();
@@ -71,6 +73,11 @@ describe('telemetry_ui_metric', () => {
           { id: 'testAppName:testKeyName1', attributes: { count: 3 } },
           { id: 'testAppName:testKeyName2', attributes: { count: 5 } },
           { id: 'testAppName2:testKeyName3', attributes: { count: 1 } },
+          {
+            id:
+              'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+            attributes: { count: 1 },
+          },
         ],
         total: 3,
       } as any;
@@ -84,6 +91,12 @@ describe('telemetry_ui_metric', () => {
         { key: 'testKeyName2', value: 5 },
       ],
       testAppName2: [{ key: 'testKeyName3', value: 1 }],
+      'kibana-user_agent': [
+        {
+          key: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+          value: 1,
+        },
+      ],
     });
   });
 });

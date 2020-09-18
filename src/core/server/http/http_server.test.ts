@@ -31,7 +31,7 @@ import {
   RouteValidationResultFactory,
   RouteValidationFunction,
 } from './router';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
@@ -48,7 +48,7 @@ let server: HttpServer;
 let config: HttpConfig;
 let configWithSSL: HttpConfig;
 
-const loggingService = loggingServiceMock.create();
+const loggingService = loggingSystemMock.create();
 const logger = loggingService.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
@@ -68,7 +68,11 @@ beforeEach(() => {
     port: 10002,
     ssl: { enabled: false },
     compression: { enabled: true },
-  } as HttpConfig;
+    requestId: {
+      allowFromAnyIp: true,
+      ipAllowlist: [],
+    },
+  } as any;
 
   configWithSSL = {
     ...config,
@@ -97,7 +101,7 @@ test('log listening address after started', async () => {
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002",
@@ -113,7 +117,7 @@ test('log listening address after started when configured with BasePath and rewr
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002",
@@ -129,7 +133,7 @@ test('log listening address after started when configured with BasePath and rewr
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002/bar",
@@ -799,6 +803,7 @@ test('exposes route details of incoming request to a route handler', async () =>
         authRequired: true,
         xsrfRequired: false,
         tags: [],
+        timeout: {},
       },
     });
 });
@@ -906,6 +911,9 @@ test('exposes route details of incoming request to a route handler (POST + paylo
         authRequired: true,
         xsrfRequired: true,
         tags: [],
+        timeout: {
+          payload: 10000,
+        },
         body: {
           parse: true, // hapi populates the default
           maxBytes: 1024, // hapi populates the default
@@ -992,6 +1000,253 @@ describe('body options', () => {
   });
 });
 
+describe('timeout options', () => {
+  describe('payload timeout', () => {
+    test('POST routes set the payload timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.post(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .post('/')
+        .send({ test: 1 })
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('DELETE routes set the payload timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.delete(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .delete('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('PUT routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.put(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .put('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('PATCH routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.patch(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .patch('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+  });
+
+  describe('idleSocket timeout', () => {
+    test('uses server socket timeout when not specified in the route', async () => {
+      const { registerRouter, server: innerServer } = await server.setup({
+        ...config,
+        socketTimeout: 11000,
+      });
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get(
+        {
+          path: '/',
+          validate: { body: schema.any() },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+
+      await server.start();
+      await supertest(innerServer.listener)
+        .get('/')
+        .send()
+        .expect(200, {
+          timeout: {
+            idleSocket: 11000,
+          },
+        });
+    });
+
+    test('sets the socket timeout when specified in the route', async () => {
+      const { registerRouter, server: innerServer } = await server.setup({
+        ...config,
+        socketTimeout: 11000,
+      });
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get(
+        {
+          path: '/',
+          validate: { body: schema.any() },
+          options: { timeout: { idleSocket: 12000 } },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+
+      await server.start();
+      await supertest(innerServer.listener)
+        .get('/')
+        .send()
+        .expect(200, {
+          timeout: {
+            idleSocket: 12000,
+          },
+        });
+    });
+  });
+
+  test(`idleSocket timeout can be smaller than the payload timeout`, async () => {
+    const { registerRouter } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.any() },
+        options: {
+          timeout: {
+            payload: 1000,
+            idleSocket: 10,
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: { timeout: req.route.options.timeout } });
+      }
+    );
+
+    registerRouter(router);
+
+    await server.start();
+  });
+});
+
 test('should return a stream in the body', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 
@@ -1046,23 +1301,12 @@ describe('setup contract', () => {
     });
   });
 
-  describe('#isTlsEnabled', () => {
-    it('returns "true" if TLS enabled', async () => {
-      const { isTlsEnabled } = await server.setup(configWithSSL);
-      expect(isTlsEnabled).toBe(true);
-    });
-    it('returns "false" if TLS not enabled', async () => {
-      const { isTlsEnabled } = await server.setup(config);
-      expect(isTlsEnabled).toBe(false);
-    });
-  });
-
   describe('#getServerInfo', () => {
     it('returns correct information', async () => {
       let { getServerInfo } = await server.setup(config);
 
       expect(getServerInfo()).toEqual({
-        host: '127.0.0.1',
+        hostname: '127.0.0.1',
         name: 'kibana',
         port: 10002,
         protocol: 'http',
@@ -1076,7 +1320,7 @@ describe('setup contract', () => {
       }));
 
       expect(getServerInfo()).toEqual({
-        host: 'localhost',
+        hostname: 'localhost',
         name: 'custom-name',
         port: 12345,
         protocol: 'http',
@@ -1096,6 +1340,16 @@ describe('setup contract', () => {
       await server.stop();
       expect(() => {
         registerStaticDir('/path1/{path*}', '/path/to/resource');
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreRouting', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreRouting } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreRouting((req, res) => res.unauthorized());
       }).not.toThrow();
     });
   });

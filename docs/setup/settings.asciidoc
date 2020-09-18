@@ -1,5 +1,5 @@
 [[settings]]
-== Configuring {kib}
+== Configure {kib}
 
 The {kib} server reads properties from the `kibana.yml` file on startup. The
 location of this file differs depending on how you installed {kib}. For example,
@@ -20,12 +20,12 @@ which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
 | `cpu.cgroup.path.override:`
- | Override for cgroup cpu path when mounted in a
-manner that is inconsistent with `/proc/self/cgroup`.
+ | *deprecated* This setting has been renamed to `ops.cGroupOverrides.cpuPath`
+and the old name will no longer be supported as of 8.0.
 
 | `cpuacct.cgroup.path.override:`
- | Override for cgroup cpuacct path when mounted
-in a manner that is inconsistent with `/proc/self/cgroup`.
+ | *deprecated* This setting has been renamed to `ops.cGroupOverrides.cpuAcctPath`
+and the old name will no longer be supported as of 8.0.
 
 | `csp.rules:`
  | A https://w3c.github.io/webappsec-csp/[content-security-policy] template
@@ -438,6 +438,14 @@ not saved in {es}. *Default: `data`*
  | Set the interval in milliseconds to sample
 system and process performance metrics. The minimum value is 100. *Default: `5000`*
 
+| `ops.cGroupOverrides.cpuPath:`
+ | Override for cgroup cpu path when mounted in a
+manner that is inconsistent with `/proc/self/cgroup`.
+
+| `ops.cGroupOverrides.cpuAcctPath:`
+ | Override for cgroup cpuacct path when mounted
+in a manner that is inconsistent with `/proc/self/cgroup`.
+
 | `server.basePath:`
  | Enables you to specify a path to mount {kib} at if you are
 running behind a proxy. Use the `server.rewriteBasePath` setting to tell {kib}
@@ -475,6 +483,12 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 | `server.port:`
  | {kib} is served by a back end server. This
 setting specifies the port to use. *Default: `5601`*
+
+| `server.requestId.allowFromAnyIp:`
+ | Sets whether or not the X-Opaque-Id header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
+
+| `server.requestId.ipAllowlist:`
+ | A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, `server.requestId.allowFromAnyIp` must also be set to `false.`
 
 | `server.rewriteBasePath:`
  | Specifies whether {kib} should
@@ -571,7 +585,7 @@ all http requests to https over the port configured as `server.port`.
  | An array of supported protocols with versions.
 Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`. *Default: TLSv1.1, TLSv1.2*
 
-| `server.xsrf.whitelist:`
+| [[settings-xsrf-whitelist]] `server.xsrf.whitelist:`
  | It is not recommended to disable protections for
 arbitrary API endpoints. Instead, supply the `kbn-xsrf` header.
 The `server.xsrf.whitelist` setting requires the following format:
@@ -585,6 +599,9 @@ The `server.xsrf.whitelist` setting requires the following format:
 
 [cols="2*<"]
 |===
+
+| [[settings-xsrf-disableProtection]] `server.xsrf.disableProtection:`
+ | Setting this to `true` will completely disable Cross-site request forgery protection in Kibana. This is not recommended. *Default: `false`*
 
 | `status.allowAnonymous:`
  | If authentication is enabled,
@@ -633,9 +650,10 @@ include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
 include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
-include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/ingest-manager-settings.asciidoc[]
 include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
 include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
 include::{kib-repo-dir}/settings/ml-settings.asciidoc[]
 include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
 include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]

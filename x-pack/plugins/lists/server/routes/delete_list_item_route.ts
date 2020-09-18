@@ -7,12 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/shared_imports';
 import { deleteListItemSchema, listItemArraySchema, listItemSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -21,7 +17,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
   router.delete(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
       validate: {
@@ -37,7 +33,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
           const deleted = await lists.deleteListItem({ id });
           if (deleted == null) {
             return siemResponse.error({
-              body: `list item with id: "${id}" item not found`,
+              body: `list item with id: "${id}" not found`,
               statusCode: 404,
             });
           } else {
@@ -56,7 +52,11 @@ export const deleteListItemRoute = (router: IRouter): void => {
               statusCode: 404,
             });
           } else {
-            const deleted = await lists.deleteListItemByValue({ listId, type: list.type, value });
+            const deleted = await lists.deleteListItemByValue({
+              listId,
+              type: list.type,
+              value,
+            });
             if (deleted == null || deleted.length === 0) {
               return siemResponse.error({
                 body: `list_id: "${listId}" with ${value} was not found`,

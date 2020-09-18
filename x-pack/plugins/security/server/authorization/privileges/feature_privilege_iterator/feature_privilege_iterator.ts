@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { KibanaFeature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
 interface IteratorOptions {
@@ -14,7 +14,7 @@ interface IteratorOptions {
 }
 
 export function* featurePrivilegeIterator(
-  feature: Feature,
+  feature: KibanaFeature,
   options: IteratorOptions
 ): IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }> {
   for (const entry of Object.entries(feature.privileges ?? {})) {
@@ -35,7 +35,7 @@ export function* featurePrivilegeIterator(
 function mergeWithSubFeatures(
   privilegeId: string,
   privilege: FeatureKibanaPrivileges,
-  feature: Feature
+  feature: KibanaFeature
 ) {
   const mergedConfig = _.cloneDeep(privilege);
   for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
@@ -72,11 +72,19 @@ function mergeWithSubFeatures(
       mergedConfig.savedObject.read,
       subFeaturePrivilege.savedObject.read
     );
+
+    mergedConfig.alerting = {
+      all: mergeArrays(mergedConfig.alerting?.all ?? [], subFeaturePrivilege.alerting?.all ?? []),
+      read: mergeArrays(
+        mergedConfig.alerting?.read ?? [],
+        subFeaturePrivilege.alerting?.read ?? []
+      ),
+    };
   }
   return mergedConfig;
 }
 
-function mergeArrays(input1: string[] | undefined, input2: string[] | undefined) {
+function mergeArrays(input1: readonly string[] | undefined, input2: readonly string[] | undefined) {
   const first = input1 ?? [];
   const second = input2 ?? [];
   return Array.from(new Set([...first, ...second]));

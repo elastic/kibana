@@ -13,29 +13,83 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import {
+  FalsePositives,
+  From,
+  RuleId,
+  Immutable,
+  DescriptionOrUndefined,
+  Interval,
+  MaxSignals,
+  RiskScore,
+  OutputIndex,
+  Name,
+  Severity,
+  Tags,
+  Threat,
+  To,
+  Type,
+  References,
+  Version,
+  AnomalyThresholdOrUndefined,
+  QueryOrUndefined,
+  LanguageOrUndefined,
+  SavedIdOrUndefined,
+  TimelineIdOrUndefined,
+  TimelineTitleOrUndefined,
+  MachineLearningJobIdOrUndefined,
+  IndexOrUndefined,
+  NoteOrUndefined,
+  MetaOrUndefined,
+  Description,
+  Enabled,
+  VersionOrUndefined,
+  IdOrUndefined,
+  RuleIdOrUndefined,
+  EnabledOrUndefined,
+  FalsePositivesOrUndefined,
+  FromOrUndefined,
+  OutputIndexOrUndefined,
+  IntervalOrUndefined,
+  MaxSignalsOrUndefined,
+  RiskScoreOrUndefined,
+  NameOrUndefined,
+  SeverityOrUndefined,
+  TagsOrUndefined,
+  ToOrUndefined,
+  ThreatOrUndefined,
+  ThresholdOrUndefined,
+  TypeOrUndefined,
+  ReferencesOrUndefined,
+  PerPageOrUndefined,
+  PageOrUndefined,
+  SortFieldOrUndefined,
+  QueryFilterOrUndefined,
+  FieldsOrUndefined,
+  SortOrderOrUndefined,
+  JobStatus,
+  LastSuccessAt,
+  StatusDate,
+  LastSuccessMessage,
+  LastFailureAt,
+  LastFailureMessage,
+  Author,
+  AuthorOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMapping,
+  RiskScoreMappingOrUndefined,
+  SeverityMapping,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  RuleNameOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
-
-export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
-  id: string | undefined;
-  rule_id: RuleAlertParams['ruleId'] | undefined;
-};
-
-export type UpdateRuleAlertParamsRest = RuleAlertParamsRest & {
-  id: string | undefined;
-  rule_id: RuleAlertParams['ruleId'] | undefined;
-};
-
-export interface FindParamsRest {
-  per_page: number;
-  page: number;
-  sort_field: string;
-  sort_order: 'asc' | 'desc';
-  fields: string[];
-  filter: string;
-}
+import { RuleTypeParams, PartialFilter } from '../types';
+import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
@@ -44,12 +98,12 @@ export interface RuleAlertType extends Alert {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusAttributes extends Record<string, any> {
   alertId: string; // created alert id.
-  statusDate: string;
-  lastFailureAt: string | null | undefined;
-  lastFailureMessage: string | null | undefined;
-  lastSuccessAt: string | null | undefined;
-  lastSuccessMessage: string | null | undefined;
-  status: RuleStatusString | null | undefined;
+  statusDate: StatusDate;
+  lastFailureAt: LastFailureAt | null | undefined;
+  lastFailureMessage: LastFailureMessage | null | undefined;
+  lastSuccessAt: LastSuccessAt | null | undefined;
+  lastSuccessMessage: LastSuccessMessage | null | undefined;
+  status: JobStatus | null | undefined;
   lastLookBackDate: string | null | undefined;
   gap: string | null | undefined;
   bulkCreateTimeDurations: string[] | null | undefined;
@@ -83,86 +137,14 @@ export interface IRuleStatusFindType {
   saved_objects: IRuleStatusSavedObject[];
 }
 
-export type RuleStatusString = 'succeeded' | 'failed' | 'going to run';
-
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
   };
 }
-export interface ImportRulesRequestParams {
-  query: { overwrite: boolean };
-  body: { file: HapiReadableStream };
-}
-
-export interface ExportRulesRequestParams {
-  body: { objects: Array<{ rule_id: string }> | null | undefined };
-  query: {
-    file_name: string;
-    exclude_export_details: boolean;
-  };
-}
-
-export interface RuleRequestParams {
-  id: string | undefined;
-  rule_id: string | undefined;
-}
-
-export type ReadRuleRequestParams = RuleRequestParams;
-export type DeleteRuleRequestParams = RuleRequestParams;
-export type DeleteRulesRequestParams = RuleRequestParams[];
-
-export interface FindRuleParams {
-  alertsClient: AlertsClient;
-  perPage?: number;
-  page?: number;
-  sortField?: string;
-  filter?: string;
-  fields?: string[];
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface FindRulesRequestParams {
-  per_page: number;
-  page: number;
-  search?: string;
-  sort_field?: string;
-  filter?: string;
-  fields?: string[];
-  sort_order?: 'asc' | 'desc';
-}
-
-export interface FindRulesStatusesRequestParams {
-  ids: string[];
-}
 
 export interface Clients {
   alertsClient: AlertsClient;
-}
-
-export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'ruleId' | 'throttle'>> & {
-  rule: SanitizedAlert | null;
-  savedObjectsClient: SavedObjectsClientContract;
-} & Clients;
-
-export type UpdateRuleParams = Omit<RuleAlertParams, 'immutable' | 'throttle'> & {
-  id: string | undefined | null;
-  savedObjectsClient: SavedObjectsClientContract;
-} & Clients;
-
-export type DeleteRuleParams = Clients & {
-  id: string | undefined;
-  ruleId: string | undefined | null;
-};
-
-export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId' | 'throttle'> & {
-  ruleId: string;
-} & Clients;
-
-export interface ReadRuleParams {
-  alertsClient: AlertsClient;
-  id?: string | undefined | null;
-  ruleId?: string | undefined | null;
 }
 
 export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
@@ -190,3 +172,155 @@ export const isRuleStatusFindTypes = (
 ): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
   return obj ? obj.every((ruleStatus) => isRuleStatusFindType(ruleStatus)) : false;
 };
+
+export interface CreateRulesOptions {
+  alertsClient: AlertsClient;
+  anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: Author;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
+  description: Description;
+  enabled: Enabled;
+  falsePositives: FalsePositives;
+  from: From;
+  query: QueryOrUndefined;
+  language: LanguageOrUndefined;
+  savedId: SavedIdOrUndefined;
+  timelineId: TimelineIdOrUndefined;
+  timelineTitle: TimelineTitleOrUndefined;
+  meta: MetaOrUndefined;
+  machineLearningJobId: MachineLearningJobIdOrUndefined;
+  filters: PartialFilter[];
+  ruleId: RuleId;
+  immutable: Immutable;
+  index: IndexOrUndefined;
+  interval: Interval;
+  license: LicenseOrUndefined;
+  maxSignals: MaxSignals;
+  riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMapping;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
+  outputIndex: OutputIndex;
+  name: Name;
+  severity: Severity;
+  severityMapping: SeverityMapping;
+  tags: Tags;
+  threat: Threat;
+  threshold: ThresholdOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
+  to: To;
+  type: Type;
+  references: References;
+  note: NoteOrUndefined;
+  version: Version;
+  exceptionsList: ListArray;
+  actions: RuleAlertAction[];
+}
+
+export interface UpdateRulesOptions {
+  id: IdOrUndefined;
+  savedObjectsClient: SavedObjectsClientContract;
+  alertsClient: AlertsClient;
+  anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: Author;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
+  description: Description;
+  enabled: Enabled;
+  falsePositives: FalsePositives;
+  from: From;
+  query: QueryOrUndefined;
+  language: LanguageOrUndefined;
+  savedId: SavedIdOrUndefined;
+  timelineId: TimelineIdOrUndefined;
+  timelineTitle: TimelineTitleOrUndefined;
+  meta: MetaOrUndefined;
+  machineLearningJobId: MachineLearningJobIdOrUndefined;
+  filters: PartialFilter[];
+  ruleId: RuleIdOrUndefined;
+  index: IndexOrUndefined;
+  interval: Interval;
+  license: LicenseOrUndefined;
+  maxSignals: MaxSignals;
+  riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMapping;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
+  outputIndex: OutputIndex;
+  name: Name;
+  severity: Severity;
+  severityMapping: SeverityMapping;
+  tags: Tags;
+  threat: Threat;
+  threshold: ThresholdOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
+  to: To;
+  type: Type;
+  references: References;
+  note: NoteOrUndefined;
+  version: VersionOrUndefined;
+  exceptionsList: ListArray;
+  actions: RuleAlertAction[];
+}
+
+export interface PatchRulesOptions {
+  savedObjectsClient: SavedObjectsClientContract;
+  alertsClient: AlertsClient;
+  anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
+  description: DescriptionOrUndefined;
+  enabled: EnabledOrUndefined;
+  falsePositives: FalsePositivesOrUndefined;
+  from: FromOrUndefined;
+  query: QueryOrUndefined;
+  language: LanguageOrUndefined;
+  savedId: SavedIdOrUndefined;
+  timelineId: TimelineIdOrUndefined;
+  timelineTitle: TimelineTitleOrUndefined;
+  meta: MetaOrUndefined;
+  machineLearningJobId: MachineLearningJobIdOrUndefined;
+  filters: PartialFilter[];
+  index: IndexOrUndefined;
+  interval: IntervalOrUndefined;
+  license: LicenseOrUndefined;
+  maxSignals: MaxSignalsOrUndefined;
+  riskScore: RiskScoreOrUndefined;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
+  outputIndex: OutputIndexOrUndefined;
+  name: NameOrUndefined;
+  severity: SeverityOrUndefined;
+  severityMapping: SeverityMappingOrUndefined;
+  tags: TagsOrUndefined;
+  threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
+  to: ToOrUndefined;
+  type: TypeOrUndefined;
+  references: ReferencesOrUndefined;
+  note: NoteOrUndefined;
+  version: VersionOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
+  actions: RuleAlertAction[] | undefined;
+  rule: SanitizedAlert | null;
+}
+
+export interface ReadRuleOptions {
+  alertsClient: AlertsClient;
+  id: IdOrUndefined;
+  ruleId: RuleIdOrUndefined;
+}
+
+export interface DeleteRuleOptions {
+  alertsClient: AlertsClient;
+  id: IdOrUndefined;
+  ruleId: RuleIdOrUndefined;
+}
+
+export interface FindRuleOptions {
+  alertsClient: AlertsClient;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  filter: QueryFilterOrUndefined;
+  fields: FieldsOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}

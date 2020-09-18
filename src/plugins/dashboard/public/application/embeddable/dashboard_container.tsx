@@ -46,6 +46,7 @@ import {
 } from '../../../../kibana_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import { EmbeddableStateTransfer, EmbeddableOutput } from '../../../../embeddable/public';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -57,6 +58,7 @@ export interface DashboardContainerInput extends ContainerInput {
   useMargins: boolean;
   title: string;
   description?: string;
+  isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
@@ -97,23 +99,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public renderEmpty?: undefined | (() => React.ReactNode);
 
+  private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
+
   constructor(
     initialInput: DashboardContainerInput,
     private readonly options: DashboardContainerOptions,
+    stateTransfer?: EmbeddableStateTransfer,
     parent?: Container
   ) {
     super(
       {
-        panels: {},
-        isFullScreenMode: false,
-        filters: [],
-        useMargins: true,
         ...initialInput,
       },
       { embeddableLoaded: {} },
       options.embeddable.getEmbeddableFactory,
       parent
     );
+    this.embeddablePanel = options.embeddable.getEmbeddablePanel(stateTransfer);
   }
 
   protected createNewPanelState<
@@ -157,29 +159,57 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         [placeholderPanelState.explicitInput.id]: placeholderPanelState,
       },
     });
-    newStateComplete.then((newPanelState: Partial<PanelState>) => {
-      const finalPanels = { ...this.input.panels };
-      delete finalPanels[placeholderPanelState.explicitInput.id];
-      const newPanelId = newPanelState.explicitInput?.id
-        ? newPanelState.explicitInput.id
-        : uuid.v4();
-      finalPanels[newPanelId] = {
-        ...placeholderPanelState,
-        ...newPanelState,
-        gridData: {
-          ...placeholderPanelState.gridData,
-          i: newPanelId,
-        },
-        explicitInput: {
-          ...newPanelState.explicitInput,
-          id: newPanelId,
-        },
-      };
-      this.updateInput({
-        panels: finalPanels,
-        lastReloadRequestTime: new Date().getTime(),
-      });
+    newStateComplete.then((newPanelState: Partial<PanelState>) =>
+      this.replacePanel(placeholderPanelState, newPanelState)
+    );
+  }
+
+  public replacePanel(
+    previousPanelState: DashboardPanelState<EmbeddableInput>,
+    newPanelState: Partial<PanelState>
+  ) {
+    // TODO: In the current infrastructure, embeddables in a container do not react properly to
+    // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
+    // until the container logic is fixed.
+
+    const finalPanels = { ...this.input.panels };
+    delete finalPanels[previousPanelState.explicitInput.id];
+    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
+    finalPanels[newPanelId] = {
+      ...previousPanelState,
+      ...newPanelState,
+      gridData: {
+        ...previousPanelState.gridData,
+        i: newPanelId,
+      },
+      explicitInput: {
+        ...newPanelState.explicitInput,
+        id: newPanelId,
+      },
+    };
+    this.updateInput({
+      panels: finalPanels,
+      lastReloadRequestTime: new Date().getTime(),
     });
+  }
+
+  public async addOrUpdateEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+  >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
+    const idToReplace = embeddableId || explicitInput.id;
+    if (idToReplace && this.input.panels[idToReplace]) {
+      this.replacePanel(this.input.panels[idToReplace], {
+        type,
+        explicitInput: {
+          ...explicitInput,
+          id: uuid.v4(),
+        },
+      });
+    } else {
+      this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
+    }
   }
 
   public render(dom: HTMLElement) {
@@ -189,7 +219,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           <DashboardViewport
             renderEmpty={this.renderEmpty}
             container={this}
-            PanelComponent={this.options.embeddable.EmbeddablePanel}
+            PanelComponent={this.embeddablePanel}
           />
         </KibanaContextProvider>
       </I18nProvider>,

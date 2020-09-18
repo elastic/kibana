@@ -4,16 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { getHostsRoutes } from './routes';
+import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
+import { HostsRoutes } from './routes';
 import { initialHostsState, hostsReducer, HostsState } from './store';
+
+const HOST_TIMELINE_IDS: TimelineIdLiteral[] = [
+  TimelineId.hostsPageEvents,
+  TimelineId.hostsPageExternalAlerts,
+];
 
 export class Hosts {
   public setup() {}
 
-  public start(): SecuritySubPluginWithStore<'hosts', HostsState> {
+  public start(storage: Storage): SecuritySubPluginWithStore<'hosts', HostsState> {
     return {
-      routes: getHostsRoutes(),
+      SubPluginRoutes: HostsRoutes,
+      storageTimelines: {
+        timelineById: getTimelinesInStorageByIds(storage, HOST_TIMELINE_IDS),
+      },
       store: {
         initialState: { hosts: initialHostsState },
         reducer: { hosts: hostsReducer },

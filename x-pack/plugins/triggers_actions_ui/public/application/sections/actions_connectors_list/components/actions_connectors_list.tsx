@@ -17,6 +17,7 @@ import {
   EuiBetaBadge,
   EuiToolTip,
   EuiButtonIcon,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -277,6 +278,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
                 setSelectedItems(updatedSelectedItemsList);
               },
+              selectable: ({ isPreconfigured }: ActionConnectorTableItem) => !isPreconfigured,
             }
           : undefined
       }
@@ -323,30 +325,45 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                   />
                 </EuiButton>,
               ],
-        toolsRight: [
-          <EuiButton
-            data-test-subj="createActionButton"
-            key="create-action"
-            fill
-            onClick={() => setAddFlyoutVisibility(true)}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-              defaultMessage="Create connector"
-            />
-          </EuiButton>,
-        ],
+        toolsRight: canSave
+          ? [
+              <EuiButton
+                data-test-subj="createActionButton"
+                key="create-action"
+                fill
+                onClick={() => setAddFlyoutVisibility(true)}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+                  defaultMessage="Create connector"
+                />
+              </EuiButton>,
+            ]
+          : [],
       }}
     />
   );
 
   const noPermissionPrompt = (
-    <h2>
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
-        defaultMessage="No permissions to create connector"
-      />
-    </h2>
+    <EuiEmptyPrompt
+      iconType="securityApp"
+      title={
+        <h1>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
+            defaultMessage="No permissions to create connectors"
+          />
+        </h1>
+      }
+      body={
+        <p data-test-subj="permissionDeniedMessage">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateDescription"
+            defaultMessage="Contact your system administrator."
+          />
+        </p>
+      }
+    />
   );
 
   return (

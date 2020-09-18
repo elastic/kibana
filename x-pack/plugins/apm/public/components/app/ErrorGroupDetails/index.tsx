@@ -13,19 +13,19 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
+import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTrackPageview } from '../../../../../observability/public';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -34,7 +34,7 @@ const Titles = styled.div`
 const Label = styled.div`
   margin-bottom: ${px(units.quarter)};
   font-size: ${fontSizes.small};
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
 const Message = styled.div`
@@ -56,54 +56,53 @@ function getShortGroupId(errorGroupId?: string) {
   return errorGroupId.slice(0, 5);
 }
 
-export function ErrorGroupDetails() {
-  const location = useLocation();
+type ErrorGroupDetailsProps = RouteComponentProps<{
+  groupId: string;
+  serviceName: string;
+}>;
+
+export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
+  const { serviceName, groupId } = match.params;
   const { urlParams, uiFilters } = useUrlParams();
-  const { serviceName, start, end, errorGroupId } = urlParams;
+  const { start, end } = urlParams;
 
-  const { data: errorGroupData } = useFetcher(
-    (callApmApi) => {
-      if (serviceName && start && end && errorGroupId) {
-        return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
-          params: {
-            path: {
-              serviceName,
-              groupId: errorGroupId,
-            },
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-            },
+  const { data: errorGroupData } = useFetcher(() => {
+    if (start && end) {
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
+        params: {
+          path: {
+            serviceName,
+            groupId,
           },
-        });
-      }
-    },
-    [serviceName, start, end, errorGroupId, uiFilters]
-  );
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+          },
+        },
+      });
+    }
+  }, [serviceName, start, end, groupId, uiFilters]);
 
-  const { data: errorDistributionData } = useFetcher(
-    (callApmApi) => {
-      if (serviceName && start && end && errorGroupId) {
-        return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/errors/distribution',
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              start,
-              end,
-              groupId: errorGroupId,
-              uiFilters: JSON.stringify(uiFilters),
-            },
+  const { data: errorDistributionData } = useFetcher(() => {
+    if (start && end) {
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/distribution',
+        params: {
+          path: {
+            serviceName,
           },
-        });
-      }
-    },
-    [serviceName, start, end, errorGroupId, uiFilters]
-  );
+          query: {
+            start,
+            end,
+            groupId,
+            uiFilters: JSON.stringify(uiFilters),
+          },
+        },
+      });
+    }
+  }, [serviceName, start, end, groupId, uiFilters]);
 
   useTrackPageview({ app: 'apm', path: 'error_group_details' });
   useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
@@ -130,7 +129,7 @@ export function ErrorGroupDetails() {
                 {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
                   defaultMessage: 'Error group {errorGroupId}',
                   values: {
-                    errorGroupId: getShortGroupId(urlParams.errorGroupId),
+                    errorGroupId: getShortGroupId(groupId),
                   },
                 })}
               </h1>
@@ -185,7 +184,6 @@ export function ErrorGroupDetails() {
             </EuiText>
           </Titles>
         )}
-
         <ErrorDistribution
           distribution={errorDistributionData}
           title={i18n.translate(

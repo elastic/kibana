@@ -7,17 +7,15 @@
 import { RouteComponentProps } from 'react-router-dom';
 import { ActionCreator } from 'typescript-fsa';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { GlobalTimeArgs } from '../../common/containers/global_time';
 
 export type SetAbsoluteRangeDatePicker = ActionCreator<{
   id: InputsModelId;
-  from: number;
-  to: number;
+  from: string;
+  to: string;
 }>;
 
-export type NetworkComponentProps = Partial<RouteComponentProps<{}>> &
-  GlobalTimeArgs & {
-    networkPagePath: string;
-    hasMlUserPermissions: boolean;
-    capabilitiesFetched: boolean;
-  };
+export type NetworkComponentProps = Partial<RouteComponentProps<{}>> & {
+  networkPagePath: string;
+  hasMlUserPermissions: boolean;
+  capabilitiesFetched: boolean;
+};

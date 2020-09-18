@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { ICON_TYPES } from '@elastic/eui';
-import { PackageInfo, PackageListItem } from '../../../../common/types/models';
+import { PackageInfo, PackageListItem } from '../types';
 import { useLinks } from '../sections/epm/hooks';
 import { sendGetPackageInfoByKey } from './index';
 
@@ -42,7 +42,7 @@ export const usePackageIconType = ({
     const svgIcons = (paramIcons || iconList)?.filter(
       (iconDef) => iconDef.type === 'image/svg+xml'
     );
-    const localIconSrc = Array.isArray(svgIcons) && svgIcons[0]?.src;
+    const localIconSrc = Array.isArray(svgIcons) && (svgIcons[0].path || svgIcons[0].src);
     if (localIconSrc) {
       CACHED_ICONS.set(pkgKey, toImage(localIconSrc));
       setIconType(CACHED_ICONS.get(pkgKey) || '');

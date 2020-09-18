@@ -6,9 +6,11 @@
 
 import { AlertType } from '../types';
 import { createExecutionHandler } from './create_execution_handler';
-import { loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { actionsMock } from '../../../actions/server/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { KibanaRequest } from 'kibana/server';
+import { asSavedObjectExecutionSource } from '../../../actions/server';
 
 const alertType: AlertType = {
   id: 'test',
@@ -19,9 +21,10 @@ const alertType: AlertType = {
   ],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
-  producer: 'alerting',
+  producer: 'alerts',
 };
 
+const actionsClient = actionsClientMock.create();
 const createExecutionHandlerParams = {
   actionsPlugin: actionsMock.createStart(),
   spaceId: 'default',
@@ -32,7 +35,7 @@ const createExecutionHandlerParams = {
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
   alertType,
-  logger: loggingServiceMock.create().get(),
+  logger: loggingSystemMock.create().get(),
   eventLogger: eventLoggerMock.create(),
   actions: [
     {
@@ -47,15 +50,24 @@ const createExecutionHandlerParams = {
       },
     },
   ],
+  request: {} as KibanaRequest,
+  alertParams: {
+    foo: true,
+    contextVal: 'My other {{context.value}} goes here',
+    stateVal: 'My other {{state.value}} goes here',
+  },
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
   createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+  createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
+    actionsClient
+  );
 });
 
-test('calls actionsPlugin.execute per selected action', async () => {
+test('enqueues execution per selected action', async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
   await executionHandler({
     actionGroup: 'default',
@@ -63,22 +75,32 @@ test('calls actionsPlugin.execute per selected action', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+  expect(
+    createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest
+  ).toHaveBeenCalledWith(createExecutionHandlerParams.request);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My  goes here",
+          "foo": true,
+          "stateVal": "My  goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 
   const eventLogger = createExecutionHandlerParams.eventLogger;
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
@@ -139,14 +161,18 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledWith({
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
     id: '2',
     params: {
       foo: true,
       contextVal: 'My other  goes here',
       stateVal: 'My other  goes here',
     },
+    source: asSavedObjectExecutionSource({
+      id: '1',
+      type: 'alert',
+    }),
     spaceId: 'default',
     apiKey: createExecutionHandlerParams.apiKey,
   });
@@ -180,7 +206,7 @@ test('trow error error message when action type is disabled', async () => {
     alertInstanceId: '2',
   });
 
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(0);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
   createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockImplementation(() => true);
   const executionHandlerForPreconfiguredAction = createExecutionHandler({
@@ -193,7 +219,7 @@ test('trow error error message when action type is disabled', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
 });
 
 test('limits actionsPlugin.execute per action group', async () => {
@@ -204,7 +230,7 @@ test('limits actionsPlugin.execute per action group', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).not.toHaveBeenCalled();
+  expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
 });
 
 test('context attribute gets parameterized', async () => {
@@ -215,22 +241,29 @@ test('context attribute gets parameterized', async () => {
     state: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My context-val goes here",
+          "foo": true,
+          "stateVal": "My  goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My context-val goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test('state attribute gets parameterized', async () => {
@@ -241,22 +274,29 @@ test('state attribute gets parameterized', async () => {
     state: { value: 'state-val' },
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
-  expect(createExecutionHandlerParams.actionsPlugin.execute.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+  expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My  goes here",
+          "foo": true,
+          "stateVal": "My state-val goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My state-val goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {

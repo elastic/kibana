@@ -75,11 +75,12 @@ const escapeWhitespace = (val: string) =>
 const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
 
 // See the Keyword rule in kuery.peg
-const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
+// I do not think that we need that anymore since we are doing a full match_phrase all the time now => return `"${escapeKuery(val)}"`;
+// const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
 
-const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
+// const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
 
-export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
+export const escapeKuery = flow(escapeSpecialCharacters, escapeWhitespace);
 
 export const convertToBuildEsQuery = ({
   config,

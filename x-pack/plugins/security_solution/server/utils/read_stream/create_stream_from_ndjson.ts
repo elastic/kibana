@@ -5,9 +5,18 @@
  */
 import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
-import { ImportRuleAlertRest } from '../../lib/detection_engine/types';
-import { createMapStream, createFilterStream } from '../../../../../../src/legacy/utils/streams';
-import { importRulesSchema } from '../../lib/detection_engine/routes/schemas/import_rules_schema';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
+import { formatErrors } from '../../../common/format_errors';
+import { importRuleValidateTypeDependents } from '../../../common/detection_engine/schemas/request/import_rules_type_dependents';
+import {
+  ImportRulesSchemaDecoded,
+  importRulesSchema,
+  ImportRulesSchema,
+} from '../../../common/detection_engine/schemas/request/import_rules_schema';
+import { exactCheck } from '../../../common/exact_check';
+import { createMapStream, createFilterStream } from '../../../../../../src/core/server/utils';
 import { BadRequestError } from '../../lib/detection_engine/errors/bad_request_error';
 
 export interface RulesObjectsExportResultDetails {
@@ -28,20 +37,28 @@ export const parseNdjsonStrings = (): Transform => {
 };
 
 export const filterExportedCounts = (): Transform => {
-  return createFilterStream<ImportRuleAlertRest | RulesObjectsExportResultDetails>(
+  return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
     (obj) => obj != null && !has('exported_count', obj)
   );
 };
 
 export const validateRules = (): Transform => {
-  return createMapStream((obj: ImportRuleAlertRest) => {
+  return createMapStream((obj: ImportRulesSchema) => {
     if (!(obj instanceof Error)) {
-      const validated = importRulesSchema.validate(obj);
-      if (validated.error != null) {
-        return new BadRequestError(validated.error.message);
-      } else {
-        return validated.value;
-      }
+      const decoded = importRulesSchema.decode(obj);
+      const checked = exactCheck(obj, decoded);
+      const onLeft = (errors: t.Errors): BadRequestError | ImportRulesSchemaDecoded => {
+        return new BadRequestError(formatErrors(errors).join());
+      };
+      const onRight = (schema: ImportRulesSchema): BadRequestError | ImportRulesSchemaDecoded => {
+        const validationErrors = importRuleValidateTypeDependents(schema);
+        if (validationErrors.length) {
+          return new BadRequestError(validationErrors.join());
+        } else {
+          return schema as ImportRulesSchemaDecoded;
+        }
+      };
+      return pipe(checked, fold(onLeft, onRight));
     } else {
       return obj;
     }

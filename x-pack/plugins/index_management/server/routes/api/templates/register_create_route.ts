@@ -7,33 +7,28 @@
 import { i18n } from '@kbn/i18n';
 
 import { TemplateDeserialized } from '../../../../common';
-import { serializeLegacyTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
+import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 
 export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/index-templates'), validate: { body: bodySchema } },
+    { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
       const template = req.body as TemplateDeserialized;
       const {
         _kbnMeta: { isLegacy },
       } = template;
 
-      if (!isLegacy) {
-        return res.badRequest({ body: 'Only legacy index templates can be created.' });
-      }
-
-      const serializedTemplate = serializeLegacyTemplate(template);
-      const { order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
-
       // Check that template with the same name doesn't already exist
-      const templateExists = await callAsCurrentUser('indices.existsTemplate', {
+      const templateExists = await doesTemplateExist({
         name: template.name,
+        callAsCurrentUser,
+        isLegacy,
       });
 
       if (templateExists) {
@@ -51,17 +46,7 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
 
       try {
         // Otherwise create new index template
-        const response = await callAsCurrentUser('indices.putTemplate', {
-          name: template.name,
-          order,
-          body: {
-            index_patterns,
-            version,
-            settings,
-            mappings,
-            aliases,
-          },
-        });
+        const response = await saveTemplate({ template, callAsCurrentUser, isLegacy });
 
         return res.ok({ body: response });
       } catch (e) {

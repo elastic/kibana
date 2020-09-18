@@ -5,8 +5,13 @@
  */
 
 import * as rt from 'io-ts';
-
-import { defaultRequestParameters, getMlResultIndex } from './common';
+import {
+  createJobIdFilters,
+  createResultTypeFilters,
+  createTimeRangeFilters,
+  defaultRequestParameters,
+  createDatasetsFilters,
+} from './common';
 
 export const createLogEntryRateQuery = (
   logRateJobId: string,
@@ -14,26 +19,18 @@ export const createLogEntryRateQuery = (
   endTime: number,
   bucketDuration: number,
   size: number,
-  afterKey?: CompositeTimestampPartitionKey
+  afterKey?: CompositeTimestampPartitionKey,
+  datasets?: string[]
 ) => ({
   ...defaultRequestParameters,
   body: {
     query: {
       bool: {
         filter: [
-          {
-            range: {
-              timestamp: {
-                gte: startTime,
-                lt: endTime,
-              },
-            },
-          },
-          {
-            terms: {
-              result_type: ['model_plot', 'record'],
-            },
-          },
+          ...createJobIdFilters(logRateJobId),
+          ...createTimeRangeFilters(startTime, endTime),
+          ...createResultTypeFilters(['model_plot', 'record']),
+          ...createDatasetsFilters(datasets),
           {
             term: {
               detector_index: {
@@ -118,7 +115,6 @@ export const createLogEntryRateQuery = (
       },
     },
   },
-  index: getMlResultIndex(logRateJobId),
   size: 0,
 });
 
@@ -150,6 +146,7 @@ export const logRateModelPlotBucketRT = rt.type({
       hits: rt.type({
         hits: rt.array(
           rt.type({
+            _id: rt.string,
             _source: logRateMlRecordRT,
           })
         ),
@@ -165,7 +162,7 @@ export const logRateModelPlotBucketRT = rt.type({
 
 export type LogRateModelPlotBucket = rt.TypeOf<typeof logRateModelPlotBucketRT>;
 
-export const logRateModelPlotResponseRT = rt.type({
+export const logRateModelPlotResponseRT = rt.partial({
   aggregations: rt.type({
     timestamp_partition_buckets: rt.intersection([
       rt.type({

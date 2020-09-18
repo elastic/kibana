@@ -18,8 +18,7 @@
  */
 import _ from 'lodash';
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { expandShorthand } from '../../../../kibana_utils/public';
-import { extractSearchSourceReferences } from '../../../../data/public';
+import { extractSearchSourceReferences, expandShorthand } from '../../../../data/public';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
   // mapping definition for the fields that this object will expose

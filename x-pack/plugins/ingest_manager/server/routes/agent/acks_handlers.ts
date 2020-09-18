@@ -7,25 +7,17 @@
 // handlers that handle events from agents in response to actions received
 
 import { RequestHandler } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
-import { PostAgentAcksRequestSchema } from '../../types/rest_spec';
-import * as APIKeyService from '../../services/api_keys';
 import { AcksService } from '../../services/agents';
 import { AgentEvent } from '../../../common/types/models';
-import { PostAgentAcksResponse } from '../../../common/types/rest_spec';
+import { PostAgentAcksRequest, PostAgentAcksResponse } from '../../../common/types/rest_spec';
 
 export const postAgentAcksHandlerBuilder = function (
   ackService: AcksService
-): RequestHandler<
-  TypeOf<typeof PostAgentAcksRequestSchema.params>,
-  undefined,
-  TypeOf<typeof PostAgentAcksRequestSchema.body>
-> {
+): RequestHandler<PostAgentAcksRequest['params'], undefined, PostAgentAcksRequest['body']> {
   return async (context, request, response) => {
     try {
       const soClient = ackService.getSavedObjectsClientContract(request);
-      const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
-      const agent = await ackService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId as string);
+      const agent = await ackService.authenticateAgentWithAccessToken(soClient, request);
       const agentEvents = request.body.events as AgentEvent[];
 
       // validate that all events are for the authorized agent obtained from the api key
@@ -48,7 +40,6 @@ export const postAgentAcksHandlerBuilder = function (
 
       const body: PostAgentAcksResponse = {
         action: 'acks',
-        success: true,
       };
 
       return response.ok({ body });

@@ -5,65 +5,92 @@
  */
 import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
-import React from 'react';
+import React, { ReactNode } from 'react';
+import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
 import { TraceLink } from '../';
+import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
+import {
+  mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
+} from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import * as hooks from '../../../../hooks/useFetcher';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
-const renderOptions = { wrapper: MockApmPluginContextWrapper };
+function Wrapper({ children }: { children?: ReactNode }) {
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper
+        value={
+          ({
+            ...mockApmPluginContextValue,
+            core: {
+              ...mockApmPluginContextValue.core,
+              http: { ...mockApmPluginContextValue.core.http, get: jest.fn() },
+            },
+          } as unknown) as ApmPluginContextValue
+        }
+      >
+        {children}
+      </MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
+}
 
-jest.mock('../../Main/route_config', () => ({
-  routes: [
-    {
-      path: '/services/:serviceName/transactions/view',
-      name: 'transaction_name',
-    },
-    {
-      path: '/traces',
-      name: 'traces',
-    },
-  ],
-}));
+const renderOptions = { wrapper: Wrapper };
 
 describe('TraceLink', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
-  it('renders transition page', () => {
-    const component = render(<TraceLink />, renderOptions);
+
+  it('renders a transition page', () => {
+    const props = ({
+      match: { params: { traceId: 'x' } },
+    } as unknown) as RouteComponentProps<{ traceId: string }>;
+    const component = render(<TraceLink {...props} />, renderOptions);
+
     expect(component.getByText('Fetching trace...')).toBeDefined();
   });
 
-  it('renders trace page when transaction is not found', () => {
-    spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
-      urlParams: {
-        traceIdLink: '123',
-        rangeFrom: 'now-24h',
-        rangeTo: 'now',
-      },
-    });
-    spyOn(hooks, 'useFetcher').and.returnValue({
-      data: { transaction: undefined },
-      status: 'success',
-    });
+  describe('when no transaction is found', () => {
+    it('renders a trace page', () => {
+      jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
+        urlParams: {
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
+        },
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
+      });
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+        data: { transaction: undefined },
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
+      });
 
-    const component = shallow(<TraceLink />);
-    expect(component.prop('to')).toEqual(
-      '/traces?kuery=trace.id%2520%253A%2520%2522123%2522&rangeFrom=now-24h&rangeTo=now'
-    );
+      const props = ({
+        match: { params: { traceId: '123' } },
+      } as unknown) as RouteComponentProps<{ traceId: string }>;
+      const component = shallow(<TraceLink {...props} />);
+
+      expect(component.prop('to')).toEqual(
+        '/traces?kuery=trace.id%2520%253A%2520%2522123%2522&rangeFrom=now-24h&rangeTo=now'
+      );
+    });
   });
 
   describe('transaction page', () => {
     beforeAll(() => {
-      spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
+      jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
         urlParams: {
-          traceIdLink: '123',
           rangeFrom: 'now-24h',
           rangeTo: 'now',
         },
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
       });
     });
+
     it('renders with date range params', () => {
       const transaction = {
         service: { name: 'foo' },
@@ -74,11 +101,17 @@ describe('TraceLink', () => {
         },
         trace: { id: 123 },
       };
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { transaction },
-        status: 'success',
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
-      const component = shallow(<TraceLink />);
+
+      const props = ({
+        match: { params: { traceId: '123' } },
+      } as unknown) as RouteComponentProps<{ traceId: string }>;
+      const component = shallow(<TraceLink {...props} />);
+
       expect(component.prop('to')).toEqual(
         '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now'
       );

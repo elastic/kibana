@@ -10,7 +10,11 @@ jest.doMock('./fetch_server_results', () => ({
 }));
 
 export const getDefaultPreferenceMock = jest.fn();
-jest.doMock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  getDefaultPreference: getDefaultPreferenceMock,
-}));
+jest.doMock('./utils', () => {
+  const original = jest.requireActual('./utils');
+
+  return {
+    ...original,
+    getDefaultPreference: getDefaultPreferenceMock,
+  };
+});

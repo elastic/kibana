@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getNumTopClasses, getNumTopFeatureImportanceValues } from './analytics';
+import { Field } from '../../../../common/types/fields';
 import {
-  getNumTopFeatureImportanceValues,
   getPredictedFieldName,
   getDependentVar,
   getPredictionFieldName,
   isClassificationAnalysis,
   isOutlierAnalysis,
   isRegressionAnalysis,
-  DataFrameAnalyticsConfig,
-} from './analytics';
-import { Field } from '../../../../common/types/fields';
+} from '../../../../common/util/analytics_utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
-import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE } from './constants';
+import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
+import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
@@ -29,7 +29,7 @@ export interface EsDoc extends Record<string, any> {
   _source: EsDocSource;
 }
 
-export const MAX_COLUMNS = 20;
+export const MAX_COLUMNS = 10;
 export const DEFAULT_REGRESSION_COLUMNS = 8;
 
 export const BASIC_NUMERICAL_TYPES = new Set([
@@ -46,6 +46,7 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.SCALED_FLOAT,
 ]);
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__ID_COPY = 'ml__id_copy';
 
 export const isKeywordAndTextType = (fieldName: string): boolean => {
@@ -177,6 +178,7 @@ export const getDefaultFieldsFromJobCaps = (
 
   const featureImportanceFields = [];
   const featureInfluenceFields = [];
+  const topClassesFields = [];
   const allFields: any = [];
   let type: ES_FIELD_TYPES | undefined;
   let predictedField: string | undefined;
@@ -207,16 +209,25 @@ export const getDefaultFieldsFromJobCaps = (
     type = newJobCapsService.getFieldById(dependentVariable)?.type;
     const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
     const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
+    const numTopClasses = getNumTopClasses(jobConfig.analysis);
 
     const defaultPredictionField = `${dependentVariable}_prediction`;
     predictedField = `${resultsField}.${
       predictionFieldName ? predictionFieldName : defaultPredictionField
     }`;
 
-    if ((numTopFeatureImportanceValues ?? 0) > 0 && needsDestIndexFields === true) {
+    if ((numTopFeatureImportanceValues ?? 0) > 0) {
       featureImportanceFields.push({
         id: `${resultsField}.${FEATURE_IMPORTANCE}`,
         name: `${resultsField}.${FEATURE_IMPORTANCE}`,
+        type: KBN_FIELD_TYPES.UNKNOWN,
+      });
+    }
+
+    if ((numTopClasses ?? 0) > 0) {
+      topClassesFields.push({
+        id: `${resultsField}.${TOP_CLASSES}`,
+        name: `${resultsField}.${TOP_CLASSES}`,
         type: KBN_FIELD_TYPES.UNKNOWN,
       });
     }
@@ -234,7 +245,12 @@ export const getDefaultFieldsFromJobCaps = (
     }
   }
 
-  allFields.push(...fields, ...featureImportanceFields, ...featureInfluenceFields);
+  allFields.push(
+    ...fields,
+    ...featureImportanceFields,
+    ...featureInfluenceFields,
+    ...topClassesFields
+  );
   allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
     sortExplorationResultsFields(a, b, jobConfig)
   );

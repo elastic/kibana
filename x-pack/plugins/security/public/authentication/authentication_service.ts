@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApplicationSetup, StartServicesAccessor, HttpSetup } from 'src/core/public';
+import {
+  ApplicationSetup,
+  StartServicesAccessor,
+  HttpSetup,
+  FatalErrorsSetup,
+} from 'src/core/public';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { PluginStartDependencies } from '../plugin';
@@ -13,9 +18,11 @@ import { loginApp } from './login';
 import { logoutApp } from './logout';
 import { loggedOutApp } from './logged_out';
 import { overwrittenSessionApp } from './overwritten_session';
+import { captureURLApp } from './capture_url';
 
 interface SetupParams {
   application: ApplicationSetup;
+  fatalErrors: FatalErrorsSetup;
   config: ConfigType;
   http: HttpSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -36,6 +43,7 @@ export interface AuthenticationServiceSetup {
 export class AuthenticationService {
   public setup({
     application,
+    fatalErrors,
     config,
     getStartServices,
     http,
@@ -48,6 +56,7 @@ export class AuthenticationService {
         .apiKeysEnabled;
 
     accessAgreementApp.create({ application, getStartServices });
+    captureURLApp.create({ application, fatalErrors, http });
     loginApp.create({ application, config, getStartServices, http });
     logoutApp.create({ application, http });
     loggedOutApp.create({ application, getStartServices, http });

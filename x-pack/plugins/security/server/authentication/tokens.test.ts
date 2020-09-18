@@ -6,20 +6,23 @@
 
 import { errors } from 'elasticsearch';
 
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 
-import { IClusterClient, ElasticsearchErrorHelpers } from '../../../../../src/core/server';
+import {
+  ILegacyClusterClient,
+  LegacyElasticsearchErrorHelpers,
+} from '../../../../../src/core/server';
 import { Tokens } from './tokens';
 
 describe('Tokens', () => {
   let tokens: Tokens;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 
     const tokensOptions = {
       client: mockClusterClient,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     };
 
     tokens = new Tokens(tokensOptions);
@@ -39,7 +42,7 @@ describe('Tokens', () => {
 
     const expirationErrors = [
       { statusCode: 401 },
-      ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()),
+      LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()),
       new errors.AuthenticationException(),
     ];
     for (const error of expirationErrors) {

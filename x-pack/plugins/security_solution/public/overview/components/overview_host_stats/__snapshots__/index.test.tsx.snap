@@ -10,7 +10,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiAccordion
     arrowDisplay="left"
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         gutterSize="none"
         justifyContent="spaceBetween"
       >
@@ -35,11 +35,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             max={157258653}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupauditbeat"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <styled.div>
@@ -243,7 +245,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiAccordion
     arrowDisplay="left"
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         gutterSize="none"
         justifyContent="spaceBetween"
       >
@@ -268,11 +270,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             max={157258653}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupendgame"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <styled.div>
@@ -508,7 +512,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiAccordion
     arrowDisplay="left"
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         gutterSize="none"
         justifyContent="spaceBetween"
       >
@@ -533,11 +537,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             max={157258653}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupfilebeat"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <styled.div>
@@ -581,7 +587,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiAccordion
     arrowDisplay="left"
     buttonContent={
-      <ForwardRef
+      <EuiFlexGroup
         gutterSize="none"
         justifyContent="spaceBetween"
       >
@@ -606,11 +612,13 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             max={157258653}
           />
         </EuiFlexItem>
-      </ForwardRef>
+      </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupwinlogbeat"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <styled.div>

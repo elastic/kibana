@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 import { CaseFullExternalService, Connector } from '../../../../../case/common/api';
 import { CaseUserActions } from '../../containers/types';
+import { CaseServices } from '../../containers/use_get_case_user_actions';
 import * as i18n from '../case_view/translations';
+import { Tags } from '../tag_list/tags';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -44,22 +46,21 @@ export const getLabelTitle = ({ action, connectors, field, firstPush }: LabelTit
   return '';
 };
 
-const getTagsLabelTitle = (action: CaseUserActions) => (
-  <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
-    <EuiFlexItem data-test-subj="ua-tags-label">
-      {action.action === 'add' && i18n.ADDED_FIELD}
-      {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
-    </EuiFlexItem>
-    {action.newValue != null &&
-      action.newValue.split(',').map((tag) => (
-        <EuiFlexItem grow={false} key={tag}>
-          <EuiBadge data-test-subj={`ua-tag`} color="default">
-            {tag}
-          </EuiBadge>
-        </EuiFlexItem>
-      ))}
-  </EuiFlexGroup>
-);
+const getTagsLabelTitle = (action: CaseUserActions) => {
+  const tags = action.newValue != null ? action.newValue.split(',') : [];
+
+  return (
+    <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
+      <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
+        {action.action === 'add' && i18n.ADDED_FIELD}
+        {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Tags tags={tags} gutterSize="xs" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
   const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
@@ -78,3 +79,20 @@ const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean)
     </EuiFlexGroup>
   );
 };
+
+export const getPushInfo = (
+  caseServices: CaseServices,
+  parsedValue: { connector_id: string; connector_name: string },
+  index: number
+) =>
+  parsedValue != null
+    ? {
+        firstPush: caseServices[parsedValue.connector_id].firstPushIndex === index,
+        parsedConnectorId: parsedValue.connector_id,
+        parsedConnectorName: parsedValue.connector_name,
+      }
+    : {
+        firstPush: false,
+        parsedConnectorId: 'none',
+        parsedConnectorName: 'none',
+      };

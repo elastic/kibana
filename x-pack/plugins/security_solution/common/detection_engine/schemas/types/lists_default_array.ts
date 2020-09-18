@@ -7,27 +7,16 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-import {
-  list_and as listAnd,
-  list_values as listValues,
-  list_values_operator as listOperator,
-} from '../common/schemas';
-
-export type ListsDefaultArrayC = t.Type<List[], List[], unknown>;
-export type List = t.TypeOf<typeof listAnd>;
-export type ListValues = t.TypeOf<typeof listValues>;
-export type ListOperator = t.TypeOf<typeof listOperator>;
+import { ListArray, list } from './lists';
 
 /**
- * Types the ListsDefaultArray as:
- *   - If null or undefined, then a default array will be set for the list
+ * Types the DefaultListArray as:
+ *   - If null or undefined, then a default array of type list will be set
  */
-export const ListsDefaultArray: ListsDefaultArrayC = new t.Type<List[], List[], unknown>(
-  'listsWithDefaultArray',
-  t.array(listAnd).is,
-  (input): Either<t.Errors, List[]> =>
-    input == null ? t.success([]) : t.array(listAnd).decode(input),
+export const DefaultListArray = new t.Type<ListArray, ListArray | undefined, unknown>(
+  'DefaultListArray',
+  t.array(list).is,
+  (input, context): Either<t.Errors, ListArray> =>
+    input == null ? t.success([]) : t.array(list).validate(input, context),
   t.identity
 );
-
-export type ListsDefaultArraySchema = t.TypeOf<typeof ListsDefaultArray>;

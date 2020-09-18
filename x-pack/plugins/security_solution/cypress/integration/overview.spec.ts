@@ -9,12 +9,13 @@ import { HOST_STATS, NETWORK_STATS } from '../screens/overview';
 import { expandHostStats, expandNetworkStats } from '../tasks/overview';
 import { loginAndWaitForPage } from '../tasks/login';
 
-import { OVERVIEW_PAGE } from '../urls/navigation';
+import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Overview Page', () => {
   before(() => {
-    cy.stubSIEMapi('overview');
-    loginAndWaitForPage(OVERVIEW_PAGE);
+    cy.stubSecurityApi('overview');
+    cy.stubSearchStrategyApi('overview_search_strategy');
+    loginAndWaitForPage(OVERVIEW_URL);
   });
 
   it('Host stats render with correct values', () => {

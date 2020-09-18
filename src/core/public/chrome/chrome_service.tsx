@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
+import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
@@ -34,10 +34,9 @@ import { IUiSettingsClient } from '../ui_settings';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
-import { ChromeNavLinks, NavLinksService } from './nav_links';
+import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-import { NavType } from './ui/header';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -148,6 +147,7 @@ export class ChromeService {
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
+    const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
@@ -156,16 +156,20 @@ export class ChromeService {
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
 
+    // erase chrome fields from a previous app while switching to a next app
+    application.currentAppId$.subscribe(() => {
+      helpExtension$.next(undefined);
+      breadcrumbs$.next([]);
+      badge$.next(undefined);
+      docTitle.reset();
+    });
+
     const setIsNavDrawerLocked = (isLocked: boolean) => {
       isNavDrawerLocked$.next(isLocked);
       localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
     };
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
-
-    // TODO #64541
-    // Can delete
-    const getNavType$ = uiSettings.get$('pageNavigation').pipe(takeUntil(this.stop$));
 
     const isIE = () => {
       const ua = window.navigator.userAgent;
@@ -184,27 +188,27 @@ export class ChromeService {
           />
         ),
       });
+    }
 
-      if (isIE()) {
-        notifications.toasts.addWarning({
-          title: mountReactNode(
-            <FormattedMessage
-              id="core.chrome.browserDeprecationWarning"
-              defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
-              values={{
-                link: (
-                  <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
-                    <FormattedMessage
-                      id="core.chrome.browserDeprecationLink"
-                      defaultMessage="the support matrix on our website"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          ),
-        });
-      }
+    if (isIE()) {
+      notifications.toasts.addWarning({
+        title: mountReactNode(
+          <FormattedMessage
+            id="core.chrome.browserDeprecationWarning"
+            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+            values={{
+              link: (
+                <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
+                  <FormattedMessage
+                    id="core.chrome.browserDeprecationLink"
+                    defaultMessage="the support matrix on our website"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
+      });
     }
 
     return {
@@ -221,6 +225,7 @@ export class ChromeService {
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+          customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           kibanaDocLink={docLinks.links.kibana}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -228,14 +233,13 @@ export class ChromeService {
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
-          legacyMode={injectedMetadata.getLegacyMode()}
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}
           navControlsLeft$={navControls.getLeft$()}
+          navControlsCenter$={navControls.getCenter$()}
           navControlsRight$={navControls.getRight$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
-          navType$={getNavType$}
         />
       ),
 
@@ -296,7 +300,11 @@ export class ChromeService {
 
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
 
-      getNavType$: () => getNavType$,
+      getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
+
+      setCustomNavLink: (customNavLink?: ChromeNavLink) => {
+        customNavLink$.next(customNavLink);
+      },
     };
   }
 
@@ -424,6 +432,16 @@ export interface ChromeStart {
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
 
   /**
+   * Get an observable of the current custom nav link
+   */
+  getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
+
+  /**
+   * Override the current set of custom nav link
+   */
+  setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
+
+  /**
    * Get an observable of the current custom help conttent
    */
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
@@ -443,13 +461,6 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
-
-  /**
-   * Get the navigation type
-   * TODO #64541
-   * Can delete
-   */
-  getNavType$(): Observable<NavType>;
 }
 
 /** @internal */

@@ -5,23 +5,21 @@
  */
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
-  createMockAgentService,
-  createMockIndexPatternRetriever,
+  createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
 import { getHostPolicyResponseHandler } from './handlers';
 import {
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaResponseFactory,
   SavedObjectsClientContract,
 } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
-import { AgentService } from '../../../../../ingest_manager/server/services';
 import { SearchResponse } from 'elasticsearch';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -29,21 +27,16 @@ import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockAgentService: jest.Mocked<AgentService>;
 
   beforeEach(() => {
-    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = new EndpointAppContextService();
-    mockAgentService = createMockAgentService();
-    endpointAppContextService.start({
-      indexPatternRetriever: createMockIndexPatternRetriever('metrics-endpoint-policy-*'),
-      agentService: mockAgentService,
-    });
+    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
   });
 
   afterEach(() => endpointAppContextService.stop());
@@ -51,7 +44,7 @@ describe('test policy response handler', () => {
   it('should return the latest policy response for a host', async () => {
     const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
     const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-      logFactory: loggingServiceMock.create(),
+      logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
     });
@@ -74,7 +67,7 @@ describe('test policy response handler', () => {
 
   it('should return not found when there is no response policy for host', async () => {
     const hostPolicyResponseHandler = getHostPolicyResponseHandler({
-      logFactory: loggingServiceMock.create(),
+      logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
     });

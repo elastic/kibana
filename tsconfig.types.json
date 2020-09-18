@@ -1,8 +1,9 @@
 {
-  "extends": "./tsconfig",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "incremental": false,
     "declaration": true,
-    "declarationDir": "./target/types",
+    "outDir": "./target/types",
     "stripInternal": false,
     "emitDeclarationOnly": true,
     "declarationMap": true
@@ -10,6 +11,8 @@
   "include": [
     "src/core/server/index.ts",
     "src/core/public/index.ts",
+    "src/plugins/data/server/index.ts",
+    "src/plugins/data/public/index.ts",
     "typings"
   ]
 }

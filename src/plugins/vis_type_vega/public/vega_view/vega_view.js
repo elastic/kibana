@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as vega from 'vega-lib';
+import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 
 export class VegaView extends VegaBaseView {
@@ -26,7 +26,6 @@ export class VegaView extends VegaBaseView {
     if (!this._$container) return;
 
     const view = new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
-    this.setDebugValues(view, this._parser.spec, this._parser.vlspec);
 
     view.warn = this.onWarn.bind(this);
     view.error = this.onError.bind(this);
@@ -36,5 +35,6 @@ export class VegaView extends VegaBaseView {
     if (this._parser.useHover) view.hover();
 
     await this.setView(view);
+    this.setDebugValues(view, this._parser.spec, this._parser.vlspec);
   }
 }

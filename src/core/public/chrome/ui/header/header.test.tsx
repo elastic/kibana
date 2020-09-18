@@ -21,7 +21,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { NavType } from '.';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
@@ -45,16 +44,16 @@ function mockProps() {
     isVisible$: new BehaviorSubject(true),
     kibanaDocLink: '/docs',
     navLinks$: new BehaviorSubject([]),
+    customNavLink$: new BehaviorSubject(undefined),
     recentlyAccessed$: new BehaviorSubject([]),
     forceAppSwitcherNavigation$: new BehaviorSubject(false),
     helpExtension$: new BehaviorSubject(undefined),
     helpSupportUrl$: new BehaviorSubject(''),
-    legacyMode: false,
     navControlsLeft$: new BehaviorSubject([]),
+    navControlsCenter$: new BehaviorSubject([]),
     navControlsRight$: new BehaviorSubject([]),
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),
-    navType$: new BehaviorSubject('modern' as NavType),
     loadingCount$: new BehaviorSubject(0),
     onIsLockedUpdate: () => {},
   };
@@ -71,10 +70,15 @@ describe('Header', () => {
     const isVisible$ = new BehaviorSubject(false);
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
-    const navType$ = new BehaviorSubject('modern' as NavType);
     const navLinks$ = new BehaviorSubject([
-      { id: 'kibana', title: 'kibana', baseUrl: '', legacy: false },
+      { id: 'kibana', title: 'kibana', baseUrl: '', href: '' },
     ]);
+    const customNavLink$ = new BehaviorSubject({
+      id: 'cloud-deployment-link',
+      title: 'Manage cloud deployment',
+      baseUrl: '',
+      href: '',
+    });
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
     ]);
@@ -86,21 +90,19 @@ describe('Header', () => {
         navLinks$={navLinks$}
         recentlyAccessed$={recentlyAccessed$}
         isLocked$={isLocked$}
-        navType$={navType$}
+        customNavLink$={customNavLink$}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiHeader').exists()).toBeFalsy();
 
     act(() => isVisible$.next(true));
     component.update();
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiHeader').exists()).toBeTruthy();
+    expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();
 
     act(() => isLocked$.next(true));
     component.update();
-    expect(component).toMatchSnapshot();
-
-    act(() => navType$.next('legacy' as NavType));
-    component.update();
+    expect(component.find('nav[aria-label="Primary"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
   });
 });

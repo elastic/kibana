@@ -47,7 +47,7 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
           />,
         },
         Object {
-          "description": <ForwardRef
+          "description": <EuiLink
             onClick={[Function]}
           >
             <FormattedMessage
@@ -55,7 +55,7 @@ exports[`RuleActionPanel renders panel for rule with a condition 1`] = `
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
               values={Object {}}
             />
-          </ForwardRef>,
+          </EuiLink>,
           "title": "",
         },
         Object {
@@ -101,7 +101,7 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
           />,
         },
         Object {
-          "description": <ForwardRef
+          "description": <EuiLink
             onClick={[Function]}
           >
             <FormattedMessage
@@ -109,7 +109,7 @@ exports[`RuleActionPanel renders panel for rule with a condition and scope, valu
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
               values={Object {}}
             />
-          </ForwardRef>,
+          </EuiLink>,
           "title": "",
         },
         Object {
@@ -143,7 +143,7 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
           />,
         },
         Object {
-          "description": <ForwardRef
+          "description": <EuiLink
             onClick={[Function]}
           >
             <FormattedMessage
@@ -151,7 +151,7 @@ exports[`RuleActionPanel renders panel for rule with scope, value in filter list
               id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
               values={Object {}}
             />
-          </ForwardRef>,
+          </EuiLink>,
           "title": <FormattedMessage
             defaultMessage="Actions"
             id="xpack.ml.ruleEditor.ruleActionPanel.actionsTitle"

@@ -7,9 +7,9 @@
 import * as Rx from 'rxjs';
 import sinon from 'sinon';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ReportingConfig } from '../';
-import { createMockReportingCore } from '../test_helpers';
+import { ReportingConfig, ReportingCore } from '../';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
+import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { ReportingSetupDeps } from '../types';
 import { FeaturesAvailability } from './';
 import {
@@ -54,16 +54,14 @@ function getPluginsMock(
   } as unknown) as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
 }
 
-const getMockReportingConfig = () => ({
-  get: () => {},
-  kbnConfig: { get: () => '' },
-});
 const getResponseMock = (base = {}) => base;
 
 describe('license checks', () => {
   let mockConfig: ReportingConfig;
+  let mockCore: ReportingCore;
   beforeAll(async () => {
-    mockConfig = getMockReportingConfig();
+    mockConfig = createMockConfig(createMockConfigSchema());
+    mockCore = await createMockReportingCore(mockConfig);
   });
 
   describe('with a basic license', () => {
@@ -72,7 +70,7 @@ describe('license checks', () => {
       const plugins = getPluginsMock({ license: 'basic' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
       const { fetch } = getReportingUsageCollector(
-        mockConfig,
+        mockCore,
         plugins.usageCollection,
         getLicenseMock('basic'),
         exportTypesRegistry,
@@ -102,7 +100,7 @@ describe('license checks', () => {
       const plugins = getPluginsMock({ license: 'none' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
       const { fetch } = getReportingUsageCollector(
-        mockConfig,
+        mockCore,
         plugins.usageCollection,
         getLicenseMock('none'),
         exportTypesRegistry,
@@ -132,7 +130,7 @@ describe('license checks', () => {
       const plugins = getPluginsMock({ license: 'platinum' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
       const { fetch } = getReportingUsageCollector(
-        mockConfig,
+        mockCore,
         plugins.usageCollection,
         getLicenseMock('platinum'),
         exportTypesRegistry,
@@ -162,7 +160,7 @@ describe('license checks', () => {
       const plugins = getPluginsMock({ license: 'basic' });
       const callClusterMock = jest.fn(() => Promise.resolve({}));
       const { fetch } = getReportingUsageCollector(
-        mockConfig,
+        mockCore,
         plugins.usageCollection,
         getLicenseMock('basic'),
         exportTypesRegistry,
@@ -184,11 +182,16 @@ describe('license checks', () => {
 });
 
 describe('data modeling', () => {
+  let mockConfig: ReportingConfig;
+  let mockCore: ReportingCore;
+  beforeAll(async () => {
+    mockConfig = createMockConfig(createMockConfigSchema());
+    mockCore = await createMockReportingCore(mockConfig);
+  });
   test('with normal looking usage data', async () => {
-    const mockConfig = getMockReportingConfig();
     const plugins = getPluginsMock();
     const { fetch } = getReportingUsageCollector(
-      mockConfig,
+      mockCore,
       plugins.usageCollection,
       getLicenseMock(),
       exportTypesRegistry,
@@ -238,10 +241,9 @@ describe('data modeling', () => {
   });
 
   test('with sparse data', async () => {
-    const mockConfig = getMockReportingConfig();
     const plugins = getPluginsMock();
     const { fetch } = getReportingUsageCollector(
-      mockConfig,
+      mockCore,
       plugins.usageCollection,
       getLicenseMock(),
       exportTypesRegistry,
@@ -291,10 +293,9 @@ describe('data modeling', () => {
   });
 
   test('with empty data', async () => {
-    const mockConfig = getMockReportingConfig();
     const plugins = getPluginsMock();
     const { fetch } = getReportingUsageCollector(
-      mockConfig,
+      mockCore,
       plugins.usageCollection,
       getLicenseMock(),
       exportTypesRegistry,
@@ -450,7 +451,7 @@ describe('data modeling', () => {
 
 describe('Ready for collection observable', () => {
   test('converts observable to promise', async () => {
-    const mockConfig = getMockReportingConfig();
+    const mockConfig = createMockConfig(createMockConfigSchema());
     const mockReporting = await createMockReportingCore(mockConfig);
 
     const usageCollection = getMockUsageCollection();

@@ -6,12 +6,12 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
 
 import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { decodePath, getTemplateDetailsLink } from '../../services/routing';
+import { decodePathFromReactRouter, getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
 
@@ -26,7 +26,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   location,
   history,
 }) => {
-  const decodedTemplateName = decodePath(name);
+  const decodedTemplateName = decodePathFromReactRouter(name);
   const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -94,30 +94,30 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
 
     content = (
       <TemplateForm
+        title={
+          <EuiTitle size="l">
+            <h1 data-test-subj="pageTitle">
+              <FormattedMessage
+                id="xpack.idxMgmt.createTemplate.cloneTemplatePageTitle"
+                defaultMessage="Clone template '{name}'"
+                values={{ name: decodedTemplateName }}
+              />
+            </h1>
+          </EuiTitle>
+        }
         defaultValue={templateData}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}
         clearSaveError={clearSaveError}
+        isLegacy={isLegacy}
       />
     );
   }
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.createTemplate.cloneTemplatePageTitle"
-              defaultMessage="Clone template '{name}'"
-              values={{ name: decodedTemplateName }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {content}
-      </EuiPageContent>
+      <EuiPageContent>{content}</EuiPageContent>
     </EuiPageBody>
   );
 };

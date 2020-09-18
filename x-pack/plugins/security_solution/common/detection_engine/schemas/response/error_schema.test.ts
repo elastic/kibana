@@ -7,15 +7,15 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { getErrorPayload } from './__mocks__/utils';
 import { errorSchema, ErrorSchema } from './error_schema';
 import { exactCheck } from '../../../exact_check';
 import { foldLeftRight, getPaths } from '../../../test_utils';
+import { getErrorSchemaMock } from './error_schema.mocks';
 
 describe('error_schema', () => {
   test('it should validate an error with a UUID given for id', () => {
-    const error = getErrorPayload();
-    const decoded = errorSchema.decode(getErrorPayload());
+    const error = getErrorSchemaMock();
+    const decoded = errorSchema.decode(getErrorSchemaMock());
     const checked = exactCheck(error, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -24,7 +24,7 @@ describe('error_schema', () => {
   });
 
   test('it should validate an error with a plain string given for id since sometimes we echo the user id which might not be a UUID back out to them', () => {
-    const error = getErrorPayload('fake id');
+    const error = getErrorSchemaMock('fake id');
     const decoded = errorSchema.decode(error);
     const checked = exactCheck(error, decoded);
     const message = pipe(checked, foldLeftRight);
@@ -35,7 +35,7 @@ describe('error_schema', () => {
 
   test('it should NOT validate an error when it has extra data next to a valid payload element', () => {
     type InvalidError = ErrorSchema & { invalid_extra_data?: string };
-    const error: InvalidError = getErrorPayload();
+    const error: InvalidError = getErrorSchemaMock();
     error.invalid_extra_data = 'invalid_extra_data';
     const decoded = errorSchema.decode(error);
     const checked = exactCheck(error, decoded);
@@ -46,7 +46,8 @@ describe('error_schema', () => {
   });
 
   test('it should NOT validate an error when it has required elements deleted from it', () => {
-    const error = getErrorPayload();
+    const error = getErrorSchemaMock();
+    // @ts-expect-error
     delete error.error;
     const decoded = errorSchema.decode(error);
     const checked = exactCheck(error, decoded);

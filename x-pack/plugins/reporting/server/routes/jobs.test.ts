@@ -10,25 +10,21 @@ import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
-import { LevelLogger } from '../lib';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockReportingCore } from '../test_helpers';
+import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { ExportTypeDefinition } from '../types';
 import { registerJobInfoRoutes } from './jobs';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('GET /api/reporting/jobs/download', () => {
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
+  const reportingSymbol = Symbol('reporting');
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
 
-  const config = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
-  const mockLogger = ({
-    error: jest.fn(),
-    debug: jest.fn(),
-  } as unknown) as jest.Mocked<LevelLogger>;
+  const config = createMockConfig(createMockConfigSchema());
 
   const getHits = (...sources: any) => {
     return {
@@ -39,12 +35,16 @@ describe('GET /api/reporting/jobs/download', () => {
   };
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer());
+    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
     core = await createMockReportingCore(config, ({
       elasticsearch: {
         legacy: { client: { callAsInternalUser: jest.fn() } },
       },
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => ({
             id: '123',
@@ -81,8 +81,6 @@ describe('GET /api/reporting/jobs/download', () => {
   });
 
   afterEach(async () => {
-    mockLogger.debug.mockReset();
-    mockLogger.error.mockReset();
     await server.stop();
   });
 
@@ -111,6 +109,9 @@ describe('GET /api/reporting/jobs/download', () => {
       // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => undefined,
         },
@@ -134,6 +135,9 @@ describe('GET /api/reporting/jobs/download', () => {
       // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => ({
             id: '123',

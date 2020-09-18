@@ -26,16 +26,12 @@ export function wrapComponentWithDefaults(component, defaults) {
     if (!result) {
       return result;
     }
-    result = _.map(
-      result,
-      function (term) {
-        if (!_.isObject(term)) {
-          term = { name: term };
-        }
-        return _.defaults(term, defaults);
-      },
-      this
-    );
+    result = _.map(result, (term) => {
+      if (!_.isObject(term)) {
+        term = { name: term };
+      }
+      return _.defaults(term, defaults);
+    });
     return result;
   };
   return component;
@@ -145,7 +141,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
         });
       });
     });
-    autoCompleteSet = _.uniq(autoCompleteSet, false);
+    autoCompleteSet = _.uniq(autoCompleteSet);
     context.autoCompleteSet = autoCompleteSet;
   }
 

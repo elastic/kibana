@@ -18,10 +18,11 @@
  */
 
 import moment from 'moment';
+
+import { configServiceMock } from '../config/mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { mockCoreContext } from '../core_context.mock';
-import { configServiceMock } from '../config/config_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { take } from 'rxjs/operators';
 
@@ -30,7 +31,7 @@ const testInterval = 100;
 const dummyMetrics = { metricA: 'value', metricB: 'otherValue' };
 
 describe('MetricsService', () => {
-  const httpMock = httpServiceMock.createSetupContract();
+  const httpMock = httpServiceMock.createInternalSetupContract();
   let metricsService: MetricsService;
 
   beforeEach(() => {
@@ -75,8 +76,8 @@ describe('MetricsService', () => {
     it('resets the collector after each collection', async () => {
       mockOpsCollector.collect.mockResolvedValue(dummyMetrics);
 
-      const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
-      await metricsService.start();
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
 
       // `advanceTimersByTime` only ensure the interval handler is executed
       // however the `reset` call is executed after the async call to `collect`
@@ -105,12 +106,31 @@ describe('MetricsService', () => {
         `"#setup() needs to be run first"`
       );
     });
+
+    it('emits the last value on each getOpsMetrics$ call', async () => {
+      const firstMetrics = { metric: 'first' };
+      const secondMetrics = { metric: 'second' };
+      mockOpsCollector.collect
+        .mockResolvedValueOnce(firstMetrics)
+        .mockResolvedValueOnce(secondMetrics);
+
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
+
+      const firstEmission = getOpsMetrics$().pipe(take(1)).toPromise();
+      jest.advanceTimersByTime(testInterval);
+      expect(await firstEmission).toEqual({ metric: 'first' });
+
+      const secondEmission = getOpsMetrics$().pipe(take(1)).toPromise();
+      jest.advanceTimersByTime(testInterval);
+      expect(await secondEmission).toEqual({ metric: 'second' });
+    });
   });
 
   describe('#stop', () => {
     it('stops the metrics interval', async () => {
-      const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
-      await metricsService.start();
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
 
@@ -125,8 +145,8 @@ describe('MetricsService', () => {
     });
 
     it('completes the metrics observable', async () => {
-      const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
-      await metricsService.start();
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
 
       let completed = false;
 

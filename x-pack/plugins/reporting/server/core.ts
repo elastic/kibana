@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { first, map, mapTo } from 'rxjs/operators';
+import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
   ElasticsearchServiceSetup,
@@ -15,18 +15,18 @@ import {
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from 'src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
-import { ScreenshotsObservableFn } from '../server/types';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { screenshotsObservableFactory } from './export_types/common/lib/screenshots';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { ESQueueInstance } from './lib/create_queue';
-import { EnqueueJobFn } from './lib/enqueue_job';
+import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
+import { ReportingStore } from './lib/store';
 
 export interface ReportingInternalSetup {
-  browserDriverFactory: HeadlessChromiumDriverFactory;
+  features: FeaturesPluginSetup;
   elasticsearch: ElasticsearchServiceSetup;
   licensing: LicensingPluginSetup;
   basePath: BasePath['get'];
@@ -34,9 +34,10 @@ export interface ReportingInternalSetup {
   security?: SecurityPluginSetup;
 }
 
-interface ReportingInternalStart {
-  enqueueJob: EnqueueJobFn;
+export interface ReportingInternalStart {
+  browserDriverFactory: HeadlessChromiumDriverFactory;
   esqueue: ESQueueInstance;
+  store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
 }
@@ -44,38 +45,109 @@ interface ReportingInternalStart {
 export class ReportingCore {
   private pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
-  private readonly pluginSetup$ = new Rx.ReplaySubject<ReportingInternalSetup>();
-  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
+  private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
+  private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private exportTypesRegistry = getExportTypesRegistry();
+  private config?: ReportingConfig;
 
-  constructor(private config: ReportingConfig) {}
+  constructor() {}
 
-  public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
-    this.pluginSetupDeps = reportingSetupDeps;
-    this.pluginSetup$.next(reportingSetupDeps);
-  }
-
-  public pluginStart(reportingStartDeps: ReportingInternalStart) {
-    this.pluginStart$.next(reportingStartDeps);
-  }
-
-  public pluginHasStarted(): Promise<boolean> {
-    return this.pluginStart$.pipe(first(), mapTo(true)).toPromise();
+  /*
+   * Register setupDeps
+   */
+  public pluginSetup(setupDeps: ReportingInternalSetup) {
+    this.pluginSetup$.next(true); // trigger the observer
+    this.pluginSetupDeps = setupDeps; // cache
   }
 
   /*
-   * Internal module dependencies
+   * Register startDeps
    */
+  public pluginStart(startDeps: ReportingInternalStart) {
+    this.pluginStart$.next(startDeps); // trigger the observer
+    this.pluginStartDeps = startDeps; // cache
+  }
+
+  /*
+   * Blocks the caller until setup is done
+   */
+  public async pluginSetsUp(): Promise<boolean> {
+    // use deps and config as a cached resolver
+    if (this.pluginSetupDeps && this.config) {
+      return true;
+    }
+    return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
+  }
+
+  /*
+   * Blocks the caller until start is done
+   */
+  public async pluginStartsUp(): Promise<boolean> {
+    return await this.getPluginStartDeps().then(() => true);
+  }
+
+  /*
+   * Synchronously checks if all async background setup and startup is completed
+   */
+  public pluginIsStarted() {
+    return this.pluginSetupDeps != null && this.config != null && this.pluginStartDeps != null;
+  }
+
+  /*
+   * Allows config to be set in the background
+   */
+  public setConfig(config: ReportingConfig) {
+    this.config = config;
+    this.pluginSetup$.next(true);
+  }
+
+  /**
+   * Registers reporting as an Elasticsearch feature for the purpose of toggling visibility based on roles.
+   */
+  public registerFeature() {
+    const config = this.getConfig();
+    const allowedRoles = ['superuser', ...(config.get('roles')?.allow ?? [])];
+    this.getPluginSetupDeps().features.registerElasticsearchFeature({
+      id: 'reporting',
+      catalogue: ['reporting'],
+      management: {
+        insightsAndAlerting: ['reporting'],
+      },
+      privileges: allowedRoles.map((role) => ({
+        requiredClusterPrivileges: [],
+        requiredRoles: [role],
+        ui: [],
+      })),
+    });
+  }
+
+  /*
+   * Gives synchronous access to the config
+   */
+  public getConfig(): ReportingConfig {
+    if (!this.config) {
+      throw new Error('Config is not yet initialized');
+    }
+    return this.config;
+  }
+
+  /*
+   * Gives async access to the startDeps
+   */
+  public async getPluginStartDeps() {
+    if (this.pluginStartDeps) {
+      return this.pluginStartDeps;
+    }
+
+    return await this.pluginStart$.pipe(first()).toPromise();
+  }
+
   public getExportTypesRegistry() {
     return this.exportTypesRegistry;
   }
 
   public async getEsqueue() {
     return (await this.getPluginStartDeps()).esqueue;
-  }
-
-  public async getEnqueueJob() {
-    return (await this.getPluginStartDeps()).enqueueJob;
   }
 
   public async getLicenseInfo() {
@@ -88,15 +160,15 @@ export class ReportingCore {
       .toPromise();
   }
 
-  public getConfig(): ReportingConfig {
-    return this.config;
+  public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
+    const config = this.getConfig();
+    const { browserDriverFactory } = await this.getPluginStartDeps();
+    return screenshotsObservableFactory(config.get('capture'), browserDriverFactory);
   }
 
-  public getScreenshotsObservable(): ScreenshotsObservableFn {
-    const { browserDriverFactory } = this.getPluginSetupDeps();
-    return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
-  }
-
+  /*
+   * Gives synchronous access to the setupDeps
+   */
   public getPluginSetupDeps() {
     if (!this.pluginSetupDeps) {
       throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
@@ -104,18 +176,7 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
-  /*
-   * Outside dependencies
-   */
-
-  private async getPluginStartDeps() {
-    if (this.pluginStartDeps) {
-      return this.pluginStartDeps;
-    }
-    return await this.pluginStart$.pipe(first()).toPromise();
-  }
-
-  public async getElasticsearchService() {
+  public getElasticsearchService() {
     return this.getPluginSetupDeps().elasticsearch;
   }
 

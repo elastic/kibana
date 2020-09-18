@@ -4,4 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+import { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { ApmServices } from './config';
+
+export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  {}
+>
+  ? TServices
+  : {};
+
+export { InheritedFtrProviderContext };
+export type FtrProviderContext = GenericFtrProviderContext<ApmServices, {}>;

@@ -146,6 +146,7 @@ export const usePostPushToService = (): UsePostPushToService => {
         abortCtrl.abort();
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -170,7 +171,7 @@ export const formatServiceRequestData = (
   const actualExternalService = caseServices[connectorId] ?? null;
 
   return {
-    caseId,
+    savedObjectId: caseId,
     createdAt,
     createdBy: {
       fullName: createdBy.fullName ?? null,

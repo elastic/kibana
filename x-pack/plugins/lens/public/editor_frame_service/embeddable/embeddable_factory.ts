@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Capabilities,
-  HttpSetup,
-  RecursiveReadonly,
-  SavedObjectsClientContract,
-} from 'kibana/public';
+import { Capabilities, HttpSetup, SavedObjectsClientContract } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { toExpression, Ast } from '@kbn/interpreter/target/common';
 import {
   IndexPatternsContract,
   IndexPattern,
@@ -27,6 +24,7 @@ import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
 import { getEditPath } from '../../../common';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { Document } from '../../persistence/saved_object_store';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -36,6 +34,7 @@ interface StartServices {
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
   uiActions?: UiActionsStart;
+  documentToExpression: (doc: Document) => Promise<Ast | null>;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -76,13 +75,15 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       indexPatternService,
       timefilter,
       expressionRenderer,
+      documentToExpression,
       uiActions,
     } = await this.getStartServices();
     const store = new SavedObjectIndexStore(savedObjectsClient);
     const savedVis = await store.load(savedObjectId);
 
-    const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(
-      async ({ id }) => {
+    const promises = savedVis.references
+      .filter(({ type }) => type === 'index-pattern')
+      .map(async ({ id }) => {
         try {
           return await indexPatternService.get(id);
         } catch (error) {
@@ -91,13 +92,14 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
           // to show.
           return null;
         }
-      }
-    );
+      });
     const indexPatterns = (
       await Promise.all(promises)
     ).filter((indexPattern: IndexPattern | null): indexPattern is IndexPattern =>
       Boolean(indexPattern)
     );
+
+    const expression = await documentToExpression(savedVis);
 
     return new Embeddable(
       timefilter,
@@ -106,9 +108,10 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       {
         savedVis,
         editPath: getEditPath(savedObjectId),
-        editUrl: coreHttp.basePath.prepend(`app/lens${getEditPath(savedObjectId)}`),
+        editUrl: coreHttp.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
         editable: await this.isEditable(),
         indexPatterns,
+        expression: expression ? toExpression(expression) : null,
       },
       input,
       parent

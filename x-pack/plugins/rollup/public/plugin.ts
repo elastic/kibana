@@ -16,7 +16,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 // @ts-ignore
@@ -70,26 +70,36 @@ export class RollupPlugin implements Plugin {
         }),
         icon: 'indexRollupApp',
         path: `/app/management/data/rollup_jobs/job_list`,
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       });
     }
 
-    management.sections.getSection(ManagementSectionId.Data).registerApp({
+    const pluginName = i18n.translate('xpack.rollupJobs.appTitle', {
+      defaultMessage: 'Rollup Jobs',
+    });
+
+    management.sections.section.data.registerApp({
       id: 'rollup_jobs',
-      title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
+      title: pluginName,
       order: 4,
       async mount(params) {
-        params.setBreadcrumbs([
-          {
-            text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
-              defaultMessage: 'Rollup Jobs',
-            }),
-          },
-        ]);
-        const { renderApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
 
-        return renderApp(core, params);
+        const {
+          chrome: { docTitle },
+        } = coreStart;
+
+        docTitle.change(pluginName);
+        params.setBreadcrumbs([{ text: pluginName }]);
+
+        const { renderApp } = await import('./application');
+        const unmountAppCallback = await renderApp(core, params);
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
   }

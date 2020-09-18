@@ -5,7 +5,43 @@
  */
 
 import { pickBy, isEmpty } from 'lodash/fp';
-import { PatchRuleParams } from './types';
+import {
+  DescriptionOrUndefined,
+  AnomalyThresholdOrUndefined,
+  QueryOrUndefined,
+  LanguageOrUndefined,
+  SavedIdOrUndefined,
+  TimelineIdOrUndefined,
+  TimelineTitleOrUndefined,
+  MachineLearningJobIdOrUndefined,
+  IndexOrUndefined,
+  NoteOrUndefined,
+  MetaOrUndefined,
+  VersionOrUndefined,
+  FalsePositivesOrUndefined,
+  FromOrUndefined,
+  OutputIndexOrUndefined,
+  IntervalOrUndefined,
+  MaxSignalsOrUndefined,
+  RiskScoreOrUndefined,
+  NameOrUndefined,
+  SeverityOrUndefined,
+  TagsOrUndefined,
+  ToOrUndefined,
+  ThreatOrUndefined,
+  ThresholdOrUndefined,
+  TypeOrUndefined,
+  ReferencesOrUndefined,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMappingOrUndefined,
+  RuleNameOverrideOrUndefined,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import { PartialFilter } from '../types';
+import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -20,10 +56,48 @@ export const calculateInterval = (
   }
 };
 
+export interface UpdateProperties {
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
+  description: DescriptionOrUndefined;
+  falsePositives: FalsePositivesOrUndefined;
+  from: FromOrUndefined;
+  query: QueryOrUndefined;
+  language: LanguageOrUndefined;
+  license: LicenseOrUndefined;
+  savedId: SavedIdOrUndefined;
+  timelineId: TimelineIdOrUndefined;
+  timelineTitle: TimelineTitleOrUndefined;
+  meta: MetaOrUndefined;
+  machineLearningJobId: MachineLearningJobIdOrUndefined;
+  filters: PartialFilter[];
+  index: IndexOrUndefined;
+  interval: IntervalOrUndefined;
+  maxSignals: MaxSignalsOrUndefined;
+  riskScore: RiskScoreOrUndefined;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
+  outputIndex: OutputIndexOrUndefined;
+  name: NameOrUndefined;
+  severity: SeverityOrUndefined;
+  severityMapping: SeverityMappingOrUndefined;
+  tags: TagsOrUndefined;
+  threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
+  to: ToOrUndefined;
+  type: TypeOrUndefined;
+  references: ReferencesOrUndefined;
+  note: NoteOrUndefined;
+  version: VersionOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
+  anomalyThreshold: AnomalyThresholdOrUndefined;
+}
+
 export const calculateVersion = (
   immutable: boolean,
   currentVersion: number,
-  updateProperties: Partial<Omit<PatchRuleParams, 'enabled' | 'ruleId'>>
+  updateProperties: UpdateProperties
 ): number => {
   // early return if we are pre-packaged/immutable rule to be safe. We are never responsible
   // for changing the version number of an immutable. Immutables are only responsible for changing
@@ -44,7 +118,7 @@ export const calculateVersion = (
   // the version number if only the enabled/disabled flag is being set. Likewise if we get other
   // properties we are not expecting such as updatedAt we do not to cause a version number bump
   // on that either.
-  const removedNullValues = pickBy<PatchRuleParams>(
+  const removedNullValues = pickBy<UpdateProperties>(
     (value: unknown) => value != null,
     updateProperties
   );

@@ -18,9 +18,28 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+
 jest.mock('../services');
+
+jest.mock('../lib/vega', () => ({
+  vega: jest.requireActual('vega'),
+  vegaLite: jest.requireActual('vega-lite'),
+}));
+
+describe(`VegaParser.parseAsync`, () => {
+  test(`should throw an error in case of $spec is not defined`, async () => {
+    const vp = new VegaParser('{}');
+
+    await vp.parseAsync();
+
+    expect(
+      vp.error.startsWith('Your specification requires a "$schema" field with a valid URL')
+    ).toBeTruthy();
+  });
+});
 
 describe(`VegaParser._setDefaultValue`, () => {
   function check(spec, expected, ...params) {
@@ -52,8 +71,31 @@ describe(`VegaParser._setDefaultColors`, () => {
     `vegalite`,
     check({}, true, {
       config: {
+        axis: {
+          domainColor: euiThemeVars.euiColorChartLines,
+          gridColor: euiThemeVars.euiColorChartLines,
+          tickColor: euiThemeVars.euiColorChartLines,
+        },
+        background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: '#54B399' },
+        style: {
+          'group-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'guide-label': {
+            fill: euiThemeVars.euiColorDarkShade,
+          },
+          'guide-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'group-subtitle': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+        },
+        title: {
+          color: euiThemeVars.euiColorDarkestShade,
+        },
       },
     })
   );
@@ -62,6 +104,12 @@ describe(`VegaParser._setDefaultColors`, () => {
     `vega`,
     check({}, false, {
       config: {
+        axis: {
+          domainColor: euiThemeVars.euiColorChartLines,
+          gridColor: euiThemeVars.euiColorChartLines,
+          tickColor: euiThemeVars.euiColorChartLines,
+        },
+        background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         arc: { fill: '#54B399' },
         area: { fill: '#54B399' },
@@ -72,15 +120,49 @@ describe(`VegaParser._setDefaultColors`, () => {
         shape: { stroke: '#54B399' },
         symbol: { fill: '#54B399' },
         trail: { fill: '#54B399' },
+        style: {
+          'group-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'guide-label': {
+            fill: euiThemeVars.euiColorDarkShade,
+          },
+          'guide-title': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+          'group-subtitle': {
+            fill: euiThemeVars.euiColorDarkestShade,
+          },
+        },
+        title: {
+          color: euiThemeVars.euiColorDarkestShade,
+        },
       },
     })
   );
 });
 
 describe('VegaParser._resolveEsQueries', () => {
+  let searchApiStub;
+  const data = [
+    {
+      name: 'requestId',
+      rawResponse: [42],
+    },
+  ];
+
+  beforeEach(() => {
+    searchApiStub = {
+      search: jest.fn(() => ({
+        toPromise: jest.fn(() => Promise.resolve(data)),
+      })),
+      resetSearchStats: jest.fn(),
+    };
+  });
+
   function check(spec, expected, warnCount) {
     return async () => {
-      const vp = new VegaParser(spec, { search: async () => [[42]] }, 0, 0, {
+      const vp = new VegaParser(spec, searchApiStub, 0, 0, {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
         getUrlForRegionLayer: async (layer) => {
           return layer.url;
@@ -96,16 +178,25 @@ describe('VegaParser._resolveEsQueries', () => {
   test('no data', check({}, {}));
   test('no data2', check({ a: 1 }, { a: 1 }));
   test('non-es data', check({ data: { a: 10 } }, { data: { a: 10 } }));
-  test('es', check({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
+  test(
+    'es',
+    check(
+      { data: { name: 'requestId', url: { index: 'a' }, x: 1 } },
+      { data: { name: 'requestId', values: [42], x: 1 } }
+    )
+  );
   test(
     'es 2',
-    check({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } })
+    check(
+      { data: { name: 'requestId', url: { '%type%': 'elasticsearch', index: 'a' } } },
+      { data: { name: 'requestId', values: [42] } }
+    )
   );
   test(
     'es arr',
     check(
-      { arr: [{ data: { url: { index: 'a' }, x: 1 } }] },
-      { arr: [{ data: { values: [42], x: 1 } }] }
+      { arr: [{ data: { name: 'requestId', url: { index: 'a' }, x: 1 } }] },
+      { arr: [{ data: { name: 'requestId', values: [42], x: 1 } }] }
     )
   );
   test(
@@ -117,43 +208,34 @@ describe('VegaParser._resolveEsQueries', () => {
   );
 });
 
-describe('VegaParser._parseSchema', () => {
-  function check(schema, isVegaLite, warningCount) {
+describe('VegaParser.parseSchema', () => {
+  function check(schema, isVegaLite) {
     return () => {
       const vp = new VegaParser({ $schema: schema });
-      expect(vp._parseSchema()).toBe(isVegaLite);
-      expect(vp.spec).toEqual({ $schema: schema });
-      expect(vp.warnings).toHaveLength(warningCount);
+      expect(vp.parseSchema(vp.spec).isVegaLite).toBe(isVegaLite);
     };
   }
 
-  test('should warn on no vega version specified', () => {
-    const vp = new VegaParser({});
-    expect(vp._parseSchema()).toBe(false);
-    expect(vp.spec).toEqual({ $schema: 'https://vega.github.io/schema/vega/v3.0.json' });
-    expect(vp.warnings).toHaveLength(1);
-  });
-
   test(
     'should not warn on current vega version',
-    check('https://vega.github.io/schema/vega/v4.0.json', false, 0)
+    check('https://vega.github.io/schema/vega/v5.json', false, 0)
   );
   test(
     'should not warn on older vega version',
-    check('https://vega.github.io/schema/vega/v3.0.json', false, 0)
+    check('https://vega.github.io/schema/vega/v4.json', false, 0)
   );
   test(
     'should warn on vega version too new to be supported',
-    check('https://vega.github.io/schema/vega/v5.0.json', false, 1)
+    check('https://vega.github.io/schema/vega/v5.99.json', false, 1)
   );
 
   test(
     'should not warn on current vega-lite version',
-    check('https://vega.github.io/schema/vega-lite/v2.0.json', true, 0)
+    check('https://vega.github.io/schema/vega-lite/v4.json', true, 0)
   );
   test(
     'should warn on vega-lite version too new to be supported',
-    check('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1)
+    check('https://vega.github.io/schema/vega-lite/v5.json', true, 1)
   );
 });
 

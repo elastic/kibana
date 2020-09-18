@@ -4,38 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, FeatureConfig } from '../../../../../features/public';
+import { KibanaFeature, KibanaFeatureConfig } from '../../../../../features/public';
 
 export const createFeature = (
-  config: Pick<FeatureConfig, 'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'> & {
+  config: Pick<
+    KibanaFeatureConfig,
+    'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'
+  > & {
     excludeFromBaseAll?: boolean;
     excludeFromBaseRead?: boolean;
+    privileges?: KibanaFeatureConfig['privileges'];
   }
 ) => {
-  const { excludeFromBaseAll, excludeFromBaseRead, ...rest } = config;
-  return new Feature({
+  const { excludeFromBaseAll, excludeFromBaseRead, privileges, ...rest } = config;
+  return new KibanaFeature({
     icon: 'discoverApp',
     navLinkId: 'discover',
     app: [],
     catalogue: [],
-    privileges: {
-      all: {
-        excludeFromBasePrivileges: excludeFromBaseAll,
-        savedObject: {
-          all: ['all-type'],
-          read: ['read-type'],
-        },
-        ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
-      },
-      read: {
-        excludeFromBasePrivileges: excludeFromBaseRead,
-        savedObject: {
-          all: [],
-          read: ['read-type'],
-        },
-        ui: ['read-ui', `read-${config.id}`],
-      },
-    },
+    privileges:
+      privileges === null
+        ? null
+        : {
+            all: {
+              excludeFromBasePrivileges: excludeFromBaseAll,
+              savedObject: {
+                all: ['all-type'],
+                read: ['read-type'],
+              },
+              ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
+            },
+            read: {
+              excludeFromBasePrivileges: excludeFromBaseRead,
+              savedObject: {
+                all: [],
+                read: ['read-type'],
+              },
+              ui: ['read-ui', `read-${config.id}`],
+            },
+          },
     ...rest,
   });
 };

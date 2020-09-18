@@ -59,25 +59,25 @@ export function compare(): ExpressionFunctionDefinition<'compare', Context, Argu
           return a !== b;
         case Operation.LT:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a < b;
           }
           return false;
         case Operation.LTE:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a <= b;
           }
           return false;
         case Operation.GT:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a > b;
           }
           return false;
         case Operation.GTE:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a >= b;
           }
           return false;

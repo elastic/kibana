@@ -15,14 +15,32 @@
 # Description:       Kibana
 ### END INIT INFO
 
+#
+# Source function libraries if present.
+# (It improves integration with systemd)
+#
+# Red Hat
+if [ -f /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+
+# Debian
+elif [ -f /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+
+# SUSE
+elif [ -f /etc/rc.status ]; then
+    . /etc/rc.status
+    rc_reset
+fi
+
 name=kibana
 program=/usr/share/kibana/bin/kibana
-pidfile="/var/run/$name.pid"
+pidfile="/var/run/kibana/$name.pid"
 
 [ -r /etc/default/$name ] && . /etc/default/$name
 [ -r /etc/sysconfig/$name ] && . /etc/sysconfig/$name
 
-export KIBANA_PATH_CONF
+export KBN_PATH_CONF
 export NODE_OPTIONS
 
 [ -z "$nice" ] && nice=0
@@ -37,17 +55,13 @@ emit() {
 }
 
 start() {
-
-  # Ensure the log directory is setup correctly.
   [ ! -d "/var/log/kibana/" ] && mkdir "/var/log/kibana/"
   chown "$user":"$group" "/var/log/kibana/"
-  chmod 755 "/var/log/kibana/"
+  chmod 2750 "/var/log/kibana/"
 
-
-  # Setup any environmental stuff beforehand
-
-
-  # Run the program!
+  [ ! -d "/var/run/kibana/" ] && mkdir "/var/run/kibana/"
+  chown "$user":"$group" "/var/run/kibana/"
+  chmod 755 "/var/run/kibana/"
 
   chroot --userspec "$user":"$group" "$chroot" sh -c "
 

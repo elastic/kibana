@@ -23,7 +23,8 @@ import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMount } from 'react-use';
 
-import { Query, UI_SETTINGS } from '../../../../data/public';
+import { Query, DataPublicPluginStart } from '../../../../data/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 import { useKibana } from '../../../../kibana_react/public';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';
@@ -43,7 +44,9 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
 
   useMount(() => {
     // set parsed values into model after initialization
-    setValue(filters.map((filter) => omit({ ...filter, input: filter.input }, 'id')));
+    setValue(
+      filters.map((filter) => omit({ ...filter, input: filter.input }, 'id') as FilterValue)
+    );
   });
 
   useEffect(() => {
@@ -58,17 +61,17 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
-    setValue(updatedFilters.map((filter) => omit(filter, 'id')));
+    setValue(updatedFilters.map((filter) => omit(filter, 'id') as FilterValue));
     setFilters(updatedFilters);
   };
 
-  const { services } = useKibana();
+  const { services } = useKibana<{ uiSettings: IUiSettingsClient; data: DataPublicPluginStart }>();
 
   const onAddFilter = () =>
     updateFilters([
       ...filters,
       {
-        input: { query: '', language: services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) },
+        input: services.data.query.queryString.getDefaultQuery(),
         label: '',
         id: generateId(),
       },

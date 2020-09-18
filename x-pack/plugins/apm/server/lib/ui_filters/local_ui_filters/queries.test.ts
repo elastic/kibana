@@ -8,8 +8,8 @@ import { getLocalUIFilters } from './';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../../public/utils/testHelpers';
-import { getServicesProjection } from '../../../../common/projections/services';
+} from '../../../utils/test_helpers';
+import { getServicesProjection } from '../../../projections/services';
 
 describe('local ui filter queries', () => {
   let mock: SearchParamsMock;
@@ -29,7 +29,10 @@ describe('local ui filter queries', () => {
       getLocalUIFilters({
         setup,
         localFilterNames: ['transactionResult', 'host'],
-        projection: getServicesProjection({ setup }),
+        projection: getServicesProjection({
+          setup,
+          searchAggregatedTransactions: false,
+        }),
         uiFilters: {
           transactionResult: ['2xx'],
         },

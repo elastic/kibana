@@ -4,13 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pluck } from 'lodash';
-import { AlertAction, State, Context, AlertType } from '../types';
-import { Logger } from '../../../../../src/core/server';
+import { map } from 'lodash';
+import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
+import {
+  PluginStartContract as ActionsPluginStartContract,
+  asSavedObjectExecutionSource,
+} from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import {
+  AlertAction,
+  AlertInstanceState,
+  AlertInstanceContext,
+  AlertType,
+  AlertTypeParams,
+  RawAlert,
+} from '../types';
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
@@ -19,17 +29,19 @@ interface CreateExecutionHandlerOptions {
   actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
   spaceId: string;
-  apiKey: string | null;
+  apiKey: RawAlert['apiKey'];
   alertType: AlertType;
   logger: Logger;
   eventLogger: IEventLogger;
+  request: KibanaRequest;
+  alertParams: AlertTypeParams;
 }
 
 interface ExecutionHandlerOptions {
   actionGroup: string;
   alertInstanceId: string;
-  context: Context;
-  state: State;
+  context: AlertInstanceContext;
+  state: AlertInstanceState;
 }
 
 export function createExecutionHandler({
@@ -43,8 +55,10 @@ export function createExecutionHandler({
   apiKey,
   alertType,
   eventLogger,
+  request,
+  alertParams,
 }: CreateExecutionHandlerOptions) {
-  const alertTypeActionGroups = new Set(pluck(alertType.actionGroups, 'id'));
+  const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
@@ -64,6 +78,7 @@ export function createExecutionHandler({
             context,
             actionParams: action.params,
             state,
+            alertParams,
           }),
         };
       });
@@ -80,11 +95,16 @@ export function createExecutionHandler({
 
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
-      await actionsPlugin.execute({
+      const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
+      await actionsClient.enqueueExecution({
         id: action.id,
         params: action.params,
         spaceId,
-        apiKey,
+        apiKey: apiKey ?? null,
+        source: asSavedObjectExecutionSource({
+          id: alertId,
+          type: 'alert',
+        }),
       });
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };

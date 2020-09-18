@@ -11,21 +11,23 @@ import {
   getEmptyIndex,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock } from '../__mocks__';
+import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } from '../__mocks__';
+import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import { SecurityPluginSetup } from '../../../../../../security/server';
+import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
 import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
-import { PrepackagedRules } from '../../types';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
-    getPrepackagedRules: (): PrepackagedRules[] => {
+    getPrepackagedRules: (): AddPrepackagedRulesSchemaDecoded[] => {
       return [
         {
+          author: ['Elastic'],
           tags: [],
-          immutable: true,
           rule_id: 'rule-1',
-          output_index: '.siem-signals',
           risk_score: 50,
+          risk_score_mapping: [],
+          severity_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',
@@ -34,6 +36,16 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
+          query: 'user.name: root or user.name: admin',
+          language: 'kuery',
+          references: [],
+          actions: [],
+          enabled: false,
+          false_positives: [],
+          max_signals: 100,
+          threat: [],
+          throttle: null,
+          exceptions_list: [],
           version: 2, // set one higher than the mocks which is set to 1 to trigger updates
         },
       ];
@@ -41,26 +53,46 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
+jest.mock('../../../timeline/routes/utils/install_prepacked_timelines', () => {
+  return {
+    installPrepackagedTimelines: jest.fn().mockResolvedValue({
+      success: true,
+      success_count: 3,
+      errors: [],
+      timelines_installed: 3,
+      timelines_updated: 0,
+    }),
+  };
+});
+
 describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
+  let securitySetup: SecurityPluginSetup;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    securitySetup = ({
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+      },
+      authz: {},
+    } as unknown) as SecurityPluginSetup;
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-    addPrepackedRulesRoute(server.router);
+    (installPrepackagedTimelines as jest.Mock).mockReset();
+    (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
+      success: true,
+      success_count: 0,
+      timelines_installed: 3,
+      timelines_updated: 0,
+      errors: [],
+    });
+
+    addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   describe('status codes', () => {
@@ -118,6 +150,8 @@ describe('add_prepackaged_rules_route', () => {
       expect(response.body).toEqual({
         rules_installed: 1,
         rules_updated: 0,
+        timelines_installed: 3,
+        timelines_updated: 0,
       });
     });
 
@@ -129,6 +163,8 @@ describe('add_prepackaged_rules_route', () => {
       expect(response.body).toEqual({
         rules_installed: 0,
         rules_updated: 1,
+        timelines_installed: 3,
+        timelines_updated: 0,
       });
     });
 
@@ -141,6 +177,98 @@ describe('add_prepackaged_rules_route', () => {
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
+    });
+  });
+
+  test('should install prepackaged timelines', async () => {
+    (installPrepackagedTimelines as jest.Mock).mockReset();
+    (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
+      success: false,
+      success_count: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+      errors: [
+        {
+          id: '36429040-b529-11ea-8d8b-21de98be11a6',
+          error: {
+            message: 'timeline_id: "36429040-b529-11ea-8d8b-21de98be11a6" already exists',
+            status_code: 409,
+          },
+        },
+      ],
+    });
+    const request = addPrepackagedRulesRequest();
+    const response = await server.inject(request, context);
+    expect(response.body).toEqual({
+      rules_installed: 0,
+      rules_updated: 1,
+      timelines_installed: 0,
+      timelines_updated: 0,
+    });
+  });
+
+  test('should include the result of installing prepackaged timelines - timelines_installed', async () => {
+    (installPrepackagedTimelines as jest.Mock).mockReset();
+    (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
+      success: true,
+      success_count: 1,
+      timelines_installed: 1,
+      timelines_updated: 0,
+      errors: [],
+    });
+    const request = addPrepackagedRulesRequest();
+    const response = await server.inject(request, context);
+    expect(response.body).toEqual({
+      rules_installed: 0,
+      rules_updated: 1,
+      timelines_installed: 1,
+      timelines_updated: 0,
+    });
+  });
+
+  test('should include the result of installing prepackaged timelines - timelines_updated', async () => {
+    (installPrepackagedTimelines as jest.Mock).mockReset();
+    (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
+      success: true,
+      success_count: 1,
+      timelines_installed: 0,
+      timelines_updated: 1,
+      errors: [],
+    });
+    const request = addPrepackagedRulesRequest();
+    const response = await server.inject(request, context);
+    expect(response.body).toEqual({
+      rules_installed: 0,
+      rules_updated: 1,
+      timelines_installed: 0,
+      timelines_updated: 1,
+    });
+  });
+
+  test('should include the result of installing prepackaged timelines - skip the error message', async () => {
+    (installPrepackagedTimelines as jest.Mock).mockReset();
+    (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
+      success: false,
+      success_count: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+      errors: [
+        {
+          id: '36429040-b529-11ea-8d8b-21de98be11a6',
+          error: {
+            message: 'timeline_id: "36429040-b529-11ea-8d8b-21de98be11a6" already exists',
+            status_code: 409,
+          },
+        },
+      ],
+    });
+    const request = addPrepackagedRulesRequest();
+    const response = await server.inject(request, context);
+    expect(response.body).toEqual({
+      rules_installed: 0,
+      rules_updated: 1,
+      timelines_installed: 0,
+      timelines_updated: 0,
     });
   });
 });

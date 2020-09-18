@@ -42,6 +42,9 @@ const FormWrapper = styled.div`
 
     padding-top: ${theme.eui.paddingSizes.xl};
     padding-bottom: ${theme.eui.paddingSizes.xl};
+    .euiFlyout {
+      z-index: ${theme.eui.euiZNavigation + 1};
+    }
   `}
 `;
 
@@ -52,6 +55,7 @@ interface ConfigureCasesComponentProps {
 }
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
@@ -77,6 +81,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.
   // TODO: Fix it if reloadConnectors type change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
@@ -89,6 +94,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     (isVisible: boolean) => {
       setAddFlyoutVisibility(isVisible);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentConfiguration, connectorId, closureType]
   );
 
@@ -96,6 +102,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     (isVisible: boolean) => {
       setEditFlyoutVisibility(isVisible);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentConfiguration, connectorId, closureType]
   );
 
@@ -113,6 +120,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         closureType,
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectorId, closureType, version]
   );
 
@@ -125,6 +133,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         closureType: type,
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectorId, closureType, version]
   );
 
@@ -141,6 +150,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     ) {
       setConnectorIsValid(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors, connectorId]);
 
   useEffect(() => {
@@ -149,6 +159,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         connectors.find((c) => c.id === connectorId) as ActionConnectorTableItem
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors, connectorId]);
 
   return (
@@ -191,6 +202,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           capabilities: application.capabilities,
           reloadConnectors,
           docLinks,
+          consumer: 'case',
         }}
       >
         <ConnectorAddFlyout

@@ -18,7 +18,7 @@
  */
 
 import { SharePluginStart, SharePluginSetup } from '../../../src/plugins/share/public';
-import { Plugin, CoreSetup, AppMountParameters } from '../../../src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import {
   HelloLinkGeneratorState,
   createHelloPageLinkGenerator,
@@ -58,6 +58,7 @@ export class AccessLinksExamplesPlugin implements Plugin<void, void, SetupDeps, 
     core.application.register({
       id: APP_ID,
       title: 'Access links examples',
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./app');
         return renderApp(

@@ -156,6 +156,9 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
               errors={errors}
               canChangeTrigger={false}
               setHasActionsDisabled={setHasActionsDisabled}
+              operation="i18n.translate('xpack.triggersActionsUI.sections.alertEdit.operationName', {
+                defaultMessage: 'edit',
+              })"
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

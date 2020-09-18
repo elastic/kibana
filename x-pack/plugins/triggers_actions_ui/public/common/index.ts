@@ -5,3 +5,7 @@
  */
 
 export * from './expression_items';
+
+export { connectorConfiguration as ServiceNowConnectorConfiguration } from '../application/components/builtin_action_types/servicenow/config';
+export { connectorConfiguration as JiraConnectorConfiguration } from '../application/components/builtin_action_types/jira/config';
+export { connectorConfiguration as ResilientConnectorConfiguration } from '../application/components/builtin_action_types/resilient/config';

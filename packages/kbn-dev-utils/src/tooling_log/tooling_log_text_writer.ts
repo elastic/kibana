@@ -47,7 +47,7 @@ export interface ToolingLogTextWriterConfig {
 
 function shouldWriteType(level: ParsedLogLevel, type: MessageTypes) {
   if (type === 'write') {
-    return true;
+    return level.name !== 'silent';
   }
 
   return Boolean(level.flags[type === 'success' ? 'info' : type]);

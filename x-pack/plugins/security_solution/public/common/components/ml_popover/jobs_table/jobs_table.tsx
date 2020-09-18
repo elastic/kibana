@@ -25,7 +25,7 @@ import styled from 'styled-components';
 import { useBasePath } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
-import { SiemJob } from '../types';
+import { SecurityJob } from '../types';
 
 const JobNameWrapper = styled.div`
   margin: 5px 0;
@@ -38,12 +38,12 @@ const truncateThreshold = 200;
 
 const getJobsTableColumns = (
   isLoading: boolean,
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>,
+  onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>,
   basePath: string
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
-    render: ({ id, description }: SiemJob) => (
+    render: ({ id, description }: SecurityJob) => (
       <JobNameWrapper>
         <EuiLink
           data-test-subj="jobs-table-link"
@@ -62,7 +62,7 @@ const getJobsTableColumns = (
   },
   {
     name: i18n.COLUMN_GROUPS,
-    render: ({ groups }: SiemJob) => (
+    render: ({ groups }: SecurityJob) => (
       <EuiFlexGroup wrap responsive={true} gutterSize="xs">
         {groups.map((group) => (
           <EuiFlexItem grow={false} key={group}>
@@ -76,9 +76,13 @@ const getJobsTableColumns = (
 
   {
     name: i18n.COLUMN_RUN_JOB,
-    render: (job: SiemJob) =>
+    render: (job: SecurityJob) =>
       job.isCompatible ? (
-        <JobSwitch job={job} isSiemJobsLoading={isLoading} onJobStateChange={onJobStateChange} />
+        <JobSwitch
+          job={job}
+          isSecurityJobsLoading={isLoading}
+          onJobStateChange={onJobStateChange}
+        />
       ) : (
         <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />
       ),
@@ -87,13 +91,16 @@ const getJobsTableColumns = (
   } as const,
 ];
 
-const getPaginatedItems = (items: SiemJob[], pageIndex: number, pageSize: number): SiemJob[] =>
-  items.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
+const getPaginatedItems = (
+  items: SecurityJob[],
+  pageIndex: number,
+  pageSize: number
+): SecurityJob[] => items.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
 export interface JobTableProps {
   isLoading: boolean;
-  jobs: SiemJob[];
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
+  jobs: SecurityJob[];
+  onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
 }
 
 export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTableProps) => {
@@ -115,11 +122,10 @@ export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTab
   return (
     <EuiBasicTable
       data-test-subj="jobs-table"
-      compressed={true}
       columns={getJobsTableColumns(isLoading, onJobStateChange, basePath)}
       items={getPaginatedItems(jobs, pageIndex, pageSize)}
       loading={isLoading}
-      noItemsMessage={<NoItemsMessage />}
+      noItemsMessage={<NoItemsMessage basePath={basePath} />}
       pagination={pagination}
       responsive={false}
       onChange={({ page }: { page: { index: number } }) => {
@@ -135,13 +141,13 @@ export const JobsTable = React.memo(JobsTableComponent);
 
 JobsTable.displayName = 'JobsTable';
 
-export const NoItemsMessage = React.memo(() => (
+export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) => (
   <EuiEmptyPrompt
     title={<h3>{i18n.NO_ITEMS_TEXT}</h3>}
     titleSize="xs"
     actions={
       <EuiButton
-        href="ml#/jobs/new_job/step/index_or_search"
+        href={`${basePath}/app/ml#/jobs/new_job/step/index_or_search`}
         iconType="popout"
         iconSide="right"
         size="s"

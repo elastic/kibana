@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ShardFailureRequest, ShardFailureResponse } from './shard_failure_types';
+export { ShardFailureRequest } from './shard_failure_types';
 export { ShardFailureOpenModalButton } from './shard_failure_open_modal_button';

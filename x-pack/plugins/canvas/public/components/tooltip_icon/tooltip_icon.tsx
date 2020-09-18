@@ -5,7 +5,7 @@
  */
 
 /* eslint react/forbid-elements: 0 */
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIconTip, PropsOf } from '@elastic/eui';
 
@@ -21,7 +21,7 @@ interface Props extends Omit<EuiIconTipProps, 'type' | 'color'> {
   icon: IconType;
 }
 
-export const TooltipIcon = ({ icon = IconType.info, ...rest }: Props) => {
+export const TooltipIcon: FC<Props> = ({ icon = IconType.info, ...rest }) => {
   const icons = {
     [IconType.error]: { type: 'alert', color: 'danger' },
     [IconType.warning]: { type: 'alert', color: 'warning' },

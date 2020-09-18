@@ -5,31 +5,43 @@
  */
 
 import { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { filter, distinctUntilChanged } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
-import { getErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
-
-export type IndexName = string;
+import {
+  AnalysisConfig,
+  ClassificationAnalysis,
+  DataFrameAnalysisConfigType,
+  RegressionAnalysis,
+} from '../../../../common/types/data_frame_analytics';
+import {
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+  getPredictionFieldName,
+  getDependentVar,
+  getPredictedFieldName,
+} from '../../../../common/util/analytics_utils';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
 export type IndexPattern = string;
-export type DataFrameAnalyticsId = string;
-
-export enum ANALYSIS_CONFIG_TYPE {
-  OUTLIER_DETECTION = 'outlier_detection',
-  REGRESSION = 'regression',
-  CLASSIFICATION = 'classification',
-}
 
 export enum ANALYSIS_ADVANCED_FIELDS {
+  ETA = 'eta',
+  FEATURE_BAG_FRACTION = 'feature_bag_fraction',
   FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
   GAMMA = 'gamma',
   LAMBDA = 'lambda',
   MAX_TREES = 'max_trees',
+  METHOD = 'method',
+  N_NEIGHBORS = 'n_neighbors',
+  NUM_TOP_CLASSES = 'num_top_classes',
   NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
+  OUTLIER_FRACTION = 'outlier_fraction',
+  RANDOMIZE_SEED = 'randomize_seed',
 }
 
 export enum OUTLIER_ANALYSIS_METHOD {
@@ -37,34 +49,6 @@ export enum OUTLIER_ANALYSIS_METHOD {
   LDOF = 'ldof',
   DISTANCE_KTH_NN = 'distance_kth_nn',
   DISTANCE_KNN = 'distance_knn',
-}
-
-interface OutlierAnalysis {
-  [key: string]: {};
-  outlier_detection: {};
-}
-
-interface Regression {
-  dependent_variable: string;
-  training_percent?: number;
-  num_top_feature_importance_values?: number;
-  prediction_field_name?: string;
-}
-export interface RegressionAnalysis {
-  [key: string]: Regression;
-  regression: Regression;
-}
-
-interface Classification {
-  dependent_variable: string;
-  training_percent?: number;
-  num_top_classes?: string;
-  num_top_feature_importance_values?: number;
-  prediction_field_name?: string;
-}
-export interface ClassificationAnalysis {
-  [key: string]: Classification;
-  classification: Classification;
 }
 
 export interface LoadExploreDataArg {
@@ -114,15 +98,23 @@ export interface DfAnalyticsExplainResponse {
 }
 
 export interface Eval {
-  meanSquaredError: number | string;
+  mse: number | string;
+  msle: number | string;
+  huber: number | string;
   rSquared: number | string;
   error: null | string;
 }
 
 export interface RegressionEvaluateResponse {
   regression: {
-    mean_squared_error: {
-      error: number;
+    huber: {
+      value: number;
+    };
+    mse: {
+      value: number;
+    };
+    msle: {
+      value: number;
     };
     r_squared: {
       value: number;
@@ -150,21 +142,11 @@ export interface ClassificationEvaluateResponse {
   };
 }
 
-interface GenericAnalysis {
-  [key: string]: Record<string, any>;
-}
-
 interface LoadEvaluateResult {
   success: boolean;
   eval: RegressionEvaluateResponse | ClassificationEvaluateResponse | null;
   error: string | null;
 }
-
-type AnalysisConfig =
-  | OutlierAnalysis
-  | RegressionAnalysis
-  | ClassificationAnalysis
-  | GenericAnalysis;
 
 export const getAnalysisType = (analysis: AnalysisConfig): string => {
   const keys = Object.keys(analysis);
@@ -174,23 +156,6 @@ export const getAnalysisType = (analysis: AnalysisConfig): string => {
   }
 
   return 'unknown';
-};
-
-export const getDependentVar = (
-  analysis: AnalysisConfig
-):
-  | RegressionAnalysis['regression']['dependent_variable']
-  | ClassificationAnalysis['classification']['dependent_variable'] => {
-  let depVar = '';
-
-  if (isRegressionAnalysis(analysis)) {
-    depVar = analysis.regression.dependent_variable;
-  }
-
-  if (isClassificationAnalysis(analysis)) {
-    depVar = analysis.classification.dependent_variable;
-  }
-  return depVar;
 };
 
 export const getTrainingPercent = (
@@ -210,22 +175,14 @@ export const getTrainingPercent = (
   return trainingPercent;
 };
 
-export const getPredictionFieldName = (
+export const getNumTopClasses = (
   analysis: AnalysisConfig
-):
-  | RegressionAnalysis['regression']['prediction_field_name']
-  | ClassificationAnalysis['classification']['prediction_field_name'] => {
-  // If undefined will be defaulted to dependent_variable when config is created
-  let predictionFieldName;
-  if (isRegressionAnalysis(analysis) && analysis.regression.prediction_field_name !== undefined) {
-    predictionFieldName = analysis.regression.prediction_field_name;
-  } else if (
-    isClassificationAnalysis(analysis) &&
-    analysis.classification.prediction_field_name !== undefined
-  ) {
-    predictionFieldName = analysis.classification.prediction_field_name;
+): ClassificationAnalysis['classification']['num_top_classes'] => {
+  let numTopClasses;
+  if (isClassificationAnalysis(analysis) && analysis.classification.num_top_classes !== undefined) {
+    numTopClasses = analysis.classification.num_top_classes;
   }
-  return predictionFieldName;
+  return numTopClasses;
 };
 
 export const getNumTopFeatureImportanceValues = (
@@ -248,35 +205,6 @@ export const getNumTopFeatureImportanceValues = (
   return numTopFeatureImportanceValues;
 };
 
-export const getPredictedFieldName = (
-  resultsField: string,
-  analysis: AnalysisConfig,
-  forSort?: boolean
-) => {
-  // default is 'ml'
-  const predictionFieldName = getPredictionFieldName(analysis);
-  const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
-  const predictedField = `${resultsField}.${
-    predictionFieldName ? predictionFieldName : defaultPredictionField
-  }`;
-  return predictedField;
-};
-
-export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
-};
-
-export const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
-};
-
-export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
-  const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
-};
-
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
   if (arg === undefined) return false;
   const keys = Object.keys(arg);
@@ -294,7 +222,7 @@ export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluat
   return (
     keys.length === 1 &&
     keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION &&
-    arg?.regression?.mean_squared_error !== undefined &&
+    arg?.regression?.mse !== undefined &&
     arg?.regression?.r_squared !== undefined
   );
 };
@@ -310,27 +238,11 @@ export const isClassificationEvaluateResponse = (
   );
 };
 
-export interface DataFrameAnalyticsConfig {
-  id: DataFrameAnalyticsId;
-  // Description attribute is not supported yet
+export interface UpdateDataFrameAnalyticsConfig {
+  allow_lazy_start?: string;
   description?: string;
-  dest: {
-    index: IndexName;
-    results_field: string;
-  };
-  source: {
-    index: IndexName | IndexName[];
-    query?: any;
-  };
-  analysis: AnalysisConfig;
-  analyzed_fields: {
-    includes: string[];
-    excludes: string[];
-  };
-  model_memory_limit: string;
-  create_time: number;
-  version: string;
-  allow_lazy_start?: boolean;
+  model_memory_limit?: string;
+  max_num_threads?: number;
 }
 
 export enum REFRESH_ANALYTICS_LIST_STATE {
@@ -347,7 +259,8 @@ export const useRefreshAnalyticsList = (
   callback: {
     isLoading?(d: boolean): void;
     onRefresh?(): void;
-  } = {}
+  } = {},
+  isManagementTable = false
 ) => {
   useEffect(() => {
     const distinct$ = refreshAnalyticsList$.pipe(distinctUntilChanged());
@@ -355,13 +268,17 @@ export const useRefreshAnalyticsList = (
     const subscriptions: Subscription[] = [];
 
     if (typeof callback.onRefresh === 'function') {
-      // initial call to refresh
-      callback.onRefresh();
+      // required in order to fetch the DFA jobs on the management page
+      if (isManagementTable) callback.onRefresh();
 
       subscriptions.push(
         distinct$
           .pipe(filter((state) => state === REFRESH_ANALYTICS_LIST_STATE.REFRESH))
-          .subscribe(() => typeof callback.onRefresh === 'function' && callback.onRefresh())
+          .subscribe(() => {
+            if (typeof callback.onRefresh === 'function') {
+              callback.onRefresh();
+            }
+          })
       );
     }
 
@@ -378,7 +295,7 @@ export const useRefreshAnalyticsList = (
     return () => {
       subscriptions.map((sub) => sub.unsubscribe());
     };
-  }, []);
+  }, [callback.onRefresh]);
 
   return {
     refresh: () => {
@@ -392,19 +309,37 @@ export const useRefreshAnalyticsList = (
 
 const DEFAULT_SIG_FIGS = 3;
 
+interface RegressionEvaluateExtractedResponse {
+  mse: number | string;
+  msle: number | string;
+  huber: number | string;
+  r_squared: number | string;
+}
+
+export const EMPTY_STAT = '--';
+
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = response?.regression?.mean_squared_error?.error;
+  const results: RegressionEvaluateExtractedResponse = {
+    mse: EMPTY_STAT,
+    msle: EMPTY_STAT,
+    huber: EMPTY_STAT,
+    r_squared: EMPTY_STAT,
+  };
 
-  if (meanSquaredError) {
-    meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
+  if (response?.regression) {
+    for (const statType in response.regression) {
+      if (response.regression.hasOwnProperty(statType)) {
+        let currentStatValue =
+          response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
+        if (currentStatValue && !isNaN(currentStatValue)) {
+          currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
+        }
+        results[statType as keyof RegressionEvaluateExtractedResponse] = currentStatValue;
+      }
+    }
   }
 
-  let rSquared = response?.regression?.r_squared?.value;
-  if (rSquared) {
-    rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
-  }
-
-  return { meanSquaredError, rSquared };
+  return results;
 }
 interface ResultsSearchBoolQuery {
   bool: Dictionary<any>;
@@ -468,13 +403,22 @@ export function getEvalQueryBody({
   return query;
 }
 
+export enum REGRESSION_STATS {
+  MSE = 'mse',
+  MSLE = 'msle',
+  R_SQUARED = 'rSquared',
+  HUBER = 'huber',
+}
+
 interface EvaluateMetrics {
   classification: {
     multiclass_confusion_matrix: object;
   };
   regression: {
     r_squared: object;
-    mean_squared_error: object;
+    mse: object;
+    msle: object;
+    huber: object;
   };
 }
 
@@ -486,7 +430,7 @@ interface LoadEvalDataConfig {
   predictionFieldName?: string;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
-  jobType: ANALYSIS_CONFIG_TYPE;
+  jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
 }
 
@@ -519,7 +463,9 @@ export const loadEvalData = async ({
     },
     regression: {
       r_squared: {},
-      mean_squared_error: {},
+      mse: {},
+      msle: {},
+      huber: {},
     },
   };
 
@@ -541,7 +487,7 @@ export const loadEvalData = async ({
     results.eval = evalResult;
     return results;
   } catch (e) {
-    results.error = getErrorMessage(e);
+    results.error = extractErrorMessage(e);
     return results;
   }
 };
@@ -598,4 +544,14 @@ export const loadDocsCount = async ({
       success: false,
     };
   }
+};
+
+export {
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+  getPredictionFieldName,
+  getDependentVar,
+  getPredictedFieldName,
+  ANALYSIS_CONFIG_TYPE,
 };

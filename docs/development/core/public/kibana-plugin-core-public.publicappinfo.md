@@ -10,6 +10,8 @@ Public information about a registered [application](./kibana-plugin-core-public.
 
 ```typescript
 export declare type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
-    legacy: false;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
+    appRoute: string;
 };
 ```

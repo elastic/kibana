@@ -104,16 +104,15 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     className="euiPopover__anchor"
                   >
                     <button
-                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiButtonEmpty__content"
+                        className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                       >
                         <div
-                          aria-hidden="true"
-                          className="euiButtonEmpty__icon"
+                          className="euiButtonContent__icon"
                           data-euiicon-type="arrowDown"
                           size="m"
                         />
@@ -133,6 +132,8 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       </div>
       <table
         className="euiTable euiTable--responsive"
+        id="generated-id"
+        tabIndex={-1}
       >
         <caption
           className="euiScreenReaderOnly euiTableCaption"
@@ -161,6 +162,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                    
                   <span
                     className="euiToolTipAnchor"
+                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -518,16 +520,15 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     className="euiPopover__anchor"
                   >
                     <button
-                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiButtonEmpty__content"
+                        className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                       >
                         <div
-                          aria-hidden="true"
-                          className="euiButtonEmpty__icon"
+                          className="euiButtonContent__icon"
                           data-euiicon-type="arrowDown"
                           size="m"
                         />
@@ -547,6 +548,8 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       </div>
       <table
         className="euiTable euiTable--responsive"
+        id="generated-id"
+        tabIndex={-1}
       >
         <caption
           className="euiScreenReaderOnly euiTableCaption"
@@ -575,6 +578,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                    
                   <span
                     className="euiToolTipAnchor"
+                    onKeyUp={[Function]}
                     onMouseOut={[Function]}
                     onMouseOver={[Function]}
                   >
@@ -754,6 +758,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                  
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -779,11 +784,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <EuiLink
                     className="c0"
-                    href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                    href="/basepath/app/apm/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
                   >
                     <a
                       className="euiLink euiLink--primary c0"
-                      href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      href="/basepath/app/apm/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
                       rel="noreferrer"
                     >
                       a0ce2
@@ -824,11 +829,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <EuiLink
                     className="c1"
-                    href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
                   >
                     <a
                       className="euiLink euiLink--primary c1"
-                      href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
                       rel="noreferrer"
                     />
                   </EuiLink>
@@ -859,6 +864,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -870,13 +876,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                       >
                         <EuiLink
                           className="c3"
-                          href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          href="/basepath/app/apm/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
                           <a
                             className="euiLink euiLink--primary c3"
-                            href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            href="/basepath/app/apm/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
                             onBlur={[Function]}
                             onFocus={[Function]}
                             rel="noreferrer"
@@ -889,6 +895,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     <br />
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -958,6 +965,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -984,6 +992,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                  
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1009,11 +1018,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <EuiLink
                     className="c0"
-                    href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                    href="/basepath/app/apm/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
                   >
                     <a
                       className="euiLink euiLink--primary c0"
-                      href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      href="/basepath/app/apm/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
                       rel="noreferrer"
                     >
                       f3ac9
@@ -1054,11 +1063,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <EuiLink
                     className="c1"
-                    href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
                   >
                     <a
                       className="euiLink euiLink--primary c1"
-                      href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
                       rel="noreferrer"
                     />
                   </EuiLink>
@@ -1089,6 +1098,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1100,13 +1110,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                       >
                         <EuiLink
                           className="c3"
-                          href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          href="/basepath/app/apm/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
                           <a
                             className="euiLink euiLink--primary c3"
-                            href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            href="/basepath/app/apm/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
                             onBlur={[Function]}
                             onFocus={[Function]}
                             rel="noreferrer"
@@ -1119,6 +1129,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     <br />
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1188,6 +1199,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1214,6 +1226,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                  
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1239,11 +1252,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <EuiLink
                     className="c0"
-                    href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                    href="/basepath/app/apm/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
                   >
                     <a
                       className="euiLink euiLink--primary c0"
-                      href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      href="/basepath/app/apm/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
                       rel="noreferrer"
                     >
                       e9086
@@ -1284,11 +1297,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <EuiLink
                     className="c1"
-                    href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
                   >
                     <a
                       className="euiLink euiLink--primary c1"
-                      href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
                       rel="noreferrer"
                     />
                   </EuiLink>
@@ -1319,6 +1332,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1330,13 +1344,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                       >
                         <EuiLink
                           className="c3"
-                          href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          href="/basepath/app/apm/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
                           <a
                             className="euiLink euiLink--primary c3"
-                            href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            href="/basepath/app/apm/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
                             onBlur={[Function]}
                             onFocus={[Function]}
                             rel="noreferrer"
@@ -1349,6 +1363,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     <br />
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1418,6 +1433,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1444,6 +1460,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                  
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1469,11 +1486,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <EuiLink
                     className="c0"
-                    href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                    href="/basepath/app/apm/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
                   >
                     <a
                       className="euiLink euiLink--primary c0"
-                      href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      href="/basepath/app/apm/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
                       rel="noreferrer"
                     >
                       8673d
@@ -1514,11 +1531,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <EuiLink
                     className="c1"
-                    href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                    href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
                   >
                     <a
                       className="euiLink euiLink--primary c1"
-                      href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      href="/basepath/app/apm/services/opbeans-python/errors?page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
                       rel="noreferrer"
                     />
                   </EuiLink>
@@ -1549,6 +1566,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   >
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1560,13 +1578,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                       >
                         <EuiLink
                           className="c3"
-                          href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          href="/basepath/app/apm/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
                           <a
                             className="euiLink euiLink--primary c3"
-                            href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            href="/basepath/app/apm/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
                             onBlur={[Function]}
                             onFocus={[Function]}
                             rel="noreferrer"
@@ -1579,6 +1597,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     <br />
                     <span
                       className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1648,6 +1667,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiToolTipAnchor"
+                  onKeyUp={[Function]}
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -1677,9 +1697,8 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           <div
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <div
+            <nav
               className="euiPagination"
-              role="group"
             >
               <button
                 aria-label="Previous page"
@@ -1696,23 +1715,34 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   size="m"
                 />
               </button>
-              <button
-                aria-label="Page 1 of 1"
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
-                data-test-subj="pagination-button-0"
-                onClick={[Function]}
-                type="button"
+              <ul
+                className="euiPagination__list"
               >
-                <span
-                  className="euiButtonEmpty__content"
+                <li
+                  className="euiPagination__item"
                 >
-                  <span
-                    className="euiButtonEmpty__text"
+                  <button
+                    aria-controls="generated-id"
+                    aria-current={true}
+                    aria-label="Page 1 of 1"
+                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-0"
+                    disabled={true}
+                    onClick={[Function]}
+                    type="button"
                   >
-                    1
-                  </span>
-                </span>
-              </button>
+                    <span
+                      className="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        className="euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
               <button
                 aria-label="Next page"
                 className="euiButtonIcon euiButtonIcon--text"
@@ -1728,7 +1758,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   size="m"
                 />
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       </EuiFlexGroup>

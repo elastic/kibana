@@ -18,12 +18,12 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { Ipv4Address } from '../../../../../../kibana_utils/public';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 import {
   isFilterable,
   IIndexPattern,
   IFieldType,
+  Ipv4Address,
   Filter,
   FieldFilter,
 } from '../../../../../common';
@@ -85,7 +85,10 @@ export function isFilterValid(
       if (typeof params !== 'object') {
         return false;
       }
-      return validateParams(params.from, field.type) || validateParams(params.to, field.type);
+      return (
+        (!params.from || validateParams(params.from, field.type)) &&
+        (!params.to || validateParams(params.to, field.type))
+      );
     case 'exists':
       return true;
     default:

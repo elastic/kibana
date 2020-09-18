@@ -12,9 +12,10 @@ import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { ActionTypeDisabledError } from './errors';
+import { actionsClientMock } from '../mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -56,10 +57,10 @@ const services = {
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 const actionExecutorInitializerParams = {
-  logger: loggingServiceMock.create().get(),
+  logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
-  getScopedSavedObjectsClient: () => savedObjectsClientMock.create(),
+  getActionsClientWithRequest: jest.fn(async () => actionsClientMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   preconfiguredActions: [],
@@ -67,16 +68,16 @@ const actionExecutorInitializerParams = {
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
   actionTypeRegistry,
-  logger: loggingServiceMock.create().get(),
+  logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   getBasePath: jest.fn().mockReturnValue(undefined),
-  getScopedSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
+  getUnsecuredSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
-  taskRunnerFactoryInitializerParams.getScopedSavedObjectsClient.mockReturnValue(
+  taskRunnerFactoryInitializerParams.getUnsecuredSavedObjectsClient.mockReturnValue(
     services.savedObjectsClient
   );
 });

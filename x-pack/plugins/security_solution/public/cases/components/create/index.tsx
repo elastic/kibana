@@ -13,7 +13,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { isEqual } from 'lodash/fp';
 import { CasePostRequest } from '../../../../../case/common/api';
@@ -24,15 +24,17 @@ import {
   useForm,
   UseField,
   FormDataProvider,
+  useFormData,
 } from '../../../shared_imports';
 import { usePostCase } from '../../containers/use_post_case';
 import { schema } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import * as i18n from '../../translations';
-import { SiemPageName } from '../../../app/types';
-import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
+import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
 import { useGetTags } from '../../containers/use_get_tags';
+import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_click';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -61,19 +63,25 @@ const initialCaseValue: CasePostRequest = {
 };
 
 export const Create = React.memo(() => {
+  const history = useHistory();
   const { caseData, isLoading, postCase } = usePostCase();
-  const [isCancel, setIsCancel] = useState(false);
   const { form } = useForm<CasePostRequest>({
     defaultValue: initialCaseValue,
     options: { stripEmptyFields: false },
     schema,
   });
+
+  const fieldName = 'description';
+  const { submit, setFieldValue } = form;
+  const [{ description }] = useFormData({ form, watch: [fieldName] });
+
   const { tags: tagOptions } = useGetTags();
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
       label,
     }))
   );
+
   useEffect(
     () =>
       setOptions(
@@ -83,28 +91,33 @@ export const Create = React.memo(() => {
       ),
     [tagOptions]
   );
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CasePostRequest>(
-    form,
-    'description'
+
+  const onDescriptionChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
+    setFieldValue,
+  ]);
+
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline(
+    description,
+    onDescriptionChange
   );
 
+  const handleTimelineClick = useTimelineClick();
+
   const onSubmit = useCallback(async () => {
-    const { isValid, data } = await form.submit();
+    const { isValid, data } = await submit();
     if (isValid) {
+      // `postCase`'s type is incorrect, it actually returns a promise
       await postCase(data);
     }
-  }, [form]);
+  }, [submit, postCase]);
 
   const handleSetIsCancel = useCallback(() => {
-    setIsCancel(true);
-  }, []);
+    history.push('/');
+  }, [history]);
 
   if (caseData != null && caseData.id) {
-    return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
-  }
-
-  if (isCancel) {
-    return <Redirect to={`/${SiemPageName.case}`} />;
+    history.push(getCaseDetailsUrl({ id: caseData.id }));
+    return null;
   }
 
   return (
@@ -140,12 +153,13 @@ export const Create = React.memo(() => {
         </Container>
         <ContainerBig>
           <UseField
-            path="description"
+            path={fieldName}
             component={MarkdownEditorForm}
             componentProps={{
               dataTestSubj: 'caseDescription',
               idAria: 'caseDescription',
               isDisabled: isLoading,
+              onClickTimeline: handleTimelineClick,
               onCursorPositionUpdate: handleCursorChange,
               topRightContent: (
                 <InsertTimelinePopover

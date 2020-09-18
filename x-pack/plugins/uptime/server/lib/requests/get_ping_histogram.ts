@@ -8,6 +8,7 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { getFilterClause } from '../helper';
 import { HistogramResult, HistogramQueryResult } from '../../../common/runtime_types';
 import { QUERY } from '../../../common/constants';
+import { getHistogramInterval } from '../helper/get_histogram_interval';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */
@@ -15,15 +16,17 @@ export interface GetPingHistogramParams {
   /** @member dateRangeEnd timestamp bounds */
   to: string;
   /** @member filters user-defined filters */
-  filters?: string | null;
+  filters?: string;
   /** @member monitorId optional limit to monitorId */
-  monitorId?: string | null;
+  monitorId?: string;
+
+  bucketSize?: string;
 }
 
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ callES, dynamicSettings, from, to, filters, monitorId }) => {
+> = async ({ callES, dynamicSettings, from, to, filters, monitorId, bucketSize }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -45,9 +48,11 @@ export const getPingHistogram: UMElasticsearchQueryFn<
       size: 0,
       aggs: {
         timeseries: {
-          auto_date_histogram: {
+          date_histogram: {
             field: '@timestamp',
-            buckets: QUERY.DEFAULT_BUCKET_COUNT,
+            fixed_interval:
+              bucketSize || getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT) + 'ms',
+            missing: 0,
           },
           aggs: {
             down: {

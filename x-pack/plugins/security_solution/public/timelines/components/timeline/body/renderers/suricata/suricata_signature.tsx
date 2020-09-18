@@ -13,7 +13,6 @@ import {
   DraggableWrapper,
 } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
-import { ExternalLinkIcon } from '../../../../../../common/components/external_link_icon';
 import { GoogleLink } from '../../../../../../common/components/links';
 import { Provider } from '../../../data_providers/provider';
 
@@ -122,7 +121,6 @@ export const SuricataSignature = React.memo<{
             <GoogleLink link={signature}>
               {signature.split(' ').splice(tokens.length).join(' ')}
             </GoogleLink>
-            <ExternalLinkIcon />
           </div>
         </DefaultDraggable>
       </LinkFlexItem>

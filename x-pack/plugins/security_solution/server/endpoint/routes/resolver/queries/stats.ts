@@ -5,13 +5,17 @@
  */
 import { SearchResponse } from 'elasticsearch';
 import { ResolverQuery } from './base';
-import { ResolverEvent, EventStats } from '../../../../../common/endpoint/types';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { AggBucket } from '../utils/pagination';
+import { SafeResolverEvent, EventStats } from '../../../../../common/endpoint/types';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 export interface StatsResult {
   alerts: Record<string, number>;
   events: Record<string, EventStats>;
+}
+
+interface AggBucket {
+  key: string;
+  doc_count: number;
 }
 
 interface CategoriesAgg extends AggBucket {
@@ -181,7 +185,7 @@ export class StatsQuery extends ResolverQuery<StatsResult> {
     };
   }
 
-  public formatResponse(response: SearchResponse<ResolverEvent>): StatsResult {
+  public formatResponse(response: SearchResponse<SafeResolverEvent>): StatsResult {
     let alerts: Record<string, number> = {};
 
     if (response.aggregations?.alerts?.ids?.buckets) {

@@ -6,11 +6,7 @@
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../actions/server';
-import {
-  SignalsStatusRestParams,
-  SignalsQueryRestParams,
-  SignalSearchResponse,
-} from '../../signals/types';
+import { SignalSearchResponse } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -26,88 +22,32 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   HapiReadableStream,
 } from '../../rules/types';
-import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
 import { requestMock } from './request';
 import { RuleNotificationAlertType } from '../../notifications/types';
+import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
-export const mockPrepackagedRule = (): PrepackagedRules => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  output_index: '.siem-signals',
-  risk_score: 50,
-  type: 'query',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  query: 'user.name: root or user.name: admin',
-  language: 'kuery',
-  threat: [
-    {
-      framework: 'fake',
-      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
-    },
-  ],
-  throttle: null,
-  enabled: true,
-  filters: [],
-  immutable: false,
-  references: [],
-  meta: {},
-  tags: [],
-  version: 1,
-  false_positives: [],
-  max_signals: 100,
-  note: '',
-  timeline_id: 'timeline-id',
-  timeline_title: 'timeline-title',
-});
-
-export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  output_index: '.siem-signals',
-  risk_score: 50,
-  type: 'query',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  query: 'user.name: root or user.name: admin',
-  language: 'kuery',
-  threat: [
-    {
-      framework: 'fake',
-      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
-    },
-  ],
-});
-
-export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
+export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+export const typicalSetStatusSignalByQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
   query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
 });
 
-export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+export const typicalSignalsQuery = (): QuerySignalsSchemaDecoded => ({
   query: { match_all: {} },
 });
 
-export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+export const typicalSignalsQueryAggs = (): QuerySignalsSchemaDecoded => ({
   aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSchemaDecoded => ({
   status: 'closed',
 });
 
@@ -115,14 +55,14 @@ export const getUpdateRequest = () =>
   requestMock.create({
     method: 'put',
     path: DETECTION_ENGINE_RULES_URL,
-    body: typicalPayload(),
+    body: getCreateRulesSchemaMock(),
   });
 
 export const getPatchRequest = () =>
   requestMock.create({
     method: 'patch',
     path: DETECTION_ENGINE_RULES_URL,
-    body: typicalPayload(),
+    body: getCreateRulesSchemaMock(),
   });
 
 export const getReadRequest = () =>
@@ -142,21 +82,21 @@ export const getReadBulkRequest = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-    body: [typicalPayload()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getUpdateBulkRequest = () =>
   requestMock.create({
     method: 'put',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    body: [typicalPayload()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getPatchBulkRequest = () =>
   requestMock.create({
     method: 'patch',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    body: [typicalPayload()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getDeleteBulkRequest = () =>
@@ -170,14 +110,14 @@ export const getDeleteBulkRequestById = () =>
   requestMock.create({
     method: 'delete',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequestById = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-    body: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequest = () =>
@@ -292,11 +232,12 @@ export const getCreateRequest = () =>
   requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: typicalPayload(),
+    body: getCreateRulesSchemaMock(),
   });
 
+// TODO: Replace this with the mocks version from the mocks file
 export const typicalMlRulePayload = () => {
-  const { query, language, index, ...mlParams } = typicalPayload();
+  const { query, language, index, ...mlParams } = getCreateRulesSchemaMock();
 
   return {
     ...mlParams,
@@ -322,8 +263,9 @@ export const createBulkMlRuleRequest = () => {
   });
 };
 
+// TODO: Replace this with a mocks file version
 export const createRuleWithActionsRequest = () => {
-  const payload = typicalPayload();
+  const payload = getCreateRulesSchemaMock();
 
   return requestMock.create({
     method: 'post',
@@ -400,6 +342,8 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
+    author: ['Elastic'],
+    buildingBlockType: undefined,
     anomalyThreshold: undefined,
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
@@ -407,8 +351,10 @@ export const getResult = (): RuleAlertType => ({
     falsePositives: [],
     from: 'now-6m',
     immutable: false,
+    savedId: undefined,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
+    license: 'Elastic License',
     machineLearningJobId: undefined,
     outputIndex: '.siem-signals',
     timelineId: 'some-timeline-id',
@@ -424,8 +370,11 @@ export const getResult = (): RuleAlertType => ({
       },
     ],
     riskScore: 50,
+    riskScoreMapping: [],
+    ruleNameOverride: undefined,
     maxSignals: 100,
     severity: 'high',
+    severityMapping: [],
     to: 'now',
     type: 'query',
     threat: [
@@ -445,41 +394,12 @@ export const getResult = (): RuleAlertType => ({
         ],
       },
     ],
+    threshold: undefined,
+    timestampOverride: undefined,
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',
     version: 1,
-    exceptions_list: [
-      {
-        field: 'source.ip',
-        values_operator: 'included',
-        values_type: 'exists',
-      },
-      {
-        field: 'host.name',
-        values_operator: 'excluded',
-        values_type: 'match',
-        values: [
-          {
-            name: 'rock01',
-          },
-        ],
-        and: [
-          {
-            field: 'host.id',
-            values_operator: 'included',
-            values_type: 'match_all',
-            values: [
-              {
-                name: '123',
-              },
-              {
-                name: '678',
-              },
-            ],
-          },
-        ],
-      },
-    ],
+    exceptionsList: getListArrayMock(),
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -598,15 +518,16 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<
         alertId: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
         statusDate: '2020-02-18T15:26:49.783Z',
         status: 'succeeded',
-        lastFailureAt: null,
+        lastFailureAt: undefined,
         lastSuccessAt: '2020-02-18T15:26:49.783Z',
-        lastFailureMessage: null,
+        lastFailureMessage: undefined,
         lastSuccessMessage: 'succeeded',
         lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
         gap: '500.32',
         searchAfterTimeDurations: ['200.00'],
         bulkCreateTimeDurations: ['800.43'],
       },
+      score: 1,
       references: [],
       updated_at: '2020-02-18T15:26:51.333Z',
       version: 'WzQ2LDFd',
@@ -628,6 +549,7 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<
         searchAfterTimeDurations: ['200.00'],
         bulkCreateTimeDurations: ['800.43'],
       },
+      score: 1,
       references: [],
       updated_at: '2020-02-18T15:15:58.860Z',
       version: 'WzMyLDFd',

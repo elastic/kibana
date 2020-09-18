@@ -5,14 +5,17 @@
  */
 
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 import { NetworkContainer } from './pages';
-import { SiemPageName } from '../app/types';
+import { NotFoundPage } from '../app/404';
 
-export const getNetworkRoutes = () => [
-  <Route
-    path={`/:pageName(${SiemPageName.network})`}
-    render={({ location, match }) => <NetworkContainer location={location} url={match.url} />}
-  />,
-];
+export const NetworkRoutes = () => (
+  <Switch>
+    <Route
+      path="/"
+      render={({ location, match }) => <NetworkContainer location={location} url={match.url} />}
+    />
+    <Route render={() => <NotFoundPage />} />
+  </Switch>
+);

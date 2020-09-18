@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import './enter_button.scss';
 
 export interface SetupModeEnterButtonProps {
   enabled: boolean;
@@ -29,7 +30,7 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   }
 
   return (
-    <div className="monSetupModeEnterButton__buttonWrapper">
+    <div className="monSetupModeEnterButton__buttonWrapper" data-test-subj="monitoringSetupModeBtn">
       <EuiButton
         onClick={enterSetupMode}
         iconType="flag"

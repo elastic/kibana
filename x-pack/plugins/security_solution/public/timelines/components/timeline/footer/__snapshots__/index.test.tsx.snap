@@ -27,30 +27,34 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       >
         <EventsCount
           closePopover={[Function]}
-          documentType="events match the search criteria"
-          footerText="events match the search criteria"
+          documentType="events"
+          footerText="events"
           isOpen={false}
           items={
             Array [
               <EuiContextMenuItem
+                data-test-subj="items-per-page-option-1"
                 icon="empty"
                 onClick={[Function]}
               >
                 1 rows
               </EuiContextMenuItem>,
               <EuiContextMenuItem
+                data-test-subj="items-per-page-option-5"
                 icon="empty"
                 onClick={[Function]}
               >
                 5 rows
               </EuiContextMenuItem>,
               <EuiContextMenuItem
+                data-test-subj="items-per-page-option-10"
                 icon="empty"
                 onClick={[Function]}
               >
                 10 rows
               </EuiContextMenuItem>,
               <EuiContextMenuItem
+                data-test-subj="items-per-page-option-20"
                 icon="empty"
                 onClick={[Function]}
               >
@@ -69,10 +73,11 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       grow={false}
     >
       <PagingControl
+        activePage={0}
         data-test-subj="paging-control"
-        hasNextPage={true}
         isLoading={false}
-        loadMore={[Function]}
+        onPageClick={[Function]}
+        totalPages={2}
       />
     </EuiFlexItem>
     <EuiFlexItem

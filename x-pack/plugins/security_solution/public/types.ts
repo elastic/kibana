@@ -12,15 +12,20 @@ import { Start as NewsfeedStart } from '../../../../src/plugins/newsfeed/public'
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { IngestManagerStart } from '../../ingest_manager/public';
+import { PluginStart as ListsPluginStart } from '../../lists/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
 import { SecurityPluginSetup } from '../../security/public';
+import { AppFrontendLibs } from './common/lib/lib';
+import { ResolverPluginSetup } from './resolver/types';
+import { Inspect } from '../common/search_strategy';
 
 export interface SetupPlugins {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
   triggers_actions_ui: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
@@ -30,7 +35,8 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
-  ingestManager: IngestManagerStart;
+  ingestManager?: IngestManagerStart;
+  lists?: ListsPluginStart;
   newsfeed?: NewsfeedStart;
   triggers_actions_ui: TriggersActionsStart;
   uiActions: UiActionsStart;
@@ -39,9 +45,17 @@ export interface StartPlugins {
 export type StartServices = CoreStart &
   StartPlugins & {
     security: SecurityPluginSetup;
+    storage: Storage;
   };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
+export interface PluginSetup {
+  resolver: () => Promise<ResolverPluginSetup>;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
+
+export interface AppObservableLibs extends AppFrontendLibs {
+  kibana: CoreStart;
+}
+
+export type InspectResponse = Inspect & { response: string[] };

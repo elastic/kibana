@@ -31,10 +31,9 @@ import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
-import { getCoreStart, getUISettings } from '../../../../services';
+import { getCoreStart } from '../../../../services';
 
 export class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -154,7 +153,7 @@ export class TimeseriesVisualization extends Component {
     const styles = reactCSS({
       default: {
         tvbVis: {
-          backgroundColor: get(model, 'background_color'),
+          borderColor: get(model, 'background_color'),
         },
       },
     });
@@ -164,7 +163,6 @@ export class TimeseriesVisualization extends Component {
     const mainAxisGroupId = yAxisIdGenerator('main_group');
 
     const seriesModel = model.series.filter((s) => !s.hidden).map((s) => cloneDeep(s));
-    const enableHistogramMode = areFieldsDifferent('chart_type')(seriesModel);
     const firstSeries = seriesModel.find((s) => s.formatter && !s.separate_axis);
 
     const mainAxisScaleType = TimeseriesVisualization.getAxisScaleType(model);
@@ -237,19 +235,17 @@ export class TimeseriesVisualization extends Component {
       }
     });
 
-    const darkMode = getUISettings().get('theme:darkMode');
     return (
       <div className="tvbVis" style={styles.tvbVis}>
         <TimeSeries
           series={series}
           yAxis={yAxis}
           onBrush={onBrush}
-          enableHistogramMode={enableHistogramMode}
           backgroundColor={model.background_color}
-          darkMode={darkMode}
           showGrid={Boolean(model.show_grid)}
           legend={Boolean(model.show_legend)}
           legendPosition={model.legend_position}
+          tooltipMode={model.tooltip_mode}
           xAxisLabel={getAxisLabelString(interval)}
           xAxisFormatter={this.xAxisFormatter(interval)}
           annotations={this.prepareAnnotations()}

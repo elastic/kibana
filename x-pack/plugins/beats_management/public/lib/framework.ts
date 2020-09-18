@@ -5,10 +5,7 @@
  */
 
 import { difference, get } from 'lodash';
-import {
-  LICENSES,
-  LicenseType,
-} from '../../../../legacy/plugins/beats_management/common/constants/security';
+import { LICENSES, LicenseType } from '../../common/constants/security';
 import { FrameworkAdapter } from './adapters/framework/adapter_types';
 
 export class FrameworkLib {
@@ -58,6 +55,6 @@ export class FrameworkLib {
   public currentUserHasOneOfRoles(roles: string[]) {
     // If the user has at least one of the roles requested, the returnd difference will be less
     // then the orig array size. difference only compares based on the left side arg
-    return difference(roles, get<string[]>(this.currentUser, 'roles', [])).length < roles.length;
+    return difference(roles, get(this.currentUser, 'roles', []) as string[]).length < roles.length;
   }
 }

@@ -37,6 +37,7 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.activemqLogs.nameTitle', {
       defaultMessage: 'ActiveMQ logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.activemqLogs.shortDescription', {
       defaultMessage: 'Collect ActiveMQ logs with Filebeat.',

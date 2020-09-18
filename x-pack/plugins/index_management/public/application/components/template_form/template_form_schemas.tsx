@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 import {
   FormSchema,
@@ -28,6 +29,7 @@ const {
   startsWithField,
   indexPatternField,
   lowerCaseStringField,
+  isJsonField,
 } = fieldValidators;
 const { toInt } = fieldFormatters;
 const indexPatternInvalidCharacters = INVALID_INDEX_PATTERN_CHARS.join(' ');
@@ -123,13 +125,47 @@ export const schemas: Record<string, FormSchema> = {
         {
           validator: indexPatternField(i18n),
           type: VALIDATION_TYPES.ARRAY_ITEM,
+          isBlocking: false,
         },
       ],
+    },
+    dataStream: {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.datastreamLabel', {
+        defaultMessage: 'Create data stream',
+      }),
+      defaultValue: false,
+      serializer: (value) => {
+        if (value === true) {
+          // For now, ES expects an empty object when defining a data stream
+          // https://github.com/elastic/elasticsearch/pull/59317
+          return {};
+        }
+      },
+      deserializer: (value) => {
+        if (typeof value === 'boolean') {
+          return value;
+        }
+
+        /**
+         * For now, it is enough to have a "data_stream" declared on the index template
+         * to assume that the template creates a data stream. In the future, this condition
+         * might change
+         */
+        return value !== undefined;
+      },
     },
     order: {
       type: FIELD_TYPES.NUMBER,
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldOrderLabel', {
         defaultMessage: 'Order (optional)',
+      }),
+      formatters: [toInt],
+    },
+    priority: {
+      type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.fieldPriorityLabel', {
+        defaultMessage: 'Priority (optional)',
       }),
       formatters: [toInt],
     },
@@ -139,6 +175,50 @@ export const schemas: Record<string, FormSchema> = {
         defaultMessage: 'Version (optional)',
       }),
       formatters: [toInt],
+    },
+    _meta: {
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {
+        defaultMessage: '_meta field data (optional)',
+      }),
+      helpText: (
+        <FormattedMessage
+          id="xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorHelpText"
+          defaultMessage="Use JSON format: {code}"
+          values={{
+            code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
+          }}
+        />
+      ),
+      validations: [
+        {
+          validator: isJsonField(
+            i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorJsonError', {
+              defaultMessage: 'The _meta field JSON is not valid.',
+            }),
+            { allowEmptyString: true }
+          ),
+        },
+      ],
+      deserializer: (value: any) => {
+        if (value === '') {
+          return value;
+        }
+        return JSON.stringify(value, null, 2);
+      },
+      serializer: (value: string) => {
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          // swallow error and return non-parsed value;
+          return value;
+        }
+      },
+    },
+    addMeta: {
+      type: FIELD_TYPES.TOGGLE,
+      label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.addMetadataLabel', {
+        defaultMessage: 'Add metadata',
+      }),
     },
   },
 };

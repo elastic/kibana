@@ -31,7 +31,7 @@ export const seriesChangeHandler = (props, items) => (doc) => {
       const metric = newMetricAggFn();
       metric.type = doc.type;
       const incompatPipelines = ['calculation', 'series_agg'];
-      if (!_.contains(incompatPipelines, doc.type)) metric.field = doc.id;
+      if (!_.includes(incompatPipelines, doc.type)) metric.field = doc.id;
       return metric;
     });
   } else {

@@ -5,42 +5,32 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
 import { HeaderSection } from '../../../common/components/header_section';
-import { useUiSetting$ } from '../../../common/lib/kibana';
+import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import {
   ID as OverviewNetworkQueryId,
-  OverviewNetworkQuery,
+  useNetworkOverview,
 } from '../../containers/overview_network';
-import { inputsModel } from '../../../common/store/inputs';
 import { getOverviewNetworkStats, OverviewNetworkStats } from '../overview_network_stats';
-import { getNetworkUrl } from '../../../common/components/link_to';
+import { getNetworkUrl, useFormatUrl } from '../../../common/components/link_to';
 import { InspectButtonContainer } from '../../../common/components/inspect';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { SecurityPageName } from '../../../app/types';
+import { LinkButton } from '../../../common/components/links';
 
 export interface OverviewNetworkProps {
-  startDate: number;
-  endDate: number;
+  startDate: GlobalTimeArgs['from'];
+  endDate: GlobalTimeArgs['to'];
   filterQuery?: ESQuery | string;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
+  setQuery: GlobalTimeArgs['setQuery'];
 }
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
@@ -51,79 +41,91 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   startDate,
   setQuery,
 }) => {
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.network);
+  const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const urlSearch = useGetUrlSearch(navTabs.network);
+
+  const [loading, { overviewNetwork, id, inspect, refetch }] = useNetworkOverview({
+    endDate,
+    filterQuery,
+    startDate,
+  });
+
+  const goToNetwork = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+        path: getNetworkUrl(urlSearch),
+      });
+    },
+    [navigateToApp, urlSearch]
+  );
+
+  const networkEventsCount = useMemo(
+    () => getOverviewNetworkStats(overviewNetwork).reduce((total, stat) => total + stat.count, 0),
+    [overviewNetwork]
+  );
+  const formattedNetworkEventsCount = useMemo(
+    () => numeral(networkEventsCount).format(defaultNumberFormat),
+    [defaultNumberFormat, networkEventsCount]
+  );
+
   const networkPageButton = useMemo(
     () => (
-      <EuiButton href={getNetworkUrl(urlSearch)}>
+      <LinkButton
+        data-test-subj="overview-network-go-to-network-page"
+        onClick={goToNetwork}
+        href={formatUrl(getNetworkUrl())}
+      >
         <FormattedMessage
           id="xpack.securitySolution.overview.networkAction"
           defaultMessage="View network"
         />
-      </EuiButton>
+      </LinkButton>
     ),
-    [urlSearch]
+    [goToNetwork, formatUrl]
   );
+
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
-        <EuiPanel>
-          <OverviewNetworkQuery
-            data-test-subj="overview-network-query"
-            endDate={endDate}
-            filterQuery={filterQuery}
-            sourceId="default"
-            startDate={startDate}
-          >
-            {({ overviewNetwork, loading, id, inspect, refetch }) => {
-              const networkEventsCount = getOverviewNetworkStats(overviewNetwork).reduce(
-                (total, stat) => total + stat.count,
-                0
-              );
-              const formattedNetworkEventsCount = numeral(networkEventsCount).format(
-                defaultNumberFormat
-              );
-
-              return (
-                <>
-                  <HeaderSection
-                    id={OverviewNetworkQueryId}
-                    subtitle={
-                      !isEmpty(overviewNetwork) ? (
-                        <FormattedMessage
-                          defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
-                          id="xpack.securitySolution.overview.overviewNetwork.networkSubtitle"
-                          values={{
-                            formattedNetworkEventsCount,
-                            networkEventsCount,
-                          }}
-                        />
-                      ) : (
-                        <>{''}</>
-                      )
-                    }
-                    title={
-                      <FormattedMessage
-                        id="xpack.securitySolution.overview.networkTitle"
-                        defaultMessage="Network events"
-                      />
-                    }
-                  >
-                    {networkPageButton}
-                  </HeaderSection>
-
-                  <OverviewNetworkStatsManage
-                    loading={loading}
-                    data={overviewNetwork}
-                    id={id}
-                    inspect={inspect}
-                    setQuery={setQuery}
-                    refetch={refetch}
+        <EuiPanel data-test-subj="overview-network-query">
+          <>
+            <HeaderSection
+              id={OverviewNetworkQueryId}
+              subtitle={
+                !isEmpty(overviewNetwork) ? (
+                  <FormattedMessage
+                    defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
+                    id="xpack.securitySolution.overview.overviewNetwork.networkSubtitle"
+                    values={{
+                      formattedNetworkEventsCount,
+                      networkEventsCount,
+                    }}
                   />
-                </>
-              );
-            }}
-          </OverviewNetworkQuery>
+                ) : (
+                  <>{''}</>
+                )
+              }
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.overview.networkTitle"
+                  defaultMessage="Network events"
+                />
+              }
+            >
+              {networkPageButton}
+            </HeaderSection>
+
+            <OverviewNetworkStatsManage
+              loading={loading}
+              data={overviewNetwork}
+              id={id}
+              inspect={inspect}
+              setQuery={setQuery}
+              refetch={refetch}
+            />
+          </>
         </EuiPanel>
       </InspectButtonContainer>
     </EuiFlexItem>

@@ -66,7 +66,7 @@ export class FollowerIndicesTable extends PureComponent {
     if (prevFollowerIndices !== followerIndices) {
       return {
         prevFollowerIndices: followerIndices,
-        filteredClusters: getFilteredIndices(followerIndices, queryText),
+        filteredIndices: getFilteredIndices(followerIndices, queryText),
       };
     }
 

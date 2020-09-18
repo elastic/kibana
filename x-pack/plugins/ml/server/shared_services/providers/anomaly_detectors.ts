@@ -4,24 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
-import { LicenseCheck } from '../license_checks';
+import { KibanaRequest } from 'kibana/server';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
+import { GetGuards } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
-    callAsCurrentUser: APICaller
+    request: KibanaRequest
   ): {
-    jobs(jobId?: string): Promise<any>;
+    jobs(jobId?: string): Promise<{ count: number; jobs: Job[] }>;
   };
 }
 
-export function getAnomalyDetectorsProvider(isFullLicense: LicenseCheck): AnomalyDetectorsProvider {
+export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetectorsProvider {
   return {
-    anomalyDetectorsProvider(callAsCurrentUser: APICaller) {
+    anomalyDetectorsProvider(request: KibanaRequest) {
       return {
-        jobs(jobId?: string) {
-          isFullLicense();
-          return callAsCurrentUser('ml.jobs', jobId !== undefined ? { jobId } : {});
+        async jobs(jobId?: string) {
+          return await getGuards(request)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(async ({ scopedClient }) => {
+              const { body } = await scopedClient.asInternalUser.ml.getJobs<{
+                count: number;
+                jobs: Job[];
+              }>(jobId !== undefined ? { job_id: jobId } : undefined);
+              return body;
+            });
         },
       };
     },

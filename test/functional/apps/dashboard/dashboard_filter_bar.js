@@ -67,7 +67,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('uses default index pattern on an empty dashboard', async () => {
         await testSubjects.click('addFilter');
-        await dashboardExpect.fieldSuggestions(['bytes']);
+        await dashboardExpect.fieldSuggestions(['agent']);
+        await filterBar.ensureFieldEditorModalIsClosed();
       });
 
       it('shows index pattern of vis when one is added', async () => {
@@ -76,6 +77,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
         await dashboardExpect.fieldSuggestions(['animal']);
+        await filterBar.ensureFieldEditorModalIsClosed();
       });
 
       it('works when a vis with no index pattern is added', async () => {

@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestManagerStart, registerDatasource } from '../../../../../ingest_manager/public';
+import {
+  IngestManagerStart,
+  registerPackagePolicyComponent,
+} from '../../../../../ingest_manager/public';
 import {
   dataPluginMock,
   Start as DataPublicStartMock,
@@ -56,6 +59,9 @@ export const depsStartMock: () => DepsStartMock = () => {
 
   return {
     data: dataMock,
-    ingestManager: { success: true, registerDatasource },
+    ingestManager: {
+      isInitialized: () => Promise.resolve(true),
+      registerPackagePolicyComponent,
+    },
   };
 };

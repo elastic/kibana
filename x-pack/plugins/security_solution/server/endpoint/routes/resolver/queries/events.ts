@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
+import { esKuery } from '../../../../../../../../src/plugins/data/server';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
-import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { PaginationBuilder } from '../utils/pagination';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Builds a query for retrieving related events for a node.
  */
-export class EventsQuery extends ResolverQuery<PaginatedResults> {
+export class EventsQuery extends ResolverQuery<SafeResolverEvent[]> {
+  private readonly kqlQuery: JsonObject[] = [];
+
   constructor(
     private readonly pagination: PaginationBuilder,
-    indexPattern: string,
-    endpointID?: string
+    indexPattern: string | string[],
+    endpointID?: string,
+    kql?: string
   ) {
     super(indexPattern, endpointID);
+    if (kql) {
+      this.kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
+    }
   }
 
   protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
@@ -26,6 +33,7 @@ export class EventsQuery extends ResolverQuery<PaginatedResults> {
       query: {
         bool: {
           filter: [
+            ...this.kqlQuery,
             {
               terms: { 'endgame.unique_pid': uniquePIDs },
             },
@@ -45,11 +53,7 @@ export class EventsQuery extends ResolverQuery<PaginatedResults> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields(
-        uniquePIDs.length,
-        'endgame.serial_event_id',
-        'endgame.unique_pid'
-      ),
+      ...this.pagination.buildQueryFields('endgame.serial_event_id', 'desc'),
     };
   }
 
@@ -58,6 +62,7 @@ export class EventsQuery extends ResolverQuery<PaginatedResults> {
       query: {
         bool: {
           filter: [
+            ...this.kqlQuery,
             {
               terms: { 'process.entity_id': entityIDs },
             },
@@ -74,14 +79,11 @@ export class EventsQuery extends ResolverQuery<PaginatedResults> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields(entityIDs.length, 'event.id', 'process.entity_id'),
+      ...this.pagination.buildQueryFields('event.id', 'desc'),
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
-    return {
-      results: ResolverQuery.getResults(response),
-      totals: PaginationBuilder.getTotals(response.aggregations),
-    };
+  formatResponse(response: SearchResponse<SafeResolverEvent>): SafeResolverEvent[] {
+    return this.getResults(response);
   }
 }

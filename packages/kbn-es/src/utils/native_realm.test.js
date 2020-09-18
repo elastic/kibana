@@ -85,7 +85,7 @@ describe('isSecurityEnabled', () => {
       throw error;
     });
 
-    expect(await nativeRealm.isSecurityEnabled()).toBe(false);
+    expect(await nativeRealm.isSecurityEnabled({ maxAttempts: 1 })).toBe(false);
   });
 
   test('rejects if unexpected error is thrown', async () => {
@@ -97,9 +97,9 @@ describe('isSecurityEnabled', () => {
       throw error;
     });
 
-    await expect(nativeRealm.isSecurityEnabled()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"ResponseError"`
-    );
+    await expect(
+      nativeRealm.isSecurityEnabled({ maxAttempts: 1 })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"ResponseError"`);
   });
 });
 
@@ -226,7 +226,7 @@ describe('setPassword', () => {
     });
 
     await expect(
-      nativeRealm.setPassword('kibana_system', 'foo')
+      nativeRealm.setPassword('kibana_system', 'foo', { maxAttempts: 1 })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"SomeError"`);
   });
 });

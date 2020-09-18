@@ -18,11 +18,10 @@ import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { State } from '../../store/types';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { reArrangeProviders } from '../../../timelines/components/timeline/data_providers/helpers';
-import { ACTIVE_TIMELINE_REDUX_ID } from '../top_n';
 import { ADDED_TO_TIMELINE_MESSAGE } from '../../hooks/translations';
 import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
 import { displaySuccessToast, useStateToaster } from '../toasters';
-
+import { TimelineId } from '../../../../common/types/timeline';
 import {
   addFieldToTimelineColumns,
   addProviderToTimeline,
@@ -35,7 +34,7 @@ import {
   userIsReArrangingProviders,
 } from './helpers';
 
-// @ts-ignore
+// @ts-expect-error
 window['__react-beautiful-dnd-disable-dev-warnings'] = true;
 
 interface Props {
@@ -67,7 +66,7 @@ const onDragEndHandler = ({
       destination: result.destination,
       dispatch,
       source: result.source,
-      timelineId: ACTIVE_TIMELINE_REDUX_ID,
+      timelineId: TimelineId.active,
     });
   } else if (providerWasDroppedOnTimeline(result)) {
     addProviderToTimeline({
@@ -76,7 +75,7 @@ const onDragEndHandler = ({
       dispatch,
       onAddedToTimeline,
       result,
-      timelineId: ACTIVE_TIMELINE_REDUX_ID,
+      timelineId: TimelineId.active,
     });
   } else if (fieldWasDroppedOnTimelineColumns(result)) {
     addFieldToTimelineColumns({
@@ -126,10 +125,10 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
           }
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [dataProviders, activeTimelineDataProviders, browserFields]
     );
     return (
-      // @ts-ignore
       <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture} sensors={sensors}>
         {children}
       </DragDropContext>
@@ -151,7 +150,7 @@ const emptyActiveTimelineDataProviders: DataProvider[] = []; // stable reference
 
 const mapStateToProps = (state: State) => {
   const activeTimelineDataProviders =
-    timelineSelectors.getTimelineByIdSelector()(state, ACTIVE_TIMELINE_REDUX_ID)?.dataProviders ??
+    timelineSelectors.getTimelineByIdSelector()(state, TimelineId.active)?.dataProviders ??
     emptyActiveTimelineDataProviders;
   const dataProviders = dragAndDropSelectors.dataProvidersSelector(state) ?? emptyDataProviders;
 
@@ -167,18 +166,6 @@ export const DragDropContextWrapper = connector(DragDropContextWrapperComponent)
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 
 const onBeforeCapture = (before: BeforeCapture) => {
-  const x =
-    window.pageXOffset !== undefined
-      ? window.pageXOffset
-      : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
-
-  const y =
-    window.pageYOffset !== undefined
-      ? window.pageYOffset
-      : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-
-  window.onscroll = () => window.scrollTo(x, y);
-
   if (!draggableIsField(before)) {
     document.body.classList.add(IS_DRAGGING_CLASS_NAME);
   }

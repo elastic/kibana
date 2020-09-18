@@ -25,23 +25,48 @@ const defaultProps = {
   scalingType: SCALING_TYPES.LIMIT,
   supportsClustering: true,
   termFields: [],
+  topHitsSplitField: null,
   topHitsSize: 1,
+  supportsMvt: true,
+  mvtDisabledReason: null,
 };
 
-test('should render', async () => {
-  const component = shallow(<ScalingForm {...defaultProps} />);
+describe('scaling form', () => {
+  test('should render', async () => {
+    const component = shallow(<ScalingForm {...defaultProps} />);
 
-  expect(component).toMatchSnapshot();
-});
+    expect(component).toMatchSnapshot();
+  });
 
-test('should not render clusters option when clustering is not supported', async () => {
-  const component = shallow(<ScalingForm {...defaultProps} supportsClustering={false} />);
+  test('should disable clusters option when clustering is not supported', async () => {
+    const component = shallow(
+      <ScalingForm
+        {...defaultProps}
+        supportsClustering={false}
+        clusteringDisabledReason="Simulated clustering disabled"
+      />
+    );
 
-  expect(component).toMatchSnapshot();
-});
+    expect(component).toMatchSnapshot();
+  });
 
-test('should render top hits form when scaling type is TOP_HITS', async () => {
-  const component = shallow(<ScalingForm {...defaultProps} scalingType={SCALING_TYPES.TOP_HITS} />);
+  test('should render top hits form when scaling type is TOP_HITS', async () => {
+    const component = shallow(
+      <ScalingForm {...defaultProps} scalingType={SCALING_TYPES.TOP_HITS} />
+    );
 
-  expect(component).toMatchSnapshot();
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should disable mvt option when mvt is not supported', async () => {
+    const component = shallow(
+      <ScalingForm
+        {...defaultProps}
+        supportsMvt={false}
+        mvtDisabledReason={'Simulated mvt disabled'}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
 });

@@ -5,12 +5,12 @@
  */
 
 import * as rt from 'io-ts';
+import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const exportTimelinesQuerySchema = rt.type({
   file_name: rt.string,
-  exclude_export_details: rt.union([rt.literal('true'), rt.literal('false')]),
 });
 
-export const exportTimelinesRequestBodySchema = rt.type({
-  ids: rt.array(rt.string),
+export const exportTimelinesRequestBodySchema = rt.partial({
+  ids: unionWithNullType(rt.array(rt.string)),
 });

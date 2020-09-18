@@ -9,13 +9,12 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../../../../graphql/types';
+import { Ecs } from '../../../../../../../common/ecs';
 import {
   DragEffects,
   DraggableWrapper,
 } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
-import { ExternalLinkIcon } from '../../../../../../common/components/external_link_icon';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';
 import { Provider } from '../../../data_providers/provider';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
@@ -120,7 +119,6 @@ export const Link = React.memo<LinkProps>(({ value, link }) => {
         <LinkFlexItem grow={false}>
           <div>
             <GoogleLink link={link}>{value}</GoogleLink>
-            <ExternalLinkIcon />
           </div>
         </LinkFlexItem>
       );
@@ -129,7 +127,6 @@ export const Link = React.memo<LinkProps>(({ value, link }) => {
         <LinkFlexItem grow={false}>
           <div>
             <GoogleLink link={value} />
-            <ExternalLinkIcon />
           </div>
         </LinkFlexItem>
       );

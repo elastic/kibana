@@ -1,11 +1,6 @@
-// This file is built by both the legacy and KP build systems so we need to
-// import this explicitly
-@import '../../legacy/ui/public/styles/_styling_constants';
-
+@import './variables';
 @import './core';
 @import './chrome/index';
 @import './overlays/index';
 @import './rendering/index';
-
-// Global styles need to be migrated
-@import '../../legacy/ui/public/styles/_legacy/_index';
+@import './styles/index';

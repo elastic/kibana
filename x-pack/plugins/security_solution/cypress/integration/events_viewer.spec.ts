@@ -10,6 +10,7 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
 } from '../screens/fields_browser';
 import {
+  EVENTS_PAGE,
   HEADER_SUBTITLE,
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
@@ -29,12 +30,12 @@ import {
   dragAndDropColumn,
   openEventsViewerFieldsBrowser,
   opensInspectQueryModal,
-  resetFields,
   waitsForEventsToBeLoaded,
 } from '../tasks/hosts/events';
-import { clearSearchBar, kqlSearch } from '../tasks/siem_header';
+import { clearSearchBar, kqlSearch } from '../tasks/security_header';
 
-import { HOSTS_PAGE } from '../urls/navigation';
+import { HOSTS_URL } from '../urls/navigation';
+import { resetFields } from '../tasks/timeline';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -46,10 +47,11 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', () => {
+// https://github.com/elastic/kibana/issues/70757
+describe.skip('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
 
@@ -75,7 +77,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer query modal', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
 
@@ -93,7 +95,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer fields behaviour', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
 
@@ -124,7 +126,7 @@ describe('Events Viewer', () => {
 
   context('Events behaviour', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
     });
@@ -153,9 +155,9 @@ describe('Events Viewer', () => {
     });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
-      loginAndWaitForPage(HOSTS_PAGE);
+      loginAndWaitForPage(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
     });
@@ -171,6 +173,7 @@ describe('Events Viewer', () => {
       const expectedOrderAfterDragAndDrop =
         'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
+      cy.get(EVENTS_PAGE).scrollTo('bottom');
       cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
       dragAndDropColumn({ column: 0, newPosition: 1 });
       cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);

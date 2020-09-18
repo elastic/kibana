@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 
 const fixedPageSize: number = 8;
 
@@ -26,12 +26,17 @@ interface Props {
 }
 
 export const SourceSelection: FC<Props> = ({ onClose }) => {
-  const { uiSettings, savedObjects } = useMlKibana().services;
+  const {
+    services: { savedObjects, uiSettings },
+  } = useMlKibana();
+  const navigateToPath = useNavigateToPath();
 
-  const onSearchSelected = (id: string, type: string) => {
-    window.location.href = `ml#/data_frame_analytics/new_job?${
-      type === 'index-pattern' ? 'index' : 'savedSearchId'
-    }=${encodeURIComponent(id)}`;
+  const onSearchSelected = async (id: string, type: string) => {
+    await navigateToPath(
+      `/data_frame_analytics/new_job?${
+        type === 'index-pattern' ? 'index' : 'savedSearchId'
+      }=${encodeURIComponent(id)}`
+    );
   };
 
   return (

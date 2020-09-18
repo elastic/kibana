@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
+import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { AlertsComponentQueryProps } from './types';
 
@@ -48,7 +49,13 @@ export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQu
     [pageFilters]
   );
 
-  return <AlertsView {...rest} pageFilters={hostPageFilters} />;
+  return (
+    <AlertsView
+      timelineId={TimelineId.hostsPageExternalAlerts}
+      {...rest}
+      pageFilters={hostPageFilters}
+    />
+  );
 });
 
 HostAlertsQueryTabBody.displayName = 'HostAlertsQueryTabBody';

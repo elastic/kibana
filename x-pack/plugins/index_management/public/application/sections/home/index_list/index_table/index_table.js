@@ -13,7 +13,6 @@ import qs from 'query-string';
 import {
   EuiButton,
   EuiCallOut,
-  EuiHealth,
   EuiLink,
   EuiCheckbox,
   EuiFlexGroup,
@@ -33,15 +32,16 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { healthToColor } from '../../../../services';
+import { encodePathForReactRouter } from '../../../../services/routing';
+import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
-import { NoMatch, PageErrorForbidden } from '../../../../components';
+import { NoMatch, PageErrorForbidden, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const HEADERS = {
@@ -73,7 +73,7 @@ const HEADERS = {
 
 export class IndexTable extends Component {
   static getDerivedStateFromProps(props, state) {
-    // Deselct any indices which no longer exist, e.g. they've been deleted.
+    // Deselect any indices which no longer exist, e.g. they've been deleted.
     const { selectedIndicesMap } = state;
     const indexNames = props.indices.map((index) => index.name);
     const selectedIndexNames = Object.keys(selectedIndicesMap);
@@ -117,7 +117,13 @@ export class IndexTable extends Component {
       }
     }
   }
+
   componentWillUnmount() {
+    // When you deep-link to an index from the data streams tab, the hidden indices are toggled on.
+    // However, this state is lost when you navigate away. We need to clear the filter too, or else
+    // navigating back to this tab would just show an empty list because the backing indices
+    // would be hidden.
+    this.props.filterChanged('');
     clearInterval(this.interval);
   }
 
@@ -146,11 +152,14 @@ export class IndexTable extends Component {
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
     sortChanged(column, newIsSortAscending);
   };
+
   renderFilterError() {
     const { filterError } = this.state;
+
     if (!filterError) {
       return;
     }
+
     return (
       <>
         <EuiSpacer />
@@ -169,6 +178,7 @@ export class IndexTable extends Component {
       </>
     );
   }
+
   onFilterChanged = ({ query, error }) => {
     if (error) {
       this.setState({ filterError: error });
@@ -177,6 +187,7 @@ export class IndexTable extends Component {
       this.setState({ filterError: null });
     }
   };
+
   getFilters = (extensionsService) => {
     const { allIndices } = this.props;
     return extensionsService.filters.reduce((accum, filterExtension) => {
@@ -184,6 +195,7 @@ export class IndexTable extends Component {
       return [...accum, ...filtersToAdd];
     }, []);
   };
+
   toggleAll = () => {
     const allSelected = this.areAllItemsSelected();
     if (allSelected) {
@@ -243,9 +255,10 @@ export class IndexTable extends Component {
   }
 
   buildRowCell(fieldName, value, index, appServices) {
-    const { openDetailPanel, filterChanged } = this.props;
+    const { openDetailPanel, filterChanged, history } = this.props;
+
     if (fieldName === 'health') {
-      return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
+      return <DataHealth health={value} />;
     } else if (fieldName === 'name') {
       return (
         <Fragment>
@@ -261,7 +274,20 @@ export class IndexTable extends Component {
           {renderBadges(index, filterChanged, appServices.extensionsService)}
         </Fragment>
       );
+    } else if (fieldName === 'data_stream') {
+      return (
+        <EuiLink
+          data-test-subj="dataStreamLink"
+          {...reactRouterNavigate(history, {
+            pathname: `/data_streams/${encodePathForReactRouter(value)}`,
+            search: '?isDeepLink=true',
+          })}
+        >
+          {value}
+        </EuiLink>
+      );
     }
+
     return value;
   }
 
@@ -471,21 +497,37 @@ export class IndexTable extends Component {
             <Fragment>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={true}>
-                  <EuiTitle size="s">
-                    <EuiText color="subdued">
-                      <FormattedMessage
-                        id="xpack.idxMgmt.home.idxMgmtDescription"
-                        defaultMessage="Update your Elasticsearch indices individually or in bulk."
-                      />
-                    </EuiText>
-                  </EuiTitle>
+                  <EuiText color="subdued">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.home.idxMgmtDescription"
+                      defaultMessage="Update your Elasticsearch indices individually or in bulk. {learnMoreLink}"
+                      values={{
+                        learnMoreLink: (
+                          <EuiLink
+                            href={documentationService.getIdxMgmtDocumentationLink()}
+                            target="_blank"
+                            external
+                          >
+                            {i18n.translate(
+                              'xpack.idxMgmt.indexTableDescription.learnMoreLinkText',
+                              {
+                                defaultMessage: 'Learn more.',
+                              }
+                            )}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiText>
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                     <EuiFlexGroup>
                       {extensionsService.toggles.map((toggle) => {
                         return this.renderToggleControl(toggle);
                       })}
+
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
@@ -504,9 +546,13 @@ export class IndexTable extends Component {
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
+
               <EuiSpacer size="l" />
+
               {this.renderBanners(extensionsService)}
+
               {indicesError && this.renderError()}
+
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 {atLeastOneItemSelected ? (
                   <EuiFlexItem grow={false}>
@@ -523,6 +569,7 @@ export class IndexTable extends Component {
                     />
                   </EuiFlexItem>
                 ) : null}
+
                 {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                   <Fragment>
                     <EuiFlexItem>
@@ -572,11 +619,14 @@ export class IndexTable extends Component {
                   </Fragment>
                 )}
               </EuiFlexGroup>
+
               {this.renderFilterError()}
+
               <EuiSpacer size="m" />
+
               {indices.length > 0 ? (
                 <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                  <EuiTable className="indTable">
+                  <EuiTable className="indTable" data-test-subj="indexTable">
                     <EuiScreenReaderOnly>
                       <caption role="status" aria-relevant="text" aria-live="polite">
                         <FormattedMessage
@@ -586,6 +636,7 @@ export class IndexTable extends Component {
                         />
                       </caption>
                     </EuiScreenReaderOnly>
+
                     <EuiTableHeader>
                       <EuiTableHeaderCellCheckbox>
                         <EuiCheckbox
@@ -603,13 +654,16 @@ export class IndexTable extends Component {
                       </EuiTableHeaderCellCheckbox>
                       {this.buildHeader()}
                     </EuiTableHeader>
+
                     <EuiTableBody>{this.buildRows(services)}</EuiTableBody>
                   </EuiTable>
                 </div>
               ) : (
                 emptyState
               )}
+
               <EuiSpacer size="m" />
+
               {indices.length > 0 ? this.renderPager() : null}
             </Fragment>
           );

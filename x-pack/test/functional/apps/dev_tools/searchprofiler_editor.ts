@@ -12,13 +12,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const aceEditor = getService('aceEditor');
   const retry = getService('retry');
+  const security = getService('security');
 
   const editorTestSubjectSelector = 'searchProfilerEditor';
 
   describe('Search Profiler Editor', () => {
     before(async () => {
+      await security.testUser.setRoles(['global_devtools_read']);
       await PageObjects.common.navigateToApp('searchProfiler');
       expect(await testSubjects.exists('searchProfilerEditor')).to.be(true);
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('correctly parses triple quotes in JSON', async () => {

@@ -1,11 +1,11 @@
 {
   "job_type": "anomaly_detector",
   "groups": [
-      "siem",
-      "winlogbeat",
-      "system"
+    "security",
+    "winlogbeat",
+    "system"
   ],
-  "description": "SIEM Winlogbeat:  Looks for rare and unusual Windows services which may indicate execution of unauthorized services, malware, or persistence mechanisms (beta)",
+  "description": "Security: Winlogbeat - Looks for rare and unusual Windows services which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -32,7 +32,7 @@
     "custom_urls": [
       {
         "url_name": "Host Details",
-        "url_value": "siem#/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
     ]
   }

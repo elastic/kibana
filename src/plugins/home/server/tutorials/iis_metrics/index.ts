@@ -36,6 +36,7 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
     name: i18n.translate('home.tutorials.iisMetrics.nameTitle', {
       defaultMessage: 'IIS Metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.iisMetrics.shortDescription', {
       defaultMessage: 'Collect IIS server related metrics.',

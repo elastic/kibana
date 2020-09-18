@@ -7,7 +7,6 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -15,12 +14,14 @@ import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   RENDER_AS,
   GRID_RESOLUTION,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
+import { makeESBbox } from '../../../../common/elasticsearch_geo_utils';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -41,7 +42,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
       id: uuid(),
       indexPatternId,
       geoField,
-      metrics: metrics ? metrics : [],
+      metrics: metrics ? metrics : [DEFAULT_METRIC],
       requestType,
       resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
     };
@@ -102,7 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  isJoinable() {
+  showJoinEditor() {
     return false;
   }
 
@@ -146,6 +147,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     registerCancelCallback,
     bucketsPerGrid,
     isRequestStillActive,
+    bufferedExtent,
   }) {
     const gridsPerRequest = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs = {
@@ -156,6 +158,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             {
               gridSplit: {
                 geotile_grid: {
+                  bounds: makeESBbox(bufferedExtent),
                   field: this._descriptor.geoField,
                   precision,
                 },
@@ -234,12 +237,16 @@ export class ESGeoGridSource extends AbstractESAggSource {
     precision,
     layerName,
     registerCancelCallback,
+    bufferedExtent,
   }) {
     searchSource.setField('aggs', {
       gridSplit: {
         geotile_grid: {
+          bounds: makeESBbox(bufferedExtent),
           field: this._descriptor.geoField,
           precision,
+          size: DEFAULT_MAX_BUCKETS_LIMIT,
+          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
         },
         aggs: {
           gridCentroid: {
@@ -282,6 +289,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             precision: searchFilters.geogridPrecision,
             layerName,
             registerCancelCallback,
+            bufferedExtent: searchFilters.buffer,
           })
         : await this._compositeAggRequest({
             searchSource,
@@ -291,6 +299,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             registerCancelCallback,
             bucketsPerGrid,
             isRequestStillActive,
+            bufferedExtent: searchFilters.buffer,
           });
 
     return {
@@ -300,7 +309,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
       },
       meta: {
         areResultsTrimmed: false,
-        sourceType: SOURCE_TYPES.ES_GEO_GRID,
       },
     };
   }
@@ -313,16 +321,12 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
-  }
-
   async getSupportedShapeTypes() {
     if (this._descriptor.requestType === RENDER_AS.GRID) {
-      return [VECTOR_SHAPE_TYPES.POLYGON];
+      return [VECTOR_SHAPE_TYPE.POLYGON];
     }
 
-    return [VECTOR_SHAPE_TYPES.POINT];
+    return [VECTOR_SHAPE_TYPE.POINT];
   }
 }
 

@@ -25,8 +25,9 @@ import { createMetricVisFn } from './metric_vis_fn';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService } from './services';
+import { setFormatService, setI18n } from './services';
 import { ConfigSchema } from '../config';
+import { metricVisRenderer } from './metric_vis_renderer';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
@@ -53,10 +54,12 @@ export class MetricVisPlugin implements Plugin<void, void> {
     { expressions, visualizations, charts }: MetricVisPluginSetupDependencies
   ) {
     expressions.registerFunction(createMetricVisFn);
-    visualizations.createReactVisualization(createMetricVisTypeDefinition());
+    expressions.registerRenderer(metricVisRenderer);
+    visualizations.createBaseVisualization(createMetricVisTypeDefinition());
   }
 
   public start(core: CoreStart, { data }: MetricVisPluginStartDependencies) {
+    setI18n(core.i18n);
     setFormatService(data.fieldFormats);
   }
 }

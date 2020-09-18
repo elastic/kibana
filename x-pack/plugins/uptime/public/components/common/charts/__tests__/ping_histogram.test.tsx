@@ -6,9 +6,14 @@
 
 import React from 'react';
 import { PingHistogramComponent, PingHistogramComponentProps } from '../ping_histogram';
-import { renderWithRouter, shallowWithRouter } from '../../../../lib';
+import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
+import moment from 'moment';
 
 describe('PingHistogram component', () => {
+  beforeAll(() => {
+    moment.prototype.fromNow = jest.fn(() => 'a year ago');
+  });
+
   const props: PingHistogramComponentProps = {
     absoluteStartDate: 1548697920000,
     absoluteEndDate: 1548700920000,
@@ -49,7 +54,12 @@ describe('PingHistogram component', () => {
   });
 
   it('renders the component without errors', () => {
-    const component = renderWithRouter(<PingHistogramComponent {...props} />);
+    const component = renderWithRouter(
+      <MountWithReduxProvider>
+        <PingHistogramComponent {...props} />
+      </MountWithReduxProvider>
+    );
+
     expect(component).toMatchSnapshot();
   });
 });

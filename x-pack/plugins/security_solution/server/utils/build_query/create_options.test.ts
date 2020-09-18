@@ -34,9 +34,19 @@ describe('createOptions', () => {
       pagination: {
         limit: 5,
       },
+      docValueFields: [
+        {
+          field: '@timestamp',
+          format: 'date_time',
+        },
+        {
+          field: 'event.end',
+          format: 'date_time',
+        },
+      ],
       timerange: {
-        from: 10,
-        to: 0,
+        from: '2020-07-08T08:00:00.000Z',
+        to: '2020-07-08T20:00:00.000Z',
         interval: '12 hours ago',
       },
       sortField: { sortFieldId: 'sort-1', direction: Direction.asc },
@@ -73,10 +83,20 @@ describe('createOptions', () => {
         limit: 5,
       },
       filterQuery: {},
+      docValueFields: [
+        {
+          field: '@timestamp',
+          format: 'date_time',
+        },
+        {
+          field: 'event.end',
+          format: 'date_time',
+        },
+      ],
       fields: [],
       timerange: {
-        from: 10,
-        to: 0,
+        from: '2020-07-08T08:00:00.000Z',
+        to: '2020-07-08T20:00:00.000Z',
         interval: '12 hours ago',
       },
     };
@@ -102,10 +122,51 @@ describe('createOptions', () => {
         limit: 5,
       },
       filterQuery: {},
+      docValueFields: [
+        {
+          field: '@timestamp',
+          format: 'date_time',
+        },
+        {
+          field: 'event.end',
+          format: 'date_time',
+        },
+      ],
       fields: [],
       timerange: {
-        from: 10,
-        to: 0,
+        from: '2020-07-08T08:00:00.000Z',
+        to: '2020-07-08T20:00:00.000Z',
+        interval: '12 hours ago',
+      },
+    };
+    expect(options).toEqual(expected);
+  });
+
+  test('should create options given all input except docValueFields', () => {
+    const argsWithoutSort: Args = omit('docValueFields', args);
+    const options = createOptions(source, argsWithoutSort, info);
+    const expected: RequestOptions = {
+      defaultIndex: DEFAULT_INDEX_PATTERN,
+      sourceConfiguration: {
+        fields: {
+          host: 'host-1',
+          container: 'container-1',
+          message: ['message-1'],
+          pod: 'pod-1',
+          tiebreaker: 'tiebreaker',
+          timestamp: 'timestamp-1',
+        },
+      },
+      sortField: { sortFieldId: 'sort-1', direction: Direction.asc },
+      pagination: {
+        limit: 5,
+      },
+      filterQuery: {},
+      docValueFields: [],
+      fields: [],
+      timerange: {
+        from: '2020-07-08T08:00:00.000Z',
+        to: '2020-07-08T20:00:00.000Z',
         interval: '12 hours ago',
       },
     };

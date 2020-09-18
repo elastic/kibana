@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["bfetch"],
-  "optionalPlugins": []
+  "requiredPlugins": ["bfetch", "developerExamples"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
 }

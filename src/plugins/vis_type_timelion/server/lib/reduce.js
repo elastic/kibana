@@ -42,7 +42,7 @@ async function pairwiseReduce(left, right, fn) {
   if (allSeriesContainKey(left, 'split') && allSeriesContainKey(right, 'split')) {
     pairwiseField = 'split';
   }
-  const indexedList = _.indexBy(right.list, pairwiseField);
+  const indexedList = _.keyBy(right.list, pairwiseField);
 
   // ensure seriesLists contain same pairwise labels
   left.list.forEach((leftSeries) => {

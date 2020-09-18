@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, pluck, min, max, last } from 'lodash';
+import { get, map, min, max, last } from 'lodash';
 import { filterPartialBuckets } from '../../../filter_partial_buckets';
 import { metrics } from '../../../metrics';
 
@@ -76,14 +76,14 @@ function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime,
   /* it's possible that no data exists for the type of metric. For example,
    * node_cgroup_throttled data could be completely null if there is no cgroup
    * throttling. */
-  const allValues = pluck(mappedData, 'y');
+  const allValues = map(mappedData, 'y');
   if (allValues.join(',') === '') {
     return; // no data exists for this type of metric
   }
 
-  const minVal = min(pluck(mappedData, 'y'));
-  const maxVal = max(pluck(mappedData, 'y'));
-  const lastVal = last(pluck(mappedData, 'y'));
+  const minVal = min(map(mappedData, 'y'));
+  const maxVal = max(map(mappedData, 'y'));
+  const lastVal = last(map(mappedData, 'y'));
   const slope = calcSlope(mappedData) > 0 ? 1 : -1; // no need for the entire precision, it's just an up/down arrow
 
   return {

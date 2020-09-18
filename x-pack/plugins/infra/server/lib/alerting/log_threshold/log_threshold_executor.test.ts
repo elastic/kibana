@@ -4,308 +4,618 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createLogThresholdExecutor } from './log_threshold_executor';
+import {
+  getPositiveComparators,
+  getNegativeComparators,
+  queryMappings,
+  buildFiltersFromCriteria,
+  getUngroupedESQuery,
+  getGroupedESQuery,
+  processUngroupedResults,
+  processGroupByResults,
+} from './log_threshold_executor';
 import {
   Comparator,
   AlertStates,
   LogDocumentCountAlertParams,
   Criterion,
+  UngroupedSearchQueryResponse,
+  GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/types';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
-import {
-  alertsMock,
-  AlertInstanceMock,
-  AlertServicesMock,
-} from '../../../../../alerts/server/mocks';
-import { libsMock } from './mocks';
+import { alertsMock } from '../../../../../alerts/server/mocks';
 
-interface AlertTestInstance {
-  instance: AlertInstanceMock;
-  actionQueue: any[];
-  state: any;
-}
+// Mocks //
+const numericField = {
+  field: 'numericField',
+  value: 10,
+};
 
-/*
- * Mocks
- */
-const alertInstances = new Map();
+const keywordField = {
+  field: 'keywordField',
+  value: 'error',
+};
 
-const services: AlertServicesMock = alertsMock.createAlertServices();
-services.alertInstanceFactory.mockImplementation((instanceId: string) => {
-  const alertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertInstanceFactory(),
-    actionQueue: [],
-    state: {},
-  };
-  alertInstance.instance.replaceState.mockImplementation((newState: any) => {
-    alertInstance.state = newState;
-    return alertInstance.instance;
+const textField = {
+  field: 'textField',
+  value: 'Something went wrong',
+};
+
+const positiveCriteria: Criterion[] = [
+  { ...numericField, comparator: Comparator.GT },
+  { ...numericField, comparator: Comparator.GT_OR_EQ },
+  { ...numericField, comparator: Comparator.LT },
+  { ...numericField, comparator: Comparator.LT_OR_EQ },
+  { ...keywordField, comparator: Comparator.EQ },
+  { ...textField, comparator: Comparator.MATCH },
+  { ...textField, comparator: Comparator.MATCH_PHRASE },
+];
+
+const negativeCriteria: Criterion[] = [
+  { ...keywordField, comparator: Comparator.NOT_EQ },
+  { ...textField, comparator: Comparator.NOT_MATCH },
+  { ...textField, comparator: Comparator.NOT_MATCH_PHRASE },
+];
+
+const baseAlertParams: Pick<LogDocumentCountAlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
+  count: {
+    comparator: Comparator.GT,
+    value: 5,
+  },
+  timeSize: 5,
+  timeUnit: 'm',
+};
+
+const TIMESTAMP_FIELD = '@timestamp';
+const FILEBEAT_INDEX = 'filebeat-*';
+
+describe('Log threshold executor', () => {
+  describe('Comparators', () => {
+    test('Correctly categorises positive comparators', () => {
+      expect(getPositiveComparators().length).toBe(7);
+    });
+
+    test('Correctly categorises negative comparators', () => {
+      expect(getNegativeComparators().length).toBe(3);
+    });
+
+    test('There is a query mapping for every comparator', () => {
+      const comparators = [...getPositiveComparators(), ...getNegativeComparators()];
+      expect(Object.keys(queryMappings).length).toBe(comparators.length);
+    });
   });
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
-
-  alertInstances.set(instanceId, alertInstance);
-
-  return alertInstance.instance;
-});
-
-/*
- * Helper functions
- */
-function getAlertState(instanceId: string): AlertStates {
-  const alert = alertInstances.get(instanceId);
-  if (alert) {
-    return alert.state.alertState;
-  } else {
-    throw new Error('Could not find alert instance `' + instanceId + '`');
-  }
-}
-
-/*
- * Executor instance (our test subject)
- */
-const executor = (createLogThresholdExecutor('test', libsMock) as unknown) as (opts: {
-  params: LogDocumentCountAlertParams;
-  services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
-}) => Promise<void>;
-
-// Wrapper to test
-type Comparison = [number, Comparator, number];
-async function callExecutor(
-  [value, comparator, threshold]: Comparison,
-  criteria: Criterion[] = []
-) {
-  services.callCluster.mockImplementationOnce(async (..._) => ({ count: value }));
-
-  return await executor({
-    services,
-    params: {
-      count: { value: threshold, comparator },
-      timeSize: 1,
-      timeUnit: 'm',
-      criteria,
-    },
-  });
-}
-
-describe('Comparators trigger alerts correctly', () => {
-  it('does not alert when counts do not reach the threshold', async () => {
-    await callExecutor([0, Comparator.GT, 1]);
-    expect(getAlertState('test')).toBe(AlertStates.OK);
-
-    await callExecutor([0, Comparator.GT_OR_EQ, 1]);
-    expect(getAlertState('test')).toBe(AlertStates.OK);
-
-    await callExecutor([1, Comparator.LT, 0]);
-    expect(getAlertState('test')).toBe(AlertStates.OK);
-
-    await callExecutor([1, Comparator.LT_OR_EQ, 0]);
-    expect(getAlertState('test')).toBe(AlertStates.OK);
-  });
-
-  it('alerts when counts reach the threshold', async () => {
-    await callExecutor([2, Comparator.GT, 1]);
-    expect(getAlertState('test')).toBe(AlertStates.ALERT);
-
-    await callExecutor([1, Comparator.GT_OR_EQ, 1]);
-    expect(getAlertState('test')).toBe(AlertStates.ALERT);
-
-    await callExecutor([1, Comparator.LT, 2]);
-    expect(getAlertState('test')).toBe(AlertStates.ALERT);
-
-    await callExecutor([2, Comparator.LT_OR_EQ, 2]);
-    expect(getAlertState('test')).toBe(AlertStates.ALERT);
-  });
-});
-
-describe('Comparators create the correct ES queries', () => {
-  beforeEach(() => {
-    services.callCluster.mockReset();
-  });
-
-  it('Works with `Comparator.EQ`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.EQ, value: 'bar' }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ term: { foo: { value: 'bar' } } }],
+  describe('Criteria filter building', () => {
+    test('Handles positive criteria', () => {
+      const alertParams: LogDocumentCountAlertParams = {
+        ...baseAlertParams,
+        criteria: positiveCriteria,
+      };
+      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
+      expect(filters.mustFilters).toEqual([
+        {
+          range: {
+            numericField: {
+              gt: 10,
+            },
+          },
         },
-      },
+        {
+          range: {
+            numericField: {
+              gte: 10,
+            },
+          },
+        },
+        {
+          range: {
+            numericField: {
+              lt: 10,
+            },
+          },
+        },
+        {
+          range: {
+            numericField: {
+              lte: 10,
+            },
+          },
+        },
+        {
+          term: {
+            keywordField: {
+              value: 'error',
+            },
+          },
+        },
+        {
+          match: {
+            textField: 'Something went wrong',
+          },
+        },
+        {
+          match_phrase: {
+            textField: 'Something went wrong',
+          },
+        },
+      ]);
+    });
+
+    test('Handles negative criteria', () => {
+      const alertParams: LogDocumentCountAlertParams = {
+        ...baseAlertParams,
+        criteria: negativeCriteria,
+      };
+      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
+
+      expect(filters.mustNotFilters).toEqual([
+        {
+          term: {
+            keywordField: {
+              value: 'error',
+            },
+          },
+        },
+        {
+          match: {
+            textField: 'Something went wrong',
+          },
+        },
+        {
+          match_phrase: {
+            textField: 'Something went wrong',
+          },
+        },
+      ]);
+    });
+
+    test('Handles time range', () => {
+      const alertParams: LogDocumentCountAlertParams = { ...baseAlertParams, criteria: [] };
+      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
+      expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
+      expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
+      expect(filters.rangeFilter.range[TIMESTAMP_FIELD].format).toBe('epoch_millis');
+
+      expect(typeof filters.groupedRangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
+      expect(typeof filters.groupedRangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
+      expect(filters.groupedRangeFilter.range[TIMESTAMP_FIELD].format).toBe('epoch_millis');
     });
   });
 
-  it('works with `Comparator.NOT_EQ`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.NOT_EQ, value: 'bar' }]
-    );
+  describe('ES queries', () => {
+    describe('Query generation', () => {
+      test('Correctly generates ungrouped queries', () => {
+        const alertParams: LogDocumentCountAlertParams = {
+          ...baseAlertParams,
+          criteria: [...positiveCriteria, ...negativeCriteria],
+        };
+        const query = getUngroupedESQuery(alertParams, TIMESTAMP_FIELD, FILEBEAT_INDEX);
+        expect(query).toEqual({
+          index: 'filebeat-*',
+          allowNoIndices: true,
+          ignoreUnavailable: true,
+          body: {
+            track_total_hits: true,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: expect.any(Number),
+                        lte: expect.any(Number),
+                        format: 'epoch_millis',
+                      },
+                    },
+                  },
+                  {
+                    range: {
+                      numericField: {
+                        gt: 10,
+                      },
+                    },
+                  },
+                  {
+                    range: {
+                      numericField: {
+                        gte: 10,
+                      },
+                    },
+                  },
+                  {
+                    range: {
+                      numericField: {
+                        lt: 10,
+                      },
+                    },
+                  },
+                  {
+                    range: {
+                      numericField: {
+                        lte: 10,
+                      },
+                    },
+                  },
+                  {
+                    term: {
+                      keywordField: {
+                        value: 'error',
+                      },
+                    },
+                  },
+                  {
+                    match: {
+                      textField: 'Something went wrong',
+                    },
+                  },
+                  {
+                    match_phrase: {
+                      textField: 'Something went wrong',
+                    },
+                  },
+                ],
+                must_not: [
+                  {
+                    term: {
+                      keywordField: {
+                        value: 'error',
+                      },
+                    },
+                  },
+                  {
+                    match: {
+                      textField: 'Something went wrong',
+                    },
+                  },
+                  {
+                    match_phrase: {
+                      textField: 'Something went wrong',
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+          },
+        });
+      });
 
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must_not: [{ term: { foo: { value: 'bar' } } }],
-        },
-      },
+      test('Correctly generates grouped queries', () => {
+        const alertParams: LogDocumentCountAlertParams = {
+          ...baseAlertParams,
+          groupBy: ['host.name'],
+          criteria: [...positiveCriteria, ...negativeCriteria],
+        };
+        const query = getGroupedESQuery(alertParams, TIMESTAMP_FIELD, FILEBEAT_INDEX);
+        expect(query).toEqual({
+          index: 'filebeat-*',
+          allowNoIndices: true,
+          ignoreUnavailable: true,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: expect.any(Number),
+                        lte: expect.any(Number),
+                        format: 'epoch_millis',
+                      },
+                    },
+                  },
+                ],
+                must_not: [
+                  {
+                    term: {
+                      keywordField: {
+                        value: 'error',
+                      },
+                    },
+                  },
+                  {
+                    match: {
+                      textField: 'Something went wrong',
+                    },
+                  },
+                  {
+                    match_phrase: {
+                      textField: 'Something went wrong',
+                    },
+                  },
+                ],
+              },
+            },
+            aggregations: {
+              groups: {
+                composite: {
+                  size: 40,
+                  sources: [
+                    {
+                      'group-0-host.name': {
+                        terms: {
+                          field: 'host.name',
+                        },
+                      },
+                    },
+                  ],
+                },
+                aggregations: {
+                  filtered_results: {
+                    filter: {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: expect.any(Number),
+                                lte: expect.any(Number),
+                                format: 'epoch_millis',
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              numericField: {
+                                gt: 10,
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              numericField: {
+                                gte: 10,
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              numericField: {
+                                lt: 10,
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              numericField: {
+                                lte: 10,
+                              },
+                            },
+                          },
+                          {
+                            term: {
+                              keywordField: {
+                                value: 'error',
+                              },
+                            },
+                          },
+                          {
+                            match: {
+                              textField: 'Something went wrong',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              textField: 'Something went wrong',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            size: 0,
+          },
+        });
+      });
     });
   });
 
-  it('works with `Comparator.MATCH`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.MATCH, value: 'bar' }]
-    );
+  describe('Results processors', () => {
+    describe('Can process ungrouped results', () => {
+      test('It handles the OK state correctly', () => {
+        const alertInstanceUpdaterMock = jest.fn();
+        const alertParams = {
+          ...baseAlertParams,
+          criteria: [positiveCriteria[0]],
+        };
+        const results = {
+          hits: {
+            total: {
+              value: 2,
+            },
+          },
+        } as UngroupedSearchQueryResponse;
+        processUngroupedResults(
+          results,
+          alertParams,
+          alertsMock.createAlertInstanceFactory,
+          alertInstanceUpdaterMock
+        );
+        // First call, second argument
+        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.OK);
+        // First call, third argument
+        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toBe(undefined);
+      });
 
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ match: { foo: 'bar' } }],
-        },
-      },
+      test('It handles the ALERT state correctly', () => {
+        const alertInstanceUpdaterMock = jest.fn();
+        const alertParams = {
+          ...baseAlertParams,
+          criteria: [positiveCriteria[0]],
+        };
+        const results = {
+          hits: {
+            total: {
+              value: 10,
+            },
+          },
+        } as UngroupedSearchQueryResponse;
+        processUngroupedResults(
+          results,
+          alertParams,
+          alertsMock.createAlertInstanceFactory,
+          alertInstanceUpdaterMock
+        );
+        // First call, second argument
+        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
+        // First call, third argument
+        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toEqual([
+          {
+            actionGroup: 'logs.threshold.fired',
+            context: {
+              conditions: ' numericField more than 10',
+              group: null,
+              matchingDocuments: 10,
+            },
+          },
+        ]);
+      });
     });
-  });
 
-  it('works with `Comparator.NOT_MATCH`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.NOT_MATCH, value: 'bar' }]
-    );
+    describe('Can process grouped results', () => {
+      test('It handles the OK state correctly', () => {
+        const alertInstanceUpdaterMock = jest.fn();
+        const alertParams = {
+          ...baseAlertParams,
+          criteria: [positiveCriteria[0]],
+          groupBy: ['host.name', 'event.dataset'],
+        };
+        const results = [
+          {
+            key: {
+              'host.name': 'i-am-a-host-name',
+              'event.dataset': 'i-am-a-dataset',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 1,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name',
+              'event.dataset': 'i-am-a-dataset',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 2,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name',
+              'event.dataset': 'i-am-a-dataset',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 3,
+            },
+          },
+        ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
+        processGroupByResults(
+          results,
+          alertParams,
+          alertsMock.createAlertInstanceFactory,
+          alertInstanceUpdaterMock
+        );
+        expect(alertInstanceUpdaterMock.mock.calls.length).toBe(3);
+        // First call, second argument
+        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.OK);
+        // First call, third argument
+        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toBe(undefined);
 
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must_not: [{ match: { foo: 'bar' } }],
-        },
-      },
-    });
-  });
+        // Second call, second argument
+        expect(alertInstanceUpdaterMock.mock.calls[1][1]).toBe(AlertStates.OK);
+        // Second call, third argument
+        expect(alertInstanceUpdaterMock.mock.calls[1][2]).toBe(undefined);
 
-  it('works with `Comparator.MATCH_PHRASE`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.MATCH_PHRASE, value: 'bar' }]
-    );
+        // Third call, second argument
+        expect(alertInstanceUpdaterMock.mock.calls[2][1]).toBe(AlertStates.OK);
+        // Third call, third argument
+        expect(alertInstanceUpdaterMock.mock.calls[2][2]).toBe(undefined);
+      });
 
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ match_phrase: { foo: 'bar' } }],
-        },
-      },
-    });
-  });
+      test('It handles the ALERT state correctly', () => {
+        const alertInstanceUpdaterMock = jest.fn();
+        const alertParams = {
+          ...baseAlertParams,
+          criteria: [positiveCriteria[0]],
+          groupBy: ['host.name', 'event.dataset'],
+        };
+        // Two groups should fire, one shouldn't
+        const results = [
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-1',
+              'event.dataset': 'i-am-a-dataset-1',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 10,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-2',
+              'event.dataset': 'i-am-a-dataset-2',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 2,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-3',
+              'event.dataset': 'i-am-a-dataset-3',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 20,
+            },
+          },
+        ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
+        processGroupByResults(
+          results,
+          alertParams,
+          alertsMock.createAlertInstanceFactory,
+          alertInstanceUpdaterMock
+        );
+        expect(alertInstanceUpdaterMock.mock.calls.length).toBe(results.length);
+        // First call, second argument
+        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
+        // First call, third argument
+        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toEqual([
+          {
+            actionGroup: 'logs.threshold.fired',
+            context: {
+              conditions: ' numericField more than 10',
+              group: 'i-am-a-host-name-1, i-am-a-dataset-1',
+              matchingDocuments: 10,
+            },
+          },
+        ]);
 
-  it('works with `Comparator.NOT_MATCH_PHRASE`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.NOT_MATCH_PHRASE, value: 'bar' }]
-    );
+        // Second call, second argument
+        expect(alertInstanceUpdaterMock.mock.calls[1][1]).toBe(AlertStates.OK);
+        // Second call, third argument
+        expect(alertInstanceUpdaterMock.mock.calls[1][2]).toBe(undefined);
 
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must_not: [{ match_phrase: { foo: 'bar' } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.GT`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.GT, value: 1 }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ range: { foo: { gt: 1 } } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.GT_OR_EQ`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.GT_OR_EQ, value: 1 }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ range: { foo: { gte: 1 } } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.LT`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.LT, value: 1 }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ range: { foo: { lt: 1 } } }],
-        },
-      },
-    });
-  });
-
-  it('works with `Comparator.LT_OR_EQ`', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [{ field: 'foo', comparator: Comparator.LT_OR_EQ, value: 1 }]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ range: { foo: { lte: 1 } } }],
-        },
-      },
-    });
-  });
-});
-
-describe('Multiple criteria create the right ES query', () => {
-  beforeEach(() => {
-    services.callCluster.mockReset();
-  });
-  it('works', async () => {
-    await callExecutor(
-      [2, Comparator.GT, 1], // Not relevant
-      [
-        { field: 'foo', comparator: Comparator.EQ, value: 'bar' },
-        { field: 'http.status', comparator: Comparator.LT, value: 400 },
-      ]
-    );
-
-    const query = services.callCluster.mock.calls[0][1]!;
-    expect(query.body).toMatchObject({
-      query: {
-        bool: {
-          must: [{ term: { foo: { value: 'bar' } } }, { range: { 'http.status': { lt: 400 } } }],
-        },
-      },
+        // Third call, second argument
+        expect(alertInstanceUpdaterMock.mock.calls[2][1]).toBe(AlertStates.ALERT);
+        // Third call, third argument
+        expect(alertInstanceUpdaterMock.mock.calls[2][2]).toEqual([
+          {
+            actionGroup: 'logs.threshold.fired',
+            context: {
+              conditions: ' numericField more than 10',
+              group: 'i-am-a-host-name-3, i-am-a-dataset-3',
+              matchingDocuments: 20,
+            },
+          },
+        ]);
+      });
     });
   });
 });

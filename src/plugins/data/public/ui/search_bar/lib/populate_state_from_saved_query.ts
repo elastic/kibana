@@ -19,14 +19,11 @@
 
 import { QueryStart, SavedQuery } from '../../../query';
 
-export const populateStateFromSavedQuery = (
-  queryService: QueryStart,
-  setQueryStringState: Function,
-  savedQuery: SavedQuery
-) => {
+export const populateStateFromSavedQuery = (queryService: QueryStart, savedQuery: SavedQuery) => {
   const {
     timefilter: { timefilter },
     filterManager,
+    queryString,
   } = queryService;
   // timefilter
   if (savedQuery.attributes.timefilter) {
@@ -40,7 +37,7 @@ export const populateStateFromSavedQuery = (
   }
 
   // query string
-  setQueryStringState(savedQuery.attributes.query);
+  queryString.setQuery(savedQuery.attributes.query);
 
   // filters
   const savedQueryFilters = savedQuery.attributes.filters || [];

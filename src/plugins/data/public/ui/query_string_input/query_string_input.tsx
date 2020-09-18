@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { Component } from 'react';
-import React from 'react';
+import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import classNames from 'classnames';
 import {
-  EuiFieldText,
+  EuiTextArea,
   EuiOutsideClickDetector,
   PopoverAnchorPosition,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiLink,
+  htmlIdGenerator,
+  EuiPortal,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { debounce, compact, isEqual } from 'lodash';
+import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
@@ -41,6 +43,7 @@ import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../k
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
+import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 
 interface Props {
@@ -49,14 +52,19 @@ interface Props {
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
+  prepend?: any;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
+  onBlur?: () => void;
   onChange?: (query: Query) => void;
+  onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
+  size?: SuggestionsListSize;
+  className?: string;
+  isInvalid?: boolean;
 }
 
 interface State {
@@ -67,6 +75,7 @@ interface State {
   selectionStart: number | null;
   selectionEnd: number | null;
   indexPatterns: IIndexPattern[];
+  queryBarRect: DOMRect | undefined;
 }
 
 const KEY_CODES = {
@@ -90,14 +99,16 @@ export class QueryStringInputUI extends Component<Props, State> {
     selectionStart: null,
     selectionEnd: null,
     indexPatterns: [],
+    queryBarRect: undefined,
   };
 
-  public inputRef: HTMLInputElement | null = null;
+  public inputRef: HTMLTextAreaElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
-  private abortController: AbortController | undefined;
+  private abortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
+  private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
@@ -222,27 +233,32 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.onChange({ query: value, language: this.props.query.language });
   };
 
-  private onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  private onInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     this.onQueryStringChange(event.target.value);
+    if (event.target.value === '') {
+      this.handleRemoveHeight();
+    } else {
+      this.handleAutoHeight();
+    }
   };
 
-  private onClickInput = (event: React.MouseEvent<HTMLInputElement>) => {
-    if (event.target instanceof HTMLInputElement) {
+  private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
+    if (event.target instanceof HTMLTextAreaElement) {
       this.onQueryStringChange(event.target.value);
     }
   };
 
-  private onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  private onKeyUp = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ([KEY_CODES.LEFT, KEY_CODES.RIGHT, KEY_CODES.HOME, KEY_CODES.END].includes(event.keyCode)) {
       this.setState({ isSuggestionsVisible: true });
-      if (event.target instanceof HTMLInputElement) {
+      if (event.target instanceof HTMLTextAreaElement) {
         this.onQueryStringChange(event.target.value);
       }
     }
   };
 
-  private onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.target instanceof HTMLInputElement) {
+  private onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.target instanceof HTMLTextAreaElement) {
       const { isSuggestionsVisible, index } = this.state;
       const preventDefault = event.preventDefault.bind(event);
       const { target, key, metaKey } = event;
@@ -257,16 +273,19 @@ export class QueryStringInputUI extends Component<Props, State> {
 
       switch (event.keyCode) {
         case KEY_CODES.DOWN:
-          event.preventDefault();
           if (isSuggestionsVisible && index !== null) {
+            event.preventDefault();
             this.incrementIndex(index);
-          } else {
+            // Note to engineers. `isSuggestionVisible` does not mean the suggestions are visible.
+            // This should likely be fixed, it's more that suggestions can be shown.
+          } else if ((isSuggestionsVisible && index == null) || this.getQueryString() === '') {
+            event.preventDefault();
             this.setState({ isSuggestionsVisible: true, index: 0 });
           }
           break;
         case KEY_CODES.UP:
-          event.preventDefault();
           if (isSuggestionsVisible && index !== null) {
+            event.preventDefault();
             this.decrementIndex(index);
           }
           break;
@@ -438,6 +457,20 @@ export class QueryStringInputUI extends Component<Props, State> {
     if (this.state.isSuggestionsVisible) {
       this.setState({ isSuggestionsVisible: false, index: null });
     }
+    this.handleBlurHeight();
+    if (this.props.onChangeQueryInputFocus) {
+      this.props.onChangeQueryInputFocus(false);
+    }
+  };
+
+  private onInputBlur = () => {
+    this.handleBlurHeight();
+    if (this.props.onChangeQueryInputFocus) {
+      this.props.onChangeQueryInputFocus(false);
+    }
+    if (isFunction(this.props.onBlur)) {
+      this.props.onBlur();
+    }
   };
 
   private onClickSuggestion = (suggestion: QuerySuggestion) => {
@@ -459,6 +492,8 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.setState({ index });
   };
 
+  textareaId = htmlIdGenerator()();
+
   public componentDidMount() {
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
@@ -467,6 +502,13 @@ export class QueryStringInputUI extends Component<Props, State> {
 
     this.initPersistedLog();
     this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.handleListUpdate();
+
+    window.addEventListener('resize', this.handleAutoHeight);
+    window.addEventListener('scroll', this.handleListUpdate, {
+      passive: true, // for better performance as we won't call preventDefault
+      capture: true, // scroll events don't bubble, they must be captured instead
+    });
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -484,22 +526,65 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
 
     if (this.state.selectionStart !== null && this.state.selectionEnd !== null) {
-      if (this.inputRef) {
-        // For some reason the type guard above does not make the compiler happy
-        // @ts-ignore
+      if (this.inputRef != null) {
         this.inputRef.setSelectionRange(this.state.selectionStart, this.state.selectionEnd);
       }
       this.setState({
         selectionStart: null,
         selectionEnd: null,
       });
+      if (document.activeElement !== null && document.activeElement.id === this.textareaId) {
+        this.handleAutoHeight();
+      } else {
+        this.handleRemoveHeight();
+      }
     }
   }
 
   public componentWillUnmount() {
+    if (this.abortController) this.abortController.abort();
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
+    window.removeEventListener('resize', this.handleAutoHeight);
+    window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }
+
+  handleListUpdate = () => {
+    if (this.componentIsUnmounting) return;
+
+    return this.setState({
+      queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
+    });
+  };
+
+  handleAutoHeight = () => {
+    if (this.inputRef !== null && document.activeElement === this.inputRef) {
+      this.inputRef.style.setProperty('height', `${this.inputRef.scrollHeight}px`, 'important');
+    }
+    this.handleListUpdate();
+  };
+
+  handleRemoveHeight = () => {
+    if (this.inputRef !== null) {
+      this.inputRef.style.removeProperty('height');
+    }
+  };
+
+  handleBlurHeight = () => {
+    if (this.inputRef !== null) {
+      this.handleRemoveHeight();
+      this.inputRef.scrollTop = 0;
+    }
+  };
+
+  handleOnFocus = () => {
+    if (this.props.onChangeQueryInputFocus) {
+      this.props.onChangeQueryInputFocus(true);
+    }
+    requestAnimationFrame(() => {
+      this.handleAutoHeight();
+    });
+  };
 
   public render() {
     const isSuggestionsVisible = this.state.isSuggestionsVisible && {
@@ -507,22 +592,31 @@ export class QueryStringInputUI extends Component<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
+    const className = classNames(
+      'euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap',
+      this.props.className
+    );
 
     return (
-      <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
-        <div
-          {...ariaCombobox}
-          style={{ position: 'relative' }}
-          aria-label={i18n.translate('data.query.queryBar.comboboxAriaLabel', {
-            defaultMessage: 'Search and filter the {pageType} page',
-            values: { pageType: this.services.appName },
-          })}
-          aria-haspopup="true"
-          aria-expanded={this.state.isSuggestionsVisible}
-        >
-          <div role="search">
-            <div className="kuiLocalSearchAssistedInput">
-              <EuiFieldText
+      <div className={className}>
+        {this.props.prepend}
+        <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
+          <div
+            {...ariaCombobox}
+            style={{ position: 'relative', width: '100%' }}
+            aria-label={i18n.translate('data.query.queryBar.comboboxAriaLabel', {
+              defaultMessage: 'Search and filter the {pageType} page',
+              values: { pageType: this.services.appName },
+            })}
+            aria-haspopup="true"
+            aria-expanded={this.state.isSuggestionsVisible}
+          >
+            <div
+              role="search"
+              className="euiFormControlLayout__childrenWrapper kbnQueryBar__textareaWrap"
+              ref={this.queryBarInputDivRefInstance}
+            >
+              <EuiTextArea
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
@@ -534,9 +628,16 @@ export class QueryStringInputUI extends Component<Props, State> {
                 onKeyUp={this.onKeyUp}
                 onChange={this.onInputChange}
                 onClick={this.onClickInput}
+                onBlur={this.onInputBlur}
+                onFocus={this.handleOnFocus}
+                className="kbnQueryBar__textarea"
                 fullWidth
-                autoFocus={!this.props.disableAutoFocus}
-                inputRef={(node) => {
+                rows={1}
+                id={this.textareaId}
+                autoFocus={
+                  this.props.onChangeQueryInputFocus ? false : !this.props.disableAutoFocus
+                }
+                inputRef={(node: any) => {
                   if (node) {
                     this.inputRef = node;
                   }
@@ -547,7 +648,6 @@ export class QueryStringInputUI extends Component<Props, State> {
                   defaultMessage: 'Start typing to search and filter the {pageType} page',
                   values: { pageType: this.services.appName },
                 })}
-                type="text"
                 aria-autocomplete="list"
                 aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
                 aria-activedescendant={
@@ -556,29 +656,33 @@ export class QueryStringInputUI extends Component<Props, State> {
                     : undefined
                 }
                 role="textbox"
-                prepend={this.props.prepend}
-                append={
-                  <QueryLanguageSwitcher
-                    language={this.props.query.language}
-                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                    onSelectLanguage={this.onSelectLanguage}
-                  />
-                }
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
-              />
+                isInvalid={this.props.isInvalid}
+              >
+                {this.getQueryString()}
+              </EuiTextArea>
             </div>
+            <EuiPortal>
+              <SuggestionsComponent
+                show={this.state.isSuggestionsVisible}
+                suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
+                index={this.state.index}
+                onClick={this.onClickSuggestion}
+                onMouseEnter={this.onMouseEnterSuggestion}
+                loadMore={this.increaseLimit}
+                queryBarRect={this.state.queryBarRect}
+                size={this.props.size}
+              />
+            </EuiPortal>
           </div>
+        </EuiOutsideClickDetector>
 
-          <SuggestionsComponent
-            show={this.state.isSuggestionsVisible}
-            suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-            index={this.state.index}
-            onClick={this.onClickSuggestion}
-            onMouseEnter={this.onMouseEnterSuggestion}
-            loadMore={this.increaseLimit}
-          />
-        </div>
-      </EuiOutsideClickDetector>
+        <QueryLanguageSwitcher
+          language={this.props.query.language}
+          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+          onSelectLanguage={this.onSelectLanguage}
+        />
+      </div>
     );
   }
 }

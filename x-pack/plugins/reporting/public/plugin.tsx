@@ -23,10 +23,11 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { ManagementSectionId, ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ReportingConfigType, JobId, JobStatusBuckets } from '../common/types';
+import { durationToNumber } from '../common/schema_utils';
+import { JobId, JobStatusBuckets, ReportingConfigType } from '../common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
 import { getGeneralErrorToast } from './components';
 import { ReportListing } from './components/report_listing';
@@ -111,12 +112,11 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
         defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
       }),
       icon: 'reportingApp',
-      path: '/app/management/kibana/reporting',
+      path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
-
-    management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
+    management.sections.section.insightsAndAlerting.registerApp({
       id: 'reporting',
       title: this.title,
       order: 1,
@@ -144,7 +144,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
 
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
 
-    share.register(csvReportingProvider({ apiClient, toasts, license$ }));
+    share.register(csvReportingProvider({ apiClient, toasts, license$, uiSettings }));
     share.register(
       reportingPDFPNGProvider({
         apiClient,
@@ -155,14 +155,11 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
     );
   }
 
-  // FIXME: only perform these actions for authenticated routes
-  // Depends on https://github.com/elastic/kibana/pull/39477
   public start(core: CoreStart) {
     const { http, notifications } = core;
     const apiClient = new ReportingAPIClient(http);
     const streamHandler = new StreamHandler(notifications, apiClient);
-    const { interval } = this.config.poll.jobsRefresh;
-
+    const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
       .pipe(
         takeUntil(this.stop$), // stop the interval when stop method is called

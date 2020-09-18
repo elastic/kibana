@@ -4,18 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { generatePath } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
+
 import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
-  MANAGEMENT_ROUTING_ROOT_PATH,
+  MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
-import { ManagementSubTab } from '../types';
-import { SiemPageName } from '../../app/types';
-import { HostIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import { AdministrationSubTab } from '../types';
+import { appendSearch } from '../../common/components/link_to/helpers';
+import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import { TrustedAppsUrlParams } from '../pages/trusted_apps/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -30,80 +36,119 @@ const querystringStringify: <ExpectedType extends object, ArgType>(
   params: Exact<ExpectedType, ArgType>
 ) => string = querystring.stringify;
 
-/** Make `selected_host` required */
-type EndpointDetailsUrlProps = Omit<HostIndexUIQueryParams, 'selected_host'> &
-  Required<Pick<HostIndexUIQueryParams, 'selected_host'>>;
+/** Make `selected_endpoint` required */
+type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
+  Required<Pick<EndpointIndexUIQueryParams, 'selected_endpoint'>>;
 
-/**
- * Input props for the `getManagementUrl()` method
- */
-export type GetManagementUrlProps = {
-  /**
-   * Exclude the URL prefix (everything to the left of where the router was mounted.
-   * This may be needed when interacting with react-router (ex. to do `history.push()` or
-   * validations against matched path)
-   */
-  excludePrefix?: boolean;
-} & (
-  | ({ name: 'default' | 'endpointList' } & HostIndexUIQueryParams)
-  | ({ name: 'endpointDetails' | 'endpointPolicyResponse' } & EndpointDetailsUrlProps)
-  | { name: 'policyList' }
-  | { name: 'policyDetails'; policyId: string }
-);
+export const getEndpointListPath = (
+  props: { name: 'default' | 'endpointList' } & EndpointIndexUIQueryParams,
+  search?: string
+) => {
+  const { name, ...queryParams } = props;
+  const urlQueryParams = querystringStringify<EndpointIndexUIQueryParams, typeof queryParams>(
+    queryParams
+  );
+  const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
-// Prefix is (almost) everything to the left of where the Router was mounted. In SIEM, since
-// we're using Hash router, thats the `#`.
-const URL_PREFIX = '#';
-
-/**
- * Returns a URL string for a given Management page view
- * @param props
- */
-export const getManagementUrl = (props: GetManagementUrlProps): string => {
-  let url = props.excludePrefix ? '' : URL_PREFIX;
-
-  if (props.name === 'default' || props.name === 'endpointList') {
-    const { name, excludePrefix, ...queryParams } = props;
-    const urlQueryParams = querystringStringify<HostIndexUIQueryParams, typeof queryParams>(
-      queryParams
-    );
-
-    if (name === 'endpointList') {
-      url += generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
-        pageName: SiemPageName.management,
-        tabName: ManagementSubTab.endpoints,
-      });
-    } else {
-      url += generatePath(MANAGEMENT_ROUTING_ROOT_PATH, {
-        pageName: SiemPageName.management,
-      });
-    }
-
-    if (urlQueryParams) {
-      url += `?${urlQueryParams}`;
-    }
-  } else if (props.name === 'endpointDetails' || props.name === 'endpointPolicyResponse') {
-    const { name, excludePrefix, ...queryParams } = props;
-    queryParams.show = (props.name === 'endpointPolicyResponse'
-      ? 'policy_response'
-      : '') as HostIndexUIQueryParams['show'];
-
-    url += `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
-      pageName: SiemPageName.management,
-      tabName: ManagementSubTab.endpoints,
-    })}?${querystringStringify<EndpointDetailsUrlProps, typeof queryParams>(queryParams)}`;
-  } else if (props.name === 'policyList') {
-    url += generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
-      pageName: SiemPageName.management,
-      tabName: ManagementSubTab.policies,
-    });
-  } else if (props.name === 'policyDetails') {
-    url += generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
-      pageName: SiemPageName.management,
-      tabName: ManagementSubTab.policies,
-      policyId: props.policyId,
-    });
+  if (name === 'endpointList') {
+    return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+      tabName: AdministrationSubTab.endpoints,
+    })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
   }
+  return `${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
+};
 
-  return url;
+export const getEndpointDetailsPath = (
+  props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & EndpointIndexUIQueryParams &
+    EndpointDetailsUrlProps,
+  search?: string
+) => {
+  const { name, ...queryParams } = props;
+  queryParams.show = (props.name === 'endpointPolicyResponse'
+    ? 'policy_response'
+    : '') as EndpointIndexUIQueryParams['show'];
+  const urlQueryParams = querystringStringify<EndpointDetailsUrlProps, typeof queryParams>(
+    queryParams
+  );
+  const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
+
+  return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+    tabName: AdministrationSubTab.endpoints,
+  })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
+};
+
+export const getPoliciesPath = (search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
+    tabName: AdministrationSubTab.policies,
+  })}${appendSearch(search)}`;
+};
+
+export const getPolicyDetailPath = (policyId: string, search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(search)}`;
+};
+
+const isDefaultOrMissing = (
+  value: number | string | undefined,
+  defaultValue: number | undefined
+) => {
+  return value === undefined || value === defaultValue;
+};
+
+const normalizeListPaginationParams = (
+  params?: Partial<TrustedAppsUrlParams>
+): Partial<TrustedAppsUrlParams> => {
+  if (params) {
+    return {
+      ...(!isDefaultOrMissing(params.page_index, MANAGEMENT_DEFAULT_PAGE)
+        ? { page_index: params.page_index }
+        : {}),
+      ...(!isDefaultOrMissing(params.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { page_size: params.page_size }
+        : {}),
+      ...(!isDefaultOrMissing(params.show, undefined) ? { show: params.show } : {}),
+    };
+  } else {
+    return {};
+  }
+};
+
+/**
+ * Given an object with url params, and a given key, return back only the first param value (case multiples were defined)
+ * @param query
+ * @param key
+ */
+export const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+  const value = query[key];
+
+  return Array.isArray(value) ? value[value.length - 1] : value;
+};
+
+const extractPageIndex = (query: querystring.ParsedUrlQuery): number => {
+  const pageIndex = Number(extractFirstParamValue(query, 'page_index'));
+
+  return !Number.isFinite(pageIndex) || pageIndex < 0 ? MANAGEMENT_DEFAULT_PAGE : pageIndex;
+};
+
+const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
+  const pageSize = Number(extractFirstParamValue(query, 'page_size'));
+
+  return MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : MANAGEMENT_DEFAULT_PAGE_SIZE;
+};
+
+export const extractListPaginationParams = (
+  query: querystring.ParsedUrlQuery
+): TrustedAppsUrlParams => ({
+  page_index: extractPageIndex(query),
+  page_size: extractPageSize(query),
+});
+
+export const getTrustedAppsListPath = (params?: Partial<TrustedAppsUrlParams>): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
+    tabName: AdministrationSubTab.trustedApps,
+  });
+
+  return `${path}${appendSearch(querystring.stringify(normalizeListPaginationParams(params)))}`;
 };

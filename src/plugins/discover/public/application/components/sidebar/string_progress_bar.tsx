@@ -17,35 +17,18 @@
  * under the License.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 
 interface Props {
   percent: number;
   count: number;
+  value: string;
 }
 
-export function StringFieldProgressBar(props: Props) {
+export function StringFieldProgressBar({ value, percent, count }: Props) {
+  const ariaLabel = `${value}: ${count} (${percent}%)`;
+
   return (
-    <EuiToolTip
-      anchorClassName="dscProgressBarTooltip__anchor"
-      content={props.count}
-      delay="regular"
-      position="right"
-    >
-      <EuiFlexGroup alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <EuiProgress
-            value={props.percent}
-            max={100}
-            color="secondary"
-            aria-hidden={true}
-            size="l"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">{props.percent}%</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
+    <EuiProgress value={percent} max={100} color="secondary" aria-label={ariaLabel} size="s" />
   );
 }

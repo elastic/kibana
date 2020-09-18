@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
-import { getErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../common/util/errors';
 
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
@@ -24,6 +24,7 @@ export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [needsDestIndexPattern, setNeedsDestIndexPattern] = useState<boolean>(false);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [jobCapsServiceErrorMessage, setJobCapsServiceErrorMessage] = useState<undefined | string>(
@@ -68,6 +69,7 @@ export const useResultsViewConfig = (jobId: string) => {
             }
 
             if (indexP === undefined) {
+              setNeedsDestIndexPattern(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
               indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
@@ -81,12 +83,12 @@ export const useResultsViewConfig = (jobId: string) => {
               setIsLoadingJobConfig(false);
             }
           } catch (e) {
-            setJobCapsServiceErrorMessage(getErrorMessage(e));
+            setJobCapsServiceErrorMessage(extractErrorMessage(e));
             setIsLoadingJobConfig(false);
           }
         }
       } catch (e) {
-        setJobConfigErrorMessage(getErrorMessage(e));
+        setJobConfigErrorMessage(extractErrorMessage(e));
         setIsLoadingJobConfig(false);
       }
     })();
@@ -100,5 +102,6 @@ export const useResultsViewConfig = (jobId: string) => {
     jobConfig,
     jobConfigErrorMessage,
     jobStatus,
+    needsDestIndexPattern,
   };
 };

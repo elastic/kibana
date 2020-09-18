@@ -7,13 +7,26 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { allEvents, defaultOptions } from './helpers';
 import { TopN } from './top_n';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('../../lib/kibana');
+jest.mock('../link_to');
 
 jest.mock('uuid', () => {
   return {
@@ -102,14 +115,14 @@ describe('TopN', () => {
             defaultView="raw"
             field={field}
             filters={[]}
-            from={1586824307695}
+            from={'2020-04-14T00:31:47.695Z'}
             indexPattern={mockIndexPattern}
             options={defaultOptions}
             query={query}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget="global"
             setQuery={jest.fn()}
-            to={1586910707695}
+            to={'2020-04-15T00:31:47.695Z'}
             toggleTopN={toggleTopN}
             value={value}
           />
@@ -141,14 +154,14 @@ describe('TopN', () => {
             defaultView="raw"
             field={field}
             filters={[]}
-            from={1586824307695}
+            from={'2020-04-14T00:31:47.695Z'}
             indexPattern={mockIndexPattern}
             options={defaultOptions}
             query={query}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget="global"
             setQuery={jest.fn()}
-            to={1586910707695}
+            to={'2020-04-15T00:31:47.695Z'}
             toggleTopN={toggleTopN}
             value={value}
           />
@@ -179,14 +192,14 @@ describe('TopN', () => {
             defaultView="alert"
             field={field}
             filters={[]}
-            from={1586824307695}
+            from={'2020-04-14T00:31:47.695Z'}
             indexPattern={mockIndexPattern}
             options={defaultOptions}
             query={query}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget="global"
             setQuery={jest.fn()}
-            to={1586910707695}
+            to={'2020-04-15T00:31:47.695Z'}
             toggleTopN={toggleTopN}
             value={value}
           />
@@ -216,14 +229,14 @@ describe('TopN', () => {
             defaultView="all"
             field={field}
             filters={[]}
-            from={1586824307695}
+            from={'2020-04-14T00:31:47.695Z'}
             indexPattern={mockIndexPattern}
             options={allEvents}
             query={query}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget="global"
             setQuery={jest.fn()}
-            to={1586910707695}
+            to={'2020-04-15T00:31:47.695Z'}
             toggleTopN={jest.fn()}
             value={value}
           />

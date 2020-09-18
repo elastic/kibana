@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { MSearchResponse } from 'elasticsearch';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { ILegacyScopedClusterClient } from 'kibana/server';
+import { MSearchResponse, SearchResponse } from 'elasticsearch';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Contract for queries to be compatible with ES multi search api
@@ -34,6 +34,10 @@ export interface QueryInfo {
    * one or many unique identifiers to be searched for in this query
    */
   ids: string | string[];
+  /**
+   * a function to handle the response
+   */
+  handler: (response: SearchResponse<SafeResolverEvent>) => void;
 }
 
 /**
@@ -44,7 +48,7 @@ export interface QueryInfo {
  * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/msearch_examples.html
  */
 export class MultiSearcher {
-  constructor(private readonly client: IScopedClusterClient) {}
+  constructor(private readonly client: ILegacyScopedClusterClient) {}
 
   /**
    * Perform the multi search on the passed in queries
@@ -57,11 +61,11 @@ export class MultiSearcher {
       throw new Error('No queries provided to MultiSearcher');
     }
 
-    let searchQuery: JsonObject[] = [];
-    queries.forEach(
-      (info) => (searchQuery = [...searchQuery, ...info.query.buildMSearch(info.ids)])
-    );
-    const res: MSearchResponse<ResolverEvent> = await this.client.callAsCurrentUser('msearch', {
+    const searchQuery: JsonObject[] = [];
+    for (const info of queries) {
+      searchQuery.push(...info.query.buildMSearch(info.ids));
+    }
+    const res: MSearchResponse<SafeResolverEvent> = await this.client.callAsCurrentUser('msearch', {
       body: searchQuery,
     });
 
@@ -72,6 +76,8 @@ export class MultiSearcher {
     if (res.responses.length !== queries.length) {
       throw new Error(`Responses length was: ${res.responses.length} expected ${queries.length}`);
     }
-    return res.responses;
+    for (let i = 0; i < queries.length; i++) {
+      queries[i].handler(res.responses[i]);
+    }
   }
 }

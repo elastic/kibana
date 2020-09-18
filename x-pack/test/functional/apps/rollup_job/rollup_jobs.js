@@ -31,9 +31,9 @@ export default function ({ getService, getPageObjects }) {
     it('create new rollup job', async () => {
       const interval = '1000ms';
 
-      pastDates.map(async (day) => {
+      for (const day of pastDates) {
         await es.index(mockIndices(day, rollupSourceDataPrepend));
-      });
+      }
 
       await PageObjects.common.navigateToApp('rollupJob');
       await PageObjects.rollup.createNewRollUpJob(

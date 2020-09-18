@@ -5,19 +5,22 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { scaleUtc } from 'd3-scale';
 import d3 from 'd3';
+import { scaleUtc } from 'd3-scale';
+import { mean } from 'lodash';
 import React from 'react';
 import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
-// @ts-ignore
+// @ts-expect-error
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 interface IBucket {
   key: number;
-  count: number;
+  count: number | undefined;
 }
 
 // TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (TransactionDistributionAPIResponse)
@@ -30,7 +33,7 @@ interface IDistribution {
 interface FormattedBucket {
   x0: number;
   x: number;
-  y: number;
+  y: number | undefined;
 }
 
 export function getFormattedBuckets(
@@ -64,7 +67,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
     distribution.bucketSize
   );
 
-  if (!buckets || distribution.noHits) {
+  if (!buckets) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
@@ -74,6 +77,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
     );
   }
 
+  const averageValue = mean(buckets.map((bucket) => bucket.y)) || 0;
   const xMin = d3.min(buckets, (d) => d.x0);
   const xMax = d3.max(buckets, (d) => d.x);
   const tickFormat = scaleUtc().domain([xMin, xMax]).tickFormat();
@@ -84,6 +88,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        height={180}
+        noHits={distribution.noHits}
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
         xType="time-utc"
@@ -101,10 +107,22 @@ export function ErrorDistribution({ distribution, title }: Props) {
         }
         formatYLong={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
-            defaultMessage: '{occCount} occurrences',
+            defaultMessage:
+              '{occCount} {occCount, plural, one {occurrence} other {occurrences}}',
             values: { occCount: value },
           })
         }
+        legends={[
+          {
+            color: theme.euiColorVis1,
+            // 0a abbreviates large whole numbers with metric prefixes like: 1000 = 1k, 32000 = 32k, 1000000 = 1m
+            legendValue: numeral(averageValue).format('0a'),
+            title: i18n.translate('xpack.apm.errorGroupDetails.avgLabel', {
+              defaultMessage: 'Avg.',
+            }),
+            legendClickDisabled: true,
+          },
+        ]}
       />
     </div>
   );

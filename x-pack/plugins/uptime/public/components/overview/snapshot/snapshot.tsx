@@ -11,7 +11,6 @@ import { ChartWrapper } from '../../common/charts/chart_wrapper';
 import { SnapshotHeading } from './snapshot_heading';
 import { Snapshot as SnapshotType } from '../../../../common/runtime_types';
 
-const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;
 
 interface SnapshotComponentProps {
@@ -29,11 +28,6 @@ export const SnapshotComponent: React.FC<SnapshotComponentProps> = ({ count, hei
   <ChartWrapper loading={loading} height={height}>
     <SnapshotHeading total={count.total} />
     <EuiSpacer size="xs" />
-    <DonutChart
-      up={count.up}
-      down={count.down}
-      height={SNAPSHOT_CHART_HEIGHT}
-      width={SNAPSHOT_CHART_WIDTH}
-    />
+    <DonutChart up={count.up} down={count.down} height={SNAPSHOT_CHART_HEIGHT} />
   </ChartWrapper>
 );

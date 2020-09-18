@@ -62,7 +62,7 @@ export class ListComponent extends SharedComponent {
 
     // verify we have all tokens
     const list = this.listGenerator();
-    const notFound = _.any(tokens, function (token) {
+    const notFound = _.some(tokens, function (token) {
       return list.indexOf(token) === -1;
     });
 

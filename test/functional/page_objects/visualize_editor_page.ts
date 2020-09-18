@@ -230,6 +230,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click('dropPartialBucketsCheckbox');
     }
 
+    public async expectMarkdownTextArea() {
+      await testSubjects.existOrFail('markdownTextarea');
+    }
+
     public async setMarkdownTxt(markdownTxt: string) {
       const input = await testSubjects.find('markdownTextarea');
       await input.clearValue();
@@ -441,6 +445,15 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       } else if (type === 'custom') {
         await comboBox.setCustom('visEditorInterval', newValue);
       } else {
+        if (type === 'numeric') {
+          const autoMode = await testSubjects.getAttribute(
+            `visEditorIntervalSwitch${aggNth}`,
+            'aria-checked'
+          );
+          if (autoMode === 'true') {
+            await testSubjects.click(`visEditorIntervalSwitch${aggNth}`);
+          }
+        }
         if (append) {
           await testSubjects.append(`visEditorInterval${aggNth}`, String(newValue));
         } else {

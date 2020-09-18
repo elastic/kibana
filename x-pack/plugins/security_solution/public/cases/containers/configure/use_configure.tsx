@@ -253,6 +253,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       didCancel = true;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.firstLoad]);
 
   const persistCaseConfigure = useCallback(
@@ -311,11 +312,13 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         abortCtrl.abort();
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [state.version]
   );
 
   useEffect(() => {
     refetchCaseConfigure();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

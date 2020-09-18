@@ -71,6 +71,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
           id="settingsPopover"
           isOpen={showActions}
           closePopover={onClosePopover}
+          repositionOnScroll
         >
           <EuiFlexGroup
             alignItems="flexStart"

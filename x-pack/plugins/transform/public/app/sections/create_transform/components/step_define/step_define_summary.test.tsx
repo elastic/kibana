@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { render, wait } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
 import {
   PivotAggsConfig,
   PivotGroupByConfig,
-  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';

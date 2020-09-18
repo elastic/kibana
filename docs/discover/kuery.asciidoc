@@ -5,7 +5,7 @@ In Kibana 6.3, we introduced a number of exciting experimental query language en
 features are now available by default in 7.0. Out of the box, Kibana's query language now includes scripted field support and a
 simplified, easier to use syntax. If you have a Basic license or above, autocomplete functionality will also be enabled.
 
-==== Language Syntax
+==== Language syntax
 
 If you're familiar with Kibana's old Lucene query syntax, you should feel right at home with the new syntax. The basics
 stay the same, we've simply refined things to make the query language easier to use.
@@ -72,7 +72,7 @@ set these terms will be matched against all fields. For example, a query for `re
 in the response field, but a query for just `200` will search for 200 across all fields in your index.
 ============
 
-==== Nested Field Support
+==== Nested field support
 
 KQL supports querying on {ref}/nested.html[nested fields] through a special syntax. You can query nested fields in subtly different
 ways, depending on the results you want, so crafting nested queries requires extra thought.

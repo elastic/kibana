@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
+import { createDataStreamPayload } from './data_streams_tab.helpers';
 
 /**
  * The below import is required to avoid a console error warn from the "brace" package
@@ -49,6 +50,52 @@ describe('<IndexManagementHome />', () => {
       // Note: this test modifies the shared location.hash state, we put it back the way it was
       actions.clickIncludeHiddenIndicesToggle();
       expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
+    });
+  });
+
+  describe('data stream column', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          health: '',
+          status: '',
+          primary: '',
+          replica: '',
+          documents: '',
+          documents_deleted: '',
+          size: '',
+          primary_size: '',
+          name: 'data-stream-index',
+          data_stream: 'dataStream1',
+        },
+      ]);
+
+      // The detail panel should still appear even if there are no data streams.
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([]);
+
+      httpRequestsMockHelpers.setLoadDataStreamResponse(createDataStreamPayload('dataStream1'));
+
+      testBed = await setup();
+
+      await act(async () => {
+        const { component } = testBed;
+
+        await nextTick();
+        component.update();
+      });
+    });
+
+    test('navigates to the data stream in the Data Streams tab', async () => {
+      const {
+        findDataStreamDetailPanel,
+        findDataStreamDetailPanelTitle,
+        actions: { clickDataStreamAt },
+      } = testBed;
+
+      await clickDataStreamAt(0);
+
+      expect(findDataStreamDetailPanel().length).toBe(1);
+      expect(findDataStreamDetailPanelTitle()).toBe('dataStream1');
     });
   });
 

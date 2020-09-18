@@ -10,7 +10,7 @@ import React from 'react';
 
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
-import { Ecs } from '../../../../../../graphql/types';
+import { Ecs } from '../../../../../../../common/ecs';
 import {
   mockDnsEvent,
   mockFimFileCreatedEvent,
@@ -48,6 +48,7 @@ import {
 } from './generic_row_renderer';
 import * as i18n from './translations';
 
+jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
 
 describe('GenericRowRenderer', () => {

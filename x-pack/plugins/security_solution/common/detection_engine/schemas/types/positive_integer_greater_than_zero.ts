@@ -7,18 +7,12 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-export type PositiveIntegerGreaterThanZeroC = t.Type<number, number, unknown>;
-
 /**
  * Types the positive integer greater than zero is:
  *   - Natural Number (positive integer and not a float),
  *   - 1 or greater
  */
-export const PositiveIntegerGreaterThanZero: PositiveIntegerGreaterThanZeroC = new t.Type<
-  number,
-  number,
-  unknown
->(
+export const PositiveIntegerGreaterThanZero = new t.Type<number, number, unknown>(
   'PositiveIntegerGreaterThanZero',
   t.number.is,
   (input, context): Either<t.Errors, number> => {

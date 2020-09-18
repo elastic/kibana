@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../../es_query';
+type KueryNode = any;
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { DEFAULT_NAMESPACE_STRING } from '../utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -39,17 +41,27 @@ function getTypes(mappings: IndexMapping, type?: string | string[]) {
 }
 
 /**
- *  Get the field params based on the types and searchFields
+ *  Get the field params based on the types, searchFields, and rootSearchFields
  */
-function getFieldsForTypes(types: string[], searchFields?: string[]) {
-  if (!searchFields || !searchFields.length) {
+function getFieldsForTypes(
+  types: string[],
+  searchFields: string[] = [],
+  rootSearchFields: string[] = []
+) {
+  if (!searchFields.length && !rootSearchFields.length) {
     return {
       lenient: true,
       fields: ['*'],
     };
   }
 
-  let fields: string[] = [];
+  let fields = [...rootSearchFields];
+  fields.forEach((field) => {
+    if (field.indexOf('.') !== -1) {
+      throw new Error(`rootSearchFields entry "${field}" is invalid: cannot contain "." character`);
+    }
+  });
+
   for (const field of searchFields) {
     fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
   }
@@ -63,25 +75,42 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  */
 function getClauseForType(
   registry: ISavedObjectTypeRegistry,
-  namespace: string | undefined,
+  namespaces: string[] = [DEFAULT_NAMESPACE_STRING],
   type: string
 ) {
+  if (namespaces.length === 0) {
+    throw new Error('cannot specify empty namespaces array');
+  }
   if (registry.isMultiNamespace(type)) {
     return {
       bool: {
-        must: [{ term: { type } }, { term: { namespaces: namespace ?? 'default' } }],
+        must: [{ term: { type } }, { terms: { namespaces } }],
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };
-  } else if (namespace && registry.isSingleNamespace(type)) {
+  } else if (registry.isSingleNamespace(type)) {
+    const should: Array<Record<string, any>> = [];
+    const eligibleNamespaces = namespaces.filter((x) => x !== DEFAULT_NAMESPACE_STRING);
+    if (eligibleNamespaces.length > 0) {
+      should.push({ terms: { namespace: eligibleNamespaces } });
+    }
+    if (namespaces.includes(DEFAULT_NAMESPACE_STRING)) {
+      should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
+    }
+    if (should.length === 0) {
+      // This is indicitive of a bug, and not user error.
+      throw new Error('unhandled search condition: expected at least 1 `should` clause.');
+    }
     return {
       bool: {
-        must: [{ term: { type } }, { term: { namespace } }],
+        must: [{ term: { type } }],
+        should,
+        minimum_should_match: 1,
         must_not: [{ exists: { field: 'namespaces' } }],
       },
     };
   }
-  // isSingleNamespace in the default namespace, or isNamespaceAgnostic
+  // isNamespaceAgnostic
   return {
     bool: {
       must: [{ term: { type } }],
@@ -98,10 +127,11 @@ interface HasReferenceQueryParams {
 interface QueryParams {
   mappings: IndexMapping;
   registry: ISavedObjectTypeRegistry;
-  namespace?: string;
+  namespaces?: string[];
   type?: string | string[];
   search?: string;
   searchFields?: string[];
+  rootSearchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
@@ -113,15 +143,30 @@ interface QueryParams {
 export function getQueryParams({
   mappings,
   registry,
-  namespace,
+  namespaces,
   type,
   search,
   searchFields,
+  rootSearchFields,
   defaultSearchOperator,
   hasReference,
   kueryNode,
 }: QueryParams) {
   const types = getTypes(mappings, type);
+
+  // A de-duplicated set of namespaces makes for a more effecient query.
+  //
+  // Additonally, we treat the `*` namespace as the `default` namespace.
+  // In the Default Distribution, the `*` is automatically expanded to include all available namespaces.
+  // However, the OSS distribution (and certain configurations of the Default Distribution) can allow the `*`
+  // to pass through to the SO Repository, and eventually to this module. When this happens, we translate to `default`,
+  // since that is consistent with how a single-namespace search behaves in the OSS distribution. Leaving the wildcard in place
+  // would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
+  // We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
+  const normalizedNamespaces = namespaces
+    ? Array.from(new Set(namespaces.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x))))
+    : undefined;
+
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
@@ -152,7 +197,9 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map((shouldType) => getClauseForType(registry, namespace, shouldType)),
+          should: types.map((shouldType) =>
+            getClauseForType(registry, normalizedNamespaces, shouldType)
+          ),
           minimum_should_match: 1,
         },
       },
@@ -164,7 +211,7 @@ export function getQueryParams({
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(types, searchFields),
+          ...getFieldsForTypes(types, searchFields, rootSearchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },

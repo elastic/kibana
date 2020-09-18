@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './legacy_alerts';
-export * from './alerts';
+export { enableAlertsRoute } from './enable';
+export { alertStatusRoute } from './status';

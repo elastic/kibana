@@ -27,6 +27,7 @@ import { PolicyNavigation } from './navigation';
 
 interface Props {
   policy: SlmPolicyPayload;
+  dataStreams: string[];
   indices: string[];
   currentUrl: string;
   isEditing?: boolean;
@@ -39,6 +40,7 @@ interface Props {
 
 export const PolicyForm: React.FunctionComponent<Props> = ({
   policy: originalPolicy,
+  dataStreams,
   indices,
   currentUrl,
   isEditing,
@@ -70,6 +72,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
       expireAfterUnit: originalPolicy.retention?.expireAfterUnit ?? TIME_UNITS.DAY,
     },
   });
+
+  const isEditingManagedPolicy = Boolean(isEditing && policy.isManagedPolicy);
 
   // Policy validation state
   const [validation, setValidation] = useState<PolicyValidation>({
@@ -126,12 +130,14 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
         currentStep={currentStep}
         maxCompletedStep={maxCompletedStep}
         updateCurrentStep={updateCurrentStep}
+        isFormValid={validation.isValid}
       />
       <EuiSpacer size="l" />
       <EuiForm>
         <CurrentStepForm
           policy={policy}
           indices={indices}
+          dataStreams={dataStreams}
           updatePolicy={updatePolicy}
           isEditing={isEditing}
           currentUrl={currentUrl}
@@ -184,8 +190,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep === lastStep ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill={isEditing && policy.isManagedPolicy ? false : true}
-                    color={isEditing && policy.isManagedPolicy ? 'warning' : 'secondary'}
+                    fill={!isEditingManagedPolicy}
+                    color={isEditingManagedPolicy ? 'warning' : 'secondary'}
                     iconType="check"
                     onClick={() => savePolicy()}
                     isLoading={isSaving}

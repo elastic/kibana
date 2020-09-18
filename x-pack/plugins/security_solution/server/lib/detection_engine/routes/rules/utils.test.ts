@@ -19,27 +19,21 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { ImportRuleAlertRest, RuleAlertParamsRest, RuleTypeParams } from '../../types';
+import { RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
-import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
+import { getOutputRuleAlertForRest } from '../__mocks__/utils';
+import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils';
 import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
-type PromiseFromStreams = ImportRuleAlertRest | Error;
+type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 describe('utils', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getResult();
@@ -60,14 +54,6 @@ describe('utils', () => {
       expect(rule).toEqual(expectedWithoutFromWithoutLanguage);
     });
 
-    test('should omit query if query is null', () => {
-      const fullRule = getResult();
-      fullRule.params.query = null;
-      const rule = transformAlertToRule(fullRule);
-      const { query, ...expectedWithoutQuery } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutQuery);
-    });
-
     test('should omit query if query is undefined', () => {
       const fullRule = getResult();
       fullRule.params.query = undefined;
@@ -79,7 +65,7 @@ describe('utils', () => {
     test('should omit a mix of undefined, null, and missing fields', () => {
       const fullRule = getResult();
       fullRule.params.query = undefined;
-      fullRule.params.language = null;
+      fullRule.params.language = undefined;
       const { from, ...omitParams } = fullRule.params;
       fullRule.params = omitParams as RuleTypeParams;
       const { enabled, ...omitEnabled } = fullRule;
@@ -120,7 +106,7 @@ describe('utils', () => {
       expect(rule).toEqual(expected);
     });
 
-    it('transforms ML Rule fields', () => {
+    test('transforms ML Rule fields', () => {
       const mlRule = getResult();
       mlRule.params.anomalyThreshold = 55;
       mlRule.params.machineLearningJobId = 'some_job_id';
@@ -132,6 +118,33 @@ describe('utils', () => {
           anomaly_threshold: 55,
           machine_learning_job_id: 'some_job_id',
           type: 'machine_learning',
+        })
+      );
+    });
+
+    // This has to stay here until we do data migration of saved objects and lists is removed from:
+    // signal_params_schema.ts
+    test('does not leak a lists structure in the transform which would cause validation issues', () => {
+      const result: RuleAlertType & { lists: [] } = { lists: [], ...getResult() };
+      const rule = transformAlertToRule(result);
+      expect(rule).toEqual(
+        expect.not.objectContaining({
+          lists: [],
+        })
+      );
+    });
+
+    // This has to stay here until we do data migration of saved objects and exceptions_list is removed from:
+    // signal_params_schema.ts
+    test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
+      const result: RuleAlertType & { exceptions_list: [] } = {
+        exceptions_list: [],
+        ...getResult(),
+      };
+      const rule = transformAlertToRule(result);
+      expect(rule).toEqual(
+        expect.not.objectContaining({
+          exceptions_list: [],
         })
       );
     });
@@ -485,7 +498,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as RuleAlertParamsRest[],
+        ] as CreateRulesBulkSchemaDecoded,
         'rule_id'
       );
       const expected = ['value2', 'value3'];
@@ -499,7 +512,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as RuleAlertParamsRest[],
+        ] as CreateRulesBulkSchemaDecoded,
         'rule_id'
       );
       const expected: string[] = [];
@@ -530,8 +543,8 @@ describe('utils', () => {
     });
 
     test('returns tuple of duplicate conflict error and single rule when rules with matching rule-ids passed in and `overwrite` is false', async () => {
-      const rule = getSimpleRule('rule-1');
-      const rule2 = getSimpleRule('rule-1');
+      const rule = getCreateRulesSchemaMock('rule-1');
+      const rule2 = getCreateRulesSchemaMock('rule-1');
       const ndJsonStream = new Readable({
         read() {
           this.push(`${JSON.stringify(rule)}\n`);
@@ -559,9 +572,9 @@ describe('utils', () => {
     });
 
     test('returns tuple of duplicate conflict error and single rule when rules with matching ids passed in and `overwrite` is false', async () => {
-      const rule = getSimpleRule('rule-1');
+      const rule = getCreateRulesSchemaMock('rule-1');
       delete rule.rule_id;
-      const rule2 = getSimpleRule('rule-1');
+      const rule2 = getCreateRulesSchemaMock('rule-1');
       delete rule2.rule_id;
       const ndJsonStream = new Readable({
         read() {
@@ -583,8 +596,8 @@ describe('utils', () => {
     });
 
     test('returns tuple of empty duplicate errors array and single rule when rules with matching rule-ids passed in and `overwrite` is true', async () => {
-      const rule = getSimpleRule('rule-1');
-      const rule2 = getSimpleRule('rule-1');
+      const rule = getCreateRulesSchemaMock('rule-1');
+      const rule2 = getCreateRulesSchemaMock('rule-1');
       const ndJsonStream = new Readable({
         read() {
           this.push(`${JSON.stringify(rule)}\n`);
@@ -604,7 +617,7 @@ describe('utils', () => {
     });
 
     test('returns tuple of empty duplicate errors array and single rule when rules without a rule-id is passed in', async () => {
-      const simpleRule = getSimpleRule();
+      const simpleRule = getCreateRulesSchemaMock();
       delete simpleRule.rule_id;
       const multipartPayload = `${JSON.stringify(simpleRule)}\n`;
       const ndJsonStream = new Readable({

@@ -25,6 +25,7 @@ import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
 import { AuthenticationHandler } from './lifecycle/auth';
+import { OnPreRoutingHandler } from './lifecycle/on_pre_routing';
 import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
@@ -46,6 +47,22 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
 export type RequestHandlerContextProvider<
   TContextName extends keyof RequestHandlerContext
 > = IContextProvider<RequestHandler<any, any, any>, TContextName>;
+
+/**
+ * @public
+ */
+export interface HttpAuth {
+  /**
+   * Gets authentication state for a request. Returned by `auth` interceptor.
+   * {@link GetAuthState}
+   */
+  get: GetAuthState;
+  /**
+   * Returns authentication status for a request.
+   * {@link IsAuthenticated}
+   */
+  isAuthenticated: IsAuthenticated;
+}
 
 /**
  * Kibana HTTP Service provides own abstraction for work with HTTP stack.
@@ -129,15 +146,26 @@ export interface HttpServiceSetup {
   ) => Promise<SessionStorageFactory<T>>;
 
   /**
-   * To define custom logic to perform for incoming requests.
+   * To define custom logic to perform for incoming requests before server performs a route lookup.
    *
    * @remarks
-   * Runs the handler before Auth interceptor performs a check that user has access to requested resources, so it's the
-   * only place when you can forward a request to another URL right on the server.
-   * Can register any number of registerOnPostAuth, which are called in sequence
+   * It's the only place when you can forward a request to another URL right on the server.
+   * Can register any number of registerOnPreRouting, which are called in sequence
+   * (from the first registered to the last). See {@link OnPreRoutingHandler}.
+   *
+   * @param handler {@link OnPreRoutingHandler} - function to call.
+   */
+  registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
+
+  /**
+   * To define custom logic to perform for incoming requests before
+   * the Auth interceptor performs a check that user has access to requested resources.
+   *
+   * @remarks
+   * Can register any number of registerOnPreAuth, which are called in sequence
    * (from the first registered to the last). See {@link OnPreAuthHandler}.
    *
-   * @param handler {@link OnPreAuthHandler} - function to call.
+   * @param handler {@link OnPreRoutingHandler} - function to call.
    */
   registerOnPreAuth: (handler: OnPreAuthHandler) => void;
 
@@ -154,13 +182,11 @@ export interface HttpServiceSetup {
   registerAuth: (handler: AuthenticationHandler) => void;
 
   /**
-   * To define custom logic to perform for incoming requests.
+   * To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
    *
    * @remarks
-   * Runs the handler after Auth interceptor
-   * did make sure a user has access to the requested resource.
    * The auth state is available at stage via http.auth.get(..)
-   * Can register any number of registerOnPreAuth, which are called in sequence
+   * Can register any number of registerOnPostAuth, which are called in sequence
    * (from the first registered to the last). See {@link OnPostAuthHandler}.
    *
    * @param handler {@link OnPostAuthHandler} - function to call.
@@ -185,28 +211,18 @@ export interface HttpServiceSetup {
    */
   basePath: IBasePath;
 
-  auth: {
-    /**
-     * Gets authentication state for a request. Returned by `auth` interceptor.
-     * {@link GetAuthState}
-     */
-    get: GetAuthState;
-    /**
-     * Returns authentication status for a request.
-     * {@link IsAuthenticated}
-     */
-    isAuthenticated: IsAuthenticated;
-  };
+  /**
+   * Auth status.
+   * See {@link HttpAuth}
+   *
+   * @deprecated use {@link HttpServiceStart.auth | the start contract} instead.
+   */
+  auth: HttpAuth;
 
   /**
    * The CSP config used for Kibana.
    */
   csp: ICspConfig;
-
-  /**
-   * Flag showing whether a server was configured to use TLS connection.
-   */
-  isTlsEnabled: boolean;
 
   /**
    * Provides ability to declare a handler function for a particular path and HTTP request method.
@@ -234,7 +250,7 @@ export interface HttpServiceSetup {
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {
-   *       return await context.elasticsearch.legacy.client.callAsInternalUser('endpoint', id);
+   *       return await context.elasticsearch.client.asCurrentUser.find(id);
    *     }
    *     return { search };
    *    }
@@ -276,8 +292,28 @@ export interface InternalHttpServiceSetup
 
 /** @public */
 export interface HttpServiceStart {
-  /** Indicates if http server is listening on a given port */
-  isListening: (port: number) => boolean;
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
+
+  /**
+   * Auth status.
+   * See {@link HttpAuth}
+   */
+  auth: HttpAuth;
+
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running http server.
+   */
+  getServerInfo: () => HttpServerInfo;
+}
+
+/** @internal */
+export interface InternalHttpServiceStart extends HttpServiceStart {
+  /** Indicates if the http server is listening on the configured port */
+  isListening: () => boolean;
 }
 
 /** @public */
@@ -285,7 +321,7 @@ export interface HttpServerInfo {
   /** The name of the Kibana server */
   name: string;
   /** The hostname of the server */
-  host: string;
+  hostname: string;
   /** The port the server is listening on */
   port: number;
   /** The protocol used by the server */

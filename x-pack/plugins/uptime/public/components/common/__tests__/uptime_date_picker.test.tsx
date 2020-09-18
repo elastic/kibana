@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { UptimeDatePicker } from '../uptime_date_picker';
-import { renderWithRouter, shallowWithRouter } from '../../../lib';
+import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../lib';
 
 describe('UptimeDatePicker component', () => {
   it('validates props with shallow render', () => {
@@ -15,7 +15,11 @@ describe('UptimeDatePicker component', () => {
   });
 
   it('renders properly with mock data', () => {
-    const component = renderWithRouter(<UptimeDatePicker />);
+    const component = renderWithRouter(
+      <MountWithReduxProvider>
+        <UptimeDatePicker />
+      </MountWithReduxProvider>
+    );
     expect(component).toMatchSnapshot();
   });
 });

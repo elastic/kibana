@@ -10,7 +10,6 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getResult,
-  typicalPayload,
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
   getFindResultStatus,
@@ -19,7 +18,7 @@ import {
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -27,14 +26,6 @@ describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.create>;
-
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -126,23 +117,25 @@ describe('update_rules_bulk', () => {
 
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
-      const request = requestMock.create({
+      const noIdRequest = requestMock.create({
         method: 'put',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), rule_id: undefined }],
+        body: [{ ...getCreateRulesSchemaMock(), rule_id: undefined }],
       });
-      const result = server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because ["value" must contain at least one of [id, rule_id]]'
-      );
+      const response = await server.inject(noIdRequest, context);
+      expect(response.body).toEqual([
+        {
+          error: { message: 'either "id" or "rule_id" must be set', status_code: 400 },
+          rule_id: '(unknown id)',
+        },
+      ]);
     });
 
     test('allows query rule type', async () => {
       const request = requestMock.create({
         method: 'put',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), type: 'query' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'query' }],
       });
       const result = server.validate(request);
 
@@ -153,13 +146,41 @@ describe('update_rules_bulk', () => {
       const request = requestMock.create({
         method: 'put',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-        body: [{ ...typicalPayload(), type: 'unknown_type' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'unknown_type' }],
       });
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
+        'Invalid value "unknown_type" supplied to "type"'
       );
+    });
+
+    test('allows rule type of query and custom from and interval', async () => {
+      const request = requestMock.create({
+        method: 'put',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [{ from: 'now-7m', interval: '5m', ...getCreateRulesSchemaMock(), type: 'query' }],
+      });
+      const result = server.validate(request);
+
+      expect(result.ok).toHaveBeenCalled();
+    });
+
+    test('disallows invalid "from" param on rule', async () => {
+      const request = requestMock.create({
+        method: 'put',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [
+          {
+            from: 'now-3755555555555555.67s',
+            interval: '5m',
+            ...getCreateRulesSchemaMock(),
+            type: 'query',
+          },
+        ],
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
     });
   });
 });

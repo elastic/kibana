@@ -16,10 +16,8 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index-preconfigured';
 export default function indexTest({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('preconfigured index action', () => {
-    after(() => esArchiver.unload('empty_kibana'));
     beforeEach(() => clearTestIndex(es));
 
     it('should execute successfully when expected for a single body', async () => {

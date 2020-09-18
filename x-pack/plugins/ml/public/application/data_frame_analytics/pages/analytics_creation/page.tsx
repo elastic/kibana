@@ -6,7 +6,6 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -16,16 +15,17 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiStepStatus,
-  EuiText,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlContext } from '../../../contexts/ml';
-import { newJobCapsService } from '../../../services/new_job_capabilities_service';
+import { ml } from '../../../services/ml_api_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
-import { CreateAnalyticsAdvancedEditor } from '../analytics_management/components/create_analytics_advanced_editor';
+import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
 import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
+import { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
@@ -34,7 +34,11 @@ export enum ANALYTICS_STEPS {
   CREATE,
 }
 
-export const Page: FC = () => {
+interface Props {
+  jobId?: DataFrameAnalyticsId;
+}
+
+export const Page: FC<Props> = ({ jobId }) => {
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
   const [activatedSteps, setActivatedSteps] = useState<boolean[]>([true, false, false, false]);
 
@@ -42,9 +46,34 @@ export const Page: FC = () => {
   const { currentIndexPattern } = mlContext;
 
   const createAnalyticsForm = useCreateAnalyticsForm();
-  const { isAdvancedEditorEnabled } = createAnalyticsForm.state;
-  const { jobType } = createAnalyticsForm.state.form;
-  const { switchToAdvancedEditor } = createAnalyticsForm.actions;
+  const { state } = createAnalyticsForm;
+  const { isAdvancedEditorEnabled, disableSwitchToForm } = state;
+  const { jobType } = state.form;
+  const {
+    initiateWizard,
+    setJobClone,
+    switchToAdvancedEditor,
+    switchToForm,
+  } = createAnalyticsForm.actions;
+
+  useEffect(() => {
+    initiateWizard();
+
+    if (currentIndexPattern) {
+      (async function () {
+        if (jobId !== undefined) {
+          const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+          if (
+            Array.isArray(analyticsConfigs.data_frame_analytics) &&
+            analyticsConfigs.data_frame_analytics.length > 0
+          ) {
+            const clonedJobConfig: any = analyticsConfigs.data_frame_analytics[0];
+            await setJobClone(clonedJobConfig);
+          }
+        }
+      })();
+    }
+  }, []);
 
   useEffect(() => {
     if (activatedSteps[currentStep] === false) {
@@ -52,14 +81,6 @@ export const Page: FC = () => {
       setActivatedSteps(activatedSteps);
     }
   }, [currentStep]);
-
-  useEffect(() => {
-    if (currentIndexPattern) {
-      (async function () {
-        await newJobCapsService.initializeFromIndexPattern(currentIndexPattern, false, false);
-      })();
-    }
-  }, []);
 
   const analyticsWizardSteps = [
     {
@@ -90,7 +111,6 @@ export const Page: FC = () => {
         />
       ),
       status: currentStep >= ANALYTICS_STEPS.ADVANCED ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardAdvancedStep',
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.creation.detailsStepTitle', {
@@ -105,7 +125,6 @@ export const Page: FC = () => {
         />
       ),
       status: currentStep >= ANALYTICS_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardDetailsStep',
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.creation.createStepTitle', {
@@ -113,7 +132,6 @@ export const Page: FC = () => {
       }),
       children: <CreateStep {...createAnalyticsForm} step={currentStep} />,
       status: currentStep >= ANALYTICS_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardCreateStep',
     },
   ];
 
@@ -125,12 +143,21 @@ export const Page: FC = () => {
             <EuiFlexItem>
               <EuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="m">
+                  <EuiTitle size="m" data-test-subj="mlDataFrameAnalyticsWizardHeaderTitle">
                     <h1>
-                      <FormattedMessage
-                        id="xpack.ml.dataframe.analytics.creationPageTitle"
-                        defaultMessage="Create analytics job"
-                      />
+                      {jobId === undefined && (
+                        <FormattedMessage
+                          id="xpack.ml.dataframe.analytics.creationPageTitle"
+                          defaultMessage="Create job"
+                        />
+                      )}
+                      {jobId !== undefined && (
+                        <FormattedMessage
+                          id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
+                          defaultMessage="Clone job from {jobId}"
+                          values={{ jobId }}
+                        />
+                      )}
                     </h1>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -145,34 +172,40 @@ export const Page: FC = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {isAdvancedEditorEnabled === false && (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  helpText={i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.enableJsonEditorHelpText',
+
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                helpText={
+                  disableSwitchToForm &&
+                  i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.jsonEditorDisabledSwitchText',
                     {
-                      defaultMessage: 'You cannot switch back to this form from the json editor.',
+                      defaultMessage:
+                        'Configuration contains advanced fields not supported by the form. You cannot switch back to the form.',
+                    }
+                  )
+                }
+              >
+                <EuiSwitch
+                  disabled={jobType === undefined || disableSwitchToForm}
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
+                    {
+                      defaultMessage: 'Switch to json editor',
                     }
                   )}
-                >
-                  <EuiButtonEmpty
-                    isDisabled={jobType === undefined}
-                    iconType="link"
-                    onClick={switchToAdvancedEditor}
-                    data-test-subj="mlAnalyticsCreateJobWizardAdvancedEditorSwitch"
-                  >
-                    <EuiText size="s" grow={false}>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
-                        {
-                          defaultMessage: 'Switch to json editor',
-                        }
-                      )}
-                    </EuiText>
-                  </EuiButtonEmpty>
-                </EuiFormRow>
-              </EuiFlexItem>
-            )}
+                  checked={isAdvancedEditorEnabled}
+                  onChange={(e) => {
+                    if (e.target.checked === true) {
+                      switchToAdvancedEditor();
+                    } else {
+                      switchToForm();
+                    }
+                  }}
+                  data-test-subj="mlAnalyticsCreateJobWizardAdvancedEditorSwitch"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
           {isAdvancedEditorEnabled === true && (

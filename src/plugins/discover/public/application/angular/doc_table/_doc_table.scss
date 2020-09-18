@@ -27,7 +27,6 @@ doc-table {
 }
 
 .kbnDocTable {
-  @include dscDocSourceStyle;
   font-size: $euiFontSizeXS;
 
   th {
@@ -36,6 +35,35 @@ doc-table {
 
     .fa {
       font-size: 1.1em;
+    }
+  }
+}
+
+.kbn-table,
+.kbnDocTable {
+  /**
+  *  Style ES document _source in table view <dt>key:<dt><dd>value</dd>
+  *  Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
+  *  row in the Context Log.
+  */
+
+  dl.source {
+    margin-bottom: 0;
+    line-height: 2em;
+    word-break: break-word;
+
+    dt,
+    dd {
+      display: inline;
+    }
+
+    dt {
+      background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
+      color: $euiTextColor;
+      padding: ($euiSizeXS / 2) $euiSizeXS;
+      margin-right: $euiSizeXS;
+      word-break: normal;
+      border-radius: $euiBorderRadius;
     }
   }
 }
@@ -80,3 +108,50 @@ doc-table {
   text-align: center;
 }
 
+.truncate-by-height {
+  overflow: hidden;
+}
+
+.table {
+  // Nesting
+  .table {
+    background-color: $euiColorEmptyShade;
+  }
+}
+
+.kbn-table {
+  // sub tables should not have a leading border
+  .table .table {
+    margin-bottom: 0;
+
+    tr:first-child > td {
+      border-top: none;
+    }
+
+    td.field-name {
+      font-weight: $euiFontWeightBold;
+    }
+  }
+}
+
+table {
+  th {
+    i.fa-sort {
+      color: $euiColorLightShade;
+    }
+
+    button.fa-sort-asc,
+    button.fa-sort-down,
+    i.fa-sort-asc,
+    i.fa-sort-down {
+      color: $euiColorPrimary;
+    }
+
+    button.fa-sort-desc,
+    button.fa-sort-up,
+    i.fa-sort-desc,
+    i.fa-sort-up {
+      color: $euiColorPrimary;
+    }
+  }
+}

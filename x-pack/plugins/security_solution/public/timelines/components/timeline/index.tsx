@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { WithSource } from '../../../common/containers/source';
-import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
+import { NO_ALERT_INDEX } from '../../../../common/constants';
+import { useWithSource } from '../../../common/containers/source';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
@@ -21,6 +23,7 @@ import {
   OnDataProviderEdited,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
+  OnToggleDataProviderType,
 } from './events';
 import { Timeline } from './timeline';
 
@@ -30,7 +33,7 @@ export interface OwnProps {
   usersViewing: string[];
 }
 
-type Props = OwnProps & PropsFromRedux;
+export type Props = OwnProps & PropsFromRedux;
 
 const StatefulTimelineComponent = React.memo<Props>(
   ({
@@ -40,8 +43,11 @@ const StatefulTimelineComponent = React.memo<Props>(
     eventType,
     end,
     filters,
+    graphEventId,
     id,
     isLive,
+    isSaving,
+    isTimelineExists,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
@@ -54,8 +60,11 @@ const StatefulTimelineComponent = React.memo<Props>(
     showCallOutUnauthorizedMsg,
     sort,
     start,
+    status,
+    timelineType,
     updateDataProviderEnabled,
     updateDataProviderExcluded,
+    updateDataProviderType,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
@@ -67,17 +76,17 @@ const StatefulTimelineComponent = React.memo<Props>(
         eventType &&
         signalIndexExists &&
         signalIndexName != null &&
-        ['signal', 'all'].includes(eventType)
+        ['signal', 'alert', 'all'].includes(eventType)
       ) {
         return [signalIndexName];
       }
-      return [];
+      return [NO_ALERT_INDEX]; // Following index does not exist so we won't show any events;
     }, [eventType, signalIndexExists, signalIndexName]);
 
     const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
       (providerId: string, andProviderId?: string) =>
         removeProvider!({ id, providerId, andProviderId }),
-      [id]
+      [id, removeProvider]
     );
 
     const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
@@ -88,7 +97,7 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
-      [id]
+      [id, updateDataProviderEnabled]
     );
 
     const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
@@ -99,7 +108,18 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           andProviderId,
         }),
-      [id]
+      [id, updateDataProviderExcluded]
+    );
+
+    const onToggleDataProviderType: OnToggleDataProviderType = useCallback(
+      ({ providerId, type, andProviderId }) =>
+        updateDataProviderType!({
+          id,
+          type,
+          providerId,
+          andProviderId,
+        }),
+      [id, updateDataProviderType]
     );
 
     const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
@@ -113,12 +133,12 @@ const StatefulTimelineComponent = React.memo<Props>(
           providerId,
           value,
         }),
-      [id]
+      [id, onDataProviderEdited]
     );
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
-      [id]
+      [id, updateItemsPerPage]
     );
 
     const toggleColumn = useCallback(
@@ -140,63 +160,79 @@ const StatefulTimelineComponent = React.memo<Props>(
           });
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [columns, id]
     );
 
     useEffect(() => {
-      if (createTimeline != null) {
+      if (createTimeline != null && !isTimelineExists) {
         createTimeline({ id, columns: defaultHeaders, show: false });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const { docValueFields, indexPattern, browserFields, loading: isLoadingSource } = useWithSource(
+      'default',
+      indexToAdd
+    );
+
     return (
-      <WithSource sourceId="default" indexToAdd={indexToAdd}>
-        {({ indexPattern, browserFields }) => (
-          <Timeline
-            browserFields={browserFields}
-            columns={columns}
-            dataProviders={dataProviders!}
-            end={end}
-            eventType={eventType}
-            filters={filters}
-            id={id}
-            indexPattern={indexPattern}
-            indexToAdd={indexToAdd}
-            isLive={isLive}
-            itemsPerPage={itemsPerPage!}
-            itemsPerPageOptions={itemsPerPageOptions!}
-            kqlMode={kqlMode}
-            kqlQueryExpression={kqlQueryExpression}
-            loadingIndexName={loading}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onClose={onClose}
-            onDataProviderEdited={onDataProviderEditedLocal}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show!}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort!}
-            start={start}
-            toggleColumn={toggleColumn}
-            usersViewing={usersViewing}
-          />
-        )}
-      </WithSource>
+      <Timeline
+        browserFields={browserFields}
+        columns={columns}
+        dataProviders={dataProviders!}
+        docValueFields={docValueFields}
+        end={end}
+        eventType={eventType}
+        filters={filters}
+        graphEventId={graphEventId}
+        id={id}
+        indexPattern={indexPattern}
+        indexToAdd={indexToAdd}
+        isLive={isLive}
+        isLoadingSource={isLoadingSource}
+        isSaving={isSaving}
+        itemsPerPage={itemsPerPage!}
+        itemsPerPageOptions={itemsPerPageOptions!}
+        kqlMode={kqlMode}
+        kqlQueryExpression={kqlQueryExpression}
+        loadingIndexName={loading}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onClose={onClose}
+        onDataProviderEdited={onDataProviderEditedLocal}
+        onDataProviderRemoved={onDataProviderRemoved}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+        onToggleDataProviderType={onToggleDataProviderType}
+        show={show!}
+        showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+        sort={sort!}
+        start={start}
+        status={status}
+        toggleColumn={toggleColumn}
+        timelineType={timelineType}
+        usersViewing={usersViewing}
+      />
     );
   },
+  // eslint-disable-next-line complexity
   (prevProps, nextProps) => {
     return (
       prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
+      prevProps.graphEventId === nextProps.graphEventId &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
+      prevProps.isSaving === nextProps.isSaving &&
+      prevProps.isTimelineExists === nextProps.isTimelineExists &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.start === nextProps.start &&
+      prevProps.timelineType === nextProps.timelineType &&
+      prevProps.status === nextProps.status &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&
@@ -222,24 +258,35 @@ const makeMapStateToProps = () => {
       dataProviders,
       eventType,
       filters,
+      graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
+      isSaving,
       kqlMode,
       show,
       sort,
+      status,
+      timelineType,
     } = timeline;
-    const kqlQueryExpression = getKqlQueryTimeline(state, id)!;
-
+    const kqlQueryTimeline = getKqlQueryTimeline(state, id)!;
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 
+    // return events on empty search
+    const kqlQueryExpression =
+      isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
+        ? ' '
+        : kqlQueryTimeline;
     return {
       columns,
       dataProviders,
       eventType,
       end: input.timerange.to,
       filters: timelineFilter,
+      graphEventId,
       id,
       isLive: input.policy.kind === 'interval',
+      isSaving,
+      isTimelineExists: getTimeline(state, id) != null,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -248,6 +295,8 @@ const makeMapStateToProps = () => {
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       sort,
       start: input.timerange.from,
+      status,
+      timelineType,
     };
   };
   return mapStateToProps;
@@ -263,6 +312,7 @@ const mapDispatchToProps = {
   updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
   updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
   updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+  updateDataProviderType: timelineActions.updateDataProviderType,
   updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,

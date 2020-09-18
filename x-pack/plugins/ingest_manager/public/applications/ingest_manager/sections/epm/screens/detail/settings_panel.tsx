@@ -10,8 +10,8 @@ import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { InstallStatus, PackageInfo } from '../../../../types';
-import { useGetDatasources } from '../../../../hooks';
-import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../constants';
+import { useGetPackagePolicies } from '../../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallationButton } from './installation_button';
 import { UpdateIcon } from '../../components/icons';
@@ -33,7 +33,7 @@ const NoteLabel = () => (
 );
 const UpdatesAvailableMsg = () => (
   <UpdatesAvailableMsgContainer>
-    <UpdateIcon />
+    <UpdateIcon size="l" />
     <FormattedMessage
       id="xpack.ingestManager.integrations.settings.versionInfo.updatesAvailable"
       defaultMessage="Updates are available"
@@ -46,13 +46,13 @@ export const SettingsPanel = (
 ) => {
   const { name, title, removable, latestVersion, version } = props;
   const getPackageInstallStatus = useGetPackageInstallStatus();
-  const { data: datasourcesData } = useGetDatasources({
+  const { data: packagePoliciesData } = useGetPackagePolicies({
     perPage: 0,
     page: 1,
-    kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
   });
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
-  const packageHasDatasources = !!datasourcesData?.total;
+  const packageHasUsages = !!packagePoliciesData?.total;
   const updateAvailable = installedVersion && installedVersion < latestVersion ? true : false;
   const isViewingOldPackage = version < latestVersion;
   // hide install/remove options if the user has version of the package is installed
@@ -175,7 +175,7 @@ export const SettingsPanel = (
               <p>
                 <FormattedMessage
                   id="xpack.ingestManager.integrations.settings.packageUninstallDescription"
-                  defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this Integration."
+                  defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
                 />
               </p>
             </div>
@@ -185,16 +185,16 @@ export const SettingsPanel = (
               <p>
                 <InstallationButton
                   {...props}
-                  disabled={!datasourcesData || removable === false ? true : packageHasDatasources}
+                  disabled={!packagePoliciesData || removable === false ? true : packageHasUsages}
                 />
               </p>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {packageHasDatasources && removable === true && (
+          {packageHasUsages && removable === true && (
             <p>
               <FormattedMessage
                 id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
-                defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} data sources from your agent configurations."
+                defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
                 values={{
                   title,
                   strongNote: (

@@ -9,15 +9,16 @@ export {
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
+  showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
 } from './common';
+export { getFieldType, ChartData } from './use_column_chart';
 export { useDataGrid } from './use_data_grid';
 export { DataGrid } from './data_grid';
 export {
   DataGridItem,
   EsSorting,
   RenderCellValue,
-  SearchResponse7,
   UseDataGridReturnType,
   UseIndexDataReturnType,
 } from './types';

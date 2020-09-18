@@ -6,7 +6,7 @@
 
 import { translation } from './selectors';
 import { CameraState, Vector2 } from '../../types';
-import { distance } from '../../lib/vector2';
+import { distance } from '../../models/vector2';
 
 /**
  * Return a new `CameraState` with the `animation` property

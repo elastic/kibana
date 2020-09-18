@@ -8,24 +8,30 @@ import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 import {
   getCategoriesHandler,
   getListHandler,
+  getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
-  installPackageHandler,
+  installPackageFromRegistryHandler,
+  installPackageByUploadHandler,
   deletePackageHandler,
 } from './handlers';
 import {
+  GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  InstallPackageRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+  InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
+
+const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
-      validate: false,
+      validate: GetCategoriesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getCategoriesHandler
@@ -38,6 +44,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getListHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
+      validate: false,
+      options: { tags: [`access:${PLUGIN_ID}`] },
+    },
+    getLimitedListHandler
   );
 
   router.get(
@@ -60,11 +75,27 @@ export const registerRoutes = (router: IRouter) => {
 
   router.post(
     {
-      path: EPM_API_ROUTES.INSTALL_PATTERN,
-      validate: InstallPackageRequestSchema,
+      path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
+      validate: InstallPackageFromRegistryRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    installPackageHandler
+    installPackageFromRegistryHandler
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
+      validate: InstallPackageByUploadRequestSchema,
+      options: {
+        tags: [`access:${PLUGIN_ID}-all`],
+        body: {
+          accepts: ['application/gzip', 'application/zip'],
+          parse: false,
+          maxBytes: MAX_FILE_SIZE_BYTES,
+        },
+      },
+    },
+    installPackageByUploadHandler
   );
 
   router.delete(

@@ -4,18 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper, shallow } from 'enzyme';
 import React from 'react';
-import { IStackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
-import { Stackframe } from '../Stackframe';
+import { ReactWrapper, shallow } from 'enzyme';
+import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
+import { mountWithTheme } from '../../../../utils/testHelpers';
+import { Stackframe as StackframeComponent } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
+
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 
 describe('Stackframe', () => {
   describe('when stackframe has source lines', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = stacktracesMock[0];
-      wrapper = mount(<Stackframe id="test" stackframe={stackframe} />);
+      wrapper = mountWithTheme(
+        <StackframeComponent id="test" stackframe={stackframe} />
+      );
     });
 
     it('should render correctly', () => {
@@ -36,8 +45,10 @@ describe('Stackframe', () => {
   describe('when stackframe does not have source lines', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      const stackframe = { line: {} } as IStackframe;
-      wrapper = mount(<Stackframe id="test" stackframe={stackframe} />);
+      const stackframe = { line: {} } as Stackframe;
+      wrapper = mountWithTheme(
+        <StackframeComponent id="test" stackframe={stackframe} />
+      );
     });
 
     it('should render only FrameHeading', () => {
@@ -52,9 +63,9 @@ describe('Stackframe', () => {
   });
 
   it('should respect isLibraryFrame', () => {
-    const stackframe = { line: {} } as IStackframe;
+    const stackframe = { line: {} } as Stackframe;
     const wrapper = shallow(
-      <Stackframe id="test" stackframe={stackframe} isLibraryFrame />
+      <StackframeComponent id="test" stackframe={stackframe} isLibraryFrame />
     );
     expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(true);
   });

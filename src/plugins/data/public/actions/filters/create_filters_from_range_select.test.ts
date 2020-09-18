@@ -23,8 +23,7 @@ import { createFiltersFromRangeSelectAction } from './create_filters_from_range_
 
 import { IndexPatternsContract, RangeFilter } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
-import { setIndexPatterns } from '../../../public/services';
-import { mockDataServices } from '../../../public/search/aggs/test_helpers';
+import { setIndexPatterns, setSearchService } from '../../../public/services';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
 
 describe('brushEvent', () => {
@@ -51,9 +50,10 @@ describe('brushEvent', () => {
   ];
 
   beforeEach(() => {
-    mockDataServices();
+    const dataStart = dataPluginMock.createStartContract();
+    setSearchService(dataStart.search);
     setIndexPatterns(({
-      ...dataPluginMock.createStartContract().indexPatterns,
+      ...dataStart.indexPatterns,
       get: async () => indexPattern,
     } as unknown) as IndexPatternsContract);
 

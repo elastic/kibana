@@ -5,9 +5,10 @@
  */
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled, useUiTracker } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
 import {
   LogColumnConfiguration,
@@ -18,11 +19,26 @@ import {
 import { TextScale } from '../../../../common/log_text_scale';
 import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
 import { LogEntryFieldColumn } from './log_entry_field_column';
-import { LogEntryActionsColumn } from './log_entry_actions_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
 import { LogEntry, LogColumn } from '../../../../common/http_api';
+import { LogEntryContextMenu } from './log_entry_context_menu';
+
+const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
+  defaultMessage: 'View actions for line',
+});
+
+const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetailsButton', {
+  defaultMessage: 'View details',
+});
+
+const LOG_VIEW_IN_CONTEXT_LABEL = i18n.translate(
+  'xpack.infra.lobs.logEntryActionsViewInContextButton',
+  {
+    defaultMessage: 'View in context',
+  }
+);
 
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
@@ -52,6 +68,8 @@ export const LogEntryRow = memo(
     scale,
     wrap,
   }: LogEntryRowProps) => {
+    const trackMetric = useUiTracker({ app: 'infra_logs' });
+
     const [isHovered, setIsHovered] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -66,15 +84,38 @@ export const LogEntryRow = memo(
       logEntry.id,
     ]);
 
-    const handleOpenViewLogInContext = useCallback(() => openViewLogInContext?.(logEntry), [
-      openViewLogInContext,
-      logEntry,
-    ]);
+    const handleOpenViewLogInContext = useCallback(() => {
+      openViewLogInContext?.(logEntry);
+      trackMetric({ metric: 'view_in_context__stream' });
+    }, [openViewLogInContext, logEntry, trackMetric]);
 
     const hasContext = useMemo(() => !isEmpty(logEntry.context), [logEntry]);
     const hasActionFlyoutWithItem = openFlyoutWithItem !== undefined;
     const hasActionViewLogInContext = hasContext && openViewLogInContext !== undefined;
     const hasActionsMenu = hasActionFlyoutWithItem || hasActionViewLogInContext;
+
+    const menuItems = useMemo(() => {
+      const items = [];
+      if (hasActionFlyoutWithItem) {
+        items.push({
+          label: LOG_DETAILS_LABEL,
+          onClick: openFlyout,
+        });
+      }
+      if (hasActionViewLogInContext) {
+        items.push({
+          label: LOG_VIEW_IN_CONTEXT_LABEL,
+          onClick: handleOpenViewLogInContext,
+        });
+      }
+
+      return items;
+    }, [
+      hasActionFlyoutWithItem,
+      hasActionViewLogInContext,
+      openFlyout,
+      handleOpenViewLogInContext,
+    ]);
 
     const logEntryColumnsById = useMemo(
       () =>
@@ -183,16 +224,15 @@ export const LogEntryRow = memo(
             key="logColumn iconLogColumn iconLogColumn:details"
             {...columnWidths[iconColumnId]}
           >
-            <LogEntryActionsColumn
-              isHovered={isHovered}
-              isMenuOpen={isMenuOpen}
-              onOpenMenu={openMenu}
-              onCloseMenu={closeMenu}
-              onViewDetails={hasActionFlyoutWithItem ? openFlyout : undefined}
-              onViewLogInContext={
-                hasActionViewLogInContext ? handleOpenViewLogInContext : undefined
-              }
-            />
+            {isHovered || isMenuOpen ? (
+              <LogEntryContextMenu
+                aria-label={MENU_LABEL}
+                isOpen={isMenuOpen}
+                onOpen={openMenu}
+                onClose={closeMenu}
+                items={menuItems}
+              />
+            ) : null}
           </LogEntryColumn>
         ) : null}
       </LogEntryRowWrapper>

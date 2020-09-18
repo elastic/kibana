@@ -6,8 +6,8 @@
 
 import Boom from 'boom';
 import {
-  ElasticsearchError,
-  ElasticsearchErrorHelpers,
+  LegacyElasticsearchError,
+  LegacyElasticsearchErrorHelpers,
   KibanaRequest,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
@@ -102,21 +102,23 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
-    if (!state) {
+    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // session isn't defined then provider is just being probed whether or not it can perform logout.
+    if (state === undefined) {
       this.logger.debug('There is no access token invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    try {
-      await this.options.tokens.invalidate(state);
-    } catch (err) {
-      this.logger.debug(`Failed invalidating access and/or refresh tokens: ${err.message}`);
-      return DeauthenticationResult.failed(err);
+    if (state) {
+      try {
+        await this.options.tokens.invalidate(state);
+      } catch (err) {
+        this.logger.debug(`Failed invalidating access and/or refresh tokens: ${err.message}`);
+        return DeauthenticationResult.failed(err);
+      }
     }
 
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.serverBasePath}/security/logged_out`
-    );
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
   }
 
   /**
@@ -151,7 +153,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
 
       // Check if SPNEGO context wasn't established and we have a response token to return to the client.
-      const challenge = ElasticsearchErrorHelpers.isNotAuthorizedError(err)
+      const challenge = LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)
         ? this.getNegotiateChallenge(err)
         : undefined;
       if (!challenge) {
@@ -296,7 +298,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate request via SPNEGO.');
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
-    let elasticsearchError: ElasticsearchError;
+    let elasticsearchError: LegacyElasticsearchError;
     try {
       await this.getUser(request, {
         // We should send a fake SPNEGO token to Elasticsearch to make sure Kerberos realm is included
@@ -310,7 +312,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     } catch (err) {
       // Fail immediately if we get unexpected error (e.g. ES isn't available). We should not touch
       // session cookie in this case.
-      if (!ElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
+      if (!LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
         return AuthenticationResult.failed(err);
       }
 
@@ -336,7 +338,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * Extracts `Negotiate` challenge from the list of challenges returned with Elasticsearch error if any.
    * @param error Error to extract challenges from.
    */
-  private getNegotiateChallenge(error: ElasticsearchError) {
+  private getNegotiateChallenge(error: LegacyElasticsearchError) {
     const challenges = ([] as string[]).concat(error.output.headers[WWWAuthenticateHeaderName]);
 
     const negotiateChallenge = challenges.find((challenge) =>

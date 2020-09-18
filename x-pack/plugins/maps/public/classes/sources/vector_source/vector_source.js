@@ -9,7 +9,7 @@ import { AbstractSource } from './../source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { VECTOR_SHAPE_TYPES } from './../vector_feature_types';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 
 export class AbstractVectorSource extends AbstractSource {
   static async getGeoJson({ format, featureCollectionPath, fetchUrl }) {
@@ -106,7 +106,7 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   // Allow source to filter and format feature properties before displaying to user
-  async filterAndFormatPropertiesToHtml(properties) {
+  async getTooltipProperties(properties) {
     const tooltipProperties = [];
     for (const key in properties) {
       if (key.startsWith('__kbn')) {
@@ -122,12 +122,12 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
-  isJoinable() {
+  showJoinEditor() {
     return true;
   }
 
   async getSupportedShapeTypes() {
-    return [VECTOR_SHAPE_TYPES.POINT, VECTOR_SHAPE_TYPES.LINE, VECTOR_SHAPE_TYPES.POLYGON];
+    return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
   getSourceTooltipContent(/* sourceDataRequest */) {

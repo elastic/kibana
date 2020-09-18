@@ -5,13 +5,13 @@
  */
 import { SearchResponse } from 'elasticsearch';
 import { ResolverQuery } from './base';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 
 /**
  * Builds a query for retrieving life cycle information about a node (start, stop, etc).
  */
-export class LifecycleQuery extends ResolverQuery<ResolverEvent[]> {
+export class LifecycleQuery extends ResolverQuery<SafeResolverEvent[]> {
   protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
     return {
       query: {
@@ -59,7 +59,7 @@ export class LifecycleQuery extends ResolverQuery<ResolverEvent[]> {
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
-    return ResolverQuery.getResults(response);
+  formatResponse(response: SearchResponse<SafeResolverEvent>): SafeResolverEvent[] {
+    return this.getResults(response);
   }
 }

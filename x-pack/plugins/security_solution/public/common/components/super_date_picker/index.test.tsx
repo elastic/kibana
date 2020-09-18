@@ -10,8 +10,14 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
-import { apolloClientObservable, mockGlobalState, SUB_PLUGINS_REDUCER } from '../../mock';
-import { createUseUiSetting$Mock } from '../../mock/kibana_react';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
+} from '../../mock';
+import { createUseUiSetting$Mock } from '../../lib/kibana/kibana_react.mock';
 import { createStore, State } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
@@ -75,11 +81,24 @@ const timepickerRanges = [
 describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
-    let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+    const { storage } = createSecuritySolutionStorageMock();
+    let store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
 
     beforeEach(() => {
       jest.clearAllMocks();
-      store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+      store = createStore(
+        state,
+        SUB_PLUGINS_REDUCER,
+        apolloClientObservable,
+        kibanaObservable,
+        storage
+      );
       mockUseUiSetting$.mockImplementation((key, defaultValue) => {
         const useUiSetting$Mock = createUseUiSetting$Mock();
 
@@ -137,8 +156,8 @@ describe('SIEM Super Date Picker', () => {
       });
 
       test('Make Sure to (end date) is superior than from (start date)', () => {
-        expect(store.getState().inputs.global.timerange.to).toBeGreaterThan(
-          store.getState().inputs.global.timerange.from
+        expect(new Date(store.getState().inputs.global.timerange.to).valueOf()).toBeGreaterThan(
+          new Date(store.getState().inputs.global.timerange.from).valueOf()
         );
       });
     });
@@ -261,44 +280,6 @@ describe('SIEM Super Date Picker', () => {
       });
     });
 
-    describe('Pick Absolute Date', () => {
-      let wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <SuperDatePicker id="global" />
-        </ReduxStoreProvider>
-      );
-      beforeEach(() => {
-        wrapper = mount(
-          <ReduxStoreProvider store={store}>
-            <SuperDatePicker id="global" />
-          </ReduxStoreProvider>
-        );
-        wrapper.find('[data-test-subj="superDatePickerShowDatesButton"]').first().simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerstartDatePopoverButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper.find('[data-test-subj="superDatePickerAbsoluteTab"]').first().simulate('click');
-        wrapper.update();
-
-        wrapper.find('button.react-datepicker__navigation--previous').first().simulate('click');
-        wrapper.update();
-
-        wrapper.find('div.react-datepicker__day').at(1).simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('button[data-test-subj="superDatePickerApplyTimeButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-      });
-    });
-
     describe('#makeMapStateToProps', () => {
       test('it should return the same shallow references given the same input twice', () => {
         const mapStateToProps = makeMapStateToProps();
@@ -340,7 +321,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.timerange.from = 999;
+        clone.inputs.global.timerange.from = '2020-07-07T09:20:18.966Z';
         const props2 = mapStateToProps(clone, { id: 'global' });
         expect(props1.start).not.toBe(props2.start);
       });
@@ -349,7 +330,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.timerange.to = 999;
+        clone.inputs.global.timerange.to = '2020-07-08T09:20:18.966Z';
         const props2 = mapStateToProps(clone, { id: 'global' });
         expect(props1.end).not.toBe(props2.end);
       });

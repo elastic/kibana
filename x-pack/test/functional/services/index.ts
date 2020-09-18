@@ -30,6 +30,7 @@ import {
   MonitoringKibanaInstancesProvider,
   MonitoringKibanaInstanceProvider,
   MonitoringKibanaSummaryStatusProvider,
+  MonitoringSetupModeProvider,
   // @ts-ignore not ts yet
 } from './monitoring';
 // @ts-ignore not ts yet
@@ -52,6 +53,7 @@ import { TransformProvider } from './transform';
 import {
   DashboardDrilldownPanelActionsProvider,
   DashboardDrilldownsManageProvider,
+  DashboardPanelTimeRangeProvider,
 } from './dashboard';
 
 // define the name and providers for services that should be
@@ -84,6 +86,7 @@ export const services = {
   monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
   monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
   monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
+  monitoringSetupMode: MonitoringSetupModeProvider,
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
@@ -97,4 +100,5 @@ export const services = {
   transform: TransformProvider,
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
+  dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
 };

@@ -19,41 +19,66 @@
 
 import { SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
 
+/**
+ * Used for accumulating the totals of all the stats older than 90d
+ */
 export interface ApplicationUsageTotal extends SavedObjectAttributes {
   appId: string;
   minutesOnScreen: number;
   numberOfClicks: number;
 }
+export const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
 
+/**
+ * Used for storing each of the reports received from the users' browsers
+ */
 export interface ApplicationUsageTransactional extends ApplicationUsageTotal {
   timestamp: string;
 }
+export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
+
+/**
+ * Used to aggregate the transactional events into daily summaries so we can purge the granular events
+ */
+export type ApplicationUsageDaily = ApplicationUsageTransactional;
+export const SAVED_OBJECTS_DAILY_TYPE = 'application_usage_daily';
 
 export function registerMappings(registerType: SavedObjectsServiceSetup['registerType']) {
+  // Type for storing ApplicationUsageTotal
   registerType({
-    name: 'application_usage_totals',
+    name: SAVED_OBJECTS_TOTAL_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
+      // Not indexing any of its contents because we use them "as-is" and don't search by these fields
+      // for more info, see the README.md for application_usage
+      dynamic: false,
+      properties: {},
+    },
+  });
+
+  // Type for storing ApplicationUsageDaily
+  registerType({
+    name: SAVED_OBJECTS_DAILY_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    mappings: {
+      dynamic: false,
       properties: {
-        appId: { type: 'keyword' },
-        numberOfClicks: { type: 'long' },
-        minutesOnScreen: { type: 'float' },
+        // This type requires `timestamp` to be indexed so we can use it when rolling up totals (timestamp < now-90d)
+        timestamp: { type: 'date' },
       },
     },
   });
 
+  // Type for storing ApplicationUsageTransactional (declaring empty mappings because we don't use the internal fields for query/aggregations)
   registerType({
-    name: 'application_usage_transactional',
+    name: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
-      properties: {
-        timestamp: { type: 'date' },
-        appId: { type: 'keyword' },
-        numberOfClicks: { type: 'long' },
-        minutesOnScreen: { type: 'float' },
-      },
+      dynamic: false,
+      properties: {},
     },
   });
 }

@@ -19,7 +19,7 @@
 
 import { Server } from 'hapi';
 
-import { configMock } from '../config/config.mock';
+import { configMock } from '../config/mocks';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
@@ -45,7 +45,7 @@ describe('LegacyInternals', () => {
     beforeEach(async () => {
       uiExports = findLegacyPluginSpecsMock().uiExports;
       config = configMock.create() as any;
-      server = httpServiceMock.createSetupContract().server;
+      server = httpServiceMock.createInternalSetupContract().server;
       legacyInternals = new LegacyInternals(uiExports, config, server);
     });
 
@@ -107,7 +107,7 @@ describe('LegacyInternals', () => {
     beforeEach(async () => {
       uiExports = findLegacyPluginSpecsMock().uiExports;
       config = configMock.create() as any;
-      server = httpServiceMock.createSetupContract().server;
+      server = httpServiceMock.createInternalSetupContract().server;
       legacyInternals = new LegacyInternals(uiExports, config, server);
     });
 

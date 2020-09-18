@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniq } from 'lodash';
+import { uniqBy } from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
@@ -38,6 +38,7 @@ export async function getFields(
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
   const reqFacade: ReqFacade = {
+    requestContext,
     ...request,
     framework,
     payload: {},
@@ -48,22 +49,6 @@ export async function getFields(
     },
     getUiSettingsService: () => requestContext.core.uiSettings.client,
     getSavedObjectsClient: () => requestContext.core.savedObjects.client,
-    server: {
-      plugins: {
-        elasticsearch: {
-          getCluster: () => {
-            return {
-              callWithRequest: async (req: any, endpoint: string, params: any) => {
-                return await requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(
-                  endpoint,
-                  params
-                );
-              },
-            };
-          },
-        },
-      },
-    },
     getEsShardTimeout: async () => {
       return await framework.globalConfig$
         .pipe(
@@ -87,5 +72,5 @@ export async function getFields(
     (field) => field.aggregatable && !indexPatterns.isNestedField(field)
   );
 
-  return uniq(fields, (field) => field.name);
+  return uniqBy(fields, (field) => field.name);
 }

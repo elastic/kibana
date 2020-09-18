@@ -14,8 +14,13 @@
     "licensing",
     "uiActions",
     "embeddable",
-    "share"
+    "share",
+    "features"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaReact",
+    "discover"
+  ]
 }

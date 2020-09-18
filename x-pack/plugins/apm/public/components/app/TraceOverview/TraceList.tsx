@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
+import { TransactionGroup } from '../../../../server/lib/transaction_groups/fetcher';
 import { fontSizes, truncate } from '../../../style/variables';
-import { convertTo } from '../../../utils/formatters';
+import { asMillisecondDuration } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
+import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
 
 const StyledTransactionLink = styled(TransactionDetailLink)`
   font-size: ${fontSizes.large};
@@ -24,11 +24,11 @@ const StyledTransactionLink = styled(TransactionDetailLink)`
 `;
 
 interface Props {
-  items: ITransactionGroup[];
+  items: TransactionGroup[];
   isLoading: boolean;
 }
 
-const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
+const traceListColumns: Array<ITableColumn<TransactionGroup>> = [
   {
     field: 'name',
     name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
@@ -36,22 +36,23 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
     }),
     width: '40%',
     sortable: true,
-    render: (name: string, { sample }: ITransactionGroup) => (
-      <EuiToolTip id="trace-transaction-link-tooltip" content={name}>
+    render: (
+      _: string,
+      { serviceName, transactionName, transactionType }: TransactionGroup
+    ) => (
+      <EuiToolTip content={transactionName}>
         <StyledTransactionLink
-          serviceName={sample.service.name}
-          transactionId={sample.transaction.id}
-          traceId={sample.trace.id}
-          transactionName={sample.transaction.name}
-          transactionType={sample.transaction.type}
+          serviceName={serviceName}
+          transactionName={transactionName}
+          transactionType={transactionType}
         >
-          {name}
+          {transactionName}
         </StyledTransactionLink>
       </EuiToolTip>
     ),
   },
   {
-    field: 'sample.service.name',
+    field: 'serviceName',
     name: i18n.translate(
       'xpack.apm.tracesTable.originatingServiceColumnLabel',
       {
@@ -67,11 +68,7 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (time: number) =>
-      convertTo({
-        unit: 'milliseconds',
-        microseconds: time,
-      }).formatted,
+    render: (time: number) => asMillisecondDuration(time),
   },
   {
     field: 'transactionsPerMinute',

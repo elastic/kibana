@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
 import { Case } from '../../../cases/containers/types';
 import { getCaseDetailsUrl } from '../../../common/components/link_to/redirect_to_case';
 import { Markdown } from '../../../common/components/markdown';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
+import { useFormatUrl } from '../../../common/components/link_to';
 import { IconWithCount } from '../recent_timelines/counts';
-
+import { LinkAnchor } from '../../../common/components/links';
 import * as i18n from './translations';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_ID } from '../../../../common/constants';
+import { SecurityPageName } from '../../../app/types';
 
 const MarkdownContainer = styled.div`
   max-height: 150px;
@@ -24,7 +26,8 @@ const MarkdownContainer = styled.div`
 `;
 
 const RecentCasesComponent = ({ cases }: { cases: Case[] }) => {
-  const search = useGetUrlSearch(navTabs.case);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
+  const { navigateToApp } = useKibana().services.application;
 
   return (
     <>
@@ -32,7 +35,17 @@ const RecentCasesComponent = ({ cases }: { cases: Case[] }) => {
         <EuiFlexGroup key={c.id} gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <EuiLink href={getCaseDetailsUrl({ id: c.id, search })}>{c.title}</EuiLink>
+              <LinkAnchor
+                onClick={(ev: { preventDefault: () => void }) => {
+                  ev.preventDefault();
+                  navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+                    path: getCaseDetailsUrl({ id: c.id, search }),
+                  });
+                }}
+                href={formatUrl(getCaseDetailsUrl({ id: c.id }))}
+              >
+                {c.title}
+              </LinkAnchor>
             </EuiText>
 
             <IconWithCount count={c.totalComment} icon={'editorComment'} tooltip={i18n.COMMENTS} />

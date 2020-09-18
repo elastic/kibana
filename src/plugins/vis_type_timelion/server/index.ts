@@ -32,7 +32,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     renameFromRoot('timelion_vis.enabled', 'vis_type_timelion.enabled'),
     renameFromRoot('timelion.enabled', 'vis_type_timelion.enabled'),
     renameFromRoot('timelion.graphiteUrls', 'vis_type_timelion.graphiteUrls'),
-    renameFromRoot('timelion.ui.enabled', 'vis_type_timelion.ui.enabled'),
+    renameFromRoot('timelion.ui.enabled', 'vis_type_timelion.ui.enabled', true),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>

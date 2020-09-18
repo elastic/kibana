@@ -7,35 +7,51 @@
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
+import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
+import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
 import { dictionaryToArray } from '../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../common/utils/date_utils';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import {
-  getErrorMessage,
+  formatHumanReadableDateTimeSeconds,
   multiColumnSortFactory,
   useDataGrid,
   RenderCellValue,
   UseIndexDataReturnType,
   INDEX_STATUS,
 } from '../../shared_imports';
+import { getErrorMessage } from '../../../common/utils/errors';
 
 import {
-  getPreviewRequestBody,
+  getPreviewTransformRequestBody,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotGroupByConfig,
   PivotQuery,
-  PreviewMappings,
+  PivotAggsConfig,
 } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 import { isPivotAggsWithExtendedForm } from '../common/pivot_aggs';
+
+/**
+ * Checks if the aggregations collection is invalid.
+ */
+function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
+  return aggsArray.some((agg) => {
+    return (
+      (isPivotAggsWithExtendedForm(agg) && !agg.isValid()) ||
+      (agg.subAggs && isConfigInvalid(Object.values(agg.subAggs)))
+    );
+  });
+}
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -59,21 +75,23 @@ export const usePivotData = (
   aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
 ): UseIndexDataReturnType => {
-  const [previewMappings, setPreviewMappings] = useState<PreviewMappings>({ properties: {} });
+  const [previewMappingsProperties, setPreviewMappingsProperties] = useState<
+    PreviewMappingsProperties
+  >({});
   const api = useApi();
 
-  const aggsArr = dictionaryToArray(aggs);
-  const groupByArr = dictionaryToArray(groupBy);
+  const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
+  const groupByArr = useMemo(() => dictionaryToArray(groupBy), [groupBy]);
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
-  const columnKeys = Object.keys(previewMappings.properties).filter(
-    (key) => previewMappings.properties[key].type !== 'object'
+  const columnKeys = Object.keys(previewMappingsProperties).filter(
+    (key) => previewMappingsProperties[key].type !== 'object'
   );
   columnKeys.sort(sortColumns(groupByArr));
 
   // EuiDataGrid State
-  const columns = columnKeys.map((id) => {
-    const field = previewMappings.properties[id];
+  const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
+    const field = previewMappingsProperties[id];
 
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
     // To fall back to the default string schema it needs to be undefined.
@@ -136,11 +154,7 @@ export const usePivotData = (
       return;
     }
 
-    const isConfigInvalid = aggsArr.some(
-      (agg) => isPivotAggsWithExtendedForm(agg) && !agg.isValid()
-    );
-
-    if (isConfigInvalid) {
+    if (isConfigInvalid(aggsArr)) {
       return;
     }
 
@@ -148,28 +162,35 @@ export const usePivotData = (
     setNoDataMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
-    try {
-      const previewRequest = getPreviewRequestBody(indexPatternTitle, query, groupByArr, aggsArr);
-      const resp = await api.getTransformsPreview(previewRequest);
-      setTableItems(resp.preview);
-      setRowCount(resp.preview.length);
-      setPreviewMappings(resp.generated_dest_index.mappings);
-      setStatus(INDEX_STATUS.LOADED);
+    const previewRequest = getPreviewTransformRequestBody(
+      indexPatternTitle,
+      query,
+      groupByArr,
+      aggsArr
+    );
+    const resp = await api.getTransformsPreview(previewRequest);
 
-      if (resp.preview.length === 0) {
-        setNoDataMessage(
-          i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
-            defaultMessage:
-              'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
-          })
-        );
-      }
-    } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+    if (!isPostTransformsPreviewResponseSchema(resp)) {
+      setErrorMessage(getErrorMessage(resp));
       setTableItems([]);
       setRowCount(0);
-      setPreviewMappings({ properties: {} });
+      setPreviewMappingsProperties({});
       setStatus(INDEX_STATUS.ERROR);
+      return;
+    }
+
+    setTableItems(resp.preview);
+    setRowCount(resp.preview.length);
+    setPreviewMappingsProperties(resp.generated_dest_index.mappings.properties);
+    setStatus(INDEX_STATUS.LOADED);
+
+    if (resp.preview.length === 0) {
+      setNoDataMessage(
+        i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody', {
+          defaultMessage:
+            'The preview request did not return any data. Please ensure the optional query returns data and that values exist for the field used by group-by and aggregation fields.',
+        })
+      );
     }
   };
 
@@ -185,9 +206,8 @@ export const usePivotData = (
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPatternTitle,
-    JSON.stringify(aggsArr),
-    JSON.stringify(groupByArr),
-    JSON.stringify(query),
+    aggsArr,
+    JSON.stringify([groupByArr, query]),
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
@@ -226,23 +246,23 @@ export const usePivotData = (
 
       if (
         [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS].includes(
-          previewMappings.properties[columnId].type
+          previewMappingsProperties[columnId].type
         )
       ) {
         return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
       }
 
-      if (previewMappings.properties[columnId].type === ES_FIELD_TYPES.BOOLEAN) {
+      if (previewMappingsProperties[columnId].type === ES_FIELD_TYPES.BOOLEAN) {
         return cellValue ? 'true' : 'false';
       }
 
       return cellValue;
     };
-  }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappings.properties]);
+  }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappingsProperties]);
 
   return {
     ...dataGrid,
-    columns,
+    chartsButtonVisible: false,
     renderCellValue,
   };
 };

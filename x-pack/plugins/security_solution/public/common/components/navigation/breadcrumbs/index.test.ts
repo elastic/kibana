@@ -36,30 +36,37 @@ const getMockObject = (
 ): RouteSpyState & TabNavigationProps => ({
   detailName,
   navTabs: {
+    case: {
+      disabled: false,
+      href: '/app/security/cases',
+      id: 'case',
+      name: 'Cases',
+      urlKey: 'case',
+    },
     hosts: {
       disabled: false,
-      href: '#/link-to/hosts',
+      href: '/app/security/hosts',
       id: 'hosts',
       name: 'Hosts',
       urlKey: 'host',
     },
     network: {
       disabled: false,
-      href: '#/link-to/network',
+      href: '/app/security/network',
       id: 'network',
       name: 'Network',
       urlKey: 'network',
     },
     overview: {
       disabled: false,
-      href: '#/link-to/overview',
+      href: '/app/security/overview',
       id: 'overview',
       name: 'Overview',
       urlKey: 'overview',
     },
     timelines: {
       disabled: false,
-      href: '#/link-to/timelines',
+      href: '/app/security/timelines',
       id: 'timelines',
       name: 'Timelines',
       urlKey: 'timeline',
@@ -74,30 +81,34 @@ const getMockObject = (
   timeline: {
     id: '',
     isOpen: false,
+    graphEventId: '',
   },
   timerange: {
     global: {
       linkTo: ['timeline'],
       timerange: {
-        from: 1558048243696,
+        from: '2019-05-16T23:10:43.696Z',
         fromStr: 'now-24h',
         kind: 'relative',
-        to: 1558134643697,
+        to: '2019-05-17T23:10:43.697Z',
         toStr: 'now',
       },
     },
     timeline: {
       linkTo: ['global'],
       timerange: {
-        from: 1558048243696,
+        from: '2019-05-16T23:10:43.696Z',
         fromStr: 'now-24h',
         kind: 'relative',
-        to: 1558134643697,
+        to: '2019-05-17T23:10:43.697Z',
         toStr: 'now',
       },
     },
   },
 });
+
+const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: boolean }) =>
+  `${appId}${options?.path ?? ''}`;
 
 describe('Navigation Breadcrumbs', () => {
   const hostName = 'siem-kibana';
@@ -108,15 +119,18 @@ describe('Navigation Breadcrumbs', () => {
 
   describe('getBreadcrumbsForRoute', () => {
     test('should return Host breadcrumbs when supplied host pathname', () => {
-      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('hosts', '/hosts', undefined));
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('hosts', '/', undefined),
+        getUrlForAppMock
+      );
       expect(breadcrumbs).toEqual([
         {
-          href: '#/link-to/overview',
+          href: '/app/security/overview',
           text: 'Security',
         },
         {
           href:
-            '#/link-to/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
           text: 'Hosts',
         },
         {
@@ -127,13 +141,16 @@ describe('Navigation Breadcrumbs', () => {
     });
 
     test('should return Network breadcrumbs when supplied network pathname', () => {
-      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', undefined));
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('network', '/', undefined),
+        getUrlForAppMock
+      );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '#/link-to/overview' },
+        { text: 'Security', href: '/app/security/overview' },
         {
           text: 'Network',
           href:
-            '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:network?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: 'Flows',
@@ -144,81 +161,162 @@ describe('Navigation Breadcrumbs', () => {
 
     test('should return Timelines breadcrumbs when supplied timelines pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
-        getMockObject('timelines', '/timelines', undefined)
+        getMockObject('timelines', '/', undefined),
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '#/link-to/overview' },
-        { text: 'Timelines', href: '#/link-to/timelines' },
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Timelines',
+          href:
+            "securitySolution:timelines?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
       ]);
     });
 
     test('should return Host Details breadcrumbs when supplied a pathname with hostName', () => {
-      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('hosts', '/hosts', hostName));
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('hosts', '/', hostName),
+        getUrlForAppMock
+      );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '#/link-to/overview' },
+        { text: 'Security', href: '/app/security/overview' },
         {
           text: 'Hosts',
           href:
-            '#/link-to/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: 'siem-kibana',
           href:
-            '#/link-to/hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         { text: 'Authentications', href: '' },
       ]);
     });
 
     test('should return IP Details breadcrumbs when supplied pathname with ipv4', () => {
-      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', ipv4));
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('network', '/', ipv4),
+        getUrlForAppMock
+      );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '#/link-to/overview' },
+        { text: 'Security', href: '/app/security/overview' },
         {
           text: 'Network',
           href:
-            '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:network?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: ipv4,
-          href: `#/link-to/network/ip/${ipv4}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+          href: `securitySolution:network/ip/${ipv4}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
         },
         { text: 'Flows', href: '' },
       ]);
     });
 
     test('should return IP Details breadcrumbs when supplied pathname with ipv6', () => {
-      const breadcrumbs = getBreadcrumbsForRoute(getMockObject('network', '/network', ipv6Encoded));
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('network', '/', ipv6Encoded),
+        getUrlForAppMock
+      );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '#/link-to/overview' },
+        { text: 'Security', href: '/app/security/overview' },
         {
           text: 'Network',
           href:
-            '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:network?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: ipv6,
-          href: `#/link-to/network/ip/${ipv6Encoded}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+          href: `securitySolution:network/ip/${ipv6Encoded}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
         },
         { text: 'Flows', href: '' },
+      ]);
+    });
+
+    test('should return Alerts breadcrumbs when supplied detection pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('detections', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Detections',
+          href:
+            "securitySolution:detections?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+      ]);
+    });
+    test('should return Cases breadcrumbs when supplied case pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('case', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Cases',
+          href:
+            "securitySolution:case?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+      ]);
+    });
+    test('should return Case details breadcrumbs when supplied case details pathname', () => {
+      const sampleCase = {
+        id: 'my-case-id',
+        name: 'Case name',
+      };
+      const breadcrumbs = getBreadcrumbsForRoute(
+        {
+          ...getMockObject('case', `/${sampleCase.id}`, sampleCase.id),
+          state: { caseTitle: sampleCase.name },
+        },
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Cases',
+          href:
+            "securitySolution:case?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+        {
+          text: sampleCase.name,
+          href: `securitySolution:case/${sampleCase.id}?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+        },
+      ]);
+    });
+    test('should return Admin breadcrumbs when supplied admin pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('administration', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Administration',
+          href: 'securitySolution:administration',
+        },
       ]);
     });
   });
 
   describe('setBreadcrumbs()', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-      setBreadcrumbs(getMockObject('hosts', '/hosts', hostName), chromeMock);
+      setBreadcrumbs(getMockObject('hosts', '/', hostName), chromeMock, getUrlForAppMock);
       expect(setBreadcrumbsMock).toBeCalledWith([
-        { text: 'Security', href: '#/link-to/overview' },
+        { text: 'Security', href: '/app/security/overview' },
         {
           text: 'Hosts',
           href:
-            '#/link-to/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
           text: 'siem-kibana',
           href:
-            '#/link-to/hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+            "securitySolution:hosts/siem-kibana?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         { text: 'Authentications', href: '' },
       ]);

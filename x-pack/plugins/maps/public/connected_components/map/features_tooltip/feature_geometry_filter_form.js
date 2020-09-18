@@ -4,22 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
-import { EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { createSpatialFilterWithGeometry } from '../../../elasticsearch_geo_utils';
+import { URL_MAX_LENGTH } from '../../../../../../../src/core/public';
+import { createSpatialFilterWithGeometry } from '../../../../common/elasticsearch_geo_utils';
 import { GEO_JSON_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 
-import { UrlOverflowService } from '../../../../../../../src/plugins/kibana_legacy/public';
 import rison from 'rison-node';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
 const META_OVERHEAD = 100;
-
-const urlOverflow = new UrlOverflowService();
 
 export class FeatureGeometryFilterForm extends Component {
   state = {
@@ -82,7 +78,7 @@ export class FeatureGeometryFilterForm extends Component {
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
     if (
       window.location.href.length + rison.encode(filter).length + META_OVERHEAD >
-      urlOverflow.failLength()
+      URL_MAX_LENGTH
     ) {
       this.setState({
         errorMsg: i18n.translate('xpack.maps.tooltip.geometryFilterForm.filterTooLargeMessage', {
@@ -97,28 +93,7 @@ export class FeatureGeometryFilterForm extends Component {
     this.props.onClose();
   };
 
-  _renderHeader() {
-    return (
-      <button
-        className="euiContextMenuPanelTitle mapFeatureTooltip_backButton"
-        type="button"
-        onClick={this.props.showPropertiesView}
-      >
-        <span className="euiContextMenu__itemLayout">
-          <EuiIcon type="arrowLeft" size="m" className="euiContextMenu__icon" />
-
-          <span className="euiContextMenu__text">
-            <FormattedMessage
-              id="xpack.maps.tooltip.showGeometryFilterViewLinkLabel"
-              defaultMessage="Filter by geometry"
-            />
-          </span>
-        </span>
-      </button>
-    );
-  }
-
-  _renderForm() {
+  render() {
     return (
       <GeometryFilterForm
         buttonLabel={i18n.translate(
@@ -128,6 +103,8 @@ export class FeatureGeometryFilterForm extends Component {
           }
         )}
         geoFields={this.props.geoFields}
+        getFilterActions={this.props.getFilterActions}
+        getActionContext={this.props.getActionContext}
         intitialGeometryLabel={this.props.geometry.type.toLowerCase()}
         onSubmit={this._createFilter}
         isFilterGeometryClosed={
@@ -137,15 +114,6 @@ export class FeatureGeometryFilterForm extends Component {
         isLoading={this.state.isLoading}
         errorMsg={this.state.errorMsg}
       />
-    );
-  }
-
-  render() {
-    return (
-      <Fragment>
-        {this._renderHeader()}
-        {this._renderForm()}
-      </Fragment>
     );
   }
 }

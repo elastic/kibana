@@ -251,8 +251,7 @@ export default function ({ getService, getPageObjects }) {
           });
         });
 
-        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
-        it.skip('and updates the pie slice legend color', async function () {
+        it('and updates the pie slice legend color', async function () {
           await retry.try(async () => {
             const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#FFFFFF');
             expect(colorExists).to.be(true);
@@ -272,8 +271,7 @@ export default function ({ getService, getPageObjects }) {
           });
         });
 
-        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
-        it.skip('resets the legend color as well', async function () {
+        it('resets the legend color as well', async function () {
           await retry.try(async () => {
             const colorExists = await PageObjects.visChart.doesSelectedLegendColorExist('#57c17b');
             expect(colorExists).to.be(true);

@@ -28,9 +28,6 @@ export const updateApiKeyRoute = (router: IRouter, licenseState: LicenseState) =
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:alerting-all'],
-      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (

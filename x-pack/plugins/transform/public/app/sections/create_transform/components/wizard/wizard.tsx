@@ -10,7 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { getCreateRequestBody, TransformPivotConfig } from '../../../../common';
+import { TransformPivotConfig } from '../../../../../../common/types/transform';
+
+import { getCreateTransformRequestBody } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import {
@@ -91,6 +93,8 @@ export const CreateTransformWizardContext = createContext<{ indexPattern: IndexP
 });
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
+  const { indexPattern } = searchItems;
+
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
@@ -110,6 +114,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         onChange={setStepDetailsState}
         overrides={stepDetailsState}
         searchItems={searchItems}
+        stepDefineState={stepDefineState}
       />
     ) : (
       <StepDetailsSummary {...stepDetailsState} />
@@ -146,9 +151,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     }
   }, []);
 
-  const { indexPattern } = searchItems;
-
-  const transformConfig = getCreateRequestBody(
+  const transformConfig = getCreateTransformRequestBody(
     indexPattern.title,
     stepDefineState,
     stepDetailsState
@@ -162,6 +165,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         transformConfig={transformConfig}
         onChange={setStepCreateState}
         overrides={stepCreateState}
+        timeFieldName={stepDetailsState.indexPatternDateField}
       />
     ) : (
       <StepCreateSummary />

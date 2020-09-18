@@ -1,5 +1,11 @@
 .mlSettingsPage {
 
+  .mlSettingsPage__header {
+    width: map-get($euiBreakpoints, 'xl');
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .mlSettingsPage__content {
     width: map-get($euiBreakpoints, 'xl');
     margin-top: $euiSize;

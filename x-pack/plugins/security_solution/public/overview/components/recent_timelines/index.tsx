@@ -5,7 +5,7 @@
  */
 
 import ApolloClient from 'apollo-client';
-import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
+import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -23,10 +23,13 @@ import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/s
 import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
 import { FilterMode } from './types';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
-import { getTimelinesUrl } from '../../../common/components/link_to/redirect_to_timelines';
 import { LoadingPlaceholders } from '../loading_placeholders';
+import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
+import { useKibana } from '../../../common/lib/kibana';
+import { SecurityPageName } from '../../../app/types';
+import { APP_ID } from '../../../../common/constants';
+import { useFormatUrl } from '../../../common/components/link_to';
+import { LinkAnchor } from '../../../common/components/links';
 
 interface OwnProps {
   apolloClient: ApolloClient<{}>;
@@ -39,8 +42,10 @@ const PAGE_SIZE = 3;
 
 const StatefulRecentTimelinesComponent = React.memo<Props>(
   ({ apolloClient, filterBy, updateIsLoading, updateTimeline }) => {
+    const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
+    const { navigateToApp } = useKibana().services.application;
     const onOpenTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+      ({ duplicate, timelineId }) => {
         queryTimelineById({
           apolloClient,
           duplicate,
@@ -52,12 +57,24 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
       [apolloClient, updateIsLoading, updateTimeline]
     );
 
+    const goToTimelines = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        navigateToApp(`${APP_ID}:${SecurityPageName.timelines}`);
+      },
+      [navigateToApp]
+    );
+
     const noTimelinesMessage =
       filterBy === 'favorites' ? i18n.NO_FAVORITE_TIMELINES : i18n.NO_TIMELINES;
-    const urlSearch = useGetUrlSearch(navTabs.timelines);
+
     const linkAllTimelines = useMemo(
-      () => <EuiLink href={getTimelinesUrl(urlSearch)}>{i18n.VIEW_ALL_TIMELINES}</EuiLink>,
-      [urlSearch]
+      () => (
+        <LinkAnchor onClick={goToTimelines} href={formatUrl('')}>
+          {i18n.VIEW_ALL_TIMELINES}
+        </LinkAnchor>
+      ),
+      [goToTimelines, formatUrl]
     );
     const loadingPlaceholders = useMemo(
       () => (
@@ -67,7 +84,8 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
     );
 
     const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
-
+    const timelineType = TimelineType.default;
+    const { timelineStatus } = useTimelineStatus({ timelineType });
     useEffect(() => {
       fetchAllTimeline({
         pageInfo: {
@@ -80,9 +98,10 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
           sortOrder: Direction.desc,
         },
         onlyUserFavorite: filterBy === 'favorites',
-        timelineType: TimelineType.default,
+        status: timelineStatus,
+        timelineType,
       });
-    }, [filterBy]);
+    }, [fetchAllTimeline, filterBy, timelineStatus, timelineType]);
 
     return (
       <>

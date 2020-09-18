@@ -26,14 +26,86 @@ import ReactDOM from 'react-dom';
 let activeSession: ContextMenuSession | null = null;
 
 const CONTAINER_ID = 'contextMenu-container';
-let initialized = false;
 
+/**
+ * Tries to find best position for opening context menu using mousemove and click event
+ * Returned position is relative to document
+ */
+export function createInteractionPositionTracker() {
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+  const lastClicks: Array<{ el?: Element; mouseX: number; mouseY: number }> = [];
+  const MAX_LAST_CLICKS = 10;
+
+  /**
+   * Track both `mouseup` and `click`
+   * `mouseup` is for clicks and brushes with mouse
+   * `click` is a fallback for keyboard interactions
+   */
+  document.addEventListener('mouseup', onClick, true);
+  document.addEventListener('click', onClick, true);
+  document.addEventListener('mousemove', onMouseUpdate, { passive: true });
+  document.addEventListener('mouseenter', onMouseUpdate, { passive: true });
+  function onClick(event: MouseEvent) {
+    lastClicks.push({
+      el: event.target as Element,
+      mouseX: event.clientX,
+      mouseY: event.clientY,
+    });
+    if (lastClicks.length > MAX_LAST_CLICKS) {
+      lastClicks.shift();
+    }
+  }
+  function onMouseUpdate(event: MouseEvent) {
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+  }
+
+  return {
+    resolveLastPosition: (): { x: number; y: number } => {
+      const lastClick = [...lastClicks]
+        .reverse()
+        .find(({ el }) => el && document.body.contains(el));
+      if (!lastClick) {
+        // fallback to last mouse position
+        return {
+          x: lastMouseX,
+          y: lastMouseY,
+        };
+      }
+
+      const { top, left, bottom, right } = lastClick.el!.getBoundingClientRect();
+
+      const mouseX = lastClick.mouseX;
+      const mouseY = lastClick.mouseY;
+
+      if (top <= mouseY && bottom >= mouseY && left <= mouseX && right >= mouseX) {
+        // click was inside target element
+        return {
+          x: mouseX,
+          y: mouseY,
+        };
+      } else {
+        // keyboard edge case. no cursor position. use target element position instead
+        return {
+          x: left + (right - left) / 2,
+          y: bottom,
+        };
+      }
+    },
+  };
+}
+
+const { resolveLastPosition } = createInteractionPositionTracker();
 function getOrCreateContainerElement() {
   let container = document.getElementById(CONTAINER_ID);
-  const y = getMouseY() + document.body.scrollTop;
+  let { x, y } = resolveLastPosition();
+  y = y + window.scrollY;
+  x = x + window.scrollX;
+
   if (!container) {
     container = document.createElement('div');
-    container.style.left = getMouseX() + 'px';
+    container.style.left = x + 'px';
     container.style.top = y + 'px';
     container.style.position = 'absolute';
 
@@ -44,37 +116,11 @@ function getOrCreateContainerElement() {
     container.id = CONTAINER_ID;
     document.body.appendChild(container);
   } else {
-    container.style.left = getMouseX() + 'px';
+    container.style.left = x + 'px';
     container.style.top = y + 'px';
   }
   return container;
 }
-
-let x: number = 0;
-let y: number = 0;
-
-function initialize() {
-  if (!initialized) {
-    document.addEventListener('mousemove', onMouseUpdate, false);
-    document.addEventListener('mouseenter', onMouseUpdate, false);
-    initialized = true;
-  }
-}
-
-function onMouseUpdate(e: any) {
-  x = e.pageX;
-  y = e.pageY;
-}
-
-function getMouseX() {
-  return x;
-}
-
-function getMouseY() {
-  return y;
-}
-
-initialize();
 
 /**
  * A FlyoutSession describes the session of one opened flyout panel. It offers
@@ -87,16 +133,6 @@ initialize();
  * @extends EventEmitter
  */
 class ContextMenuSession extends EventEmitter {
-  /**
-   * Binds the current flyout session to an Angular scope, meaning this flyout
-   * session will be closed as soon as the Angular scope gets destroyed.
-   * @param {object} scope - An angular scope object to bind to.
-   */
-  public bindToAngularScope(scope: ng.IScope): void {
-    const removeWatch = scope.$on('$destroy', () => this.close());
-    this.on('closed', () => removeWatch());
-  }
-
   /**
    * Closes the opened flyout as long as it's still the open one.
    * If this is not the active session anymore, this method won't do anything.
@@ -151,6 +187,7 @@ export function openContextMenu(
       panelPaddingSize="none"
       anchorPosition="downRight"
       withTitle
+      ownFocus={true}
     >
       <EuiContextMenu
         initialPanelId="mainMenu"

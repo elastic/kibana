@@ -67,6 +67,7 @@ export class ShareMenuManager {
     shareableUrl,
     post,
     basePath,
+    embedUrlParamExtensions,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     post: HttpStart['post'];
@@ -102,6 +103,7 @@ export class ShareMenuManager {
             onClose={this.onClose}
             post={post}
             basePath={basePath}
+            embedUrlParamExtensions={embedUrlParamExtensions}
           />
         </EuiWrappingPopover>
       </I18nProvider>

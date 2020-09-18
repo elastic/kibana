@@ -1,6 +1,6 @@
 # Embeddables
 
-Embeddables are re-usable widgets that can be rendered in any environment or plugin.  Developers can embed them directly in their plugin.  End users can dynamically add them to any embeddable _containers_.
+Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable _containers_.
 
 ## Embeddable containers
 
@@ -15,6 +15,12 @@ yarn start --run-examples
 ```
 
 and navigate to the Embeddable explorer app.
+
+There is also an example of rendering dashboard container outside of dashboard app [here](https://github.com/elastic/kibana/tree/master/examples/dashboard_embeddable_examples).
+
+## Docs
+
+[Embeddable docs, guides & caveats](./docs/README.md)
 
 ## Testing
 

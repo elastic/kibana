@@ -15,6 +15,8 @@ import {
   warningColor,
   errorColor,
 } from '../../utils/httpStatusCodeToColor';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ApmTimeSeriesResponse } from '../../../server/lib/transactions/charts/get_timeseries_data/transform';
 
 describe('chartSelectors', () => {
   describe('getAnomalyScoreSeries', () => {
@@ -62,7 +64,7 @@ describe('chartSelectors', () => {
             { x: 0, y: 100 },
             { x: 1000, y: 200 },
           ],
-          legendValue: '0 ms',
+          legendValue: '200 μs',
           title: 'Avg.',
           type: 'linemark',
         },
@@ -98,7 +100,7 @@ describe('chartSelectors', () => {
   });
 
   describe('getTpmSeries', () => {
-    const apmTimeseries = {
+    const apmTimeseries: ApmTimeSeriesResponse = {
       responseTimes: {
         avg: [],
         p95: [],
@@ -107,13 +109,14 @@ describe('chartSelectors', () => {
       tpmBuckets: [
         {
           key: 'HTTP 2xx',
+          avg: 3.5,
           dataPoints: [
             { x: 0, y: 5 },
-            { x: 0, y: 2 },
+            { x: 1, y: 2 },
           ],
         },
-        { key: 'HTTP 4xx', dataPoints: [{ x: 0, y: 1 }] },
-        { key: 'HTTP 5xx', dataPoints: [{ x: 0, y: 0 }] },
+        { key: 'HTTP 4xx', avg: 1, dataPoints: [{ x: 0, y: 1 }] },
+        { key: 'HTTP 5xx', avg: 0, dataPoints: [{ x: 0, y: 0 }] },
       ],
       overallAvgDuration: 200,
     };
@@ -125,7 +128,7 @@ describe('chartSelectors', () => {
           color: successColor,
           data: [
             { x: 0, y: 5 },
-            { x: 0, y: 2 },
+            { x: 1, y: 2 },
           ],
           legendValue: '3.5 tpm',
           title: 'HTTP 2xx',
@@ -154,7 +157,7 @@ describe('chartSelectors', () => {
         expect(
           getTpmSeries({
             ...apmTimeseries,
-            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }],
+            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
           })[0].color
         ).toEqual(theme.euiColorSecondary);
       });
@@ -166,7 +169,7 @@ describe('chartSelectors', () => {
         expect(
           getTpmSeries({
             ...apmTimeseries,
-            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }],
+            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
           })[0].color
         ).toEqual(theme.euiColorSecondary);
       });
@@ -178,7 +181,7 @@ describe('chartSelectors', () => {
         expect(
           getTpmSeries({
             ...apmTimeseries,
-            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }],
+            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
           })[0].color
         ).toEqual(theme.euiColorSecondary);
       });
@@ -190,7 +193,7 @@ describe('chartSelectors', () => {
         expect(
           getTpmSeries({
             ...apmTimeseries,
-            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }],
+            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
           })[0].color
         ).toEqual(theme.euiColorSecondary);
       });
@@ -202,7 +205,7 @@ describe('chartSelectors', () => {
         expect(
           getTpmSeries({
             ...apmTimeseries,
-            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }],
+            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
           })[0].color
         ).toEqual(theme.euiColorDanger);
       });
@@ -214,7 +217,7 @@ describe('chartSelectors', () => {
         expect(
           getTpmSeries({
             ...apmTimeseries,
-            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }],
+            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
           })[0].color
         ).toEqual(theme.euiColorDanger);
       });
@@ -226,7 +229,7 @@ describe('chartSelectors', () => {
         expect(
           getTpmSeries({
             ...apmTimeseries,
-            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }],
+            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
           })[0].color
         ).toEqual(theme.euiColorDanger);
       });
@@ -238,7 +241,7 @@ describe('chartSelectors', () => {
         expect(
           getTpmSeries({
             ...apmTimeseries,
-            tpmBuckets: [{ key, dataPoints: [{ x: 0, y: 0 }] }],
+            tpmBuckets: [{ key, avg: 0, dataPoints: [{ x: 0, y: 0 }] }],
           })[0].color
         ).toEqual(theme.euiColorDanger);
       });

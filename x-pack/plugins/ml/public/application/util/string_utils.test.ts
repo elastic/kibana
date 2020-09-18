@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
+import { Detector } from '../../../common/types/anomaly_detection_jobs';
+
 import {
   replaceStringTokens,
   detectorToString,
-  sortByKey,
   toLocaleString,
   mlEscape,
   escapeForElasticsearchQuery,
@@ -15,7 +17,7 @@ import {
 
 describe('ML - string utils', () => {
   describe('replaceStringTokens', () => {
-    const testRecord = {
+    const testRecord: CustomUrlAnomalyRecordDoc = {
       job_id: 'test_job',
       result_type: 'record',
       probability: 0.0191711,
@@ -30,19 +32,23 @@ describe('ML - string utils', () => {
       testfield1: 'test$tring=[+-?]',
       testfield2: '{<()>}',
       testfield3: 'host=\\\\test@uk.dev',
+      earliest: '0',
+      latest: '0',
+      is_interim: false,
+      initial_record_score: 0,
     };
 
-    test('returns correct values without URI encoding', () => {
+    test('should return correct values without URI encoding', () => {
       const result = replaceStringTokens('user=$user$,time=$timestamp$', testRecord, false);
       expect(result).toBe("user=Des O'Connor,time=1454890500000");
     });
 
-    test('returns correct values for missing token without URI encoding', () => {
+    test('should return correct values for missing token without URI encoding', () => {
       const result = replaceStringTokens('user=$username$,time=$timestamp$', testRecord, false);
       expect(result).toBe('user=$username$,time=1454890500000');
     });
 
-    test('returns correct values with URI encoding', () => {
+    test('should return correct values with URI encoding', () => {
       const testString1 = 'https://www.google.co.uk/webhp#q=$testfield1$';
       const testString2 = 'https://www.google.co.uk/webhp#q=$testfield2$';
       const testString3 = 'https://www.google.co.uk/webhp#q=$testfield3$';
@@ -59,7 +65,7 @@ describe('ML - string utils', () => {
       expect(result4).toBe("https://www.google.co.uk/webhp#q=Des%20O'Connor");
     });
 
-    test('returns correct values for missing token with URI encoding', () => {
+    test('should return correct values for missing token with URI encoding', () => {
       const testString = 'https://www.google.co.uk/webhp#q=$username$&time=$timestamp$';
       const result = replaceStringTokens(testString, testRecord, true);
       expect(result).toBe('https://www.google.co.uk/webhp#q=$username$&time=1454890500000');
@@ -67,18 +73,18 @@ describe('ML - string utils', () => {
   });
 
   describe('detectorToString', () => {
-    test('returns the correct descriptions for detectors', () => {
-      const detector1 = {
+    test('should return the correct descriptions for detectors', () => {
+      const detector1: Detector = {
         function: 'count',
       };
 
-      const detector2 = {
+      const detector2: Detector = {
         function: 'count',
         by_field_name: 'airline',
         use_null: false,
       };
 
-      const detector3 = {
+      const detector3: Detector = {
         function: 'mean',
         field_name: 'CPUUtilization',
         partition_field_name: 'region',
@@ -95,52 +101,8 @@ describe('ML - string utils', () => {
     });
   });
 
-  describe('sortByKey', () => {
-    const obj = {
-      zebra: 'stripes',
-      giraffe: 'neck',
-      elephant: 'trunk',
-    };
-
-    const valueComparator = function (value: string) {
-      return value;
-    };
-
-    test('returns correct ordering with default comparator', () => {
-      const result = sortByKey(obj, false);
-      const keys = Object.keys(result);
-      expect(keys[0]).toBe('elephant');
-      expect(keys[1]).toBe('giraffe');
-      expect(keys[2]).toBe('zebra');
-    });
-
-    test('returns correct ordering with default comparator and order reversed', () => {
-      const result = sortByKey(obj, true);
-      const keys = Object.keys(result);
-      expect(keys[0]).toBe('zebra');
-      expect(keys[1]).toBe('giraffe');
-      expect(keys[2]).toBe('elephant');
-    });
-
-    test('returns correct ordering with comparator', () => {
-      const result = sortByKey(obj, false, valueComparator);
-      const keys = Object.keys(result);
-      expect(keys[0]).toBe('giraffe');
-      expect(keys[1]).toBe('zebra');
-      expect(keys[2]).toBe('elephant');
-    });
-
-    test('returns correct ordering with comparator and order reversed', () => {
-      const result = sortByKey(obj, true, valueComparator);
-      const keys = Object.keys(result);
-      expect(keys[0]).toBe('elephant');
-      expect(keys[1]).toBe('zebra');
-      expect(keys[2]).toBe('giraffe');
-    });
-  });
-
   describe('toLocaleString', () => {
-    test('returns correct comma placement for large numbers', () => {
+    test('should return correct comma placement for large numbers', () => {
       expect(toLocaleString(1)).toBe('1');
       expect(toLocaleString(10)).toBe('10');
       expect(toLocaleString(100)).toBe('100');
@@ -152,21 +114,28 @@ describe('ML - string utils', () => {
       expect(toLocaleString(100000000)).toBe('100,000,000');
       expect(toLocaleString(1000000000)).toBe('1,000,000,000');
     });
+    test('should return empty string for undefined or null', () => {
+      expect(toLocaleString(undefined)).toBe('');
+      expect(toLocaleString(null)).toBe('');
+    });
   });
 
   describe('mlEscape', () => {
-    test('returns correct escaping of characters', () => {
+    test('should return correct escaping of characters', () => {
       expect(mlEscape('foo&bar')).toBe('foo&amp;bar');
       expect(mlEscape('foo<bar')).toBe('foo&lt;bar');
       expect(mlEscape('foo>bar')).toBe('foo&gt;bar');
       expect(mlEscape('foo"bar')).toBe('foo&quot;bar');
-      expect(mlEscape("foo'bar")).toBe('foo&#39;bar');
-      expect(mlEscape('foo/bar')).toBe('foo&#x2F;bar');
+      expect(mlEscape("foo'bar")).toBe('foo&apos;bar');
+      expect(mlEscape('foo/bar')).toBe('foo&sol;bar');
+      expect(mlEscape('escape © everything ≠ / 𝌆 \\')).toBe(
+        'escape&#x20;&copy;&#x20;everything&#x20;&ne;&#x20;&sol;&#x20;&#xD834;&#xDF06;&#x20;&#x5C;'
+      );
     });
   });
 
   describe('escapeForElasticsearchQuery', () => {
-    test('returns correct escaping of reserved elasticsearch characters', () => {
+    test('should return correct escaping of reserved elasticsearch characters', () => {
       expect(escapeForElasticsearchQuery('foo+bar')).toBe('foo\\+bar');
       expect(escapeForElasticsearchQuery('foo-bar')).toBe('foo\\-bar');
       expect(escapeForElasticsearchQuery('foo=bar')).toBe('foo\\=bar');

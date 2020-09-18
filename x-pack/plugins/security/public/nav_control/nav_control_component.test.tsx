@@ -22,7 +22,7 @@ describe('SecurityNavControl', () => {
     const wrapper = shallowWithIntl(<SecurityNavControl {...props} />);
     const { button } = wrapper.find(EuiPopover).props();
     expect(button).toMatchInlineSnapshot(`
-      <ForwardRef
+      <EuiHeaderSectionItemButton
         aria-controls="headerUserMenu"
         aria-expanded={false}
         aria-haspopup="true"
@@ -33,7 +33,7 @@ describe('SecurityNavControl', () => {
         <EuiLoadingSpinner
           size="m"
         />
-      </ForwardRef>
+      </EuiHeaderSectionItemButton>
     `);
   });
 
@@ -49,7 +49,7 @@ describe('SecurityNavControl', () => {
     wrapper.update();
     const { button } = wrapper.find(EuiPopover).props();
     expect(button).toMatchInlineSnapshot(`
-      <ForwardRef
+      <EuiHeaderSectionItemButton
         aria-controls="headerUserMenu"
         aria-expanded={false}
         aria-haspopup="true"
@@ -61,7 +61,7 @@ describe('SecurityNavControl', () => {
           name="foo"
           size="s"
         />
-      </ForwardRef>
+      </EuiHeaderSectionItemButton>
     `);
   });
 

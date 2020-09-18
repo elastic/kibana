@@ -4,5 +4,6 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "licensing"],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": ["kibanaReact"]
 }

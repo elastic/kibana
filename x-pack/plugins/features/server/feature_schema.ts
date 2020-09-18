@@ -8,8 +8,8 @@ import Joi from 'joi';
 
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { FeatureConfig } from '../common/feature';
-import { FeatureKibanaPrivileges } from '.';
+import { KibanaFeatureConfig } from '../common';
+import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
@@ -26,13 +26,18 @@ const managementSchema = Joi.object().pattern(
   Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
+const alertingSchema = Joi.array().items(Joi.string());
 
-const privilegeSchema = Joi.object({
+const kibanaPrivilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
+  alerting: Joi.object({
+    all: alertingSchema,
+    read: alertingSchema,
+  }),
   savedObject: Joi.object({
     all: Joi.array().items(Joi.string()).required(),
     read: Joi.array().items(Joi.string()).required(),
@@ -40,12 +45,16 @@ const privilegeSchema = Joi.object({
   ui: Joi.array().items(Joi.string().regex(uiCapabilitiesRegex)).required(),
 });
 
-const subFeaturePrivilegeSchema = Joi.object({
+const kibanaSubFeaturePrivilegeSchema = Joi.object({
   id: Joi.string().regex(subFeaturePrivilegePartRegex).required(),
   name: Joi.string().required(),
   includeIn: Joi.string().allow('all', 'read', 'none').required(),
   management: managementSchema,
   catalogue: catalogueSchema,
+  alerting: Joi.object({
+    all: alertingSchema,
+    read: alertingSchema,
+  }),
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
   savedObject: Joi.object({
@@ -55,17 +64,17 @@ const subFeaturePrivilegeSchema = Joi.object({
   ui: Joi.array().items(Joi.string().regex(uiCapabilitiesRegex)).required(),
 });
 
-const subFeatureSchema = Joi.object({
+const kibanaSubFeatureSchema = Joi.object({
   name: Joi.string().required(),
   privilegeGroups: Joi.array().items(
     Joi.object({
       groupType: Joi.string().valid('mutually_exclusive', 'independent').required(),
-      privileges: Joi.array().items(subFeaturePrivilegeSchema).min(1),
+      privileges: Joi.array().items(kibanaSubFeaturePrivilegeSchema).min(1),
     })
   ),
 });
 
-const schema = Joi.object({
+const kibanaFeatureSchema = Joi.object({
   id: Joi.string()
     .regex(featurePrivilegePartRegex)
     .invalid(...prohibitedFeatureIds)
@@ -82,16 +91,17 @@ const schema = Joi.object({
   app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,
+  alerting: alertingSchema,
   privileges: Joi.object({
-    all: privilegeSchema,
-    read: privilegeSchema,
+    all: kibanaPrivilegeSchema,
+    read: kibanaPrivilegeSchema,
   })
     .allow(null)
     .required(),
   subFeatures: Joi.when('privileges', {
     is: null,
-    then: Joi.array().items(subFeatureSchema).max(0),
-    otherwise: Joi.array().items(subFeatureSchema),
+    then: Joi.array().items(kibanaSubFeatureSchema).max(0),
+    otherwise: Joi.array().items(kibanaSubFeatureSchema),
   }),
   privilegesTooltip: Joi.string(),
   reserved: Joi.object({
@@ -100,20 +110,37 @@ const schema = Joi.object({
       .items(
         Joi.object({
           id: Joi.string().regex(reservedFeaturePrrivilegePartRegex).required(),
-          privilege: privilegeSchema.required(),
+          privilege: kibanaPrivilegeSchema.required(),
         })
       )
       .required(),
   }),
 });
 
-export function validateFeature(feature: FeatureConfig) {
-  const validateResult = Joi.validate(feature, schema);
+const elasticsearchPrivilegeSchema = Joi.object({
+  ui: Joi.array().items(Joi.string()).required(),
+  requiredClusterPrivileges: Joi.array().items(Joi.string()),
+  requiredIndexPrivileges: Joi.object().pattern(Joi.string(), Joi.array().items(Joi.string())),
+  requiredRoles: Joi.array().items(Joi.string()),
+});
+
+const elasticsearchFeatureSchema = Joi.object({
+  id: Joi.string()
+    .regex(featurePrivilegePartRegex)
+    .invalid(...prohibitedFeatureIds)
+    .required(),
+  management: managementSchema,
+  catalogue: catalogueSchema,
+  privileges: Joi.array().items(elasticsearchPrivilegeSchema).required(),
+});
+
+export function validateKibanaFeature(feature: KibanaFeatureConfig) {
+  const validateResult = Joi.validate(feature, kibanaFeatureSchema);
   if (validateResult.error) {
     throw validateResult.error;
   }
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
-  const { app = [], management = {}, catalogue = [] } = feature;
+  const { app = [], management = {}, catalogue = [], alerting = [] } = feature;
 
   const unseenApps = new Set(app);
 
@@ -126,7 +153,9 @@ export function validateFeature(feature: FeatureConfig) {
 
   const unseenCatalogue = new Set(catalogue);
 
-  function validateAppEntry(privilegeId: string, entry: string[] = []) {
+  const unseenAlertTypes = new Set(alerting);
+
+  function validateAppEntry(privilegeId: string, entry: readonly string[] = []) {
     entry.forEach((privilegeApp) => unseenApps.delete(privilegeApp));
 
     const unknownAppEntries = difference(entry, app);
@@ -139,7 +168,7 @@ export function validateFeature(feature: FeatureConfig) {
     }
   }
 
-  function validateCatalogueEntry(privilegeId: string, entry: string[] = []) {
+  function validateCatalogueEntry(privilegeId: string, entry: readonly string[] = []) {
     entry.forEach((privilegeCatalogue) => unseenCatalogue.delete(privilegeCatalogue));
 
     const unknownCatalogueEntries = difference(entry || [], catalogue);
@@ -152,9 +181,26 @@ export function validateFeature(feature: FeatureConfig) {
     }
   }
 
+  function validateAlertingEntry(privilegeId: string, entry: FeatureKibanaPrivileges['alerting']) {
+    const all = entry?.all ?? [];
+    const read = entry?.read ?? [];
+
+    all.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
+    read.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
+
+    const unknownAlertingEntries = difference([...all, ...read], alerting);
+    if (unknownAlertingEntries.length > 0) {
+      throw new Error(
+        `Feature privilege ${
+          feature.id
+        }.${privilegeId} has unknown alerting entries: ${unknownAlertingEntries.join(', ')}`
+      );
+    }
+  }
+
   function validateManagementEntry(
     privilegeId: string,
-    managementEntry: Record<string, string[]> = {}
+    managementEntry: Record<string, readonly string[]> = {}
   ) {
     Object.entries(managementEntry).forEach(([managementSectionId, managementSectionEntry]) => {
       if (unseenManagement.has(managementSectionId)) {
@@ -212,6 +258,7 @@ export function validateFeature(feature: FeatureConfig) {
     validateCatalogueEntry(privilegeId, privilegeDefinition.catalogue);
 
     validateManagementEntry(privilegeId, privilegeDefinition.management);
+    validateAlertingEntry(privilegeId, privilegeDefinition.alerting);
   });
 
   const subFeatureEntries = feature.subFeatures ?? [];
@@ -221,6 +268,7 @@ export function validateFeature(feature: FeatureConfig) {
         validateAppEntry(subFeaturePrivilege.id, subFeaturePrivilege.app);
         validateCatalogueEntry(subFeaturePrivilege.id, subFeaturePrivilege.catalogue);
         validateManagementEntry(subFeaturePrivilege.id, subFeaturePrivilege.management);
+        validateAlertingEntry(subFeaturePrivilege.id, subFeaturePrivilege.alerting);
       });
     });
   });
@@ -261,4 +309,40 @@ export function validateFeature(feature: FeatureConfig) {
       )}`
     );
   }
+
+  if (unseenAlertTypes.size > 0) {
+    throw new Error(
+      `Feature ${
+        feature.id
+      } specifies alerting entries which are not granted to any privileges: ${Array.from(
+        unseenAlertTypes.values()
+      ).join(',')}`
+    );
+  }
+}
+
+export function validateElasticsearchFeature(feature: ElasticsearchFeatureConfig) {
+  const validateResult = Joi.validate(feature, elasticsearchFeatureSchema);
+  if (validateResult.error) {
+    throw validateResult.error;
+  }
+  // the following validation can't be enforced by the Joi schema without a very convoluted and verbose definition
+  const { privileges } = feature;
+  privileges.forEach((privilege, index) => {
+    const {
+      requiredClusterPrivileges = [],
+      requiredIndexPrivileges = [],
+      requiredRoles = [],
+    } = privilege;
+
+    if (
+      requiredClusterPrivileges.length === 0 &&
+      requiredIndexPrivileges.length === 0 &&
+      requiredRoles.length === 0
+    ) {
+      throw new Error(
+        `Feature ${feature.id} has a privilege definition at index ${index} without any privileges defined.`
+      );
+    }
+  });
 }

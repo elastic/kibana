@@ -23,13 +23,11 @@ import {
   HttpServiceConstructor,
   I18nServiceConstructor,
   InjectedMetadataServiceConstructor,
-  LegacyPlatformServiceConstructor,
   MockChromeService,
   MockFatalErrorsService,
   MockHttpService,
   MockI18nService,
   MockInjectedMetadataService,
-  MockLegacyPlatformService,
   MockNotificationsService,
   MockOverlayService,
   MockPluginsService,
@@ -44,6 +42,8 @@ import {
   MockContextService,
   IntegrationsServiceConstructor,
   MockIntegrationsService,
+  CoreAppConstructor,
+  MockCoreApp,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -78,7 +78,6 @@ describe('constructor', () => {
     createCoreSystem();
 
     expect(InjectedMetadataServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(LegacyPlatformServiceConstructor).toHaveBeenCalledTimes(1);
     expect(I18nServiceConstructor).toHaveBeenCalledTimes(1);
     expect(FatalErrorsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
@@ -88,6 +87,7 @@ describe('constructor', () => {
     expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
     expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -100,25 +100,6 @@ describe('constructor', () => {
     expect(InjectedMetadataServiceConstructor).toHaveBeenCalledTimes(1);
     expect(InjectedMetadataServiceConstructor).toHaveBeenCalledWith({
       injectedMetadata,
-    });
-  });
-
-  it('passes required params to LegacyPlatformService', () => {
-    const requireLegacyFiles = { requireLegacyFiles: true };
-    const requireLegacyBootstrapModule = { requireLegacyBootstrapModule: true };
-    const requireNewPlatformShimModule = { requireNewPlatformShimModule: true };
-
-    createCoreSystem({
-      requireLegacyFiles,
-      requireLegacyBootstrapModule,
-      requireNewPlatformShimModule,
-    });
-
-    expect(LegacyPlatformServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(LegacyPlatformServiceConstructor).toHaveBeenCalledWith({
-      requireLegacyFiles,
-      requireLegacyBootstrapModule,
-      requireNewPlatformShimModule,
     });
   });
 
@@ -187,7 +168,6 @@ describe('#setup()', () => {
       pluginDependencies: new Map([
         [pluginA, []],
         [pluginB, [pluginA]],
-        [MockLegacyPlatformService.legacyId, [pluginA, pluginB]],
       ]),
     });
   });
@@ -230,6 +210,11 @@ describe('#setup()', () => {
   it('calls integrations#setup()', async () => {
     await setupCore();
     expect(MockIntegrationsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls coreApp#setup()', async () => {
+    await setupCore();
+    expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -293,11 +278,6 @@ describe('#start()', () => {
     expect(MockPluginsService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls legacyPlatform#start()', async () => {
-    await startCore();
-    expect(MockLegacyPlatformService.start).toHaveBeenCalledTimes(1);
-  });
-
   it('calls overlays#start()', async () => {
     await startCore();
     expect(MockOverlayService.start).toHaveBeenCalledTimes(1);
@@ -309,27 +289,23 @@ describe('#start()', () => {
     expect(MockRenderingService.start).toHaveBeenCalledWith({
       application: expect.any(Object),
       chrome: expect.any(Object),
-      injectedMetadata: expect.any(Object),
       overlays: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
 
-  it('calls start#setup()', async () => {
+  it('calls integrations#start()', async () => {
     await startCore();
     expect(MockIntegrationsService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls coreApp#start()', async () => {
+    await startCore();
+    expect(MockCoreApp.start).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('#stop()', () => {
-  it('calls legacyPlatform.stop()', () => {
-    const coreSystem = createCoreSystem();
-
-    expect(MockLegacyPlatformService.stop).not.toHaveBeenCalled();
-    coreSystem.stop();
-    expect(MockLegacyPlatformService.stop).toHaveBeenCalled();
-  });
-
   it('calls notifications.stop()', () => {
     const coreSystem = createCoreSystem();
 
@@ -377,6 +353,14 @@ describe('#stop()', () => {
     expect(MockIntegrationsService.stop).toHaveBeenCalled();
   });
 
+  it('calls coreApp.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockCoreApp.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockCoreApp.stop).toHaveBeenCalled();
+  });
+
   it('clears the rootDomElement', async () => {
     const rootDomElement = document.createElement('div');
     const coreSystem = createCoreSystem({
@@ -401,31 +385,12 @@ describe('RenderingService targetDomElement', () => {
     let targetDomElementParentInStart: HTMLElement | null;
     MockRenderingService.start.mockImplementation(({ targetDomElement }) => {
       targetDomElementParentInStart = targetDomElement.parentElement;
-      return { legacyTargetDomElement: document.createElement('div') };
     });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();
     await core.start();
     expect(targetDomElementParentInStart!).toBe(rootDomElement);
-  });
-});
-
-describe('LegacyPlatformService targetDomElement', () => {
-  it('only mounts the element when start, after setting up the legacyPlatformService', async () => {
-    const core = createCoreSystem();
-
-    let targetDomElementInStart: HTMLElement | undefined;
-    MockLegacyPlatformService.start.mockImplementation(({ targetDomElement }) => {
-      targetDomElementInStart = targetDomElement;
-    });
-
-    await core.setup();
-    await core.start();
-    // Starting the core system should pass the legacyTargetDomElement to the LegacyPlatformService
-    const renderingLegacyTargetDomElement =
-      MockRenderingService.start.mock.results[0].value.legacyTargetDomElement;
-    expect(targetDomElementInStart!).toBe(renderingLegacyTargetDomElement);
   });
 });
 

@@ -45,6 +45,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     jobType,
     lambda,
     method,
+    maxNumThreads,
     maxTrees,
     modelMemoryLimit,
     nNeighbors,
@@ -214,6 +215,15 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     );
   }
 
+  if (maxNumThreads !== undefined) {
+    advancedFirstCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.maxNumThreads', {
+        defaultMessage: 'Maximum number of threads',
+      }),
+      description: `${maxNumThreads}`,
+    });
+  }
+
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -239,7 +249,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.ml.dataframe.analytics.create.hyperParametersDetailsTitle', {
-            defaultMessage: 'Hyper parameters',
+            defaultMessage: 'Hyperparameters',
           })}
         </h3>
       </EuiTitle>

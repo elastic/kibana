@@ -25,6 +25,13 @@ export const selectIsLoading = (state: Immutable<PolicyListState>) => state.isLo
 
 export const selectApiError = (state: Immutable<PolicyListState>) => state.apiError;
 
+export const selectIsDeleting = (state: Immutable<PolicyListState>) => state.isDeleting;
+
+export const selectDeleteStatus = (state: Immutable<PolicyListState>) => state.deleteStatus;
+
+export const selectAgentStatusSummary = (state: Immutable<PolicyListState>) =>
+  state.agentStatusSummary;
+
 export const isOnPolicyListPage = (state: Immutable<PolicyListState>) => {
   return (
     matchPath(state.location?.pathname ?? '', {
@@ -77,3 +84,17 @@ export const urlSearchParams: (
 
   return searchParams;
 });
+
+/**
+ * Returns package information for Endpoint
+ * @param state
+ */
+export const endpointPackageInfo = (state: Immutable<PolicyListState>) => state.endpointPackageInfo;
+
+/**
+ * Returns the version number for the endpoint package.
+ */
+export const endpointPackageVersion = createSelector(
+  endpointPackageInfo,
+  (info) => info?.version ?? undefined
+);

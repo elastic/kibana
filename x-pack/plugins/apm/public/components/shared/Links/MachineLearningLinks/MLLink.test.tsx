@@ -15,11 +15,12 @@ test('MLLink produces the correct URL', async () => {
       <MLLink path="/some/path" query={{ ml: { jobIds: ['something'] } }} />
     ),
     {
-      search: '?rangeFrom=now-5h&rangeTo=now-2h',
+      search:
+        '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
     } as Location
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/ml#/some/path?_g=(ml:(jobIds:!(something)),refreshInterval:(pause:true,value:'0'),time:(from:now-5h,to:now-2h))"`
+    `"/basepath/app/ml#/some/path?_g=(ml:(jobIds:!(something)),refreshInterval:(pause:!t,value:0),time:(from:now-5h,to:now-2h))"`
   );
 });

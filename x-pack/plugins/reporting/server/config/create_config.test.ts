@@ -11,7 +11,7 @@ import { createConfig$ } from './create_config';
 import { ReportingConfigType } from './schema';
 
 interface KibanaServer {
-  host?: string;
+  hostname?: string;
   port?: number;
   protocol?: string;
 }
@@ -41,11 +41,15 @@ describe('Reporting server createConfig$', () => {
   let mockLogger: LevelLogger;
 
   beforeEach(() => {
-    mockCoreSetup = makeMockCoreSetup({ host: 'kibanaHost', port: 5601, protocol: 'http' });
+    mockCoreSetup = makeMockCoreSetup({ hostname: 'kibanaHost', port: 5601, protocol: 'http' });
     mockInitContext = makeMockInitContext({
       kibanaServer: {},
     });
-    mockLogger = ({ warn: jest.fn(), debug: jest.fn() } as unknown) as LevelLogger;
+    mockLogger = ({
+      warn: jest.fn(),
+      debug: jest.fn(),
+      clone: jest.fn().mockImplementation(() => mockLogger),
+    } as unknown) as LevelLogger;
   });
 
   afterEach(() => {

@@ -24,8 +24,8 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
-} from '../../../../../test_utils/kbn_server';
-import { APICaller } from '../../../elasticsearch/';
+} from '../../../../test_helpers/kbn_server';
+import { LegacyAPICaller } from '../../../elasticsearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
@@ -37,9 +37,8 @@ let kbnServer: TestKibanaUtils['kbnServer'];
 interface AllServices {
   kbnServer: TestKibanaUtils['kbnServer'];
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   uiSettings: IUiSettingsClient;
-  deleteKibanaIndex: typeof deleteKibanaIndex;
 }
 
 let services: AllServices;
@@ -62,20 +61,6 @@ export async function startServers() {
   kbnServer = kbn.kbnServer;
 }
 
-async function deleteKibanaIndex(callCluster: APICaller) {
-  const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
-  const indexNames = kibanaIndices.map((x: any) => x.index);
-  if (!indexNames.length) {
-    return;
-  }
-  await callCluster('indices.putSettings', {
-    index: indexNames,
-    body: { index: { blocks: { read_only: false } } },
-  });
-  await callCluster('indices.delete', { index: indexNames });
-  return indexNames;
-}
-
 export function getServices() {
   if (services) {
     return services;
@@ -83,21 +68,19 @@ export function getServices() {
 
   const callCluster = esServer.es.getCallCluster();
 
-  const savedObjects = kbnServer.server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+  const savedObjectsClient = kbn.coreStart.savedObjects.getScopedClient(
     httpServerMock.createKibanaRequest()
   );
 
-  const uiSettings = kbnServer.server.uiSettingsServiceFactory({
-    savedObjectsClient,
-  });
+  const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
+    savedObjectsClient
+  );
 
   services = {
     kbnServer,
     callCluster,
     savedObjectsClient,
     uiSettings,
-    deleteKibanaIndex,
   };
 
   return services;

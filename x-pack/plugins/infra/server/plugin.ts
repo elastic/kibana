@@ -19,8 +19,6 @@ import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_sta
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
-import { LogEntryCategoriesAnalysis, LogEntryRateAnalysis } from './lib/log_analysis';
-import { InfraSnapshot } from './lib/snapshot';
 import { InfraSourceStatus } from './lib/source_status';
 import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
@@ -31,6 +29,7 @@ import { registerAlertTypes } from './lib/alerting';
 import { infraSourceConfigurationSavedObjectType } from './lib/sources';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
+import { InfraRequestHandlerContext } from './types';
 
 export const config = {
   schema: schema.object({
@@ -105,9 +104,6 @@ export class InfraServerPlugin {
         sources,
       }
     );
-    const snapshot = new InfraSnapshot();
-    const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
-    const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
 
     // register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
@@ -115,6 +111,8 @@ export class InfraServerPlugin {
     core.savedObjects.registerType(inventoryViewSavedObjectType);
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
+    // and make them available via the request context so we can do away with
+    // the wrapper classes
     const domainLibs: InfraDomainLibs = {
       fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework), {
         sources,
@@ -129,16 +127,13 @@ export class InfraServerPlugin {
     this.libs = {
       configuration: this.config,
       framework,
-      logEntryCategoriesAnalysis,
-      logEntryRateAnalysis,
-      snapshot,
       sources,
       sourceStatus,
       ...domainLibs,
     };
 
-    plugins.features.registerFeature(METRICS_FEATURE);
-    plugins.features.registerFeature(LOGS_FEATURE);
+    plugins.features.registerKibanaFeature(METRICS_FEATURE);
+    plugins.features.registerKibanaFeature(LOGS_FEATURE);
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
@@ -150,6 +145,21 @@ export class InfraServerPlugin {
 
     initInfraServer(this.libs);
     registerAlertTypes(plugins.alerts, this.libs);
+
+    core.http.registerRouteHandlerContext(
+      'infra',
+      (context, request): InfraRequestHandlerContext => {
+        const mlSystem = plugins.ml?.mlSystemProvider(request);
+        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request);
+        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
+
+        return {
+          mlAnomalyDetectors,
+          mlSystem,
+          spaceId,
+        };
+      }
+    );
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);

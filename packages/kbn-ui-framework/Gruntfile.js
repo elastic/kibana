@@ -19,9 +19,9 @@
 
 const sass = require('node-sass');
 const postcss = require('postcss');
-const postcssConfig = require('../../src/optimize/postcss.config');
+const postcssConfig = require('@kbn/optimizer/postcss.config.js');
 const chokidar = require('chokidar');
-const debounce = require('lodash/function/debounce');
+const { debounce } = require('lodash');
 
 const platform = require('os').platform();
 const isPlatformWindows = /^win/.test(platform);

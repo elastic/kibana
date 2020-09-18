@@ -34,7 +34,7 @@ export const apmIndicesRoute = createRoute(() => ({
 }));
 
 // save ui indices
-export const saveApmIndicesRoute = createRoute((core) => ({
+export const saveApmIndicesRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/apm-indices/save',
   options: {
@@ -42,15 +42,17 @@ export const saveApmIndicesRoute = createRoute((core) => ({
   },
   params: {
     body: t.partial({
+      /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': t.string,
       'apm_oss.errorIndices': t.string,
       'apm_oss.onboardingIndices': t.string,
       'apm_oss.spanIndices': t.string,
       'apm_oss.transactionIndices': t.string,
       'apm_oss.metricsIndices': t.string,
+      /* eslint-enable @typescript-eslint/naming-convention */
     }),
   },
-  handler: async ({ context, request }) => {
+  handler: async ({ context }) => {
     const { body } = context.params;
     const savedObjectsClient = context.core.savedObjects.client;
     return await saveApmIndices(savedObjectsClient, body);

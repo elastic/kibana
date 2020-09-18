@@ -202,3 +202,13 @@ describe('share url panel content', () => {
     });
   });
 });
+
+test('should show url param extensions', () => {
+  const TestExtension = () => <div data-test-subj="testExtension" />;
+  const extensions = [{ paramName: 'testExtension', component: TestExtension }];
+  const component = shallow(
+    <UrlPanelContent {...defaultProps} urlParamExtensions={extensions} objectId="id1" />
+  );
+  expect(component.find('TestExtension').length).toBe(1);
+  expect(component).toMatchSnapshot();
+});

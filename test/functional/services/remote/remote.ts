@@ -23,7 +23,7 @@ import { resolve } from 'path';
 import { mergeMap } from 'rxjs/operators';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { initWebDriver } from './webdriver';
+import { initWebDriver, BrowserConfig } from './webdriver';
 import { Browsers } from './browsers';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
@@ -58,21 +58,18 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
   };
 
-  const { driver, consoleLog$ } = await initWebDriver(
-    log,
-    browserType,
-    lifecycle,
-    config.get('browser.logPollingMs')
-  );
-  const isW3CEnabled = (driver as any).executor_.w3c;
+  const browserConfig: BrowserConfig = {
+    logPollingMs: config.get('browser.logPollingMs'),
+    acceptInsecureCerts: config.get('browser.acceptInsecureCerts'),
+  };
 
+  const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
   const caps = await driver.getCapabilities();
-  const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
   log.info(
-    `Remote initialized: ${caps.get(
-      'browserName'
-    )} ${browserVersion}, w3c compliance=${isW3CEnabled}, collectingCoverage=${collectCoverage}`
+    `Remote initialized: ${caps.get('browserName')} ${caps.get(
+      'browserVersion'
+    )}, collectingCoverage=${collectCoverage}`
   );
 
   if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {

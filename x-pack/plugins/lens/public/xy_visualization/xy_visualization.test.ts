@@ -9,6 +9,7 @@ import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import { State, SeriesType } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import { LensIconChartBar } from '../assets/chart_bar';
 
 function exampleState(): State {
   return {
@@ -49,9 +50,7 @@ describe('xy_visualization', () => {
     it('should show the preferredSeriesType if there are no layers', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
-      // 'test-file-stub' is a hack, but it at least means we aren't using
-      // a standard icon here.
-      expect(desc.icon).toEqual('test-file-stub');
+      expect(desc.icon).toEqual(LensIconChartBar);
       expect(desc.label).toEqual('Bar chart');
     });
 
@@ -154,12 +153,6 @@ describe('xy_visualization', () => {
       expect(xyVisualization.initialize(createMockFramePublicAPI(), exampleState())).toEqual(
         exampleState()
       );
-    });
-  });
-
-  describe('#getPersistableState', () => {
-    it('persists the state as given', () => {
-      expect(xyVisualization.getPersistableState(exampleState())).toEqual(exampleState());
     });
   });
 

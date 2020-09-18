@@ -5,42 +5,48 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { LegacyAPICaller } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ReportingCore } from '../';
-import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { ReportingConfig } from '../../server';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { ReportingSetupDeps } from '../types';
 import { GetLicense } from './';
 import { getReportingUsage } from './get_reporting_usage';
-import { RangeStats } from './types';
+import { ReportingUsageType } from './types';
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
 
+interface XpackBulkUpload {
+  usage: {
+    xpack: {
+      reporting: ReportingUsageType;
+    };
+  };
+}
 /*
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
-  config: ReportingConfig,
+  reporting: ReportingCore,
   usageCollection: UsageCollectionSetup,
   getLicense: GetLicense,
   exportTypesRegistry: ExportTypesRegistry,
   isReady: () => Promise<boolean>
 ) {
-  return usageCollection.makeUsageCollector({
-    type: KIBANA_REPORTING_TYPE,
-    fetch: (callCluster: CallCluster) =>
-      getReportingUsage(config, getLicense, callCluster, exportTypesRegistry),
+  return usageCollection.makeUsageCollector<ReportingUsageType, XpackBulkUpload>({
+    type: 'reporting',
+    fetch: (callCluster: LegacyAPICaller) => {
+      const config = reporting.getConfig();
+      return getReportingUsage(config, getLicense, callCluster, exportTypesRegistry);
+    },
     isReady,
-
     /*
      * Format the response data into a model for internal upload
      * 1. Make this data part of the "kibana_stats" type
      * 2. Organize the payload in the usage.xpack.reporting namespace of the data payload
      */
-    formatForBulkUpload: (result: RangeStats) => {
+    formatForBulkUpload: (result: ReportingUsageType) => {
       return {
         type: METATYPE,
         payload: {
@@ -63,7 +69,6 @@ export function registerReportingUsageCollector(
     return;
   }
 
-  const config = reporting.getConfig();
   const exportTypesRegistry = reporting.getExportTypesRegistry();
   const getLicense = async () => {
     return await licensing.license$
@@ -78,10 +83,10 @@ export function registerReportingUsageCollector(
       )
       .toPromise();
   };
-  const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
+  const collectionIsReady = reporting.pluginStartsUp.bind(reporting);
 
   const collector = getReportingUsageCollector(
-    config,
+    reporting,
     usageCollection,
     getLicense,
     exportTypesRegistry,

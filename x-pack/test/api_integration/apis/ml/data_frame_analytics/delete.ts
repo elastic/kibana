@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
       includes: [],
       excludes: [],
     },
-    model_memory_limit: '350mb',
+    model_memory_limit: '60mb',
   };
 
   const testJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.message).to.eql('resource_not_found_exception');
       });
 
       describe('with deleteDestIndex setting', function () {
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await ml.testResources.deleteIndexPattern(destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
         });
 
         it('should delete job and index pattern by id', async () => {
@@ -194,10 +194,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         after(async () => {
           await ml.api.deleteIndices(destinationIndex);
-          await ml.testResources.deleteIndexPattern(destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
         });
 
-        it('deletes job, target index, and index pattern by id', async () => {
+        it('should delete job, target index, and index pattern by id', async () => {
           const { body } = await supertest
             .delete(`/api/ml/data_frame/analytics/${analyticsId}`)
             .query({ deleteDestIndex: true, deleteDestIndexPattern: true })

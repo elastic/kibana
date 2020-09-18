@@ -6,7 +6,7 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { NOTIFICATIONS_ID } from '../../../../common/constants';
+import { NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
 import { getSignalsCount } from './get_signals_count';
@@ -14,7 +14,7 @@ import { RuleAlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
-import { parseScheduleDates } from '../signals/utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 
 export const rulesNotificationAlertType = ({
   logger,
@@ -25,7 +25,7 @@ export const rulesNotificationAlertType = ({
   name: 'SIEM notification',
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
-  producer: 'siem',
+  producer: SERVER_APP_ID,
   validate: {
     params: schema.object({
       ruleAlertId: schema.string(),
@@ -64,7 +64,8 @@ export const rulesNotificationAlertType = ({
       from: fromInMs,
       to: toInMs,
       id: ruleAlertSavedObject.id,
-      kibanaSiemAppUrl: ruleAlertParams.meta?.kibana_siem_app_url,
+      kibanaSiemAppUrl: (ruleAlertParams.meta as { kibana_siem_app_url?: string } | undefined)
+        ?.kibana_siem_app_url,
     });
 
     logger.info(

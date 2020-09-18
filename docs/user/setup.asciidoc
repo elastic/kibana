@@ -1,5 +1,5 @@
 [[setup]]
-= Set Up Kibana
+= Set up Kibana
 
 [partintro]
 --
@@ -48,11 +48,9 @@ the patch version.
 
 include::{kib-repo-dir}/setup/install.asciidoc[]
 
-include::{kib-repo-dir}/setup/start-stop.asciidoc[]
-
 include::{kib-repo-dir}/setup/settings.asciidoc[]
 
-include::{kib-repo-dir}/setup/docker.asciidoc[]
+include::{kib-repo-dir}/setup/start-stop.asciidoc[]
 
 include::{kib-repo-dir}/setup/access.asciidoc[]
 

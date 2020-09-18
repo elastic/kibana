@@ -22,15 +22,13 @@ import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
 import { AppRouter, AppNotFound } from '../ui';
-import { EitherApp, MockedMounterMap, MockedMounterTuple } from '../test_types';
-import { createRenderer, createAppMounter, createLegacyAppMounter, getUnmounter } from './utils';
+import { MockedMounterMap, MockedMounterTuple } from '../test_types';
+import { createRenderer, createAppMounter, getUnmounter } from './utils';
 import { AppStatus } from '../types';
-import { ScopedHistory } from '../scoped_history';
 
 describe('AppRouter', () => {
-  let mounters: MockedMounterMap<EitherApp>;
+  let mounters: MockedMounterMap;
   let globalHistory: History;
-  let appStatuses$: BehaviorSubject<Map<string, AppStatus>>;
   let update: ReturnType<typeof createRenderer>;
   let scopedAppHistory: History;
 
@@ -53,12 +51,22 @@ describe('AppRouter', () => {
     );
   };
 
+  const createMountersRenderer = () =>
+    createRenderer(
+      <AppRouter
+        history={globalHistory}
+        mounters={mockMountersToMounters()}
+        appStatuses$={mountersToAppStatus$()}
+        setAppLeaveHandler={noop}
+        setAppActionMenu={noop}
+        setIsMounting={noop}
+      />
+    );
+
   beforeEach(() => {
     mounters = new Map([
       createAppMounter({ appId: 'app1', html: '<span>App 1</span>' }),
-      createLegacyAppMounter('legacyApp1', jest.fn()),
       createAppMounter({ appId: 'app2', html: '<div>App 2</div>' }),
-      createLegacyAppMounter('baseApp:legacyApp2', jest.fn()),
       createAppMounter({
         appId: 'app3',
         html: '<div>Chromeless A</div>',
@@ -70,7 +78,6 @@ describe('AppRouter', () => {
         appRoute: '/chromeless-b/path',
       }),
       createAppMounter({ appId: 'disabledApp', html: '<div>Disabled app</div>' }),
-      createLegacyAppMounter('disabledLegacyApp', jest.fn()),
       createAppMounter({
         appId: 'scopedApp',
         extraMountHook: ({ history }) => {
@@ -88,18 +95,9 @@ describe('AppRouter', () => {
         html: '<div>App 6</div>',
         appRoute: '/app/my-app/app6',
       }),
-    ] as Array<MockedMounterTuple<EitherApp>>);
+    ] as MockedMounterTuple[]);
     globalHistory = createMemoryHistory();
-    appStatuses$ = mountersToAppStatus$();
-    update = createRenderer(
-      <AppRouter
-        history={globalHistory}
-        mounters={mockMountersToMounters()}
-        appStatuses$={appStatuses$}
-        setAppLeaveHandler={noop}
-        setIsMounting={noop}
-      />
-    );
+    update = createMountersRenderer();
   });
 
   it('calls mount handler and returned unmount function when navigating between apps', async () => {
@@ -220,15 +218,7 @@ describe('AppRouter', () => {
       })
     );
     globalHistory = createMemoryHistory();
-    update = createRenderer(
-      <AppRouter
-        history={globalHistory}
-        mounters={mockMountersToMounters()}
-        appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={noop}
-        setIsMounting={noop}
-      />
-    );
+    update = createMountersRenderer();
 
     await navigate('/fake-login');
 
@@ -252,20 +242,59 @@ describe('AppRouter', () => {
       })
     );
     globalHistory = createMemoryHistory();
-    update = createRenderer(
-      <AppRouter
-        history={globalHistory}
-        mounters={mockMountersToMounters()}
-        appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={noop}
-        setIsMounting={noop}
-      />
-    );
+    update = createMountersRenderer();
 
     await navigate('/spaces/fake-login');
 
     expect(mounters.get('spaces')!.mounter.mount).toHaveBeenCalled();
     expect(mounters.get('login')!.mounter.mount).not.toHaveBeenCalled();
+  });
+
+  it('should mount an exact route app only when the path is an exact match', async () => {
+    mounters.set(
+      ...createAppMounter({
+        appId: 'exactApp',
+        html: '<div>exact app</div>',
+        exactRoute: true,
+        appRoute: '/app/exact-app',
+      })
+    );
+
+    globalHistory = createMemoryHistory();
+    update = createMountersRenderer();
+
+    await navigate('/app/exact-app/some-path');
+
+    expect(mounters.get('exactApp')!.mounter.mount).not.toHaveBeenCalled();
+
+    await navigate('/app/exact-app');
+
+    expect(mounters.get('exactApp')!.mounter.mount).toHaveBeenCalledTimes(1);
+  });
+
+  it('should mount an an app with a route nested in an exact route app', async () => {
+    mounters.set(
+      ...createAppMounter({
+        appId: 'exactApp',
+        html: '<div>exact app</div>',
+        exactRoute: true,
+        appRoute: '/app/exact-app',
+      })
+    );
+    mounters.set(
+      ...createAppMounter({
+        appId: 'nestedApp',
+        html: '<div>nested app</div>',
+        appRoute: '/app/exact-app/another-app',
+      })
+    );
+    globalHistory = createMemoryHistory();
+    update = createMountersRenderer();
+
+    await navigate('/app/exact-app/another-app');
+
+    expect(mounters.get('exactApp')!.mounter.mount).not.toHaveBeenCalled();
+    expect(mounters.get('nestedApp')!.mounter.mount).toHaveBeenCalledTimes(1);
   });
 
   it('should not remount when changing pages within app', async () => {
@@ -304,15 +333,7 @@ describe('AppRouter', () => {
 
   it('should not remount when when changing pages within app using hash history', async () => {
     globalHistory = createHashHistory();
-    update = createRenderer(
-      <AppRouter
-        history={globalHistory}
-        mounters={mockMountersToMounters()}
-        appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={noop}
-        setIsMounting={noop}
-      />
-    );
+    update = createMountersRenderer();
 
     const { mounter, unmount } = mounters.get('app1')!;
     await navigate('/app/app1/page1');
@@ -359,26 +380,6 @@ describe('AppRouter', () => {
     expect(globalHistory.location.pathname).toEqual('/app/scopedApp/subpath');
   });
 
-  it('calls legacy mount handler', async () => {
-    await navigate('/app/legacyApp1');
-    expect(mounters.get('legacyApp1')!.mounter.mount.mock.calls[0][0]).toMatchObject({
-      appBasePath: '/app/legacyApp1',
-      element: expect.any(HTMLDivElement),
-      onAppLeave: expect.any(Function),
-      history: expect.any(ScopedHistory),
-    });
-  });
-
-  it('handles legacy apps with subapps', async () => {
-    await navigate('/app/baseApp');
-    expect(mounters.get('baseApp:legacyApp2')!.mounter.mount.mock.calls[0][0]).toMatchObject({
-      appBasePath: '/app/baseApp',
-      element: expect.any(HTMLDivElement),
-      onAppLeave: expect.any(Function),
-      history: expect.any(ScopedHistory),
-    });
-  });
-
   it('displays error page if no app is found', async () => {
     const dom = await navigate('/app/unknown');
 
@@ -387,12 +388,6 @@ describe('AppRouter', () => {
 
   it('displays error page if app is inaccessible', async () => {
     const dom = await navigate('/app/disabledApp');
-
-    expect(dom?.exists(AppNotFound)).toBe(true);
-  });
-
-  it('displays error page if legacy app is inaccessible', async () => {
-    const dom = await navigate('/app/disabledLegacyApp');
 
     expect(dom?.exists(AppNotFound)).toBe(true);
   });

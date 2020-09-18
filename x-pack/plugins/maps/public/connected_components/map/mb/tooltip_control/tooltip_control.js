@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../../common/constants';
 import { TooltipPopover } from './tooltip_popover';
+import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../../classes/util/mb_filter_expressions';
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {
   let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
@@ -53,7 +54,7 @@ export class TooltipControl extends React.Component {
     });
   }
 
-  _getIdsForFeatures(mbFeatures) {
+  _getTooltipFeatures(mbFeatures) {
     const uniqueFeatures = [];
     //there may be duplicates in the results from mapbox
     //this is because mapbox returns the results per tile
@@ -72,9 +73,18 @@ export class TooltipControl extends React.Component {
         }
       }
       if (!match) {
+        // "tags" (aka properties) are optional in .mvt tiles.
+        // It's not entirely clear how mapbox-gl handles those.
+        // - As null value (as defined in https://tools.ietf.org/html/rfc7946#section-3.2)
+        // - As undefined value
+        // - As empty object literal
+        // To avoid ambiguity, normalize properties to empty object literal.
+        const mbProperties = mbFeature.properties ? mbFeature.properties : {};
+        //This keeps track of first properties (assuming these will be identical for features in different tiles)
         uniqueFeatures.push({
           id: featureId,
           layerId: layerId,
+          mbProperties,
         });
       }
     }
@@ -89,7 +99,7 @@ export class TooltipControl extends React.Component {
 
     this._updateHoverTooltipState.cancel(); //ignore any possible moves
 
-    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
       // No features at click location so there is no tooltip to open
       return;
@@ -98,9 +108,9 @@ export class TooltipControl extends React.Component {
     const targetMbFeataure = mbFeatures[0];
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
-    const features = this._getIdsForFeatures(mbFeatures);
+    const features = this._getTooltipFeatures(mbFeatures);
     this.props.openOnClickTooltip({
-      features: features,
+      features,
       location: popupAnchorLocation,
     });
   };
@@ -111,7 +121,7 @@ export class TooltipControl extends React.Component {
       return;
     }
 
-    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
       this.props.closeOnHoverTooltip();
       return;
@@ -127,7 +137,7 @@ export class TooltipControl extends React.Component {
     }
 
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
-    const features = this._getIdsForFeatures(mbFeatures);
+    const features = this._getTooltipFeatures(mbFeatures);
     this.props.openOnHoverTooltip({
       features: features,
       location: popupAnchorLocation,
@@ -149,7 +159,7 @@ export class TooltipControl extends React.Component {
     });
   }
 
-  _getFeaturesUnderPointer(mbLngLatPoint) {
+  _getMbFeaturesUnderPointer(mbLngLatPoint) {
     if (!this.props.mbMap) {
       return [];
     }
@@ -166,7 +176,10 @@ export class TooltipControl extends React.Component {
         y: mbLngLatPoint.y + PADDING,
       },
     ];
-    return this.props.mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
+    return this.props.mbMap.queryRenderedFeatures(mbBbox, {
+      layers: mbLayerIds,
+      filter: EXCLUDE_TOO_MANY_FEATURES_BOX,
+    });
   }
 
   render() {
@@ -186,6 +199,8 @@ export class TooltipControl extends React.Component {
           mbMap={this.props.mbMap}
           layerList={this.props.layerList}
           addFilters={this.props.addFilters}
+          getFilterActions={this.props.getFilterActions}
+          getActionContext={this.props.getActionContext}
           renderTooltipContent={this.props.renderTooltipContent}
           geoFields={this.props.geoFields}
           features={features}

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { skip } from 'rxjs/operators';
 import * as Rx from 'rxjs';
@@ -12,11 +11,7 @@ import { mount } from 'enzyme';
 
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { CustomTimeRangeAction } from './custom_time_range_action';
-/* eslint-disable */
-import {
-  HelloWorldContainer,
-} from '../../../../src/plugins/embeddable/public/lib/test_samples';
-/* eslint-enable */
+import { HelloWorldContainer } from '../../../../src/plugins/embeddable/public/lib/test_samples';
 
 import {
   HelloWorldEmbeddable,
@@ -25,8 +20,6 @@ import {
 
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { ReactElement } from 'react';
-
-jest.mock('ui/new_platform');
 
 const createOpenModalMock = () => {
   const mock = jest.fn();

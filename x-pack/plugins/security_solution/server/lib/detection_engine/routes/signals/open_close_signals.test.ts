@@ -15,17 +15,8 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('set signal status', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -101,11 +92,12 @@ describe('set signal status', () => {
         path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         body: setStatusSignalMissingIdsAndQueryPayload(),
       });
-      const result = server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" must contain at least one of [signal_ids, query]'
-      );
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: ['either "signal_ids" or "query" must be set'],
+        status_code: 400,
+      });
     });
 
     test('rejects if signal_ids but no status', async () => {
@@ -118,7 +110,7 @@ describe('set signal status', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'child "status" fails because ["status" is required]'
+        'Invalid value "undefined" supplied to "status"'
       );
     });
 
@@ -132,7 +124,7 @@ describe('set signal status', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'child "status" fails because ["status" is required]'
+        'Invalid value "undefined" supplied to "status"'
       );
     });
 
@@ -150,7 +142,7 @@ describe('set signal status', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'child "status" fails because ["status" is required]'
+        'Invalid value "undefined" supplied to "status"'
       );
     });
   });

@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy, last } from 'lodash';
+import { sortBy, last, first } from 'lodash';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { WaffleSortOption } from '../hooks/use_waffle_options';
 
 const SORT_PATHS = {
   name: (node: SnapshotNode) => last(node.path),
-  value: 'metric.value',
+  value: (node: SnapshotNode) => {
+    const metric = first(node.metrics);
+    return (metric && metric.value) || 0;
+  },
 };
 
 export const sortNodes = (sort: WaffleSortOption, nodes: SnapshotNode[]) => {
