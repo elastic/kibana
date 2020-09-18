@@ -20,15 +20,14 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'home', 'timePicker']);
   const retry = getService('retry');
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
+  // const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const TEST_COLUMN_NAMES = ['@message'];
   const TEST_FILTER_COLUMN_NAMES = [
     ['extension', 'jpg'],
     ['geo.src', 'IN'],
@@ -36,13 +35,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Filter panel', () => {
     before(async () => {
-      await esArchiver.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
       });
+      await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      // await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('a11y test on add filter panel', async () => {
@@ -50,19 +48,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test on selecting values from filter value drop downs', async () => {
-      await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-      await a11y.testAppSnapshot();
-    });
+    // it('a11y test on selecting values from filter value drop downs', async () => {
+    //   await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+    //   await a11y.testAppSnapshot();
+    // });
+    //
+    // it('a11y test on edit a single filter panel', async () => {
+    //   await filterBar.clickEditFilter();
+    //   await a11y.testAppSnapshot();
+    // });
 
-    it('a11y test on edit a single filter panel', async () => {
-      // await filterBar.
-      await a11y.testAppSnapshot();
-    });
-
-    it('a11y test on filter bar actions panel', async () => {
-      await PageObjects.discover.showAllFilterActions();
-      await a11y.testAppSnapshot();
-    });
+    // it('a11y test on filter bar actions panel', async () => {
+    //   await PageObjects.discover.showAllFilterActions();
+    //   await a11y.testAppSnapshot();
+    // });
   });
 }
