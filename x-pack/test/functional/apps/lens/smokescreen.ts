@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
     });
 
-    it('should transition from a multi-layer stacked bar to a multi-layer line chart', async () => {
+    it('should transition from a multi-layer stacked bar to a multi-layer line chart and correctly remove all layers', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -119,8 +119,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
 
       await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'terms',
+          field: 'geo.src',
+        },
+        1
+      );
 
+      await PageObjects.lens.closeDimensionEditor();
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'avg',
+          field: 'bytes',
+        },
+        1
+      );
+
+      await PageObjects.lens.closeDimensionEditor();
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
+      await testSubjects.click('lnsLayerRemove');
+      await testSubjects.click('lnsLayerRemove');
+      await testSubjects.existOrFail('empty-workspace');
     });
 
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
