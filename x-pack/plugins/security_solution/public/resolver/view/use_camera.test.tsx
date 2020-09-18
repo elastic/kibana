@@ -33,7 +33,7 @@ describe('useCamera on an unpainted element', () => {
   beforeEach(async () => {
     store = createStore(resolverReducer);
 
-    const Test = function Test() {
+    const Test = function () {
       const camera = useCamera();
       const { ref, onMouseDown } = camera;
       projectionMatrix = camera.projectionMatrix;

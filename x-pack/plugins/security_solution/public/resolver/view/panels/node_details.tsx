@@ -53,11 +53,7 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
  */
-const NodeDetailView = memo(function NodeDetailView({
-  processEvent,
-}: {
-  processEvent: ResolverEvent;
-}) {
+const NodeDetailView = memo(function ({ processEvent }: { processEvent: ResolverEvent }) {
   const processName = event.eventName(processEvent);
   const entityId = event.entityId(processEvent);
   const isProcessTerminated = useSelector((state: ResolverState) =>

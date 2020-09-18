@@ -60,4 +60,3 @@ export const PanelContentError = memo(function ({
     </>
   );
 });
-PanelContentError.displayName = 'TableServiceError';

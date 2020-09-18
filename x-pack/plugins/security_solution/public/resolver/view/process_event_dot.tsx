@@ -192,7 +192,6 @@ const UnstyledProcessEventDot = React.memo(
 
     /**
      * Type in non-SVG components scales as follows:
-     *  (These values were adjusted to match the proportions in the comps provided by UX/Design)
      *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
      *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
      */

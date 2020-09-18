@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo, useMemo, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
@@ -20,7 +22,6 @@ import { PanelLoading } from './panel_loading';
 import { ResolverState } from '../../types';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
 
-// Adding some styles to prevent horizontal scrollbars, per request from UX review
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
     max-width: 8em;
@@ -38,7 +39,6 @@ const StyledDescriptiveName = memo(styled(EuiText)`
   overflow-wrap: break-word;
 `);
 
-// Styling subtitles, per UX review:
 const StyledFlexTitle = memo(styled('h3')`
   display: flex;
   flex-flow: row;
@@ -57,7 +57,6 @@ const TitleHr = memo(() => {
     <StyledTitleRule className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall override" />
   );
 });
-TitleHr.displayName = 'TitleHR';
 
 /**
  * Take description list entries and prepare them for display by

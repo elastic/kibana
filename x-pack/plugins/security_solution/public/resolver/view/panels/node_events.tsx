@@ -47,7 +47,7 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
  * | 2                      | Network                    |
  *
  */
-const EventCountsForProcess = memo(function EventCountsForProcess({
+const EventCountsForProcess = memo(function ({
   processEvent,
   relatedStats,
 }: {
@@ -193,4 +193,3 @@ const EventCountsForProcess = memo(function EventCountsForProcess({
     </>
   );
 });
-EventCountsForProcess.displayName = 'EventCountsForProcess';
