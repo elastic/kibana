@@ -103,10 +103,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const managementApp = registerManagementSection(pluginsSetup.management, core);
 
-    // the mlUrlGenerator should be registered even if ML is not enabled
-    // for other plugins to access ML links
-    registerUrlGenerator(pluginsSetup.share, core);
-
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
@@ -116,6 +112,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
+
+        // the mlUrlGenerator should be registered even without full license
+        // for other plugins to access ML links
+        registerUrlGenerator(pluginsSetup.share, core);
 
         const { capabilities } = coreStart.application;
 
