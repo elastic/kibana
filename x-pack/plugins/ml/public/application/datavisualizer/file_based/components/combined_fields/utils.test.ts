@@ -4,7 +4,143 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isWithinLatRange, isWithinLonRange } from './utils';
+import {
+  addCombinedFieldsToMappings,
+  addCombinedFieldsToPipeline,
+  createGeoPointCombinedField,
+  isWithinLatRange,
+  isWithinLonRange,
+  removeCombinedFieldsFromMappings,
+  removeCombinedFieldsFromPipeline,
+} from './utils';
+
+const combinedFields = [createGeoPointCombinedField('lat', 'lon', 'location')];
+
+test('addCombinedFieldsToMappings', () => {
+  const mappings = {
+    _meta: {
+      created_by: '',
+    },
+    properties: {
+      lat: {
+        type: 'number',
+      },
+      lon: {
+        type: 'number',
+      },
+    },
+  };
+  expect(addCombinedFieldsToMappings(mappings, combinedFields)).toEqual({
+    _meta: {
+      created_by: '',
+    },
+    properties: {
+      lat: {
+        type: 'number',
+      },
+      lon: {
+        type: 'number',
+      },
+      location: {
+        type: 'geo_point',
+      },
+    },
+  });
+});
+
+test('removeCombinedFieldsFromMappings', () => {
+  const mappings = {
+    _meta: {
+      created_by: '',
+    },
+    properties: {
+      lat: {
+        type: 'number',
+      },
+      lon: {
+        type: 'number',
+      },
+      location: {
+        type: 'geo_point',
+      },
+    },
+  };
+  expect(removeCombinedFieldsFromMappings(mappings, combinedFields)).toEqual({
+    _meta: {
+      created_by: '',
+    },
+    properties: {
+      lat: {
+        type: 'number',
+      },
+      lon: {
+        type: 'number',
+      },
+    },
+  });
+});
+
+test('addCombinedFieldsToPipeline', () => {
+  const pipeline = {
+    description: '',
+    processors: [
+      {
+        set: {
+          field: 'anotherfield',
+          value: '{{value}}',
+        },
+      },
+    ],
+  };
+  expect(addCombinedFieldsToPipeline(pipeline, combinedFields)).toEqual({
+    description: '',
+    processors: [
+      {
+        set: {
+          field: 'anotherfield',
+          value: '{{value}}',
+        },
+      },
+      {
+        set: {
+          field: 'location',
+          value: '{{lat}},{{lon}}',
+        },
+      },
+    ],
+  });
+});
+
+test('removeCombinedFieldsFromPipeline', () => {
+  const pipeline = {
+    description: '',
+    processors: [
+      {
+        set: {
+          field: 'anotherfield',
+          value: '{{value}}',
+        },
+      },
+      {
+        set: {
+          field: 'location',
+          value: '{{lat}},{{lon}}',
+        },
+      },
+    ],
+  };
+  expect(removeCombinedFieldsFromPipeline(pipeline, combinedFields)).toEqual({
+    description: '',
+    processors: [
+      {
+        set: {
+          field: 'anotherfield',
+          value: '{{value}}',
+        },
+      },
+    ],
+  });
+});
 
 test('isWithinLatRange', () => {
   expect(isWithinLatRange('fieldAlpha', {})).toBe(false);
