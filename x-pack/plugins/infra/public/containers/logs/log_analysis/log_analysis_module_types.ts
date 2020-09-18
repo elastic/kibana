@@ -24,7 +24,11 @@ export interface ModuleDescriptor<JobType extends string> {
   jobTypes: JobType[];
   bucketSpan: number;
   getJobIds: (spaceId: string, sourceId: string) => Record<JobType, string>;
-  getJobSummary: (spaceId: string, sourceId: string) => Promise<FetchJobStatusResponsePayload>;
+  getJobSummary: (
+    spaceId: string,
+    sourceId: string,
+    fetch: HttpSetup['fetch']
+  ) => Promise<FetchJobStatusResponsePayload>;
   getModuleDefinition: (fetch: HttpSetup['fetch']) => Promise<GetMlModuleResponsePayload>;
   setUpModule: (
     start: number | undefined,

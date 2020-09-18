@@ -43,8 +43,11 @@ const getJobIds = (spaceId: string, sourceId: string) =>
     {} as Record<LogEntryCategoriesJobType, string>
   );
 
-const getJobSummary = async (spaceId: string, sourceId: string) => {
-  const response = await callJobsSummaryAPI(spaceId, sourceId, logEntryCategoriesJobTypes);
+const getJobSummary = async (spaceId: string, sourceId: string, fetch: HttpSetup['fetch']) => {
+  const response = await callJobsSummaryAPI(
+    { spaceId, sourceId, jobTypes: logEntryCategoriesJobTypes },
+    fetch
+  );
   const jobIds = Object.values(getJobIds(spaceId, sourceId));
 
   return response.filter((jobSummary) => jobIds.includes(jobSummary.id));

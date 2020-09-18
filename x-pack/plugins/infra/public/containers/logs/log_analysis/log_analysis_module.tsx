@@ -27,7 +27,7 @@ export const useLogAnalysisModule = <JobType extends string>({
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
-        return await moduleDescriptor.getJobSummary(spaceId, sourceId);
+        return await moduleDescriptor.getJobSummary(spaceId, sourceId, services.http.fetch);
       },
       onResolve: (jobResponse) => {
         dispatchModuleStatus({
@@ -66,7 +66,11 @@ export const useLogAnalysisModule = <JobType extends string>({
           },
           services.http.fetch
         );
-        const jobSummaries = await moduleDescriptor.getJobSummary(spaceId, sourceId);
+        const jobSummaries = await moduleDescriptor.getJobSummary(
+          spaceId,
+          sourceId,
+          services.http.fetch
+        );
         return { setupResult, jobSummaries };
       },
       onResolve: ({ setupResult: { datafeeds, jobs }, jobSummaries }) => {

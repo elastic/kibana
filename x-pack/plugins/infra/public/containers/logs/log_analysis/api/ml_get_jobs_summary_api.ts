@@ -4,21 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { HttpSetup } from 'src/core/public';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { npStart } from '../../../../legacy_singletons';
 
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
 
+interface RequestArgs<JobType extends string> {
+  spaceId: string;
+  sourceId: string;
+  jobTypes: JobType[];
+}
+
 export const callJobsSummaryAPI = async <JobType extends string>(
-  spaceId: string,
-  sourceId: string,
-  jobTypes: JobType[]
+  requestArgs: RequestArgs<JobType>,
+  fetch: HttpSetup['fetch']
 ) => {
-  const response = await npStart.http.fetch('/api/ml/jobs/jobs_summary', {
+  const { spaceId, sourceId, jobTypes } = requestArgs;
+  const response = await fetch('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
