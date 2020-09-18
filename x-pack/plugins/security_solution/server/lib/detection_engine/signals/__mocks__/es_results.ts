@@ -24,6 +24,7 @@ export const sampleRuleAlertParams = (
   buildingBlockType: 'default',
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
+  eventCategoryOverride: undefined,
   falsePositives: [],
   immutable: false,
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],

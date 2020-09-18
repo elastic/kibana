@@ -348,6 +348,7 @@ export const getResult = (): RuleAlertType => ({
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    eventCategoryOverride: undefined,
     falsePositives: [],
     from: 'now-6m',
     immutable: false,

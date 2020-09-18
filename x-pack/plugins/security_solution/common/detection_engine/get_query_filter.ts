@@ -72,6 +72,13 @@ export const getQueryFilter = (
   return buildEsQuery(indexPattern, initialQuery, enabledFilters, config);
 };
 
+interface EqlSearchRequest {
+  method: string;
+  path: string;
+  body: object;
+  event_category_field?: string;
+}
+
 export const buildEqlSearchRequest = (
   query: string,
   index: string[],
@@ -79,8 +86,9 @@ export const buildEqlSearchRequest = (
   to: string,
   size: number,
   timestampOverride: TimestampOverrideOrUndefined,
-  exceptionLists: ExceptionListItemSchema[]
-) => {
+  exceptionLists: ExceptionListItemSchema[],
+  eventCategoryOverride: string | undefined
+): EqlSearchRequest => {
   const timestamp = timestampOverride ?? '@timestamp';
   const indexPattern: IIndexPattern = {
     fields: [],
@@ -102,7 +110,7 @@ export const buildEqlSearchRequest = (
     exceptionFilter = buildExceptionFilter(exceptionQueries, indexPattern, config, true, 1024);
   }
   const indexString = index.join();
-  return {
+  const baseRequest = {
     method: 'POST',
     path: `/${indexString}/_eql/search`,
     body: {
@@ -119,6 +127,14 @@ export const buildEqlSearchRequest = (
       },
     },
   };
+  if (eventCategoryOverride) {
+    return {
+      ...baseRequest,
+      event_category_field: eventCategoryOverride,
+    };
+  } else {
+    return baseRequest;
+  }
 };
 
 export const buildExceptionFilter = (

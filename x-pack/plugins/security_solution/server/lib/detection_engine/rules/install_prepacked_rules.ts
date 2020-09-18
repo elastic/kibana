@@ -22,6 +22,7 @@ export const installPrepackagedRules = (
       building_block_type: buildingBlockType,
       description,
       enabled,
+      event_category_override: eventCategoryOverride,
       false_positives: falsePositives,
       from,
       query,
@@ -66,6 +67,7 @@ export const installPrepackagedRules = (
         buildingBlockType,
         description,
         enabled,
+        eventCategoryOverride,
         falsePositives,
         from,
         immutable: true, // At the moment we force all prepackaged rules to be immutable

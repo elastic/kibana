@@ -16,6 +16,7 @@ import {
   anomaly_threshold,
   description,
   enabled,
+  event_category_override,
   false_positives,
   from,
   id,
@@ -113,6 +114,9 @@ export const dependentRulesSchema = t.partial({
   language,
   query,
 
+  // eql fields
+  event_category_override,
+
   // when type = saved_query, saved_is is required
   saved_id,
 
@@ -205,7 +209,7 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 };
 
 export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (['query', 'saved_query', 'threshold', 'eql_query'].includes(typeAndTimelineOnly.type)) {
+  if (['query', 'saved_query', 'threshold'].includes(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
@@ -239,6 +243,19 @@ export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.
   }
 };
 
+export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'eql_query') {
+    return [
+      t.exact(
+        t.partial({ event_category_override: dependentRulesSchema.props.event_category_override })
+      ),
+      t.exact(t.type({ query: dependentRulesSchema.props.query })),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
@@ -248,6 +265,7 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
     ...addQueryFields(typeAndTimelineOnly),
     ...addMlFields(typeAndTimelineOnly),
     ...addThresholdFields(typeAndTimelineOnly),
+    ...addEqlFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

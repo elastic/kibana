@@ -52,6 +52,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         building_block_type: buildingBlockType,
         description,
         enabled,
+        event_category_override: eventCategoryOverride,
         false_positives: falsePositives,
         from,
         query: queryOrUndefined,
@@ -90,7 +91,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          type !== 'machine_learning' && languageOrUndefined == null
+          type !== 'machine_learning' && type !== 'eql_query' && languageOrUndefined == null
             ? 'kuery'
             : languageOrUndefined;
 
@@ -136,6 +137,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           buildingBlockType,
           description,
           enabled,
+          eventCategoryOverride,
           falsePositives,
           from,
           immutable: false,

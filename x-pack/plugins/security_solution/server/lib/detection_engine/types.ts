@@ -37,6 +37,7 @@ import {
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
   Type,
+  EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
@@ -50,6 +51,7 @@ export interface RuleTypeParams {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   ruleId: RuleId;

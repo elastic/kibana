@@ -114,6 +114,7 @@ export const transformAlertToRule = (
     description: alert.params.description,
     enabled: alert.enabled,
     anomaly_threshold: alert.params.anomalyThreshold,
+    event_category_override: alert.params.eventCategoryOverride,
     false_positives: alert.params.falsePositives,
     filters: alert.params.filters,
     from: alert.params.from,

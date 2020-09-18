@@ -14,6 +14,7 @@ const signalSchema = schema.object({
   buildingBlockType: schema.nullable(schema.string()),
   description: schema.string(),
   note: schema.nullable(schema.string()),
+  eventCategoryOverride: schema.maybe(schema.string()),
   falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
   from: schema.string(),
   ruleId: schema.string(),

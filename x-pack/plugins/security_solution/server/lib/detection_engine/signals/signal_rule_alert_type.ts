@@ -357,7 +357,8 @@ export const signalRulesAlertType = ({
             params.to,
             searchAfterSize,
             params.timestampOverride,
-            exceptionItems ?? []
+            exceptionItems ?? [],
+            params.eventCategoryOverride
           );
           const response: EqlSignalSearchResponse = await services.callCluster(
             'transport.request',

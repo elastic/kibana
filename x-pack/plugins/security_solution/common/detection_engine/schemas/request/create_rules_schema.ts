@@ -45,6 +45,7 @@ import {
   Author,
   RiskScoreMapping,
   SeverityMapping,
+  event_category_override,
 } from '../common/schemas';
 
 import {
@@ -82,6 +83,7 @@ export const createRulesSchema = t.intersection([
       author: DefaultStringArray, // defaults to empty array of strings if not set during decode
       building_block_type, // defaults to undefined if not set during decode
       enabled: DefaultBooleanTrue, // defaults to true if not set during decode
+      event_category_override, // defaults to "undefined" if not set during decode
       false_positives: DefaultStringArray, // defaults to empty string array if not set during decode
       filters, // defaults to undefined if not set during decode
       from: DefaultFromString, // defaults to "now-6m" if not set during decode
