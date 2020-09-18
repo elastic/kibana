@@ -619,3 +619,81 @@ export interface ResolverPluginSetup {
     };
   };
 }
+
+/**
+ * Parameters to control what panel content is shown. Can be encoded and decoded from the URL using methods in
+ * `models/location_search`
+ */
+export type PanelViewAndParameters =
+  | {
+      /**
+       * The panel will show a index view (e.g. a list) of the nodes.
+       */
+      panelView: 'nodes';
+    }
+  | {
+      /**
+       * The panel will show the details of a single node.
+       */
+      panelView: 'nodeDetail';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node that will be shown in detail
+         */
+        nodeID: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show a index view of the all events related to a specific node.
+       * This may show a summary of aggregation of the events related to the node.
+       */
+      panelView: 'nodeEvents';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node whose events will be shown.
+         */
+        nodeID: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show an index view of the events related to a specific node. Only events with a specific type will be shown.
+       */
+      panelView: 'nodeEventsOfType';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node whose events will be shown.
+         */
+        nodeID: string;
+        /**
+         * A parameter used to filter the events. For example, events that don't contain `eventType` in their `event.category` field may be hidden.
+         */
+        eventType: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show details about a particular event. This is meant as a subview of 'nodeEventsOfType'.
+       */
+      panelView: 'eventDetail';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node related to the event being shown.
+         */
+        nodeID: string;
+        /**
+         * A value used for the `nodeEventsOfType` view. Used to associate this view with a parent `nodeEventsOfType` view.
+         * e.g. The user views the `nodeEventsOfType` and follows a link to the `eventDetail` view. The `eventDetail` view can
+         * use `eventType` to populate breadcrumbs and allow the user to return to the previous filter.
+         *
+         * This cannot be inferred from the event itself, as an event may have any number of 'eventType's.
+         */
+        eventType: string;
+
+        /**
+         * `event.id` that uniquely identifies the event to show.
+         */
+        eventID: string;
+      };
+    };

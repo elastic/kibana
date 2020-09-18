@@ -76,4 +76,6 @@ export const JSON_HEADER = {
   Accept: 'application/json', // Required for Enterprise Search APIs
 };
 
+export const READ_ONLY_MODE_HEADER = 'x-ent-search-read-only-mode';
+
 export const ENGINES_PAGE_SIZE = 10;

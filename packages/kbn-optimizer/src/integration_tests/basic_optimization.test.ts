@@ -25,7 +25,8 @@ import { inspect } from 'util';
 import cpy from 'cpy';
 import del from 'del';
 import { toArray, tap, filter } from 'rxjs/operators';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');

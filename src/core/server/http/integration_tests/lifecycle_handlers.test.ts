@@ -26,7 +26,7 @@ import { HttpService } from '../http_service';
 import { HttpServerSetup } from '../http_server';
 import { IRouter, RouteRegistrar } from '../router';
 
-import { configServiceMock } from '../../config/config_service.mock';
+import { configServiceMock } from '../../config/mocks';
 import { contextServiceMock } from '../../context/context_service.mock';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
