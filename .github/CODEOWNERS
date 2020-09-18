@@ -282,6 +282,7 @@
 #CC# /x-pack/legacy/plugins/encrypted_saved_objects/ @elastic/kibana-security
 #CC# /x-pack/plugins/security_solution/ @elastic/kibana-security
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
+#CC# /x-pack/plugins/audit_trail/ @elastic/kibana-security
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization
