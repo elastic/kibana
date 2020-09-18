@@ -5,13 +5,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import * as selectors from '../../store/selectors';
 import { Breadcrumbs } from './breadcrumbs';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
-import { ResolverState } from '../../types';
+import { useLinkProps } from '../use_link_props';
 
 export function PanelLoading() {
   const waitingString = i18n.translate(
@@ -26,11 +23,8 @@ export function PanelLoading() {
       defaultMessage: 'Events',
     }
   );
-  const nodesHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
-  const nodesLinkNavProps = useNavigateOrReplace({
-    search: nodesHref,
+  const nodesLinkNavProps = useLinkProps({
+    panelView: 'nodes',
   });
   const waitCrumbs = useMemo(() => {
     return [

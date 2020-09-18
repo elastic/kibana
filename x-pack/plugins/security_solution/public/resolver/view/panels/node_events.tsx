@@ -17,6 +17,7 @@ import { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { PanelLoading } from './panel_loading';
+import { useLinkProps } from '../use_link_props';
 
 export function NodeEvents({ nodeID }: { nodeID: string }) {
   const processEvent = useSelector((state: ResolverState) =>
@@ -82,34 +83,19 @@ const EventCountsForProcess = memo(function ({
       defaultMessage: 'Events',
     }
   );
-  const eventsHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
 
-  const eventLinkNavProps = useNavigateOrReplace({
-    search: eventsHref,
+  const eventLinkNavProps = useLinkProps({
+    panelView: 'nodes',
   });
 
-  const processDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeDetail',
-      panelParameters: { nodeID: processEntityId },
-    })
-  );
-
-  const processDetailNavProps = useNavigateOrReplace({
-    search: processDetailHref,
+  const processDetailNavProps = useLinkProps({
+    panelView: 'nodeDetail',
+    panelParameters: { nodeID: processEntityId },
   });
 
-  const nodeDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeEvents',
-      panelParameters: { nodeID: processEntityId },
-    })
-  );
-
-  const nodeDetailNavProps = useNavigateOrReplace({
-    search: nodeDetailHref!,
+  const nodeDetailNavProps = useLinkProps({
+    panelView: 'nodeEvents',
+    panelParameters: { nodeID: processEntityId },
   });
   const crumbs = useMemo(() => {
     return [
@@ -151,16 +137,11 @@ const EventCountsForProcess = memo(function ({
     );
   }, [relatedEventsState]);
 
-  const eventDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'eventDetail',
-      panelParameters: { nodeID: processEntityId, eventType: name, eventID: processEntityId },
-    })
-  );
-
-  const eventDetailNavProps = useNavigateOrReplace({
-    search: eventDetailHref,
+  const eventDetailNavProps = useLinkProps({
+    panelView: 'eventDetail',
+    panelParameters: { nodeID: processEntityId, eventType: name, eventID: processEntityId },
   });
+
   const columns = useMemo<Array<EuiBasicTableColumn<EventCountsTableView>>>(
     () => [
       {

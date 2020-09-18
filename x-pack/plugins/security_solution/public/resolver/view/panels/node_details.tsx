@@ -32,7 +32,7 @@ import { useCubeAssets } from '../use_cube_assets';
 import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { useLinkProps } from '../use_link_props';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
@@ -131,12 +131,8 @@ const NodeDetailView = memo(function ({ processEvent }: { processEvent: Resolver
     return processDescriptionListData;
   }, [processEvent]);
 
-  const nodesHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
-
-  const nodesLinkNavProps = useNavigateOrReplace({
-    search: nodesHref,
+  const nodesLinkNavProps = useLinkProps({
+    panelView: 'nodes',
   });
 
   const crumbs = useMemo(() => {
@@ -159,21 +155,14 @@ const NodeDetailView = memo(function ({ processEvent }: { processEvent: Resolver
             defaultMessage="Details for: {processName}"
           />
         ),
-        onClick: () => {},
       },
     ];
   }, [processName, nodesLinkNavProps]);
   const { descriptionText } = useCubeAssets(isProcessTerminated, false);
 
-  const nodeDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeEvents',
-      panelParameters: { nodeID: entityId },
-    })
-  );
-
-  const nodeDetailNavProps = useNavigateOrReplace({
-    search: nodeDetailHref!,
+  const nodeDetailNavProps = useLinkProps({
+    panelView: 'nodeEvents',
+    panelParameters: { nodeID: entityId },
   });
 
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);

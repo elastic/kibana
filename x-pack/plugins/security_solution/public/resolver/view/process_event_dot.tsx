@@ -21,6 +21,7 @@ import { fontSize } from './font_size';
 import { useCubeAssets } from './use_cube_assets';
 import { useSymbolIDs } from './use_symbol_ids';
 import { useColors } from './use_colors';
+import { useLinkProps } from './use_link_props';
 
 interface StyledActionsContainer {
   readonly color: string;
@@ -238,15 +239,10 @@ const UnstyledProcessEventDot = React.memo(
     const isOrigin = nodeID === originID;
 
     const dispatch = useResolverDispatch();
-    const processDetailHref = useSelector((state: ResolverState) =>
-      selectors.relativeHref(state)({
-        panelView: 'nodeDetail',
-        panelParameters: { nodeID },
-      })
-    );
 
-    const processDetailNavProps = useNavigateOrReplace({
-      search: processDetailHref,
+    const processDetailNavProps = useLinkProps({
+      panelView: 'nodeDetail',
+      panelParameters: { nodeID },
     });
 
     const handleFocus = useCallback(() => {

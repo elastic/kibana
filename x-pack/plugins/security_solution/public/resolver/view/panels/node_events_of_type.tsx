@@ -25,6 +25,7 @@ import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { useRelatedEventDetailNavigation } from '../use_related_event_detail_navigation';
 import { PanelLoading } from './panel_loading';
 import { DescriptiveName } from './descriptive_name';
+import { useLinkProps } from '../use_link_props';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -68,7 +69,7 @@ const NodeCategoryEntries = memo(function ({
   crumbs,
   matchingEventEntries,
   eventType,
-  processEntityId,
+  nodeID,
 }: {
   crumbs: Array<{
     text: string | JSX.Element | null;
@@ -77,10 +78,10 @@ const NodeCategoryEntries = memo(function ({
   }>;
   matchingEventEntries: MatchingEventEntry[];
   eventType: string;
-  processEntityId: string;
+  nodeID: string;
 }) {
   const relatedLookupsByCategory = useSelector(selectors.relatedEventInfoByEntityId);
-  const lookupsForThisNode = relatedLookupsByCategory(processEntityId);
+  const lookupsForThisNode = relatedLookupsByCategory(nodeID);
   const shouldShowLimitWarning = lookupsForThisNode?.shouldShowLimitForCategory(eventType);
   const numberDisplayed = lookupsForThisNode?.numberActuallyDisplayedForCategory(eventType);
   const numberMissing = lookupsForThisNode?.numberNotDisplayedForCategory(eventType);
@@ -144,6 +145,7 @@ export function NodeEventsOfType({ nodeID, eventType }: { nodeID: string; eventT
         processEvent={processEvent}
         eventType={eventType}
         relatedStats={relatedEventsStats}
+        nodeID={nodeID}
       />
     </StyledPanel>
   );
@@ -153,19 +155,17 @@ const NodeEventList = memo(function ({
   processEvent,
   eventType,
   relatedStats,
+  nodeID,
 }: {
   processEvent: ResolverEvent | null;
   eventType: string;
   relatedStats: ResolverNodeStats | undefined;
+  nodeID: string;
 }) {
   const processName = processEvent && event.processName(processEvent);
-  const processEntityId = processEvent ? event.entityId(processEvent) : '';
-  const nodesHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
 
-  const nodesLinkNavProps = useNavigateOrReplace({
-    search: nodesHref,
+  const nodesLinkNavProps = useLinkProps({
+    panelView: 'nodes',
   });
   const totalCount = relatedStats
     ? Object.values(relatedStats.events.byCategory).reduce((sum, val) => sum + val, 0)
@@ -178,7 +178,7 @@ const NodeEventList = memo(function ({
   );
 
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
-  const relatedsReady = processEntityId && relatedsReadyMap.get(processEntityId);
+  const relatedsReady = relatedsReadyMap.get(nodeID);
 
   const dispatch = useResolverDispatch();
 
@@ -186,15 +186,15 @@ const NodeEventList = memo(function ({
     if (typeof relatedsReady === 'undefined') {
       dispatch({
         type: 'appDetectedMissingEventData',
-        payload: processEntityId,
+        payload: nodeID,
       });
     }
-  }, [relatedsReady, dispatch, processEntityId]);
+  }, [relatedsReady, dispatch, nodeID]);
 
   const relatedByCategory = useSelector(selectors.relatedEventsByCategory);
-  const eventsForCurrentCategory = relatedByCategory(processEntityId)(eventType);
+  const eventsForCurrentCategory = relatedByCategory(nodeID)(eventType);
   const relatedEventDetailNavigation = useRelatedEventDetailNavigation({
-    nodeID: processEntityId,
+    nodeID,
     category: eventType,
     events: eventsForCurrentCategory,
   });
@@ -217,27 +217,16 @@ const NodeEventList = memo(function ({
     });
   }, [eventType, eventsForCurrentCategory, relatedEventDetailNavigation]);
 
-  const nodeDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeDetail',
-      panelParameters: { nodeID: processEntityId },
-    })
-  );
-
-  const nodeDetailNavProps = useNavigateOrReplace({
-    search: nodeDetailHref,
+  const nodeDetailNavProps = useLinkProps({
+    panelView: 'nodeDetail',
+    panelParameters: { nodeID },
   });
 
-  const nodeEventsHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeEvents',
-      panelParameters: { nodeID: processEntityId },
-    })
-  );
-
-  const nodeEventsNavProps = useNavigateOrReplace({
-    search: nodeEventsHref,
+  const nodeEventsNavProps = useLinkProps({
+    panelView: 'nodeEvents',
+    panelParameters: { nodeID },
   });
+
   const crumbs = useMemo(() => {
     return [
       {
@@ -287,7 +276,7 @@ const NodeEventList = memo(function ({
   return (
     <NodeCategoryEntries
       crumbs={crumbs}
-      processEntityId={processEntityId}
+      nodeID={nodeID}
       matchingEventEntries={matchingEventEntries}
       eventType={eventType}
     />

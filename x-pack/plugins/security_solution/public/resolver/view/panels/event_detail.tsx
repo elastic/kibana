@@ -21,8 +21,8 @@ import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
 import { PanelLoading } from './panel_loading';
 import { ResolverState } from '../../types';
-import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { DescriptiveName } from './descriptive_name';
+import { useLinkProps } from '../use_link_props';
 
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
@@ -116,11 +116,8 @@ export const EventDetail = memo(function ({
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
   const relatedsReady = relatedsReadyMap.get(processEntityId!);
   const dispatch = useResolverDispatch();
-  const nodesHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({ panelView: 'nodes' })
-  );
-  const nodesLinkNavProps = useNavigateOrReplace({
-    search: nodesHref,
+  const nodesLinkNavProps = useLinkProps({
+    panelView: 'nodes',
   });
 
   /**
@@ -150,34 +147,19 @@ export const EventDetail = memo(function ({
     selectors.relatedEventDisplayInfoByEntityAndSelfId(state)(nodeID, eventID)
   );
 
-  const nodeDetailHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeDetail',
-      panelParameters: { nodeID: processEntityId },
-    })
-  );
-  const nodeDetailLinkNavProps = useNavigateOrReplace({
-    search: nodeDetailHref,
+  const nodeDetailLinkNavProps = useLinkProps({
+    panelView: 'nodeDetail',
+    panelParameters: { nodeID: processEntityId },
   });
 
-  const nodeEventsHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeEvents',
-      panelParameters: { nodeID: processEntityId },
-    })
-  );
-  const nodeEventsLinkNavProps = useNavigateOrReplace({
-    search: nodeEventsHref,
+  const nodeEventsLinkNavProps = useLinkProps({
+    panelView: 'nodeEvents',
+    panelParameters: { nodeID: processEntityId },
   });
 
-  const nodeEventsOfTypeHref = useSelector((state: ResolverState) =>
-    selectors.relativeHref(state)({
-      panelView: 'nodeEventsOfType',
-      panelParameters: { nodeID: processEntityId, eventType: relatedEventCategory },
-    })
-  );
-  const nodeEventsOfTypeLinkNavProps = useNavigateOrReplace({
-    search: nodeEventsOfTypeHref,
+  const nodeEventsOfTypeLinkNavProps = useLinkProps({
+    panelView: 'nodeEventsOfType',
+    panelParameters: { nodeID: processEntityId, eventType: relatedEventCategory },
   });
   const crumbs = useMemo(() => {
     return [
@@ -221,7 +203,6 @@ export const EventDetail = memo(function ({
             defaultMessage: 'N/A',
           })
         ),
-        onClick: () => {},
       },
     ];
   }, [
