@@ -14,7 +14,7 @@ export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
   fetch: HttpSetup['fetch']
 ) => {
   try {
-    await callStopDatafeeds(spaceId, sourceId, jobTypes);
+    await callStopDatafeeds({ spaceId, sourceId, jobTypes }, fetch);
   } catch (err) {
     // Proceed only if datafeed has been deleted or didn't exist in the first place
     if (err?.res?.status !== 404) {

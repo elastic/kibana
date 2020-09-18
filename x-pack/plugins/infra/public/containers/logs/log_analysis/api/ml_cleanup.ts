@@ -9,7 +9,6 @@ import type { HttpSetup } from 'src/core/public';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { npStart } from '../../../../legacy_singletons';
 
 import { getDatafeedId, getJobId } from '../../../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
@@ -51,13 +50,20 @@ export const callGetJobDeletionTasks = async (fetch: HttpSetup['fetch']) => {
   );
 };
 
+interface StopDatafeedsRequestArgs<JobType extends string> {
+  spaceId: string;
+  sourceId: string;
+  jobTypes: JobType[];
+}
+
 export const callStopDatafeeds = async <JobType extends string>(
-  spaceId: string,
-  sourceId: string,
-  jobTypes: JobType[]
+  requestArgs: StopDatafeedsRequestArgs<JobType>,
+  fetch: HttpSetup['fetch']
 ) => {
+  const { spaceId, sourceId, jobTypes } = requestArgs;
+
   // Stop datafeed due to https://github.com/elastic/kibana/issues/44652
-  const stopDatafeedResponse = await npStart.http.fetch('/api/ml/jobs/stop_datafeeds', {
+  const stopDatafeedResponse = await fetch('/api/ml/jobs/stop_datafeeds', {
     method: 'POST',
     body: JSON.stringify(
       stopDatafeedsRequestPayloadRT.encode({
