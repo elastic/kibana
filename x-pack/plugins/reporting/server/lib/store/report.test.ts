@@ -40,7 +40,6 @@ describe('Class Report', () => {
     expect(report.toApiJSON()).toMatchObject({
       attempts: 0,
       browser_type: 'browser_type_test_string',
-      completed_at: undefined,
       created_by: 'created_by_test_string',
       index: '.reporting-test-index-12345',
       jobtype: 'test-report',
@@ -48,7 +47,6 @@ describe('Class Report', () => {
       payload: { headers: 'payload_test_field', objectType: 'testOt' },
       meta: { objectType: 'test' },
       priority: 1,
-      started_at: undefined,
       status: 'pending',
       timeout: 30000,
     });
@@ -84,7 +82,6 @@ describe('Class Report', () => {
         attempts: 0,
         browser_type: 'browser_type_test_string',
         completed_at: undefined,
-        // created_at: 'Fri Aug 21 2020 19:45:48 GMT+0000',
         created_by: 'created_by_test_string',
         jobtype: 'test-report',
         max_attempts: 50,
@@ -100,7 +97,6 @@ describe('Class Report', () => {
       attempts: 0,
       browser_type: 'browser_type_test_string',
       completed_at: undefined,
-      // created_at: 'Fri Aug 21 2020 19:45:48 GMT+0000',
       created_by: 'created_by_test_string',
       id: '12342p9o387549o2345',
       index: '.reporting-test-update',

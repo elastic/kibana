@@ -28,8 +28,6 @@ describe('POST /api/reporting/generate', () => {
     get: jest.fn().mockImplementation((...args) => {
       const key = args.join('.');
       switch (key) {
-        case 'encryptionKey':
-          return 'lalalalallalaaalaalalalaa';
         case 'queue.indexInterval':
           return 'year';
         case 'queue.timeout':

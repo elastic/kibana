@@ -15,8 +15,8 @@ import { TaskRunResult } from '../tasks';
 interface ReportDocumentHead {
   _id: string;
   _index: string;
-  _primary_term: unknown;
   _seq_no: unknown;
+  _primary_term: unknown;
 }
 
 /*
@@ -38,10 +38,7 @@ export interface ReportSource {
     title: string;
     layout?: LayoutParams;
   };
-  meta: {
-    objectType: string;
-    layout?: string;
-  };
+  meta: { objectType: string; layout?: string };
   browser_type: string;
   max_attempts: number;
   timeout: number;
