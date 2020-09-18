@@ -55,7 +55,7 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
  * Created, PID, User/Domain, etc.
  */
 const NodeDetailView = memo(function ({ processEvent }: { processEvent: ResolverEvent }) {
-  const processName = event.eventName(processEvent);
+  const processName = event.processName(processEvent);
   const entityId = event.entityId(processEvent);
   const isProcessTerminated = useSelector((state: ResolverState) =>
     selectors.isProcessTerminated(state)(entityId)

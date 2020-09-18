@@ -60,7 +60,7 @@ const EventCountsForProcess = memo(function ({
   }
 
   const relatedEventsState = { stats: relatedStats.events.byCategory };
-  const processName = processEvent && event.eventName(processEvent);
+  const processName = processEvent && event.processName(processEvent);
   const processEntityId = event.entityId(processEvent);
   /**
    * totalCount: This will reflect the aggregated total by category for all related events

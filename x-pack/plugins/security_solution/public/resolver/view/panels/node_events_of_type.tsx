@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { memo, useMemo, useEffect, Fragment } from 'react';
+import React, { memo, useMemo, useEffect, Fragment, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
@@ -24,6 +24,7 @@ import { ResolverState } from '../../types';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { useRelatedEventDetailNavigation } from '../use_related_event_detail_navigation';
 import { PanelLoading } from './panel_loading';
+import { DescriptiveName } from './descriptive_name';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -39,7 +40,7 @@ interface MatchingEventEntry {
   formattedDate: string;
   eventType: string;
   eventCategory: string;
-  name: { subject: string; descriptor?: string };
+  name: ReactNode;
   setQueryParams: () => void;
 }
 
@@ -97,7 +98,6 @@ const NodeCategoryEntries = memo(function ({
       <EuiSpacer size="l" />
       <>
         {matchingEventEntries.map((eventView, index) => {
-          const { subject, descriptor = '' } = eventView.name;
           return (
             <Fragment key={index}>
               <EuiText>
@@ -120,13 +120,7 @@ const NodeCategoryEntries = memo(function ({
                 </StyledTime>
               </EuiText>
               <EuiSpacer size="xs" />
-              <EuiButtonEmpty onClick={eventView.setQueryParams}>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.resolver.panel.processEventListByType.eventDescriptiveName"
-                  values={{ subject, descriptor }}
-                  defaultMessage="{descriptor} {subject}"
-                />
-              </EuiButtonEmpty>
+              <EuiButtonEmpty onClick={eventView.setQueryParams}>{eventView.name}</EuiButtonEmpty>
               {index === matchingEventEntries.length - 1 ? null : <EuiHorizontalRule margin="m" />}
             </Fragment>
           );
@@ -164,7 +158,7 @@ const NodeEventList = memo(function ({
   eventType: string;
   relatedStats: ResolverNodeStats | undefined;
 }) {
-  const processName = processEvent && event.eventName(processEvent);
+  const processName = processEvent && event.processName(processEvent);
   const processEntityId = processEvent ? event.entityId(processEvent) : '';
   const nodesHref = useSelector((state: ResolverState) =>
     selectors.relativeHref(state)({ panelView: 'nodes' })
@@ -217,7 +211,7 @@ const NodeEventList = memo(function ({
         formattedDate,
         eventCategory: `${eventType}`,
         eventType: `${event.ecsEventType(resolverEvent)}`,
-        name: event.descriptiveName(resolverEvent),
+        name: <DescriptiveName event={resolverEvent} />,
         setQueryParams: () => relatedEventDetailNavigation(entityId),
       };
     });

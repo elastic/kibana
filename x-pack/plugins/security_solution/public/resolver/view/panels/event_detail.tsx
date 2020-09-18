@@ -22,6 +22,7 @@ import { PanelContentError } from './panel_content_error';
 import { PanelLoading } from './panel_loading';
 import { ResolverState } from '../../types';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { DescriptiveName } from './descriptive_name';
 
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
@@ -96,7 +97,7 @@ export const EventDetail = memo(function ({
     (sum, val) => sum + val,
     0
   );
-  const processName = (parentEvent && event.eventName(parentEvent)) || '*';
+  const processName = (parentEvent && event.processName(parentEvent)) || '*';
   const processEntityId = (parentEvent && event.entityId(parentEvent)) || '';
   const totalCount = countForParent || 0;
   const eventsString = i18n.translate(
@@ -148,10 +149,6 @@ export const EventDetail = memo(function ({
   ] = useSelector((state: ResolverState) =>
     selectors.relatedEventDisplayInfoByEntityAndSelfId(state)(nodeID, eventID)
   );
-
-  const { subject = '', descriptor = '' } = relatedEventToShowDetailsFor
-    ? event.descriptiveName(relatedEventToShowDetailsFor)
-    : {};
 
   const nodeDetailHref = useSelector((state: ResolverState) =>
     selectors.relativeHref(state)({
@@ -218,13 +215,11 @@ export const EventDetail = memo(function ({
       },
       {
         text: relatedEventToShowDetailsFor ? (
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.eventDescriptiveName"
-            values={{ subject, descriptor }}
-            defaultMessage="{descriptor} {subject}"
-          />
+          <DescriptiveName event={relatedEventToShowDetailsFor} />
         ) : (
-          naString
+          i18n.translate('xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.NA', {
+            defaultMessage: 'N/A',
+          })
         ),
         onClick: () => {},
       },
@@ -234,11 +229,8 @@ export const EventDetail = memo(function ({
     eventsString,
     totalCount,
     countBySameCategory,
-    naString,
     relatedEventCategory,
     relatedEventToShowDetailsFor,
-    subject,
-    descriptor,
     nodeEventsOfTypeLinkNavProps,
     nodeEventsLinkNavProps,
     nodeDetailLinkNavProps,
@@ -288,11 +280,7 @@ export const EventDetail = memo(function ({
       <EuiSpacer size="m" />
       <StyledDescriptiveName>
         <GeneratedText>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.eventDescriptiveNameInTitle"
-            values={{ subject, descriptor }}
-            defaultMessage="{descriptor} {subject}"
-          />
+          <DescriptiveName event={relatedEventToShowDetailsFor} />
         </GeneratedText>
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
