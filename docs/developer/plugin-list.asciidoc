@@ -498,6 +498,10 @@ in their infrastructure.
 |Contains HTTP endpoints and UiSettings that are slated for removal.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
+|NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
+
+
 |===
 
 include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]
