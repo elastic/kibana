@@ -135,16 +135,10 @@ export const sendGetFleetAgentStatusForPolicy = (
  * Get Endpoint Security Package information
  */
 export const sendGetEndpointSecurityPackage = async (
-  http: HttpStart,
-  options: HttpFetchOptions = {}
+  http: HttpStart
 ): Promise<GetPackagesResponse['response'][0]> => {
-  const securityPackages = await http.get<GetPackagesResponse>(INGEST_API_EPM_PACKAGES, {
-    ...options,
-    query: {
-      ...options.query,
-      category: 'security',
-    },
-  });
+  const options = { query: { category: 'security' } };
+  const securityPackages = await http.get<GetPackagesResponse>(INGEST_API_EPM_PACKAGES, options);
   const endpointPackageInfo = securityPackages.response.find(
     (epmPackage) => epmPackage.name === 'endpoint'
   );
