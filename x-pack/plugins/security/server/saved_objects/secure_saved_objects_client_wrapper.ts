@@ -165,7 +165,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const response = await this.baseClient.find<T>({
       ...options,
       typesAndNamespacesMap: undefined, // if the user is fully authorized, use `undefined` as the typesAndNamespacesMap to prevent privilege escalation
-      ...(status === 'partially_authorized' && { typesAndNamespacesMap, type: '' }), // the repository requires that `type` must be empty if `typesAndNamespacesMap` is defined
+      ...(status === 'partially_authorized' && { typesAndNamespacesMap, type: '', namespaces: [] }), // the repository requires that `type` and `namespaces` must be empty if `typesAndNamespacesMap` is defined
     });
     return await this.redactSavedObjectsNamespaces(response);
   }

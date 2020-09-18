@@ -2477,6 +2477,13 @@ describe('SavedObjectsRepository', () => {
         expect(client.search).not.toHaveBeenCalled();
       });
 
+      it(`throws when namespaces is an empty array`, async () => {
+        await expect(
+          savedObjectsRepository.find({ type: 'foo', namespaces: [] })
+        ).rejects.toThrowError('options.namespaces cannot be an empty array');
+        expect(client.search).not.toHaveBeenCalled();
+      });
+
       it(`throws when type is not falsy and typesAndNamespacesMap is defined`, async () => {
         await expect(
           savedObjectsRepository.find({ type: 'foo', typesAndNamespacesMap: new Map() })
@@ -2484,6 +2491,17 @@ describe('SavedObjectsRepository', () => {
           'options.type must be an empty string when options.typesAndNamespacesMap is used'
         );
         expect(client.search).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is not an empty array and typesAndNamespacesMap is defined`, async () => {
+        const test = async (args) => {
+          await expect(savedObjectsRepository.find(args)).rejects.toThrowError(
+            'options.namespaces must be an empty array when options.typesAndNamespacesMap is used'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        };
+        await test({ type: '', typesAndNamespacesMap: new Map() });
+        await test({ type: '', namespaces: ['some-ns'], typesAndNamespacesMap: new Map() });
       });
 
       it(`throws when searchFields is defined but not an array`, async () => {

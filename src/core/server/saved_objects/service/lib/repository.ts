@@ -714,9 +714,17 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.type must be a string or an array of strings'
       );
+    } else if (namespaces?.length === 0) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.namespaces cannot be an empty array'
+      );
     } else if (type && typesAndNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.type must be an empty string when options.typesAndNamespacesMap is used'
+      );
+    } else if (namespaces?.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.namespaces must be an empty array when options.typesAndNamespacesMap is used'
       );
     }
 

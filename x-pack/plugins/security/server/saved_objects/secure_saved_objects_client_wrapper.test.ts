@@ -684,6 +684,7 @@ describe('#find', () => {
         // forbidden-ns is completely forbidden, so there are no entries with this namespace
       ]),
       type: '',
+      namespaces: [],
     });
     expect(result).toEqual(apiCallReturnValue);
   });
