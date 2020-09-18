@@ -243,7 +243,7 @@ Tip: Consider using <<helpers, date>> helper for date formatting.
 [[variables]]
 ==== Disable URL drilldown
 
-You can disable URL drilldown feature on your {kib} instance by disabling `urlDrilldown` plugin:
+You can disable URL drilldown feature on your {kib} instance by disabling the plugin:
 
 ["source","yml"]
 -----------
