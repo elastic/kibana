@@ -13,16 +13,6 @@ import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, AUTO_BARS, MODES, MIN_HISTOGRAM_BARS } from './constants';
 
-function getMaxBarsValueToShow(value: string, maxValue: number) {
-  if (value === '') {
-    return '';
-  }
-  if (value === AUTO_BARS) {
-    return maxValue;
-  }
-  return value;
-}
-
 const BaseRangeEditor = ({
   maxBars,
   step,
@@ -71,7 +61,7 @@ const BaseRangeEditor = ({
               min={MIN_HISTOGRAM_BARS}
               max={maxHistogramBars}
               step={step}
-              value={getMaxBarsValueToShow(maxBarsValue, maxHistogramBars)}
+              value={maxBarsValue}
               onChange={({ currentTarget }) => setMaxBarsValue(currentTarget.value)}
             />
           </EuiFlexItem>
