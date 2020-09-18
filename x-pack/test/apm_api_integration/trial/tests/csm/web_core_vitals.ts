@@ -71,7 +71,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
               0,
               0,
             ],
-            "tbt": "0.00",
+            "tbt": 0,
           }
         `);
       });
