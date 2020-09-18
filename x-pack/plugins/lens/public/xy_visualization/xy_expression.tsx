@@ -226,6 +226,12 @@ export interface LensChartControls {
   toPngBlob?: () => Promise<Blob>;
 }
 
+const toBlob = async (blobOrUrl: Blob | string): Promise<Blob> => {
+  if (typeof blobOrUrl === 'object') return blobOrUrl;
+  const response = await fetch(blobOrUrl);
+  return await response.blob();
+};
+
 export function XYChart({
   data,
   args,
@@ -251,7 +257,7 @@ export function XYChart({
           pixelRatio: 2,
         });
         if (!snapshot) throw new Error('Could not generate PNG.');
-        return snapshot.blobOrDataUrl as Blob;
+        return toBlob(snapshot.blobOrDataUrl);
       },
     };
     onControls(controls);

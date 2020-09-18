@@ -29,6 +29,8 @@ interface Context {
 
 export const COPY_PNG_ACTION = 'COPY_PNG_ACTION';
 
+declare const ClipboardItem: any;
+
 export class CopyPngAction implements UiActionsActionDefinition<Context> {
   public readonly id = COPY_PNG_ACTION;
   public readonly order = 25;
@@ -39,10 +41,14 @@ export class CopyPngAction implements UiActionsActionDefinition<Context> {
   public readonly isCompatible = async (
     context: ActionDefinitionContext<Context>
   ): Promise<boolean> => {
-    return true;
+    return !!context.embeddable.toPngBlob;
   };
 
   public readonly execute = async (context: ActionDefinitionContext<Context>): Promise<void> => {
-    alert('lala');
+    const { embeddable } = context;
+    if (!embeddable.toPngBlob) return;
+    const blob = await embeddable.toPngBlob();
+    const item = new ClipboardItem({ [blob.type]: blob });
+    await (navigator.clipboard as any).write([item]);
   };
 }
