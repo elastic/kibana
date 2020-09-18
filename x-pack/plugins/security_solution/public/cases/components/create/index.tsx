@@ -16,10 +16,9 @@ import styled, { css } from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash/fp';
 
-import { CasePostRequest, Connector } from '../../../../../case/common/api';
 import { Field, Form, getUseField, useForm, UseField, useFormData } from '../../../shared_imports';
 import { usePostCase } from '../../containers/use_post_case';
-import { schema } from './schema';
+import { schema, FormProps } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import * as i18n from '../../translations';
@@ -30,6 +29,9 @@ import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_cl
 import { SettingFieldsForm } from '../settings/fields_form';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { ActionConnector } from '../../containers/configure/types';
+import { normalizeCaseConnector, normalizeActionConnector } from '../configure_cases/utils';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -51,36 +53,49 @@ const MySpinner = styled(EuiLoadingSpinner)`
   z-index: 99;
 `;
 
-const initialCaseValue: CasePostRequest = {
+const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
+  connector: null,
 };
 
 export const Create = React.memo(() => {
   const history = useHistory();
   const { caseData, isLoading, postCase } = usePostCase();
   const { loading: isLoadingConnectors, connectors } = useConnectors();
-
-  const { form } = useForm<CasePostRequest>({
-    defaultValue: initialCaseValue,
-    options: { stripEmptyFields: false },
-    schema,
-  });
-
-  const { submit, setFieldValue } = form;
-  const [{ connector, tags, description }] = useFormData({
-    form,
-    watch: ['connector', 'tags', 'description'],
-  });
+  const { connector: configureConnector, loading: isLoadingCaseConfigure } = useCaseConfigure();
   const { tags: tagOptions } = useGetTags();
+
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
       label,
     }))
   );
 
-  const [currentConnector, setCurrentConnector] = useState<Connector | null>(null);
+  const [fields, setFields] = useState<Record<string, unknown>>({});
+
+  const { form } = useForm<FormProps>({
+    defaultValue: initialCaseValue,
+    options: { stripEmptyFields: false },
+    schema,
+  });
+
+  const { submit, setFieldValue } = form;
+  const [{ connector, tags, description }] = useFormData<{
+    connector: ActionConnector;
+    tags: string[];
+    description: string;
+  }>({
+    form,
+    watch: ['connector', 'tags', 'description'],
+  });
+
+  useEffect(() => {
+    if (!isLoadingCaseConfigure) {
+      setFieldValue('connector', normalizeCaseConnector(connectors, configureConnector));
+    }
+  }, [connectors, configureConnector, isLoadingCaseConfigure, setFieldValue]);
 
   useEffect(
     () =>
@@ -114,11 +129,6 @@ export const Create = React.memo(() => {
     }
   }, [tags, options]);
 
-  useEffect(() => {
-    const selectedConnector = connectors.find((c) => c.id === connector) ?? null;
-    setCurrentConnector(selectedConnector);
-  }, [connector, connectors]);
-
   const onDescriptionChange = useCallback((newValue) => setFieldValue('description', newValue), [
     setFieldValue,
   ]);
@@ -134,9 +144,11 @@ export const Create = React.memo(() => {
     const { isValid, data } = await submit();
     if (isValid) {
       // `postCase`'s type is incorrect, it actually returns a promise
-      await postCase(data);
+      const caseConnector =
+        data.connector != null ? { ...normalizeActionConnector(data.connector), fields } : null;
+      await postCase({ ...data, connector: caseConnector });
     }
-  }, [submit, postCase]);
+  }, [submit, postCase, fields]);
 
   const handleSetIsCancel = useCallback(() => {
     history.push('/');
@@ -188,12 +200,12 @@ export const Create = React.memo(() => {
               idAria: 'caseConnectors',
               isLoading,
               disabled: isLoadingConnectors,
-              defaultValue: 'none',
+              defaultValue: null,
             }}
           />
         </Container>
         <Container>
-          <SettingFieldsForm connector={currentConnector} />
+          <SettingFieldsForm connector={connector} onFieldsChange={setFields} />
         </Container>
         <ContainerBig>
           <UseField

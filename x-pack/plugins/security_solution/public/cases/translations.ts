@@ -230,3 +230,7 @@ export const CONNECTORS = i18n.translate('xpack.securitySolution.case.caseView.c
 export const EDIT_CONNECTOR = i18n.translate('xpack.securitySolution.case.caseView.editConnector', {
   defaultMessage: 'Change external incident management system',
 });
+
+export const NO_CONNECTOR = i18n.translate('xpack.securitySolution.case.common.noConnector', {
+  defaultMessage: 'No connector selected',
+});

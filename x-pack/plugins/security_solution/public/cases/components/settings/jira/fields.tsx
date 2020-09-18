@@ -85,7 +85,6 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
 
     setIssueTypesSelectOptions([]);
     onChange('issueType', null);
-    onChange('labels', null);
     onChange('priority', null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connector]);
@@ -98,7 +97,6 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
 
     setPrioritiesSelectOptions([]);
     onChange('issueType', issueType);
-    onChange('labels', null);
     onChange('priority', null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issueType]);

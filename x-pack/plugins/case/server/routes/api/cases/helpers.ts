@@ -102,7 +102,7 @@ export const getConnectorFromConfiguration = (
   name:
     caseConfigure.saved_objects.length > 0
       ? caseConfigure.saved_objects[0].attributes.connector.name
-      : '',
+      : 'none',
   type:
     caseConfigure.saved_objects.length > 0
       ? caseConfigure.saved_objects[0].attributes.connector.type

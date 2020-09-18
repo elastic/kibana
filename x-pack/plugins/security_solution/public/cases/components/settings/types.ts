@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
-import { Connector } from '../../../../../case/common/api';
+import { ActionConnector } from '../../../../../case/common/api';
 import { JiraSettingFields } from './jira';
+
+export type CaseSettingsConnector = ActionConnector;
 
 export interface CaseSetting<UIProps = unknown> {
   id: string;
@@ -26,6 +28,6 @@ export interface CaseSettingsRegistry {
 
 export interface SettingFieldsProps<TFields> {
   fields: TFields;
-  connector: Connector;
+  connector: CaseSettingsConnector;
   onChange: (property: string, value: unknown) => void;
 }

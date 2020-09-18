@@ -9,10 +9,10 @@ import React, { useCallback, useEffect } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import { Connector } from '../../../../../case/common/api/cases';
+import { ActionConnector } from '../../../../../case/common/api/cases';
 
 interface ConnectorSelectorProps {
-  connectors: Connector[];
+  connectors: ActionConnector[];
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
@@ -37,10 +37,10 @@ export const ConnectorSelector = ({
   }, [defaultValue]);
 
   const handleContentChange = useCallback(
-    (newContent: string) => {
-      field.setValue(newContent);
+    (newConnector: string) => {
+      field.setValue(connectors.find((c) => c.id === newConnector) ?? null);
     },
-    [field]
+    [field, connectors]
   );
 
   return (
@@ -56,7 +56,7 @@ export const ConnectorSelector = ({
     >
       <ConnectorsDropdown
         connectors={connectors}
-        selectedConnector={field.value as string}
+        selectedConnector={(field.value as ActionConnector)?.id ?? 'none'}
         disabled={disabled}
         isLoading={isLoading}
         onChange={handleContentChange}

@@ -42,7 +42,7 @@ export function initPostCaseApi({
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
         const myCaseConfigure = await caseConfigureService.find({ client });
-        const connector = getConnectorFromConfiguration(myCaseConfigure);
+        const connector = query.connector ?? getConnectorFromConfiguration(myCaseConfigure);
         const newCase = await caseService.postNewCase({
           client,
           attributes: transformNewCase({
