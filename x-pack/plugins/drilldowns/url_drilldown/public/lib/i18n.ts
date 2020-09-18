@@ -6,9 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const txtUrlDrilldownDisplayName = i18n.translate(
-  'xpack.drilldowns.urlDrilldown.DisplayName',
-  {
-    defaultMessage: 'Go to URL',
-  }
-);
+export const txtUrlDrilldownDisplayName = i18n.translate('xpack.urlDrilldown.DisplayName', {
+  defaultMessage: 'Go to URL',
+});
