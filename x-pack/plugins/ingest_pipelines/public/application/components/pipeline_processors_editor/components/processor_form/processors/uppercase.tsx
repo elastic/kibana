@@ -17,7 +17,10 @@ export const Uppercase: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.uppercaseForm.fieldNameHelpText',
-          { defaultMessage: 'The field to make uppercase.' }
+          {
+            defaultMessage:
+              'Field to uppercase. For an array of strings, each element is uppercased.',
+          }
         )}
       />
 

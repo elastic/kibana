@@ -16,6 +16,7 @@ import { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
 import {
   createAnomalyDetectionJobManagementUrl,
   createAnomalyDetectionCreateJobSelectType,
+  createAnomalyDetectionCreateJobSelectIndex,
   createExplorerUrl,
   createSingleMetricViewerUrl,
 } from './anomaly_detection_urls_generator';
@@ -23,10 +24,8 @@ import {
   createDataFrameAnalyticsJobManagementUrl,
   createDataFrameAnalyticsExplorationUrl,
 } from './data_frame_analytics_urls_generator';
-import {
-  createIndexDataVisualizerUrl,
-  createDataVisualizerUrl,
-} from './data_visualizer_urls_generator';
+import { createGenericMlUrl } from './common';
+import { createEditCalendarUrl, createEditFilterUrl } from './settings_urls_generator';
 
 declare module '../../../../../src/plugins/share/public' {
   export interface UrlGeneratorStateMapping {
@@ -44,8 +43,12 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
 
   public readonly id = ML_APP_URL_GENERATOR;
 
-  public readonly createUrl = async (mlUrlGeneratorState: MlUrlGeneratorState): Promise<string> => {
-    const appBasePath = this.params.appBasePath;
+  public readonly createUrl = async (
+    mlUrlGeneratorParams: MlUrlGeneratorState
+  ): Promise<string> => {
+    const { excludeBasePath, ...mlUrlGeneratorState } = mlUrlGeneratorParams;
+    const appBasePath = excludeBasePath === true ? '' : this.params.appBasePath;
+
     switch (mlUrlGeneratorState.page) {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
         return createAnomalyDetectionJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);
@@ -56,18 +59,39 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
           appBasePath,
           mlUrlGeneratorState.pageState
         );
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX:
+        return createAnomalyDetectionCreateJobSelectIndex(
+          appBasePath,
+          mlUrlGeneratorState.pageState
+        );
       case ML_PAGES.SINGLE_METRIC_VIEWER:
         return createSingleMetricViewerUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
         return createDataFrameAnalyticsJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         return createDataFrameAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
       case ML_PAGES.DATA_VISUALIZER:
       case ML_PAGES.DATA_VISUALIZER_FILE:
-      case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
-        return createDataVisualizerUrl(appBasePath, mlUrlGeneratorState);
       case ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER:
-        return createIndexDataVisualizerUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.DATA_VISUALIZER_INDEX_SELECT:
+      case ML_PAGES.OVERVIEW:
+      case ML_PAGES.SETTINGS:
+      case ML_PAGES.FILTER_LISTS_MANAGE:
+      case ML_PAGES.FILTER_LISTS_NEW:
+      case ML_PAGES.CALENDARS_MANAGE:
+      case ML_PAGES.CALENDARS_NEW:
+      case ML_PAGES.ACCESS_DENIED:
+        return createGenericMlUrl(
+          appBasePath,
+          mlUrlGeneratorState.page,
+          mlUrlGeneratorState.pageState
+        );
+      case ML_PAGES.FILTER_LISTS_EDIT:
+        return createEditFilterUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.CALENDARS_EDIT:
+        return createEditCalendarUrl(appBasePath, mlUrlGeneratorState.pageState);
+
       default:
         throw new Error('Page type is not provided or unknown');
     }
