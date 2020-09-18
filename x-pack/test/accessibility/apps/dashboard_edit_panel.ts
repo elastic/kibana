@@ -31,9 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
     });
 
-    // after(async () => {
-    //   await esArchiver.unload('dashboard/drilldowns');
-    // });
+    after(async () => {
+      await esArchiver.unload('dashboard/drilldowns');
+    });
 
     it('dashboard panel main edit ', async () => {
       await testSubjects.click('dashboardEditMode');
@@ -62,7 +62,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // clone panel
     it('dashboard embeddable clone panel', async () => {
       await testSubjects.click('embeddablePanelAction-clonePanel');
-      // await testSubjects.click('embeddablePanelAction-CUSTOM_TIME_RANGE');
       await a11y.testAppSnapshot();
     });
 
@@ -83,13 +82,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // fullscreen
-    it('dashboard embeddable fullscreen', async () => {
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-togglePanel');
-      await testSubjects.click('embeddablePanelAction-togglePanel');
-      await a11y.testAppSnapshot();
-    });
+    // // fullscreen
+    // it('dashboard embeddable fullscreen', async () => {
+    //   await testSubjects.click('embeddablePanelToggleMenuIcon');
+    //   await testSubjects.click('embeddablePanelAction-togglePanel');
+    //   // await testSubjects.moveMouseTo('flyoutCloseButton');
+    //   await testSubjects.click('embeddablePanelAction-togglePanel');
+    //   await a11y.testAppSnapshot();
+    // });
 
     // replace panel
     it('dashboard embeddable replace panel', async () => {
@@ -104,20 +104,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('embeddablePanelAction-deletePanel');
       await a11y.testAppSnapshot();
     });
-
-    // it('dashboard embeddable open flyout and drilldown', async () => {
-    //   await testSubjects.click('embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN');
-    //   await a11y.testAppSnapshot();
-    // });
-
-    // it('dashboard embeddable open flyout and drilldown', async () => {
-    //   await testSubjects.click('embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN');
-    //   await a11y.testAppSnapshot();
-    // });
-
-    // it('dashboard panel inspect', async () => {
-    //   await dashboardPanelActions.openInspectorByTitle('[Flights] Airline Carrier');
-    //   await a11y.testAppSnapshot();
-    // });
   });
 }
