@@ -113,6 +113,12 @@ export const teamAssignment = (teamAssignmentsPath) => (log) => async (obj) => {
 
   return isTotal.isRight() ? obj : await assignTeam(teamAssignmentsPath, coveredFilePath, log, obj);
 };
+export const last = (x) => {
+  const xs = x.split('\n');
+  const len = xs.length;
+
+  return len === 1 ? xs[0] : xs[len - 1];
+};
 async function assignTeam(teamAssignmentsPath, coveredFilePath, log, obj) {
   const params = [coveredFilePath, teamAssignmentsPath];
 
@@ -126,6 +132,7 @@ async function assignTeam(teamAssignmentsPath, coveredFilePath, log, obj) {
   }
 
   return Either.fromNullable(grepResponse)
+    .map(last)
     .map(findTeam)
     .map(pluckTeam)
     .fold(

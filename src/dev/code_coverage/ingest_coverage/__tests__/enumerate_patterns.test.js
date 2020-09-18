@@ -38,4 +38,13 @@ describe(`enumeratePatterns`, () => {
       )
     ).to.be(true);
   });
+  it(`should resolve src/plugins/charts/public/static/color_maps/color_maps.ts to kibana-app`, () => {
+    const actual = enumeratePatterns(REPO_ROOT)(log)(
+      new Map([['src/plugins/charts/public/static/color_maps', ['kibana-app']]])
+    );
+
+    expect(actual[0][0]).to.be(
+      'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app'
+    );
+  });
 });
