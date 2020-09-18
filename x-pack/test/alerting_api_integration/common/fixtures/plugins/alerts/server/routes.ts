@@ -138,7 +138,13 @@ export function defineRoutes(
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         includedHiddenTypes: ['alert'],
       });
-      const result = await savedObjectsWithAlerts.update(type, id, attributes, options);
+      const savedAlert = await savedObjectsWithAlerts.get<RawAlert>(type, id);
+      const result = await savedObjectsWithAlerts.update(
+        type,
+        id,
+        { ...savedAlert.attributes, ...attributes },
+        options
+      );
       return res.ok({ body: result });
     }
   );
