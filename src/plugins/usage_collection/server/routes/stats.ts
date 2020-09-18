@@ -86,10 +86,6 @@ export function registerStatsRoute({
     return collectorSet.toObject(usage);
   };
 
-  // const getClusterUuid = async (callCluster: LegacyAPICaller): Promise<string> => {
-  //   const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
-  //   return uuid;
-  // };
   const getClusterUuid = async (esClient: ElasticsearchClient): Promise<string> => {
     const result = await esClient.info<ESClusterInfo>();
     const { cluster_uuid: uuid } = result.body;
