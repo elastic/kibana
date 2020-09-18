@@ -103,8 +103,6 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         policy_id: { type: 'keyword' },
         policy_revision: { type: 'integer' },
         type: { type: 'keyword' },
-        version: { type: 'keyword' },
-        source_uri: { type: 'keyword' },
         data: { type: 'binary' },
         ack_data: { type: 'text' },
         sent_at: { type: 'date' },
