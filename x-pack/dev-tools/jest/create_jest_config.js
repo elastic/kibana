@@ -8,7 +8,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
   const fileMockPath = `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`;
   return {
     rootDir,
-    roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
+    roots: ['<rootDir>/plugins'],
     moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
