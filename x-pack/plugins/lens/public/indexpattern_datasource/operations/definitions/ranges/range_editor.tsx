@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiFormRow, EuiRange, EuiFlexItem, EuiFlexGroup } from 
 import { IFieldFormat } from 'src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
-import { TYPING_DEBOUNCE_TIME, AUTO_BARS, MODES, MIN_HISTOGRAM_BARS } from './constants';
+import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
 
 const BaseRangeEditor = ({
   maxBars,
