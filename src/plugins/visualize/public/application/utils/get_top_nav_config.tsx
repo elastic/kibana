@@ -332,8 +332,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(originatingApp === 'dashboards' &&
-    dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables
+    ...(originatingApp === 'dashboards'
       ? [
           {
             id: 'cancel',
