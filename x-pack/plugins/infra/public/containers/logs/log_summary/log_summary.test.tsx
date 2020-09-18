@@ -5,6 +5,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 
 import { useLogSummary } from './log_summary';
 
@@ -15,6 +17,10 @@ import { datemathToEpochMillis } from '../../../utils/datemath';
 // We use a second variable with a type cast to help the compiler further down the line.
 jest.mock('./api/fetch_log_summary', () => ({ fetchLogSummary: jest.fn() }));
 const fetchLogSummaryMock = fetchLogSummary as jest.MockedFunction<typeof fetchLogSummary>;
+
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({ services: mockCoreMock.createStart() }),
+}));
 
 describe('useLogSummary hook', () => {
   beforeEach(() => {
@@ -50,22 +56,16 @@ describe('useLogSummary hook', () => {
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        sourceId: 'INITIAL_SOURCE_ID',
-      })
-    );
+    expect(fetchLogSummaryMock.mock.calls[0][0]).toMatchObject({ sourceId: 'INITIAL_SOURCE_ID' });
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
     rerender({ sourceId: 'CHANGED_SOURCE_ID' });
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        sourceId: 'CHANGED_SOURCE_ID',
-      })
-    );
+    expect(fetchLogSummaryMock.mock.calls[1][0]).toMatchObject({
+      sourceId: 'CHANGED_SOURCE_ID',
+    });
     expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
 
@@ -93,22 +93,18 @@ describe('useLogSummary hook', () => {
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        query: 'INITIAL_FILTER_QUERY',
-      })
-    );
+    expect(fetchLogSummaryMock.mock.calls[0][0]).toMatchObject({
+      query: 'INITIAL_FILTER_QUERY',
+    });
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
     rerender({ filterQuery: 'CHANGED_FILTER_QUERY' });
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        query: 'CHANGED_FILTER_QUERY',
-      })
-    );
+    expect(fetchLogSummaryMock.mock.calls[1][0]).toMatchObject({
+      query: 'CHANGED_FILTER_QUERY',
+    });
     expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
 
@@ -128,12 +124,10 @@ describe('useLogSummary hook', () => {
 
     await waitForNextUpdate();
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        startTimestamp: firstRange.startTimestamp,
-        endTimestamp: firstRange.endTimestamp,
-      })
-    );
+    expect(fetchLogSummaryMock.mock.calls[0][0]).toMatchObject({
+      startTimestamp: firstRange.startTimestamp,
+      endTimestamp: firstRange.endTimestamp,
+    });
 
     const secondRange = createMockDateRange('now-20s', 'now');
 
@@ -141,12 +135,10 @@ describe('useLogSummary hook', () => {
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        startTimestamp: secondRange.startTimestamp,
-        endTimestamp: secondRange.endTimestamp,
-      })
-    );
+    expect(fetchLogSummaryMock.mock.calls[1][0]).toMatchObject({
+      startTimestamp: secondRange.startTimestamp,
+      endTimestamp: secondRange.endTimestamp,
+    });
   });
 });
 
