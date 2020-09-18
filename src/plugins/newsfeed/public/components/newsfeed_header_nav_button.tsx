@@ -68,10 +68,10 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
           aria-haspopup="true"
           aria-label={
             showBadge
-              ? i18n.translate('header.newsfeedButton.unreadAriaLabel', {
+              ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
                   defaultMessage: 'Newsfeed menu - unread items available',
                 })
-              : i18n.translate('header.newsfeedButton.readAriaLabel', {
+              : i18n.translate('newsfeed.headerButton.readAriaLabel', {
                   defaultMessage: 'Newsfeed menu - all items read',
                 })
           }

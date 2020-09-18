@@ -49,7 +49,9 @@ export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async getRedButtonSign() {
-      return await testSubjects.exists('showBadgeNews');
+      return (await testSubjects.find('newsfeed')).elementHasClass(
+        'euiHeaderSectionItemButton__notification--dot'
+      );
     }
 
     async getNewsfeedList() {
