@@ -26,6 +26,9 @@ export function getLensTopNavConfig(options: {
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
       disableButton: !savingPermitted,
+      description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
+        defaultMessage: 'Save the current lens visualization and return to the last app',
+      }),
     });
   }
 
@@ -40,6 +43,9 @@ export function getLensTopNavConfig(options: {
     emphasize: !showSaveAndReturn,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',
+    description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
+      defaultMessage: 'Save the current lens visualization',
+    }),
     disableButton: !savingPermitted,
   });
 
@@ -50,6 +56,9 @@ export function getLensTopNavConfig(options: {
       }),
       run: actions.cancel,
       testId: 'lnsApp_cancelButton',
+      description: i18n.translate('xpack.lens.app.cancelButtonAriaLabel', {
+        defaultMessage: 'Return to the last app without saving changes',
+      }),
     });
   }
   return topNavMenu;
