@@ -33,7 +33,7 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, ...data }] = useNetworkKpiUniqueFlows({
+  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniqueFlows({
     filterQuery,
     endDate: to,
     startDate: from,
@@ -44,6 +44,7 @@ const NetworkKpiUniqueFlowsComponent: React.FC<NetworkKpiProps> = ({
     <NetworkKpiBaseComponentManage
       data={data}
       id={id}
+      inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}

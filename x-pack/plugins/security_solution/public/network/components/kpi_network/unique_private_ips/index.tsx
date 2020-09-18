@@ -52,7 +52,7 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, ...data }] = useNetworkKpiUniquePrivateIps({
+  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
     filterQuery,
     endDate: to,
     startDate: from,
@@ -63,6 +63,7 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
     <NetworkKpiBaseComponentManage
       data={data}
       id={id}
+      inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}

@@ -33,7 +33,7 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, ...data }] = useNetworkKpiTlsHandshakes({
+  const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiTlsHandshakes({
     filterQuery,
     endDate: to,
     startDate: from,
@@ -44,6 +44,7 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
     <NetworkKpiBaseComponentManage
       data={data}
       id={id}
+      inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}

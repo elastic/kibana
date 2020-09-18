@@ -47,7 +47,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, ...data }] = useHostsKpiUniqueIps({
+  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
     filterQuery,
     endDate: to,
     startDate: from,
@@ -58,6 +58,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
     <HostsKpiBaseComponentManage
       data={data}
       id={id}
+      inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}

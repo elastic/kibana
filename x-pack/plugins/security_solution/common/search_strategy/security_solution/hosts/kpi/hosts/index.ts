@@ -14,5 +14,5 @@ export type HostsKpiHostsRequestOptions = RequestBasicOptions;
 export interface HostsKpiHostsStrategyResponse extends IEsSearchResponse {
   hosts: Maybe<number>;
   hostsHistogram: Maybe<HostsKpiHistogramData[]>;
-  inspect: Maybe<Inspect>;
+  inspect?: Maybe<Inspect>;
 }

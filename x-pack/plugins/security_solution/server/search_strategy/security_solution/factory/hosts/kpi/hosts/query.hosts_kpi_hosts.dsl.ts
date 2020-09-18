@@ -15,17 +15,6 @@ export const buildHostsKpiHostsQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
-      bool: {
-        filter: [
-          {
-            term: {
-              'event.category': 'authentication',
-            },
-          },
-        ],
-      },
-    },
-    {
       range: {
         '@timestamp': {
           gte: from,
@@ -41,47 +30,21 @@ export const buildHostsKpiHostsQuery = ({
     allowNoIndices: true,
     ignoreUnavailable: true,
     body: {
-      aggs: {
-        authentication_success: {
-          filter: {
-            term: {
-              'event.outcome': 'success',
-            },
+      aggregations: {
+        hosts: {
+          cardinality: {
+            field: 'host.name',
           },
         },
-        authentication_success_histogram: {
+        hosts_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
             buckets: '6',
           },
           aggs: {
             count: {
-              filter: {
-                term: {
-                  'event.outcome': 'success',
-                },
-              },
-            },
-          },
-        },
-        authentication_failure: {
-          filter: {
-            term: {
-              'event.outcome': 'failure',
-            },
-          },
-        },
-        authentication_failure_histogram: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: '6',
-          },
-          aggs: {
-            count: {
-              filter: {
-                term: {
-                  'event.outcome': 'failure',
-                },
+              cardinality: {
+                field: 'host.name',
               },
             },
           },

@@ -47,7 +47,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   setQuery,
   skip,
 }) => {
-  const [loading, { refetch, id, ...data }] = useHostsKpiAuthentications({
+  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiAuthentications({
     filterQuery,
     endDate: to,
     startDate: from,
@@ -58,6 +58,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
     <HostsKpiBaseComponentManage
       data={data}
       id={id}
+      inspect={inspect}
       loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}

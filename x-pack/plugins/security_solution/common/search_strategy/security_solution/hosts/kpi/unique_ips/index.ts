@@ -16,5 +16,5 @@ export interface HostsKpiUniqueIpsStrategyResponse extends IEsSearchResponse {
   uniqueSourceIpsHistogram: Maybe<HostsKpiHistogramData[]>;
   uniqueDestinationIps: Maybe<number>;
   uniqueDestinationIpsHistogram: Maybe<HostsKpiHistogramData[]>;
-  inspect: Maybe<Inspect>;
+  inspect?: Maybe<Inspect>;
 }

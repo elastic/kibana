@@ -20,5 +20,5 @@ export interface HostsKpiAuthenticationsStrategyResponse extends IEsSearchRespon
   authenticationsSuccessHistogram: Maybe<HostsKpiHistogramData[]>;
   authenticationsFailure: Maybe<number>;
   authenticationsFailureHistogram: Maybe<HostsKpiHistogramData[]>;
-  inspect: Maybe<Inspect>;
+  inspect?: Maybe<Inspect>;
 }
