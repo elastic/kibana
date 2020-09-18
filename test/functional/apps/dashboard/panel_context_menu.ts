@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const renderable = getService('renderable');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
@@ -78,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // The second parameter of true will include the timestamp in the url and
       // trigger a hard refresh.
       await browser.get(currentUrl.toString(), true);
-      await renderable.waitForRender();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await dashboardPanelActions.expectExistsEditPanelAction();
@@ -88,7 +86,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Get rid of the timestamp in the url.
       await browser.get(currentUrl.toString(), false);
-      await renderable.waitForRender();
     });
 
     describe('visualization object edit menu', () => {
@@ -150,7 +147,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before('reset dashboard', async () => {
         const currentUrl = await browser.getCurrentUrl();
         await browser.get(currentUrl.toString(), false);
-        await renderable.waitForRender();
       });
 
       before('and add one panel and save to put dashboard in "view" mode', async () => {
