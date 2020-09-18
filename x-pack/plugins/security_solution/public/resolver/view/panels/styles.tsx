@@ -37,3 +37,31 @@ export const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; te
     background: ${(props) => props.text};
   }
 `;
+
+export const StyledButtonTextContainer = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+`;
+
+export const StyledAnalyzedEvent = styled.div`
+  color: ${(props) => props.color};
+  font-size: 10.5px;
+  font-weight: 700;
+`;
+
+export const StyledLabelTitle = styled.div``;
+
+export const StyledLabelContainer = styled.div`
+  display: inline-block;
+  flex: 3;
+  min-width: 0;
+
+  ${StyledAnalyzedEvent},
+  ${StyledLabelTitle} {
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;

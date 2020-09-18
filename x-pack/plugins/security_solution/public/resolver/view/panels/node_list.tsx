@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import {
   EuiBasicTableColumn,
   EuiBadge,
@@ -16,8 +16,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 import { StyledPanel } from '../styles';
+import {
+  StyledLabelTitle,
+  StyledAnalyzedEvent,
+  StyledLabelContainer,
+  StyledButtonTextContainer,
+} from './styles';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { formatter } from './panel_content_utilities';
@@ -28,34 +33,6 @@ import { LimitWarning } from '../limit_warnings';
 import { ResolverState } from '../../types';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { useColors } from '../use_colors';
-
-const StyledButtonTextContainer = styled.div`
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-`;
-
-const StyledAnalyzedEvent = styled.div`
-  color: ${(props) => props.color};
-  font-size: 10.5px;
-  font-weight: 700;
-`;
-
-const StyledLabelTitle = styled.div``;
-
-const StyledLabelContainer = styled.div`
-  display: inline-block;
-  flex: 3;
-  min-width: 0;
-
-  ${StyledAnalyzedEvent},
-  ${StyledLabelTitle} {
-    overflow: hidden;
-    text-align: left;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-`;
 
 interface ProcessTableView {
   name?: string;
@@ -113,42 +90,32 @@ export const NodeList = memo(() => {
     []
   );
 
-  const { processNodePositions } = useSelector(selectors.layout);
-  const nodeHrefs: Map<SafeResolverEvent, string | null | undefined> = useSelector(
-    (state: ResolverState) => {
+  const processTableView: ProcessTableView[] = useSelector(
+    useCallback((state: ResolverState) => {
+      const { processNodePositions } = selectors.layout(state);
       const relativeHref = selectors.relativeHref(state);
-      return new Map(
-        [...processNodePositions.keys()].map((processEvent) => {
-          const nodeID = event.entityIDSafeVersion(processEvent);
-          if (nodeID === undefined) {
-            return [processEvent, null];
-          }
-          return [
-            processEvent,
-            relativeHref({
+      const view: ProcessTableView[] = [];
+      for (const processEvent of processNodePositions.keys()) {
+        const name = event.processNameSafeVersion(processEvent);
+        const nodeID = event.entityIDSafeVersion(processEvent);
+        if (nodeID !== undefined) {
+          view.push({
+            name,
+            timestamp: event.timestampAsDateSafeVersion(processEvent),
+            event: processEvent,
+            href: relativeHref({
               panelView: 'nodeDetail',
               panelParameters: {
                 nodeID,
               },
             }),
-          ];
-        })
-      );
-    }
+          });
+        }
+      }
+      return view;
+    }, [])
   );
-  const processTableView: ProcessTableView[] = useMemo(
-    () =>
-      [...processNodePositions.keys()].map((processEvent) => {
-        const name = event.processNameSafeVersion(processEvent);
-        return {
-          name,
-          timestamp: event.timestampAsDateSafeVersion(processEvent),
-          event: processEvent,
-          href: nodeHrefs.get(processEvent) ?? undefined,
-        };
-      }),
-    [processNodePositions, nodeHrefs]
-  );
+
   const numberOfProcesses = processTableView.length;
 
   const crumbs = useMemo(() => {
