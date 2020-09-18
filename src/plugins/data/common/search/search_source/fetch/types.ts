@@ -18,8 +18,8 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { GetConfigFn } from '../../../common';
 import { LegacyFetchHandlers } from '../legacy/types';
+import { GetConfigFn } from '../../../types';
 
 /**
  * @internal
