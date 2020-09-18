@@ -40,8 +40,8 @@ export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
       {} as IAccount,
       {
         initializeAppData: (_, { appSearch: account }) => account,
-        setOnboardingComplete: (state) => ({
-          ...state,
+        setOnboardingComplete: (account) => ({
+          ...account,
           onboardingComplete: true,
         }),
       },
