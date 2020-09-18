@@ -17,26 +17,29 @@
  * under the License.
  */
 
-const { join } = require('path');
-const { name, build } = require('../package.json');
-const { loadConfiguration } = require('@kbn/apm-config-loader');
-
-const ROOT_DIR = join(__dirname, '..');
-const apmConfig = loadConfiguration(ROOT_DIR);
+import { resolve } from 'path';
+// deep import to avoid loading the whole package
+import { getConfigPath } from '@kbn/utils/target/path';
 
 /**
- * Flag to disable APM RUM support on all kibana builds by default
+ * Return the configuration files that needs to be loaded.
+ *
+ * This mimics the behavior of the `src/cli/serve/serve.js` cli script by reading
+ * `-c` and `--config` options from process.argv, and fallbacks to `@kbn/utils`'s `getConfigPath()`
  */
-const isKibanaDistributable = Boolean(build && build.distributable === true);
+export const getConfigurationFilePaths = (): string[] => {
+  let configPaths: string[] = [];
 
-module.exports = function (serviceName = name) {
-  if (process.env.kbnWorkerType === 'optmzr') {
-    return;
+  const args = process.argv;
+  for (let i = 0; i < args.length; i++) {
+    if ((args[i] === '-c' || args[i] === '--config') && args[i + 1]) {
+      configPaths.push(resolve(process.cwd(), args[++i]));
+    }
   }
 
-  const conf = apmConfig.getConfig(serviceName);
-  require('elastic-apm-node').start(conf);
-};
+  if (!configPaths.length) {
+    configPaths = [getConfigPath()];
+  }
 
-module.exports.getConfig = apmConfig.getConfig;
-module.exports.isKibanaDistributable = isKibanaDistributable;
+  return configPaths;
+};

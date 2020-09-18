@@ -17,26 +17,17 @@
  * under the License.
  */
 
-const { join } = require('path');
-const { name, build } = require('../package.json');
-const { loadConfiguration } = require('@kbn/apm-config-loader');
+import { getConfigurationFilePaths, getConfigFromFiles } from './utils';
 
-const ROOT_DIR = join(__dirname, '..');
-const apmConfig = loadConfiguration(ROOT_DIR);
+import { ApmConfiguration } from './config';
 
 /**
- * Flag to disable APM RUM support on all kibana builds by default
+ * Load the APM configuration.
+ *
+ * @param root The root directory of kibana (where the sources and the `package.json` file are)
  */
-const isKibanaDistributable = Boolean(build && build.distributable === true);
-
-module.exports = function (serviceName = name) {
-  if (process.env.kbnWorkerType === 'optmzr') {
-    return;
-  }
-
-  const conf = apmConfig.getConfig(serviceName);
-  require('elastic-apm-node').start(conf);
+export const loadConfiguration = (rootDir: string): ApmConfiguration => {
+  const configPaths = getConfigurationFilePaths();
+  const rawConfiguration = getConfigFromFiles(configPaths);
+  return new ApmConfiguration(rootDir, rawConfiguration);
 };
-
-module.exports.getConfig = apmConfig.getConfig;
-module.exports.isKibanaDistributable = isKibanaDistributable;
