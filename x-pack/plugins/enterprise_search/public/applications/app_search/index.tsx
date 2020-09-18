@@ -51,7 +51,7 @@ export const AppSearchUnconfigured: React.FC = () => (
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData } = useActions(AppLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -63,7 +63,7 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
         <SetupGuide />
       </Route>
       <Route>
-        <Layout navigation={<AppSearchNav />}>
+        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
             <ErrorConnecting />
           ) : (
