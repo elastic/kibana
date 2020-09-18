@@ -30,7 +30,7 @@ Feature: CSM Dashboard
 
   Scenario: Search by url filter focus
     When a user clicks inside url search field
-    Then it display top pages in the suggestion popover
+    Then it displays top pages in the suggestion popover
 
   Scenario: Search by url filter
     When a user enters a query in url search field
