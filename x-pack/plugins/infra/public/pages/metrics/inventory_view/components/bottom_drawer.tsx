@@ -8,7 +8,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled, useUiTracker } from '../../../../../../observability/public';
 import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
 
@@ -28,7 +28,12 @@ export const BottomDrawer: React.FC<{
 }> = ({ measureRef, interval, formatter, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const onClick = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  const trackDrawerOpen = useUiTracker({ app: 'infra_metrics' });
+  const onClick = useCallback(() => {
+    if (!isOpen) trackDrawerOpen({ metric: 'open_timeline_drawer__inventory' });
+    setIsOpen(!isOpen);
+  }, [isOpen, trackDrawerOpen]);
+
   return (
     <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen}>
       <BottomActionTopBar ref={isOpen ? null : measureRef}>
