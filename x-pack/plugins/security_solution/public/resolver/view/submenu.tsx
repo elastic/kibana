@@ -10,7 +10,6 @@ import { EuiI18nNumber } from '@elastic/eui';
 import styled from 'styled-components';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
-import { Matrix3 } from '../types';
 import { useColors } from './use_colors';
 
 /**
