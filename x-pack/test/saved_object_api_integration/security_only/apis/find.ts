@@ -59,10 +59,10 @@ export default function ({ getService }: FtrProviderContext) {
       };
     }
 
-    const authorizedGlobally = user.authorizedAtSpaces.includes('*');
+    const isAuthorizedGlobally = user.authorizedAtSpaces.includes('*');
 
     return {
-      defaultCases: authorizedGlobally
+      defaultCases: isAuthorizedGlobally
         ? [
             createTestDefinitions(defaultCases.normalTypes, false, { user }),
             createTestDefinitions(defaultCases.hiddenAndUnknownTypes, {

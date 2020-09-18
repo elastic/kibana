@@ -7,10 +7,13 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import querystring from 'querystring';
-import { Assign } from '@kbn/utility-types';
-import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SAVED_OBJECT_TEST_CASES, CONFLICT_TEST_CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import { getUrlPrefix } from '../lib/saved_object_test_utils';
+import {
+  getUrlPrefix,
+  isUserAuthorizedAtSpace,
+  getRedactedNamespaces,
+} from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
 const {
@@ -22,13 +25,11 @@ export interface FindTestDefinition extends TestDefinition {
 }
 export type FindTestSuite = TestSuite<FindTestDefinition>;
 
-type FindSavedObjectCase = Assign<TestCase, { namespaces: string[] }>;
-
 export interface FindTestCase {
   title: string;
   query: string;
   successResult?: {
-    savedObjects?: FindSavedObjectCase | FindSavedObjectCase[];
+    savedObjects?: TestCase | TestCase[];
     page?: number;
     perPage?: number;
     total?: number;
@@ -39,51 +40,10 @@ export interface FindTestCase {
   };
 }
 
-// additional sharedtype objects that exist but do not have common test cases defined
-const CONFLICT_1_OBJ = Object.freeze({
-  type: 'sharedtype',
-  id: 'conflict_1',
-  namespaces: ['default', 'space_1', 'space_2'],
-});
-const CONFLICT_2A_OBJ = Object.freeze({
-  type: 'sharedtype',
-  id: 'conflict_2a',
-  originId: 'conflict_2',
-  namespaces: ['default', 'space_1', 'space_2'],
-});
-const CONFLICT_2B_OBJ = Object.freeze({
-  type: 'sharedtype',
-  id: 'conflict_2b',
-  originId: 'conflict_2',
-  namespaces: ['default', 'space_1', 'space_2'],
-});
-const CONFLICT_3_OBJ = Object.freeze({
-  type: 'sharedtype',
-  id: 'conflict_3',
-  namespaces: ['default', 'space_1', 'space_2'],
-});
-const CONFLICT_4A_OBJ = Object.freeze({
-  type: 'sharedtype',
-  id: 'conflict_4a',
-  originId: 'conflict_4',
-  namespaces: ['default', 'space_1', 'space_2'],
-});
-
 const TEST_CASES = [
-  { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespaces: ['default'] },
-  { ...CASES.SINGLE_NAMESPACE_SPACE_1, namespaces: ['space_1'] },
-  { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespaces: ['space_2'] },
-  { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespaces: ['default', 'space_1'] },
-  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, namespaces: ['space_1'] },
-  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, namespaces: ['space_2'] },
-  { ...CASES.NAMESPACE_AGNOSTIC, namespaces: undefined },
-  { ...CASES.HIDDEN, namespaces: undefined },
+  ...Object.values(SAVED_OBJECT_TEST_CASES),
+  ...Object.values(CONFLICT_TEST_CASES),
 ];
-
-expect(TEST_CASES.length).to.eql(
-  Object.values(CASES).length,
-  'Unhandled test cases in `find` suite'
-);
 
 export const getTestCases = (
   { currentSpace, crossSpaceSearch }: { currentSpace?: string; crossSpaceSearch?: string[] } = {
@@ -91,7 +51,8 @@ export const getTestCases = (
     crossSpaceSearch: undefined,
   }
 ) => {
-  const crossSpaceIds = crossSpaceSearch?.filter((s) => s !== (currentSpace ?? 'default')) ?? [];
+  const crossSpaceIds =
+    crossSpaceSearch?.filter((s) => s !== (currentSpace ?? DEFAULT_SPACE_ID)) ?? [];
   const isCrossSpaceSearch = crossSpaceIds.length > 0;
   const isWildcardSearch = crossSpaceIds.includes('*');
 
@@ -100,7 +61,7 @@ export const getTestCases = (
     : '';
 
   const buildTitle = (title: string) =>
-    crossSpaceSearch ? `${title} (cross-space ${isWildcardSearch ? 'with wildcard' : ''})` : title;
+    crossSpaceSearch ? `${title} (cross-space${isWildcardSearch ? ' with wildcard' : ''})` : title;
 
   type CasePredicate = (testCase: TestCase) => boolean;
   const getExpectedSavedObjects = (predicate: CasePredicate) => {
@@ -113,13 +74,16 @@ export const getTestCases = (
 
       return TEST_CASES.filter((t) => {
         const hasOtherNamespaces =
-          Array.isArray(t.namespaces) &&
-          t.namespaces!.some((ns) => ns !== (currentSpace ?? 'default'));
+          Array.isArray(t.expectedNamespaces) &&
+          t.expectedNamespaces!.some((ns) => ns !== (currentSpace ?? DEFAULT_SPACE_ID));
         return hasOtherNamespaces && predicate(t);
       });
     }
     return TEST_CASES.filter(
-      (t) => (!t.namespaces || t.namespaces.includes(currentSpace ?? 'default')) && predicate(t)
+      (t) =>
+        (!t.expectedNamespaces ||
+          t.expectedNamespaces.includes(currentSpace ?? DEFAULT_SPACE_ID)) &&
+        predicate(t)
     );
   };
 
@@ -136,19 +100,13 @@ export const getTestCases = (
       query: `type=sharedtype&fields=title${namespacesQueryParam}`,
       successResult: {
         // expected depends on which spaces the user is authorized against...
-        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype').concat(
-          CONFLICT_1_OBJ,
-          CONFLICT_2A_OBJ,
-          CONFLICT_2B_OBJ,
-          CONFLICT_3_OBJ,
-          CONFLICT_4A_OBJ
-        ),
+        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype'),
       },
     } as FindTestCase,
     namespaceAgnosticType: {
       title: buildTitle('find namespace-agnostic type'),
       query: `type=globaltype&fields=title${namespacesQueryParam}`,
-      successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
+      successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
     } as FindTestCase,
     hiddenType: {
       title: buildTitle('find hidden type'),
@@ -175,7 +133,7 @@ export const getTestCases = (
     filterWithNamespaceAgnosticType: {
       title: buildTitle('filter with namespace-agnostic type'),
       query: `type=globaltype&filter=globaltype.attributes.title:*global*${namespacesQueryParam}`,
-      successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
+      successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
     } as FindTestCase,
     filterWithHiddenType: {
       title: buildTitle('filter with hidden type'),
@@ -196,16 +154,13 @@ export const getTestCases = (
   };
 };
 
+function objectComparator(a: { id: string }, b: { id: string }) {
+  return a.id > b.id ? 1 : a.id < b.id ? -1 : 0;
+}
+
 export const createRequest = ({ query }: FindTestCase) => ({ query });
-const getTestTitle = ({ failure, title }: FindTestCase) => {
-  let description = 'success';
-  if (failure?.statusCode === 200) {
-    description = 'unauthorized';
-  } else if (failure?.statusCode === 400) {
-    description = 'bad request';
-  }
-  return `${description} ["${title}"]`;
-};
+const getTestTitle = ({ failure, title }: FindTestCase) =>
+  `${failure?.reason || 'success'} ["${title}"]`;
 
 export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectResponseBody = (
@@ -224,6 +179,8 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           saved_objects: [],
         };
         expect(response.body).to.eql(expected);
+      } else {
+        throw new Error(`Unexpected failure reason: ${failure.reason}`);
       }
     } else if (failure?.statusCode === 400) {
       if (failure.reason === 'bad_request') {
@@ -247,11 +204,8 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       const savedObjectsArray = Array.isArray(savedObjects) ? savedObjects : [savedObjects];
       const authorizedSavedObjects = savedObjectsArray.filter(
         (so) =>
-          !user ||
-          !so.namespaces ||
-          so.namespaces.some(
-            (ns) => user.authorizedAtSpaces.includes(ns) || user.authorizedAtSpaces.includes('*')
-          )
+          !so.expectedNamespaces ||
+          so.expectedNamespaces.some((x) => isUserAuthorizedAtSpace(user, x))
       );
       expect(response.body.page).to.eql(page);
       expect(response.body.per_page).to.eql(perPage);
@@ -261,16 +215,17 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         expect(response.body.total).to.eql(total || authorizedSavedObjects.length);
       }
 
-      authorizedSavedObjects.sort((s1, s2) => (s1.id < s2.id ? -1 : 1));
-      response.body.saved_objects.sort((s1: any, s2: any) => (s1.id < s2.id ? -1 : 1));
+      authorizedSavedObjects.sort(objectComparator);
+      response.body.saved_objects.sort(objectComparator);
 
       for (let i = 0; i < authorizedSavedObjects.length; i++) {
         const object = response.body.saved_objects[i];
-        const { type: expectedType, id: expectedId } = authorizedSavedObjects[i];
-        expect(object.type).to.eql(expectedType);
-        expect(object.id).to.eql(expectedId);
+        const expected = authorizedSavedObjects[i];
+        const expectedNamespaces = getRedactedNamespaces(user, expected.expectedNamespaces);
+        expect(object.type).to.eql(expected.type);
+        expect(object.id).to.eql(expected.id);
         expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-        expect(object.namespaces).to.eql(object.namespaces);
+        expect(object.namespaces).to.eql(expectedNamespaces);
         // don't test attributes, version, or references
       }
     }
