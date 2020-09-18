@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { SAVED_OBJECT_TEST_CASES as CASES } from './saved_object_test_cases';
 import { SPACES } from './spaces';
 import { AUTHENTICATION } from './authentication';
 import { TestCase, TestUser, ExpectResponseBody } from './types';
