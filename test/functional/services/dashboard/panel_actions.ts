@@ -120,9 +120,13 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       log.debug(`replacePanel(${title})`);
       if (title) {
         const panelOptions = await this.getPanelHeading(title);
-        await this.openContextMenuMorePanel(panelOptions);
+        await this.openContextMenu(panelOptions);
       } else {
-        await this.openContextMenuMorePanel();
+        await this.openContextMenu();
+      }
+      const actionExists = await testSubjects.exists(REPLACE_PANEL_DATA_TEST_SUBJ);
+      if (!actionExists) {
+        await this.clickContextMenuMoreItem();
       }
       await testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
