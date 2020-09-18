@@ -69,9 +69,14 @@ export class ExportTypesRegistry {
   }
 }
 
-// TODO: define a 2nd export type registry for "immediate execute" report job types.
-// That type does not need a `CreateJobFn` in the definition. Then remove the below `any`s
+// TODO: Define a 2nd ExportTypeRegistry instance for "immediate execute" report job types only.
+// It should not require a `CreateJobFn` for its ExportTypeDefinitions.
+// Once that is done, the `any` types below can be removed.
 
+/*
+ * @return ExportTypeRegistry: the ExportTypeRegistry instance that should be
+ * used to register async export type definitions
+ */
 export function getExportTypesRegistry(): ExportTypesRegistry {
   const registry = new ExportTypesRegistry();
   type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
