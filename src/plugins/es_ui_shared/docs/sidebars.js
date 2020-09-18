@@ -34,7 +34,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Examples',
-      items: ['form_lib/examples/validation'],
+      items: ['form_lib/examples/validation', 'form_lib/examples/react_to_changes'],
     },
     {
       type: 'category',
