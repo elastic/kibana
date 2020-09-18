@@ -118,11 +118,11 @@ def base(Map params, Closure closure) {
 
 // Worker for ci processes. Extends the base worker and adds GCS artifact upload, error reporting, junit processing
 def ci(Map params, Closure closure) {
-  def config = [ramDisk: true, bootstrapped: true] + params
+  def config = [ramDisk: true, bootstrapped: true, runErrorReporter: true] + params
 
   return base(config) {
     kibanaPipeline.withGcsArtifactUpload(config.name) {
-      kibanaPipeline.withPostBuildReporting {
+      kibanaPipeline.withPostBuildReporting(config) {
         closure()
       }
     }
