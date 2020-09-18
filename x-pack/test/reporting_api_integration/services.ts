@@ -94,7 +94,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async postJobJSON(apiPath: string, jobJSON: object = {}): Promise<string> {
-      log.debug(`ReportingAPI.postJobJSON(${JSON.stringify(jobJSON)})`);
+      log.debug(`ReportingAPI.postJobJSON(${apiPath} / ${JSON.stringify(jobJSON)})`);
       const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON);
       return body.path;
     },
