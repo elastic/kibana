@@ -171,6 +171,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         Object {
           "baseUrl": "/",
           "category": Object {
+            "euiIconType": "managementApp",
             "id": "management",
             "label": "Management",
             "order": 5000,
@@ -1606,6 +1607,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiCollapsibleNavGroup>
               <EuiCollapsibleNavGroup
                 data-test-subj="collapsibleNavGroup-management"
+                iconType="managementApp"
                 initialIsOpen={true}
                 isCollapsible={true}
                 key="management"
@@ -1621,6 +1623,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       gutterSize="m"
                       responsive={false}
                     >
+                      <EuiFlexItem
+                        grow={false}
+                      >
+                        <EuiIcon
+                          size="l"
+                          type="managementApp"
+                        />
+                      </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiTitle
                           size="xxs"
@@ -1686,6 +1696,23 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             <div
                               className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                             >
+                              <EuiFlexItem
+                                grow={false}
+                              >
+                                <div
+                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <EuiIcon
+                                    size="l"
+                                    type="managementApp"
+                                  >
+                                    <div
+                                      data-euiicon-type="managementApp"
+                                      size="l"
+                                    />
+                                  </EuiIcon>
+                                </div>
+                              </EuiFlexItem>
                               <EuiFlexItem>
                                 <div
                                   className="euiFlexItem"

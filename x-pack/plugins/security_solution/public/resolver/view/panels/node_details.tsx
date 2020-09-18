@@ -27,7 +27,7 @@ import {
 } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
 import { ResolverEvent } from '../../../../common/endpoint/types';
-import { useResolverTheme } from '../assets';
+import { useCubeAssets } from '../use_cube_assets';
 import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
@@ -166,13 +166,7 @@ const NodeDetailView = memo(function NodeDetailView({
       },
     ];
   }, [processName, nodesLinkNavProps]);
-  const { cubeAssetsForNode } = useResolverTheme();
-  const { descriptionText } = useMemo(() => {
-    if (!processEvent) {
-      return { descriptionText: '' };
-    }
-    return cubeAssetsForNode(isProcessTerminated, false);
-  }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
+  const { descriptionText } = useCubeAssets(isProcessTerminated, false);
 
   const nodeDetailHref = useSelector((state: ResolverState) =>
     selectors.relativeHref(state)({
