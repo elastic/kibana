@@ -26,7 +26,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { NewsfeedPluginBrowserConfig, FetchResult } from './types';
 import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
-import { getApi } from './lib/api';
+import { getApi, NewsfeedApiEndpoint } from './lib/api';
 
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
@@ -53,22 +53,28 @@ export class NewsfeedPublicPlugin
   }
 
   public start(core: CoreStart) {
-    const api$ = this.fetchNewsfeed(core).pipe(share());
+    const api$ = this.fetchNewsfeed(core, this.config).pipe(share());
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) => this.mount(api$, target),
     });
 
-    return { newsfeed$: api$ };
+    return {
+      createNewsFeed$: (endpoint: NewsfeedApiEndpoint) =>
+        this.fetchNewsfeed(core, { service: { pathTemplate: `/${endpoint}/v{VERSION}.json` } }),
+    };
   }
 
   public stop() {
     this.stop$.next();
   }
 
-  private fetchNewsfeed(core: CoreStart): Rx.Observable<FetchResult | null | void> {
+  private fetchNewsfeed(
+    core: CoreStart,
+    config: NewsfeedPluginBrowserConfig
+  ): Rx.Observable<FetchResult | null | void> {
     const { http } = core;
-    return getApi(http, this.config, this.kibanaVersion).pipe(
+    return getApi(http, config, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       catchError(() => Rx.of(null)) // do not throw error
     );

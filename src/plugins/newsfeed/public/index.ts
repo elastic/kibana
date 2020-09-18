@@ -24,8 +24,15 @@ import {
   NewsfeedPublicPlugin,
 } from './plugin';
 import { FetchResult, NewsfeedItem } from './types';
+import { NewsfeedApiEndpoint } from './lib/api';
 
-export { NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart, FetchResult, NewsfeedItem };
+export {
+  NewsfeedPublicPluginSetup,
+  NewsfeedPublicPluginStart,
+  FetchResult,
+  NewsfeedItem,
+  NewsfeedApiEndpoint,
+};
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new NewsfeedPublicPlugin(initializerContext);

@@ -19,6 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { NewsfeedApiEndpoint } from 'src/plugins/newsfeed/public';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
 import { KibanaOverviewApp } from './components/app';
@@ -29,6 +30,7 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   const { notifications, http } = core;
+  const newsfeed$ = newsfeed.createNewsFeed$(NewsfeedApiEndpoint.KIBANA);
 
   ReactDOM.render(
     <KibanaOverviewApp
@@ -36,7 +38,7 @@ export const renderApp = (
       notifications={notifications}
       http={http}
       navigation={navigation}
-      newsfeed$={newsfeed.newsfeed$}
+      newsfeed$={newsfeed$}
     />,
     element
   );
