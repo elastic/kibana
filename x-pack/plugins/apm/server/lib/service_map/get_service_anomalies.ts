@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { maybe } from '../../../common/utils/maybe';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseReturnType } from '../../../typings/common';
 import {
@@ -53,10 +52,6 @@ export async function getServiceAnomalies({
     };
   }
 
-  const lte = end;
-  // fetch data for at least 30 minutes
-  const gte = Math.min(end - 30 * 60 * 1000, start);
-
   const params = {
     body: {
       size: 0,
@@ -67,7 +62,12 @@ export async function getServiceAnomalies({
             { terms: { job_id: mlJobIds } },
             {
               range: {
-                timestamp: { gte, lte, format: 'epoch_millis' },
+                timestamp: {
+                  // fetch data for at least 30 minutes
+                  gte: Math.min(end - 30 * 60 * 1000, start),
+                  lte: end,
+                  format: 'epoch_millis',
+                },
               },
             },
             {
@@ -143,18 +143,15 @@ function transformResponseToServiceAnomalies(
     response.aggregations?.services.buckets ?? []
   ).reduce(
     (statsByServiceName, { key: serviceName, top_score: topScoreAgg }) => {
-      const mlResult = maybe(topScoreAgg.hits.hits[0])?._source;
-
-      const jobId = mlResult?.job_id;
-      const transactionType = mlResult?.by_field_value;
+      const mlResult = topScoreAgg.hits.hits[0]._source;
 
       return {
         ...statsByServiceName,
         [serviceName]: {
-          transactionType,
-          jobId,
-          actualValue: mlResult?.actual?.[0],
-          anomalyScore: mlResult?.record_score || 0,
+          transactionType: mlResult.by_field_value,
+          jobId: mlResult.job_id,
+          actualValue: mlResult.actual,
+          anomalyScore: mlResult.record_score || 0,
         },
       };
     },
