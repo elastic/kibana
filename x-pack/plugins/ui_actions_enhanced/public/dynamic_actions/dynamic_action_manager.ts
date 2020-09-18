@@ -172,15 +172,7 @@ export class DynamicActionManager {
     this.ui.transitions.startFetching();
     try {
       const events = await this.params.storage.list();
-
-      for (const event of events) {
-        try {
-          this.reviveAction(event);
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error(`Failed to revive action [event.eventId = ${event.eventId}]`);
-        }
-      }
+      for (const event of events) this.reviveAction(event);
 
       this.ui.transitions.finishFetching(events);
     } catch (error) {
