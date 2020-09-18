@@ -42,6 +42,20 @@ export function getSeverity(score?: number) {
 export function getSeverityColor(theme: EuiTheme, severity?: Severity) {
   switch (severity) {
     case Severity.warning:
+      return theme.eui.euiColorVis0;
+    case Severity.minor:
+    case Severity.major:
+      return theme.eui.euiColorVis5;
+    case Severity.critical:
+      return theme.eui.euiColorVis9;
+    default:
+      return;
+  }
+}
+
+export function getSeverityBadgeColor(theme: EuiTheme, severity?: Severity) {
+  switch (severity) {
+    case Severity.warning:
       return theme.eui.euiColorVis0_behindText;
     case Severity.minor:
     case Severity.major:

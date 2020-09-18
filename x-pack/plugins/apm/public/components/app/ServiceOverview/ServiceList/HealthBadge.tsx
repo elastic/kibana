@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import {
-  getSeverityColor,
+  getSeverityBadgeColor,
   getSeverityLabel,
   Severity,
 } from '../../../../../common/anomaly_detection';
@@ -18,7 +18,7 @@ export function HealthBadge({ severity }: { severity?: Severity }) {
   const unknownColor = theme.eui.euiColorLightShade;
 
   return (
-    <EuiBadge color={getSeverityColor(theme, severity) ?? unknownColor}>
+    <EuiBadge color={getSeverityBadgeColor(theme, severity) ?? unknownColor}>
       {getSeverityLabel(severity)}
     </EuiBadge>
   );
