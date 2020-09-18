@@ -75,7 +75,7 @@ describe('xy_visualization', () => {
         'Stacked area'
       );
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
-        'Stacked H. bar'
+        'H. Stacked bar'
       );
     });
   });
