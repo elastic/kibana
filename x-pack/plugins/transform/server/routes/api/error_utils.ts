@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom, { boomify, isBoom } from 'boom';
+import Boom from 'boom';
 
 import { i18n } from '@kbn/i18n';
 
@@ -76,7 +76,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
 }
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
-  const boom = isBoom(error) ? error : boomify(error, { statusCode: error.status });
+  const boom = Boom.isBoom(error) ? error : Boom.boomify(error, { statusCode: error.status });
   return {
     body: boom,
     headers: boom.output.headers,
