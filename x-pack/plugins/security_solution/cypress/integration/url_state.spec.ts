@@ -30,7 +30,7 @@ import { openAllHosts } from '../tasks/hosts/main';
 
 import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
 import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/security_header';
-import { openTimeline } from '../tasks/security_main';
+import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
   addDescriptionToTimeline,
   addNameToTimeline,
@@ -82,7 +82,7 @@ describe('url state', () => {
 
   it('sets the timeline start and end dates from the url when locked to global time', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
-    openTimeline();
+    openTimelineUsingToggle();
 
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
@@ -105,7 +105,7 @@ describe('url state', () => {
     );
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).should('have.attr', 'title', ABSOLUTE_DATE.endTime);
 
-    openTimeline();
+    openTimelineUsingToggle();
 
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
@@ -121,7 +121,7 @@ describe('url state', () => {
 
   it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlUnlinked);
-    openTimeline();
+    openTimelineUsingToggle();
     setTimelineStartDate(ABSOLUTE_DATE.newStartTimeTyped);
     updateTimelineDates();
     setTimelineEndDate(ABSOLUTE_DATE.newEndTimeTyped);
@@ -220,7 +220,7 @@ describe('url state', () => {
 
   it('sets and reads the url state for timeline by id', () => {
     loginAndWaitForPage(HOSTS_URL);
-    openTimeline();
+    openTimelineUsingToggle();
     executeTimelineKQL('host.name: *');
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
