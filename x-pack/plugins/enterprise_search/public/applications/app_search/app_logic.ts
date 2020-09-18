@@ -14,9 +14,9 @@ import { getRoleAbilities } from './utils/role';
 export interface IAppValues {
   hasInitialized: boolean;
   ilmEnabled: boolean;
-  configuredLimits: IConfiguredLimits;
-  account: IAccount;
-  myRole: IRole;
+  configuredLimits: Partial<IConfiguredLimits>;
+  account: Partial<IAccount>;
+  myRole: Partial<IRole>;
 }
 export interface IAppActions {
   initializeAppData(props: IInitialAppData): Required<IInitialAppData>;
@@ -37,7 +37,7 @@ export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
       },
     ],
     account: [
-      {} as IAccount,
+      {},
       {
         initializeAppData: (_, { appSearch: account }) => account,
         setOnboardingComplete: (account) => ({
@@ -47,7 +47,7 @@ export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
       },
     ],
     configuredLimits: [
-      {} as IConfiguredLimits,
+      {},
       {
         initializeAppData: (_, { configuredLimits }) => configuredLimits.appSearch,
       },
