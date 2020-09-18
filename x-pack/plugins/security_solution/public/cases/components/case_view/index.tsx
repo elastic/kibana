@@ -17,7 +17,7 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { Case } from '../../containers/types';
-import { getCaseUrl } from '../../../common/components/link_to';
+import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { HeaderPage } from '../../../common/components/header_page';
 import { EditableTitle } from '../../../common/components/header_page/editable_title';
@@ -26,12 +26,9 @@ import { useGetCase } from '../../containers/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
-import { useBasePath } from '../../../common/lib/kibana';
 import { CaseStatus } from '../case_status';
-import { navTabs } from '../../../app/home/home_navigations';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePushToService } from '../use_push_to_service';
@@ -77,9 +74,9 @@ export interface CaseProps extends Props {
 
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
-    const basePath = window.location.origin + useBasePath();
-    const caseLink = `${basePath}/app/security/cases/${caseId}`;
-    const search = useGetUrlSearch(navTabs.case);
+    const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
+    const allCasesLink = getCaseUrl(search);
+    const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
     const [initLoadingData, setInitLoadingData] = useState(true);
     const {
       caseUserActions,
@@ -267,9 +264,9 @@ export const CaseComponent = React.memo<CaseProps>(
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
-        body: i18n.EMAIL_BODY(caseLink),
+        body: i18n.EMAIL_BODY(caseDetailsLink),
       }),
-      [caseLink, caseData.title]
+      [caseDetailsLink, caseData.title]
     );
 
     useEffect(() => {
@@ -280,12 +277,12 @@ export const CaseComponent = React.memo<CaseProps>(
 
     const backOptions = useMemo(
       () => ({
-        href: getCaseUrl(search),
+        href: allCasesLink,
         text: i18n.BACK_TO_ALL,
         dataTestSubj: 'backToCases',
         pageId: SecurityPageName.case,
       }),
-      [search]
+      [allCasesLink]
     );
 
     return (
