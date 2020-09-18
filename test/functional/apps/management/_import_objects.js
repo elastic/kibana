@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(false);
       });
 
-      it('should import saved objects with index patterns when index patterns already exists - ndjson', async () => {
+      it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson')
@@ -387,7 +387,7 @@ export default function ({ getService, getPageObjects }) {
         expect(isSavedObjectImported).to.be(false);
       });
 
-      it('should import saved objects with index patterns when index patterns already exists - json', async () => {
+      it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')

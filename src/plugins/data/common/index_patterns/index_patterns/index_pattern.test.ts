@@ -22,9 +22,8 @@ import { map, last } from 'lodash';
 import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
-// @ts-ignore
+// @ts-expect-error
 import mockLogStashFields from '../../../../../fixtures/logstash_fields';
-// @ts-ignore
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternField } from '../fields';
 
@@ -168,7 +167,6 @@ describe('IndexPattern', () => {
   describe('add and remove scripted fields', () => {
     test('should append the scripted field', async () => {
       // keep a copy of the current scripted field count
-      // const saveSpy = sinon.spy(indexPattern, 'save');
       const oldCount = indexPattern.getScriptedFields().length;
 
       // add a new scripted field
@@ -186,7 +184,6 @@ describe('IndexPattern', () => {
       );
 
       const scriptedFields = indexPattern.getScriptedFields();
-      // expect(saveSpy.callCount).to.equal(1);
       expect(scriptedFields).toHaveLength(oldCount + 1);
       expect((indexPattern.fields.getByName(scriptedField.name) as IndexPatternField).name).toEqual(
         scriptedField.name
@@ -194,14 +191,12 @@ describe('IndexPattern', () => {
     });
 
     test('should remove scripted field, by name', async () => {
-      // const saveSpy = sinon.spy(indexPattern, 'save');
       const scriptedFields = indexPattern.getScriptedFields();
       const oldCount = scriptedFields.length;
       const scriptedField = last(scriptedFields)!;
 
       await indexPattern.removeScriptedField(scriptedField.name);
 
-      // expect(saveSpy.callCount).to.equal(1);
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
       expect(indexPattern.fields.getByName(scriptedField.name)).toEqual(undefined);
     });
@@ -233,7 +228,6 @@ describe('IndexPattern', () => {
       } as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
       const spec = indexPattern.toSpec();
-      // const restoredPattern = await create(spec);
       const restoredPattern = new IndexPattern({
         spec,
         savedObjectsClient: {} as any,
@@ -251,26 +245,22 @@ describe('IndexPattern', () => {
 
   describe('popularizeField', () => {
     test('should increment the popularity count by default', () => {
-      // const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(async (field) => {
         const oldCount = field.count || 0;
 
         await indexPattern.popularizeField(field.name);
 
-        // expect(saveSpy.callCount).to.equal(i + 1);
         expect(field.count).toEqual(oldCount + 1);
       });
     });
 
     test('should increment the popularity count', () => {
-      // const saveSpy = sinon.stub(indexPattern, 'save');
       indexPattern.fields.forEach(async (field) => {
         const oldCount = field.count || 0;
         const incrementAmount = 4;
 
         await indexPattern.popularizeField(field.name, incrementAmount);
 
-        // expect(saveSpy.callCount).to.equal(i + 1);
         expect(field.count).toEqual(oldCount + incrementAmount);
       });
     });
