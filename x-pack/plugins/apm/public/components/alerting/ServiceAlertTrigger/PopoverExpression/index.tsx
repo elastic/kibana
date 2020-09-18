@@ -15,7 +15,6 @@ interface Props {
 
 export function PopoverExpression(props: Props) {
   const { title, value, children } = props;
-
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   return (

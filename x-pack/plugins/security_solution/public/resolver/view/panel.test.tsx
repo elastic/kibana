@@ -136,6 +136,14 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     });
   });
 
+  it('should show a single analyzed event in the node list', async () => {
+    await expect(
+      simulator().map(
+        () => simulator().testSubject('resolver:node-list:node-link:analyzed-event').length
+      )
+    ).toYieldEqualTo(1);
+  });
+
   it('should have 3 nodes (with icons) in the node list', async () => {
     await expect(
       simulator().map(() => simulator().testSubject('resolver:node-list:node-link:title').length)
