@@ -32,7 +32,7 @@ export const isFileAllowed = (x) => {
   return isJsOrTsOrTsxOrJsx.test(x);
 };
 export const isRejectedDir = (x) =>
-  /node_modules|__tests__|__fixture__|__fixtures__|build/gm.test(x);
+  /node_modules|__tests__|__fixture__|__fixtures__|build\//gm.test(x);
 const isGlobFound = (x) => (xs) => (x === xs[0] ? false : true);
 export const globExpands = (x) => isGlobFound(x)(prokGlob(x));
 export const tryPath = (x) => {
