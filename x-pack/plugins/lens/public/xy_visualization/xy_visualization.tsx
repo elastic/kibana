@@ -15,12 +15,13 @@ import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
-import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
-import chartMixedSVG from '../assets/chart_mixed_xy.svg';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression } from './to_expression';
+import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
+import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
+import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 
-const defaultIcon = chartBarStackedSVG;
+const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -49,29 +50,27 @@ function getDescription(state?: State) {
 
   const visualizationType = getVisualizationType(state);
 
-  if (!state.layers.length) {
-    const preferredType = visualizationType as VisualizationType;
+  if (visualizationType === 'mixed' && isHorizontalChart(state.layers)) {
     return {
-      icon: preferredType.largeIcon || preferredType.icon,
-      label: preferredType.label,
+      icon: LensIconChartBarHorizontal,
+      label: i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
+        defaultMessage: 'Mixed horizontal bar',
+      }),
+    };
+  }
+
+  if (visualizationType === 'mixed') {
+    return {
+      icon: LensIconChartMixedXy,
+      label: i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
+        defaultMessage: 'Mixed XY',
+      }),
     };
   }
 
   return {
-    icon:
-      visualizationType === 'mixed'
-        ? chartMixedSVG
-        : visualizationType.largeIcon || visualizationType.icon,
-    label:
-      visualizationType === 'mixed'
-        ? isHorizontalChart(state.layers)
-          ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-              defaultMessage: 'Mixed horizontal bar',
-            })
-          : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
-              defaultMessage: 'Mixed XY',
-            })
-        : visualizationType.label,
+    icon: visualizationType.icon,
+    label: visualizationType.label,
   };
 }
 
@@ -178,7 +177,7 @@ export const xyVisualization: Visualization<State> = {
           filterOperations: isBucketed,
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
-          required: true,
+          required: !layer.seriesType.includes('percentage'),
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
@@ -231,6 +230,7 @@ export const xyVisualization: Visualization<State> = {
           suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
+          required: layer.seriesType.includes('percentage'),
         },
       ],
     };

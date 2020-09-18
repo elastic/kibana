@@ -13,7 +13,7 @@ import {
   decryptJobHeaders,
   getConditionalHeaders,
   getFullUrls,
-  omitBlacklistedHeaders,
+  omitBlockedHeaders,
 } from '../../common';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { TaskPayloadPNG } from '../types';
@@ -37,7 +37,7 @@ export const runTaskFnFactory: QueuedPngExecutorFactory = function executeJobFac
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
-      map((decryptedHeaders) => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map((decryptedHeaders) => omitBlockedHeaders({ job, decryptedHeaders })),
       map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
       mergeMap((conditionalHeaders) => {
         const urls = getFullUrls({ config, job });

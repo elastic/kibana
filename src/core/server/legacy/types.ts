@@ -24,7 +24,6 @@ import { KibanaRequest, LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from '../plugins';
 import { InternalRenderingServiceSetup } from '../rendering';
-import { SavedObjectsLegacyUiExports } from '../types';
 
 /**
  * @internal
@@ -128,13 +127,13 @@ export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order' |
  * @internal
  * @deprecated
  */
-export type LegacyUiExports = SavedObjectsLegacyUiExports & {
+export interface LegacyUiExports {
   defaultInjectedVarProviders?: VarsProvider[];
   injectedVarsReplacers?: VarsReplacer[];
   navLinkSpecs?: LegacyNavLinkSpec[] | null;
   uiAppSpecs?: Array<LegacyAppSpec | undefined>;
   unknown?: [{ pluginSpec: LegacyPluginSpec; type: unknown }];
-};
+}
 
 /**
  * @public

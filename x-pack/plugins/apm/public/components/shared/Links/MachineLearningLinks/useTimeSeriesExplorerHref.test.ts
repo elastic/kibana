@@ -12,7 +12,7 @@ jest.mock('../../../../hooks/useApmPluginContext', () => ({
   }),
 }));
 
-jest.mock('../../../../hooks/useLocation', () => ({
+jest.mock('react-router-dom', () => ({
   useLocation: () => ({
     search:
       '?rangeFrom=2020-07-29T17:27:29.000Z&rangeTo=2020-07-29T18:45:00.000Z&refreshInterval=10000&refreshPaused=true',

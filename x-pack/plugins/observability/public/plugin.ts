@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
@@ -28,6 +30,8 @@ interface SetupPlugins {
 export type ObservabilityPluginStart = void;
 
 export class Plugin implements PluginClass<ObservabilityPluginSetup, ObservabilityPluginStart> {
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: SetupPlugins) {
@@ -35,7 +39,9 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
       id: 'observability-overview',
       title: 'Overview',
       order: 8000,
+      euiIconType: 'logoObservability',
       appRoute: '/app/observability',
+      updater$: this.appUpdater$,
       category: DEFAULT_APP_CATEGORIES.observability,
 
       mount: async (params: AppMountParameters<unknown>) => {
@@ -78,7 +84,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
       dashboard: { register: registerDataHandler },
     };
   }
-  public start(core: CoreStart) {
-    toggleOverviewLinkInNav(core);
+  public start({ application }: CoreStart) {
+    toggleOverviewLinkInNav(this.appUpdater$, application);
   }
 }

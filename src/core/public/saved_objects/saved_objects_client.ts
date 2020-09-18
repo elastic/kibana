@@ -19,6 +19,7 @@
 
 import { cloneDeep, pick, throttle } from 'lodash';
 import { resolve as resolveUrl } from 'url';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObject,

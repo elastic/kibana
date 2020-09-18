@@ -16,29 +16,17 @@ import {
 } from '../screens/alerts_detection_rules';
 import {
   ABOUT_INVESTIGATION_NOTES,
-  ABOUT_OVERRIDE_FALSE_POSITIVES,
-  ABOUT_OVERRIDE_MITRE,
-  ABOUT_OVERRIDE_NAME_OVERRIDE,
-  ABOUT_OVERRIDE_RISK,
-  ABOUT_OVERRIDE_RISK_OVERRIDE,
-  ABOUT_OVERRIDE_SEVERITY_OVERRIDE,
-  ABOUT_OVERRIDE_TAGS,
-  ABOUT_OVERRIDE_TIMESTAMP_OVERRIDE,
-  ABOUT_OVERRIDE_URLS,
   ABOUT_RULE_DESCRIPTION,
-  ABOUT_SEVERITY,
-  ABOUT_STEP,
-  DEFINITION_CUSTOM_QUERY,
-  DEFINITION_INDEX_PATTERNS,
-  DEFINITION_TIMELINE,
-  DEFINITION_STEP,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
-  SCHEDULE_LOOPBACK,
-  SCHEDULE_RUNS,
-  SCHEDULE_STEP,
+  ABOUT_DETAILS,
+  getDescriptionForTitle,
+  DEFINITION_DETAILS,
+  SCHEDULE_DETAILS,
+  DETAILS_TITLE,
+  DETAILS_DESCRIPTION,
 } from '../screens/rule_details';
 
 import {
@@ -141,56 +129,56 @@ describe('Detection rules, override', () => {
 
     const expectedOverrideSeverities = ['Low', 'Medium', 'High', 'Critical'];
 
-    cy.get(ABOUT_STEP).eq(ABOUT_SEVERITY).invoke('text').should('eql', newOverrideRule.severity);
-    newOverrideRule.severityOverride.forEach((severity, i) => {
-      cy.get(ABOUT_STEP)
-        .eq(ABOUT_OVERRIDE_SEVERITY_OVERRIDE + i)
+    cy.get(ABOUT_DETAILS).within(() => {
+      getDescriptionForTitle('Severity').invoke('text').should('eql', newOverrideRule.severity);
+      getDescriptionForTitle('Risk score').invoke('text').should('eql', newOverrideRule.riskScore);
+      getDescriptionForTitle('Risk score override')
         .invoke('text')
-        .should(
-          'eql',
-          `${severity.sourceField}:${severity.sourceValue}${expectedOverrideSeverities[i]}`
-        );
+        .should('eql', `${newOverrideRule.riskOverride}signal.rule.risk_score`);
+      getDescriptionForTitle('Rule name override')
+        .invoke('text')
+        .should('eql', newOverrideRule.nameOverride);
+      getDescriptionForTitle('Reference URLs').invoke('text').should('eql', expectedUrls);
+      getDescriptionForTitle('False positive examples')
+        .invoke('text')
+        .should('eql', expectedFalsePositives);
+      getDescriptionForTitle('MITRE ATT&CK').invoke('text').should('eql', expectedMitre);
+      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
+      getDescriptionForTitle('Timestamp override')
+        .invoke('text')
+        .should('eql', newOverrideRule.timestampOverride);
+      cy.contains(DETAILS_TITLE, 'Severity override')
+        .invoke('index', DETAILS_TITLE) // get index relative to other titles, not all siblings
+        .then((severityOverrideIndex) => {
+          newOverrideRule.severityOverride.forEach((severity, i) => {
+            cy.get(DETAILS_DESCRIPTION)
+              .eq(severityOverrideIndex + i)
+              .invoke('text')
+              .should(
+                'eql',
+                `${severity.sourceField}:${severity.sourceValue}${expectedOverrideSeverities[i]}`
+              );
+          });
+        });
     });
-
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_OVERRIDE_RISK)
-      .invoke('text')
-      .should('eql', newOverrideRule.riskScore);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_OVERRIDE_RISK_OVERRIDE)
-      .invoke('text')
-      .should('eql', `${newOverrideRule.riskOverride}signal.rule.risk_score`);
-    cy.get(ABOUT_STEP).eq(ABOUT_OVERRIDE_URLS).invoke('text').should('eql', expectedUrls);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_OVERRIDE_FALSE_POSITIVES)
-      .invoke('text')
-      .should('eql', expectedFalsePositives);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_OVERRIDE_NAME_OVERRIDE)
-      .invoke('text')
-      .should('eql', newOverrideRule.nameOverride);
-    cy.get(ABOUT_STEP).eq(ABOUT_OVERRIDE_MITRE).invoke('text').should('eql', expectedMitre);
-    cy.get(ABOUT_STEP)
-      .eq(ABOUT_OVERRIDE_TIMESTAMP_OVERRIDE)
-      .invoke('text')
-      .should('eql', newOverrideRule.timestampOverride);
-    cy.get(ABOUT_STEP).eq(ABOUT_OVERRIDE_TAGS).invoke('text').should('eql', expectedTags);
 
     cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', INVESTIGATION_NOTES_MARKDOWN);
 
-    cy.get(DEFINITION_INDEX_PATTERNS).then((patterns) => {
-      cy.wrap(patterns).each((pattern, index) => {
-        cy.wrap(pattern).invoke('text').should('eql', expectedIndexPatterns[index]);
-      });
+    cy.get(DEFINITION_DETAILS).within(() => {
+      getDescriptionForTitle('Index patterns')
+        .invoke('text')
+        .should('eql', expectedIndexPatterns.join(''));
+      getDescriptionForTitle('Custom query')
+        .invoke('text')
+        .should('eql', `${newOverrideRule.customQuery} `);
+      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Query');
+      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
     });
-    cy.get(DEFINITION_STEP)
-      .eq(DEFINITION_CUSTOM_QUERY)
-      .invoke('text')
-      .should('eql', `${newOverrideRule.customQuery} `);
-    cy.get(DEFINITION_STEP).eq(DEFINITION_TIMELINE).invoke('text').should('eql', 'None');
 
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_RUNS).invoke('text').should('eql', '5m');
-    cy.get(SCHEDULE_STEP).eq(SCHEDULE_LOOPBACK).invoke('text').should('eql', '1m');
+    cy.get(SCHEDULE_DETAILS).within(() => {
+      getDescriptionForTitle('Runs every').invoke('text').should('eql', '5m');
+      getDescriptionForTitle('Additional look-back time').invoke('text').should('eql', '1m');
+    });
   });
 });

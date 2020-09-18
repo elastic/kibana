@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { EuiPanel } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -22,16 +21,11 @@ const tickFormatY = (y?: number) => {
 };
 
 export function ErroneousTransactionsRateChart() {
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const syncedChartsProps = useChartsSync();
 
-  const {
-    serviceName,
-    start,
-    end,
-    transactionType,
-    transactionName,
-  } = urlParams;
+  const { start, end, transactionType, transactionName } = urlParams;
 
   const { data } = useFetcher(() => {
     if (serviceName && start && end) {
@@ -76,6 +70,7 @@ export function ErroneousTransactionsRateChart() {
       <CustomPlot
         {...syncedChartsProps}
         noHits={data?.noHits}
+        yMax={1}
         series={[
           {
             color: theme.euiColorVis7,

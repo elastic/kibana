@@ -20,7 +20,7 @@ import {
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
-import { PopoverEditor } from './popover_editor';
+import { DimensionEditor } from './dimension_editor';
 import { changeColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -265,7 +265,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
     props.state.layers[layerId].columns[props.columnId] || null;
 
   return (
-    <PopoverEditor
+    <DimensionEditor
       {...props}
       currentIndexPattern={currentIndexPattern}
       selectedColumn={selectedColumn}

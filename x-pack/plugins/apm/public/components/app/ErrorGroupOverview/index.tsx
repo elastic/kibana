@@ -22,13 +22,17 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
-function ErrorGroupOverview() {
+interface ErrorGroupOverviewProps {
+  serviceName: string;
+}
+
+function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { serviceName, start, end, sortField, sortDirection } = urlParams;
+  const { start, end, sortField, sortDirection } = urlParams;
 
   const { data: errorDistributionData } = useFetcher(() => {
-    if (serviceName && start && end) {
+    if (start && end) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/errors/distribution',
         params: {
@@ -48,7 +52,7 @@ function ErrorGroupOverview() {
   const { data: errorGroupListData } = useFetcher(() => {
     const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
-    if (serviceName && start && end) {
+    if (start && end) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/errors',
         params: {
@@ -117,7 +121,10 @@ function ErrorGroupOverview() {
             </EuiTitle>
             <EuiSpacer size="s" />
 
-            <ErrorGroupList items={errorGroupListData} />
+            <ErrorGroupList
+              items={errorGroupListData}
+              serviceName={serviceName}
+            />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

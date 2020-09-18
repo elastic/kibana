@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { config as pathConfig } from '@kbn/utils';
+import { mapToObject } from '@kbn/std';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
 import { AuditTrailService } from './audit_trail';
@@ -31,7 +33,7 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
-import { EnvironmentService } from './environment';
+import { EnvironmentService, config as pidConfig } from './environment';
 import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
@@ -39,12 +41,10 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
-import { config as pathConfig } from './path';
 import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
-import { mapToObject } from '../utils';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
@@ -121,10 +121,13 @@ export class Server {
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-      // 1) Can access context from any NP plugin
+      // 1) Can access context from any KP plugin
       // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
       //    New Platform plugins.
-      pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
+      pluginDependencies: new Map([
+        ...pluginTree.asOpaqueIds,
+        [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
+      ]),
     });
 
     const auditTrailSetup = this.auditTrail.setup();
@@ -142,7 +145,6 @@ export class Server {
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
-      legacyPlugins,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
@@ -150,11 +152,15 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
-    await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
+      pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
+      environment: environmentSetup,
+      http: httpSetup,
+      metrics: metricsSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -186,6 +192,7 @@ export class Server {
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
+      metrics: metricsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -307,6 +314,7 @@ export class Server {
       uiSettingsConfig,
       opsConfig,
       statusConfig,
+      pidConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
