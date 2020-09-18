@@ -1,5 +1,5 @@
-[[url-drilldown]]
-== URL drilldown
+[[url-drilldown-plugin]]
+== URL drilldown plugin
 
 NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to `ui_actions_enhanced` plugin.
 
