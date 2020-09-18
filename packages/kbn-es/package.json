@@ -14,7 +14,7 @@
     "getopts": "^2.0.6",
     "glob": "^7.1.2",
     "mkdirp": "^0.5.1",
-    "node-fetch": "^2.0.0",
+    "node-fetch": "^2.6.1",
     "simple-git": "^1.91.0",
     "tar-fs": "^2.1.0",
     "tree-kill": "^1.1.0",
