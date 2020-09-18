@@ -16,7 +16,7 @@ interface ConnectorSelectorProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
-  defaultValue?: string;
+  defaultValue?: ActionConnector;
   disabled: boolean;
   isLoading: boolean;
 }
@@ -38,9 +38,9 @@ export const ConnectorSelector = ({
 
   const handleContentChange = useCallback(
     (newConnector: string) => {
-      field.setValue(connectors.find((c) => c.id === newConnector) ?? null);
+      field.setValue(newConnector);
     },
-    [field, connectors]
+    [field]
   );
 
   return (
@@ -56,7 +56,7 @@ export const ConnectorSelector = ({
     >
       <ConnectorsDropdown
         connectors={connectors}
-        selectedConnector={(field.value as ActionConnector)?.id ?? 'none'}
+        selectedConnector={(field.value as string) ?? 'none'}
         disabled={disabled}
         isLoading={isLoading}
         onChange={handleContentChange}

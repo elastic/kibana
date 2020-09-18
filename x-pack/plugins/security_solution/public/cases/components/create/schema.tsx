@@ -18,7 +18,7 @@ export const schemaTags = {
   labelAppend: OptionalFieldLabel,
 };
 
-export type FormProps = Omit<CasePostRequest, 'connector'> & { connector: ActionConnector | null };
+export type FormProps = Omit<CasePostRequest, 'connector'> & { connectorId: string };
 
 export const schema: FormSchema<FormProps> = {
   title: {
@@ -39,9 +39,9 @@ export const schema: FormSchema<FormProps> = {
     ],
   },
   tags: schemaTags,
-  connector: {
+  connectorId: {
     type: FIELD_TYPES.SUPER_SELECT,
     label: i18n.CONNECTORS,
-    defaultValue: null,
+    defaultValue: 'none',
   },
 };

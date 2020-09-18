@@ -19,7 +19,7 @@ import { Case } from './types';
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector_id' | 'description' | 'status' | 'tags' | 'title'
+  'connector' | 'description' | 'status' | 'tags' | 'title'
 >;
 
 interface NewCaseState {

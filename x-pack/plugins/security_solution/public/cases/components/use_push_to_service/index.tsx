@@ -16,7 +16,7 @@ import { getConfigureCasesUrl, useFormatUrl } from '../../../common/components/l
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
-import { Connector } from '../../../../../case/common/api/cases';
+import { ActionConnector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { LinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
@@ -28,7 +28,7 @@ export interface UsePushToService {
   caseConnectorId: string;
   caseConnectorName: string;
   caseServices: CaseServices;
-  connectors: Connector[];
+  connectors: ActionConnector[];
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
   isValidConnector: boolean;

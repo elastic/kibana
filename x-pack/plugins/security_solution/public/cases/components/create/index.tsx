@@ -30,8 +30,13 @@ import { SettingFieldsForm } from '../settings/fields_form';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { ActionConnector } from '../../containers/configure/types';
-import { normalizeCaseConnector, normalizeActionConnector } from '../configure_cases/utils';
+import {
+  normalizeCaseConnector,
+  normalizeActionConnector,
+  getConnectorById,
+  getNoneConnector,
+} from '../configure_cases/utils';
+import { ActionConnector } from '../../containers/types';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -57,7 +62,7 @@ const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
-  connector: null,
+  connectorId: 'none',
 };
 
 export const Create = React.memo(() => {
@@ -67,6 +72,7 @@ export const Create = React.memo(() => {
   const { connector: configureConnector, loading: isLoadingCaseConfigure } = useCaseConfigure();
   const { tags: tagOptions } = useGetTags();
 
+  const [connector, setConnector] = useState<ActionConnector | null>(null);
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
       label,
@@ -82,18 +88,25 @@ export const Create = React.memo(() => {
   });
 
   const { submit, setFieldValue } = form;
-  const [{ connector, tags, description }] = useFormData<{
-    connector: ActionConnector;
+  const [{ connectorId, tags, description }] = useFormData<{
+    connectorId: string;
     tags: string[];
     description: string;
   }>({
     form,
-    watch: ['connector', 'tags', 'description'],
+    watch: ['connectorId', 'tags', 'description'],
   });
 
   useEffect(() => {
+    setConnector(getConnectorById(connectorId, connectors) ?? null);
+  }, [connectors, connectorId]);
+
+  useEffect(() => {
     if (!isLoadingCaseConfigure) {
-      setFieldValue('connector', normalizeCaseConnector(connectors, configureConnector));
+      setFieldValue(
+        'connectorId',
+        normalizeCaseConnector(connectors, configureConnector)?.id ?? 'none'
+      );
     }
   }, [connectors, configureConnector, isLoadingCaseConfigure, setFieldValue]);
 
@@ -143,12 +156,16 @@ export const Create = React.memo(() => {
   const onSubmit = useCallback(async () => {
     const { isValid, data } = await submit();
     if (isValid) {
+      const { connectorId: dataConnectorId, ...dataWithoutConnectorId } = data;
+      const caseConnector = getConnectorById(dataConnectorId, connectors);
+      const connectorToUpdate = caseConnector
+        ? normalizeActionConnector(caseConnector)
+        : getNoneConnector();
+
       // `postCase`'s type is incorrect, it actually returns a promise
-      const caseConnector =
-        data.connector != null ? { ...normalizeActionConnector(data.connector), fields } : null;
-      await postCase({ ...data, connector: caseConnector });
+      await postCase({ ...dataWithoutConnectorId, connector: { ...connectorToUpdate, fields } });
     }
-  }, [submit, postCase, fields]);
+  }, [submit, postCase, fields, connectors]);
 
   const handleSetIsCancel = useCallback(() => {
     history.push('/');
@@ -192,7 +209,7 @@ export const Create = React.memo(() => {
         </Container>
         <Container>
           <UseField
-            path="connector"
+            path="connectorId"
             component={ConnectorSelector}
             componentProps={{
               connectors,
@@ -200,7 +217,6 @@ export const Create = React.memo(() => {
               idAria: 'caseConnectors',
               isLoading,
               disabled: isLoadingConnectors,
-              defaultValue: null,
             }}
           />
         </Container>

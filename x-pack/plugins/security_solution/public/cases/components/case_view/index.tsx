@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { Case } from '../../containers/types';
+import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -35,6 +35,11 @@ import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { SecurityPageName } from '../../../app/types';
+import {
+  getConnectorById,
+  normalizeActionConnector,
+  getNoneConnector,
+} from '../configure_cases/utils';
 
 interface Props {
   caseId: string;
@@ -78,6 +83,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const allCasesLink = getCaseUrl(search);
     const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
     const [initLoadingData, setInitLoadingData] = useState(true);
+
     const {
       caseUserActions,
       fetchCaseUserActions,
@@ -85,7 +91,8 @@ export const CaseComponent = React.memo<CaseProps>(
       hasDataToPush,
       isLoading: isLoadingUserActions,
       participants,
-    } = useGetCaseUserActions(caseId, caseData.connectorId);
+    } = useGetCaseUserActions(caseId, caseData.connector.id);
+
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
     });
@@ -110,13 +117,13 @@ export const CaseComponent = React.memo<CaseProps>(
               });
             }
             break;
-          case 'connectorId':
-            const connectorId = getTypedPayload<string>(value);
-            if (connectorId.length > 0) {
+          case 'connector':
+            const connector = getTypedPayload<CaseConnector>(value);
+            if (connector != null) {
               updateCaseProperty({
                 fetchCaseUserActions,
-                updateKey: 'connector_id',
-                updateValue: connectorId,
+                updateKey: 'connector',
+                updateValue: connector,
                 updateCase: handleUpdateNewCase,
                 version: caseData.version,
                 onSuccess,
@@ -169,6 +176,7 @@ export const CaseComponent = React.memo<CaseProps>(
       },
       [fetchCaseUserActions, updateCaseProperty, updateCase, caseData]
     );
+
     const handleUpdateCase = useCallback(
       (newCase: Case) => {
         updateCase(newCase);
@@ -180,20 +188,20 @@ export const CaseComponent = React.memo<CaseProps>(
     const { loading: isLoadingConnectors, connectors } = useConnectors();
 
     const [caseConnectorName, isValidConnector] = useMemo(() => {
-      const connector = connectors.find((c) => c.id === caseData.connectorId);
+      const connector = connectors.find((c) => c.id === caseData.connector.id);
       return [connector?.name ?? 'none', !!connector];
-    }, [connectors, caseData.connectorId]);
+    }, [connectors, caseData.connector]);
 
     const currentExternalIncident = useMemo(
       () =>
-        caseServices != null && caseServices[caseData.connectorId] != null
-          ? caseServices[caseData.connectorId]
+        caseServices != null && caseServices[caseData.connector.id] != null
+          ? caseServices[caseData.connector.id]
           : null,
-      [caseServices, caseData.connectorId]
+      [caseServices, caseData.connector]
     );
 
     const { pushButton, pushCallouts } = usePushToService({
-      caseConnectorId: caseData.connectorId,
+      caseConnectorId: caseData.connector.id,
       caseConnectorName,
       caseServices,
       caseId: caseData.id,
@@ -205,22 +213,31 @@ export const CaseComponent = React.memo<CaseProps>(
     });
 
     const onSubmitConnector = useCallback(
-      (connectorId, onSuccess, onError) =>
+      (connectorId, onSuccess, onError) => {
+        const connector = getConnectorById(connectorId, connectors);
+        const connectorToUpdate = connector
+          ? normalizeActionConnector(connector)
+          : getNoneConnector();
+
         onUpdateField({
-          key: 'connectorId',
-          value: connectorId,
+          key: 'connector',
+          value: { ...connectorToUpdate, fields: {} },
           onSuccess,
           onError,
-        }),
-      [onUpdateField]
+        });
+      },
+      [onUpdateField, connectors]
     );
+
     const onSubmitTags = useCallback((newTags) => onUpdateField({ key: 'tags', value: newTags }), [
       onUpdateField,
     ]);
+
     const onSubmitTitle = useCallback(
       (newTitle) => onUpdateField({ key: 'title', value: newTitle }),
       [onUpdateField]
     );
+
     const toggleStatusCase = useCallback(
       (e) =>
         onUpdateField({
@@ -229,6 +246,7 @@ export const CaseComponent = React.memo<CaseProps>(
         }),
       [onUpdateField]
     );
+
     const handleRefresh = useCallback(() => {
       fetchCaseUserActions(caseData.id);
       fetchCase();
@@ -261,6 +279,7 @@ export const CaseComponent = React.memo<CaseProps>(
             },
       [caseData.closedAt, caseData.createdAt, caseData.status]
     );
+
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
@@ -379,7 +398,7 @@ export const CaseComponent = React.memo<CaseProps>(
                   isLoading={isLoadingConnectors}
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
-                  selectedConnector={caseData.connectorId}
+                  selectedConnector={caseData.connector.id}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
