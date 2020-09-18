@@ -15,6 +15,8 @@ import {
 } from './schemas/datafeeds_schema';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 
+import { Datafeed, DatafeedStats } from '../../common/types/anomaly_detection_jobs';
+
 /**
  * Routes for datafeed service
  */
@@ -34,12 +36,17 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetDatafeeds'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobsInSpaces }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getDatafeeds();
+        const { body } = await client.asInternalUser.ml.getDatafeeds<{ datafeeds: Datafeed[] }>();
+        const datafeeds = await jobsInSpaces.filterDatafeedsForSpace<Datafeed>(
+          'anomaly-detector',
+          body.datafeeds,
+          'datafeed_id'
+        );
 
         return response.ok({
-          body,
+          body: { datafeeds },
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -95,12 +102,19 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetDatafeeds'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobsInSpaces }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getDatafeedStats();
+        const { body } = await client.asInternalUser.ml.getDatafeedStats<{
+          datafeeds: DatafeedStats[];
+        }>();
+        const datafeeds = await jobsInSpaces.filterDatafeedsForSpace<DatafeedStats>(
+          'anomaly-detector',
+          body.datafeeds,
+          'datafeed_id'
+        );
 
         return response.ok({
-          body,
+          body: { datafeeds },
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -164,7 +178,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
       try {
         const datafeedId = request.params.datafeedId;
         const { body } = await client.asInternalUser.ml.putDatafeed(
@@ -174,6 +188,13 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
           },
           getAuthorizationHeader(request)
         );
+
+        await jobsInSpaces.addDatafeed(datafeedId, request.body.job_id);
+
+        // const jobs = await context.core.savedObjects.client.find({
+        //   type: 'ml-job',
+        // });
+        // console.log(jobs.saved_objects.map((o) => o.attributes));
 
         return response.ok({
           body,

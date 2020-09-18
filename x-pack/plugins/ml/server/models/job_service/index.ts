@@ -11,11 +11,12 @@ import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
 import { modelSnapshotProvider } from './model_snapshots';
+import { JobsInSpaces } from '../../saved_objects';
 
-export function jobServiceProvider(client: IScopedClusterClient) {
+export function jobServiceProvider(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces) {
   return {
     ...datafeedsProvider(client),
-    ...jobsProvider(client),
+    ...jobsProvider(client, jobsInSpaces),
     ...groupsProvider(client),
     ...newJobCapsProvider(client),
     ...newJobChartsProvider(client),

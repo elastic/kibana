@@ -76,9 +76,15 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, context, response }) => {
       try {
         const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({ size: 1000 });
+        // const jobs = await context.core.savedObjects.client.find({
+        //   type: 'ml-job',
+        //   search: 'data-frame-analytics',
+        //   searchFields: ['type'],
+        // });
+        // console.log(jobs.saved_objects.map((o) => o.attributes));
         return response.ok({
           body,
         });

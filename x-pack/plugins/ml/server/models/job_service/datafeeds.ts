@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import { JobsInSpaces } from '../../saved_objects';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];
@@ -26,7 +27,10 @@ interface Results {
   };
 }
 
-export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
+export function datafeedsProvider(
+  { asInternalUser }: IScopedClusterClient,
+  jobsInSpaces: JobsInSpaces
+) {
   async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
     const jobIds = await getJobIdsByDatafeedId();
     const doStartsCalled = datafeedIds.reduce((acc, cur) => {
@@ -139,9 +143,16 @@ export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
   }
 
   async function getDatafeedIdsByJobId() {
-    const {
+    let {
       body: { datafeeds },
     } = await asInternalUser.ml.getDatafeeds<MlDatafeedsResponse>();
+
+    datafeeds = await jobsInSpaces.filterJobsForSpace<Datafeed>(
+      'anomaly-detector',
+      datafeeds,
+      'job_id'
+    );
+
     return datafeeds.reduce((acc, cur) => {
       acc[cur.job_id] = cur.datafeed_id;
       return acc;
@@ -152,7 +163,14 @@ export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
     const {
       body: { datafeeds },
     } = await asInternalUser.ml.getDatafeeds<MlDatafeedsResponse>();
-    return datafeeds.reduce((acc, cur) => {
+
+    const filteredDatafeeds = await jobsInSpaces.filterJobsForSpace<Datafeed>(
+      'anomaly-detector',
+      datafeeds,
+      'job_id'
+    );
+
+    return filteredDatafeeds.reduce((acc, cur) => {
       acc[cur.datafeed_id] = cur.job_id;
       return acc;
     }, {} as { [id: string]: string });

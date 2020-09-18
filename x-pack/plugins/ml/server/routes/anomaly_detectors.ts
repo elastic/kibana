@@ -22,6 +22,8 @@ import {
   updateModelSnapshotSchema,
 } from './schemas/anomaly_detectors_schema';
 
+import { Job, JobStats } from '../../common/types/anomaly_detection_jobs';
+
 /**
  * Routes for the anomaly detectors
  */
@@ -44,11 +46,17 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ response, client }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ response, client, jobsInSpaces }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getJobs();
+        const { body } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
+        const jobs = await jobsInSpaces.filterJobsForSpace<Job>(
+          'anomaly-detector',
+          body.jobs,
+          'job_id'
+        );
+
         return response.ok({
-          body,
+          body: { jobs },
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -106,11 +114,16 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response, jobsInSpaces }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getJobStats();
+        const { body } = await client.asInternalUser.ml.getJobStats<{ jobs: JobStats[] }>();
+        const jobs = await jobsInSpaces.filterJobsForSpace<JobStats>(
+          'anomaly-detector',
+          body.jobs,
+          'job_id'
+        );
         return response.ok({
-          body,
+          body: { jobs },
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -173,13 +186,21 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, jobsInSpaces }) => {
       try {
         const { jobId } = request.params;
         const { body } = await client.asInternalUser.ml.putJob({
           job_id: jobId,
           body: request.body,
         });
+
+        await jobsInSpaces.createAnomalyDetectionJob(jobId);
+
+        // const jobs = await context.core.savedObjects.client.find({
+        //   type: 'ml-job',
+        // });
+        // console.log(jobs.saved_objects.map((o) => o.attributes));
+
         return response.ok({
           body,
         });

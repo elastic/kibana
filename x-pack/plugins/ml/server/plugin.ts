@@ -47,6 +47,7 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { inferenceRoutes } from './routes/inference';
+import { setupSavedObjects } from './saved_objects';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -113,6 +114,8 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
+
+    setupSavedObjects(coreSetup.savedObjects);
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),

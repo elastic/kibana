@@ -11,6 +11,7 @@ import {
   RequestHandler,
 } from 'kibana/server';
 
+import { filterJobIdsFactory } from '../../saved_objects/filter';
 import { MlLicense } from '../../../common/license';
 
 type Handler = (handlerParams: {
@@ -18,6 +19,7 @@ type Handler = (handlerParams: {
   request: KibanaRequest<any, any, any, any>;
   response: KibanaResponseFactory;
   context: RequestHandlerContext;
+  jobsInSpaces: ReturnType<typeof filterJobIdsFactory>;
 }) => ReturnType<RequestHandler>;
 
 export class MlServerLicense extends MlLicense {
@@ -39,11 +41,14 @@ function guard(check: () => boolean, handler: Handler) {
       return response.forbidden();
     }
 
+    const jobsInSpaces = filterJobIdsFactory(context.core.savedObjects.client);
+
     return handler({
       client: context.core.elasticsearch.client,
       request,
       response,
       context,
+      jobsInSpaces,
     });
   };
 }

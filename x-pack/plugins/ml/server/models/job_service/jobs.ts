@@ -30,6 +30,8 @@ import {
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
+import { JobsInSpaces } from '../../saved_objects';
+
 export interface MlJobsResponse {
   jobs: Job[];
   count: number;
@@ -47,10 +49,10 @@ interface Results {
   };
 }
 
-export function jobsProvider(client: IScopedClusterClient) {
+export function jobsProvider(client: IScopedClusterClient, jobsInSpaces: JobsInSpaces) {
   const { asInternalUser } = client;
 
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(client);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(client, jobsInSpaces);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(client);
   const calMngr = new CalendarManager(client);
@@ -100,6 +102,7 @@ export function jobsProvider(client: IScopedClusterClient) {
     const results: Results = {};
     for (const jobId of jobIds) {
       try {
+        await jobsInSpaces.jobExists('anomaly-detector', jobId);
         await asInternalUser.ml.closeJob({ job_id: jobId });
         results[jobId] = { closed: true };
       } catch (error) {
@@ -139,6 +142,7 @@ export function jobsProvider(client: IScopedClusterClient) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
+    jobsInSpaces.jobExists('anomaly-detector', jobId);
     const { body } = await asInternalUser.ml.stopDatafeed({ datafeed_id: datafeedId, force: true });
     if (body.stopped !== true) {
       return { success: false };
@@ -377,7 +381,11 @@ export function jobsProvider(client: IScopedClusterClient) {
         jobs.push(tempJob);
       });
     }
-    return jobs;
+    return jobsInSpaces.filterJobsForSpace<CombinedJobWithStats>(
+      'anomaly-detector',
+      jobs,
+      'job_id'
+    );
   }
 
   async function deletingJobTasks() {
@@ -395,9 +403,12 @@ export function jobsProvider(client: IScopedClusterClient) {
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
-      const {
+      let {
         body: { jobs },
       } = await asInternalUser.ml.getJobs<MlJobsResponse>();
+
+      jobs = await jobsInSpaces.filterJobsForSpace<Job>('anomaly-detector', jobs, 'job_id');
+
       jobIds.push(...jobs.filter((j) => j.deleting === true).map((j) => j.job_id));
     }
     return { jobIds };
