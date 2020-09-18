@@ -62,7 +62,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should use formats from non-default spaces', async () => {
-        setSpaceConfig('non_default_space', { 'csv:separator': ';', 'dateFormat:tz': 'US/Alaska' });
+        setSpaceConfig('non_default_space', {
+          'csv:separator': ';',
+          'csv:quoteValues': false,
+          'dateFormat:tz': 'US/Alaska',
+        });
         const path = await reportingAPI.postJobJSON(
           `/s/non_default_space/api/reporting/generate/csv`,
           {
@@ -71,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         const csv = await getCompleted$(path).toPromise();
         expect(csv).to.match(
-          /^"order_date";category;"customer_first_name";"customer_full_name";"total_quantity";"total_unique_products";"taxless_total_price";"taxful_total_price";currency\n"Jul 11, 2019 @ 16:00:00.000";/
+          /^order_date;category;customer_first_name;customer_full_name;total_quantity;total_unique_products;taxless_total_price;taxful_total_price;currency\nJul 11, 2019 @ 16:00:00.000;/
         );
       });
 
