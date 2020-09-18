@@ -14,7 +14,6 @@ import {
   IndexedProcessNode,
   AABB,
   VisibleEntites,
-  SectionData,
   TreeFetcherParameters,
 } from '../../types';
 import {
@@ -32,14 +31,11 @@ import {
   ResolverNodeStats,
   ResolverRelatedEvents,
   SafeResolverEvent,
-  EndpointEvent,
-  LegacyEndpointEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import * as vector2 from '../../models/vector2';
-import { formatDate } from '../../view/panels/panel_content_utilities';
 
 /**
  * If there is currently a request.

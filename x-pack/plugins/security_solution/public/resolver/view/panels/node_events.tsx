@@ -59,12 +59,12 @@ const EventCountsForProcess = memo(function ({
   relatedStats: ResolverNodeStats;
 }) {
   interface EventCountsTableView {
-    name: string;
+    eventType: string;
     count: number;
   }
 
-  const processName = processEvent && event.processName(processEvent);
-  const processEntityId = event.entityId(processEvent);
+  const nodeName = processEvent && event.processName(processEvent);
+  const nodeID = event.entityId(processEvent);
 
   const eventLinkNavProps = useLinkProps({
     panelView: 'nodes',
@@ -72,12 +72,12 @@ const EventCountsForProcess = memo(function ({
 
   const processDetailNavProps = useLinkProps({
     panelView: 'nodeDetail',
-    panelParameters: { nodeID: processEntityId },
+    panelParameters: { nodeID },
   });
 
   const nodeDetailNavProps = useLinkProps({
     panelView: 'nodeEvents',
-    panelParameters: { nodeID: processEntityId },
+    panelParameters: { nodeID },
   });
   const crumbs = useMemo(() => {
     return [
@@ -91,7 +91,7 @@ const EventCountsForProcess = memo(function ({
         ...eventLinkNavProps,
       },
       {
-        text: processName,
+        text: nodeName,
         ...processDetailNavProps,
       },
       {
@@ -105,22 +105,18 @@ const EventCountsForProcess = memo(function ({
         ...nodeDetailNavProps,
       },
     ];
-  }, [relatedStats, processName, eventLinkNavProps, nodeDetailNavProps, processDetailNavProps]);
+  }, [relatedStats, nodeName, eventLinkNavProps, nodeDetailNavProps, processDetailNavProps]);
+
   const rows = useMemo(() => {
     return Object.entries(relatedStats.events.byCategory).map(
       ([eventType, count]): EventCountsTableView => {
         return {
-          name: eventType,
+          eventType,
           count,
         };
       }
     );
-  }, [relatedStats]);
-
-  const eventDetailNavProps = useLinkProps({
-    panelView: 'eventDetail',
-    panelParameters: { nodeID: processEntityId, eventType: name, eventID: processEntityId },
-  });
+  }, [relatedStats.events.byCategory]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<EventCountsTableView>>>(
     () => [
@@ -133,18 +129,22 @@ const EventCountsForProcess = memo(function ({
         sortable: true,
       },
       {
-        field: 'name',
+        field: 'eventType',
         name: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.table.row.eventType', {
           defaultMessage: 'Event Type',
         }),
         width: '80%',
         sortable: true,
-        render(name: string) {
-          return <EuiButtonEmpty {...eventDetailNavProps}>{name}</EuiButtonEmpty>;
+        render(eventType: string) {
+          return (
+            <NodeEventsLink nodeID={nodeID} eventType={eventType}>
+              {eventType}
+            </NodeEventsLink>
+          );
         },
       },
     ],
-    [eventDetailNavProps]
+    [nodeID]
   );
   return (
     <>
@@ -154,3 +154,22 @@ const EventCountsForProcess = memo(function ({
     </>
   );
 });
+
+function NodeEventsLink({
+  nodeID,
+  eventType,
+  children,
+}: {
+  nodeID: string;
+  eventType: string;
+  children: React.ReactNode;
+}) {
+  const props = useLinkProps({
+    panelView: 'nodeEventsOfType',
+    panelParameters: {
+      nodeID,
+      eventType,
+    },
+  });
+  return <EuiButtonEmpty {...props}>{children}</EuiButtonEmpty>;
+}
