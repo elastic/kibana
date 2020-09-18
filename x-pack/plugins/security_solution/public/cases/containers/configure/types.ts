@@ -14,6 +14,7 @@ import {
   CasesConfigure,
   ActionConnector,
   ConfigureCaseConnector,
+  CaseConnector,
 } from '../../../../../case/common/api';
 
 export {
@@ -24,6 +25,7 @@ export {
   ThirdPartyField,
   ActionConnector,
   ConfigureCaseConnector,
+  CaseConnector,
 };
 
 export interface CasesConfigurationMapping {
