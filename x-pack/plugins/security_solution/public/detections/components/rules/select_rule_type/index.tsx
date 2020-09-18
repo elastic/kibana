@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
@@ -17,7 +18,7 @@ import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import EqlSearchIcon from './eql_search_icon.svg';
 
 interface SelectRuleTypeProps {
   describedByIds?: string[];
@@ -133,7 +134,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             data-test-subj="eqlRuleType"
             title={i18n.EQL_TYPE_TITLE}
             description={i18n.EQL_TYPE_DESCRIPTION}
-            icon={<EuiIcon size="l" type="bullseye" />}
+            icon={<EuiIcon size="l" type={EqlSearchIcon} />}
             isDisabled={eqlSelectableConfig.isDisabled && !eqlSelectableConfig.isSelected}
             selectable={eqlSelectableConfig}
           />
