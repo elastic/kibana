@@ -21,13 +21,13 @@ import * as i18n from '../../translations';
 import { Form, UseField, useForm } from '../../../shared_imports';
 import { schema } from './schema';
 import { ConnectorSelector } from '../connector_selector/form';
-import { Connector } from '../../../../../case/common/api/cases';
+import { ActionConnector } from '../../../../../case/common/api/cases';
 
 interface EditConnectorProps {
-  connectors: Connector[];
+  connectors: ActionConnector[];
   disabled?: boolean;
   isLoading: boolean;
-  onSubmit: (a: string[], onSuccess: () => void, onError: () => void) => void;
+  onSubmit: (connectorId: string, onSuccess: () => void, onError: () => void) => void;
   selectedConnector: string;
 }
 
@@ -48,14 +48,15 @@ export const EditConnector = React.memo(
     onSubmit,
     selectedConnector,
   }: EditConnectorProps) => {
-    const initialState = { connectors };
     const { form } = useForm({
-      defaultValue: initialState,
+      defaultValue: { connectorId: selectedConnector },
       options: { stripEmptyFields: false },
       schema,
     });
+
     const { setFieldValue, submit } = form;
     const [connectorHasChanged, setConnectorHasChanged] = useState(false);
+
     const onChangeConnector = useCallback(
       (connectorId) => {
         setConnectorHasChanged(selectedConnector !== connectorId);
@@ -75,8 +76,8 @@ export const EditConnector = React.memo(
 
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await submit();
-      if (isValid && newData.connector) {
-        onSubmit(newData.connector, noop, onError);
+      if (isValid && newData.connectorId) {
+        onSubmit(newData.connectorId, noop, onError);
         setConnectorHasChanged(false);
       }
     }, [submit, onSubmit, onError]);
@@ -97,7 +98,7 @@ export const EditConnector = React.memo(
                 <EuiFlexGroup gutterSize="none" direction="row">
                   <EuiFlexItem>
                     <UseField
-                      path="connector"
+                      path="connectorId"
                       component={ConnectorSelector}
                       componentProps={{
                         connectors,
