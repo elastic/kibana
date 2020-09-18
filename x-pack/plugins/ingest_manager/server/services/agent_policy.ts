@@ -404,8 +404,9 @@ class AgentPolicyService {
     }, []);
 
     await createAgentPolicyAction(soClient, {
-      type: 'CONFIG_CHANGE',
-      data: { config: policy } as any,
+      // This is problematic...
+      type: 'POLICY_CHANGE',
+      data: { config: policy, policy } as any,
       ack_data: { packages },
       created_at: new Date().toISOString(),
       policy_id: policy.id,

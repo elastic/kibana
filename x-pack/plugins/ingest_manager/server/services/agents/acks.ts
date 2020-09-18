@@ -137,7 +137,7 @@ function getLatestConfigChangePolicyActionIfUpdated(
   return actions.reduce<null | AgentPolicyAction>((acc, action) => {
     if (
       !isAgentPolicyAction(action) ||
-      action.type !== 'CONFIG_CHANGE' ||
+      (action.type !== 'POLICY_CHANGE' && action.type !== 'CONFIG_CHANGE') ||
       action.policy_id !== agent.policy_id ||
       (acc?.policy_revision ?? 0) < (agent.policy_revision || 0)
     ) {

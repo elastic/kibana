@@ -21,7 +21,7 @@ export type AgentStatus =
   | 'unenrolling'
   | 'degraded';
 
-export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL';
+export type AgentActionType = 'POLICY_CHANGE' | 'CONFIG_CHANGE' | 'UNENROLL';
 
 export interface NewAgentAction {
   type: AgentActionType;

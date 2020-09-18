@@ -2757,7 +2757,7 @@
                               "data": "{\"config\":{\"id\":\"ae556400-5e39-11ea-8b49-f9747e466f7b\",\"outputs\":{\"default\":{\"type\":\"elasticsearch\",\"hosts\":[\"http://localhost:9200\"],\"api_key\":\"\",\"api_token\":\"6ckkp3ABz7e_XRqr3LM8:gQuDfUNSRgmY0iziYqP9Hw\"}},\"packagePolicies\":[]}}",
                               "created_at": "2020-03-04T20:02:56.149Z",
                               "id": "6a95c00a-d76d-4931-97c3-0bf935272d7d",
-                              "type": "CONFIG_CHANGE"
+                              "type": "POLICY_CHANGE"
                             }
                           ],
                           "access_api_key_id": "6Mkkp3ABz7e_XRqrzLNJ",
@@ -2920,7 +2920,7 @@
                       "actions": [
                         {
                           "agent_id": "a6f14bd2-1a2a-481c-9212-9494d064ffdf",
-                          "type": "CONFIG_CHANGE",
+                          "type": "POLICY_CHANGE",
                           "data": {
                             "config": {
                               "id": "2fe89350-a5e0-11ea-a587-5f886c8a849f",

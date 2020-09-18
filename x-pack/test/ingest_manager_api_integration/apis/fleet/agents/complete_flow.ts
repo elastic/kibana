@@ -76,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       expect(checkinApiResponse.actions).length(1);
-      expect(checkinApiResponse.actions[0].type).be('CONFIG_CHANGE');
+      expect(checkinApiResponse.actions[0].type).be('POLICY_CHANGE');
       const policyChangeAction = checkinApiResponse.actions[0];
       const defaultOutputApiKey = policyChangeAction.data.config.outputs.default.api_key;
 

@@ -15,7 +15,7 @@ describe('test agent actions services', () => {
 
     const newAgentAction: Omit<AgentAction, 'id'> = {
       agent_id: 'agentid',
-      type: 'CONFIG_CHANGE',
+      type: 'POLICY_CHANGE',
       data: { content: 'data' },
       sent_at: '2020-03-14T19:45:02.620Z',
       created_at: '2020-03-14T19:45:02.620Z',
@@ -24,7 +24,7 @@ describe('test agent actions services', () => {
       Promise.resolve({
         attributes: {
           agent_id: 'agentid',
-          type: 'CONFIG_CHANGE',
+          type: 'POLICY_CHANGE',
           data: JSON.stringify({ content: 'data' }),
           sent_at: '2020-03-14T19:45:02.620Z',
           created_at: '2020-03-14T19:45:02.620Z',
