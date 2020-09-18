@@ -19,6 +19,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
     });
 
     describe('Settings', function () {
+      loadTestFile(require.resolve('./settings/custom_link.ts'));
       describe('Anomaly detection', function () {
         loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));
         loadTestFile(require.resolve('./settings/anomaly_detection/read_user'));
