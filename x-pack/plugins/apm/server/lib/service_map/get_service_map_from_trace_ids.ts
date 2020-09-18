@@ -29,15 +29,15 @@ export function getConnections(
           return false;
         }
 
-        if (environment) {
-          if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-            return !node[SERVICE_ENVIRONMENT];
-          }
-
-          return node[SERVICE_ENVIRONMENT] === environment;
+        if (!environment) {
+          return true;
         }
 
-        return true;
+        if (environment === ENVIRONMENT_NOT_DEFINED.value) {
+          return !node[SERVICE_ENVIRONMENT];
+        }
+
+        return node[SERVICE_ENVIRONMENT] === environment;
       });
     });
   }
