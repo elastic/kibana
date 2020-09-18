@@ -9,12 +9,10 @@ import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 
 const lineageLimitMessage = (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.resolver.eitherLineageLimitExceeded"
-      defaultMessage="Some process events in the visualization and event list below could not be displayed because the data limit has been reached."
-    />
-  </>
+  <FormattedMessage
+    id="xpack.securitySolution.endpoint.resolver.eitherLineageLimitExceeded"
+    defaultMessage="Some process events in the visualization and event list below could not be displayed because the data limit has been reached."
+  />
 );
 
 const LineageTitleMessage = React.memo(function LineageTitleMessage({
@@ -23,13 +21,11 @@ const LineageTitleMessage = React.memo(function LineageTitleMessage({
   numberOfEntries: number;
 }) {
   return (
-    <>
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.resolver.relatedEventLimitTitle"
-        defaultMessage="This list includes {numberOfEntries} process events."
-        values={{ numberOfEntries }}
-      />
-    </>
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.resolver.relatedEventLimitTitle"
+      defaultMessage="This list includes {numberOfEntries} process events."
+      values={{ numberOfEntries }}
+    />
   );
 });
 
@@ -41,13 +37,11 @@ const RelatedEventsLimitMessage = React.memo(function RelatedEventsLimitMessage(
   category: string;
 }) {
   return (
-    <>
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded"
-        defaultMessage="{numberOfEventsMissing} {category} events could not be displayed because the data limit has been reached."
-        values={{ numberOfEventsMissing, category }}
-      />
-    </>
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded"
+      defaultMessage="{numberOfEventsMissing} {category} events could not be displayed because the data limit has been reached."
+      values={{ numberOfEventsMissing, category }}
+    />
   );
 });
 
@@ -59,13 +53,11 @@ const RelatedLimitTitleMessage = React.memo(function RelatedLimitTitleMessage({
   category: string;
 }) {
   return (
-    <>
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.resolver.relatedLimitsExceededTitle"
-        defaultMessage="This list includes {numberOfEventsDisplayed} {category} events."
-        values={{ numberOfEventsDisplayed, category }}
-      />
-    </>
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.resolver.relatedLimitsExceededTitle"
+      defaultMessage="This list includes {numberOfEventsDisplayed} {category} events."
+      values={{ numberOfEventsDisplayed, category }}
+    />
   );
 });
 
