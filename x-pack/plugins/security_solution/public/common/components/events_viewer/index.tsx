@@ -89,6 +89,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         id,
         columns,
         excludedRowRendererIds,
+        indexNames: selectedPatterns,
         sort,
         itemsPerPage,
         showCheckboxes,

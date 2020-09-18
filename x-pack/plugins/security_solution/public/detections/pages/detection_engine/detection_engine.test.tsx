@@ -20,7 +20,7 @@ import {
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { DetectionEnginePageComponent } from './detection_engine';
 import { useUserData } from '../../components/user_info';
-import { useWithSource } from '../../../common/containers/source';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { createStore, State } from '../../../common/store';
 import { mockHistory, Router } from '../../../cases/components/__mock__/router';
 
@@ -74,7 +74,7 @@ describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {
     (useParams as jest.Mock).mockReturnValue({});
     (useUserData as jest.Mock).mockReturnValue([{}]);
-    (useWithSource as jest.Mock).mockReturnValue({
+    (useSourcererScope as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
