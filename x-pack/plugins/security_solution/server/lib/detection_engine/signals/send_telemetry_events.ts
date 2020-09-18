@@ -4,21 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { TelemetryEventsSender, TelemetryEvent } from '../../telemetry/sender';
 import { RuleTypeParams } from '../types';
 import { BuildRuleMessage } from './rule_messages';
+import { SignalSearchResponse, SignalSource } from './types';
+import { Logger } from '../../../../../../../src/core/server';
 
-export function selectEvents(filteredEvents: object[]): object[] {
-  const sources = filteredEvents.hits.hits.map(function (obj: object): object {
-    if (!('_source' in obj)) {
-      return undefined;
-    }
-    // TODO: filter out non-endpoint alerts
+export interface SearchResultWithSource {
+  _source: SignalSource;
+}
 
+export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
+  const sources = filteredEvents.hits.hits.map(function (
+    obj: SearchResultWithSource
+  ): TelemetryEvent {
     return obj._source;
   });
 
-  return sources.filter(function (obj) {
+  return sources.filter(function (obj: TelemetryEvent) {
+    // TODO: filter out non-endpoint alerts
     return obj !== undefined;
   });
 }
@@ -26,7 +30,7 @@ export function selectEvents(filteredEvents: object[]): object[] {
 export function sendAlertTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender,
-  filteredEvents: object[],
+  filteredEvents: SignalSearchResponse,
   ruleParams: RuleTypeParams,
   buildRuleMessage: BuildRuleMessage
 ) {

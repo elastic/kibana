@@ -64,8 +64,8 @@ import { securitySolutionSearchStrategyProvider } from './search_strategy/securi
 import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import {
-  TelemetryPluginsStart,
-  TelemetryPluginsSetup,
+  TelemetryPluginStart,
+  TelemetryPluginSetup,
 } from '../../../../src/plugins/telemetry/server';
 
 export interface SetupPlugins {
@@ -80,14 +80,14 @@ export interface SetupPlugins {
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  telemetry?: TelemetryPluginsSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export interface StartPlugins {
   data: DataPluginStart;
   ingestManager?: IngestManagerStartContract;
   taskManager?: TaskManagerStartContract;
-  telemetry?: TelemetryPluginsStart;
+  telemetry?: TelemetryPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -112,8 +112,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
   private readonly endpointAppContextService = new EndpointAppContextService();
-  private readonly telemetryEventsSender = new TelemetryEventsSender();
-  private readonly telemetrySetup;
+  private readonly telemetryEventsSender: TelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
 
@@ -127,6 +126,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
     this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
+    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
 
     this.logger.debug('plugin initialized');
   }
@@ -136,7 +136,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const config = await this.config$.pipe(first()).toPromise();
     const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
-    this.telemetrySetup = plugins.telemetry;
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
@@ -296,6 +295,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     });
 
+    this.telemetryEventsSender.setup(plugins.telemetry);
+
     return {};
   }
 
@@ -341,11 +342,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.logger.debug('User artifacts task not available.');
     }
 
-    this.telemetryEventsSender.start({
-      logger: this.logger,
-      telemetryStart: plugins.telemetry,
-      telemetrySetup: this.telemetrySetup,
-    });
+    this.telemetryEventsSender.start(plugins.telemetry);
 
     return {};
   }

@@ -6,17 +6,11 @@
 
 import { pick, cloneDeep } from 'lodash';
 
-import { PluginInitializerContext, Logger } from '../../../../../../core/server';
+import { Logger } from 'src/core/server';
 import {
-  TelemetryPluginsStart,
-  TelemetryPluginsSetup,
+  TelemetryPluginStart,
+  TelemetryPluginSetup,
 } from '../../../../../../src/plugins/telemetry/server';
-
-export interface TelemetryEventsSenderContract {
-  logger: Logger;
-  telemetryStart: TelemetryPluginsStart;
-  telemetrySetup: TelemetryPluginsSetup;
-}
 
 // Allowlist for the fields that we copy from the original event to the
 // telemetry event.
@@ -31,22 +25,50 @@ const allowlistHost = ['os'];
 // event.* fields:
 const allowlistEvent = ['kind'];
 
+export type SearchTypes =
+  | string
+  | string[]
+  | number
+  | number[]
+  | boolean
+  | boolean[]
+  | object
+  | object[]
+  | undefined;
+
+export interface TelemetryEvent {
+  [key: string]: SearchTypes;
+  '@timestamp'?: string;
+  file?: {
+    [key: string]: SearchTypes;
+    Ext?: {
+      [key: string]: SearchTypes;
+    };
+  };
+}
+
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
-  private readonly checkIntervalMs = 5 * 1000;
-  private readonly maxQueueSize = 100;
+  private readonly checkIntervalMs = 5 * 1000; // TODO: change to 60s before merging
   private readonly logger: Logger;
-  private readonly telemetryStart: TelemetryPluginsStart;
-  private readonly telemetrySetup: TelemetryPluginsSetup;
+  private maxQueueSize = 100;
+  private telemetryStart?: TelemetryPluginStart;
+  private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
-  private queue: object[] = [];
-  private isOptedIn = true; // Assume true until the first check
+  private queue: TelemetryEvent[] = [];
+  private isOptedIn?: boolean = true; // Assume true until the first check
 
-  public start(startContract: TelemetryEventsSenderContract) {
-    this.logger = startContract.logger.get('telemetry_events');
-    this.telemetrySetup = startContract.telemetrySetup;
-    this.telemetryStart = startContract.telemetryStart;
+  constructor(logger: Logger) {
+    this.logger = logger.get('telemetry_events');
+  }
+
+  public setup(telemetrySetup?: TelemetryPluginSetup) {
+    this.telemetrySetup = telemetrySetup;
+  }
+
+  public start(telemetryStart?: TelemetryPluginStart) {
+    this.telemetryStart = telemetryStart;
 
     this.logger.debug(`Starting task`);
     setTimeout(() => {
@@ -61,7 +83,7 @@ export class TelemetryEventsSender {
     }
   }
 
-  public queueTelemetryEvents(events: object[]) {
+  public queueTelemetryEvents(events: TelemetryEvent[]) {
     const qlength = this.queue.length;
 
     if (events.length === 0) {
@@ -82,12 +104,12 @@ export class TelemetryEventsSender {
     }
   }
 
-  private processEvents(events: object[]): object[] {
-    return events.map(function (obj: object): object {
-      const newObj = pick(obj, allowlistTop);
+  public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
+    return events.map(function (obj: TelemetryEvent): TelemetryEvent {
+      const newObj: TelemetryEvent = pick(obj, allowlistTop);
       if ('file' in obj) {
         newObj.file = pick(obj.file, allowlistFile);
-        if ('Ext' in obj.file) {
+        if (obj.file?.Ext !== undefined) {
           newObj.file.Ext = pick(obj.file.Ext, allowlistFileExt);
         }
       }
@@ -112,6 +134,8 @@ export class TelemetryEventsSender {
       return;
     }
 
+    // Checking opt-in status is relatively expensive (calls a saved-object), so
+    // we only check it when we have things to send.
     this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
     if (!this.isOptedIn) {
       this.logger.debug(`Telemetry is not opted-in.`);

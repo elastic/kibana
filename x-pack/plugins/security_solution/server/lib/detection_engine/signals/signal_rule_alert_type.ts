@@ -44,7 +44,7 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
-import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 
 export const signalRulesAlertType = ({
   logger,
@@ -54,7 +54,7 @@ export const signalRulesAlertType = ({
   lists,
 }: {
   logger: Logger;
-  eventsTelemetry: TelemetryEventsSender;
+  eventsTelemetry: TelemetryEventsSender | undefined;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;

@@ -5,23 +5,49 @@
  */
 
 import { selectEvents } from './send_telemetry_events';
-import { loggingSystemMock } from 'src/core/server/mocks';
 
 describe('sendAlertTelemetry', () => {
   it('selectEvents', () => {
     const filteredEvents = {
+      took: 0,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
       hits: {
+        total: 2,
+        max_score: 0,
         hits: [
           {
+            _index: 'x',
+            _type: 'x',
+            _id: 'x',
+            _score: 0,
             _source: {
+              '@timestamp': 'x',
               key1: 'hello',
             },
           },
           {
-            key2: 'hello',
+            _index: 'x',
+            _type: 'x',
+            _id: 'x',
+            _score: 0,
+            _source: {
+              '@timestamp': 'x',
+              key2: 'hello',
+            },
           },
           {
+            _index: 'x',
+            _type: 'x',
+            _id: 'x',
+            _score: 0,
             _source: {
+              '@timestamp': 'x',
               key3: 'hello',
             },
           },
@@ -32,9 +58,15 @@ describe('sendAlertTelemetry', () => {
     const sources = selectEvents(filteredEvents);
     expect(sources).toStrictEqual([
       {
+        '@timestamp': 'x',
         key1: 'hello',
       },
       {
+        '@timestamp': 'x',
+        key2: 'hello',
+      },
+      {
+        '@timestamp': 'x',
         key3: 'hello',
       },
     ]);
