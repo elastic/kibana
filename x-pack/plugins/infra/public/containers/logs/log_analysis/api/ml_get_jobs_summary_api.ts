@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { HttpSetup } from 'src/core/public';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
+import type { HttpSetup } from 'src/core/public';
 
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs<JobType extends string> {
   spaceId: string;
@@ -32,10 +29,7 @@ export const callJobsSummaryAPI = async <JobType extends string>(
       })
     ),
   });
-  return pipe(
-    fetchJobStatusResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(fetchJobStatusResponsePayloadRT)(response);
 };
 
 export const fetchJobStatusRequestPayloadRT = rt.type({

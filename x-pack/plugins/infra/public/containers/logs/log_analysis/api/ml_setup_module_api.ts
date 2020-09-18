@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as rt from 'io-ts';
 import type { HttpSetup } from 'src/core/public';
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
-
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../../common/log_analysis';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   moduleId: string;
@@ -55,10 +51,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
     ),
   });
 
-  return pipe(
-    setupMlModuleResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(setupMlModuleResponsePayloadRT)(response);
 };
 
 const setupMlModuleTimeParamsRT = rt.partial({

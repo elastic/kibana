@@ -5,16 +5,13 @@
  */
 
 import type { HttpSetup } from 'src/core/public';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
 
 import {
   getLogEntryExamplesRequestPayloadRT,
   getLogEntryExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../../common/http_api/log_analysis';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   sourceId: string;
@@ -48,8 +45,5 @@ export const callGetLogEntryExamplesAPI = async (
     ),
   });
 
-  return pipe(
-    getLogEntryExamplesSuccessReponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(getLogEntryExamplesSuccessReponsePayloadRT)(response);
 };

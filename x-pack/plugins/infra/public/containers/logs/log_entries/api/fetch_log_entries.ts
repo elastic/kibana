@@ -5,11 +5,8 @@
  */
 
 import type { HttpSetup } from 'src/core/public';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
 
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 import {
   LOG_ENTRIES_PATH,
@@ -27,5 +24,5 @@ export const fetchLogEntries = async (
     body: JSON.stringify(logEntriesRequestRT.encode(requestArgs)),
   });
 
-  return pipe(logEntriesResponseRT.decode(response), fold(throwErrors(createPlainError), identity));
+  return decodeOrThrow(logEntriesResponseRT)(response);
 };

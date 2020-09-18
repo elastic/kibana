@@ -5,10 +5,7 @@
  */
 
 import type { HttpSetup } from 'src/core/public';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 import {
   LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
@@ -26,8 +23,5 @@ export const fetchLogSummaryHighlights = async (
     body: JSON.stringify(logEntriesSummaryHighlightsRequestRT.encode(requestArgs)),
   });
 
-  return pipe(
-    logEntriesSummaryHighlightsResponseRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(logEntriesSummaryHighlightsResponseRT)(response);
 };

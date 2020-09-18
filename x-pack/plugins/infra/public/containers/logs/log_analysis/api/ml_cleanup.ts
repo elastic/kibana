@@ -6,12 +6,9 @@
 
 import * as rt from 'io-ts';
 import type { HttpSetup } from 'src/core/public';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import { getDatafeedId, getJobId } from '../../../../../common/log_analysis';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface DeleteJobsRequestArgs<JobType extends string> {
   spaceId: string;
@@ -35,19 +32,13 @@ export const callDeleteJobs = async <JobType extends string>(
     ),
   });
 
-  return pipe(
-    deleteJobsResponsePayloadRT.decode(deleteJobsResponse),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(deleteJobsResponsePayloadRT)(deleteJobsResponse);
 };
 
 export const callGetJobDeletionTasks = async (fetch: HttpSetup['fetch']) => {
   const jobDeletionTasksResponse = await fetch('/api/ml/jobs/deleting_jobs_tasks');
 
-  return pipe(
-    getJobDeletionTasksResponsePayloadRT.decode(jobDeletionTasksResponse),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(getJobDeletionTasksResponsePayloadRT)(jobDeletionTasksResponse);
 };
 
 interface StopDatafeedsRequestArgs<JobType extends string> {
@@ -72,10 +63,7 @@ export const callStopDatafeeds = async <JobType extends string>(
     ),
   });
 
-  return pipe(
-    stopDatafeedsResponsePayloadRT.decode(stopDatafeedResponse),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(stopDatafeedsResponsePayloadRT)(stopDatafeedResponse);
 };
 
 export const deleteJobsRequestPayloadRT = rt.type({

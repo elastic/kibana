@@ -5,9 +5,7 @@
  */
 
 import type { HttpSetup } from 'src/core/public';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
+
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,
   ValidationIndicesFieldSpecification,
@@ -15,7 +13,7 @@ import {
   validationIndicesResponsePayloadRT,
 } from '../../../../../common/http_api';
 
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   indices: string[];
@@ -32,8 +30,5 @@ export const callValidateIndicesAPI = async (
     body: JSON.stringify(validationIndicesRequestPayloadRT.encode({ data: { indices, fields } })),
   });
 
-  return pipe(
-    validationIndicesResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(validationIndicesResponsePayloadRT)(response);
 };

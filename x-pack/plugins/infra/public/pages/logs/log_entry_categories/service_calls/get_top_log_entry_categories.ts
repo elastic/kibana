@@ -6,16 +6,12 @@
 
 import type { HttpSetup } from 'src/core/public';
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
-
 import {
   getLogEntryCategoriesRequestPayloadRT,
   getLogEntryCategoriesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
 } from '../../../../../common/http_api/log_analysis';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   sourceId: string;
@@ -67,8 +63,5 @@ export const callGetTopLogEntryCategoriesAPI = async (
     ),
   });
 
-  return pipe(
-    getLogEntryCategoriesSuccessReponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(getLogEntryCategoriesSuccessReponsePayloadRT)(response);
 };
