@@ -20,6 +20,7 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
 
@@ -65,7 +66,15 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
-          aria-label="Newsfeed menu"
+          aria-label={
+            showBadge
+              ? i18n.translate('header.newsfeedButton.unreadAriaLabel', {
+                  defaultMessage: 'Newsfeed menu - unread items available',
+                })
+              : i18n.translate('header.newsfeedButton.readAriaLabel', {
+                  defaultMessage: 'Newsfeed menu - all items read',
+                })
+          }
           notification={showBadge ? true : null}
           onClick={showFlyout}
         >
