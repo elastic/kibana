@@ -9,6 +9,7 @@ import { shallow } from 'enzyme';
 import { ServiceList, SERVICE_COLUMNS } from '../index';
 import props from './props.json';
 import { mockMoment } from '../../../../../utils/testHelpers';
+import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
 
 describe('ServiceOverview -> List', () => {
   beforeAll(() => {
@@ -52,25 +53,28 @@ describe('ServiceOverview -> List', () => {
 
   describe('without ML data', () => {
     it('does not render health column', () => {
-      const wrapper = shallow(
-        <ServiceList items={props.items} displayHealthStatus={false} />
-      );
+      const wrapper = shallow(<ServiceList items={props.items} />);
 
       const columns = wrapper.props().columns;
 
-      expect(columns[0].field).not.toBe('severity');
+      expect(columns[0].field).not.toBe('healthStatus');
     });
   });
 
   describe('with ML data', () => {
     it('renders health column', () => {
       const wrapper = shallow(
-        <ServiceList items={props.items} displayHealthStatus />
+        <ServiceList
+          items={props.items.map((item) => ({
+            ...item,
+            healthStatus: ServiceHealthStatus.warning,
+          }))}
+        />
       );
 
       const columns = wrapper.props().columns;
 
-      expect(columns[0].field).toBe('severity');
+      expect(columns[0].field).toBe('healthStatus');
     });
   });
 });

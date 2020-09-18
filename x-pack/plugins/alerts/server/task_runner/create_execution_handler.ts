@@ -19,6 +19,7 @@ import {
   AlertInstanceContext,
   AlertType,
   AlertTypeParams,
+  RawAlert,
 } from '../types';
 
 interface CreateExecutionHandlerOptions {
@@ -28,7 +29,7 @@ interface CreateExecutionHandlerOptions {
   actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
   spaceId: string;
-  apiKey: string | null;
+  apiKey: RawAlert['apiKey'];
   alertType: AlertType;
   logger: Logger;
   eventLogger: IEventLogger;
@@ -101,7 +102,7 @@ export function createExecutionHandler({
         id: action.id,
         params: action.params,
         spaceId,
-        apiKey,
+        apiKey: apiKey ?? null,
         source: asSavedObjectExecutionSource({
           id: alertId,
           type: 'alert',
