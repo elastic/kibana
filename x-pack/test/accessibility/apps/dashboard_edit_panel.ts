@@ -7,14 +7,14 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, common, timePicker } = getPageObjects(['dashboard']);
+  const { dashboard } = getPageObjects(['dashboard']);
   const a11y = getService('a11y');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const drilldowns = getService('dashboardDrilldownsManage');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security']);
+  const PageObjects = getPageObjects(['security', 'common']);
   const toasts = getService('toasts');
 
   describe('Dashboard Edit Panel', () => {
