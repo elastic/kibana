@@ -7,9 +7,8 @@
 import { IESAggField } from './es_agg_field';
 import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { TOP_TERM_PERCENTAGE_SUFFIX, VECTOR_STYLES } from '../../../common/constants';
+import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
 import { FIELD_ORIGIN } from '../../../common/constants';
-import { getMbPropertyName } from './field';
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;
