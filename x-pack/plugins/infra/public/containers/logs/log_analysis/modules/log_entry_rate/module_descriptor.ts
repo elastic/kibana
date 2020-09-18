@@ -57,7 +57,8 @@ const setUpModule = async (
   start: number | undefined,
   end: number | undefined,
   datasetFilter: DatasetFilter,
-  { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration
+  { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration,
+  fetch: HttpSetup['fetch']
 ) => {
   const indexNamePattern = indices.join(',');
   const jobOverrides = [
@@ -94,15 +95,17 @@ const setUpModule = async (
       : undefined;
 
   return callSetupMlModuleAPI(
-    moduleId,
-    start,
-    end,
-    spaceId,
-    sourceId,
-    indexNamePattern,
-    jobOverrides,
-    [],
-    query
+    {
+      moduleId,
+      start,
+      end,
+      spaceId,
+      sourceId,
+      indexPattern: indexNamePattern,
+      jobOverrides,
+      query,
+    },
+    fetch
   );
 };
 

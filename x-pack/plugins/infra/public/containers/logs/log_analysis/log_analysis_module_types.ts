@@ -30,7 +30,8 @@ export interface ModuleDescriptor<JobType extends string> {
     start: number | undefined,
     end: number | undefined,
     datasetFilter: DatasetFilter,
-    sourceConfiguration: ModuleSourceConfiguration
+    sourceConfiguration: ModuleSourceConfiguration,
+    fetch: HttpSetup['fetch']
   ) => Promise<SetupMlModuleResponsePayload>;
   cleanUpModule: (spaceId: string, sourceId: string) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (
