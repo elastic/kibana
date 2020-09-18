@@ -52,7 +52,7 @@ export const getTestCases = (
   }
 ) => {
   const crossSpaceIds =
-    crossSpaceSearch?.filter((s) => s !== (currentSpace ?? DEFAULT_SPACE_ID)) ?? [];
+    crossSpaceSearch?.filter((s) => s !== (currentSpace ?? DEFAULT_SPACE_ID)) ?? []; // intentionally exclude the current space
   const isCrossSpaceSearch = crossSpaceIds.length > 0;
   const isWildcardSearch = crossSpaceIds.includes('*');
 
@@ -74,8 +74,8 @@ export const getTestCases = (
 
       return TEST_CASES.filter((t) => {
         const hasOtherNamespaces =
-          Array.isArray(t.expectedNamespaces) &&
-          t.expectedNamespaces!.some((ns) => ns !== (currentSpace ?? DEFAULT_SPACE_ID));
+          !t.expectedNamespaces || // namespace-agnostic types do not have an expectedNamespaces field
+          t.expectedNamespaces.some((ns) => ns !== (currentSpace ?? DEFAULT_SPACE_ID));
         return hasOtherNamespaces && predicate(t);
       });
     }
@@ -115,6 +115,15 @@ export const getTestCases = (
     unknownType: {
       title: buildTitle('find unknown type'),
       query: `type=wigwags${namespacesQueryParam}`,
+    } as FindTestCase,
+    eachType: {
+      title: buildTitle('find each type'),
+      query: `type=isolatedtype&type=sharedtype&type=globaltype&type=hiddentype&type=wigwags${namespacesQueryParam}`,
+      successResult: {
+        savedObjects: getExpectedSavedObjects((t) =>
+          ['isolatedtype', 'sharedtype', 'globaltype'].includes(t.type)
+        ),
+      },
     } as FindTestCase,
     pageBeyondTotal: {
       title: buildTitle('find page beyond total'),

@@ -27,6 +27,7 @@ const createTestCases = (currentSpace: string, crossSpaceSearch?: string[]) => {
     cases.singleNamespaceType,
     cases.multiNamespaceType,
     cases.namespaceAgnosticType,
+    cases.eachType,
     cases.pageBeyondTotal,
     cases.unknownSearchField,
     cases.filterWithNamespaceAgnosticType,
