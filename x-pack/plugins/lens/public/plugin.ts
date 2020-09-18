@@ -116,7 +116,6 @@ export class LensPlugin {
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        console.dir(params);
         const { mountApp } = await import('./app_plugin/mounter');
         return mountApp(core, params, this.createEditorFrame!);
       },
