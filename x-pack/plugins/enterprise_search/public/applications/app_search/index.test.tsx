@@ -55,15 +55,16 @@ describe('AppSearchConfigured', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(Layout)).toHaveLength(1);
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
   });
 
   it('initializes app data with passed props', () => {
     const initializeAppData = jest.fn();
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
 
-    shallow(<AppSearchConfigured readOnlyMode={true} />);
+    shallow(<AppSearchConfigured ilmEnabled={true} />);
 
-    expect(initializeAppData).toHaveBeenCalledWith({ readOnlyMode: true });
+    expect(initializeAppData).toHaveBeenCalledWith({ ilmEnabled: true });
   });
 
   it('does not re-initialize app data', () => {
@@ -82,6 +83,14 @@ describe('AppSearchConfigured', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+  });
+
+  it('passes readOnlyMode state', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({ readOnlyMode: true }));
+
+    const wrapper = shallow(<AppSearchConfigured />);
+
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
   });
 
   describe('ability checks', () => {

@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
+import styled from 'styled-components';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
@@ -31,6 +32,11 @@ import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
+
+const StyledCubeForProcess = styled(CubeForProcess)`
+  position: relative;
+  top: 0.75em;
+`;
 
 export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   const processEvent = useSelector((state: ResolverState) =>
@@ -186,7 +192,7 @@ const NodeDetailView = memo(function NodeDetailView({
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <StyledTitle aria-describedby={titleID}>
-          <CubeForProcess
+          <StyledCubeForProcess
             data-test-subj="resolver:node-detail:title-icon"
             running={!isProcessTerminated}
           />
