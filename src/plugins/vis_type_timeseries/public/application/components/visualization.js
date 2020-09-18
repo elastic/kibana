@@ -20,7 +20,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 
 import { TimeseriesVisualization } from './vis_types/timeseries/vis';
 import { metric } from './vis_types/metric/vis';
@@ -44,13 +43,6 @@ export function Visualization(props) {
   const { visData, model } = props;
   // Show the error panel
   const error = _.get(visData, `${model.id}.error`);
-  if (_.get(error, 'error.type') === 'index_not_found_exception') {
-    const index = _.get(error, 'error.index');
-    error.message = i18n.translate('visTypeTimeseries.error.missingIndexErrorMessage', {
-      defaultMessage: 'Index "{index}" is missing',
-      values: { index },
-    });
-  }
   if (error) {
     return (
       <div className={props.className}>
