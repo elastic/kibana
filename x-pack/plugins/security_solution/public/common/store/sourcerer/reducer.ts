@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import isEmpty from 'lodash/isEmpty';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
@@ -38,13 +39,22 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     },
   }))
   .case(setSelectedIndexPatterns, (state, { id, selectedPatterns }) => {
+    const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
+    const newSelectedPatterns = selectedPatterns.filter(
+      (sp) =>
+        state.configIndexPatterns.includes(sp) ||
+        kibanaIndexPatterns.includes(sp) ||
+        (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
+    );
     return {
       ...state,
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          selectedPatterns,
+          selectedPatterns: isEmpty(newSelectedPatterns)
+            ? state.configIndexPatterns
+            : newSelectedPatterns,
         },
       },
     };

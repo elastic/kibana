@@ -214,7 +214,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const previousIndexesName = useRef<string[]>([]);
 
   const indexNamesSelectedSelector = useMemo(
-    () => sourcererSelectors.getIndexesNameSelectedSelector(),
+    () => sourcererSelectors.getIndexNamesSelectedSelector(),
     []
   );
   const indexNames = useSelector<State, string[]>(

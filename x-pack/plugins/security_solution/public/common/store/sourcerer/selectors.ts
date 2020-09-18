@@ -37,7 +37,7 @@ export const configIndexPatternsSelector = () =>
     (configIndexPatterns) => configIndexPatterns
   );
 
-export const getIndexesNameSelectedSelector = () => {
+export const getIndexNamesSelectedSelector = () => {
   const getScopesSelector = scopesSelector();
   const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 

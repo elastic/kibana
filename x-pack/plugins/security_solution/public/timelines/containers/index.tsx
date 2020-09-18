@@ -195,7 +195,11 @@ export const useTimelineEvents = ({
   );
 
   useEffect(() => {
-    if (!canQueryTimeline || skipQueryForDetectionsPage(id, indexNames)) {
+    if (
+      !canQueryTimeline ||
+      skipQueryForDetectionsPage(id, indexNames) ||
+      indexNames.length === 0
+    ) {
       return;
     }
 
