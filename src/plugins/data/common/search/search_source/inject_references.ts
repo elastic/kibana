@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { SavedObjectReference } from 'src/core/types';
 import { SearchSourceFields } from './types';
-import { SavedObjectReference } from '../../../../../core/types';
 
 export const injectReferences = (
   searchSourceFields: SearchSourceFields & { indexRefName: string },
