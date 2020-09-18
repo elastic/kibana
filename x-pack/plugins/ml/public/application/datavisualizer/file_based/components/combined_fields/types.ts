@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify, isBoom } from 'boom';
-
-export function wrapError(error: any) {
-  if (isBoom(error)) {
-    return error;
-  }
-
-  return boomify(error, { statusCode: error.status });
+export interface CombinedField {
+  mappingType: string;
+  delimiter: string;
+  combinedFieldName: string;
+  fieldNames: string[];
 }
