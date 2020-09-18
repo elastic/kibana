@@ -973,7 +973,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     const { indexPattern } = $scope;
-    indexPattern.fields.getByName(field.name).count += 1;
+    // sometimes its a field instance, sometimes just a string
+    indexPattern.fields.getByName(field.name || field).count += 1;
     core.savedObjects.client
       .update('index-pattern', indexPattern.id, indexPattern.prepBody(), {
         version: indexPattern.version,
