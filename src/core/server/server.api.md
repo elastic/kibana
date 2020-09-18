@@ -416,6 +416,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     logging: LoggingServiceSetup;
     // (undocumented)
+    metrics: MetricsServiceSetup;
+    // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     status: StatusServiceSetup;
@@ -433,9 +435,6 @@ export interface CoreStart {
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
     http: HttpServiceStart;
-    // Warning: (ae-forgotten-export) The symbol "MetricsServiceStart" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "MetricsServiceStart"
-    //
     // (undocumented)
     metrics: MetricsServiceStart;
     // (undocumented)
@@ -1311,7 +1310,7 @@ export class LegacyElasticsearchErrorHelpers {
 //
 // @internal @deprecated (undocumented)
 export class LegacyInternals implements ILegacyInternals {
-    constructor();
+    constructor(uiExports: LegacyUiExports, config: LegacyConfig, server: Server);
     // (undocumented)
     getInjectedUiAppVars(id: string): Promise<Record<string, any>>;
     // (undocumented)
@@ -1320,7 +1319,7 @@ export class LegacyInternals implements ILegacyInternals {
     //
     // (undocumented)
     injectUiAppVars(id: string, injector: VarsInjector): void;
-}
+    }
 
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
@@ -1332,6 +1331,16 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
+
+// Warning: (ae-forgotten-export) The symbol "LegacyPlugins" needs to be exported by the entry point index.d.ts
+//
+// @internal @deprecated (undocumented)
+export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
+    // (undocumented)
+    pluginExtendedConfig: LegacyConfig;
+    // (undocumented)
+    settings: LegacyVars;
+}
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceSetupDeps {
@@ -1355,6 +1364,31 @@ export interface LegacyServiceStartDeps {
     core: LegacyCoreStart;
     // (undocumented)
     plugins: Record<string, unknown>;
+}
+
+// @internal @deprecated (undocumented)
+export interface LegacyUiExports {
+    // Warning: (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    defaultInjectedVarProviders?: VarsProvider[];
+    // Warning: (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    injectedVarsReplacers?: VarsReplacer[];
+    // Warning: (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    navLinkSpecs?: LegacyNavLinkSpec[] | null;
+    // Warning: (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    uiAppSpecs?: Array<LegacyAppSpec | undefined>;
+    // (undocumented)
+    unknown?: [{
+        pluginSpec: LegacyPluginSpec;
+        type: unknown;
+    }];
 }
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
@@ -1395,6 +1429,9 @@ export interface MetricsServiceSetup {
     readonly collectionInterval: number;
     getOpsMetrics$: () => Observable<OpsMetrics>;
 }
+
+// @public
+export type MetricsServiceStart = MetricsServiceSetup;
 
 // @public @deprecated (undocumented)
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
@@ -2554,18 +2591,22 @@ export const ServiceStatusLevels: Readonly<{
     available: Readonly<{
         toString: () => "available";
         valueOf: () => 0;
+        toJSON: () => "available";
     }>;
     degraded: Readonly<{
         toString: () => "degraded";
         valueOf: () => 1;
+        toJSON: () => "degraded";
     }>;
     unavailable: Readonly<{
         toString: () => "unavailable";
         valueOf: () => 2;
+        toJSON: () => "unavailable";
     }>;
     critical: Readonly<{
         toString: () => "critical";
         valueOf: () => 3;
+        toJSON: () => "critical";
     }>;
 }>;
 
@@ -2626,6 +2667,7 @@ export type SharedGlobalConfig = RecursiveReadonly<{
     kibana: Pick<KibanaConfigType_2, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+    savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 
 // @public
@@ -2640,6 +2682,7 @@ export interface StatusServiceSetup {
     dependencies$: Observable<Record<string, ServiceStatus>>;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "StatusSetup"
     derivedStatus$: Observable<ServiceStatus>;
+    isStatusPageAnonymous: () => boolean;
     overall$: Observable<ServiceStatus>;
     set(status$: Observable<ServiceStatus>): void;
 }
@@ -2709,7 +2752,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:272:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:135:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:274:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:277:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
 
 ```

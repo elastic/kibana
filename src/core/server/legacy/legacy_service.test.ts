@@ -46,6 +46,7 @@ import { coreMock } from '../mocks';
 import { statusServiceMock } from '../status/status_service.mock';
 import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+import { metricsServiceMock } from '../metrics/metrics_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -93,6 +94,7 @@ beforeEach(() => {
       status: statusServiceMock.createInternalSetupContract(),
       auditTrail: auditTrailServiceMock.createSetupContract(),
       logging: loggingServiceMock.createInternalSetupContract(),
+      metrics: metricsServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
     uiPlugins: {

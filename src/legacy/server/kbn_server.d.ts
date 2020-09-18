@@ -32,7 +32,6 @@ import {
 import { LegacyConfig, ILegacyInternals } from '../../core/server/legacy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
-import { ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
 // lot of legacy code was assuming this type only had these two methods
 export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;
@@ -40,10 +39,7 @@ export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;
 // Extend the defaults with the plugins and server methods we need.
 declare module 'hapi' {
   interface PluginProperties {
-    elasticsearch: ElasticsearchPlugin;
-    kibana: any;
     spaces: any;
-    // add new plugin types here
   }
 
   interface Server {

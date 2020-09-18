@@ -12,3 +12,5 @@ export {
   IFlashMessagesActions,
 } from './flash_messages_logic';
 export { FlashMessagesProvider } from './flash_messages_provider';
+export { flashAPIErrors } from './handle_api_errors';
+export { setSuccessMessage, setErrorMessage, setQueuedSuccessMessage } from './set_message_helpers';

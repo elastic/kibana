@@ -153,12 +153,15 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
-    await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
+      environment: environmentSetup,
+      http: httpSetup,
+      metrics: metricsSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -189,6 +192,7 @@ export class Server {
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
+      metrics: metricsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);

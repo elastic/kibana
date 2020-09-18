@@ -28,7 +28,6 @@ import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import { statusMixin } from './status';
 import configCompleteMixin from './config/complete';
 import { optimizeMixin } from '../../optimize';
 import { uiMixin } from '../ui';
@@ -82,7 +81,6 @@ export default class KbnServer {
 
         loggingMixin,
         warningsMixin,
-        statusMixin,
 
         // scan translations dirs, register locale files and initialize i18n engine.
         i18nMixin,

@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useRef, useLayoutEffect, useMemo } from 'react';
 import { EuiI18nNumber, EuiButton, EuiPopover, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
+import { ResolverNodeStats } from '../../../common/endpoint/types';
+import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { Matrix3 } from '../types';
 import { useResolverTheme } from './assets';
 
@@ -62,14 +64,12 @@ const SubButton = React.memo(
     menuIsOpen,
     action,
     count,
-    title,
     nodeID,
   }: {
     hasMenu: boolean;
     menuIsOpen?: boolean;
     action: (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     count?: number;
-    title: string;
     nodeID: string;
   }) => {
     const iconType = menuIsOpen === true ? 'arrowUp' : 'arrowDown';
@@ -86,7 +86,7 @@ const SubButton = React.memo(
         data-test-resolver-node-id={nodeID}
         id={nodeID}
       >
-        {count ? <EuiI18nNumber value={count} /> : ''} {title}
+        {count ? <EuiI18nNumber value={count} /> : ''} {subMenuAssets.relatedEvents.title}
       </StyledActionButton>
     );
   }
@@ -101,17 +101,16 @@ const NodeSubMenuComponents = React.memo(
   ({
     count,
     buttonBorderColor,
-    menuTitle,
     menuAction,
-    optionsWithActions,
     className,
     projectionMatrix,
     nodeID,
+    relatedEventStats,
   }: {
-    menuTitle: string;
     className?: string;
     menuAction?: () => unknown;
     buttonBorderColor: ButtonColor;
+    // eslint-disable-next-line react/no-unused-prop-types
     buttonFill: string;
     count?: number;
     /**
@@ -119,8 +118,7 @@ const NodeSubMenuComponents = React.memo(
      */
     projectionMatrix: Matrix3;
     nodeID: string;
-  } & {
-    optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
+    relatedEventStats: ResolverNodeStats | undefined;
   }) => {
     // keep a ref to the popover so we can call its reposition method
     const popoverRef = useRef<EuiPopover>(null);
@@ -148,6 +146,23 @@ const NodeSubMenuComponents = React.memo(
 
     // The last projection matrix that was used to position the popover
     const projectionMatrixAtLastRender = useRef<Matrix3>();
+    const relatedEventCallbacks = useRelatedEventByCategoryNavigation({
+      nodeID,
+      categories: relatedEventStats?.events?.byCategory,
+    });
+    const relatedEventOptions = useMemo(() => {
+      if (relatedEventStats === undefined) {
+        return [];
+      } else {
+        return Object.entries(relatedEventStats.events.byCategory).map(([category, total]) => {
+          return {
+            prefix: <EuiI18nNumber value={total || 0} />,
+            optionTitle: category,
+            action: () => relatedEventCallbacks(category),
+          };
+        });
+      }
+    }, [relatedEventStats, relatedEventCallbacks]);
 
     useLayoutEffect(() => {
       if (
@@ -167,7 +182,6 @@ const NodeSubMenuComponents = React.memo(
       // no matter what, keep track of the last project matrix that was used to size the popover
       projectionMatrixAtLastRender.current = projectionMatrix;
     }, [projectionMatrixAtLastRender, projectionMatrix]);
-
     const {
       colorMap: { pillStroke: pillBorderStroke, resolverBackground: pillFill },
     } = useResolverTheme();
@@ -177,8 +191,7 @@ const NodeSubMenuComponents = React.memo(
         backgroundColor: pillFill,
       };
     }, [pillBorderStroke, pillFill]);
-
-    if (!optionsWithActions) {
+    if (relatedEventStats === undefined) {
       /**
        * When called with a `menuAction`
        * Render without dropdown and call the supplied action when host button is clicked
@@ -191,14 +204,14 @@ const NodeSubMenuComponents = React.memo(
             size="s"
             tabIndex={-1}
           >
-            {menuTitle}
+            {subMenuAssets.relatedEvents.title}
           </EuiButton>
         </div>
       );
     }
 
-    if (typeof optionsWithActions === 'string') {
-      return <></>;
+    if (relatedEventOptions === undefined) {
+      return null;
     }
 
     return (
@@ -208,7 +221,6 @@ const NodeSubMenuComponents = React.memo(
           menuIsOpen={menuIsOpen}
           action={handleMenuOpenClick}
           count={count}
-          title={menuTitle}
           nodeID={nodeID}
         />
         {menuIsOpen ? (
@@ -217,7 +229,7 @@ const NodeSubMenuComponents = React.memo(
             aria-hidden={!menuIsOpen}
             aria-describedby={nodeID}
           >
-            {optionsWithActions
+            {relatedEventOptions
               .sort((opta, optb) => {
                 return opta.optionTitle.localeCompare(optb.optionTitle);
               })
