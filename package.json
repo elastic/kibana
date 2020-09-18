@@ -206,7 +206,7 @@
     "mustache": "2.3.0",
     "ngreact": "0.5.1",
     "no-ui-slider": "1.2.0",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "1.3.2",
     "opn": "^5.4.0",
     "oppsy": "^2.0.0",
     "pegjs": "0.9.0",
