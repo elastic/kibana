@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { NotificationsSetup } from 'src/core/public';
-import { JobStatusBuckets, JobSummary } from '../';
+import { JobStatusBuckets, JobStatusBucket } from '../';
 import { JobId, ReportDocument } from '../../common/types';
 import {
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
@@ -29,7 +29,7 @@ function updateStored(jobIds: JobId[]): void {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
 }
 
-function summarizeJob(src: ReportDocument): JobSummary {
+function reportToJobStatusBucket(src: ReportDocument): JobStatusBucket {
   return {
     id: src._id,
     status: src._source.status,
@@ -96,8 +96,8 @@ export class ReportingNotifierStreamHandler {
   public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobStatusBuckets> {
     return Rx.from(this.apiClient.findForJobIds(storedJobs)).pipe(
       map((jobs: ReportDocument[]) => {
-        const completedJobs: JobSummary[] = [];
-        const failedJobs: JobSummary[] = [];
+        const completedJobs: JobStatusBucket[] = [];
+        const failedJobs: JobStatusBucket[] = [];
         const pending: JobId[] = [];
 
         // add side effects to storage
@@ -108,9 +108,9 @@ export class ReportingNotifierStreamHandler {
           } = job;
           if (storedJobs.includes(jobId)) {
             if (jobStatus === JOB_STATUS_COMPLETED || jobStatus === JOB_STATUS_WARNINGS) {
-              completedJobs.push(summarizeJob(job));
+              completedJobs.push(reportToJobStatusBucket(job));
             } else if (jobStatus === JOB_STATUS_FAILED) {
-              failedJobs.push(summarizeJob(job));
+              failedJobs.push(reportToJobStatusBucket(job));
             } else {
               pending.push(jobId);
             }

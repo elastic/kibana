@@ -16,7 +16,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { ReportingPublicPlugin as Plugin };
 export { jobCompletionNotifications };
 
-export interface JobSummary {
+export interface JobStatusBucket {
   id: JobId;
   status: JobStatus;
   title: string;
@@ -26,8 +26,8 @@ export interface JobSummary {
 }
 
 export interface JobStatusBuckets {
-  completed: JobSummary[];
-  failed: JobSummary[];
+  completed: JobStatusBucket[];
+  failed: JobStatusBucket[];
 }
 
 type DownloadLink = string;

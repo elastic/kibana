@@ -6,7 +6,7 @@
 
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
-import { JobSummary } from '../';
+import { JobStatusBucket } from '../';
 import { ReportDocument } from '../../common/types';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
@@ -112,7 +112,7 @@ describe('stream handler', () => {
             title: 'Yas',
             type: 'yas',
             status: 'completed',
-          } as JobSummary,
+          } as JobStatusBucket,
         ],
         failed: [],
       }).subscribe(() => {
@@ -134,7 +134,7 @@ describe('stream handler', () => {
             type: 'yas',
             status: 'completed',
             maxSizeReached: true,
-          } as JobSummary,
+          } as JobStatusBucket,
         ],
         failed: [],
       }).subscribe(() => {
@@ -156,7 +156,7 @@ describe('stream handler', () => {
             type: 'yas',
             status: 'completed',
             csvContainsFormulas: true,
-          } as JobSummary,
+          } as JobStatusBucket,
         ],
         failed: [],
       }).subscribe(() => {
@@ -178,7 +178,7 @@ describe('stream handler', () => {
             title: 'Yas 7',
             type: 'yas',
             status: 'failed',
-          } as JobSummary,
+          } as JobStatusBucket,
         ],
       }).subscribe(() => {
         expect(mockShowSuccess.callCount).toBe(0);
@@ -198,21 +198,21 @@ describe('stream handler', () => {
             title: 'Yas 8',
             type: 'yas',
             status: 'completed',
-          } as JobSummary,
+          } as JobStatusBucket,
           {
             id: 'yas9',
             title: 'Yas 9',
             type: 'yas',
             status: 'completed',
             csvContainsFormulas: true,
-          } as JobSummary,
+          } as JobStatusBucket,
           {
             id: 'yas10',
             title: 'Yas 10',
             type: 'yas',
             status: 'completed',
             maxSizeReached: true,
-          } as JobSummary,
+          } as JobStatusBucket,
         ],
         failed: [
           {
@@ -220,7 +220,7 @@ describe('stream handler', () => {
             title: 'Yas 13',
             type: 'yas',
             status: 'failed',
-          } as JobSummary,
+          } as JobStatusBucket,
         ],
       }).subscribe(() => {
         expect(mockShowSuccess.callCount).toBe(1);
