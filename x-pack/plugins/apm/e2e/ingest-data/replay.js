@@ -129,7 +129,7 @@ async function init() {
   spinner.start();
   requestProgress.total = items.length;
 
-  const limit = pLimit(20); // number of concurrent requests
+  const limit = pLimit(15); // number of concurrent requests
   await Promise.all(
     items.map(async (item) => {
       try {
