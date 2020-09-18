@@ -11,6 +11,7 @@ import { ActionExecutor, ExecutorError, ILicenseState, TaskRunnerFactory } from 
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
+import { licensingMock } from '../../licensing/server/mocks';
 
 const mockTaskManager = taskManagerMock.setup();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -22,6 +23,7 @@ beforeEach(() => {
   mockedLicenseState = licenseStateMock.create();
   mockedActionsConfig = actionsConfigMock.create();
   actionTypeRegistryParams = {
+    licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
     taskRunnerFactory: new TaskRunnerFactory(
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
@@ -235,7 +237,9 @@ describe('isActionTypeEnabled', () => {
   test('should call isLicenseValidForActionType of the license state', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     actionTypeRegistry.isActionTypeEnabled('foo');
-    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType);
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+      notifyUsage: false,
+    });
   });
 
   test('should return false when isActionTypeEnabled is false and isLicenseValidForActionType is true', async () => {

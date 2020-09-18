@@ -211,6 +211,7 @@ describe('Actions Plugin', () => {
         features: featuresPluginMock.createSetup(),
       };
       pluginsStart = {
+        licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
       };

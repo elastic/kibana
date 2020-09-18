@@ -77,7 +77,7 @@ export class LicenseState {
     }
   }
 
-  public notifyUsage(actionType: ActionType) {
+  private notifyUsage(actionType: ActionType) {
     if (this._notifyUsage) {
       this._notifyUsage(getActionTypeFeatureUsageName(actionType));
     }

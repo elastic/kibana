@@ -93,11 +93,11 @@ export interface PluginSetupContract {
 }
 
 export interface PluginStartContract {
-  isActionTypeEnabled(id: string, options: { notifyUsage: boolean }): boolean;
+  isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
   isActionExecutable(
     actionId: string,
     actionTypeId: string,
-    options: { notifyUsage: boolean }
+    options?: { notifyUsage: boolean }
   ): boolean;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;

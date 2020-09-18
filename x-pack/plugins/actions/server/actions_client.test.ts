@@ -14,6 +14,7 @@ import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
+import { licensingMock } from '../../licensing/server/mocks';
 
 import {
   elasticsearchServiceMock,
@@ -47,6 +48,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   mockedLicenseState = licenseStateMock.create();
   actionTypeRegistryParams = {
+    licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
     taskRunnerFactory: new TaskRunnerFactory(
       new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
@@ -299,6 +301,7 @@ describe('create()', () => {
     });
 
     const localActionTypeRegistryParams = {
+      licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
       taskRunnerFactory: new TaskRunnerFactory(
         new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
