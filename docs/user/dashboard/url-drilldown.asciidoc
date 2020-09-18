@@ -240,7 +240,7 @@ Tip: Consider using <<helpers, date>> helper for date formatting.
 |===
 
 [float]
-[[variables]]
+[[disable]]
 ==== Disable URL drilldown
 
 You can disable URL drilldown feature on your {kib} instance by disabling the plugin:
