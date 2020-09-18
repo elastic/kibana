@@ -38,6 +38,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   IAggConfigs,
+  ISearchSource,
   tabifyAggResponse,
 } from '../../../common/search';
 
@@ -48,7 +49,6 @@ import {
   getQueryService,
   getSearchService,
 } from '../../services';
-import { ISearchSource } from '../search_source';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { serializeAggConfig } from './utils';
 
