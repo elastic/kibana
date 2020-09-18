@@ -87,7 +87,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsCreateOptions = {}
   ) {
     const args = { type, attributes, options };
-    await this.ensureAuthorized(type, 'create', options.namespace, { args });
+    const namespaces = [options.namespace, ...(options.initialNamespaces || [])];
+    await this.ensureAuthorized(type, 'create', namespaces, { args });
 
     const savedObject = await this.baseClient.create(type, attributes, options);
     return await this.redactSavedObjectNamespaces(savedObject);
@@ -113,12 +114,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsBaseOptions = {}
   ) {
     const args = { objects, options };
-    await this.ensureAuthorized(
-      this.getUniqueObjectTypes(objects),
-      'bulk_create',
-      options.namespace,
-      { args }
+    const namespaces = objects.reduce(
+      (acc, { initialNamespaces = [] }) => {
+        return acc.concat(initialNamespaces);
+      },
+      [options.namespace]
     );
+
+    await this.ensureAuthorized(this.getUniqueObjectTypes(objects), 'bulk_create', namespaces, {
+      args,
+    });
 
     const response = await this.baseClient.bulkCreate(objects, options);
     return await this.redactSavedObjectsNamespaces(response);

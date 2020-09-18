@@ -230,9 +230,22 @@ export class SavedObjectsRepository {
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
       originId,
+      initialNamespaces,
       version,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
+
+    if (initialNamespaces) {
+      if (!this._registry.isMultiNamespace(type)) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          '"options.initialNamespaces" can only be used on multi-namespace types'
+        );
+      } else if (!initialNamespaces.length) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          '"options.initialNamespaces" must be a non-empty array of strings'
+        );
+      }
+    }
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -247,9 +260,11 @@ export class SavedObjectsRepository {
     } else if (this._registry.isMultiNamespace(type)) {
       if (id && overwrite) {
         // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
-        savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
+        // note: this check throws an error if the object is found but does not exist in this namespace
+        const existingNamespaces = await this.preflightGetNamespaces(type, id, namespace);
+        savedObjectNamespaces = initialNamespaces || existingNamespaces;
       } else {
-        savedObjectNamespaces = getSavedObjectNamespaces(namespace);
+        savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
       }
     }
 
@@ -305,14 +320,25 @@ export class SavedObjectsRepository {
 
     let bulkGetRequestIndexCounter = 0;
     const expectedResults: Either[] = objects.map((object) => {
+      let error: DecoratedError | undefined;
       if (!this._allowedTypes.includes(object.type)) {
+        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
+      } else if (object.initialNamespaces) {
+        if (!this._registry.isMultiNamespace(object.type)) {
+          error = SavedObjectsErrorHelpers.createBadRequestError(
+            '"initialNamespaces" can only be used on multi-namespace types'
+          );
+        } else if (!object.initialNamespaces.length) {
+          error = SavedObjectsErrorHelpers.createBadRequestError(
+            '"initialNamespaces" must be a non-empty array of strings'
+          );
+        }
+      }
+
+      if (error) {
         return {
           tag: 'Left' as 'Left',
-          error: {
-            id: object.id,
-            type: object.type,
-            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type)),
-          },
+          error: { id: object.id, type: object.type, error: errorContent(error) },
         };
       }
 
@@ -362,7 +388,7 @@ export class SavedObjectsRepository {
       let versionProperties;
       const {
         esRequestIndex,
-        object: { version, ...object },
+        object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
       if (esRequestIndex !== undefined) {
@@ -383,13 +409,14 @@ export class SavedObjectsRepository {
             },
           };
         }
-        savedObjectNamespaces = getSavedObjectNamespaces(namespace, docFound && actualResult);
+        savedObjectNamespaces =
+          initialNamespaces || getSavedObjectNamespaces(namespace, docFound && actualResult);
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
-          savedObjectNamespaces = getSavedObjectNamespaces(namespace);
+          savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
         }
         versionProperties = getExpectedVersionProperties(version);
       }

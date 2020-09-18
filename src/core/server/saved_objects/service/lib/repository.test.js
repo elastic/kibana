@@ -635,6 +635,32 @@ describe('SavedObjectsRepository', () => {
         await test(namespace);
       });
 
+      it(`adds initialNamespaces instead of namespaces`, async () => {
+        const test = async (namespace) => {
+          const ns2 = 'bar-namespace';
+          const ns3 = 'baz-namespace';
+          const objects = [
+            { ...obj1, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [ns2] },
+            { ...obj2, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [ns3] },
+          ];
+          await bulkCreateSuccess(objects, { namespace, overwrite: true });
+          const body = [
+            expect.any(Object),
+            expect.objectContaining({ namespaces: [ns2] }),
+            expect.any(Object),
+            expect.objectContaining({ namespaces: [ns3] }),
+          ];
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({ body }),
+            expect.anything()
+          );
+          client.bulk.mockClear();
+          client.mget.mockClear();
+        };
+        await test(undefined);
+        await test(namespace);
+      });
+
       it(`doesn't add namespaces to request body for any types that are not multi-namespace`, async () => {
         const test = async (namespace) => {
           const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
@@ -730,6 +756,34 @@ describe('SavedObjectsRepository', () => {
         await expect(
           savedObjectsRepository.bulkCreate([obj3], { namespace: ALL_NAMESPACES_STRING })
         ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
+
+      it(`returns error when initialNamespaces is used with a non-multi-namespace object`, async () => {
+        const test = async (objType) => {
+          const obj = { ...obj3, type: objType, initialNamespaces: [] };
+          await bulkCreateError(
+            obj,
+            undefined,
+            expectErrorResult(
+              obj,
+              createBadRequestError('"initialNamespaces" can only be used on multi-namespace types')
+            )
+          );
+        };
+        await test('dashboard');
+        await test(NAMESPACE_AGNOSTIC_TYPE);
+      });
+
+      it(`throws when options.initialNamespaces is used with a multi-namespace type and is empty`, async () => {
+        const obj = { ...obj3, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [] };
+        await bulkCreateError(
+          obj,
+          undefined,
+          expectErrorResult(
+            obj,
+            createBadRequestError('"initialNamespaces" must be a non-empty array of strings')
+          )
+        );
       });
 
       it(`returns error when type is invalid`, async () => {
@@ -1895,21 +1949,23 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+      it(`prepends namespace to the id and adds namespace to the body when providing namespace for single-namespace type`, async () => {
         await createSuccess(type, attributes, { id, namespace });
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${namespace}:${type}:${id}`,
+            body: expect.objectContaining({ namespace }),
           }),
           expect.anything()
         );
       });
 
-      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+      it(`doesn't prepend namespace to the id or add namespace to the body when providing no namespace for single-namespace type`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
+            body: expect.not.objectContaining({ namespace: expect.anything() }),
           }),
           expect.anything()
         );
@@ -1920,25 +1976,44 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
+            body: expect.not.objectContaining({ namespace: expect.anything() }),
           }),
           expect.anything()
         );
       });
 
-      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
-        await createSuccess(NAMESPACE_AGNOSTIC_TYPE, attributes, { id, namespace });
-        expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}`,
-          }),
-          expect.anything()
-        );
-        client.create.mockClear();
-
+      it(`doesn't prepend namespace to the id and adds namespaces to body when using multi-namespace type`, async () => {
         await createSuccess(MULTI_NAMESPACE_TYPE, attributes, { id, namespace });
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
+            body: expect.objectContaining({ namespaces: [namespace] }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`adds initialNamespaces instead of namespaces`, async () => {
+        const options = { id, namespace, initialNamespaces: ['bar-namespace', 'baz-namespace'] };
+        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, options);
+        expect(client.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${MULTI_NAMESPACE_TYPE}:${id}`,
+            body: expect.objectContaining({ namespaces: options.initialNamespaces }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`doesn't prepend namespace to the id or add namespace or namespaces fields when using namespace-agnostic type`, async () => {
+        await createSuccess(NAMESPACE_AGNOSTIC_TYPE, attributes, { id, namespace });
+        expect(client.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}`,
+            body: expect.not.objectContaining({
+              namespace: expect.anything(),
+              namespaces: expect.anything(),
+            }),
           }),
           expect.anything()
         );
@@ -1946,6 +2021,28 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
+      it(`throws when options.initialNamespaces is used with a non-multi-namespace object`, async () => {
+        const test = async (objType) => {
+          await expect(
+            savedObjectsRepository.create(objType, attributes, { initialNamespaces: [namespace] })
+          ).rejects.toThrowError(
+            createBadRequestError(
+              '"options.initialNamespaces" can only be used on multi-namespace types'
+            )
+          );
+        };
+        await test('dashboard');
+        await test(NAMESPACE_AGNOSTIC_TYPE);
+      });
+
+      it(`throws when options.initialNamespaces is used with a multi-namespace type and is empty`, async () => {
+        await expect(
+          savedObjectsRepository.create(MULTI_NAMESPACE_TYPE, attributes, { initialNamespaces: [] })
+        ).rejects.toThrowError(
+          createBadRequestError('"options.initialNamespaces" must be a non-empty array of strings')
+        );
+      });
+
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           savedObjectsRepository.create(type, attributes, { namespace: ALL_NAMESPACES_STRING })

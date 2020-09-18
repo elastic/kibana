@@ -50,6 +50,13 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   refresh?: MutatingOperationRefreshSetting;
   /** Optional ID of the original saved object, if this object's `id` was regenerated */
   originId?: string;
+  /**
+   * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsCreateOptions}.
+   *
+   * Note: this can only be used for multi-namespace object types.
+   */
+  initialNamespaces?: string[];
 }
 
 /**
@@ -66,6 +73,13 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   migrationVersion?: SavedObjectsMigrationVersion;
   /** Optional ID of the original saved object, if this object's `id` was regenerated */
   originId?: string;
+  /**
+   * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsCreateOptions}.
+   *
+   * Note: this can only be used for multi-namespace object types.
+   */
+  initialNamespaces?: string[];
 }
 
 /**

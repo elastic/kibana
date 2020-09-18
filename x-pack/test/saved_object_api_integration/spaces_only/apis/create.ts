@@ -48,6 +48,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+    CASES.NEW_EACH_SPACE_OBJ,
+    CASES.NEW_ALL_SPACES_OBJ,
   ];
 };
 
