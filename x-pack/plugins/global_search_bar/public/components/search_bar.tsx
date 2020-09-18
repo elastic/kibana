@@ -11,6 +11,8 @@ import {
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   EuiText,
+  EuiIcon,
+  EuiHeaderSectionItemButton,
   EuiSelectableMessage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -138,6 +140,12 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     <EuiSelectableTemplateSitewide
       onChange={onChange}
       options={options}
+      popoverButtonBreakpoints={['xs', 's']}
+      popoverButton={
+        <EuiHeaderSectionItemButton aria-label="Site-wide search">
+          <EuiIcon type="search" size="m" />
+        </EuiHeaderSectionItemButton>
+      }
       searchProps={{
         onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
           setSearchValue(e.currentTarget.value),
