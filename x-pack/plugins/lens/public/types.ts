@@ -23,6 +23,7 @@ import {
   TriggerContext,
   VALUE_CLICK_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
+import { LensChartControls } from './xy_visualization/xy_expression';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -535,6 +536,10 @@ export interface LensBrushEvent {
   name: 'brush';
   data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
 }
+export interface LensControlsEvent {
+  name: 'controls';
+  data: LensChartControls;
+}
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
   return event.name === 'filter';
@@ -544,11 +549,15 @@ export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensB
   return event.name === 'brush';
 }
 
+export function isLensControlsEvent(event: ExpressionRendererEvent): event is LensControlsEvent {
+  return event.name === 'controls';
+}
+
 /**
  * Expression renderer handlers specifically for lens renderers. This is a narrowed down
  * version of the general render handlers, specifying supported event types. If this type is
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensFilterEvent | LensBrushEvent) => void;
+  event: (event: LensFilterEvent | LensBrushEvent | LensControlsEvent) => void;
 }

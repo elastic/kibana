@@ -211,4 +211,10 @@ export interface IEmbeddable<
    * List of triggers that this embeddable will execute.
    */
   supportedTriggers(): Array<keyof TriggerContextMapping>;
+
+  /**
+   * Generate .png image out of the embeddable. This method is optional, however,
+   * if it is implemented, the embeddable must return a .png image as a `Blob`.
+   */
+  toPngBlob?(): Promise<Blob>;
 }

@@ -32,7 +32,8 @@ import {
 import { DOC_TYPE, Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { isLensBrushEvent, isLensFilterEvent } from '../../types';
+import { isLensBrushEvent, isLensFilterEvent, isLensControlsEvent } from '../../types';
+import { LensChartControls } from '../../xy_visualization/xy_expression';
 
 export interface LensEmbeddableConfiguration {
   expression: string | null;
@@ -63,6 +64,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private autoRefreshFetchSubscription: Subscription;
+  private chartControls: LensChartControls;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -207,6 +209,9 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         embeddable: this,
       });
     }
+    if (isLensControlsEvent(event)) {
+      this.chartControls = event.data;
+    }
   };
 
   destroy() {
@@ -232,5 +237,11 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         this.render(this.domNode);
       }
     }
+  }
+
+  async toPngBlob() {
+    if (!this.chartControls) throw new Error('Chart controls not available.');
+    if (!this.chartControls.toPngBlob) throw new Error('Lens <Chart> .toPngBlob() not available.');
+    return await this.chartControls.toPngBlob();
   }
 }
