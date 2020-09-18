@@ -39,13 +39,6 @@ export interface AgentAction extends NewAgentAction {
   ack_data?: any;
 }
 
-export interface AgentUpgradeAction extends AgentAction {
-  data: {
-    version: string;
-    source_uri: string;
-  };
-}
-
 export interface AgentPolicyAction extends NewAgentAction {
   id: string;
   type: AgentActionType;
@@ -72,17 +65,7 @@ export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
   policy_id: string;
   policy_revision: number;
 };
-export type AgentUpgradeActionSOAttributes = CommonAgentActionSOAttributes & {
-  data: {
-    version: string;
-    source_uri: string;
-  };
-};
-
-export type BaseAgentActionSOAttributes =
-  | AgentActionSOAttributes
-  | AgentPolicyActionSOAttributes
-  | AgentUpgradeActionSOAttributes;
+export type BaseAgentActionSOAttributes = AgentActionSOAttributes | AgentPolicyActionSOAttributes;
 
 export interface NewAgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';

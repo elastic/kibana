@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { AgentUpgradeActionSOAttributes, AgentSOAttributes, AgentAction } from '../../types';
+import { AgentSOAttributes, AgentAction, AgentActionSOAttributes } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAgentAction } from './actions';
 import { appContextService } from '../app_context';
@@ -44,11 +44,13 @@ export async function ackAgentUpgraded(
     attributes: { data },
   } = await appContextService
     .getEncryptedSavedObjects()
-    .getDecryptedAsInternalUser<AgentUpgradeActionSOAttributes>(
+    .getDecryptedAsInternalUser<AgentActionSOAttributes>(
       AGENT_ACTION_SAVED_OBJECT_TYPE,
       agentAction.id
     );
+  if (!data) throw new Error('data missing from UPGRADE action');
   const { version } = JSON.parse(data);
+  if (!version) throw new Error('version missing from UPGRADE action');
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentAction.agent_id, {
     upgraded_at: new Date().toISOString(),
     local_metadata: {

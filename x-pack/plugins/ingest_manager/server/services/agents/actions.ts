@@ -12,7 +12,6 @@ import {
   BaseAgentActionSOAttributes,
   AgentActionSOAttributes,
   AgentPolicyActionSOAttributes,
-  AgentUpgradeAction,
 } from '../../../common/types/models';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
@@ -36,10 +35,7 @@ export function createAgentPolicyAction(
 ): Promise<AgentPolicyAction> {
   return createAction(soClient, newAgentAction);
 }
-async function createAction(
-  soClient: SavedObjectsClientContract,
-  newAgentAction: Omit<AgentUpgradeAction, 'id'>
-): Promise<AgentUpgradeAction>;
+
 async function createAction(
   soClient: SavedObjectsClientContract,
   newAgentAction: Omit<AgentPolicyAction, 'id'>
@@ -50,11 +46,8 @@ async function createAction(
 ): Promise<AgentAction>;
 async function createAction(
   soClient: SavedObjectsClientContract,
-  newAgentAction:
-    | Omit<AgentPolicyAction, 'id'>
-    | Omit<AgentAction, 'id'>
-    | Omit<AgentUpgradeAction, 'id'>
-): Promise<AgentPolicyAction | AgentAction | AgentUpgradeAction> {
+  newAgentAction: Omit<AgentPolicyAction, 'id'> | Omit<AgentAction, 'id'>
+): Promise<AgentPolicyAction | AgentAction> {
   const so = await soClient.create<BaseAgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, {
     ...newAgentAction,
     data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
