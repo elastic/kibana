@@ -8841,7 +8841,6 @@
     "xpack.infra.registerFeatures.logsDescription": "ログをリアルタイムでストリーするか、コンソール式の UI で履歴ビューをスクロールします。",
     "xpack.infra.registerFeatures.logsTitle": "ログ",
     "xpack.infra.sampleDataLinkLabel": "ログ",
-    "xpack.infra.savedView.changeView": "ビューの変更",
     "xpack.infra.savedView.currentView": "現在のビュー",
     "xpack.infra.savedView.defaultViewNameHosts": "デフォルトビュー",
     "xpack.infra.savedView.errorOnCreate.duplicateViewName": "その名前のビューは既に存在します",
