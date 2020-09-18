@@ -16,7 +16,8 @@
     "embeddable",
     "uiActions",
     "kibanaLegacy",
-    "indexPatternManagement"
+    "indexPatternManagement",
+    "discover"
   ],
   "optionalPlugins": [
     "home",
@@ -34,5 +35,8 @@
     "dashboard",
     "savedObjects",
     "home"
+  ],
+  "extraPublicDirs": [
+    "common"
   ]
 }
