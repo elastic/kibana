@@ -8,6 +8,7 @@ import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { PostAgentUnenrollResponse, PostBulkAgentUnenrollResponse } from '../../../common/types';
 import { PostAgentUnenrollRequestSchema, PostBulkAgentUnenrollRequestSchema } from '../../types';
+import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 
@@ -26,11 +27,8 @@ export const postAgentUnenrollHandler: RequestHandler<
 
     const body: PostAgentUnenrollResponse = {};
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -41,7 +39,7 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
 > = async (context, request, response) => {
   if (!licenseService.isGoldPlus()) {
     return response.customError({
-      statusCode: 500,
+      statusCode: 403,
       body: { message: 'Requires Gold license' },
     });
   }
@@ -58,10 +56,7 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
 
     const body: PostBulkAgentUnenrollResponse = {};
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };

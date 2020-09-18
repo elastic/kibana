@@ -29,6 +29,7 @@ import {
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
 } from '../../types';
+import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
@@ -316,11 +317,8 @@ export const putAgentsReassignHandler: RequestHandler<
 
     const body: PutAgentReassignResponse = {};
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -331,7 +329,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
 > = async (context, request, response) => {
   if (!licenseService.isGoldPlus()) {
     return response.customError({
-      statusCode: 500,
+      statusCode: 403,
       body: { message: 'Requires Gold license' },
     });
   }
@@ -360,11 +358,8 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       };
     }, {});
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 

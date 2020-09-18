@@ -43,8 +43,8 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         throw error;
       }
       setIsSubmitting(false);
-      const successMessage = forceUnenroll
-        ? isSingleAgent
+      if (forceUnenroll) {
+        const successMessage = isSingleAgent
           ? i18n.translate(
               'xpack.ingestManager.unenrollAgents.successForceSingleNotificationTitle',
               { defaultMessage: 'Agent unenrolled' }
@@ -52,15 +52,18 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
           : i18n.translate(
               'xpack.ingestManager.unenrollAgents.successForceMultiNotificationTitle',
               { defaultMessage: 'Agents unenrolled' }
-            )
-        : isSingleAgent
-        ? i18n.translate('xpack.ingestManager.unenrollAgents.successSingleNotificationTitle', {
-            defaultMessage: 'Unenrolling agent',
-          })
-        : i18n.translate('xpack.ingestManager.unenrollAgents.successMultiNotificationTitle', {
-            defaultMessage: 'Unenrolling agents',
-          });
-      notifications.toasts.addSuccess(successMessage);
+            );
+        notifications.toasts.addSuccess(successMessage);
+      } else {
+        const successMessage = isSingleAgent
+          ? i18n.translate('xpack.ingestManager.unenrollAgents.successSingleNotificationTitle', {
+              defaultMessage: 'Unenrolling agent',
+            })
+          : i18n.translate('xpack.ingestManager.unenrollAgents.successMultiNotificationTitle', {
+              defaultMessage: 'Unenrolling agents',
+            });
+        notifications.toasts.addSuccess(successMessage);
+      }
       onClose();
     } catch (error) {
       setIsSubmitting(false);

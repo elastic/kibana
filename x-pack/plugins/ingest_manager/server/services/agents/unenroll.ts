@@ -114,7 +114,7 @@ export async function forceUnenrollAgents(
   const apiKeys: string[] = [];
 
   // Get all API keys that need to be invalidated
-  agentsToUpdate.map((agent) => {
+  agentsToUpdate.forEach((agent) => {
     if (agent.access_api_key_id) {
       apiKeys.push(agent.access_api_key_id);
     }

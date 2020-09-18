@@ -64,7 +64,7 @@ export const findAllSOs = async <T = unknown>(
         page: currentPage,
       });
       if (currentPageSavedObjects.length) {
-        savedObjectResults = [...savedObjectResults, ...currentPageSavedObjects];
+        savedObjectResults = savedObjectResults.concat(currentPageSavedObjects);
       }
     }
   }
