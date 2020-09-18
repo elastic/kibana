@@ -34,6 +34,7 @@ import {
   panelNotificationTrigger,
   PANEL_NOTIFICATION_TRIGGER,
 } from './lib';
+import { CopyPngAction } from './lib/actions/copy_png_action';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
@@ -61,7 +62,6 @@ export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(panelBadgeTrigger);
   uiActions.registerTrigger(panelNotificationTrigger);
 
-  const actionApplyFilter = createFilterAction();
-
-  uiActions.registerAction(actionApplyFilter);
+  uiActions.registerAction(createFilterAction());
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, new CopyPngAction());
 };
