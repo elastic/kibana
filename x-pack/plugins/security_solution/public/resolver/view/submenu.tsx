@@ -82,7 +82,6 @@ const NodeSubMenuComponents = React.memo(
       }
     }, [relatedEventStats, relatedEventCallbacks]);
 
-    
     const { pillStroke: pillBorderStroke, resolverBackground: pillFill } = useColors();
     const listStylesFromTheme = useMemo(() => {
       return {
@@ -107,6 +106,7 @@ const NodeSubMenuComponents = React.memo(
                 className="item"
                 data-test-subj="resolver:map:node-submenu-item"
                 style={listStylesFromTheme}
+                key={opt.optionTitle}
               >
                 <button type="button" className="kbn-resetFocusState" onClick={opt.action}>
                   {opt.prefix} {opt.optionTitle}
