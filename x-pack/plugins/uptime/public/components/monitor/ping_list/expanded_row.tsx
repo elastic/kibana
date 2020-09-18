@@ -22,6 +22,7 @@ import { EuiPanel } from '@elastic/eui';
 import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 import { PingRedirects } from './ping_redirects';
+import { ScriptExpandedRow } from './script_expanded_row';
 
 interface Props {
   ping: Ping;
@@ -55,6 +56,10 @@ const BodyExcerpt = ({ content }: { content: string }) =>
 
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
+
+  if (ping.monitor.type === 'suitejourney') {
+    return <ScriptExpandedRow checkGroup={ping.monitor.check_group} />;
+  }
 
   // Show the error block
   if (ping.error) {
@@ -115,6 +120,7 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
         description,
       };
     }) ?? [];
+  console.log(ping);
   if (ping.script?.journey) {
     listItems.push({
       title: i18n.translate('xpack.uptime.pingList.expandedRow.journey', {

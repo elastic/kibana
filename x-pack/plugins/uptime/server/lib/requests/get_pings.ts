@@ -27,7 +27,17 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
 }) => {
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
   const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
-  const filter: any[] = [{ range: { '@timestamp': { gte: from, lte: to } } }];
+  const filter: any[] = [
+    { range: { '@timestamp': { gte: from, lte: to } } },
+    { exists: { field: 'summary' } },
+    {
+      range: {
+        'monitor.duration.us': {
+          gt: 0,
+        },
+      },
+    },
+  ];
   if (monitorId) {
     filter.push({ term: { 'monitor.id': monitorId } });
   }

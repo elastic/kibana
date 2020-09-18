@@ -145,6 +145,8 @@ export const PingListComponent = (props: Props) => {
     false
   );
 
+  console.log(pings);
+
   const columns: any[] = [
     {
       field: 'monitor.status',
@@ -235,12 +237,15 @@ export const PingListComponent = (props: Props) => {
       width: '24px',
       isExpander: true,
       render: (item: Ping) => {
-        console.log("CAN RENDER", !item.script?.journey, item.script)
+        console.log('CAN RENDER', !item.script?.journey, item.script);
         return (
           <EuiButtonIcon
             data-test-subj="uptimePingListExpandBtn"
             onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
-            disabled={!(item.script?.journey) && !item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)}
+            disabled={
+              // !item.suite?.journey && !item.error && !(item.http?.response?.body?.bytes ?? 0 > 0)
+              false
+            }
             aria-label={
               expandedRows[item.docId]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {
