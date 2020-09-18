@@ -7,7 +7,8 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ReportingConfigType } from '../server/config';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { LayoutParams } from '../server/lib/layouts';
+import { LayoutParams } from '../server/lib/layouts';
+export { LayoutParams };
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ReportDocument, ReportSource } from '../server/lib/store/report';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -23,6 +24,39 @@ export type JobStatus =
 
 export interface JobContent {
   content: string;
+}
+
+export interface ReportApiJSON {
+  id: string;
+  index: string;
+  kibana_name: string;
+  kibana_id: string;
+  browser_type: string | undefined;
+  created_at: string;
+  priority?: number;
+  jobtype: string;
+  created_by: string | false;
+  timeout?: number;
+  output?: {
+    content_type: string;
+    size: number;
+    warnings?: string[];
+  };
+  process_expiration?: string;
+  completed_at: string | undefined;
+  payload: {
+    layout?: LayoutParams;
+    title: string;
+    browserTimezone?: string;
+  };
+  meta: {
+    layout?: string;
+    objectType: string;
+  };
+  max_attempts: number;
+  started_at: string | undefined;
+  attempts: number;
+  status: string;
 }
 
 export interface PollerOptions {

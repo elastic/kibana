@@ -8,7 +8,7 @@ import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { HttpSetup } from 'src/core/public';
 import { DownloadReportFn, ManagementLinkFn } from '../';
-import { JobId, ReportDocument, ReportSource } from '../../common/types';
+import { JobId, ReportApiJSON, ReportDocument, ReportSource } from '../../common/types';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
@@ -25,40 +25,6 @@ export interface JobQueueEntry {
 export interface JobContent {
   content: string;
   content_type: boolean;
-}
-
-export interface JobInfo {
-  kibana_name: string;
-  kibana_id: string;
-  browser_type: string;
-  created_at: string;
-  priority: number;
-  jobtype: string;
-  created_by: string;
-  timeout: number;
-  output: {
-    content_type: string;
-    size: number;
-    warnings: string[];
-  };
-  process_expiration: string;
-  completed_at: string;
-  payload: {
-    layout: { id: string; dimensions: { width: number; height: number } };
-    objects: Array<{ relativeUrl: string }>;
-    type: string;
-    title: string;
-    forceNow: string;
-    browserTimezone: string;
-  };
-  meta: {
-    layout: string;
-    objectType: string;
-  };
-  max_attempts: number;
-  started_at: string;
-  attempts: number;
-  status: string;
 }
 
 interface JobParams {
@@ -122,7 +88,7 @@ export class ReportingAPIClient {
     });
   }
 
-  public getInfo(jobId: string): Promise<JobInfo> {
+  public getInfo(jobId: string): Promise<ReportApiJSON> {
     return this.http.get(`${API_LIST_URL}/info/${jobId}`, {
       asSystemRequest: true,
     });

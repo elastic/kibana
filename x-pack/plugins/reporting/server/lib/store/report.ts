@@ -7,7 +7,7 @@
 import moment from 'moment';
 // @ts-ignore no module definition
 import Puid from 'puid';
-import { JobStatus } from '../../../common/types';
+import { JobStatus, ReportApiJSON } from '../../../common/types';
 import { JobStatuses } from '../../../constants';
 import { LayoutParams } from '../layouts';
 import { TaskRunResult } from '../tasks';
@@ -28,6 +28,8 @@ export interface ReportDocument extends ReportDocumentHead {
 
 export interface ReportSource {
   jobtype: string;
+  kibana_name: string;
+  kibana_id: string;
   created_by: string | false;
   payload: {
     headers: string; // encrypted headers
@@ -62,6 +64,8 @@ export class Report implements Partial<ReportSource> {
   public _primary_term?: unknown; // set by ES
   public _seq_no: unknown; // set by ES
 
+  public readonly kibana_name: ReportSource['kibana_name'];
+  public readonly kibana_id: ReportSource['kibana_id'];
   public readonly jobtype: ReportSource['jobtype'];
   public readonly created_at: ReportSource['created_at'];
   public readonly created_by: ReportSource['created_by'];
@@ -91,6 +95,8 @@ export class Report implements Partial<ReportSource> {
     this._seq_no = opts._seq_no;
 
     this.payload = opts.payload!;
+    this.kibana_name = opts.kibana_name!;
+    this.kibana_id = opts.kibana_id!;
     this.jobtype = opts.jobtype!;
     this.max_attempts = opts.max_attempts!;
     this.attempts = opts.attempts || 0;
@@ -150,10 +156,12 @@ export class Report implements Partial<ReportSource> {
   /*
    * Data structure for API responses
    */
-  toApiJSON() {
+  toApiJSON(): ReportApiJSON {
     return {
       id: this._id,
-      index: this._index,
+      index: this._index!,
+      kibana_name: this.kibana_name,
+      kibana_id: this.kibana_id,
       jobtype: this.jobtype,
       created_at: this.created_at,
       created_by: this.created_by,
