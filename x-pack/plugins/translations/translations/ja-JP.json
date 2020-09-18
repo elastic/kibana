@@ -207,7 +207,6 @@
     "apmOss.tutorial.nodeClient.configure.commands.setRequiredServiceNameComment": "package.json からサービス名を上書きします",
     "apmOss.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment": "APM Server にトークンが必要な場合に使います",
     "apmOss.tutorial.nodeClient.configure.textPost": "[Babel/ES モジュール]({babelEsModulesLink}) との使用を含む高度な用途に関しては、 [ドキュメンテーション]({documentationLink}) をご覧ください。",
-    "apmOss.tutorial.nodeClient.configure.textPre": "エージェントとは、アプリケーションプロセス内で実行されるライブラリです。APM サービスは「serviceName」に基づいてプログラムで作成されます。このエージェントは様々なフレームワークをサポートしていますが、カスタムスタックで使用することもできます。",
     "apmOss.tutorial.nodeClient.configure.title": "エージェントの構成",
     "apmOss.tutorial.nodeClient.install.textPre": "Node.js 用の APM エージェントをアプリケーションに依存関係としてインストール。",
     "apmOss.tutorial.nodeClient.install.title": "APM エージェントのインストール",
