@@ -19,7 +19,7 @@
 
 import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
-import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
 
@@ -66,14 +66,10 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
           aria-label="Newsfeed menu"
+          notification={showBadge ? true : null}
           onClick={showFlyout}
         >
           <EuiIcon type="cheer" size="m" />
-          {showBadge ? (
-            <EuiNotificationBadge className="euiHeaderNotification" data-test-subj="showBadgeNews">
-              &#9642;
-            </EuiNotificationBadge>
-          ) : null}
         </EuiHeaderSectionItemButton>
         {flyoutVisible ? <NewsfeedFlyout /> : null}
       </Fragment>
