@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import debounce from 'lodash/debounce';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 
@@ -86,7 +86,7 @@ export class GeoPointForm extends Component<Props, State> {
     this.hasNameCollision(geoPointField);
   };
 
-  hasNameCollision = _.debounce((name: string) => {
+  hasNameCollision = debounce((name: string) => {
     try {
       const geoPointFieldError = this.props.hasNameCollision(name) ? getNameCollisionMsg(name) : '';
       this.setState({ geoPointFieldError });

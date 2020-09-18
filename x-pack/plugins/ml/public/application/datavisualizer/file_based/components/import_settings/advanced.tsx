@@ -139,6 +139,7 @@ export const AdvancedSettings: FC<Props> = ({
         combinedFields={combinedFields}
         onCombinedFieldsChange={onCombinedFieldsChange}
         results={results}
+        isDisabled={initialized === true}
       />
 
       <EuiFlexGroup>

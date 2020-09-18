@@ -38,6 +38,7 @@ interface Props {
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
   results: FindFileStructureResponse;
+  isDisabled: boolean;
 }
 
 interface State {
@@ -188,28 +189,35 @@ export class CombinedFieldsForm extends Component<Props, State> {
               <EuiFlexItem>
                 <CombinedFieldLabel combinedField={combinedField} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  onClick={this.removeCombinedField.bind(null, idx)}
-                  title={i18n.translate('xpack.ml.fileDatavisualizer.removeCombinedFieldsLabel', {
-                    defaultMessage: 'Remove combined field',
-                  })}
-                  aria-label={i18n.translate(
-                    'xpack.ml.fileDatavisualizer.removeCombinedFieldsLabel',
-                    {
+              {!this.props.isDisabled && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    onClick={this.removeCombinedField.bind(null, idx)}
+                    title={i18n.translate('xpack.ml.fileDatavisualizer.removeCombinedFieldsLabel', {
                       defaultMessage: 'Remove combined field',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
+                    })}
+                    aria-label={i18n.translate(
+                      'xpack.ml.fileDatavisualizer.removeCombinedFieldsLabel',
+                      {
+                        defaultMessage: 'Remove combined field',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           ))}
           <EuiPopover
             id="combineFieldsPopover"
             button={
-              <EuiButtonEmpty onClick={this.togglePopover} size="xs" iconType="plusInCircleFilled">
+              <EuiButtonEmpty
+                onClick={this.togglePopover}
+                size="xs"
+                iconType="plusInCircleFilled"
+                isDisabled={this.props.isDisabled}
+              >
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.addCombinedFieldsLabel"
                   defaultMessage="Add combined field"
