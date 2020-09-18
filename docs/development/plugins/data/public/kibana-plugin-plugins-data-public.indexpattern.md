@@ -25,11 +25,11 @@ export declare class IndexPattern implements IIndexPattern
 |  [flattenHit](./kibana-plugin-plugins-data-public.indexpattern.flattenhit.md) |  | <code>any</code> |  |
 |  [formatField](./kibana-plugin-plugins-data-public.indexpattern.formatfield.md) |  | <code>any</code> |  |
 |  [formatHit](./kibana-plugin-plugins-data-public.indexpattern.formathit.md) |  | <code>any</code> |  |
-|  [getOriginalBody](./kibana-plugin-plugins-data-public.indexpattern.getoriginalbody.md) |  | <code>() =&gt; {</code><br/><code>        [x: string]: any;</code><br/><code>    }</code> |  |
+|  [getOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.getoriginalsavedobjectbody.md) |  | <code>() =&gt; {</code><br/><code>        [x: string]: any;</code><br/><code>    }</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpattern.intervalname.md) |  | <code>string &#124; undefined</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
-|  [resetOriginalBody](./kibana-plugin-plugins-data-public.indexpattern.resetoriginalbody.md) |  | <code>() =&gt; void</code> |  |
+|  [resetOriginalSavedObjectBody](./kibana-plugin-plugins-data-public.indexpattern.resetoriginalsavedobjectbody.md) |  | <code>() =&gt; void</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
@@ -43,6 +43,7 @@ export declare class IndexPattern implements IIndexPattern
 |  --- | --- | --- |
 |  [addScriptedField(name, script, fieldType, lang)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  |  |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-public.indexpattern.getaggregationrestrictions.md) |  |  |
+|  [getAsSavedObjectBody()](./kibana-plugin-plugins-data-public.indexpattern.getassavedobjectbody.md) |  |  |
 |  [getComputedFields()](./kibana-plugin-plugins-data-public.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-public.indexpattern.getfieldbyname.md) |  |  |
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfield.md) |  |  |
@@ -54,7 +55,6 @@ export declare class IndexPattern implements IIndexPattern
 |  [isTimeBasedWildcard()](./kibana-plugin-plugins-data-public.indexpattern.istimebasedwildcard.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
-|  [prepBody()](./kibana-plugin-plugins-data-public.indexpattern.prepbody.md) |  |  |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |
 

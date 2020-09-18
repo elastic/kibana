@@ -349,7 +349,7 @@ export class IndexPatternsService {
       }
     }
 
-    indexPattern.resetOriginalBody();
+    indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
   };
 
@@ -389,7 +389,7 @@ export class IndexPatternsService {
       }
     }
 
-    const body = indexPattern.prepBody();
+    const body = indexPattern.getAsSavedObjectBody();
     const response = await this.savedObjectsClient.create(savedObjectType, body, {
       id: indexPattern.id,
     });
@@ -405,8 +405,8 @@ export class IndexPatternsService {
     if (!indexPattern.id) return;
 
     // get the list of attributes
-    const body = indexPattern.prepBody();
-    const originalBody = indexPattern.getOriginalBody();
+    const body = indexPattern.getAsSavedObjectBody();
+    const originalBody = indexPattern.getOriginalSavedObjectBody();
 
     // get changed keys
     const originalChangedKeys: string[] = [];
@@ -426,7 +426,7 @@ export class IndexPatternsService {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = await this.get(indexPattern.id as string);
           // What keys changed from now and what the server returned
-          const updatedBody = samePattern.prepBody();
+          const updatedBody = samePattern.getAsSavedObjectBody();
 
           // Build a list of changed keys from the server response
           // and ensure we ignore the key if the server response

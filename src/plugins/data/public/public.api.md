@@ -1120,6 +1120,17 @@ export class IndexPattern implements IIndexPattern {
         time_zone?: string | undefined;
     }>> | undefined;
     // (undocumented)
+    getAsSavedObjectBody(): {
+        title: string;
+        timeFieldName: string | undefined;
+        intervalName: string | undefined;
+        sourceFilters: string | undefined;
+        fields: string | undefined;
+        fieldFormatMap: string | undefined;
+        type: string | undefined;
+        typeMeta: string | undefined;
+    };
+    // (undocumented)
     getComputedFields(): {
         storedFields: string[];
         scriptFields: any;
@@ -1135,7 +1146,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     // (undocumented)
-    getOriginalBody: () => {
+    getOriginalSavedObjectBody: () => {
         [x: string]: any;
     };
     // (undocumented)
@@ -1161,20 +1172,9 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     popularizeField(fieldName: string, unit?: number): Promise<void>;
     // (undocumented)
-    prepBody(): {
-        title: string;
-        timeFieldName: string | undefined;
-        intervalName: string | undefined;
-        sourceFilters: string | undefined;
-        fields: string | undefined;
-        fieldFormatMap: string | undefined;
-        type: string | undefined;
-        typeMeta: string | undefined;
-    };
-    // (undocumented)
     removeScriptedField(fieldName: string): void;
     // (undocumented)
-    resetOriginalBody: () => void;
+    resetOriginalSavedObjectBody: () => void;
     // Warning: (ae-forgotten-export) The symbol "SourceFilter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

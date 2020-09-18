@@ -31,7 +31,6 @@ import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields'
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
-import { expandShorthand, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 
@@ -60,32 +59,9 @@ export class IndexPattern implements IIndexPattern {
   public version: string | undefined;
   private savedObjectsClient: SavedObjectsClientCommon;
   public sourceFilters?: SourceFilter[];
-  private originalBody: { [key: string]: any } = {};
+  private originalSavedObjectBody: { [key: string]: any } = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
-
-  // todo  get rid  of this
-  private mapping: MappingObject = expandShorthand({
-    title: ES_FIELD_TYPES.TEXT,
-    timeFieldName: ES_FIELD_TYPES.KEYWORD,
-    intervalName: ES_FIELD_TYPES.KEYWORD,
-    fields: 'json',
-    sourceFilters: 'json',
-    fieldFormatMap: {
-      type: ES_FIELD_TYPES.TEXT,
-      _serialize: (map = {}) => {
-        const serialized = _.transform(map, this.serializeFieldFormatMap);
-        return _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
-      },
-      _deserialize: (map = '{}') => {
-        return _.mapValues(JSON.parse(map), (mapping) => {
-          return this.deserializeFieldFormatMap(mapping);
-        });
-      },
-    },
-    type: ES_FIELD_TYPES.KEYWORD,
-    typeMeta: 'json',
-  });
 
   constructor({
     spec = {},
@@ -129,17 +105,11 @@ export class IndexPattern implements IIndexPattern {
     });
   }
 
-  getOriginalBody = () => ({ ...this.originalBody });
+  getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
 
-  resetOriginalBody = () => {
-    this.originalBody = this.prepBody();
+  resetOriginalSavedObjectBody = () => {
+    this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
-
-  private serializeFieldFormatMap(flat: any, format: string, field: string | undefined) {
-    if (format && field) {
-      flat[field] = format;
-    }
-  }
 
   private deserializeFieldFormatMap(mapping: any) {
     try {
@@ -270,9 +240,14 @@ export class IndexPattern implements IIndexPattern {
     field.count = count;
 
     try {
-      const res = await this.savedObjectsClient.update('index-pattern', this.id, this.prepBody(), {
-        version: this.version,
-      });
+      const res = await this.savedObjectsClient.update(
+        'index-pattern',
+        this.id,
+        this.getAsSavedObjectBody(),
+        {
+          version: this.version,
+        }
+      );
       this.version = res.version;
     } catch (e) {
       // no need for an error message here
@@ -318,16 +293,24 @@ export class IndexPattern implements IIndexPattern {
     return _.includes(this.title, '*');
   }
 
-  prepBody() {
+  getAsSavedObjectBody() {
+    const serializeFieldFormatMap = (flat: any, format: string, field: string | undefined) => {
+      if (format && field) {
+        flat[field] = format;
+      }
+    };
+    const serialized = _.transform(this.fieldFormatMap, serializeFieldFormatMap);
+    const fieldFormatMap = _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
+
     return {
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
-      sourceFilters: this.mapping.sourceFilters._serialize!(this.sourceFilters),
-      fields: this.mapping.fields._serialize!(this.fields),
-      fieldFormatMap: this.mapping.fieldFormatMap._serialize!(this.fieldFormatMap),
+      sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
+      fields: this.fields ? JSON.stringify(this.fields) : undefined,
+      fieldFormatMap,
       type: this.type,
-      typeMeta: this.mapping.typeMeta._serialize!(this.typeMeta),
+      typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
     };
   }
 
