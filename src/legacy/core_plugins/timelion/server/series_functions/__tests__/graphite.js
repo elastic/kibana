@@ -17,31 +17,32 @@
  * under the License.
  */
 
+import proxyquire from 'proxyquire';
+import Promise from 'bluebird';
 const expect = require('chai').expect;
 
-import fn from './graphite';
-
-jest.mock('node-fetch', () => () => {
+const graphiteResponse = function () {
   return Promise.resolve({
     json: function () {
-      return [
-        {
-          target: '__beer__',
-          datapoints: [
-            [3, 1000],
-            [14, 2000],
-            [1.5, 3000],
-            [92.6535, 4000],
-          ],
-        },
-      ];
-    },
+      return [{
+        target: '__beer__',
+        datapoints: [
+          [3, 1000],
+          [14, 2000],
+          [1.5, 3000],
+          [92.6535, 4000],
+        ]
+      }];
+    }
   });
-});
+};
 
-import invoke from './__tests__/helpers/invoke_series_fn.js';
+const filename = require('path').basename(__filename);
+const fn = proxyquire(`../${filename}`, { 'node-fetch': graphiteResponse });
 
-describe('graphite', function () {
+import invoke from './helpers/invoke_series_fn.js';
+
+describe(filename, function () {
   it('should wrap the graphite response up in a seriesList', function () {
     return invoke(fn, []).then(function (result) {
       expect(result.output.list[0].data[0][1]).to.eql(3);
