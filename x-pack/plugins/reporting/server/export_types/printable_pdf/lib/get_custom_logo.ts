@@ -14,9 +14,13 @@ export const getCustomLogo = async (
   spaceId?: string
 ) => {
   const fakeRequest = reporting.getFakeRequest({ headers: conditionalHeaders.headers }, spaceId);
-  const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest);
-
-  const logo: string = await uiSettingsClient.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
+  const [
+    uiSettingsClient,
+    logo,
+  ] = await Promise.all([
+    reporting.getUiSettingsClient(fakeRequest),
+    uiSettingsClient.get(UI_SETTINGS_CUSTOM_PDF_LOGO),
+  ];
 
   // continue the pipeline
   return { conditionalHeaders, logo };
