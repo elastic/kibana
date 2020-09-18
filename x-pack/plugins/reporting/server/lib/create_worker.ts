@@ -38,7 +38,7 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
     // and hands it to the export type run function
     const workerFn = (
       jobSource: ReportDocument,
-      task: ReportTaskParams,
+      payload: ReportTaskParams['payload'],
       cancellationToken: CancellationToken
     ) => {
       const {
@@ -56,7 +56,7 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
       }
 
       // pass the work to the jobExecutor
-      return jobTypeExecutor(jobId, task.payload, cancellationToken);
+      return jobTypeExecutor(jobId, payload, cancellationToken);
     };
 
     const workerOptions = {
