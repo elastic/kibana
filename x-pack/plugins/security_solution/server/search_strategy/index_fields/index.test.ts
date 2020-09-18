@@ -6,12 +6,7 @@
 
 import { sortBy } from 'lodash/fp';
 
-import {
-  formatIndexFields,
-  formatFirstFields,
-  formatSecondFields,
-  createFieldItem,
-} from './elasticsearch_adapter';
+import { formatIndexFields, formatFirstFields, formatSecondFields, createFieldItem } from './index';
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
 
 describe('Index Fields', () => {
@@ -379,6 +374,7 @@ describe('Index Fields', () => {
           aggregatable: false,
           category: '_id',
           indexes: ['auditbeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -390,6 +386,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: '_index',
           indexes: ['auditbeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -401,6 +398,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'base',
           indexes: ['auditbeat'],
+          readFromDocValues: true,
         },
         {
           description:
@@ -412,6 +410,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['auditbeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -423,6 +422,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['auditbeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -434,6 +434,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['auditbeat'],
+          readFromDocValues: false,
         },
         {
           description: 'Version of the agent.',
@@ -444,6 +445,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['auditbeat'],
+          readFromDocValues: false,
         },
         {
           description: 'Each document has an _id that uniquely identifies it',
@@ -454,6 +456,7 @@ describe('Index Fields', () => {
           aggregatable: false,
           category: '_id',
           indexes: ['filebeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -465,6 +468,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: '_index',
           indexes: ['filebeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -476,6 +480,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'base',
           indexes: ['filebeat'],
+          readFromDocValues: false,
         },
         {
           name: 'agent.hostname',
@@ -484,6 +489,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['filebeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -495,6 +501,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['filebeat'],
+          readFromDocValues: false,
         },
         {
           description: 'Version of the agent.',
@@ -505,6 +512,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['filebeat'],
+          readFromDocValues: false,
         },
         {
           description: 'Each document has an _id that uniquely identifies it',
@@ -515,6 +523,7 @@ describe('Index Fields', () => {
           aggregatable: false,
           category: '_id',
           indexes: ['packetbeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -526,6 +535,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: '_index',
           indexes: ['packetbeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -537,6 +547,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'base',
           indexes: ['packetbeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -548,6 +559,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['packetbeat'],
+          readFromDocValues: false,
         },
         {
           description:
@@ -559,6 +571,7 @@ describe('Index Fields', () => {
           aggregatable: true,
           category: 'agent',
           indexes: ['packetbeat'],
+          readFromDocValues: false,
         },
       ]);
       expect(fields).toEqual([
@@ -669,6 +682,8 @@ describe('Index Fields', () => {
           type: 'string',
           searchable: true,
           aggregatable: false,
+          readFromDocValues: false,
+          esTypes: [],
         },
         0
       );

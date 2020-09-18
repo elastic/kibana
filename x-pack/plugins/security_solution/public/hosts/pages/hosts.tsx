@@ -105,7 +105,13 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
               <Display show={!globalFullScreen}>
                 <HeaderPage
                   border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                  subtitle={
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.hosts}
+                      indexNames={selectedPatterns}
+                    />
+                  }
                   title={i18n.PAGE_TITLE}
                 />
 

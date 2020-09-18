@@ -113,7 +113,12 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 <HeaderPage
                   border
                   subtitle={
-                    <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={detailName} />
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.hostDetails}
+                      hostName={detailName}
+                      indexNames={selectedPatterns}
+                    />
                   }
                   title={detailName}
                 />
@@ -135,6 +140,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                     >
                       {({ isLoadingAnomaliesData, anomaliesData }) => (
                         <HostOverviewManage
+                          docValueFields={docValueFields}
                           id={id}
                           inspect={inspect}
                           refetch={refetch}
@@ -142,6 +148,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                           data={hostOverview as HostItem}
                           anomaliesData={anomaliesData}
                           isLoadingAnomaliesData={isLoadingAnomaliesData}
+                          indexNames={selectedPatterns}
                           loading={loading}
                           startDate={from}
                           endDate={to}

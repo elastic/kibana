@@ -50,19 +50,16 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     };
   })
   .case(setSource, (state, { id, payload }) => {
-    const { allExistingIndexPatterns, ...sourcererScopes } = payload;
+    const { ...sourcererScopes } = payload;
     return {
       ...state,
-      ...(state.sourcererScopes[id].selectedPatterns.length === 0
-        ? { allIndexPatterns: allExistingIndexPatterns }
-        : {}),
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
           ...sourcererScopes,
           ...(state.sourcererScopes[id].selectedPatterns.length === 0
-            ? { selectedPatterns: allExistingIndexPatterns }
+            ? { selectedPatterns: state.configIndexPatterns }
             : {}),
         },
       },

@@ -15,7 +15,7 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useWithSource } from '../../common/containers/source';
+import { useFetchIndex } from '../../common/containers/source';
 
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
@@ -44,19 +44,13 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
 }) => {
-  const endpointMetadataIndex = useMemo<string[]>(() => {
-    return [ENDPOINT_METADATA_INDEX];
-  }, []);
-
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
 
-  // TODO convert useWithSource to use the new index fields
-  const { indicesExist: metadataIndexExists } = useWithSource(
-    'default',
-    endpointMetadataIndex,
-    true
-  );
+  const endpointMetadataIndex = useMemo<string[]>(() => {
+    return [ENDPOINT_METADATA_INDEX];
+  }, []);
+  const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex);
 
   const { addMessage, hasMessage } = useMessagesStorage();
   const hasDismissEndpointNoticeMessage: boolean = useMemo(

@@ -50,8 +50,8 @@ import {
   getMappedNonEcsValue,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { ExceptionsBuilderExceptionItem } from '../types';
+import { useFetchIndex } from '../../../containers/source';
 
 export interface AddExceptionModalBaseProps {
   ruleName: string;
@@ -122,14 +122,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
-
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    ruleIndices,
-    'rules'
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
+    signalIndexName !== null ? [signalIndexName] : []
   );
+
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
   const onError = useCallback(
     (error: Error): void => {
