@@ -70,6 +70,7 @@ export function ErroneousTransactionsRateChart() {
       <CustomPlot
         {...syncedChartsProps}
         noHits={data?.noHits}
+        yMax={1}
         series={[
           {
             color: theme.euiColorVis7,

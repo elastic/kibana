@@ -13,14 +13,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects([
-    'header',
-    'common',
-    'visualize',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['header', 'header', 'timePicker']);
 
   return logWrapper('lensPage', log, {
     /**
