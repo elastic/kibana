@@ -658,7 +658,9 @@ function getDefaultState(state, results) {
       ? JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2)
       : state.indexSettingsString;
 
-  const combinedFields = getDefaultCombinedFields(results);
+  const combinedFields = state.combinedFields.length
+    ? state.combinedFields
+    : getDefaultCombinedFields(results);
 
   const mappingsString =
     state.mappingsString === ''
