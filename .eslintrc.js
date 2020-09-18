@@ -338,10 +338,6 @@ module.exports = {
                   '(src|x-pack)/plugins/**/*',
                   '!(src|x-pack)/plugins/**/server/**/*',
 
-                  'src/legacy/core_plugins/**/*',
-                  '!src/legacy/core_plugins/**/server/**/*',
-                  '!src/legacy/core_plugins/**/index.{js,mjs,ts,tsx}',
-
                   'examples/**/*',
                   '!examples/**/server/**/*',
                 ],
@@ -363,12 +359,7 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
-                from: [
-                  'plugins/**/*',
-                  'src/plugins/**/*',
-                  'src/legacy/core_plugins/**/*',
-                  'src/legacy/ui/**/*',
-                ],
+                from: ['plugins/**/*', 'src/plugins/**/*', 'src/legacy/ui/**/*'],
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
@@ -381,10 +372,6 @@ module.exports = {
                 target: [
                   'test/plugin_functional/plugins/**/public/np_ready/**/*',
                   'test/plugin_functional/plugins/**/server/np_ready/**/*',
-                  'src/legacy/core_plugins/**/public/np_ready/**/*',
-                  'src/legacy/core_plugins/vis_type_*/public/**/*',
-                  '!src/legacy/core_plugins/vis_type_*/public/legacy*',
-                  'src/legacy/core_plugins/**/server/np_ready/**/*',
                 ],
                 allowSameFolder: true,
                 errorMessage:
@@ -1211,10 +1198,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: [
-        'src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}',
-        'src/legacy/core_plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}',
-      ],
+      files: ['src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
