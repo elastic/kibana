@@ -14,14 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('lens smokescreen tests', () => {
-    it('should allow editing saved visualizations', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
-      await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
-    });
-
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -32,18 +24,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'date_histogram',
         field: '@timestamp',
       });
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: '@message.raw',
       });
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.removeDimension('lnsDatatable_column');
@@ -54,6 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'terms',
         field: 'ip',
       });
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.save('Afancilenstest');
 
@@ -70,8 +66,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // legend item(s), so we're using a class selector here.
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
     });
+    it('should create an xy visualization with filters aggregation', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('lnsXYvis');
+      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+        operation: 'filters',
+        isPreviousIncompatible: true,
+      });
+      await PageObjects.lens.addFilterToAgg(`geo.src : CN`);
 
-    it('should allow seamless transition to and from table view', async () => {
+      expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`ip : *`, `geo.src : CN`]);
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
+    });
+
+    it('should transition from metric to table to metric', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
@@ -84,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
     });
 
-    it('should switch from a multi-layer stacked bar to a multi-layer line chart', async () => {
+    it('should transition from a multi-layer stacked bar to a multi-layer line chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -95,12 +106,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: '@timestamp',
       });
 
+      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
 
+      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.createLayer();
 
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
@@ -110,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
     });
 
-    it('should switch from a multi-layer stacked bar to donut chart using suggestions', async () => {
+    it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -121,12 +134,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'geo.dest',
       });
 
+      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
 
+      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.configureDimension(
@@ -138,6 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1
       );
 
+      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -146,6 +162,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         1
       );
+
+      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-asDonut > lnsSuggestion');
 
@@ -158,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should allow transition from line chart to donut chart and to bar chart', async () => {
+    it('should transition from line chart to donut chart and to bar chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
@@ -185,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should allow seamless transition from bar chart to line chart using layer chart switch', async () => {
+    it('should transition from bar chart to line chart using layer chart switch', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
@@ -203,7 +221,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should allow seamless transition from pie chart to treemap chart', async () => {
+    it('should transition from pie chart to treemap chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsPieVis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsPieVis');
@@ -221,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should allow creating a pie chart and switching to datatable', async () => {
+    it('should create a pie chart and switch to datatable', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -231,6 +249,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'date_histogram',
         field: '@timestamp',
       });
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
@@ -238,6 +257,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
+      await PageObjects.lens.closeDimensionEditor();
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 

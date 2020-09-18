@@ -13,7 +13,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['header', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['header', 'header', 'timePicker', 'common']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -85,19 +85,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param layerIndex - the index of the layer
      */
     async configureDimension(
-      opts: { dimension: string; operation: string; field: string },
+      opts: {
+        dimension: string;
+        operation: string;
+        field?: string;
+        isPreviousIncompatible?: boolean;
+      },
       layerIndex = 0
     ) {
       await retry.try(async () => {
         await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
         await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
       });
+      const operationSelector = opts.isPreviousIncompatible
+        ? `lns-indexPatternDimension-${opts.operation} incompatible`
+        : `lns-indexPatternDimension-${opts.operation}`;
+      await testSubjects.click(operationSelector);
 
-      await testSubjects.click(`lns-indexPatternDimension-${opts.operation}`);
+      if (opts.field) {
+        const target = await testSubjects.find('indexPattern-dimension-field');
+        await comboBox.openOptionsList(target);
+        await comboBox.setElement(target, opts.field);
+      }
+    },
 
-      const target = await testSubjects.find('indexPattern-dimension-field');
-      await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, opts.field);
+    // closes the dimension editor flyout
+    async closeDimensionEditor() {
       await testSubjects.click('lns-indexPattern-dimensionContainerTitle');
     },
 
@@ -107,7 +120,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async removeDimension(dimensionTestSubj: string) {
       await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
-
+    /**
+     * adds new filter to filters agg
+     */
+    async addFilterToAgg(queryString: string) {
+      await testSubjects.click('lns-newBucket-add');
+      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
+      await queryInput.type(queryString);
+      await PageObjects.common.pressEnterKey();
+      await PageObjects.common.pressEnterKey();
+      await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+    },
     /**
      * Save the current Lens visualization.
      */
@@ -143,6 +166,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     getTitle() {
       return testSubjects.getVisibleText('lns_ChartTitle');
+    },
+
+    async getFiltersAggLabels() {
+      const labels = [];
+      const filters = await testSubjects.findAll('indexPattern-filters-existingFilterContainer');
+      for (let i = 0; i < filters.length; i++) {
+        labels.push(await filters[i].getVisibleText());
+      }
+      log.debug(`Found ${labels.length} filters on current page`);
+      return labels;
     },
 
     /**
