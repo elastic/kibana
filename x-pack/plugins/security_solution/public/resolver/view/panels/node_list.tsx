@@ -26,6 +26,7 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
 import { ResolverState } from '../../types';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
+import { useResolverTheme } from '../assets';
 
 const StyledLimitWarning = styled(LimitWarning)`
   flex-flow: row wrap;
@@ -46,6 +47,35 @@ const StyledLimitWarning = styled(LimitWarning)`
     display: inline;
   }
 `;
+
+const StyledButtonTextContainer = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+`;
+
+const StyledAnalyzedEvent = styled.div`
+  color: ${(props) => props.color};
+  font-size: 10.5px;
+  font-weight: 700;
+`;
+
+const StyledLabelTitle = styled.div``;
+
+const StyledLabelContainer = styled.div`
+  display: inline-block;
+  flex: 3;
+  min-width: 0;
+
+  ${StyledAnalyzedEvent},
+  ${StyledLabelTitle} {
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
 interface ProcessTableView {
   name?: string;
   timestamp?: Date;
@@ -173,9 +203,14 @@ export const NodeList = memo(() => {
 
 function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }) {
   const entityID = event.entityIDSafeVersion(item.event);
+  const originID = useSelector(selectors.originID);
+  const isOrigin = originID === entityID;
   const isTerminated = useSelector((state: ResolverState) =>
     entityID === undefined ? false : selectors.isProcessTerminated(state)(entityID)
   );
+  const {
+    colorMap: { descriptionText },
+  } = useResolverTheme();
   return (
     <EuiButtonEmpty {...useNavigateOrReplace({ search: item.href })}>
       {name === '' ? (
@@ -188,13 +223,28 @@ function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }
           )}
         </EuiBadge>
       ) : (
-        <>
+        <StyledButtonTextContainer>
           <CubeForProcess
             running={!isTerminated}
+            isOrigin={isOrigin}
             data-test-subj="resolver:node-list:node-link:icon"
           />
-          <span data-test-subj="resolver:node-list:node-link:title">{name}</span>
-        </>
+          <StyledLabelContainer>
+            {isOrigin && (
+              <StyledAnalyzedEvent
+                color={descriptionText}
+                data-test-subj="resolver:node-list:node-link:analyzed-event"
+              >
+                {i18n.translate('xpack.securitySolution.resolver.panel.table.row.analyzedEvent', {
+                  defaultMessage: 'ANALYZED EVENT',
+                })}
+              </StyledAnalyzedEvent>
+            )}
+            <StyledLabelTitle data-test-subj="resolver:node-list:node-link:title">
+              {name}
+            </StyledLabelTitle>
+          </StyledLabelContainer>
+        </StyledButtonTextContainer>
       )}
     </EuiButtonEmpty>
   );
