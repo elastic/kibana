@@ -84,6 +84,21 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
           expectSnapshot(elements).toMatch();
         });
+
+        it('returns service map elements filtering by environment not defined', async () => {
+          const ENVIRONMENT_NOT_DEFINED = 'ENVIRONMENT_NOT_DEFINED';
+          const { body, status } = await supertest.get(
+            `/api/apm/service-map?start=${start}&end=${end}&environment=${ENVIRONMENT_NOT_DEFINED}`
+          );
+          expect(status).to.be(200);
+          const environments = new Set();
+          body.elements.forEach((element: { data: Record<string, any> }) => {
+            environments.add(element.data['service.environment']);
+          });
+          expect(environments.size).to.eql(1);
+          expect(environments.has(ENVIRONMENT_NOT_DEFINED)).to.eql(true);
+          expectSnapshot(body).toMatch();
+        });
       });
     });
 
@@ -150,6 +165,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "serviceAnomalyStats": Object {
                   "actualValue": 3933482.1764705875,
                   "anomalyScore": 2.6101702751482714,
+                  "healthStatus": "healthy",
                   "jobId": "apm-testing-d457-high_mean_transaction_duration",
                   "transactionType": "request",
                 },
@@ -164,6 +180,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "serviceAnomalyStats": Object {
                   "actualValue": 684716.5813953485,
                   "anomalyScore": 0.20498907719907372,
+                  "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",
                 },

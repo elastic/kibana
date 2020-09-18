@@ -89,6 +89,7 @@ export class UiActionsServiceEnhancements {
     ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
   >({
     id: factoryId,
+    isBeta,
     order,
     CollectConfig,
     createConfig,
@@ -109,6 +110,7 @@ export class UiActionsServiceEnhancements {
       ExecutionContext
     > = {
       id: factoryId,
+      isBeta,
       minimalLicense,
       licenseFeatureName,
       order,

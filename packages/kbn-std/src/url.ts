@@ -16,8 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ParsedQuery } from 'query-string';
+
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
+
+// duplicate type from 'query-string' to avoid adding the d.ts file to all packages depending on kbn-std
+export interface ParsedQuery<T = string> {
+  [key: string]: T | T[] | null | undefined;
+}
 
 /**
  * We define our own typings because the current version of @types/node

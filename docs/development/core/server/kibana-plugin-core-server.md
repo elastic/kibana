@@ -65,7 +65,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Capabilities](./kibana-plugin-core-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) | APIs to manage the [Capabilities](./kibana-plugin-core-server.capabilities.md) that will be used by the application.<!-- -->Plugins relying on capabilities to toggle some of their features should register them during the setup phase using the <code>registerProvider</code> method.<!-- -->Plugins having the responsibility to restrict capabilities depending on a given context should register their capabilities switcher using the <code>registerSwitcher</code> method.<!-- -->Refers to the methods documentation for complete description and examples. |
 |  [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md) | APIs to access the application [Capabilities](./kibana-plugin-core-server.capabilities.md)<!-- -->. |
-|  [ConfigDeprecationFactory](./kibana-plugin-core-server.configdeprecationfactory.md) | Provides helpers to generates the most commonly used [ConfigDeprecation](./kibana-plugin-core-server.configdeprecation.md) when invoking a [ConfigDeprecationProvider](./kibana-plugin-core-server.configdeprecationprovider.md)<!-- -->.<!-- -->See methods documentation for more detailed examples. |
 |  [ContextSetup](./kibana-plugin-core-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
@@ -81,7 +80,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |  |
 |  [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |  |
 |  [ElasticsearchStatusMeta](./kibana-plugin-core-server.elasticsearchstatusmeta.md) |  |
-|  [EnvironmentMode](./kibana-plugin-core-server.environmentmode.md) |  |
 |  [ErrorHttpResponseOptions](./kibana-plugin-core-server.errorhttpresponseoptions.md) | HTTP response parameters |
 |  [Explanation](./kibana-plugin-core-server.explanation.md) |  |
 |  [FakeRequest](./kibana-plugin-core-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
@@ -114,11 +112,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LegacyRequest](./kibana-plugin-core-server.legacyrequest.md) |  |
 |  [LegacyServiceSetupDeps](./kibana-plugin-core-server.legacyservicesetupdeps.md) |  |
 |  [LegacyServiceStartDeps](./kibana-plugin-core-server.legacyservicestartdeps.md) |  |
-|  [Logger](./kibana-plugin-core-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerContextConfigInput](./kibana-plugin-core-server.loggercontextconfiginput.md) |  |
-|  [LoggerFactory](./kibana-plugin-core-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) | Provides APIs to plugins for customizing the plugin's logger. |
-|  [LogMeta](./kibana-plugin-core-server.logmeta.md) | Contextual metadata |
 |  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [NodesVersionCompatibility](./kibana-plugin-core-server.nodesversioncompatibility.md) |  |
 |  [OnPostAuthToolkit](./kibana-plugin-core-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
@@ -131,7 +126,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OpsOsMetrics](./kibana-plugin-core-server.opsosmetrics.md) | OS related metrics |
 |  [OpsProcessMetrics](./kibana-plugin-core-server.opsprocessmetrics.md) | Process related metrics |
 |  [OpsServerMetrics](./kibana-plugin-core-server.opsservermetrics.md) | server related metrics |
-|  [PackageInfo](./kibana-plugin-core-server.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-core-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginConfigDescriptor](./kibana-plugin-core-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
 |  [PluginInitializerContext](./kibana-plugin-core-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
@@ -233,10 +227,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResult](./kibana-plugin-core-server.authresult.md) |  |
 |  [CapabilitiesProvider](./kibana-plugin-core-server.capabilitiesprovider.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
-|  [ConfigDeprecation](./kibana-plugin-core-server.configdeprecation.md) | Configuration deprecation returned from [ConfigDeprecationProvider](./kibana-plugin-core-server.configdeprecationprovider.md) that handles a single deprecation from the configuration. |
-|  [ConfigDeprecationLogger](./kibana-plugin-core-server.configdeprecationlogger.md) | Logger interface used when invoking a [ConfigDeprecation](./kibana-plugin-core-server.configdeprecation.md) |
-|  [ConfigDeprecationProvider](./kibana-plugin-core-server.configdeprecationprovider.md) | A provider that should returns a list of [ConfigDeprecation](./kibana-plugin-core-server.configdeprecation.md)<!-- -->.<!-- -->See [ConfigDeprecationFactory](./kibana-plugin-core-server.configdeprecationfactory.md) for more usage examples. |
-|  [ConfigPath](./kibana-plugin-core-server.configpath.md) |  |
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
 |  [ElasticsearchClient](./kibana-plugin-core-server.elasticsearchclient.md) | Client used to query the elasticsearch cluster. |
 |  [ElasticsearchClientConfig](./kibana-plugin-core-server.elasticsearchclientconfig.md) | Configuration options to be used to create a [cluster client](./kibana-plugin-core-server.iclusterclient.md) using the [createClient API](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md) |
@@ -263,6 +253,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LegacyElasticsearchClientConfig](./kibana-plugin-core-server.legacyelasticsearchclientconfig.md) |  |
 |  [LifecycleResponseFactory](./kibana-plugin-core-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
 |  [LoggerConfigType](./kibana-plugin-core-server.loggerconfigtype.md) |  |
+|  [MetricsServiceStart](./kibana-plugin-core-server.metricsservicestart.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [MIGRATION\_ASSISTANCE\_INDEX\_ACTION](./kibana-plugin-core-server.migration_assistance_index_action.md) |  |
 |  [MIGRATION\_DEPRECATION\_LEVEL](./kibana-plugin-core-server.migration_deprecation_level.md) |  |
 |  [MutatingOperationRefreshSetting](./kibana-plugin-core-server.mutatingoperationrefreshsetting.md) | Elasticsearch Refresh setting for mutating operation |

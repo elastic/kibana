@@ -7,14 +7,14 @@
 import sinon from 'sinon';
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { ReportingConfig, ReportingCore } from '../..';
-import { createMockReportingCore, createMockLevelLogger } from '../../test_helpers';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockLevelLogger,
+  createMockReportingCore,
+} from '../../test_helpers';
 import { Report } from './report';
 import { ReportingStore } from './store';
-
-const getMockConfig = (mockConfigGet: sinon.SinonStub) => ({
-  get: mockConfigGet,
-  kbnConfig: { get: mockConfigGet },
-});
 
 describe('ReportingStore', () => {
   const mockLogger = createMockLevelLogger();
@@ -25,10 +25,12 @@ describe('ReportingStore', () => {
   const mockElasticsearch = { legacy: { client: { callAsInternalUser: callClusterStub } } };
 
   beforeEach(async () => {
-    const mockConfigGet = sinon.stub();
-    mockConfigGet.withArgs('index').returns('.reporting-test');
-    mockConfigGet.withArgs('queue', 'indexInterval').returns('week');
-    mockConfig = getMockConfig(mockConfigGet);
+    const reportingConfig = {
+      index: '.reporting-test',
+      queue: { indexInterval: 'week' },
+    };
+    const mockSchema = createMockConfigSchema(reportingConfig);
+    mockConfig = createMockConfig(mockSchema);
     mockCore = await createMockReportingCore(mockConfig);
 
     callClusterStub.reset();
@@ -67,15 +69,17 @@ describe('ReportingStore', () => {
         priority: 10,
         started_at: undefined,
         status: 'pending',
-        timeout: undefined,
+        timeout: 120000,
       });
     });
 
     it('throws if options has invalid indexInterval', async () => {
-      const mockConfigGet = sinon.stub();
-      mockConfigGet.withArgs('index').returns('.reporting-test');
-      mockConfigGet.withArgs('queue', 'indexInterval').returns('centurially');
-      mockConfig = getMockConfig(mockConfigGet);
+      const reportingConfig = {
+        index: '.reporting-test',
+        queue: { indexInterval: 'centurially' },
+      };
+      const mockSchema = createMockConfigSchema(reportingConfig);
+      mockConfig = createMockConfig(mockSchema);
       mockCore = await createMockReportingCore(mockConfig);
 
       const store = new ReportingStore(mockCore, mockLogger);
@@ -159,7 +163,7 @@ describe('ReportingStore', () => {
         priority: 10,
         started_at: undefined,
         status: 'pending',
-        timeout: undefined,
+        timeout: 120000,
       });
     });
 
@@ -190,7 +194,7 @@ describe('ReportingStore', () => {
         priority: 10,
         started_at: undefined,
         status: 'pending',
-        timeout: undefined,
+        timeout: 120000,
       });
     });
   });
