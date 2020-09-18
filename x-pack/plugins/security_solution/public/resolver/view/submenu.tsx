@@ -10,7 +10,8 @@ import { EuiI18nNumber } from '@elastic/eui';
 import styled from 'styled-components';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
-import { useResolverTheme } from './assets';
+import { Matrix3 } from '../types';
+import { useColors } from './use_colors';
 
 /**
  * i18n-translated titles for submenus and identifiers for display of states:
@@ -81,9 +82,8 @@ const NodeSubMenuComponents = React.memo(
       }
     }, [relatedEventStats, relatedEventCallbacks]);
 
-    const {
-      colorMap: { pillStroke: pillBorderStroke, resolverBackground: pillFill },
-    } = useResolverTheme();
+    
+    const { pillStroke: pillBorderStroke, resolverBackground: pillFill } = useColors();
     const listStylesFromTheme = useMemo(() => {
       return {
         border: `1.5px solid ${pillBorderStroke}`,
