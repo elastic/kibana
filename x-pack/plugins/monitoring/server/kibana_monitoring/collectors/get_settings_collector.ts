@@ -9,9 +9,10 @@ import {
   XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
   CLUSTER_ALERTS_ADDRESS_CONFIG_KEY,
 } from '../../../common/constants';
+import { Logger } from '../../../../../../src/core/server';
+import { Collector } from '../../../../../../src/plugins/usage_collection/server';
 import { MonitoringConfig } from '../../config';
 import { CoreServices } from '../../core_services';
-import { Logger } from '../../../../../../src/core/server';
 
 let loggedDeprecationWarning = false;
 /*
@@ -65,11 +66,19 @@ export async function checkForEmailValue(
   }
 }
 
+interface EmailSettingData {
+  xpack: { default_admin_email: string | null };
+}
+
+export interface KibanaSettingsCollector extends Collector<EmailSettingData | undefined> {
+  getEmailValueStructure(email: string | null): EmailSettingData;
+}
+
 export function getSettingsCollector(usageCollection: any, config: MonitoringConfig) {
   return usageCollection.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
-    async fetch() {
+    async fetch(this: KibanaSettingsCollector) {
       let kibanaSettingsData;
       const defaultAdminEmail = await checkForEmailValue(config);
 
@@ -91,7 +100,7 @@ export function getSettingsCollector(usageCollection: any, config: MonitoringCon
       // returns undefined if there was no result
       return kibanaSettingsData;
     },
-    getEmailValueStructure(email: string) {
+    getEmailValueStructure(email: string | null) {
       return {
         xpack: {
           default_admin_email: email,

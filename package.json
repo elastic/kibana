@@ -75,27 +75,18 @@
   },
   "resolutions": {
     "**/@types/node": ">=10.17.17 <10.20.0",
-    "**/@types/react": "^16.9.36",
-    "**/@types/hapi": "^17.0.18",
-    "**/@types/angular": "^1.6.56",
-    "**/@types/hoist-non-react-statics": "^3.3.1",
-    "**/@types/chai": "^4.2.11",
-    "**/cypress/@types/lodash": "^4.14.159",
-    "**/cypress/lodash": "^4.17.20",
-    "**/typescript": "4.0.2",
+    "**/cross-fetch/node-fetch": "^2.6.1",
+    "**/deepmerge": "^4.2.2",
+    "**/fast-deep-equal": "^3.1.1",
     "**/graphql-toolkit/lodash": "^4.17.15",
     "**/hoist-non-react-statics": "^3.3.2",
-    "**/isomorphic-git/**/base64-js": "^1.2.1",
+    "**/isomorphic-fetch/node-fetch": "^2.6.1",
     "**/istanbul-instrumenter-loader/schema-utils": "1.0.0",
-    "**/image-diff/gm/debug": "^2.6.9",
     "**/load-grunt-config/lodash": "^4.17.20",
+    "**/minimist": "^1.2.5",
     "**/node-jose/node-forge": "^0.10.0",
-    "**/react-dom": "^16.12.0",
-    "**/react": "^16.12.0",
-    "**/react-test-renderer": "^16.12.0",
     "**/request": "^2.88.2",
-    "**/deepmerge": "^4.2.2",
-    "**/fast-deep-equal": "^3.1.1"
+    "**/typescript": "4.0.2"
   },
   "workspaces": {
     "packages": [
@@ -125,7 +116,7 @@
     "@babel/register": "^7.10.5",
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "7.9.0-rc.2",
-    "@elastic/eui": "28.2.0",
+    "@elastic/eui": "28.4.0",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "^2.5.0",
     "@elastic/request-crypto": "1.1.4",
@@ -191,7 +182,7 @@
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "mustache": "2.3.2",
-    "node-fetch": "1.7.3",
+    "node-fetch": "2.6.1",
     "node-forge": "^0.10.0",
     "opn": "^5.5.0",
     "oppsy": "^2.0.0",
@@ -485,7 +476,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.22.0",
+    "node": "10.22.1",
     "yarn": "^1.21.1"
   }
 }

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -21,18 +22,19 @@ export async function getClientMetrics({
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
-        pageViews: { value_count: { field: 'transaction.type' } },
+        pageViews: {
+          value_count: {
+            field: TRANSACTION_DURATION,
+          },
+        },
         backEnd: {
           percentiles: {
             field: TRANSACTION_TIME_TO_FIRST_BYTE,
