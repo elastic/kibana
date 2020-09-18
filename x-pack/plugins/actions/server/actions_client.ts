@@ -13,6 +13,7 @@ import {
 } from 'src/core/server';
 
 import { i18n } from '@kbn/i18n';
+import { omitBy, isUndefined } from 'lodash';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
 import {
@@ -151,8 +152,10 @@ export class ActionsClient {
         'update'
       );
     }
-    const existingObject = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-    const { actionTypeId } = existingObject.attributes;
+    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
+      RawAction
+    >('action', id);
+    const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
@@ -160,12 +163,25 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.unsecuredSavedObjectsClient.update<RawAction>('action', id, {
-      actionTypeId,
-      name,
-      config: validatedActionTypeConfig as SavedObjectAttributes,
-      secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-    });
+    const result = await this.unsecuredSavedObjectsClient.create<RawAction>(
+      'action',
+      {
+        ...attributes,
+        actionTypeId,
+        name,
+        config: validatedActionTypeConfig as SavedObjectAttributes,
+        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+      },
+      omitBy(
+        {
+          id,
+          overwrite: true,
+          references,
+          version,
+        },
+        isUndefined
+      )
+    );
 
     return {
       id,
