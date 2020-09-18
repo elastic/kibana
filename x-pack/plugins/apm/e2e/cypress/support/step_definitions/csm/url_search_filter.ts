@@ -7,7 +7,7 @@
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { DEFAULT_TIMEOUT } from './csm_dashboard';
 
-When(`a user click inside url search field`, () => {
+When(`a user clicks inside url search field`, () => {
   // wait for all loading to finish
   cy.get('kbnLoadingIndicator').should('not.be.visible');
   cy.get('.euiStat__title-isLoading').should('not.be.visible');
@@ -16,7 +16,7 @@ When(`a user click inside url search field`, () => {
   });
 });
 
-Then(`it display top pages in the suggestion popover`, () => {
+Then(`it displays top pages in the suggestion popover`, () => {
   cy.get('kbnLoadingIndicator').should('not.be.visible');
 
   cy.get('div.euiPopover__panel-isOpen', DEFAULT_TIMEOUT).within(() => {
