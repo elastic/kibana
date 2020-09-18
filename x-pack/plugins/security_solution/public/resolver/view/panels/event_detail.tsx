@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-continue */
+
 /* eslint-disable react/display-name */
 
-import React, { memo, useMemo, useEffect, Fragment } from 'react';
+import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
-import { BoldCode, StyledTime, GeneratedText } from './panel_content_utilities';
+import { BoldCode, StyledTime, GeneratedText, formatDate } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
-import { useResolverDispatch } from '../use_resolver_dispatch';
-import { PanelContentError } from './panel_content_error';
 import { PanelLoading } from './panel_loading';
 import { ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
@@ -61,21 +61,6 @@ const TitleHr = memo(() => {
   );
 });
 
-/**
- * Take description list entries and prepare them for display by
- * seeding with `<wbr />` tags.
- *
- * @param entries {title: string, description: string}[]
- */
-function entriesForDisplay(entries: Array<{ title: string; description: string }>) {
-  return entries.map((entry) => {
-    return {
-      description: <GeneratedText>{entry.description}</GeneratedText>,
-      title: <GeneratedText>{entry.title}</GeneratedText>,
-    };
-  });
-}
-
 export const EventDetail = memo(
   ({
     nodeID,
@@ -97,7 +82,6 @@ export const EventDetail = memo(
       return (
         <EventDetailContents
           nodeID={nodeID}
-          eventID={eventID}
           event={event}
           processEvent={processEvent}
           eventType={eventType}
@@ -119,13 +103,11 @@ export const EventDetail = memo(
  */
 const EventDetailContents = memo(function ({
   nodeID,
-  eventID,
   event,
   eventType,
   processEvent,
 }: {
   nodeID: string;
-  eventID: string;
   event: ResolverEvent;
   /**
    * Event type to use in the breadcrumbs
@@ -133,20 +115,12 @@ const EventDetailContents = memo(function ({
   eventType: string;
   processEvent: ResolverEvent;
 }) {
-  const [
-    relatedEventToShowDetailsFor,
-    countBySameCategory,
-    relatedEventCategory = i18n.translate(
-      'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.NA',
-      {
-        defaultMessage: 'N/A',
-      }
-    ),
-    sections,
-    formattedDate,
-  ] = useSelector((state: ResolverState) =>
-    selectors.relatedEventDisplayInfoByEntityAndSelfId(state)(nodeID, eventID)
-  );
+  const formattedDate = useMemo(() => {
+    const timestamp = eventModel.timestampSafeVersion(event);
+    if (timestamp !== undefined) {
+      return formatDate(new Date(timestamp));
+    }
+  }, [event]);
 
   return (
     <StyledPanel>
@@ -162,7 +136,7 @@ const EventDetailContents = memo(function ({
           <FormattedMessage
             id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.categoryAndType"
             values={{
-              category: relatedEventCategory,
+              category: eventType,
               eventType: String(eventModel.ecsEventType(event)),
             }}
             defaultMessage="{category} {eventType}"
@@ -183,15 +157,45 @@ const EventDetailContents = memo(function ({
         </GeneratedText>
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
-      {sections.map(({ sectionTitle, entries }, index) => {
-        const displayEntries = entriesForDisplay(entries);
+      <EventDetailFields event={event} />
+    </StyledPanel>
+  );
+});
+
+function EventDetailFields({ event }: { event: ResolverEvent }) {
+  const sections = useMemo(() => {
+    const returnValue: Array<{
+      namespace: React.ReactNode;
+      descriptions: Array<{ title: React.ReactNode; description: React.ReactNode }>;
+    }> = [];
+    for (const [key, value] of Object.entries(event)) {
+      // ignore these keys
+      if (key === 'agent' || key === 'ecs' || key === 'process' || key === '@timestamp') {
+        continue;
+      }
+
+      const section = {
+        // Group the fields by their top-level namespace
+        namespace: <GeneratedText>{key}</GeneratedText>,
+        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => ({
+          title: <GeneratedText>{path.join('.')}</GeneratedText>,
+          description: <GeneratedText>{String(fieldValue)}</GeneratedText>,
+        })),
+      };
+      returnValue.push(section);
+    }
+    return returnValue;
+  }, [event]);
+  return (
+    <>
+      {sections.map(({ namespace, descriptions }, index) => {
         return (
           <Fragment key={index}>
             {index === 0 ? null : <EuiSpacer size="m" />}
             <EuiTitle size="xxxs">
               <EuiTextColor color="subdued">
                 <StyledFlexTitle>
-                  {sectionTitle}
+                  {namespace}
                   <TitleHr />
                 </StyledFlexTitle>
               </EuiTextColor>
@@ -202,15 +206,54 @@ const EventDetailContents = memo(function ({
               align="left"
               titleProps={{ className: 'desc-title' }}
               compressed
-              listItems={displayEntries}
+              listItems={descriptions}
             />
             {index === sections.length - 1 ? null : <EuiSpacer size="m" />}
           </Fragment>
         );
       })}
-    </StyledPanel>
+    </>
   );
-});
+}
+
+/**
+ * Sort of like object entries, but does a DFS of an object.
+ * Instead of getting a key, an array of keys is returned.
+ * The array of keys represents the
+ */
+function deepObjectEntries(root: object): Array<[string[], unknown]> {
+  const queue: Array<{ path: string[]; value: unknown }> = [{ path: [], value: root }];
+  const result: Array<[string[], unknown]> = [];
+  while (queue.length) {
+    const next = queue.shift();
+    if (next === undefined) {
+      // this should be impossible
+      throw new Error();
+    }
+    const { path, value } = next;
+    if (Array.isArray(value)) {
+      // array (branch)
+      queue.push(
+        ...value.map((element) => ({
+          path: [...path], // unlike with object paths, don't add the number indices to `path`
+          value: element,
+        }))
+      );
+    } else if (typeof value === 'object' && value !== null) {
+      // object (branch)
+      queue.push(
+        ...Object.keys(value).map((key) => ({
+          path: [...path, key],
+          value: (value as Record<string, unknown>)[key],
+        }))
+      );
+    } else {
+      // leaf
+      result.push([path, value]);
+    }
+  }
+  return result;
+}
 
 function EventDetailBreadcrumbs({
   nodeID,

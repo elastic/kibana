@@ -254,65 +254,6 @@ const objectToDescriptionListEntries = function* (
 };
 
 /**
- * Returns a function that returns the information needed to display related event details based on
- * the related event's entityID and its own ID.
- * @deprecated
- */
-export const relatedEventDisplayInfoByEntityAndSelfID: (
-  state: DataState
-) => (
-  entityID: string,
-  relatedEventId: string | number
-) => [
-  EndpointEvent | LegacyEndpointEvent | undefined,
-  number,
-  string | undefined,
-  SectionData,
-  string
-] = createSelector(relatedEventsByEntityId, function relatedEventDetails(
-  /* eslint-disable no-shadow */
-  relatedEventsByEntityId
-  /* eslint-enable no-shadow */
-) {
-  return defaultMemoize((entityID: string, relatedEventId: string | number) => {
-    const relatedEventsForThisProcess = relatedEventsByEntityId.get(entityID);
-    if (!relatedEventsForThisProcess) {
-      return [undefined, 0, undefined, [], ''];
-    }
-    const specificEvent = relatedEventsForThisProcess.events.find(
-      (evt) => eventModel.eventID(evt) === relatedEventId
-    );
-    // For breadcrumbs:
-    const specificCategory = specificEvent && eventModel.primaryEventCategory(specificEvent);
-    const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
-      return eventModel.primaryEventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
-    }, 0);
-    // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
-    const { agent, ecs, process, ...relevantData } = specificEvent as SafeResolverEvent & {
-      // Type this with various unknown keys so that ts will let us delete those keys
-      ecs: unknown;
-      process: unknown;
-    };
-
-    let displayDate = '';
-    const sectionData: SectionData = Object.entries(relevantData)
-      .map(([sectionTitle, val]) => {
-        if (sectionTitle === '@timestamp') {
-          displayDate = formatDate(val);
-          return { sectionTitle: '', entries: [] };
-        }
-        if (typeof val !== 'object') {
-          return { sectionTitle, entries: [{ title: sectionTitle, description: `${val}` }] };
-        }
-        return { sectionTitle, entries: [...objectToDescriptionListEntries(val)] };
-      })
-      .filter((v) => v.sectionTitle !== '' && v.entries.length);
-
-    return [specificEvent, countOfCategory, specificCategory, sectionData, displayDate];
-  });
-});
-
-/**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
  * @deprecated
@@ -350,7 +291,7 @@ export const relatedEventsByCategory: (
 );
 
 export const relatedEventCountByType: (
-  state: ResolverState
+  state: DataState
 ) => (nodeID: string, eventType: string) => number | undefined = createSelector(
   relatedEventsStats,
   (statsMap) => {
