@@ -9,10 +9,3 @@ linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
-
-echo " -> running visual regression tests from kibana directory"
-yarn percy exec -t 10000 -- -- \
-  node scripts/functional_tests \
-    --debug --bail \
-    --kibana-install-dir "$installDir" \
-    --config test/visual_regression/config.ts;
