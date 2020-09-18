@@ -31,15 +31,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Exports from Non-default Space', () => {
     before(async () => {
       await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana_spaces'); // dashboard in non default space
+      await esArchiver.load('reporting/ecommerce_kibana_spaces'); // multiple spaces with different config settings
     });
 
     after(async () => {
       await esArchiver.unload('reporting/ecommerce');
       await esArchiver.unload('reporting/ecommerce_kibana_spaces');
-    });
-
-    afterEach(async () => {
       await reportingAPI.deleteAllReports();
     });
 
