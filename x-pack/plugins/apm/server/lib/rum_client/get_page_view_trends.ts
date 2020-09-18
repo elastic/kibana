@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -20,7 +19,7 @@ export async function getPageViewTrends({
   setup: Setup & SetupTimeRange & SetupUIFilters;
   breakdowns?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
   let breakdownItem: BreakdownItem | null = null;
@@ -68,17 +67,15 @@ export async function getPageViewTrends({
       x: xVal,
       y: bCount,
     };
-    if (breakdownItem) {
-      const categoryBuckets = (bucket.breakdown as any).buckets;
-      categoryBuckets.forEach(
-        ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
-          if (key === 'Other') {
-            res[key + `(${breakdownItem?.name})`] = docCount;
-          } else {
-            res[key] = docCount;
-          }
+    if ('breakdown' in bucket) {
+      const categoryBuckets = bucket.breakdown.buckets;
+      categoryBuckets.forEach(({ key, doc_count: docCount }) => {
+        if (key === 'Other') {
+          res[key + `(${breakdownItem?.name})`] = docCount;
+        } else {
+          res[key] = docCount;
         }
-      );
+      });
     }
 
     return res;

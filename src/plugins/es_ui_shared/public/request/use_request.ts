@@ -49,7 +49,7 @@ export const useRequest = <D = any, E = Error>(
 
   // Consumers can use isInitialRequest to implement a polling UX.
   const requestCountRef = useRef<number>(0);
-  const isInitialRequest = requestCountRef.current === 0;
+  const isInitialRequestRef = useRef<boolean>(true);
   const pollIntervalIdRef = useRef<any>(null);
 
   const clearPollInterval = useCallback(() => {
@@ -97,6 +97,9 @@ export const useRequest = <D = any, E = Error>(
     if (isOutdatedRequest || isUnmounted) {
       return;
     }
+
+    // Surface to consumers that at least one request has resolved.
+    isInitialRequestRef.current = false;
 
     setError(responseError);
     // If there's an error, keep the data from the last request in case it's still useful to the user.
@@ -146,7 +149,7 @@ export const useRequest = <D = any, E = Error>(
   }, [clearPollInterval]);
 
   return {
-    isInitialRequest,
+    isInitialRequest: isInitialRequestRef.current,
     isLoading,
     error,
     data,

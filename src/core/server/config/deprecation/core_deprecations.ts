@@ -18,7 +18,7 @@
  */
 
 import { has, get } from 'lodash';
-import { ConfigDeprecationProvider, ConfigDeprecation } from './types';
+import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(process.env, 'CONFIG_PATH')) {

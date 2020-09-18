@@ -21,7 +21,7 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 
 import { Logger } from '../cli_plugin/lib/logger';
-import { getConfigDirectory, getDataPath } from '../core/server/path';
+import { getConfigDirectory, getDataPath } from '@kbn/utils';
 
 export function getKeystore() {
   const configKeystore = join(getConfigDirectory(), 'kibana.keystore');

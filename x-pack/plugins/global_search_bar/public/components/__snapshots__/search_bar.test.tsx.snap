@@ -7,8 +7,13 @@ Array [
     "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Canvas",
     "label": "Canvas",
+    "meta": Array [
+      Object {
+        "text": "Kibana",
+      },
+    ],
     "prepend": undefined,
-    "title": "Canvasundefinedundefined",
+    "title": "Canvas •  Kibana",
     "url": "/app/test/Canvas",
   },
   Object {
@@ -16,8 +21,13 @@ Array [
     "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Discover",
     "label": "Discover",
+    "meta": Array [
+      Object {
+        "text": "Kibana",
+      },
+    ],
     "prepend": undefined,
-    "title": "Discoverundefinedundefined",
+    "title": "Discover •  Kibana",
     "url": "/app/test/Discover",
   },
   Object {
@@ -25,8 +35,13 @@ Array [
     "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Graph",
     "label": "Graph",
+    "meta": Array [
+      Object {
+        "text": "Kibana",
+      },
+    ],
     "prepend": undefined,
-    "title": "Graphundefinedundefined",
+    "title": "Graph •  Kibana",
     "url": "/app/test/Graph",
   },
 ]
@@ -39,8 +54,13 @@ Array [
     "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Discover",
     "label": "Discover",
+    "meta": Array [
+      Object {
+        "text": "Kibana",
+      },
+    ],
     "prepend": undefined,
-    "title": "Discoverundefinedundefined",
+    "title": "Discover •  Kibana",
     "url": "/app/test/Discover",
   },
   Object {
@@ -66,7 +86,7 @@ exports[`SearchBar supports keyboard shortcuts 1`] = `
   aria-haspopup="listbox"
   aria-label="Filter options"
   autocomplete="off"
-  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch euiSelectableTemplateSitewide__search"
+  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiFieldSearch-isClearable euiSelectableSearch euiSelectableTemplateSitewide__search"
   data-test-subj="header-search"
   placeholder="Search Elastic"
   type="search"
