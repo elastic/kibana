@@ -34,7 +34,6 @@ import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
-import { defaultIngestErrorHandler } from '../../errors';
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
