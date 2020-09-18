@@ -43,6 +43,12 @@ export const InstallPackageFromRegistryRequestSchema = {
   ),
 };
 
+export const BulkUpgradePackagesFromRegistryRequestSchema = {
+  body: schema.object({
+    upgrade: schema.arrayOf(schema.string(), { minSize: 1 }),
+  }),
+};
+
 export const InstallPackageByUploadRequestSchema = {
   body: schema.buffer(),
 };
