@@ -19,7 +19,7 @@ import {
   ConnectorEditFlyout,
 } from '../../../../../triggers_actions_ui/public';
 
-import { ClosureType, ActionConnector, CaseConnector } from '../../containers/configure/types';
+import { ClosureType } from '../../containers/configure/types';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
@@ -28,7 +28,12 @@ import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import { getNoneConnector } from './utils';
+import {
+  getConnectorById,
+  getNoneConnector,
+  normalizeActionConnector,
+  normalizeCaseConnector,
+} from './utils';
 import * as i18n from './translations';
 
 const FormWrapper = styled.div`
@@ -103,26 +108,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     [setEditFlyoutVisibility]
   );
 
-  const getConnectorById = useCallback(
-    (id: string): ActionConnector | null => connectors.find((c) => c.id === id) ?? null,
-    [connectors]
-  );
-
-  const normalizeActionConnector = useCallback(
-    (actionConnector: ActionConnector): CaseConnector => ({
-      id: actionConnector.id,
-      name: actionConnector.name,
-      type: actionConnector.actionTypeId,
-    }),
-    []
-  );
-
-  const normalizeCaseConnector = useCallback(
-    (caseConnector: CaseConnector): ActionConnector | null =>
-      connectors.find((c) => c.id === caseConnector.id) ?? null,
-    [connectors]
-  );
-
   const onChangeConnector = useCallback(
     (id: string) => {
       if (id === 'add-connector') {
@@ -130,7 +115,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         return;
       }
 
-      const actionConnector = getConnectorById(id);
+      const actionConnector = getConnectorById(id, connectors);
       const caseConnector =
         actionConnector != null ? normalizeActionConnector(actionConnector) : getNoneConnector();
 
@@ -140,7 +125,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         closureType,
       });
     },
-    [closureType, getConnectorById, persistCaseConfigure, setConnector, normalizeActionConnector]
+    [connectors, closureType, persistCaseConfigure, setConnector]
   );
 
   const onChangeClosureType = useCallback(
@@ -171,9 +156,11 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   useEffect(() => {
     if (!isLoadingConnectors && connector.id !== 'none') {
-      setEditedConnectorItem(normalizeCaseConnector(connector) as ActionConnectorTableItem);
+      setEditedConnectorItem(
+        normalizeCaseConnector(connectors, connector) as ActionConnectorTableItem
+      );
     }
-  }, [connectors, connector, isLoadingConnectors, normalizeCaseConnector]);
+  }, [connectors, connector, isLoadingConnectors]);
 
   return (
     <FormWrapper>

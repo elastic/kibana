@@ -8,7 +8,8 @@ import {
   ActionType,
   CasesConfigurationMapping,
   ThirdPartyField,
-  CaseConnector,
+  ConfigureCaseConnector,
+  ActionConnector,
 } from '../../containers/configure/types';
 
 export const setActionTypeToMapping = (
@@ -43,4 +44,26 @@ export const setThirdPartyToMapping = (
     return item;
   });
 
-export const getNoneConnector = (): CaseConnector => ({ id: 'none', name: 'none', type: '.none' });
+export const getNoneConnector = (): ConfigureCaseConnector => ({
+  id: 'none',
+  name: 'none',
+  type: '.none',
+});
+
+export const getConnectorById = (
+  id: string,
+  connectors: ActionConnector[]
+): ActionConnector | null => connectors.find((c) => c.id === id) ?? null;
+
+export const normalizeActionConnector = (
+  actionConnector: ActionConnector
+): ConfigureCaseConnector => ({
+  id: actionConnector.id,
+  name: actionConnector.name,
+  type: actionConnector.actionTypeId,
+});
+
+export const normalizeCaseConnector = (
+  connectors: ActionConnector[],
+  caseConnector: ConfigureCaseConnector
+): ActionConnector | null => connectors.find((c) => c.id === caseConnector.id) ?? null;
