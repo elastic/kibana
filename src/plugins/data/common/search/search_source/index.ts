@@ -17,21 +17,11 @@
  * under the License.
  */
 
-import { has } from 'lodash';
-import { Query } from 'src/plugins/data/public';
-
-/**
- * Creates a standardized query object from old queries that were either strings or pure ES query DSL
- *
- * @param query - a legacy query, what used to be stored in SearchSource's query property
- * @return Object
- */
-
-export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
-  // Lucene was the only option before, so language-less queries are all lucene
-  if (!has(query, 'language')) {
-    return { query, language: 'lucene' };
-  }
-
-  return query as Query;
-}
+export { SearchSource, ISearchSource, SearchSourceDependencies } from './search_source';
+export { createSearchSource } from './create_search_source';
+export { SortDirection, EsQuerySortValue, SearchSourceFields } from './types';
+export { injectReferences } from './inject_references';
+export { extractReferences } from './extract_references';
+export { parseSearchSourceJSON } from './parse_json';
+export * from './fetch';
+export * from './legacy';

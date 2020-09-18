@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { fetchSoon } from './fetch_soon';
-import { callClient } from './call_client';
-import { FetchHandlers } from '../fetch/types';
-import { SearchRequest } from '../index';
 import { SearchResponse } from 'elasticsearch';
-import { GetConfigFn, UI_SETTINGS, ISearchOptions } from '../../../common';
+import { UI_SETTINGS } from '../../../constants';
+import { GetConfigFn } from '../../../types';
+import { FetchHandlers, SearchRequest } from '../fetch';
+import { ISearchOptions } from '../../index';
+import { callClient } from './call_client';
+import { fetchSoon } from './fetch_soon';
 
 function getConfigStub(config: any = {}): GetConfigFn {
   return (key) => config[key];

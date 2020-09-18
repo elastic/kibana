@@ -75,9 +75,10 @@ import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, ISearchGeneric } from '../..';
+import { IIndexPattern } from '../../index_patterns';
+import { ISearchGeneric } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from '../fetch';
+import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 import {
   getEsQueryConfig,
@@ -87,7 +88,7 @@ import {
   ISearchOptions,
 } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { fetchSoon } from '../legacy';
+import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
 
 /** @internal */
