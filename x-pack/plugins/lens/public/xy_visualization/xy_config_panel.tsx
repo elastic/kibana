@@ -208,6 +208,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               isDisabled={!hasNonBarSeries}
               type="values"
               groupPosition="left"
+              buttonDataTestSubj="lnsMissingValuesButton"
             >
               <EuiFormRow
                 display="columnCompressed"
@@ -216,6 +217,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 })}
               >
                 <EuiSuperSelect
+                  data-test-subj="lnsMissingValuesSelect"
                   compressed
                   options={fittingFunctionDefinitions.map(({ id, title, description }) => {
                     return {
@@ -467,6 +469,7 @@ const ColorPicker = ({
 
   const colorPicker = (
     <EuiColorPicker
+      data-test-subj="indexPattern-dimension-colorPicker"
       compressed
       isClearable
       onChange={handleColor}

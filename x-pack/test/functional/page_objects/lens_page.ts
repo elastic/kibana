@@ -164,6 +164,29 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
+    async editDimensionLabel(label: string) {
+      await testSubjects.setValue('indexPattern-label-edit', label);
+    },
+    async editDimensionFormat(format: string) {
+      const formatInput = await testSubjects.find('indexPattern-dimension-format');
+      await comboBox.openOptionsList(formatInput);
+      await comboBox.setElement(formatInput, format);
+    },
+    async editDimensionColor(color: string) {
+      const colorPickerInput = await testSubjects.find('colorPickerAnchor');
+      await colorPickerInput.type(color);
+      await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+    },
+    async editMissingValues(option: string) {
+      await retry.try(async () => {
+        await testSubjects.click('lnsMissingValuesButton');
+        await testSubjects.exists('lnsMissingValuesSelect');
+      });
+      await testSubjects.click('lnsMissingValuesSelect');
+      const optionSelector = await find.byCssSelector(`#${option}`);
+      await optionSelector.click();
+    },
+
     getTitle() {
       return testSubjects.getVisibleText('lns_ChartTitle');
     },
@@ -307,6 +330,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+    },
+
+    async assertMissingValues(option: string) {
+      await this.assertExactText('[data-test-subj="lnsMissingValuesSelect"]', option);
+    },
+    async assertColor(color: string) {
+      // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
+      await testSubjects.getAttribute('colorPickerAnchor', color);
     },
   });
 }

@@ -8,10 +8,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -143,6 +144,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsLayerRemove');
       await testSubjects.click('lnsLayerRemove');
       await testSubjects.existOrFail('empty-workspace');
+    });
+
+    it('should edit settings of xy line chart', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('lnsXYvis');
+      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
+      await PageObjects.lens.goToTimeRange();
+      await testSubjects.click('lnsXY_splitDimensionPanel > indexPattern-dimension-remove');
+      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'max',
+        field: 'memory',
+      });
+      await PageObjects.lens.editDimensionLabel('Test of label');
+      await PageObjects.lens.editDimensionFormat('Percent');
+      await PageObjects.lens.editDimensionColor('#ff0000');
+      await PageObjects.lens.editMissingValues('Linear');
+
+      await PageObjects.lens.assertMissingValues('Linear');
+      await PageObjects.lens.assertColor('#ff0000');
+
+      await testSubjects.existOrFail('indexPattern-dimension-formatDecimals');
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Test of label'
+      );
     });
 
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
