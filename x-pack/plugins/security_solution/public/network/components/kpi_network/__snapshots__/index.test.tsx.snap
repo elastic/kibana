@@ -10,3 +10,14 @@ exports[`NetworkKpi Component rendering it renders the default widget 1`] = `
   to="2019-06-18T06:00:00.000Z"
 />
 `;
+
+exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
+<NetworkKpiComponent
+  filterQuery=""
+  from="2019-06-15T06:00:00.000Z"
+  narrowDateRange={[MockFunction]}
+  setQuery={[MockFunction]}
+  skip={true}
+  to="2019-06-18T06:00:00.000Z"
+/>
+`;
