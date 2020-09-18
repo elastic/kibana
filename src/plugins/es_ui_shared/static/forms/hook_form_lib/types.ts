@@ -69,14 +69,9 @@ export interface FormHook<T extends FormData = FormData> {
   __getFieldDefaultValue: (fieldName: string) => unknown;
 }
 
-export interface FormSchema<T extends FormData = FormData> {
-  [key: string]: FormSchemaEntry<T>;
-}
-
-type FormSchemaEntry<T extends FormData> =
-  | FieldConfig<T>
-  | Array<FieldConfig<T>>
-  | { [key: string]: FieldConfig<T> | Array<FieldConfig<T>> | FormSchemaEntry<T> };
+export type FormSchema<T extends FormData = FormData> = {
+  [K in keyof T]: FieldConfig<T, T[K]> | FormSchema<T[K]>;
+};
 
 export interface FormConfig<T extends FormData = FormData> {
   onSubmit?: FormSubmitHandler<T>;
