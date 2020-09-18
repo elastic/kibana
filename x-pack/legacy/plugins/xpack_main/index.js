@@ -13,7 +13,7 @@ export const xpackMain = (kibana) => {
     id: 'xpack_main',
     configPrefix: 'xpack.xpack_main',
     publicDir: resolve(__dirname, 'public'),
-    require: ['elasticsearch'],
+    require: [],
 
     config(Joi) {
       return Joi.object({

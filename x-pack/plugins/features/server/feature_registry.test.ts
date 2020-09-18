@@ -59,7 +59,7 @@ describe('FeatureRegistry', () => {
           read: {
             savedObject: {
               all: [],
-              read: ['config', 'url'],
+              read: ['config', 'url', 'telemetry'],
             },
             ui: [],
           },
@@ -287,7 +287,7 @@ describe('FeatureRegistry', () => {
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
     });
 
-    it(`automatically grants 'read' access to config and url saved objects for both privileges`, () => {
+    it(`automatically grants access to config, url, and telemetry saved objects`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -321,7 +321,7 @@ describe('FeatureRegistry', () => {
       const allPrivilege = result[0].privileges?.all;
       const readPrivilege = result[0].privileges?.read;
       expect(allPrivilege?.savedObject.read).toEqual(['config', 'url']);
-      expect(readPrivilege?.savedObject.read).toEqual(['config', 'url']);
+      expect(readPrivilege?.savedObject.read).toEqual(['config', 'telemetry', 'url']);
     });
 
     it(`automatically grants 'all' access to telemetry and 'read' to [config, url] saved objects for the reserved privilege`, () => {
@@ -392,7 +392,7 @@ describe('FeatureRegistry', () => {
       const readPrivilege = result[0].privileges!.read;
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
       expect(allPrivilege?.savedObject.read).toEqual(['config', 'url']);
-      expect(readPrivilege?.savedObject.read).toEqual(['config', 'url']);
+      expect(readPrivilege?.savedObject.read).toEqual(['config', 'url', 'telemetry']);
     });
 
     it(`does not allow duplicate features to be registered`, () => {

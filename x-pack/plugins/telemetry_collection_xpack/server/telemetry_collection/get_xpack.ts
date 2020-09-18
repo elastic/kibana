@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { LegacyAPICaller } from 'kibana/server';
 import { TIMEOUT } from './constants';
 
 /**
@@ -14,7 +14,7 @@ import { TIMEOUT } from './constants';
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  */
-export function getXPackUsage(callCluster: CallCluster) {
+export function getXPackUsage(callCluster: LegacyAPICaller) {
   return callCluster('transport.request', {
     method: 'GET',
     path: '/_xpack/usage',

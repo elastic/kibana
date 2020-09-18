@@ -65,8 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     ],
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/77701
-  describe.skip('endpoint list', function () {
+  describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -160,20 +159,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'endpointDetailsFlyoutTitle'
           );
           expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
-        });
-
-        // Just check the href link is correct - would need to load ingest data to validate the integration
-        it('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
-          // The prior test results in a tooltip. We need to move the mouse to clear it and allow the click
-          await (await testSubjects.find('hostnameCellLink')).moveMouseTo();
-          await (await testSubjects.find('hostnameCellLink')).click();
-          const endpointDetailsLinkToIngestButton = await testSubjects.find(
-            'endpointDetailsLinkToIngest'
-          );
-          const hrefLink = await endpointDetailsLinkToIngestButton.getAttribute('href');
-          expect(hrefLink).to.contain(
-            '/app/ingestManager#/fleet/agents/023fa40c-411d-4188-a941-4147bfadd095/activity?openReassignFlyout=true'
-          );
         });
       });
 
@@ -313,18 +298,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedDataFromQuery);
-      });
-    });
-
-    describe.skip('when there is no data,', () => {
-      before(async () => {
-        // clear out the data and reload the page
-        await deleteMetadataStream(getService);
-        await deleteMetadataCurrentStream(getService);
-        await pageObjects.endpoint.navigateToEndpointList();
-      });
-      it('displays empty Policy Table page.', async () => {
-        await testSubjects.existOrFail('emptyPolicyTable');
       });
     });
   });

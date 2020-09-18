@@ -5,8 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LicenseType } from '../../licensing/common/types';
 import { AlertType } from '../common/alert_types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import {
+  LicensingPluginSetup,
+  LicensingRequestHandlerContext,
+} from '../../licensing/server';
 
 export const APM_FEATURE = {
   id: 'apm',
@@ -60,5 +65,43 @@ export const APM_FEATURE = {
   },
 };
 
-export const APM_SERVICE_MAPS_FEATURE_NAME = 'APM service maps';
-export const APM_SERVICE_MAPS_LICENSE_TYPE = 'platinum';
+interface Feature {
+  name: string;
+  license: LicenseType;
+}
+type FeatureName = 'serviceMaps' | 'ml' | 'customLinks';
+export const features: Record<FeatureName, Feature> = {
+  serviceMaps: {
+    name: 'APM service maps',
+    license: 'platinum',
+  },
+  ml: {
+    name: 'APM machine learning',
+    license: 'platinum',
+  },
+  customLinks: {
+    name: 'APM custom links',
+    license: 'gold',
+  },
+};
+
+export function registerFeaturesUsage({
+  licensingPlugin,
+}: {
+  licensingPlugin: LicensingPluginSetup;
+}) {
+  Object.values(features).forEach(({ name, license }) => {
+    licensingPlugin.featureUsage.register(name, license);
+  });
+}
+
+export function notifyFeatureUsage({
+  licensingPlugin,
+  featureName,
+}: {
+  licensingPlugin: LicensingRequestHandlerContext;
+  featureName: FeatureName;
+}) {
+  const feature = features[featureName];
+  licensingPlugin.featureUsage.notifyUsage(feature.name);
+}
