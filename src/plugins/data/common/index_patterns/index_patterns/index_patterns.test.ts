@@ -18,7 +18,7 @@
  */
 
 import { defaults } from 'lodash';
-import { IndexPatternsService } from '.';
+import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
@@ -168,5 +168,47 @@ describe('IndexPatterns', () => {
     }
 
     expect(result.res.status).toBe(409);
+  });
+
+  test('create', async () => {
+    const title = 'kibana-*';
+    indexPatterns.refreshFields = jest.fn();
+
+    const indexPattern = await indexPatterns.create({ title }, true);
+    expect(indexPattern).toBeInstanceOf(IndexPattern);
+    expect(indexPattern.title).toBe(title);
+    expect(indexPatterns.refreshFields).not.toBeCalled();
+
+    await indexPatterns.create({ title });
+    expect(indexPatterns.refreshFields).toBeCalled();
+  });
+
+  test('createAndSave', async () => {
+    const title = 'kibana-*';
+    indexPatterns.createSavedObject = jest.fn();
+    indexPatterns.setDefault = jest.fn();
+    await indexPatterns.createAndSave({ title });
+    expect(indexPatterns.createSavedObject).toBeCalled();
+    expect(indexPatterns.setDefault).toBeCalled();
+  });
+
+  test('savedObjectToSpec', () => {
+    const savedObject = {
+      id: 'id',
+      version: 'version',
+      attributes: {
+        title: 'kibana-*',
+        timeFieldName: '@timestamp',
+        fields: '[]',
+        sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
+        fieldFormatMap: '{"field":{}}',
+        typeMeta: '{}',
+        type: '',
+      },
+      type: 'index-pattern',
+      references: [],
+    };
+
+    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
   });
 });

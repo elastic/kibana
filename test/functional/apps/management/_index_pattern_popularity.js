@@ -57,6 +57,7 @@ export default function ({ getService, getPageObjects }) {
       // Cancel saving the popularity change
       await PageObjects.settings.controlChangeCancel();
       await PageObjects.settings.openControlsByName(fieldName);
+      // check that it is 0 (previous increase was cancelled
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
       expect(popularity).to.be('0');
