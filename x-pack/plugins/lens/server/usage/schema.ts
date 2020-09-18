@@ -41,17 +41,28 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   indexpattern_dimension_operation_sum: { type: 'long' },
   indexpattern_dimension_operation_count: { type: 'long' },
   indexpattern_dimension_operation_cardinality: { type: 'long' },
+  indexpattern_dimension_operation_filters: { type: 'long' },
 };
 
 const suggestionEventsSchema: MakeSchemaFrom<LensUsage['suggestion_events_30_days']> = {
   back_to_current: { type: 'long' },
   reload: { type: 'long' },
-  position_0_of_5: { type: 'long' },
 };
 
 const savedSchema: MakeSchemaFrom<LensUsage['saved_overall']> = {
+  bar: { type: 'long' },
+  bar_horizontal: { type: 'long' },
+  line: { type: 'long' },
+  area: { type: 'long' },
   bar_stacked: { type: 'long' },
-  // TODO: Extend this list as we know more visualizationTypes
+  bar_percentage_stacked: { type: 'long' },
+  bar_horizontal_stacked: { type: 'long' },
+  bar_horizontal_percentage_stacked: { type: 'long' },
+  area_stacked: { type: 'long' },
+  area_percentage_stacked: { type: 'long' },
+  lnsDatatable: { type: 'long' },
+  lnsPie: { type: 'long' },
+  lnsMetric: { type: 'long' },
 };
 
 export const lensUsageSchema: MakeSchemaFrom<LensUsage> = {
