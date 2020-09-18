@@ -7,9 +7,11 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import { useFormFieldMock } from '../../../../common/mock';
+import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { EqlQueryBar, EqlQueryBarProps } from './eql_query_bar';
+
+jest.mock('../../../../common/lib/kibana');
 
 describe('EqlQueryBar', () => {
   let mockField: EqlQueryBarProps['field'];
@@ -32,7 +34,9 @@ describe('EqlQueryBar', () => {
 
   it('sets the field value on input change', () => {
     const wrapper = mount(
-      <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={mockField} />
+      <TestProviders>
+        <EqlQueryBar index={mockIndex} dataTestSubj="myQueryBar" field={mockField} />
+      </TestProviders>
     );
 
     wrapper
