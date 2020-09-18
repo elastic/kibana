@@ -8,7 +8,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const apmIndices: SavedObjectsType = {
   name: 'apm-indices',
   hidden: false,
-  namespaceType: 'agnostic',
+  namespaceType: 'single',
   mappings: {
     properties: {
       /* eslint-disable @typescript-eslint/naming-convention */
