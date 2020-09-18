@@ -13,7 +13,6 @@
 import uniq from 'lodash/uniq';
 
 import PropTypes from 'prop-types';
-import rison from 'rison-node';
 import React, { Component, Fragment } from 'react';
 import memoizeOne from 'memoize-one';
 import {
@@ -54,12 +53,15 @@ import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '../../../../../common/constants/annotations';
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 
 const CURRENT_SERIES = 'current_series';
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
-export class AnnotationsTable extends Component {
+class AnnotationsTableUI extends Component {
   static propTypes = {
     annotations: PropTypes.array,
     jobs: PropTypes.array,
@@ -199,7 +201,17 @@ export class AnnotationsTable extends Component {
     }
   }
 
-  openSingleMetricView = (annotation = {}) => {
+  openSingleMetricView = async (annotation = {}) => {
+    const {
+      services: {
+        application: { navigateToApp },
+
+        share: {
+          urlGenerators: { getUrlGenerator },
+        },
+      },
+    } = this.props.kibana;
+
     // Creates the link to the Single Metric Viewer.
     // Set the total time range from the start to the end of the annotation.
     const job = this.getJob(annotation.job_id);
@@ -210,30 +222,10 @@ export class AnnotationsTable extends Component {
     );
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(resultLatest).toISOString();
-
-    const globalSettings = {
-      ml: {
-        jobIds: [job.job_id],
-      },
-      refreshInterval: {
-        display: 'Off',
-        pause: false,
-        value: 0,
-      },
-      time: {
-        from,
-        to,
-        mode: 'absolute',
-      },
-    };
-
-    const appState = {
-      query: {
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
-        },
-      },
+    const timeRange = {
+      from,
+      to,
+      mode: 'absolute',
     };
     let mlTimeSeriesExplorer = {};
     const entityCondition = {};
@@ -247,11 +239,11 @@ export class AnnotationsTable extends Component {
       };
 
       if (annotation.timestamp < dataCounts.earliest_record_timestamp) {
-        globalSettings.time.from = new Date(annotation.timestamp).toISOString();
+        timeRange.from = new Date(annotation.timestamp).toISOString();
       }
 
       if (annotation.end_timestamp > dataCounts.latest_record_timestamp) {
-        globalSettings.time.to = new Date(annotation.end_timestamp).toISOString();
+        timeRange.to = new Date(annotation.end_timestamp).toISOString();
       }
     }
 
@@ -274,14 +266,34 @@ export class AnnotationsTable extends Component {
       entityCondition[annotation.by_field_name] = annotation.by_field_value;
     }
     mlTimeSeriesExplorer.entities = entityCondition;
-    appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
+    // appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
-    const _g = rison.encode(globalSettings);
-    const _a = rison.encode(appState);
+    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
+        timeRange,
+        refreshInterval: {
+          display: 'Off',
+          pause: false,
+          value: 0,
+        },
+        jobIds: [job.job_id],
+        query: {
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
+        },
+        ...mlTimeSeriesExplorer,
+      },
+      excludeBasePath: true,
+    });
 
-    const url = `?_g=${_g}&_a=${_a}`;
-    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, url);
-    window.open(`#/timeseriesexplorer${url}`, '_self');
+    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricViewerLink);
+    await navigateToApp(PLUGIN_ID, {
+      path: singleMetricViewerLink,
+    });
   };
 
   onMouseOverRow = (record) => {
@@ -686,3 +698,5 @@ export class AnnotationsTable extends Component {
     );
   }
 }
+
+export const AnnotationsTable = withKibana(AnnotationsTableUI);
