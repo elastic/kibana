@@ -130,7 +130,7 @@ export function processNameSafeVersion(event: SafeResolverEvent): string | undef
   }
 }
 
-export function eventId(event: ResolverEvent): number | undefined | string {
+export function eventID(event: ResolverEvent): number | undefined | string {
   if (isLegacyEvent(event)) {
     return event.endgame.serial_event_id;
   }

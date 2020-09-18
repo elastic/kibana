@@ -61,7 +61,7 @@ const NodeDetailView = memo(function ({ processEvent }: { processEvent: Resolver
     selectors.isProcessTerminated(state)(entityId)
   );
   const relatedEventTotal = useSelector((state: ResolverState) => {
-    return selectors.relatedEventAggregateTotalByEntityId(state)(entityId);
+    return selectors.relatedEventTotalCount(state)(entityId);
   });
   const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
     const eventTime = event.eventTimestamp(processEvent);

@@ -10,7 +10,7 @@ import { createSelector } from 'reselect';
 import { PanelViewAndParameters, ResolverUIState } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { isPanelViewAndParameters } from '../../models/location_search';
-import { eventId } from '../../../../common/endpoint/models/event';
+import { eventID } from '../../../../common/endpoint/models/event';
 
 /**
  * id of the "current" tree node (fake-focused)
@@ -129,7 +129,7 @@ export const relatedEventDetailHrefs: (
   return (category: string, nodeID: string, events: ResolverEvent[]) => {
     const hrefsByEntityID = new Map<string, string | undefined>();
     events.map((event) => {
-      const entityID = String(eventId(event));
+      const entityID = String(eventID(event));
       const eventDetailPanelParams: PanelViewAndParameters = {
         panelView: 'eventDetail',
         panelParameters: {

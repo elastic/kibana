@@ -15,7 +15,7 @@ import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime, GeneratedText } from './panel_content_utilities';
 import { Breadcrumbs } from './breadcrumbs';
-import * as event from '../../../../common/endpoint/models/event';
+import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { PanelContentError } from './panel_content_error';
@@ -23,6 +23,7 @@ import { PanelLoading } from './panel_loading';
 import { ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
+import { ResolverEvent } from '../../../../common/endpoint/types';
 
 const StyledDescriptionList = memo(styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
@@ -75,47 +76,63 @@ function entriesForDisplay(entries: Array<{ title: string; description: string }
   });
 }
 
+export const EventDetail = memo(
+  ({
+    nodeID,
+    eventID,
+    eventType,
+  }: {
+    nodeID: string;
+    eventID: string;
+    /** The event type to show in the breadcrumbs */
+    eventType: string;
+  }) => {
+    const event = useSelector((state: ResolverState) =>
+      selectors.eventByID(state)({ nodeID, eventID })
+    );
+    const processEvent = useSelector((state: ResolverState) =>
+      selectors.processEventForID(state)(nodeID)
+    );
+    if (event && processEvent) {
+      return (
+        <EventDetailContents
+          nodeID={nodeID}
+          eventID={eventID}
+          event={event}
+          processEvent={processEvent}
+          eventType={eventType}
+        />
+      );
+    } else {
+      return (
+        <StyledPanel>
+          <PanelLoading />
+        </StyledPanel>
+      );
+    }
+  }
+);
+
 /**
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
-export const EventDetail = memo(function ({
+const EventDetailContents = memo(function ({
   nodeID,
   eventID,
+  event,
+  eventType,
+  processEvent,
 }: {
   nodeID: string;
   eventID: string;
-}) {
-  const parentEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
-
-  const totalCount = useSelector(
-    (state: ResolverState) => selectors.relatedEventsStats(state)(nodeID)?.events.total
-  );
-
-  const processName = parentEvent ? event.processName(parentEvent) : null;
-
-  const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
-  const relatedsReady = relatedsReadyMap.get(nodeID);
-  const dispatch = useResolverDispatch();
-  const nodesLinkNavProps = useLinkProps({
-    panelView: 'nodes',
-  });
-
+  event: ResolverEvent;
   /**
-   * If we don't have the related events for the parent yet, use this effect
-   * to request them.
+   * Event type to use in the breadcrumbs
    */
-  useEffect(() => {
-    if (typeof relatedsReady === 'undefined' && nodeID !== null && nodeID !== undefined) {
-      dispatch({
-        type: 'appDetectedMissingEventData',
-        payload: nodeID,
-      });
-    }
-  }, [relatedsReady, dispatch, nodeID]);
-
+  eventType: string;
+  processEvent: ResolverEvent;
+}) {
   const [
     relatedEventToShowDetailsFor,
     countBySameCategory,
@@ -131,101 +148,14 @@ export const EventDetail = memo(function ({
     selectors.relatedEventDisplayInfoByEntityAndSelfId(state)(nodeID, eventID)
   );
 
-  const nodeDetailLinkNavProps = useLinkProps({
-    panelView: 'nodeDetail',
-    panelParameters: { nodeID },
-  });
-
-  const nodeEventsLinkNavProps = useLinkProps({
-    panelView: 'nodeEvents',
-    panelParameters: { nodeID },
-  });
-
-  const nodeEventsOfTypeLinkNavProps = useLinkProps({
-    panelView: 'nodeEventsOfType',
-    panelParameters: { nodeID, eventType: relatedEventCategory },
-  });
-  const crumbs = useMemo(() => {
-    return [
-      {
-        text: i18n.translate(
-          'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
-          {
-            defaultMessage: 'Events',
-          }
-        ),
-        ...nodesLinkNavProps,
-      },
-      {
-        text: processName,
-        ...nodeDetailLinkNavProps,
-      },
-      {
-        text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.numberOfEvents"
-              values={{ totalCount }}
-              defaultMessage="{totalCount} Events"
-            />
-          </>
-        ),
-        ...nodeEventsLinkNavProps,
-      },
-      {
-        text: (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.countByCategory"
-              values={{ count: countBySameCategory, category: relatedEventCategory }}
-              defaultMessage="{count} {category}"
-            />
-          </>
-        ),
-        ...nodeEventsOfTypeLinkNavProps,
-      },
-      {
-        text: relatedEventToShowDetailsFor ? (
-          <DescriptiveName event={relatedEventToShowDetailsFor} />
-        ) : (
-          i18n.translate('xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.NA', {
-            defaultMessage: 'N/A',
-          })
-        ),
-      },
-    ];
-  }, [
-    totalCount,
-    processName,
-    countBySameCategory,
-    relatedEventCategory,
-    relatedEventToShowDetailsFor,
-    nodeEventsOfTypeLinkNavProps,
-    nodeEventsLinkNavProps,
-    nodeDetailLinkNavProps,
-    nodesLinkNavProps,
-  ]);
-
-  if (!relatedsReady) {
-    return <PanelLoading />;
-  }
-
-  /**
-   * Could happen if user e.g. loads a URL with a bad crumbEvent
-   */
-  if (!relatedEventToShowDetailsFor) {
-    const errString = i18n.translate(
-      'xpack.securitySolution.endpoint.resolver.panel.relatedDetail.missing',
-      {
-        defaultMessage: 'Related event not found.',
-      }
-    );
-    return <PanelContentError translatedErrorMessage={errString} />;
-  }
-
   return (
     <StyledPanel>
-      <Breadcrumbs breadcrumbs={crumbs} />
+      <EventDetailBreadcrumbs
+        nodeID={nodeID}
+        nodeName={processEvent ? eventModel.processName(processEvent) : null}
+        event={event}
+        breadcrumbEventCategory={eventType}
+      />
       <EuiSpacer size="l" />
       <EuiText size="s">
         <BoldCode>
@@ -233,7 +163,7 @@ export const EventDetail = memo(function ({
             id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.categoryAndType"
             values={{
               category: relatedEventCategory,
-              eventType: String(event.ecsEventType(relatedEventToShowDetailsFor)),
+              eventType: String(eventModel.ecsEventType(event)),
             }}
             defaultMessage="{category} {eventType}"
           />
@@ -249,7 +179,7 @@ export const EventDetail = memo(function ({
       <EuiSpacer size="m" />
       <StyledDescriptiveName>
         <GeneratedText>
-          <DescriptiveName event={relatedEventToShowDetailsFor} />
+          <DescriptiveName event={event} />
         </GeneratedText>
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
@@ -281,3 +211,95 @@ export const EventDetail = memo(function ({
     </StyledPanel>
   );
 });
+
+function EventDetailBreadcrumbs({
+  nodeID,
+  nodeName,
+  event,
+  breadcrumbEventCategory,
+}: {
+  nodeID: string;
+  nodeName: string | null;
+  event: ResolverEvent;
+  breadcrumbEventCategory: string;
+}) {
+  const countByCategory = useSelector((state: ResolverState) =>
+    selectors.relatedEventCountByType(state)(nodeID, breadcrumbEventCategory)
+  );
+  const relatedEventCount: number | undefined = useSelector((state: ResolverState) =>
+    selectors.relatedEventTotalCount(state)(nodeID)
+  );
+  const nodesLinkNavProps = useLinkProps({
+    panelView: 'nodes',
+  });
+
+  const nodeDetailLinkNavProps = useLinkProps({
+    panelView: 'nodeDetail',
+    panelParameters: { nodeID },
+  });
+
+  const nodeEventsLinkNavProps = useLinkProps({
+    panelView: 'nodeEvents',
+    panelParameters: { nodeID },
+  });
+
+  const nodeEventsOfTypeLinkNavProps = useLinkProps({
+    panelView: 'nodeEventsOfType',
+    panelParameters: { nodeID, eventType: breadcrumbEventCategory },
+  });
+  const breadcrumbs = useMemo(() => {
+    return [
+      {
+        text: i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
+          {
+            defaultMessage: 'Events',
+          }
+        ),
+        ...nodesLinkNavProps,
+      },
+      {
+        text: nodeName,
+        ...nodeDetailLinkNavProps,
+      },
+      {
+        text: (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.numberOfEvents"
+              values={{ totalCount: relatedEventCount }}
+              defaultMessage="{totalCount} Events"
+            />
+          </>
+        ),
+        ...nodeEventsLinkNavProps,
+      },
+      {
+        text: (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.countByCategory"
+              values={{ count: countByCategory, category: breadcrumbEventCategory }}
+              defaultMessage="{count} {category}"
+            />
+          </>
+        ),
+        ...nodeEventsOfTypeLinkNavProps,
+      },
+      {
+        text: <DescriptiveName event={event} />,
+      },
+    ];
+  }, [
+    breadcrumbEventCategory,
+    countByCategory,
+    event,
+    nodeDetailLinkNavProps,
+    nodeEventsLinkNavProps,
+    nodeName,
+    relatedEventCount,
+    nodesLinkNavProps,
+    nodeEventsOfTypeLinkNavProps,
+  ]);
+  return <Breadcrumbs breadcrumbs={breadcrumbs} />;
+}

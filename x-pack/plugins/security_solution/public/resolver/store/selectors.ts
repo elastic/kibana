@@ -62,6 +62,11 @@ export const isProcessTerminated = composeSelectors(
 );
 
 /**
+ * Retrieve an event from memory using the event's ID.
+ */
+export const eventByID = composeSelectors(dataStateSelector, dataSelectors.eventByID);
+
+/**
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
@@ -119,11 +124,18 @@ export const relatedEventsStats: (
  * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
  * towards the aggregate total.
  */
-export const relatedEventAggregateTotalByEntityId: (
+export const relatedEventTotalCount: (
   state: ResolverState
-) => (nodeID: string) => number = composeSelectors(
+) => (nodeID: string) => number | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventAggregateTotalByEntityId
+  dataSelectors.relatedEventTotalCount
+);
+
+export const relatedEventCountByType: (
+  state: ResolverState
+) => (nodeID: string, eventType: string) => number | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventCountByType
 );
 
 /**

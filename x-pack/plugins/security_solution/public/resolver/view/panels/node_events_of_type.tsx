@@ -185,7 +185,7 @@ const NodeEventList = memo(function ({
     return eventsForCurrentCategory.map((resolverEvent) => {
       const eventTime = event.eventTimestamp(resolverEvent);
       const formattedDate = eventTime !== undefined ? formatDate(eventTime) : eventTime;
-      const entityId = event.eventId(resolverEvent);
+      const entityId = event.eventID(resolverEvent);
       return {
         formattedDate,
         eventCategory: `${eventType}`,

@@ -24,6 +24,7 @@ import {
   uniqueParentPidForProcess,
 } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
+import * as eventModel from '../../../../common/endpoint/models/event';
 
 import {
   ResolverEvent,
@@ -37,7 +38,6 @@ import {
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
-import * as eventModel from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
 import { formatDate } from '../../view/panels/panel_content_utilities';
 
@@ -115,8 +115,8 @@ export const isProcessTerminated = createSelector(terminatedProcesses, function 
   terminatedProcesses
   /* eslint-enable no-shadow */
 ) {
-  return (entityId: string) => {
-    return terminatedProcesses.has(entityId);
+  return (entityID: string) => {
+    return terminatedProcesses.has(entityID);
   };
 });
 
@@ -169,24 +169,18 @@ export const relatedEventsStats: (
 );
 
 /**
- * This returns the "aggregate total" for related events, tallied as the sum
- * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
- * towards the aggregate total.
+ * The total number of events related to a node.
  */
-export const relatedEventAggregateTotalByEntityId: (
+export const relatedEventTotalCount: (
   state: DataState
-) => (entityId: string) => number = createSelector(relatedEventsStats, (relatedStats) => {
-  return (entityId) => {
-    const statsForEntity = relatedStats(entityId);
-    if (statsForEntity === undefined) {
-      return 0;
-    }
-    return Object.values(statsForEntity?.events?.byCategory || {}).reduce(
-      (sum, val) => sum + val,
-      0
-    );
-  };
-});
+) => (entityID: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (relatedStats) => {
+    return (entityID) => {
+      return relatedStats(entityID)?.events?.total;
+    };
+  }
+);
 
 /**
  * returns a map of entity_ids to related event data.
@@ -195,6 +189,33 @@ export const relatedEventAggregateTotalByEntityId: (
 export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
   return data.relatedEvents;
 }
+
+export const eventByID = createSelector(relatedEventsByEntityId, (relatedEvents) => {
+  // A map of nodeID to a map of eventID to events. Lazily populated.
+  const memo = new Map<string, Map<string | number, ResolverEvent>>();
+  return ({ eventID, nodeID }: { eventID: string; nodeID: string }) => {
+    const eventsWrapper = relatedEvents.get(nodeID);
+    if (!eventsWrapper) {
+      return undefined;
+    }
+    if (!memo.has(nodeID)) {
+      const map = new Map<string | number, ResolverEvent>();
+      for (const event of eventsWrapper.events) {
+        const id = eventModel.eventID(event);
+        if (id !== undefined) {
+          map.set(id, event);
+        }
+      }
+      memo.set(nodeID, map);
+    }
+    const eventMap = memo.get(nodeID);
+    if (!eventMap) {
+      // This shouldn't be possible.
+      return undefined;
+    }
+    return eventMap.get(eventID);
+  };
+});
 
 /**
  * A helper function to turn objects into EuiDescriptionList entries.
@@ -240,7 +261,7 @@ const objectToDescriptionListEntries = function* (
 export const relatedEventDisplayInfoByEntityAndSelfID: (
   state: DataState
 ) => (
-  entityId: string,
+  entityID: string,
   relatedEventId: string | number
 ) => [
   EndpointEvent | LegacyEndpointEvent | undefined,
@@ -253,13 +274,13 @@ export const relatedEventDisplayInfoByEntityAndSelfID: (
   relatedEventsByEntityId
   /* eslint-enable no-shadow */
 ) {
-  return defaultMemoize((entityId: string, relatedEventId: string | number) => {
-    const relatedEventsForThisProcess = relatedEventsByEntityId.get(entityId);
+  return defaultMemoize((entityID: string, relatedEventId: string | number) => {
+    const relatedEventsForThisProcess = relatedEventsByEntityId.get(entityID);
     if (!relatedEventsForThisProcess) {
       return [undefined, 0, undefined, [], ''];
     }
     const specificEvent = relatedEventsForThisProcess.events.find(
-      (evt) => eventModel.eventId(evt) === relatedEventId
+      (evt) => eventModel.eventID(evt) === relatedEventId
     );
     // For breadcrumbs:
     const specificCategory = specificEvent && eventModel.primaryEventCategory(specificEvent);
@@ -305,9 +326,9 @@ export const relatedEventsByCategory: (
     relatedEventsByEntityId
     /* eslint-enable no-shadow */
   ) {
-    return defaultMemoize((entityId: string) => {
+    return defaultMemoize((entityID: string) => {
       return defaultMemoize((ecsCategory: string) => {
-        const relatedById = relatedEventsByEntityId.get(entityId);
+        const relatedById = relatedEventsByEntityId.get(entityID);
         // With no related events, we can't return related by category
         if (!relatedById) {
           return [];
@@ -325,6 +346,23 @@ export const relatedEventsByCategory: (
         );
       });
     });
+  }
+);
+
+export const relatedEventCountByType: (
+  state: ResolverState
+) => (nodeID: string, eventType: string) => number | undefined = createSelector(
+  relatedEventsStats,
+  (statsMap) => {
+    return (nodeID: string, eventType: string): number | undefined => {
+      const stats = statsMap(nodeID);
+      if (stats) {
+        const value = Object.prototype.hasOwnProperty.call(stats.events.byCategory, eventType);
+        if (typeof value === 'number') {
+          return value;
+        }
+      }
+    };
   }
 );
 
@@ -377,12 +415,12 @@ export const relatedEventInfoByEntityId: (
     relatedEventsStats
     /* eslint-enable no-shadow */
   ) {
-    return (entityId) => {
-      const stats = relatedEventsStats(entityId);
+    return (entityID) => {
+      const stats = relatedEventsStats(entityID);
       if (!stats) {
         return null;
       }
-      const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityId);
+      const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityID);
       const hasMoreEvents =
         eventsResponseForThisEntry && eventsResponseForThisEntry.nextEvent !== null;
       /**

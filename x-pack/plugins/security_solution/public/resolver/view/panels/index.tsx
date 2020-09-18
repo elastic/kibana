@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
 import { NodeEventsOfType } from './node_events_of_type';
 import { NodeEvents } from './node_events';
-import { NodeDetail } from './node_details';
+import { NodeDetail } from './node_detail';
 import { NodeList } from './node_list';
 import { EventDetail } from './event_detail';
 import { PanelViewAndParameters } from '../../types';
@@ -37,6 +37,7 @@ export const PanelRouter = memo(function () {
       <EventDetail
         nodeID={params.panelParameters.nodeID}
         eventID={params.panelParameters.eventID}
+        eventType={params.panelParameters.eventType}
       />
     );
   } else {
