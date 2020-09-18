@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime, GeneratedText } from './panel_content_utilities';
-import { DeprecatedBreadcrumbs } from './breadcrumbs';
+import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
@@ -256,7 +256,7 @@ export const EventDetail = memo(function ({
 
   return (
     <StyledPanel>
-      <DeprecatedBreadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText size="s">
         <BoldCode>

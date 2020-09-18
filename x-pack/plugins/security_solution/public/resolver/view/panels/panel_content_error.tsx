@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import * as selectors from '../../store/selectors';
 import { ResolverState } from '../../types';
-import { DeprecatedBreadcrumbs } from './breadcrumbs';
+import { Breadcrumbs } from './breadcrumbs';
 
 /**
  * Display an error in the panel when something goes wrong and give the user a way to "retreat" back to a default state.
@@ -48,7 +48,7 @@ export const PanelContentError = memo(function ({
   }, [nodesLinkNavProps]);
   return (
     <>
-      <DeprecatedBreadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText textAlign="center">{translatedErrorMessage}</EuiText>
       <EuiSpacer size="l" />
