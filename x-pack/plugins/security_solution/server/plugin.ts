@@ -16,6 +16,7 @@ import {
   Plugin as IPlugin,
   PluginInitializerContext,
   SavedObjectsClient,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
@@ -178,6 +179,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       icon: 'logoSecurity',
+      category: DEFAULT_APP_CATEGORIES.security,
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
@@ -315,6 +317,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager?.agentService,
+      packageService: plugins.ingestManager?.packageService,
       logger: this.logger,
       manifestManager,
       registerIngestCallback,
