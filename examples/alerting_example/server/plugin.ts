@@ -19,6 +19,7 @@
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '../../../src/core/server';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerts/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../x-pack/plugins/features/server';
 
@@ -47,6 +48,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
+      category: DEFAULT_APP_CATEGORIES.management,
       alerting: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
       privileges: {
         all: {
