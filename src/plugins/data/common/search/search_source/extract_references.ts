@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectReference } from '../../../../../core/types';
-import { Filter } from '../../../common/es_query/filters';
+import { SavedObjectReference } from 'src/core/types';
+import { Filter } from '../../es_query/filters';
 import { SearchSourceFields } from './types';
 
 export const extractReferences = (

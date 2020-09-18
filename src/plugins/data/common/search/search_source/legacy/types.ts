@@ -17,9 +17,30 @@
  * under the License.
  */
 
-export { SearchSource, ISearchSource, SearchSourceDependencies } from './search_source';
-export { createSearchSource } from './create_search_source';
-export { SortDirection, EsQuerySortValue, SearchSourceFields } from './types';
-export { injectReferences } from './inject_references';
-export { extractReferences } from './extract_references';
-export { parseSearchSourceJSON } from './parse_json';
+import { BehaviorSubject } from 'rxjs';
+import { SearchResponse } from 'elasticsearch';
+import { FetchHandlers, SearchRequest } from '../fetch';
+
+// @internal
+export interface LegacyFetchHandlers {
+  callMsearch: (params: {
+    body: SearchRequest;
+    signal: AbortSignal;
+  }) => Promise<Array<SearchResponse<any>>>;
+  loadingCount$: BehaviorSubject<number>;
+}
+
+export interface SearchStrategySearchParams extends FetchHandlers {
+  searchRequests: SearchRequest[];
+}
+
+// @deprecated
+export interface SearchStrategyProvider {
+  id: string;
+  search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
+}
+
+export interface SearchStrategyResponse<T = any> {
+  searching: Promise<Array<SearchResponse<T>>>;
+  abort: () => void;
+}
