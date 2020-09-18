@@ -13,10 +13,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
+  const security = getService('security');
 
   describe('lens reporting', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('lens/reporting');
+      await security.testUser.setRoles(
+        ['test_logstash_reader', 'global_dashboard_read', 'reporting_user'],
+        false
+      );
     });
 
     after(async () => {
@@ -26,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         refresh: true,
         body: { query: { match_all: {} } },
       });
+      await security.testUser.restoreDefaults();
     });
 
     it('should not cause PDF reports to fail', async () => {
@@ -34,7 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.reporting.openPdfReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
       const url = await PageObjects.reporting.getReportURL(60000);
-
       expect(url).to.be.ok();
     });
   });
