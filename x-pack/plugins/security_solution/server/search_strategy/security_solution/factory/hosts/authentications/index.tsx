@@ -55,7 +55,7 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
       edges,
       totalCount,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

@@ -33,7 +33,7 @@ Object {
       },
       "pageViews": Object {
         "value_count": Object {
-          "field": "transaction.type",
+          "field": "transaction.duration.us",
         },
       },
     },
