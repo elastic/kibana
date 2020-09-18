@@ -1,5 +1,5 @@
 [[kuery-query]]
-== Kibana Query Language
+=== Kibana Query Language
 
 The Kibana Query Language (KQL) makes it easy to find
 the right field and syntax for your {es} query. If you have the
@@ -41,7 +41,7 @@ but so will "quick fox brown".
 
 NOTE: Terms without fields are matched against the default field in your index settings.
 If a default field is not
-set, these terms will be matched against all fields. For example, a query
+set, these terms are matched against all fields. For example, a query
 for `response:200` will search for the value 200
 in the response field, but a query for just `200` will search for 200
 across all fields in your index.
@@ -53,35 +53,35 @@ across all fields in your index.
 KQL supports `or`, `and`, and `not`. By default, `and` has a higher precedence than `or`.
 To override the default precedence, group operators in parenthesis.
 
-Match documents where `response` is 200, `extension` is php, or both:
+To match documents where `response` is 200, `extension` is php, or both:
 
 [source,yaml]
 -------------------
 response:200 or extension:php
 -------------------
 
-Match documents where `response` is 200 and `extension` is php:
+To match documents where `response` is 200 and `extension` is php:
 
 [source,yaml]
 -------------------
 response:200 and extension:php
 -------------------
 
-Match documents where `response` is 200 or 404.
+To match documents where `response` is 200 or 404.
 
 [source,yaml]
 -------------------
 response:(200 or 404)
 -------------------
 
-Match documents where `response` is 200 and `extension` is either php or css:
+To match documents where `response` is 200 and `extension` is either php or css:
 
 [source,yaml]
 -------------------
 response:200 and (extension:php or extension:css)
 -------------------
 
-Match documents where `response` is 200 and `extension` is
+To match documents where `response` is 200 and `extension` is
 php OR `extension` is css and response is anything:
 
 [source,yaml]
@@ -89,21 +89,21 @@ php OR `extension` is css and response is anything:
 response:200 and extension:php or extension:css
 -------------------
 
-Match documents where `response` is not 200:
+To match documents where `response` is not 200:
 
 [source,yaml]
 -------------------
 not response:200
 -------------------
 
-Match documents where `response` is 200 but `extension` is not php or css.
+To match documents where `response` is 200 but `extension` is not php or css.
 
 [source,yaml]
 -------------------
 response:200 and not (extension:php or extension:css)
 -------------------
 
-Match multi-value fields that contain a list of terms:
+To match multi-value fields that contain a list of terms:
 
 [source,yaml]
 -------------------
@@ -117,7 +117,7 @@ KQL supports `>`, `>=`, `<`, and `<=`. For example:
 
 [source,yaml]
 -------------------
-account_number:>=`100` and age:<=200
+account_number:>=100 and items_sold:<=200
 -------------------
 
 [discrete]
@@ -134,7 +134,7 @@ response:*
 [discrete]
 === Wildcard queries
 
-Match documents where `machine.os` starts with "win", such
+To match documents where `machine.os` starts with "win", such
 as "windows 7" and "windows 10":
 
 [source,yaml]
@@ -142,7 +142,7 @@ as "windows 7" and "windows 10":
 machine.os:win*
 -------------------
 
-Match multiple fields:
+To match multiple fields:
 
 [source,yaml]
 -------------------
@@ -161,9 +161,9 @@ for the term
 A main consideration for querying {ref}/nested.html[nested fields] is how to match parts of the nested query to the individual nested documents.
 There are two main approaches:
 
-* *Parts of the query can only match a single nested document.* This is what most users want when querying on a nested field.
-* *Parts of the query can match different nested documents.* This is how a regular object field works.
- This query is generally less useful than the first approach.
+* *Match parts of the query to a single nested document only.* This is what most users want when querying on a nested field.
+* *Match parts of the query to different nested documents.* This is how a regular object field works.
+ This query is generally less useful than matching to a single document.
 
 In the following document, `items` is a nested field. Each document in the nested
 field contains a name, stock, and category.
@@ -207,7 +207,7 @@ To match stores that have more than 10 bananas in stock:
 items:{ name:banana and stock > 10 }
 -------------------
 
-`items` is the "nested path". Everything inside the curly braces (the "nested group")
+`items` is the "nested path". Everything inside the curly braces (the nested group)
 must match a single nested document.
 
 The following query does not return any matches because no single nested
@@ -249,7 +249,7 @@ subquery can match a different nested document because it is in a separate group
 [discrete]
 ==== Nested fields inside other nested fields
 
-KQL supports nested fields inside of other nested fields&mdash;you simply have to
+KQL supports nested fields inside of other nested fields&mdash;you have to
 specify the full path. In this document,
 `level1` and `level2` are nested fields:
 
