@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const comboBox = getService('comboBox');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
