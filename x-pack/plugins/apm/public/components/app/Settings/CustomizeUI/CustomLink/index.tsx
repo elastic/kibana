@@ -7,7 +7,7 @@
 import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { INVALID_LICENSE } from '../../../../../../common/custom_link';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { useLicense } from '../../../../../hooks/useLicense';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/useFetcher';
@@ -94,15 +94,7 @@ export function CustomLinkOverview() {
             />
           )
         ) : (
-          <LicensePrompt
-            text={i18n.translate(
-              'xpack.apm.settings.customizeUI.customLink.license.text',
-              {
-                defaultMessage:
-                  "To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services.",
-              }
-            )}
-          />
+          <LicensePrompt text={INVALID_LICENSE} />
         )}
       </EuiPanel>
     </>

@@ -6,11 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'src/core/server';
-import { getFieldFormats } from '../../../services';
 import { ReportingConfig } from '../../../';
 import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { CSV_BOM_CHARS } from '../../../../common/constants';
+import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
+import { getFieldFormats } from '../../../services';
 import { IndexPatternSavedObject, SavedSearchGeneratorResult } from '../types';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 import { createEscapeValue } from './escape_value';
@@ -64,7 +65,7 @@ export function createGenerateCsv(logger: LevelLogger) {
     );
     const escapeValue = createEscapeValue(settings.quoteValues, settings.escapeFormulaValues);
     const bom = config.get('csv', 'useByteOrderMarkEncoding') ? CSV_BOM_CHARS : '';
-    const builder = new MaxSizeStringBuilder(settings.maxSizeBytes, bom);
+    const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(settings.maxSizeBytes), bom);
 
     const { fields, metaFields, conflictedTypesFields } = job;
     const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
