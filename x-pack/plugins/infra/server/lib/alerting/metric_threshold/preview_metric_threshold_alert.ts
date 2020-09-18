@@ -81,10 +81,11 @@ export const previewMetricThresholdAlert: (
     // Now determine how to interpolate this histogram based on the alert interval
     const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
     const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
-    const throttleIntervalInSeconds = getIntervalInSeconds(alertThrottle);
-    const executionsPerThrottle = Math.floor(
-      (throttleIntervalInSeconds / alertIntervalInSeconds) * alertResultsPerExecution
+    const throttleIntervalInSeconds = Math.max(
+      getIntervalInSeconds(alertThrottle),
+      alertIntervalInSeconds
     );
+
     const previewResults = await Promise.all(
       groups.map(async (group) => {
         // Interpolate the buckets returned by evaluateAlert and return a count of how many of these
@@ -102,7 +103,7 @@ export const previewMetricThresholdAlert: (
         let throttleTracker = 0;
         const notifyWithThrottle = () => {
           if (throttleTracker === 0) numberOfNotifications++;
-          throttleTracker++;
+          throttleTracker += alertIntervalInSeconds;
         };
         for (let i = 0; i < numberOfExecutionBuckets; i++) {
           const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
@@ -130,9 +131,9 @@ export const previewMetricThresholdAlert: (
             numberOfTimesFired++;
             notifyWithThrottle();
           } else if (throttleTracker > 0) {
-            throttleTracker++;
+            throttleTracker += alertIntervalInSeconds;
           }
-          if (throttleTracker === executionsPerThrottle) {
+          if (throttleTracker >= throttleIntervalInSeconds) {
             throttleTracker = 0;
           }
         }

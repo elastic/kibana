@@ -80,7 +80,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
         } as AlertPreviewRequestParams,
         alertType,
       });
-      setPreviewResult({ ...result, groupByDisplayName, previewLookbackInterval });
+      setPreviewResult({ ...result, groupByDisplayName, previewLookbackInterval, alertThrottle });
     } catch (e) {
       setPreviewError(e);
     } finally {
@@ -241,7 +241,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
                     id="xpack.infra.metrics.alertFlyout.alertPreviewTotalNotifications"
                     defaultMessage='As a result, this alert would have sent {notifications} based on the selected "notify every" setting of "{alertThrottle}."'
                     values={{
-                      alertThrottle,
+                      alertThrottle: previewResult.alertThrottle,
                       notifications: (
                         <strong>
                           {i18n.translate(
