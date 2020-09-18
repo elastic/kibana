@@ -7,6 +7,7 @@
 import { CaseSettingsRegistry } from './types';
 import { createCaseSettingsRegistry } from './settings_registry';
 import { getCaseSetting as getJiraCaseSetting, JiraSettingFields } from './jira';
+import { getCaseSetting as getResilientCaseSetting, ResilientSettingFields } from './resilient';
 
 interface UseCaseSettingReturn {
   caseSettingsRegistry: CaseSettingsRegistry;
@@ -14,6 +15,7 @@ interface UseCaseSettingReturn {
 
 function registerCaseSettings(caseSettingsRegistry: CaseSettingsRegistry) {
   caseSettingsRegistry.register<JiraSettingFields>(getJiraCaseSetting());
+  caseSettingsRegistry.register<ResilientSettingFields>(getResilientCaseSetting());
 }
 
 const caseSettingsRegistry = createCaseSettingsRegistry();

@@ -122,7 +122,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
       <EuiFormRow
         fullWidth
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.jira.urgencySelectFieldLabel',
+          'xpack.securitySolution.case.settings.jira.issueTypesSelectFieldLabel',
           {
             defaultMessage: 'Issue type',
           }
@@ -149,7 +149,7 @@ const JiraSettingFieldsComponent: React.FunctionComponent<SettingFieldsProps<
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectFieldLabel',
+                    'xpack.securitySolution.case.settings.jira.prioritySelectFieldLabel',
                     {
                       defaultMessage: 'Priority',
                     }

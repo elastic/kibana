@@ -7,9 +7,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { ActionConnector } from '../../../containers/types';
-import { getFieldsByIssueType } from './api';
-import { Fields } from './types';
+import { getIncidentTypes } from './api';
 import * as i18n from './translations';
+
+type IncidentTypes = Array<{ id: number; name: string }>;
 
 interface Props {
   http: HttpSetup;
@@ -17,49 +18,47 @@ interface Props {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  issueType: string;
   connector?: ActionConnector;
 }
 
-export interface UseGetFieldsByIssueType {
-  fields: Fields;
+export interface UseGetIncidentTypes {
+  incidentTypes: IncidentTypes;
   isLoading: boolean;
 }
 
-export const useGetFieldsByIssueType = ({
+export const useGetIncidentTypes = ({
   http,
   toastNotifications,
   connector,
-  issueType,
-}: Props): UseGetFieldsByIssueType => {
+}: Props): UseGetIncidentTypes => {
   const [isLoading, setIsLoading] = useState(true);
-  const [fields, setFields] = useState<Fields>({});
+  const [incidentTypes, setIncidentTypes] = useState<IncidentTypes>([]);
   const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
     let didCancel = false;
     const fetchData = async () => {
-      if (!connector || !issueType) {
+      if (!connector) {
         setIsLoading(false);
         return;
       }
 
       abortCtrl.current = new AbortController();
       setIsLoading(true);
+
       try {
-        const res = await getFieldsByIssueType({
+        const res = await getIncidentTypes({
           http,
           signal: abortCtrl.current.signal,
           connectorId: connector.id,
-          id: issueType,
         });
 
         if (!didCancel) {
           setIsLoading(false);
-          setFields(res.data ?? {});
+          setIncidentTypes(res.data ?? []);
           if (res.status && res.status === 'error') {
             toastNotifications.addDanger({
-              title: i18n.FIELDS_API_ERROR,
+              title: i18n.INCIDENT_TYPES_API_ERROR,
               text: `${res.serviceMessage ?? res.message}`,
             });
           }
@@ -67,7 +66,7 @@ export const useGetFieldsByIssueType = ({
       } catch (error) {
         if (!didCancel) {
           toastNotifications.addDanger({
-            title: i18n.FIELDS_API_ERROR,
+            title: i18n.INCIDENT_TYPES_API_ERROR,
             text: error.message,
           });
         }
@@ -82,10 +81,10 @@ export const useGetFieldsByIssueType = ({
       setIsLoading(false);
       abortCtrl.current.abort();
     };
-  }, [http, connector, issueType, toastNotifications]);
+  }, [http, connector, toastNotifications]);
 
   return {
+    incidentTypes,
     isLoading,
-    fields,
   };
 };

@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
-import { CaseSettingConnector } from '../../../types';
+import { ActionConnector } from '../../../containers/types';
 import { getIssueTypes } from './api';
 import { IssueTypes } from './types';
 import * as i18n from './translations';
@@ -17,7 +17,7 @@ interface Props {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  connector?: CaseSettingConnector;
+  connector?: ActionConnector;
 }
 
 export interface UseGetIssueTypes {
