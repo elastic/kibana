@@ -11,7 +11,8 @@
     "urlForwarding",
     "visualizations",
     "dashboard",
-    "charts"
+    "charts",
+    "uiActions"
   ],
   "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions"],
   "configPath": ["xpack", "lens"],

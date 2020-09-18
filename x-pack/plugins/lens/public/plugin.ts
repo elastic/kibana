@@ -27,10 +27,15 @@ import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visu
 import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
 
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  ACTION_VISUALIZE_FIELD,
+  VISUALIZE_FIELD_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 
 import './index.scss';
 
@@ -111,6 +116,7 @@ export class LensPlugin {
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
+        console.dir(params);
         const { mountApp } = await import('./app_plugin/mounter');
         return mountApp(core, params, this.createEditorFrame!);
       },
@@ -121,6 +127,12 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    // unregisters the Visualize action and registers the lens one
+    startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
+    startDependencies.uiActions.addTriggerAction(
+      VISUALIZE_FIELD_TRIGGER,
+      visualizeFieldAction(core.application)
+    );
   }
 
   stop() {
