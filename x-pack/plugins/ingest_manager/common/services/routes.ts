@@ -46,6 +46,10 @@ export const epmRouteService = {
     ); // trim trailing slash
   },
 
+  getBulkInstallPath: () => {
+    return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
+  },
+
   getRemovePath: (pkgkey: string) => {
     return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
   },
