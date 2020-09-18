@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
-import { StyledBreadcrumbs } from './panel_content_utilities';
+import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
@@ -187,7 +187,7 @@ const EventCountsForProcess = memo(function ({
   );
   return (
     <>
-      <StyledBreadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />
     </>

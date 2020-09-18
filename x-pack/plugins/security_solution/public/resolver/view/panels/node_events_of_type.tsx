@@ -13,7 +13,8 @@ import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { StyledPanel } from '../styles';
-import { formatDate, StyledBreadcrumbs, BoldCode, StyledTime } from './panel_content_utilities';
+import { formatDate, BoldCode, StyledTime } from './panel_content_utilities';
+import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
@@ -85,7 +86,7 @@ const NodeCategoryEntries = memo(function ({
 
   return (
     <>
-      <StyledBreadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={crumbs} />
       {shouldShowLimitWarning && typeof numberDisplayed !== 'undefined' && numberMissing ? (
         <StyledRelatedLimitWarning
           eventType={eventType}

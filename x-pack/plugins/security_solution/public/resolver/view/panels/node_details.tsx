@@ -16,7 +16,8 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
-import { formatDate, StyledBreadcrumbs, GeneratedText } from './panel_content_utilities';
+import { formatDate, GeneratedText } from './panel_content_utilities';
+import { Breadcrumbs } from './breadcrumbs';
 import {
   processPath,
   processPid,
@@ -178,7 +179,7 @@ const NodeDetailView = memo(function ({ processEvent }: { processEvent: Resolver
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
-      <StyledBreadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <StyledTitle aria-describedby={titleID}>

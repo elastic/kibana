@@ -20,7 +20,8 @@ import styled from 'styled-components';
 import { StyledPanel } from '../styles';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
-import { formatter, StyledBreadcrumbs } from './panel_content_utilities';
+import { formatter } from './panel_content_utilities';
+import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
@@ -187,7 +188,7 @@ export const NodeList = memo(() => {
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
     <StyledPanel>
-      <StyledBreadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={crumbs} />
       {showWarning && <StyledLimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView>
