@@ -27,6 +27,7 @@ import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 // @ts-ignore
 import { createTagCloudVisualization } from './components/tag_cloud_visualization';
 import { TagCloudVisDependencies } from './plugin';
+import { toExpressionAst } from './to_ast';
 
 export const createTagCloudVisTypeDefinition = (deps: TagCloudVisDependencies) => ({
   name: 'tagcloud',
@@ -47,6 +48,7 @@ export const createTagCloudVisTypeDefinition = (deps: TagCloudVisDependencies) =
       showLabel: true,
     },
   },
+  toExpressionAst,
   visualization: createTagCloudVisualization(deps),
   editorConfig: {
     collections: {

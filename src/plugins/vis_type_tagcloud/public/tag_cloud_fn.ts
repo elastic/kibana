@@ -26,7 +26,7 @@ const name = 'tagcloud';
 
 interface Arguments extends TagCloudVisParams {
   metric: any; // these aren't typed yet
-  bucket: any; // these aren't typed yet
+  bucket?: any; // these aren't typed yet
 }
 
 interface RenderValue {
@@ -36,12 +36,14 @@ interface RenderValue {
   params: any;
 }
 
-export const createTagCloudFn = (): ExpressionFunctionDefinition<
+export type TagcloudExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof name,
   KibanaDatatable,
   Arguments,
   Render<RenderValue>
-> => ({
+>;
+
+export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
   name,
   type: 'render',
   inputTypes: ['kibana_datatable'],

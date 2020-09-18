@@ -83,12 +83,12 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
-export class Vis {
+export class Vis<TVisParams = VisParams> {
   public readonly type: VisType;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
-  public params: VisParams = {};
+  public params: TVisParams;
   // Session state is for storing information that is transitory, and will not be saved with the visualization.
   // For instance, map bounds, which depends on the view port, browser window size, etc.
   public sessionState: Record<string, any> = {};
