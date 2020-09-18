@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
-
-export * from './policies';
+export { DataTierAllocationField } from './data_tier_allocation_field';

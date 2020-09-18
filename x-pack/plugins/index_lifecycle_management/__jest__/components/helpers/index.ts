@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
+import * as editPolicyHelpers from './edit_policy';
 
-export * from './policies';
+export { HttpRequestMockHelpers, init } from './http_requests';
+
+export { editPolicyHelpers };
