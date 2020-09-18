@@ -52,15 +52,15 @@ export class IngestPipelinesUrlGenerator
 }
 
 export const registerUrlGenerator = (
-  getStartServices: CoreSetup['getStartServices'],
+  coreSetup: CoreSetup,
   management: Dependencies['management'],
   share: Dependencies['share']
 ) => {
   const getAppBasePath = async (absolute = false) => {
-    const [coreStart] = await getStartServices();
+    const [coreStart] = await coreSetup.getStartServices();
     return coreStart.application.getUrlForApp(MANAGEMENT_APP_ID, {
       path: management.sections.section.ingest.getApp(PLUGIN_ID)!.basePath,
-      absolute,
+      absolute: !!absolute,
     });
   };
 
