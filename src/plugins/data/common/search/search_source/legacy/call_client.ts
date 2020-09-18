@@ -18,10 +18,9 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { ISearchOptions } from 'src/plugins/data/common';
-import { FetchHandlers } from '../fetch';
+import { FetchHandlers, SearchRequest } from '../fetch';
 import { defaultSearchStrategy } from './default_search_strategy';
-import { SearchRequest } from '../index';
+import { ISearchOptions } from '../../index';
 
 export function callClient(
   searchRequests: SearchRequest[],

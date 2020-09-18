@@ -17,51 +17,50 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
-import { coreMock } from '../../../../../core/public/mocks';
-import { getCallMsearch } from './call_msearch';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { LegacyFetchHandlers, SearchStrategySearchParams } from './types';
 import { BehaviorSubject } from 'rxjs';
 
 const { search } = defaultSearchStrategy;
 
-const msearchMock = jest.fn().mockResolvedValue({ body: { responses: [] } });
-
-describe('defaultSearchStrategy', function () {
-  describe('search', function () {
+describe('defaultSearchStrategy', () => {
+  describe('search', () => {
     let searchArgs: MockedKeys<SearchStrategySearchParams>;
-    let http: jest.Mocked<HttpStart>;
 
     beforeEach(() => {
-      msearchMock.mockClear();
-
-      http = coreMock.createStart().http;
-      http.post.mockResolvedValue(msearchMock);
-
       searchArgs = {
         searchRequests: [
           {
             index: { title: 'foo' },
+            body: {},
           },
         ],
         getConfig: jest.fn(),
         onResponse: (req, res) => res,
         legacy: {
-          callMsearch: getCallMsearch({ http }),
+          callMsearch: jest.fn().mockResolvedValue(undefined),
           loadingCount$: new BehaviorSubject(0) as any,
         } as jest.Mocked<LegacyFetchHandlers>,
       };
     });
 
-    test('calls http.post with the correct arguments', async () => {
+    test('calls callMsearch with the correct arguments', async () => {
       await search({ ...searchArgs });
-      expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      expect(searchArgs.legacy.callMsearch.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "/internal/_msearch",
             Object {
-              "body": "{\\"searches\\":[{\\"header\\":{\\"index\\":\\"foo\\"}}]}",
+              "body": Object {
+                "searches": Array [
+                  Object {
+                    "body": Object {},
+                    "header": Object {
+                      "index": "foo",
+                      "preference": undefined,
+                    },
+                  },
+                ],
+              },
               "signal": AbortSignal {},
             },
           ],

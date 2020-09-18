@@ -17,20 +17,6 @@
  * under the License.
  */
 
-import { getSearchParams } from './get_search_params';
-import { GetConfigFn, UI_SETTINGS } from '../../../common';
-
-function getConfigStub(config: any = {}): GetConfigFn {
-  return (key) => config[key];
-}
-
-describe('getSearchParams', () => {
-  test('includes custom preference', () => {
-    const config = getConfigStub({
-      [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
-      [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
-    });
-    const searchParams = getSearchParams(config);
-    expect(searchParams.preference).toBe('aaa');
-  });
-});
+export { getSearchParams, getSearchParamsFromRequest, getPreference } from './get_search_params';
+export { RequestFailure } from './request_error';
+export * from './types';

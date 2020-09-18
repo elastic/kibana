@@ -19,9 +19,9 @@
 
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
 import { SearchSourceDependencies } from './search_source';
-import { IIndexPattern } from '../../../common/index_patterns';
+import { IIndexPattern } from '../../index_patterns';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
-import { Filter } from '../../../common/es_query/filters';
+import { Filter } from '../../es_query/filters';
 import { BehaviorSubject } from 'rxjs';
 
 describe('createSearchSource', () => {
