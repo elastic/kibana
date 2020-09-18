@@ -6,7 +6,6 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
@@ -124,22 +123,17 @@ export const Grok: FunctionComponent = () => {
       <UseArray path="fields.patterns" validations={fieldsConfig.patterns.validations}>
         {({ items, addItem, removeItem, moveItem, error }) => {
           return (
-            <EuiFormRow
-              label={fieldsConfig.patterns.label}
+            <DragAndDropTextList
+              label={fieldsConfig.patterns.label!}
               helpText={fieldsConfig.patterns.helpText}
-              isInvalid={typeof error === 'string'}
               error={error}
-              fullWidth
-            >
-              <DragAndDropTextList
-                value={items}
-                onMove={moveItem}
-                onAdd={addItem}
-                onRemove={removeItem}
-                addLabel={i18nTexts.addPatternLabel}
-                textValidation={patternValidation}
-              />
-            </EuiFormRow>
+              value={items}
+              onMove={moveItem}
+              onAdd={addItem}
+              onRemove={removeItem}
+              addLabel={i18nTexts.addPatternLabel}
+              textValidation={patternValidation}
+            />
           );
         }}
       </UseArray>

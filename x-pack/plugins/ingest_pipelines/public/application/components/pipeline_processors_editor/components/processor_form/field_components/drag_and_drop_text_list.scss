@@ -1,6 +1,7 @@
 .pipelineProcessorsEditor__form__dragAndDropList {
   &__panel {
-    box-shadow: none;
+    background-color: $euiColorLightestShade;
+    padding: $euiSizeM;
   }
 
   &__grabIcon {
@@ -16,9 +17,12 @@
   }
 
   &__item {
-    background-color: $euiColorEmptyShade;
-    padding-top: $euiSizeM;
-    padding-bottom: $euiSizeM;
-    border-bottom: $euiBorderThin;
+    background-color: $euiColorLightestShade;
+    padding-top: $euiSizeS;
+    padding-bottom: $euiSizeS;
+  }
+
+  &__labelContainer {
+    margin-bottom: $euiSizeXS;
   }
 }
