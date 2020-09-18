@@ -96,7 +96,8 @@ export default function ({ getService, loadTestFile }) {
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
-      loadTestFile(require.resolve('./replace_panels'));
+      loadTestFile(require.resolve('./panel_replacing'));
+      loadTestFile(require.resolve('./panel_cloning'));
       loadTestFile(require.resolve('./panel_controls'));
       loadTestFile(require.resolve('./dashboard_state'));
     });
