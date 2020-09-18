@@ -79,6 +79,15 @@ describe('getFormatWithAggs', () => {
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
+  test('creates alternative format for range', () => {
+    const mapping = { id: 'range', params: { template: 'within' } };
+    const getFieldFormat = getFormatWithAggs(getFormat);
+    const format = getFieldFormat(mapping);
+
+    expect(format.convert({ gte: 1, lt: 20 })).toBe('1 ≤ and < 20');
+    expect(getFormat).toHaveBeenCalledTimes(1);
+  });
+
   test('creates custom format for terms', () => {
     const mapping = {
       id: 'terms',
