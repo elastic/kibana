@@ -319,8 +319,7 @@ export async function installPackage({
     registryPackageInfo,
     paths,
     callCluster,
-    savedObjectsClient,
-    appContextService.getLogger()
+    savedObjectsClient
   );
 
   // if this is an update or retrying an update, delete the previous version's pipelines
