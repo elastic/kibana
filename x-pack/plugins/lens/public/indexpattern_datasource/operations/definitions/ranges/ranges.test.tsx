@@ -7,22 +7,20 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import {
-  EuiSwitchEvent,
-  EuiFieldNumber,
-  EuiSwitch,
-  EuiRange,
-  EuiButtonEmpty,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState, IndexPattern } from '../../../types';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { rangeOperation } from '../index';
 import { RangeIndexPatternColumn } from './ranges';
-import { autoInterval } from 'src/plugins/data/common';
-import { MODES, DEFAULT_INTERVAL, TYPING_DEBOUNCE_TIME } from './constants';
+import {
+  MODES,
+  DEFAULT_INTERVAL,
+  TYPING_DEBOUNCE_TIME,
+  MIN_HISTOGRAM_BARS,
+  SLICES,
+} from './constants';
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
 
@@ -54,6 +52,9 @@ describe('ranges', () => {
   let state: IndexPatternPrivateState;
   const InlineOptions = rangeOperation.paramEditor!;
   const sourceField = 'MyField';
+  const MAX_HISTOGRAM_VALUE = 100;
+  const GRANULARITY_DEFAULT_VALUE = (MAX_HISTOGRAM_VALUE - MIN_HISTOGRAM_BARS) / 2;
+  const GRANULARITY_STEP = (MAX_HISTOGRAM_VALUE - MIN_HISTOGRAM_BARS) / SLICES;
 
   function setToHistogramMode() {
     const column = state.layers.first.columns.col1 as RangeIndexPatternColumn;
@@ -67,10 +68,6 @@ describe('ranges', () => {
     column.dataType = 'string';
     column.scale = 'ordinal';
     column.params.type = MODES.Range;
-  }
-
-  function disableAutoMode() {
-    (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.interval = '';
   }
 
   function getDefaultState(): IndexPatternPrivateState {
@@ -95,7 +92,6 @@ describe('ranges', () => {
               sourceField,
               params: {
                 type: MODES.Histogram,
-                interval: autoInterval,
                 ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
                 maxBars: 'auto',
               },
@@ -135,7 +131,6 @@ describe('ranges', () => {
           type: MODES.Histogram,
           params: expect.objectContaining({
             field: sourceField,
-            interval: autoInterval,
             maxBars: null,
           }),
         })
@@ -195,9 +190,9 @@ describe('ranges', () => {
         state = getDefaultState();
       });
 
-      it('should start with auto interval', () => {
+      it('should start update the state with the default maxBars value', () => {
         const setStateSpy = jest.fn();
-        const instance = mount(
+        mount(
           <InlineOptions
             {...defaultOptions}
             state={state}
@@ -207,10 +202,25 @@ describe('ranges', () => {
             layerId="first"
           />
         );
-        expect(instance.find(EuiSwitch).prop('checked')).toBe(true);
 
-        // check that the value is set to 100 to start with
-        expect(instance.find(EuiRange).prop('value')).toEqual(100);
+        expect(setStateSpy).toHaveBeenCalledWith({
+          ...state,
+          layers: {
+            first: {
+              ...state.layers.first,
+              columns: {
+                ...state.layers.first.columns,
+                col1: {
+                  ...state.layers.first.columns.col1,
+                  params: {
+                    ...state.layers.first.columns.col1.params,
+                    maxBars: GRANULARITY_DEFAULT_VALUE,
+                  },
+                },
+              },
+            },
+          },
+        });
       });
 
       it('should update state when changing Max bars number', () => {
@@ -231,7 +241,7 @@ describe('ranges', () => {
           instance.find(EuiRange).prop('onChange')!(
             {
               currentTarget: {
-                value: '50',
+                value: '' + MAX_HISTOGRAM_VALUE,
               },
             } as React.ChangeEvent<HTMLInputElement>,
             true
@@ -249,7 +259,7 @@ describe('ranges', () => {
                     ...state.layers.first.columns.col1,
                     params: {
                       ...state.layers.first.columns.col1.params,
-                      maxBars: 50,
+                      maxBars: MAX_HISTOGRAM_VALUE,
                     },
                   },
                 },
@@ -259,7 +269,7 @@ describe('ranges', () => {
         });
       });
 
-      it('should not update the state when Max bars number is out of range', () => {
+      it('should update the state using the plus or minus buttons by the step amount', () => {
         const setStateSpy = jest.fn();
 
         const instance = mount(
@@ -273,85 +283,9 @@ describe('ranges', () => {
           />
         );
 
-        // below the lower bound
         act(() => {
-          instance.find(EuiRange).prop('onChange')!(
-            {
-              currentTarget: {
-                value: '0',
-              },
-            } as React.ChangeEvent<HTMLInputElement>,
-            true
-          );
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(setStateSpy).not.toHaveBeenCalled();
-        });
-
-        // above the higher bound
-        act(() => {
-          instance.find(EuiRange).prop('onChange')!(
-            {
-              currentTarget: {
-                value: '1000',
-              },
-            } as React.ChangeEvent<HTMLInputElement>,
-            true
-          );
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(setStateSpy).not.toHaveBeenCalled();
-        });
-      });
-
-      it('should pass to granularity mode when disabling auto interval', () => {
-        const setStateSpy = jest.fn();
-        const instance = mount(
-          <InlineOptions
-            {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
-            columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
-          />
-        );
-
-        act(() => {
-          instance.find(EuiSwitch).prop('onChange')!({
-            target: {
-              checked: false,
-            },
-          } as EuiSwitchEvent);
-
-          expect(
-            instance.find('[data-test-subj="lns-indexPattern-range-interval-field"]')
-          ).toBeDefined();
-        });
-      });
-
-      it('should update state when changing granularity interval', () => {
-        const setStateSpy = jest.fn();
-
-        disableAutoMode();
-
-        const instance = mount(
-          <InlineOptions
-            {...defaultOptions}
-            state={state}
-            setState={setStateSpy}
-            columnId="col1"
-            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
-            layerId="first"
-          />
-        );
-
-        act(() => {
-          instance.find(EuiFieldNumber).prop('onChange')!({
-            target: {
-              value: '50',
-            },
-          } as React.ChangeEvent<HTMLInputElement>);
+          // minus button
+          instance.find(EuiButtonEmpty).first().prop('onClick')!({} as ReactMouseEvent);
           jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
 
           expect(setStateSpy).toHaveBeenCalledWith({
@@ -365,7 +299,30 @@ describe('ranges', () => {
                     ...state.layers.first.columns.col1,
                     params: {
                       ...state.layers.first.columns.col1.params,
-                      interval: 50,
+                      maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          // plus button
+          instance.find(EuiButtonEmpty).at(1).prop('onClick')!({} as ReactMouseEvent);
+          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+          expect(setStateSpy).toHaveBeenCalledWith({
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    ...state.layers.first.columns.col1,
+                    params: {
+                      ...state.layers.first.columns.col1.params,
+                      maxBars: GRANULARITY_DEFAULT_VALUE,
                     },
                   },
                 },
