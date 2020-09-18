@@ -34,7 +34,6 @@ export interface ManageScope {
 
 export interface ManageScopeInit extends Partial<ManageScope> {
   id: SourcererScopeName;
-  allExistingIndexPatterns: string[];
 }
 
 export type SourcererScopeById = {

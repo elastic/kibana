@@ -8,14 +8,13 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { useWithSource } from '../../containers/source';
 import { mockBrowserFields } from '../../containers/source/mock';
 import '../../mock/match_media';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
-
+import { useSourcererScope } from '../../containers/sourcerer';
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 import {
   ManageGlobalTimeline,
@@ -26,12 +25,12 @@ import { TimelineId } from '../../../../common/types/timeline';
 jest.mock('../link_to');
 
 jest.mock('../../lib/kibana');
-jest.mock('../../containers/source', () => {
-  const original = jest.requireActual('../../containers/source');
+jest.mock('../../containers/sourcerer', () => {
+  const original = jest.requireActual('../../containers/sourcerer');
 
   return {
     ...original,
-    useWithSource: jest.fn(),
+    useSourcererScope: jest.fn(),
   };
 });
 
@@ -79,8 +78,10 @@ describe('DraggableWrapperHoverContent', () => {
   beforeAll(() => {
     // our mock implementation of the useAddToTimeline hook returns a mock startDragToTimeline function:
     (useAddToTimeline as jest.Mock).mockReturnValue(jest.fn());
-    (useWithSource as jest.Mock).mockReturnValue({
+    (useSourcererScope as jest.Mock).mockReturnValue({
       browserFields: mockBrowserFields,
+      selectedPatterns: [],
+      indexPattern: {},
     });
   });
 

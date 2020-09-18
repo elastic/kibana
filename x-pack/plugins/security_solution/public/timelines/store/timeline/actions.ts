@@ -63,6 +63,7 @@ export const createTimeline = actionCreator<{
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
+  indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
     filterQueryDraft: KueryFilterQuery | null;

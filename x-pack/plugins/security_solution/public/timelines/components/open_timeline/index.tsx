@@ -5,12 +5,12 @@
  */
 
 import ApolloClient from 'apollo-client';
-import React, { useEffect, useState, useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { connect, ConnectedProps, shallowEqual, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../graphql/types';
-import { State } from '../../../common/store';
+import { sourcererSelectors, State } from '../../../common/store';
 import { TimelineId } from '../../../../common/types/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -110,6 +110,15 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
+    const configIndexNamesSelectedSelector = useMemo(
+      () => sourcererSelectors.configIndexPatternsSelector(),
+      []
+    );
+    const configIndexNames = useSelector<State, string[]>(
+      configIndexNamesSelectedSelector,
+      shallowEqual
+    );
+
     const {
       customTemplateTimelineCount,
       defaultTimelineCount,
@@ -193,7 +202,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
         if (timelineIds.includes(timeline.savedObjectId || '')) {
-          createNewTimeline({ id: TimelineId.active, columns: defaultHeaders, show: false });
+          createNewTimeline({
+            id: TimelineId.active,
+            columns: defaultHeaders,
+            indexNames: configIndexNames,
+            show: false,
+          });
         }
 
         await apolloClient.mutate<
@@ -206,7 +220,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         });
         refetch();
       },
-      [apolloClient, createNewTimeline, refetch, timeline]
+      [apolloClient, createNewTimeline, configIndexNames, refetch, timeline]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -382,12 +396,14 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   createNewTimeline: ({
     id,
     columns,
+    indexNames,
     show,
   }: {
     id: string;
     columns: ColumnHeaderOptions[];
+    indexNames: string[];
     show?: boolean;
-  }) => dispatch(dispatchCreateNewTimeline({ id, columns, show })),
+  }) => dispatch(dispatchCreateNewTimeline({ id, columns, indexNames, show })),
   updateIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
     dispatch(dispatchUpdateIsLoading({ id, isLoading })),
   updateTimeline: dispatchUpdateTimeline(dispatch),

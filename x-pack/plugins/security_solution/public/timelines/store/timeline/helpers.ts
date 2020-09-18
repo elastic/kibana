@@ -139,6 +139,7 @@ interface AddNewTimelineParams {
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
+  indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
     filterQueryDraft: KueryFilterQuery | null;
@@ -159,6 +160,7 @@ export const addNewTimeline = ({
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
+  indexNames,
   kqlQuery = { filterQuery: null, filterQueryDraft: null },
   sort = timelineDefaults.sort,
   show = false,
@@ -186,6 +188,7 @@ export const addNewTimeline = ({
       excludedRowRendererIds,
       filters,
       itemsPerPage,
+      indexNames,
       kqlQuery,
       sort,
       show,

@@ -82,7 +82,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
       [setAbsoluteRangeDatePicker]
     );
 
-    const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -109,7 +109,13 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
               <Display show={!globalFullScreen}>
                 <HeaderPage
                   border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                  subtitle={
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.network}
+                      indexNames={selectedPatterns}
+                    />
+                  }
                   title={i18n.PAGE_TITLE}
                 />
 

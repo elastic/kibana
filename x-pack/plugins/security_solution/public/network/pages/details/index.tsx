@@ -125,7 +125,14 @@ const NetworkDetailsComponent: React.FC = () => {
               border
               data-test-subj="network-details-headline"
               draggableArguments={headerDraggableArguments}
-              subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
+              subtitle={
+                <LastEventTime
+                  docValueFields={docValueFields}
+                  indexKey={LastEventIndexKey.ipDetails}
+                  indexNames={selectedPatterns}
+                  ip={ip}
+                />
+              }
               title={ip}
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />

@@ -154,13 +154,12 @@ const StatefulTimelineComponent = React.memo<Props>(
           });
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [columns, id]
+      [columns, id, removeColumn, upsertColumn]
     );
 
     useEffect(() => {
       if (createTimeline != null && !isTimelineExists) {
-        createTimeline({ id, columns: defaultHeaders, show: false });
+        createTimeline({ id, columns: defaultHeaders, indexNames: selectedPatterns, show: false });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -202,7 +201,6 @@ const StatefulTimelineComponent = React.memo<Props>(
       />
     );
   },
-  // eslint-disable-next-line complexity
   (prevProps, nextProps) => {
     return (
       prevProps.end === nextProps.end &&

@@ -148,6 +148,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
+        indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
       });
@@ -158,6 +159,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: timelineDefaults.columns,
+        indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
       });
@@ -174,6 +176,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
+        indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
       });

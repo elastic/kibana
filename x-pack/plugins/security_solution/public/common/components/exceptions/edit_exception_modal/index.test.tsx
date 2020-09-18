@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 
 import { EditExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useFetchIndex } from '../../../containers/source';
 import {
   stubIndexPattern,
   stubIndexPatternWithFields,
@@ -50,7 +50,7 @@ describe('When the edit exception modal is opened', () => {
       { isLoading: false },
       jest.fn(),
     ]);
-    (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
       {
         isLoading: false,
         indexPatterns: stubIndexPatternWithFields,
@@ -67,7 +67,7 @@ describe('When the edit exception modal is opened', () => {
   describe('when the modal is loading', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+      (useFetchIndex as jest.Mock).mockImplementation(() => [
         {
           isLoading: true,
           indexPatterns: stubIndexPattern,

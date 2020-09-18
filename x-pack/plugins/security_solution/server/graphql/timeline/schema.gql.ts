@@ -167,7 +167,7 @@ export const timelineSchema = gql`
     filters: [FilterTimelineInput!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryInput
-    indexNames: [String]
+    indexNames: [String!]
     title: String
     templateTimelineId: String
     templateTimelineVersion: Int
@@ -270,7 +270,7 @@ export const timelineSchema = gql`
     filters: [FilterTimelineResult!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryResult
-    indexNames: [String]
+    indexNames: [String!]
     notes: [NoteResult!]
     noteIds: [String!]
     pinnedEventIds: [String!]

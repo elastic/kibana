@@ -17,7 +17,7 @@ import {
 import { Overview } from './index';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
-import { useWithSource } from '../../common/containers/source';
+import { useFetchIndex } from '../../common/containers/source';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -53,11 +53,11 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
 };
 const mockUseSourcererScope = useSourcererScope as jest.Mock;
 const mockUseIngestEnabledCheck = useIngestEnabledCheck as jest.Mock;
-const mockUseWithSource = useWithSource as jest.Mock;
+const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
 describe('Overview', () => {
   beforeEach(() => {
-    mockUseWithSource.mockReturnValue({
+    mockUseFetchIndex.mockReturnValue({
       indicesExist: true,
     });
   });
@@ -85,7 +85,7 @@ describe('Overview', () => {
     });
 
     test('it DOES render the Endpoint banner when the endpoint index is NOT available AND storage is NOT set', () => {
-      mockUseWithSource.mockReturnValue({
+      mockUseFetchIndex.mockReturnValue({
         indicesExist: false,
       });
       mockUseSourcererScope.mockReturnValue({

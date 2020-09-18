@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import isEmpty from 'lodash/isEmpty';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
@@ -38,31 +39,37 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
     },
   }))
   .case(setSelectedIndexPatterns, (state, { id, selectedPatterns }) => {
+    const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
+    const newSelectedPatterns = selectedPatterns.filter(
+      (sp) =>
+        state.configIndexPatterns.includes(sp) ||
+        kibanaIndexPatterns.includes(sp) ||
+        (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
+    );
     return {
       ...state,
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          selectedPatterns,
+          selectedPatterns: isEmpty(newSelectedPatterns)
+            ? state.configIndexPatterns
+            : newSelectedPatterns,
         },
       },
     };
   })
   .case(setSource, (state, { id, payload }) => {
-    const { allExistingIndexPatterns, ...sourcererScopes } = payload;
+    const { ...sourcererScopes } = payload;
     return {
       ...state,
-      ...(state.sourcererScopes[id].selectedPatterns.length === 0
-        ? { allIndexPatterns: allExistingIndexPatterns }
-        : {}),
       sourcererScopes: {
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
           ...sourcererScopes,
           ...(state.sourcererScopes[id].selectedPatterns.length === 0
-            ? { selectedPatterns: allExistingIndexPatterns }
+            ? { selectedPatterns: state.configIndexPatterns }
             : {}),
         },
       },

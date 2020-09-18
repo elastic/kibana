@@ -4,22 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, isUndefined } from 'lodash';
 import { set } from '@elastic/safer-lodash-set/fp';
-import { get, keyBy, pick, isEmpty } from 'lodash/fp';
+import { keyBy, pick, isEmpty, isEqual, isUndefined } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 
 import { IIndexPattern } from 'src/plugins/data/public';
 
-import { DEFAULT_INDEX_KEY, NO_ALERT_INDEX } from '../../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../lib/kibana';
+import { useKibana } from '../../lib/kibana';
 
-import { SourceQuery } from '../../../graphql/types';
-
-import { sourceQuery } from './index.gql_query';
-import { useApolloClient } from '../../utils/apollo_context';
 import {
   IndexField,
   IndexFieldsStrategyResponse,
@@ -31,8 +25,6 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 
 import { State } from '../../store';
-
-export { sourceQuery };
 
 export interface BrowserField {
   aggregatable: boolean;
@@ -98,28 +90,6 @@ export const getDocValueFields = memoizeOne(
   (_title: string, fields: IndexField[]): DocValueFields[] =>
     fields && fields.length > 0
       ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
-          if (field.type === 'date' && accumulator.length < 100) {
-            const format: string =
-              field.format != null && !isEmpty(field.format) ? field.format : 'date_time';
-            return [
-              ...accumulator,
-              {
-                field: field.name,
-                format,
-              },
-            ];
-          }
-          return accumulator;
-        }, [])
-      : [],
-  // Update the value only if _title has changed
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
-);
-
-export const getDocValueFields2 = memoizeOne(
-  (_title: string, fields: IndexField[]): DocValueFields[] =>
-    fields && fields.length > 0
-      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
           if (field.readFromDocValues && accumulator.length < 100) {
             const format: string =
               field.format != null && !isEmpty(field.format) ? field.format : 'date_time';
@@ -142,117 +112,99 @@ export const indicesExistOrDataTemporarilyUnavailable = (
   indicesExist: boolean | null | undefined
 ) => indicesExist || isUndefined(indicesExist);
 
-const EMPTY_BROWSER_FIELDS = {};
-const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
+const DEFAULT_BROWSER_FIELDS = {};
+const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
+const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
 
-interface UseWithSourceState {
+interface FetchIndexReturn {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
-  errorMessage: string | null;
-  indexPattern: IIndexPattern;
-  indicesExist: boolean | undefined | null;
-  loading: boolean;
+  indexes: string[];
+  indexExists: boolean;
+  indexPatterns: IIndexPattern;
 }
 
-export const useWithSource = (
-  sourceId = 'default',
-  indexToAdd?: string[] | null,
-  onlyCheckIndexToAdd?: boolean,
-  // Fun fact: When using this hook multiple times within a component (e.g. add_exception_modal & edit_exception_modal),
-  // the apolloClient will perform queryDeduplication and prevent the first query from executing. A deep compare is not
-  // performed on `indices`, so another field must be passed to circumvent this.
-  // For details, see https://github.com/apollographql/react-apollo/issues/2202
-  queryDeduplication = 'default'
-) => {
-  const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const defaultIndex = useMemo<string[]>(() => {
-    const filterIndexAdd = (indexToAdd ?? []).filter((item) => item !== NO_ALERT_INDEX);
-    if (!isEmpty(filterIndexAdd)) {
-      return onlyCheckIndexToAdd ? filterIndexAdd : [...configIndex, ...filterIndexAdd];
-    }
-    return configIndex;
-  }, [configIndex, indexToAdd, onlyCheckIndexToAdd]);
+export const useFetchIndex = (indexNames: string[]): [boolean, FetchIndexReturn] => {
+  const { data, notifications } = useKibana().services;
+  const abortCtrl = useRef(new AbortController());
+  const previousIndexesName = useRef<string[]>([]);
+  const [isLoading, setLoading] = useState(true);
 
-  const [state, setState] = useState<UseWithSourceState>({
-    browserFields: EMPTY_BROWSER_FIELDS,
-    docValueFields: EMPTY_DOCVALUE_FIELD,
-    errorMessage: null,
-    indexPattern: getIndexFields(defaultIndex.join(), []),
-    indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
-    loading: true,
+  const [state, setState] = useState<FetchIndexReturn>({
+    browserFields: DEFAULT_BROWSER_FIELDS,
+    docValueFields: DEFAULT_DOC_VALUE_FIELDS,
+    indexes: indexNames,
+    indexExists: false,
+    indexPatterns: DEFAULT_INDEX_PATTERNS,
   });
 
-  const apolloClient = useApolloClient();
+  const indexFieldsSearch = useCallback(
+    (iNames) => {
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+        const searchSubscription$ = data.search
+          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+            { indices: iNames, onlyCheckIfIndicesExist: true },
+            {
+              abortSignal: abortCtrl.current.signal,
+              strategy: 'securitySolutionIndexFields',
+            }
+          )
+          .subscribe({
+            next: (response) => {
+              if (!response.isPartial && !response.isRunning) {
+                if (!didCancel) {
+                  const stringifyIndices = response.indicesExists.sort().join();
+                  previousIndexesName.current = response.indicesExists;
+                  setLoading(false);
+                  setState({
+                    browserFields: getBrowserFields(stringifyIndices, response.indexFields),
+                    docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
+                    indexes: response.indicesExists,
+                    indexExists: response.indicesExists.length > 0,
+                    indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                  });
+                }
+                searchSubscription$.unsubscribe();
+              } else if (!didCancel && response.isPartial && !response.isRunning) {
+                setLoading(false);
+                notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
+
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger({
+                  text: msg.message,
+                  title: i18n.FAIL_BEAT_FIELDS,
+                });
+              }
+            },
+          });
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    [data.search, notifications.toasts, setLoading]
+  );
 
   useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
-
-    async function fetchSource() {
-      if (!apolloClient) return;
-
-      setState((prevState) => ({ ...prevState, loading: true }));
-
-      try {
-        const result = await apolloClient.query<
-          SourceQuery.Query,
-          SourceQuery.Variables & { queryDeduplication: string }
-        >({
-          query: sourceQuery,
-          fetchPolicy: 'cache-first',
-          variables: {
-            sourceId,
-            defaultIndex,
-            queryDeduplication,
-          },
-          context: {
-            fetchOptions: {
-              signal: abortCtrl.signal,
-            },
-          },
-        });
-
-        if (isSubscribed) {
-          setState({
-            loading: false,
-            indicesExist: indicesExistOrDataTemporarilyUnavailable(
-              get('data.source.status.indicesExist', result)
-            ),
-            browserFields: getBrowserFields(
-              defaultIndex.join(),
-              get('data.source.status.indexFields', result)
-            ),
-            docValueFields: getDocValueFields(
-              defaultIndex.join(),
-              get('data.source.status.indexFields', result)
-            ),
-            indexPattern: getIndexFields(
-              defaultIndex.join(),
-              get('data.source.status.indexFields', result)
-            ),
-            errorMessage: null,
-          });
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          setState((prevState) => ({
-            ...prevState,
-            loading: false,
-            errorMessage: error.message,
-          }));
-        }
-      }
+    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
+      indexFieldsSearch(indexNames);
     }
+  }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
-    fetchSource();
-
-    return () => {
-      isSubscribed = false;
-      return abortCtrl.abort();
-    };
-  }, [apolloClient, sourceId, defaultIndex, queryDeduplication]);
-
-  return state;
+  return [isLoading, state];
 };
 
 export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
@@ -262,7 +214,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const previousIndexesName = useRef<string[]>([]);
 
   const indexNamesSelectedSelector = useMemo(
-    () => sourcererSelectors.getIndexesNameSelectedSelector(),
+    () => sourcererSelectors.getIndexNamesSelectedSelector(),
     []
   );
   const indexNames = useSelector<State, string[]>(
@@ -301,9 +253,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                     sourcererActions.setSource({
                       id: sourcererScopeName,
                       payload: {
-                        allExistingIndexPatterns: response.indicesExists.sort(),
                         browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                        docValueFields: getDocValueFields2(stringifyIndices, response.indexFields),
+                        docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
                         errorMessage: null,
                         id: sourcererScopeName,
                         indexPattern: getIndexFields(stringifyIndices, response.indexFields),
@@ -346,7 +297,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   useEffect(() => {
-    if (indexNames.length > 0 && !isEqual(previousIndexesName.current, indexNames)) {
+    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
       indexFieldsSearch(indexNames);
     }
   }, [indexNames, indexFieldsSearch, previousIndexesName]);
