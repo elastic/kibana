@@ -69,7 +69,10 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
     }
 
     async clickContextMenuMoreItem() {
-      await testSubjects.click('embeddablePanelMore-mainMenu');
+      const hasMoreSubPanel = await testSubjects.exists('embeddablePanelMore-mainMenu');
+      if (hasMoreSubPanel) {
+        await testSubjects.click('embeddablePanelMore-mainMenu');
+      }
     }
 
     async openContextMenuMorePanel(parent?: WebElementWrapper) {
@@ -99,6 +102,10 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
     }
 
     async clickExpandPanelToggle() {
+      log.debug(`clickExpandPanelToggle`);
+      this.openContextMenu();
+      const isActionVisible = await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 

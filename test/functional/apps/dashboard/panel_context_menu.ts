@@ -18,11 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  PIE_CHART_VIS_NAME,
-  // AREA_CHART_VIS_NAME,
-  // LINE_CHART_VIS_NAME,
-} from '../../page_objects/dashboard_page';
+import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -30,9 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  // const dashboardReplacePanel = getService('dashboardReplacePanel');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  // const renderable = getService('renderable');
+  const renderable = getService('renderable');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
@@ -83,6 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // The second parameter of true will include the timestamp in the url and
       // trigger a hard refresh.
       await browser.get(currentUrl.toString(), true);
+      await renderable.waitForRender();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await dashboardPanelActions.expectExistsEditPanelAction();
@@ -92,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Get rid of the timestamp in the url.
       await browser.get(currentUrl.toString(), false);
+      await renderable.waitForRender();
     });
 
     describe('visualization object edit menu', () => {
@@ -149,39 +146,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    /*
     describe('on an expanded panel', function () {
-      before(async () => {
+      before('reset dashboard', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        await browser.get(currentUrl.toString(), false);
         await renderable.waitForRender();
+      });
+
+      before('and add one panel and save to put dashboard in "view" mode', async () => {
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         await PageObjects.dashboard.saveDashboard(dashboardName);
-        await dashboardPanelActions.openContextMenu();
+      });
+
+      before('expand panel to "full screen"', async () => {
         await dashboardPanelActions.clickExpandPanelToggle();
       });
 
-      it('are hidden in view mode', async function () {
+      it('context menu actions are hidden in view mode', async function () {
         await dashboardPanelActions.expectMissingEditPanelAction();
         await dashboardPanelActions.expectMissingDuplicatePanelAction();
         await dashboardPanelActions.expectMissingReplacePanelAction();
         await dashboardPanelActions.expectMissingRemovePanelAction();
       });
-      it('in edit mode hides remove icons ', async function () {
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.expectExistsEditPanelAction();
-        await dashboardPanelActions.expectExistsClonePanelAction();
-        await dashboardPanelActions.expectExistsReplacePanelAction();
-        await dashboardPanelActions.expectMissingRemovePanelAction();
-      });
-      after(async () => {
-        await dashboardPanelActions.clickExpandPanelToggle();
+
+      describe('in edit mode', () => {
+        it('switch to edit mode', async function () {
+          await PageObjects.dashboard.switchToEditMode();
+        });
+
+        it('some context menu actions should be present', async function () {
+          await dashboardPanelActions.expectExistsEditPanelAction();
+          await dashboardPanelActions.expectExistsClonePanelAction();
+          await dashboardPanelActions.expectExistsReplacePanelAction();
+        });
+
+        it('"remove panel" action should not be present', async function () {
+          await dashboardPanelActions.expectMissingRemovePanelAction();
+        });
       });
     });
-     */
-    /*
-
-
-
-
-
-    */
   });
 }
