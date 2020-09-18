@@ -140,7 +140,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
   const isLoading = status !== 'success';
 
   const titleText = searchValue
-    ? (data?.total ?? 0) + ' ' + I18LABELS.searchResults
+    ? I18LABELS.getSearchResultsLabel(data?.total ?? 0)
     : I18LABELS.topPages;
 
   function PopOverTitle() {

@@ -82,9 +82,11 @@ export const I18LABELS = {
   searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
     defaultMessage: 'Search by url',
   }),
-  searchResults: i18n.translate('xpack.apm.rum.filters.searchResults', {
-    defaultMessage: 'Search results',
-  }),
+  getSearchResultsLabel: (total: number) =>
+    i18n.translate('xpack.apm.rum.filters.searchResults', {
+      defaultMessage: '{total} Search results',
+      values: { total },
+    }),
   topPages: i18n.translate('xpack.apm.rum.filters.topPages', {
     defaultMessage: 'Top pages',
   }),
