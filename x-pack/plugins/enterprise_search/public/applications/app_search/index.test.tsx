@@ -86,7 +86,7 @@ describe('AppSearchConfigured', () => {
   });
 
   it('passes readOnlyMode state', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({ readOnlyMode: true }));
+    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, readOnlyMode: true }));
 
     const wrapper = shallow(<AppSearchConfigured />);
 
