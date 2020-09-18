@@ -45,7 +45,7 @@ export const InstallPackageFromRegistryRequestSchema = {
 
 export const BulkUpgradePackagesFromRegistryRequestSchema = {
   body: schema.object({
-    upgrade: schema.arrayOf(schema.string(), { minSize: 1 }),
+    packages: schema.arrayOf(schema.string(), { minSize: 1 }),
   }),
 };
 
