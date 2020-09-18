@@ -9,7 +9,7 @@ import { PLUGIN_ID } from '../../common/constants';
 import { durationToNumber } from '../../common/schema_utils';
 import { ReportingCore } from '../../server';
 import { LevelLogger } from '../../server/lib';
-import { ExportTypeDefinition, RunTaskFn } from '../../server/types';
+import { RunTaskFn } from '../../server/types';
 import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
@@ -27,9 +27,7 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
     // export type / execute job map
     const jobExecutors: Map<string, RunTaskFn> = new Map();
 
-    for (const exportType of reporting
-      .getExportTypesRegistry()
-      .getAll() as ExportTypeDefinition[]) {
+    for (const exportType of reporting.getExportTypesRegistry().getAll()) {
       const jobExecutor = exportType.runTaskFnFactory(reporting, logger);
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
