@@ -4,26 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDebounce } from 'react-use';
-import {
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiText,
-  EuiRange,
-  EuiSwitch,
-} from '@elastic/eui';
-import { EuiIconTip } from '@elastic/eui';
-import {
-  isAutoInterval,
-  IFieldFormat,
-  UI_SETTINGS,
-} from '../../../../../../../../src/plugins/data/common';
+import { EuiButtonEmpty, EuiFormRow, EuiRange, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { IFieldFormat } from 'src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
-import { TYPING_DEBOUNCE_TIME, AUTO_BARS, MODES } from './constants';
+import { TYPING_DEBOUNCE_TIME, AUTO_BARS, MODES, MIN_HISTOGRAM_BARS } from './constants';
 
 function getMaxBarsValueToShow(value: string, maxValue: number) {
   if (value === '') {
@@ -36,50 +24,23 @@ function getMaxBarsValueToShow(value: string, maxValue: number) {
 }
 
 const BaseRangeEditor = ({
-  autoIntervalEnabled,
   maxBars,
-  interval,
+  step,
   maxHistogramBars,
   onToggleEditor,
-  toggleAutoInterval,
   onMaxBarsChange,
-  onIntervalChange,
 }: {
-  autoIntervalEnabled: boolean;
-  maxBars: 'auto' | '' | number;
-  interval: '' | number;
+  maxBars: number;
+  step: number;
   maxHistogramBars: number;
   onToggleEditor: () => void;
-  toggleAutoInterval: (enabled: boolean) => void;
-  onMaxBarsChange: (newMaxBars: number | 'auto') => void;
-  onIntervalChange: (newInterval: '' | number) => void;
+  onMaxBarsChange: (newMaxBars: number) => void;
 }) => {
-  // store the value as string: storing it as Number has some issues with decimals
-  const [intervalValue, setIntervalValue] = useState(String(interval));
   const [maxBarsValue, setMaxBarsValue] = useState(String(maxBars));
 
-  // Update locally all the time, but bounce the parents prop function
-  // to aviod too many requests
   useDebounce(
     () => {
-      // avoid initial set for the same value (empty string is converted to 0 in this check, it's ok)
-      if (!isNaN(Number(intervalValue)) && intervalValue !== String(interval)) {
-        onIntervalChange(intervalValue === '' ? intervalValue : Number(intervalValue));
-      }
-    },
-    TYPING_DEBOUNCE_TIME,
-    [intervalValue]
-  );
-
-  useDebounce(
-    () => {
-      if (
-        maxBarsValue !== '' &&
-        Number(maxBarsValue) <= maxHistogramBars &&
-        Number(maxBarsValue) > 0
-      ) {
-        onMaxBarsChange(Number(maxBarsValue));
-      }
+      onMaxBarsChange(Number(maxBarsValue));
     },
     TYPING_DEBOUNCE_TIME,
     [maxBarsValue]
@@ -92,115 +53,76 @@ const BaseRangeEditor = ({
           defaultMessage: 'Granularity',
         })}
         data-test-subj="indexPattern-ranges-section-label"
-        labelAppend={
-          <EuiSwitch
-            label={i18n.translate('xpack.lens.indexPattern.ranges.autoInterval', {
-              defaultMessage: 'Auto',
-            })}
-            checked={autoIntervalEnabled}
-            onChange={(e) => toggleAutoInterval(e.target.checked)}
-            data-test-subj="indexPattern-ranges-auto-interval"
-            compressed
-          />
-        }
       >
-        <>
-          {autoIntervalEnabled ? (
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="minusInCircle"
+              onClick={() =>
+                setMaxBarsValue('' + Math.max(Number(maxBarsValue) - step, MIN_HISTOGRAM_BARS))
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiRange
               compressed
-              showLabels
-              showInput="inputWithPopover"
               data-test-subj="lns-indexPattern-range-maxBars-field"
-              min={1}
+              min={MIN_HISTOGRAM_BARS}
               max={maxHistogramBars}
-              step={1}
+              step={step}
               value={getMaxBarsValueToShow(maxBarsValue, maxHistogramBars)}
               onChange={({ currentTarget }) => setMaxBarsValue(currentTarget.value)}
-              placeholder={i18n.translate('xpack.lens.indexPattern.ranges.autoIntervals', {
-                defaultMessage: 'Enter the max interval',
-              })}
-              prepend={
-                <>
-                  <EuiText size="s">
-                    {i18n.translate('xpack.lens.indexPattern.ranges.maxIntervals', {
-                      defaultMessage: 'Max intervals',
-                    })}
-                  </EuiText>{' '}
-                  <EuiIconTip
-                    position="right"
-                    content={i18n.translate('xpack.lens.indexPattern.ranges.maxIntervalsHelp', {
-                      defaultMessage:
-                        "Intervals will be selected automatically based on the available data. The maximum number of intervals can never be greater than the Advanced Setting's {histogramMaxBars}",
-                      values: { histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS },
-                    })}
-                    type="questionInCircle"
-                    color="subdued"
-                  />
-                </>
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="plusInCircle"
+              onClick={() =>
+                setMaxBarsValue('' + Math.min(Number(maxBarsValue) + step, maxHistogramBars))
               }
             />
-          ) : (
-            <EuiFieldNumber
-              compressed
-              data-test-subj="lns-indexPattern-range-interval-field"
-              value={intervalValue}
-              onChange={({ target }) => setIntervalValue(target.value)}
-              placeholder={i18n.translate('xpack.lens.indexPattern.ranges.enterInterval', {
-                defaultMessage: 'Enter an interval',
-              })}
-              prepend={
-                <>
-                  <EuiText size="s">
-                    {i18n.translate('xpack.lens.indexPattern.ranges.min', {
-                      defaultMessage: 'Min interval',
-                    })}
-                  </EuiText>{' '}
-                  <EuiIconTip
-                    position="right"
-                    content={i18n.translate('xpack.lens.indexPattern.ranges.minIntervalsHelp', {
-                      defaultMessage:
-                        "Intervals will be automatically scaled if the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}",
-                      values: { histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS },
-                    })}
-                    type="questionInCircle"
-                    color="subdued"
-                  />
-                </>
-              }
-            />
-          )}
-
-          <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
-            {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
-              defaultMessage: 'Create custom intervals',
-            })}
-          </EuiButtonEmpty>
-        </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+      <EuiFormRow hasChildLabel={false} display="rowCompressed">
+        <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
+          {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
+            defaultMessage: 'Create custom intervals',
+          })}
+        </EuiButtonEmpty>
       </EuiFormRow>
     </>
   );
 };
 
 export const RangeEditor = ({
-  onAutoIntervalToggle,
   setParam,
   params,
   maxHistogramBars,
+  maxBars,
+  granularityStep,
   onChangeMode,
   rangeFormatter,
 }: {
   params: RangeColumnParams;
   maxHistogramBars: number;
+  maxBars: number;
+  granularityStep: number;
   setParam: UpdateParamsFnType;
-  onAutoIntervalToggle: (enabled: boolean) => void;
   onChangeMode: (mode: MODES_TYPES) => void;
   rangeFormatter: IFieldFormat;
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
-  const isAutoIntervalEnabled = isAutoInterval(params.interval);
-  const numericIntervalValue: number | '' = isAutoIntervalEnabled
-    ? ''
-    : (params.interval as number);
+
+  // if the maxBars in the params is set to auto refresh it with the default value
+  // only on bootstrap
+  useEffect(() => {
+    if (params.maxBars !== maxBars) {
+      setParam('maxBars', maxBars);
+    }
+  }, [maxBars, params.maxBars, setParam]);
 
   if (isAdvancedEditor) {
     return (
@@ -217,19 +139,14 @@ export const RangeEditor = ({
       />
     );
   }
+
   return (
     <BaseRangeEditor
-      key={isAutoIntervalEnabled ? 'auto' : 'manual'}
-      autoIntervalEnabled={isAutoIntervalEnabled}
-      interval={numericIntervalValue}
-      maxBars={params.maxBars}
+      maxBars={maxBars}
+      step={granularityStep}
       maxHistogramBars={maxHistogramBars}
-      toggleAutoInterval={onAutoIntervalToggle}
-      onMaxBarsChange={(maxBars: number | 'auto') => {
-        setParam('maxBars', maxBars);
-      }}
-      onIntervalChange={(interval: number | '') => {
-        setParam('interval', interval);
+      onMaxBarsChange={(newMaxBars: number) => {
+        setParam('maxBars', newMaxBars);
       }}
       onToggleEditor={() => {
         onChangeMode(MODES.Range);

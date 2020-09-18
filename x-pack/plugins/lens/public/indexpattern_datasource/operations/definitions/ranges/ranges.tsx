@@ -8,16 +8,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm } from '@elastic/eui';
 
-import {
-  autoInterval,
-  RangeType,
-  UI_SETTINGS,
-} from '../../../../../../../../src/plugins/data/common';
+import { RangeType, UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam, changeColumn } from '../../../state_helpers';
-import { MODES, AUTO_BARS, DEFAULT_INTERVAL } from './constants';
+import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 
 export type RangeTypeLens = RangeType & { label: string };
 
@@ -27,8 +23,7 @@ export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'range';
   params: {
     type: MODES_TYPES;
-    interval: 'auto' | '' | number;
-    maxBars: 'auto' | number;
+    maxBars: typeof AUTO_BARS | number;
     ranges: RangeTypeLens[];
   };
 }
@@ -49,34 +44,6 @@ export const isValidRange = (range: RangeTypeLens): boolean => {
   }
   return true;
 };
-
-function getParamsForNewMode(
-  type: MODES_TYPES,
-  isAuto: boolean
-): RangeIndexPatternColumn['params'] {
-  if (type === MODES.Histogram) {
-    if (isAuto) {
-      return {
-        type: MODES.Histogram,
-        interval: autoInterval,
-        ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-        maxBars: 'auto',
-      };
-    }
-    return {
-      type: MODES.Histogram,
-      interval: '',
-      ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-      maxBars: 'auto',
-    };
-  }
-  return {
-    type: MODES.Range,
-    interval: autoInterval,
-    ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-    maxBars: 'auto',
-  };
-}
 
 function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
   if (params.type === MODES.Range) {
@@ -101,7 +68,6 @@ function getEsAggsParams({ sourceField, params }: RangeIndexPatternColumn) {
   return {
     field: sourceField,
     // fallback to 0 in case of empty string
-    interval: params.interval === '' ? 0 : params.interval,
     maxBars: params.maxBars === AUTO_BARS ? null : params.maxBars,
     has_extended_bounds: false,
     min_doc_count: 0,
@@ -137,7 +103,11 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
       sourceField: field.name,
       isBucketed: true,
       scale: 'interval', // ordinal for Range
-      params: getParamsForNewMode(MODES.Histogram, true),
+      params: {
+        type: MODES.Histogram,
+        ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+        maxBars: AUTO_BARS,
+      },
     };
   },
   isTransferable: (column, newIndexPattern) => {
@@ -169,6 +139,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
   },
   paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
     const rangeFormatter = data.fieldFormats.deserialize({ id: 'range' });
+    const MAX_HISTOGRAM_BARS = uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+    const granularityStep = (MAX_HISTOGRAM_BARS - MIN_HISTOGRAM_BARS) / SLICES;
+    const maxBarsDefaultValue = (MAX_HISTOGRAM_BARS - MIN_HISTOGRAM_BARS) / 2;
+
     // Used to change one param at the time
     const setParam: UpdateParamsFnType = (paramName, value) => {
       setState(
@@ -183,10 +157,9 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
     };
 
     // Useful to change more params at once
-    const onChangeMode = (newMode: MODES_TYPES, enabled: boolean) => {
+    const onChangeMode = (newMode: MODES_TYPES) => {
       const scale = newMode === MODES.Range ? 'ordinal' : 'interval';
       const dataType = newMode === MODES.Range ? 'string' : 'number';
-      const newModeParams = getParamsForNewMode(newMode, enabled);
       setState(
         changeColumn({
           state,
@@ -196,7 +169,11 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
             ...currentColumn,
             scale,
             dataType,
-            params: newModeParams,
+            params: {
+              type: newMode,
+              ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+              maxBars: maxBarsDefaultValue,
+            },
           },
           keepParams: false,
         })
@@ -205,14 +182,15 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn> = {
     return (
       <EuiForm>
         <RangeEditor
-          onAutoIntervalToggle={(enabled: boolean) => {
-            onChangeMode(currentColumn.params.type, enabled);
-          }}
           setParam={setParam}
-          params={currentColumn.params}
-          onChangeMode={(newMode: MODES_TYPES) =>
-            onChangeMode(newMode, currentColumn.params.interval === autoInterval)
+          maxBars={
+            currentColumn.params.maxBars === AUTO_BARS
+              ? maxBarsDefaultValue
+              : currentColumn.params.maxBars
           }
+          granularityStep={granularityStep}
+          params={currentColumn.params}
+          onChangeMode={onChangeMode}
           maxHistogramBars={uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)}
           rangeFormatter={rangeFormatter}
         />

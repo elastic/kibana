@@ -11,6 +11,8 @@ export const TO_PLACEHOLDER = '+\u221E';
 
 export const DEFAULT_INTERVAL = 1000;
 export const AUTO_BARS = 'auto';
+export const MIN_HISTOGRAM_BARS = 1;
+export const SLICES = 6;
 
 export const MODES = {
   Range: 'range',
