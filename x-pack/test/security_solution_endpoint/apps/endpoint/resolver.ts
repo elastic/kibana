@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const nodeData: string[] = [];
       const TableData: string[] = [];
 
-      const Table = await testSubjects.findAll('resolver:node-list:item');
+      const Table = await testSubjects.findAll('resolver:node-list:node-link:title');
       for (const value of Table) {
         const text = await value._webElement.getText();
         TableData.push(text.split('\n')[0]);
