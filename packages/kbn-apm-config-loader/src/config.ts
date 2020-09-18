@@ -18,7 +18,7 @@
  */
 
 import { join } from 'path';
-import { merge } from 'lodash';
+import { merge, get } from 'lodash';
 import { execSync } from 'child_process';
 // deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils/target/path';
@@ -72,11 +72,11 @@ export class ApmConfiguration {
     // if not manually defined, we will then read the value from the `{DATA_FOLDER}/uuid` file.
     // note that as the file is created by the platform AFTER apm init, the file
     // will not be present at first startup, but there is nothing we can really do about that.
-    if (this.rawKibanaConfig.server?.uuid) {
-      return this.rawKibanaConfig.server?.uuid;
+    if (get(this.rawKibanaConfig, 'server.uuid')) {
+      return this.rawKibanaConfig.server.uuid;
     }
 
-    const dataPath: string = this.rawKibanaConfig.path?.data || getDataPath();
+    const dataPath: string = get(this.rawKibanaConfig, 'path.data') || getDataPath();
     try {
       const filename = join(dataPath, 'uuid');
       return readFileSync(filename, 'utf-8');
