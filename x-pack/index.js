@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { xpackMain } from './legacy/plugins/xpack_main';
 import { spaces } from './legacy/plugins/spaces';
 
 module.exports = function (kibana) {
-  return [xpackMain(kibana), spaces(kibana)];
+  return [spaces(kibana)];
 };

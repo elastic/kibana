@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTheme } from '../../../legacy/common/eui_styled_components';
+import type { EuiTheme } from '../../xpack_legacy/common';
 
 export interface ServiceAnomalyStats {
   transactionType?: string;
