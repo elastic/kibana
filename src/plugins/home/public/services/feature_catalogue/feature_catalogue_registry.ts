@@ -45,6 +45,8 @@ export interface FeatureCatalogueEntry {
   readonly showOnHomePage: boolean;
   /** An ordinal used to sort features relative to one another for display on the home page */
   readonly order?: number;
+  /** Optional function to control visibility of this feature. */
+  readonly visible?: () => boolean;
 }
 
 /** @public */
@@ -103,7 +105,10 @@ export class FeatureCatalogueRegistry {
     }
     const capabilities = this.capabilities;
     return [...this.features.values()]
-      .filter((entry) => capabilities.catalogue[entry.id] !== false)
+      .filter(
+        (entry) =>
+          capabilities.catalogue[entry.id] !== false && (entry.visible ? entry.visible() : true)
+      )
       .sort(compareByKey('title'));
   }
 

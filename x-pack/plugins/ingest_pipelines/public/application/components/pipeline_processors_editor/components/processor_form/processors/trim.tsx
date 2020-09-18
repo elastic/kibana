@@ -17,7 +17,7 @@ export const Trim: FunctionComponent = () => {
       <FieldNameField
         helpText={i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.trimForm.fieldNameHelpText',
-          { defaultMessage: 'The field to trim whitespace from.' }
+          { defaultMessage: 'Field to trim. For an array of strings, each element is trimmed.' }
         )}
       />
 

@@ -177,7 +177,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         );
         // Click the second child node's primary button
         if (button) {
-          button.simulate('click');
+          button.simulate('click', { button: 0 });
         }
       });
       it('should render the second child node as selected, and the origin as not selected, and the query string should indicate that the second child is selected', async () => {
@@ -194,7 +194,8 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         ).toYieldEqualTo({
           // Just the second child should be marked as selected in the query string
           search: urlSearch(resolverComponentInstanceID, {
-            selectedEntityID: entityIDs.secondChild,
+            panelParameters: { nodeID: entityIDs.secondChild },
+            panelView: 'nodeDetail',
           }),
           // The second child is rendered and has `[aria-selected]`
           selectedSecondChildNodeCount: 1,
@@ -291,7 +292,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
           simulator.processNodeSubmenuButton(entityIDs.origin)
         );
         if (button) {
-          button.simulate('click');
+          button.simulate('click', { button: 0 });
         }
       });
       it('should open the submenu and display exactly one option with the correct count', async () => {
@@ -308,8 +309,8 @@ describe('Resolver, when analyzing a tree that has two related events for the or
           simulator.processNodeSubmenuButton(entityIDs.origin)
         );
         if (button) {
-          button.simulate('click');
-          button.simulate('click'); // The first click opened the menu, this second click closes it
+          button.simulate('click', { button: 0 });
+          button.simulate('click', { button: 0 }); // The first click opened the menu, this second click closes it
         }
       });
       it('should close the submenu', async () => {

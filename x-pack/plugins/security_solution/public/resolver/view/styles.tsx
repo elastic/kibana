@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { EuiPanel } from '@elastic/eui';
+
 import styled from 'styled-components';
-import { Panel } from './panels';
 
 /**
  * The top level DOM element for Resolver
@@ -40,7 +42,7 @@ export const StyledMapContainer = styled.div<{ backgroundColor: string }>`
 /**
  * The Panel, styled for use in `ResolverMap`.
  */
-export const StyledPanel = styled(Panel)`
+export const StyledPanel = styled(EuiPanel)`
   position: absolute;
   left: 0;
   top: 0;

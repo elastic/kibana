@@ -19,9 +19,12 @@ import {
   EuiTextColor,
   EuiTitle,
   EuiLink,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  txtBetaActionFactoryLabel,
+  txtBetaActionFactoryTooltip,
   txtChangeButton,
   txtTriggerPickerHelpText,
   txtTriggerPickerLabel,
@@ -255,7 +258,15 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           )}
           <EuiFlexItem grow={true}>
             <EuiText>
-              <h4>{actionFactory.getDisplayName(context)}</h4>
+              <h4>
+                {actionFactory.getDisplayName(context)}{' '}
+                {actionFactory.isBeta && (
+                  <EuiBetaBadge
+                    label={txtBetaActionFactoryLabel}
+                    tooltipContent={txtBetaActionFactoryTooltip}
+                  />
+                )}
+              </h4>
             </EuiText>
           </EuiFlexItem>
           {showDeselect && (
@@ -350,6 +361,10 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
               disabled={!actionFactory.isCompatibleLicense()}
+              betaBadgeLabel={actionFactory.isBeta ? txtBetaActionFactoryLabel : undefined}
+              betaBadgeTooltipContent={
+                actionFactory.isBeta ? txtBetaActionFactoryTooltip : undefined
+              }
             >
               {actionFactory.getIconType(context) && (
                 <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
