@@ -40,6 +40,7 @@ export const ConfirmModal = ({
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
+        data-test-subj="visualizeConfirmModal"
         title={title}
         onCancel={onCancel}
         onConfirm={onConfirm}

@@ -362,6 +362,18 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('visualizesaveAndReturnButton');
     }
+
+    public async cancelAndReturn() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizeCancelAndReturnButton');
+      await testSubjects.click('visualizeCancelAndReturnButton');
+      await retry.waitFor(
+        'confirm modal to show',
+        async () => await testSubjects.exists('visualizeConfirmModal')
+      );
+      await testSubjects.exists('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
+    }
   }
 
   return new VisualizePage();
