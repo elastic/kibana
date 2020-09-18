@@ -1253,10 +1253,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@28.4.0":
-  version "28.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-28.4.0.tgz#6b3b6b5e8b602d009410a97c26e22093846f708a"
-  integrity sha512-4iXo5fNx4qqeI+Tj5EJ0qHRhyi8KTLaqeQJCWg9Vy7N83ap6kp6s7X6D6qYUHqdmOdJH9QZYuYIpRUi3TQEJNg==
+"@elastic/eui@29.0.0":
+  version "29.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-29.0.0.tgz#1c8d822c62ad5e29298a3a36f5b02fd9b32a5550"
+  integrity sha512-YsDjtN/nRA4vvWukg5FDN4iPQgHUVxDwn/JZ1mArCeMe34JwzYJlEkk6Z/+iNbJOZQNHngmV8I2TStcP8k82gg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
