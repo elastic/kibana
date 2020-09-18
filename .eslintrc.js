@@ -17,9 +17,6 @@
  * under the License.
  */
 
-const { readdirSync } = require('fs');
-const { resolve } = require('path');
-
 const APACHE_2_0_LICENSE_HEADER = `
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -345,10 +342,6 @@ module.exports = {
                   '!src/legacy/core_plugins/**/server/**/*',
                   '!src/legacy/core_plugins/**/index.{js,mjs,ts,tsx}',
 
-                  'x-pack/legacy/plugins/**/*',
-                  '!x-pack/legacy/plugins/**/server/**/*',
-                  '!x-pack/legacy/plugins/**/index.{js,mjs,ts,tsx}',
-
                   'examples/**/*',
                   '!examples/**/server/**/*',
                 ],
@@ -392,8 +385,6 @@ module.exports = {
                   'src/legacy/core_plugins/vis_type_*/public/**/*',
                   '!src/legacy/core_plugins/vis_type_*/public/legacy*',
                   'src/legacy/core_plugins/**/server/np_ready/**/*',
-                  'x-pack/legacy/plugins/**/public/np_ready/**/*',
-                  'x-pack/legacy/plugins/**/server/np_ready/**/*',
                 ],
                 allowSameFolder: true,
                 errorMessage:
@@ -450,15 +441,7 @@ module.exports = {
             forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
-            pluginMap: readdirSync(resolve(__dirname, 'x-pack/legacy/plugins')).reduce(
-              (acc, name) => {
-                if (!name.startsWith('_')) {
-                  acc[name] = `x-pack/legacy/plugins/${name}`;
-                }
-                return acc;
-              },
-              {}
-            ),
+            pluginMap: {},
           },
         },
       },
@@ -761,16 +744,6 @@ module.exports = {
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
-      },
-    },
-
-    /**
-     * GIS overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/maps/**/*.js'],
-      rules: {
-        'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
       },
     },
 
