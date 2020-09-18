@@ -58,7 +58,7 @@ export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonPro
       edges,
       inspect,
       pageInfo: {
-        activePage: activePage ? activePage : 0,
+        activePage: activePage ?? 0,
         fakeTotalCount,
         showMorePagesIndicator,
       },

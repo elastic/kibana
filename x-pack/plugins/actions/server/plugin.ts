@@ -71,7 +71,10 @@ import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
 import { ActionExecutionSource } from './lib/action_execution_source';
-import { shouldLegacyRbacApplyBySource } from './authorization/should_legacy_rbac_apply_by_source';
+import {
+  getAuthorizationModeBySource,
+  AuthorizationMode,
+} from './authorization/get_authorization_mode_by_source';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -281,7 +284,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const getActionsClientWithRequest = async (
       request: KibanaRequest,
-      source?: ActionExecutionSource<unknown>
+      authorizationContext?: ActionExecutionSource<unknown>
     ) => {
       if (isESOUsingEphemeralEncryptionKey === true) {
         throw new Error(
@@ -303,7 +306,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         request,
         authorization: instantiateAuthorization(
           request,
-          await shouldLegacyRbacApplyBySource(unsecuredSavedObjectsClient, source)
+          await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
         ),
         actionExecutor: actionExecutor!,
         executionEnqueuer: createExecutionEnqueuerFunction({
@@ -316,7 +319,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     };
 
     // Ensure the public API cannot be used to circumvent authorization
-    // using our legacy exemption mechanism
+    // using our legacy exemption mechanism by passing in a legacy SO
+    // as authorizationContext which would then set a Legacy AuthorizationMode
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
@@ -389,11 +393,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
   private instantiateAuthorization = (
     request: KibanaRequest,
-    shouldUseLegacyRbac: boolean = false
+    authorizationMode?: AuthorizationMode
   ) => {
     return new ActionsAuthorization({
       request,
-      shouldUseLegacyRbac,
+      authorizationMode,
       authorization: this.security?.authz,
       authentication: this.security?.authc,
       auditLogger: new ActionsAuthorizationAuditLogger(
