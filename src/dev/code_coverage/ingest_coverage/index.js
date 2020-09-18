@@ -20,6 +20,8 @@
 import { resolve } from 'path';
 import { prok } from './process';
 import { run, createFlagError } from '@kbn/dev-utils';
+import { pathExists } from './team_assignment/enumeration_helpers';
+import { id, reThrow } from './utils';
 
 const ROOT = resolve(__dirname, '../../../..');
 const flags = {
@@ -45,6 +47,8 @@ export function runCoverageIngestionCli() {
       const jsonSummaryPath = resolveRoot(flags.path);
       const vcsInfoFilePath = resolveRoot(flags.vcsInfoPath);
       const { teamAssignmentsPath } = flags;
+
+      pathExists(teamAssignmentsPath).fold(reThrow, id);
 
       prok({ jsonSummaryPath, vcsInfoFilePath, teamAssignmentsPath }, log);
     },

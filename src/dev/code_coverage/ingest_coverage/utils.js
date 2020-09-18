@@ -26,3 +26,6 @@ export const pink = (x) => chalk.bgMagenta.bold.cyan.bold(x);
 export const id = (x) => x;
 export const always = (x) => () => x; // Wraps a value in a fn. Eager evaluation if passed a fn.
 export const pretty = (x) => JSON.stringify(x, null, 2);
+export const reThrow = (e) => {
+  throw e;
+};
