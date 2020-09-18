@@ -14,10 +14,8 @@ import {
 } from '@elastic/eui';
 import { JSErrors } from './JSErrors';
 import { I18LABELS } from '../translations';
-import { HighTrafficPages } from './HighTrafficPages';
 
-interface Props {}
-export function ImpactfulMetrics(props: Props) {
+export function ImpactfulMetrics() {
   return (
     <EuiPanel>
       <EuiTitle size="s">
@@ -26,16 +24,7 @@ export function ImpactfulMetrics(props: Props) {
       <EuiSpacer size="xs" />
       <EuiFlexGroup wrap>
         <EuiFlexItem style={{ flexBasis: 650 }}>
-          <EuiTitle size="xs">
-            <h3>{I18LABELS.jsErrors}</h3>
-          </EuiTitle>
           <JSErrors />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ flexBasis: 650 }}>
-          <EuiTitle size="xs">
-            <h3>{I18LABELS.highTrafficPages}</h3>
-          </EuiTitle>
-          <HighTrafficPages />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

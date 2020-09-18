@@ -4,11 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { EuiBasicTable, EuiSpacer } from '@elastic/eui';
-import { Pagination } from '@elastic/eui/src/components/basic_table/pagination_bar';
+import React, { useContext, useState } from 'react';
+import {
+  EuiBasicTable,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiTitle,
+  EuiStat,
+  EuiToolTip,
+} from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { I18LABELS } from '../translations';
+import { CsmSharedContext } from '../CsmSharedContext';
 
 export function JSErrors() {
   const { urlParams, uiFilters } = useUrlParams();
@@ -38,38 +48,81 @@ export function JSErrors() {
     [start, end, serviceName, uiFilters, pagination]
   );
 
+  const {
+    sharedData: { totalPageViews },
+  } = useContext(CsmSharedContext);
+
+  const items = (data?.items ?? []).map(({ errorMessage, count }) => ({
+    errorMessage,
+    percent: ((count / totalPageViews) * 100).toFixed(1) + ' %',
+  }));
+
   const cols = [
     {
       field: 'errorMessage',
-      name: 'Error message',
-      truncateText: true,
+      name: I18LABELS.errorMessage,
     },
     {
-      name: 'Impacted page loads',
-      field: 'count',
+      name: I18LABELS.impactedPageLoads,
+      field: 'percent',
       align: 'right' as const,
     },
   ];
 
-  const onTableChange = ({ page }: Pagination) => {
+  const onTableChange = ({
+    page,
+  }: {
+    page: { size: number; index: number };
+  }) => {
     setPagination({
-      ...page,
+      pageIndex: page.index,
+      pageSize: page.size,
     });
   };
 
   return (
     <>
+      <EuiTitle size="xs">
+        <h3>{I18LABELS.jsErrors}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleSize="s"
+            title={
+              <EuiToolTip content={data?.totalErrors ?? 0}>
+                <>{numeral(data?.totalErrors ?? 0).format('0 a')}</>
+              </EuiToolTip>
+            }
+            description={I18LABELS.totalErrors}
+            isLoading={status !== 'success'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleSize="s"
+            title={
+              (((data?.totalErrorPages ?? 0) / totalPageViews) * 100).toFixed(
+                0
+              ) + ' %'
+            }
+            description={I18LABELS.errorRate}
+            isLoading={status !== 'success'}
+          />
+        </EuiFlexItem>{' '}
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable
         loading={status !== 'success'}
         responsive={false}
         compressed={true}
         columns={cols}
-        items={data?.items ?? []}
+        items={items}
         onChange={onTableChange}
         pagination={{
           ...pagination,
-          totalItemCount: data?.total ?? 0,
+          totalItemCount: data?.totalErrorGroups ?? 0,
         }}
       />
     </>

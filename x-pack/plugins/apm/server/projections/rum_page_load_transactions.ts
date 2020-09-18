@@ -13,6 +13,7 @@ import {
   SPAN_TYPE,
   AGENT_NAME,
   TRANSACTION_TYPE,
+  SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
 import { ProcessorEvent } from '../../common/processor_event';
@@ -90,6 +91,12 @@ export function getRumErrorsProjection({
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [AGENT_NAME]: 'rum-js' } },
+      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
+      {
+        term: {
+          [SERVICE_LANGUAGE_NAME]: 'javascript',
+        },
+      },
       ...uiFiltersES,
     ],
   };

@@ -97,6 +97,21 @@ export const I18LABELS = {
       defaultMessage: 'Page load duration by region',
     }
   ),
+  totalErrors: i18n.translate('xpack.apm.rum.jsErrors.totalErrors', {
+    defaultMessage: 'Total errors',
+  }),
+  errorRate: i18n.translate('xpack.apm.rum.jsErrors.errorRate', {
+    defaultMessage: 'Error rate',
+  }),
+  errorMessage: i18n.translate('xpack.apm.rum.jsErrors.errorMessage', {
+    defaultMessage: 'Error message',
+  }),
+  impactedPageLoads: i18n.translate(
+    'xpack.apm.rum.jsErrors.impactedPageLoads',
+    {
+      defaultMessage: 'Impacted page loads',
+    }
+  ),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(

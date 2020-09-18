@@ -180,7 +180,6 @@ const createApmApi = () => {
     .add(rumVisitorsBreakdownRoute)
     .add(rumWebCoreVitals)
     .add(rumJSErrors)
-    .add(rumHighTrafficPages)
     .add(rumLongTaskMetrics)
 
     // Observability dashboard

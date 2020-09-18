@@ -16,7 +16,6 @@ import { getRumServices } from '../lib/rum_client/get_rum_services';
 import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
-import { getHighTrafficPages } from '../lib/rum_client/get_high_traffic_pages';
 import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
 
 export const percentileRangeRt = t.partial({
@@ -164,31 +163,6 @@ export const rumJSErrors = createRoute(() => ({
 
     return getJSErrors({
       setup,
-      pageSize: Number(pageSize),
-      pageIndex: Number(pageIndex),
-    });
-  },
-}));
-
-export const rumHighTrafficPages = createRoute(() => ({
-  path: '/api/apm/rum-client/high-traffic-pages',
-  params: {
-    query: t.intersection([
-      uiFiltersRt,
-      rangeRt,
-      t.type({ pageSize: t.string, pageIndex: t.string, sorting: t.string }),
-    ]),
-  },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-
-    const {
-      query: { pageSize, pageIndex, sorting },
-    } = context.params;
-
-    return getHighTrafficPages({
-      setup,
-      sorting,
       pageSize: Number(pageSize),
       pageIndex: Number(pageIndex),
     });

@@ -9,24 +9,27 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { RumOverview } from '../RumDashboard';
 import { RumHeader } from './RumHeader';
+import { CsmSharedContextProvider } from './CsmSharedContext';
 
 export function RumHome() {
   return (
     <div>
-      <RumHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>
-                {i18n.translate('xpack.apm.csm.title', {
-                  defaultMessage: 'Client Side Monitoring',
-                })}
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </RumHeader>
-      <RumOverview />
+      <CsmSharedContextProvider>
+        <RumHeader>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="l">
+                <h1>
+                  {i18n.translate('xpack.apm.csm.title', {
+                    defaultMessage: 'Client Side Monitoring',
+                  })}
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </RumHeader>
+        <RumOverview />
+      </CsmSharedContextProvider>
     </div>
   );
 }

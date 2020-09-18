@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumErrorsProjection } from '../../projections/rum_overview';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
+import {
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  ERROR_GROUP_ID,
+  TRANSACTION_ID,
+} from '../../../common/elasticsearch_fieldnames';
 
 export async function getJSErrors({
   setup,
@@ -27,25 +33,44 @@ export async function getJSErrors({
 
   const params = mergeProjection(projection, {
     body: {
-      size: pageSize,
-      from: pageSize * pageIndex,
-      query: {
-        bool: {
-          filter: [
-            ...projection.body.query.bool.filter,
-            {
-              term: {
-                'service.language.name': 'javascript',
+      size: 0,
+      track_total_hits: true,
+      aggs: {
+        totalErrorGroups: {
+          cardinality: {
+            field: ERROR_GROUP_ID,
+          },
+        },
+        totalErrorPages: {
+          cardinality: {
+            field: TRANSACTION_ID,
+          },
+        },
+        errors: {
+          terms: {
+            field: ERROR_GROUP_ID,
+            size: 500,
+          },
+          aggs: {
+            bucket_truncate: {
+              bucket_sort: {
+                size: pageSize,
+                from: pageIndex * pageSize,
               },
             },
-          ],
-        },
-      },
-      collapse: {
-        field: 'error.grouping_key',
-        inner_hits: {
-          name: 'errorInfo',
-          size: 0,
+            sample: {
+              top_hits: {
+                _source: [
+                  ERROR_EXC_MESSAGE,
+                  ERROR_EXC_TYPE,
+                  ERROR_GROUP_ID,
+                  '@timestamp',
+                ],
+                sort: [{ '@timestamp': 'desc' as const }],
+                size: 1,
+              },
+            },
+          },
         },
       },
     },
@@ -55,12 +80,19 @@ export async function getJSErrors({
 
   const response = await apmEventClient.search(params);
 
+  const { totalErrorGroups, totalErrorPages, errors } =
+    response.aggregations ?? {};
+
   return {
-    total: response.hits.total.value,
-    items: response.hits.hits.map((hit) => {
+    totalErrorPages: totalErrorPages?.value ?? 0,
+    totalErrors: response.hits.total.value ?? 0,
+    totalErrorGroups: totalErrorGroups?.value ?? 0,
+    items: errors?.buckets.map(({ sample, doc_count: count }) => {
       return {
-        errorMessage: hit._source.error.exception[0].message,
-        count: hit.inner_hits.errorInfo.hits.total.value,
+        count,
+        errorMessage: (sample.hits.hits[0]._source as {
+          error: { exception: Array<{ message: string }> };
+        }).error.exception?.[0].message,
       };
     }),
   };
