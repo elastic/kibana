@@ -27,6 +27,7 @@ const tasks = new Listr(
             '--reporters',
             resolve(__dirname, './node_modules/jest-silent-reporter'),
             '--collect-coverage',
+            'false',
           ],
           execaOpts
         ),
