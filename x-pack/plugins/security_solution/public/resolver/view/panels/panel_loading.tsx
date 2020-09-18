@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import * as selectors from '../../store/selectors';
-import { Breadcrumbs } from './breadcrumbs';
+import { DeprecatedBreadcrumbs } from './breadcrumbs';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
 import { ResolverState } from '../../types';
 
@@ -42,7 +42,7 @@ export function PanelLoading() {
   }, [nodesLinkNavProps, eventsString]);
   return (
     <>
-      <Breadcrumbs breadcrumbs={waitCrumbs} />
+      <DeprecatedBreadcrumbs breadcrumbs={waitCrumbs} />
       <EuiSpacer size="l" />
       <EuiTitle>
         <h4>{waitingString}</h4>

@@ -17,7 +17,7 @@ import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
 import { formatDate, GeneratedText } from './panel_content_utilities';
-import { Breadcrumbs } from './breadcrumbs';
+import { DeprecatedBreadcrumbs } from './breadcrumbs';
 import {
   processPath,
   processPid,
@@ -179,7 +179,7 @@ const NodeDetailView = memo(function ({ processEvent }: { processEvent: Resolver
   const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
-      <Breadcrumbs breadcrumbs={crumbs} />
+      <DeprecatedBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <StyledTitle aria-describedby={titleID}>

@@ -11,11 +11,25 @@ import { EuiBreadcrumb, EuiBetaBadge } from '@elastic/eui';
 import React, { memo } from 'react';
 import { BetaHeader, ThemedBreadcrumbs } from './styles';
 import { useColors } from '../use_colors';
+import { PanelViewAndParameters } from '../../types';
 
 /**
- * Breadcrumb menu with adjustments per direction from UX team
+ * Renders a styled EuiBreadcrumb containing a link for `panelViewAndParameters` as well as links to each corresponding parent panel.
  */
-export const Breadcrumbs = memo(function ({ breadcrumbs }: { breadcrumbs: EuiBreadcrumb[] }) {
+export const Breadcrumb = memo(
+  ({ panelViewAndParameters }: { panelViewAndParameters: PanelViewAndParameters }) => {
+    return <></>;
+  }
+);
+
+/**
+ * Breadcrumb menu
+ */
+export const DeprecatedBreadcrumbs = memo(function ({
+  breadcrumbs,
+}: {
+  breadcrumbs: EuiBreadcrumb[];
+}) {
   const { resolverBreadcrumbBackground, resolverEdgeText } = useColors();
   return (
     <>
