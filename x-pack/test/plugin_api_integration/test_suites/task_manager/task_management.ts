@@ -8,19 +8,33 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
+import {
+  DEFAULT_MAX_WORKERS,
+  DEFAULT_POLL_INTERVAL,
+} from '../../../../plugins/task_manager/server/config';
+import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
+import { SavedObjectsRawDoc } from '../../../../../src/core/server';
 
 const {
   task: { properties: taskManagerIndexMapping },
-} = require('../../../../plugins/task_manager/server/saved_objects/mappings.json');
+} = TaskManagerMapping;
 
-const {
-  DEFAULT_MAX_WORKERS,
-  DEFAULT_POLL_INTERVAL,
-} = require('../../../../plugins/task_manager/server/config.ts');
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export interface RawDoc {
+  _id: string;
+  _source: any;
+  _type?: string;
+}
+export interface SearchResults {
+  hits: {
+    hits: RawDoc[];
+  };
+}
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const log = getService('log');
   const retry = getService('retry');
@@ -53,14 +67,16 @@ export default function ({ getService }) {
       }
     });
 
-    function currentTasks() {
+    function currentTasks(): Promise<{
+      docs: ConcreteTaskInstance[];
+    }> {
       return supertest
         .get('/api/sample_tasks')
         .expect(200)
         .then((response) => response.body);
     }
 
-    function currentTask(task) {
+    function currentTask(task: string): ConcreteTaskInstance {
       return supertest
         .get(`/api/sample_tasks/task/${task}`)
         .send({ task })
@@ -68,30 +84,26 @@ export default function ({ getService }) {
         .then((response) => response.body);
     }
 
-    function ensureTasksIndexRefreshed() {
-      return supertest
-        .get(`/api/ensure_tasks_index_refreshed`)
-        .send({})
-        .expect(200)
-        .then((response) => response.body);
+    function ensureTasksIndexRefreshed(): Promise<void> {
+      return supertest.get(`/api/ensure_tasks_index_refreshed`).send({}).expect(200);
     }
 
-    function historyDocs(taskId) {
+    function historyDocs(taskId: string) {
       return es
         .search({
           index: testHistoryIndex,
           q: taskId ? `taskId:${taskId}` : 'type:task',
         })
-        .then((result) => result.hits.hits);
+        .then((result: SearchResults) => result.hits.hits);
     }
 
-    function scheduleTask(task) {
+    function scheduleTask(task: string): ConcreteTaskInstance {
       return supertest
         .post('/api/sample_tasks/schedule')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then((response) => response.body);
+        .then((response: { body: ConcreteTaskInstance }) => response.body);
     }
 
     function runTaskNow(task) {
@@ -109,7 +121,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then((response) => response.body);
+        .then((response: { body: ConcreteTaskInstance }) => response.body);
     }
 
     function releaseTasksWaitingForEventToComplete(event) {
@@ -120,11 +132,14 @@ export default function ({ getService }) {
         .expect(200);
     }
 
-    function getTaskById(tasks, id) {
+    function getTaskById(tasks: ConcreteTaskInstance[], id: string) {
       return tasks.filter((task) => task.id === id)[0];
     }
 
-    async function provideParamsToTasksWaitingForParams(taskId, data = {}) {
+    async function provideParamsToTasksWaitingForParams(
+      taskId: string,
+      data: Record<string, unknown> = {}
+    ) {
       // wait for task to start running and stall on waitForParams
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
@@ -564,12 +579,10 @@ export default function ({ getService }) {
       expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
     });
 
-    async function expectReschedule(originalRunAt, currentTask, expectedDiff) {
+    async function expectReschedule(originalRunAt: number, task: Task, expectedDiff: number) {
       const buffer = 10000;
-      expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.greaterThan(
-        expectedDiff - buffer
-      );
-      expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
+      expect(Date.parse(task.runAt) - originalRunAt).to.be.greaterThan(expectedDiff - buffer);
+      expect(Date.parse(task.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
     }
 
     it('should run tasks in parallel, allowing for long running tasks along side faster tasks', async () => {

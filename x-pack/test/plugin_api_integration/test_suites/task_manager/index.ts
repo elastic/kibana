@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('task_manager', function taskManagerSuite() {
     this.tags('ciGroup2');
-    loadTestFile(require.resolve('./task_manager_integration'));
+    loadTestFile(require.resolve('./task_management'));
   });
 }
