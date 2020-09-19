@@ -7,7 +7,6 @@
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { UnwrapPromise } from '@kbn/utility-types';
 import semver from 'semver';
-import Boom from 'boom';
 import { BulkInstallPackageInfo, IBulkInstallPackageError } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
@@ -36,11 +35,14 @@ import {
 } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets, removeInstallation } from './remove';
-import { IngestManagerError, PackageOutdatedError } from '../../../errors';
+import {
+  IngestManagerError,
+  PackageOutdatedError,
+  ingestErrorToResponseOptions,
+} from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
-import { ingestErrorToResponseOptions } from '../../../errors/handlers';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -108,7 +110,7 @@ export async function handleInstallPackageFailure({
   callCluster,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  error: IngestManagerError | Boom | Error;
+  error: unknown;
   pkgName: string;
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
