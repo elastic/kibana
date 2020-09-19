@@ -386,7 +386,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      await pageObjects.common.closeToast();
+      await retry.try(async () => {
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 10 alerts');
+      });
 
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
