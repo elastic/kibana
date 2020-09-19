@@ -49,30 +49,45 @@ export async function getWebCoreVitals({
           percentiles: {
             field: LCP_FIELD,
             percents: [50],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
         fid: {
           percentiles: {
             field: FID_FIELD,
             percents: [50],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
         cls: {
           percentiles: {
             field: CLS_FIELD,
             percents: [50],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
         tbt: {
           percentiles: {
             field: TBT_FIELD,
             percents: [50],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
         fcp: {
           percentiles: {
             field: FCP_FIELD,
             percents: [50],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
         lcpRanks: {
@@ -80,6 +95,9 @@ export async function getWebCoreVitals({
             field: LCP_FIELD,
             values: [2500, 4000],
             keyed: false,
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
         fidRanks: {
@@ -87,6 +105,9 @@ export async function getWebCoreVitals({
             field: FID_FIELD,
             values: [100, 300],
             keyed: false,
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
         clsRanks: {
@@ -94,6 +115,9 @@ export async function getWebCoreVitals({
             field: CLS_FIELD,
             values: [0.1, 0.25],
             keyed: false,
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
       },

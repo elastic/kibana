@@ -14,13 +14,69 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { SPAN_DURATION } from '../../../common/elasticsearch_fieldnames';
+import {
+  SPAN_DURATION,
+  TRANSACTION_ID,
+} from '../../../common/elasticsearch_fieldnames';
 
-export async function getLongTaskMetrics({
+export async function getPageLoadTransactionIds({
   setup,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
+  const projection = getRumPageLoadTransactionsProjection({
+    setup,
+  });
+
+  let result: string[] = [];
+
+  let afterKey: any;
+
+  do {
+    const params = mergeProjection(projection, {
+      body: {
+        size: 0,
+        query: {
+          bool: projection.body.query.bool,
+        },
+        aggs: {
+          transIds: {
+            composite: {
+              sources: [
+                {
+                  transactionId: {
+                    terms: {
+                      field: TRANSACTION_ID,
+                    },
+                  },
+                },
+              ],
+              ...(afterKey ? { after: afterKey } : {}),
+              size: 10000,
+            },
+          },
+        },
+      },
+    });
+
+    const { apmEventClient } = setup;
+
+    const response = await apmEventClient.search(params);
+    const { transIds } = response.aggregations ?? {};
+
+    result = result.concat(
+      (transIds?.buckets ?? []).map(({ key }) => (key as unknown) as string)
+    );
+
+    afterKey = transIds?.after_key;
+  } while (afterKey !== undefined);
+
+  return result;
+}
+
+export async function getLongTaskMetrics(
+  setup: Setup & SetupTimeRange & SetupUIFilters
+) {
   const projection = getRumLongTasksProjection({
     setup,
   });
@@ -28,90 +84,43 @@ export async function getLongTaskMetrics({
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
-      aggs: {
-        transIds: {
-          terms: {
-            field: 'transaction.id',
-            size: 1000,
-          },
-          aggs: {
-            sumLongTask: {
-              sum: {
-                field: SPAN_DURATION,
-              },
-            },
-            longestLongTask: {
-              max: {
-                field: SPAN_DURATION,
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search(params);
-  const { transIds } = response.aggregations ?? {};
-
-  const validTransactions: string[] = await filterPageLoadTransactions(
-    setup,
-    (transIds?.buckets ?? []).map((bucket) => bucket.key as string)
-  );
-  let noOfLongTasks = 0;
-  let sumOfLongTasks = 0;
-  let longestLongTask = 0;
-
-  (transIds?.buckets ?? []).forEach((bucket) => {
-    if (validTransactions.includes(bucket.key as string)) {
-      noOfLongTasks += bucket.doc_count;
-      sumOfLongTasks += bucket.sumLongTask.value ?? 0;
-      if ((bucket.longestLongTask.value ?? 0) > longestLongTask) {
-        longestLongTask = bucket.longestLongTask.value!;
-      }
-    }
-  });
-  return {
-    noOfLongTasks,
-    sumOfLongTasks,
-    longestLongTask,
-  };
-}
-
-async function filterPageLoadTransactions(
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  transactionIds: string[]
-) {
-  const projection = getRumPageLoadTransactionsProjection({
-    setup,
-  });
-
-  const params = mergeProjection(projection, {
-    body: {
-      size: transactionIds.length,
+      track_total_hits: true,
       query: {
         bool: {
-          must: [
+          filter: [
+            ...projection.body.query.bool.filter,
             {
               terms: {
-                'transaction.id': transactionIds,
+                [TRANSACTION_ID]: getPageLoadTransactionIds({ setup }),
               },
             },
           ],
-          filter: [...projection.body.query.bool.filter],
         },
       },
-      _source: ['transaction.id'],
+      aggs: {
+        longestLongTask: {
+          max: {
+            field: SPAN_DURATION,
+          },
+        },
+        sumOfLongTasks: {
+          sum: {
+            field: SPAN_DURATION,
+          },
+        },
+      },
     },
   });
 
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  return response.hits.hits.map((hit) => (hit._source as any).transaction.id)!;
+
+  const { sumOfLongTasks, longestLongTask } = response.aggregations ?? {};
+
+  return {
+    noOfLongTasks: response.hits.total.value,
+    sumOfLongTasks: sumOfLongTasks?.value ?? 0,
+    longestLongTask: longestLongTask?.value ?? 0,
+  };
 }
