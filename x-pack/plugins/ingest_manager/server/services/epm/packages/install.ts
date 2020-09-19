@@ -152,7 +152,7 @@ export async function handleInstallPackageFailure({
 }
 
 type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
-function errorToOptions({
+function bulkInstallErrorToOptions({
   pkgToUpgrade,
   error,
 }: {
@@ -166,20 +166,20 @@ function errorToOptions({
   return options;
 }
 
-async function successCase({
-  savedObjectsClient,
-  callCluster,
-  installedPkg,
-  latestPackage,
-  pkgToUpgrade,
-}: {
+interface UpgradePackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallESAsCurrentUser;
   installedPkg: UnwrapPromise<ReturnType<typeof getInstallationObject>>;
   latestPackage: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
   pkgToUpgrade: string;
-}): Promise<BulkInstallResponse> {
-  console.log({ installedPkg, latestPackage, pkgToUpgrade });
+}
+async function upgradePackage({
+  savedObjectsClient,
+  callCluster,
+  installedPkg,
+  latestPackage,
+  pkgToUpgrade,
+}: UpgradePackageParams): Promise<BulkInstallResponse> {
   // TODO I think we want version here and not `install_version`?
   if (!installedPkg || semver.gt(latestPackage.version, installedPkg.attributes.version)) {
     const pkgkey = Registry.pkgToPkgKey({
@@ -204,7 +204,7 @@ async function successCase({
         installedPkg,
         callCluster,
       });
-      return errorToOptions({ pkgToUpgrade, error: installFailed });
+      return bulkInstallErrorToOptions({ pkgToUpgrade, error: installFailed });
     }
   } else {
     // package was already at the latest version
@@ -238,21 +238,29 @@ export async function bulkInstallPackages({
   const installedAndLatestResults = await Promise.allSettled(installedAndLatestPromises);
   const installResponsePromises = installedAndLatestResults.map(async (result, index) => {
     const pkgToUpgrade = packagesToUpgrade[index];
-    if (result.status === 'rejected') {
-      return errorToOptions({ pkgToUpgrade, error: result.reason });
-    } else {
+    if (result.status === 'fulfilled') {
       const [installedPkg, latestPackage] = result.value;
-      return successCase({
+      return upgradePackage({
         savedObjectsClient,
         callCluster,
         installedPkg,
         latestPackage,
         pkgToUpgrade,
       });
+    } else {
+      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
     }
   });
-  const installResponses = await Promise.all(installResponsePromises);
-  console.log('bulkInstallPackages returns', installResponses);
+  const installResults = await Promise.allSettled(installResponsePromises);
+  const installResponses = installResults.map((result, index) => {
+    const pkgToUpgrade = packagesToUpgrade[index];
+    if (result.status === 'fulfilled') {
+      return result.value;
+    } else {
+      return bulkInstallErrorToOptions({ pkgToUpgrade, error: result.reason });
+    }
+  });
+
   return installResponses;
 }
 

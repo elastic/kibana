@@ -21,7 +21,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe.only('bulk package upgrade api', async () => {
+  describe('bulk package upgrade api', async () => {
     skipIfNoDockerRegistry(providerContext);
 
     describe('bulk package upgrade with a package already installed', async () => {
@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(entry.oldVersion).equal('0.1.0');
         expect(entry.newVersion).equal('0.3.0');
       });
-      it.skip('should the same package multiple times for upgrade', async function () {
+      it('should the same package multiple times for upgrade', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
           .post(`/api/ingest_manager/epm/packages/_bulk`)
           .set('kbn-xsrf', 'xxxx')
