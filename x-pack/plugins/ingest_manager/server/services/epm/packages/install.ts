@@ -40,7 +40,7 @@ import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { installTransformForDataset } from '../elasticsearch/transform/install';
 import { appContextService } from '../../app_context';
-import { formatBulkInstallError } from '../../../errors/handlers';
+import { ingestErrorToResponseOptions } from '../../../errors/handlers';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -159,11 +159,12 @@ function bulkInstallErrorToOptions({
   pkgToUpgrade: string;
   error: Error;
 }): IBulkInstallPackageError {
-  const options: IBulkInstallPackageError = {
+  const { statusCode, body } = ingestErrorToResponseOptions(error);
+  return {
     name: pkgToUpgrade,
-    ...formatBulkInstallError(error),
+    statusCode,
+    error: body.message,
   };
-  return options;
 }
 
 interface UpgradePackageParams {
@@ -220,15 +221,16 @@ async function upgradePackage({
   }
 }
 
+interface BulkInstallPackagesParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  packagesToUpgrade: string[];
+  callCluster: CallESAsCurrentUser;
+}
 export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToUpgrade,
   callCluster,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  packagesToUpgrade: string[];
-  callCluster: CallESAsCurrentUser;
-}): Promise<BulkInstallResponse[]> {
+}: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const installedAndLatestPromises = packagesToUpgrade.map((pkgToUpgrade) =>
     Promise.all([
       getInstallationObject({ savedObjectsClient, pkgName: pkgToUpgrade }),
@@ -264,17 +266,18 @@ export async function bulkInstallPackages({
   return installResponses;
 }
 
+interface InstallPackageParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  callCluster: CallESAsCurrentUser;
+  force?: boolean;
+}
 export async function installPackage({
   savedObjectsClient,
   pkgkey,
   callCluster,
   force = false,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
-  callCluster: CallESAsCurrentUser;
-  force?: boolean;
-}): Promise<AssetReference[]> {
+}: InstallPackageParams): Promise<AssetReference[]> {
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
