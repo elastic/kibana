@@ -98,7 +98,7 @@ export const AlertsList: React.FunctionComponent = () => {
   useEffect(() => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typesFilter, actionTypesFilter]);
+  }, [typesFilter + actionTypesFilter]);
 
   
   useEffect(() => {
