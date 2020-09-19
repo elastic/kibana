@@ -4,28 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from '../../../../../../../src/core/public';
-import { DETECTION_ENGINE_EQL_VALIDATION_URL } from '../../../../common/constants';
-import { EqlValidationSchema as EqlValidationRequest } from '../../../../common/detection_engine/schemas/request/eql_validation_schema';
-import { EqlValidationSchema as EqlValidationResponse } from '../../../../common/detection_engine/schemas/response/eql_validation_schema';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { EqlQueryTypes } from '../../../../common/search_strategy/eql';
+import {
+  ValidationStrategyRequest,
+  ValidationStrategyResponse,
+} from '../../../../common/search_strategy/eql/validation';
 
-interface ApiParams {
-  http: HttpStart;
+interface Params {
+  data: DataPublicPluginStart;
+  index: string[];
+  query: string;
   signal: AbortSignal;
 }
 
-export const validateEql = async ({
-  http,
-  query,
+export const validateEql = ({
+  data,
   index,
+  query,
   signal,
-}: ApiParams & EqlValidationRequest) => {
-  return http.fetch<EqlValidationResponse>(DETECTION_ENGINE_EQL_VALIDATION_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      query,
-      index,
-    }),
-    signal,
-  });
+}: Params): Promise<ValidationStrategyResponse> => {
+  return data.search
+    .search<ValidationStrategyRequest, ValidationStrategyResponse>(
+      { factoryQueryType: EqlQueryTypes.validation, index, query },
+      {
+        strategy: 'eql',
+        abortSignal: signal,
+      }
+    )
+    .toPromise();
 };

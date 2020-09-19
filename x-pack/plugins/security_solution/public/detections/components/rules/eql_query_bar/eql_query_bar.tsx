@@ -31,7 +31,7 @@ export interface EqlQueryBarProps {
 }
 
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria, index }) => {
-  const { http } = useKibana().services;
+  const { data } = useKibana().services;
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const { error, start, result } = useEqlValidation();
@@ -54,9 +54,9 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria,
 
   const handleValidation = useCallback(() => {
     if (fieldValue) {
-      start({ http, index, query: fieldValue });
+      start({ data, index, query: fieldValue });
     }
-  }, [fieldValue, http, index, start]);
+  }, [data, fieldValue, index, start]);
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
