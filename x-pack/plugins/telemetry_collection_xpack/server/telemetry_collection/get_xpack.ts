@@ -8,10 +8,6 @@ import { ElasticsearchClient } from 'src/core/server';
 import { XpackUsage } from '@elastic/elasticsearch/api/requestParams';
 import { TIMEOUT } from './constants';
 
-export async function xpackUsageGetter(esClient: ElasticsearchClient) {
-  const { body } = await esClient.xpack.usage<XpackUsage>({ master_timeout: TIMEOUT });
-  return body;
-}
 /**
  * Get the cluster stats from the connected cluster.
  *
@@ -19,6 +15,7 @@ export async function xpackUsageGetter(esClient: ElasticsearchClient) {
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  */
-export function getXPackUsage(esClient: ElasticsearchClient) {
-  return xpackUsageGetter(esClient);
+export async function getXPackUsage(esClient: ElasticsearchClient) {
+  const { body } = await esClient.xpack.usage<XpackUsage>({ master_timeout: TIMEOUT });
+  return body;
 }

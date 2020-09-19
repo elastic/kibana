@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock } from '../../../../../src/core/server/mocks';
+import { coreMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 
 const kibana = {
@@ -53,34 +53,43 @@ const mockUsageCollection = (kibanaUsage = kibana) => ({
   toObject: (data: any) => data,
 });
 
+function clearEsClientMock(esClient: any) {
+  esClient.xpack.usage.mockClear();
+  esClient.license.get.mockClear();
+  esClient.nodes.usage.mockClear();
+  esClient.info.mockClear();
+}
+
 describe('Telemetry Collection: Get Aggregated Stats', () => {
   test('OSS-like telemetry (no license nor X-Pack telemetry)', async () => {
-    const callCluster = jest.fn(async (method: string, options: { path?: string }) => {
-      switch (method) {
-        case 'transport.request':
-          if (options.path === '/_license' || options.path === '/_xpack/usage') {
-            // eslint-disable-next-line no-throw-literal
-            throw { statusCode: 404 };
-          } else if (options.path === '/_nodes/usage') {
-            return {
-              cluster_name: 'test cluster',
-              nodes: nodesUsage,
-            };
-          }
-          return {};
-        case 'info':
-          return { cluster_uuid: 'test', cluster_name: 'test', version: { number: '8.0.0' } };
-        default:
-          return {};
-      }
-    });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    // mock for xpack.usage should throw a 404 for this test
+    esClient.xpack.usage.mockRejectedValue(new Error('Not Found'));
+    // mock for license should throw a 404 for this test
+    esClient.license.get.mockRejectedValue(new Error('Not Found'));
+    // mock for nodes usage should resolve for this test
+    esClient.nodes.usage.mockResolvedValue(
+      // @ts-ignore
+      Promise.resolve({ body: { cluster_name: 'test cluster', nodes: nodesUsage } })
+    );
+    // mock for info should resolve for this test
+    esClient.info.mockResolvedValue(
+      // @ts-ignore
+      Promise.resolve({
+        body: {
+          cluster_uuid: 'test',
+          cluster_name: 'test',
+          version: { number: '8.0.0' },
+        },
+      })
+    );
     const usageCollection = mockUsageCollection();
     const context = getContext();
 
     const stats = await getStatsWithXpack(
       [{ clusterUuid: '1234' }],
       {
-        callCluster,
+        esClient,
         usageCollection,
       } as any,
       context
@@ -90,39 +99,44 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         timestamp: expect.any(String),
       });
     });
+    clearEsClientMock(esClient);
   });
 
   test('X-Pack telemetry (license + X-Pack)', async () => {
-    const callCluster = jest.fn(async (method: string, options: { path?: string }) => {
-      switch (method) {
-        case 'transport.request':
-          if (options.path === '/_license') {
-            return {
-              license: { type: 'basic' },
-            };
-          }
-          if (options.path === '/_xpack/usage') {
-            return {};
-          }
-          if (options.path === '/_nodes/usage') {
-            return {
-              cluster_name: 'test cluster',
-              nodes: nodesUsage,
-            };
-          }
-        case 'info':
-          return { cluster_uuid: 'test', cluster_name: 'test', version: { number: '8.0.0' } };
-        default:
-          return {};
-      }
-    });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    // mock for license should return a basic license
+    esClient.license.get.mockResolvedValue(
+      // @ts-ignore
+      Promise.resolve({ body: { license: { type: 'basic' } } })
+    );
+    // mock for xpack usage should return an empty object
+    esClient.xpack.usage.mockResolvedValue(
+      // @ts-ignore
+      Promise.resolve({ body: {} })
+    );
+    // mock for nodes usage should return the cluster name and nodes usage
+    esClient.nodes.usage.mockResolvedValue(
+      // @ts-ignore
+      Promise.resolve({ body: { cluster_name: 'test cluster', nodes: nodesUsage } })
+    );
+    esClient.info.mockResolvedValue(
+      // @ts-ignore
+      Promise.resolve({
+        body: {
+          cluster_uuid: 'test',
+          cluster_name: 'test',
+          version: { number: '8.0.0' },
+        },
+      })
+    );
+    // mock for info should return cluster_uuid, cluster_name and version
     const usageCollection = mockUsageCollection();
     const context = getContext();
 
     const stats = await getStatsWithXpack(
       [{ clusterUuid: '1234' }],
       {
-        callCluster,
+        esClient,
         usageCollection,
       } as any,
       context
@@ -132,5 +146,6 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         timestamp: expect.any(String),
       });
     });
+    clearEsClientMock(esClient);
   });
 });
