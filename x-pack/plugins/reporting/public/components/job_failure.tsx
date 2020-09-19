@@ -9,12 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { ToastInput } from 'src/core/public';
-import { JobStatusBucket, ManagementLinkFn } from '../';
+import { JobSummary, ManagementLinkFn } from '../';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 export const getFailureToast = (
   errorText: string,
-  job: JobStatusBucket,
+  job: JobSummary,
   getManagmenetLink: ManagementLinkFn
 ): ToastInput => {
   return {

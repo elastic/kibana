@@ -7,12 +7,12 @@
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { JobStatusBucket } from '../';
+import { JobSummary } from '../';
 import { JobId } from '../../common/types';
 
 interface Props {
   getUrl: (jobId: JobId) => string;
-  job: JobStatusBucket;
+  job: JobSummary;
 }
 
 export const DownloadButton = ({ getUrl, job }: Props) => {

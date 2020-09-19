@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { NotificationsSetup } from 'src/core/public';
-import { JobStatusBuckets, JobStatusBucket } from '../';
+import { JobSummarySet, JobSummary } from '../';
 import { JobId, ReportDocument } from '../../common/types';
 import {
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
@@ -29,7 +29,7 @@ function updateStored(jobIds: JobId[]): void {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobIds));
 }
 
-function reportToJobStatusBucket(src: ReportDocument): JobStatusBucket {
+function getReportStatus(src: ReportDocument): JobSummary {
   return {
     id: src._id,
     status: src._source.status,
@@ -49,7 +49,7 @@ export class ReportingNotifierStreamHandler {
   public showNotifications({
     completed: completedJobs,
     failed: failedJobs,
-  }: JobStatusBuckets): Rx.Observable<JobStatusBuckets> {
+  }: JobSummarySet): Rx.Observable<JobSummarySet> {
     const showNotificationsAsync = async () => {
       // notifications with download link
       for (const job of completedJobs) {
@@ -93,11 +93,11 @@ export class ReportingNotifierStreamHandler {
    * An observable that finds jobs that are known to be "processing" (stored in
    * session storage) but have non-processing job status on the server
    */
-  public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobStatusBuckets> {
+  public findChangedStatusJobs(storedJobs: JobId[]): Rx.Observable<JobSummarySet> {
     return Rx.from(this.apiClient.findForJobIds(storedJobs)).pipe(
       map((jobs: ReportDocument[]) => {
-        const completedJobs: JobStatusBucket[] = [];
-        const failedJobs: JobStatusBucket[] = [];
+        const completedJobs: JobSummary[] = [];
+        const failedJobs: JobSummary[] = [];
         const pending: JobId[] = [];
 
         // add side effects to storage
@@ -108,9 +108,9 @@ export class ReportingNotifierStreamHandler {
           } = job;
           if (storedJobs.includes(jobId)) {
             if (jobStatus === JOB_STATUS_COMPLETED || jobStatus === JOB_STATUS_WARNINGS) {
-              completedJobs.push(reportToJobStatusBucket(job));
+              completedJobs.push(getReportStatus(job));
             } else if (jobStatus === JOB_STATUS_FAILED) {
-              failedJobs.push(reportToJobStatusBucket(job));
+              failedJobs.push(getReportStatus(job));
             } else {
               pending.push(jobId);
             }
