@@ -5,6 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { UnwrapPromise } from '@kbn/utility-types';
 import semver from 'semver';
 import Boom from 'boom';
 import { BulkInstallPackageInfo, IBulkInstallPackageError } from '../../../../common';
@@ -19,7 +20,6 @@ import {
   EsAssetReference,
   ElasticsearchAssetType,
   InstallType,
-  RegistrySearchResult,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -152,6 +152,79 @@ export async function handleInstallPackageFailure({
 }
 
 type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
+function errorToOptions({
+  pkgToUpgrade,
+  error,
+}: {
+  pkgToUpgrade: string;
+  error: Error;
+}): IBulkInstallPackageError {
+  const options: IBulkInstallPackageError = {
+    name: pkgToUpgrade,
+    ...formatBulkInstallError(error),
+  };
+  return options;
+}
+
+async function successCase({
+  savedObjectsClient,
+  callCluster,
+  installedPkg,
+  latestPackage,
+  pkgToUpgrade,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  callCluster: CallESAsCurrentUser;
+  installedPkg: UnwrapPromise<ReturnType<typeof getInstallationObject>>;
+  latestPackage: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
+  pkgToUpgrade: string;
+}): Promise<BulkInstallResponse> {
+  console.log({ installedPkg, latestPackage, pkgToUpgrade });
+  // TODO I think we want version here and not `install_version`?
+  if (!installedPkg || semver.gt(latestPackage.version, installedPkg.attributes.version)) {
+    const pkgkey = Registry.pkgToPkgKey({
+      name: latestPackage.name,
+      version: latestPackage.version,
+    });
+
+    try {
+      const assets = await installPackage({ savedObjectsClient, pkgkey, callCluster });
+      const info: BulkInstallPackageInfo = {
+        name: pkgToUpgrade,
+        newVersion: latestPackage.version,
+        oldVersion: installedPkg?.attributes.version ?? null,
+        assets,
+      };
+      return info;
+    } catch (installFailed) {
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: installFailed,
+        pkgName: latestPackage.name,
+        pkgVersion: latestPackage.version,
+        installedPkg,
+        callCluster,
+      });
+      const error: IBulkInstallPackageError = {
+        name: pkgToUpgrade,
+        ...formatBulkInstallError(installFailed),
+      };
+      return error;
+    }
+  } else {
+    // package was already at the latest version
+    const info: BulkInstallPackageInfo = {
+      name: pkgToUpgrade,
+      newVersion: latestPackage.version,
+      oldVersion: latestPackage.version,
+      assets: [
+        ...installedPkg.attributes.installed_es,
+        ...installedPkg.attributes.installed_kibana,
+      ],
+    };
+    return info;
+  }
+}
 
 export async function bulkInstallPackages({
   savedObjectsClient,
@@ -162,60 +235,31 @@ export async function bulkInstallPackages({
   packagesToUpgrade: string[];
   callCluster: CallESAsCurrentUser;
 }): Promise<BulkInstallResponse[]> {
-  const res: BulkInstallResponse[] = [];
-  for (const pkgToUpgrade of packagesToUpgrade) {
-    let installedPkg: SavedObject<Installation> | undefined;
-    let latestPackage: RegistrySearchResult | undefined;
-    try {
-      [installedPkg, latestPackage] = await Promise.all([
-        getInstallationObject({ savedObjectsClient, pkgName: pkgToUpgrade }),
-        Registry.fetchFindLatestPackage(pkgToUpgrade),
-      ]);
-    } catch (e) {
-      res.push({ name: pkgToUpgrade, ...formatBulkInstallError(e) });
-      continue;
-    }
-
-    // TODO I think we want version here and not `install_version`?
-    if (!installedPkg || semver.gt(latestPackage.version, installedPkg.attributes.version)) {
-      const pkgkey = Registry.pkgToPkgKey({
-        name: latestPackage.name,
-        version: latestPackage.version,
-      });
-
-      try {
-        const assets = await installPackage({ savedObjectsClient, pkgkey, callCluster });
-        res.push({
-          name: pkgToUpgrade,
-          newVersion: latestPackage.version,
-          oldVersion: installedPkg?.attributes.version ?? null,
-          assets,
-        });
-      } catch (e) {
-        res.push({ name: pkgToUpgrade, ...formatBulkInstallError(e) });
-        await handleInstallPackageFailure({
-          savedObjectsClient,
-          error: e,
-          pkgName: latestPackage.name,
-          pkgVersion: latestPackage.version,
-          installedPkg,
-          callCluster,
-        });
-      }
+  const installedAndLatestPromises = packagesToUpgrade.map((pkgToUpgrade) =>
+    Promise.all([
+      getInstallationObject({ savedObjectsClient, pkgName: pkgToUpgrade }),
+      Registry.fetchFindLatestPackage(pkgToUpgrade),
+    ])
+  );
+  const installedAndLatestResults = await Promise.allSettled(installedAndLatestPromises);
+  const installResponsePromises = installedAndLatestResults.map(async (result, index) => {
+    const pkgToUpgrade = packagesToUpgrade[index];
+    if (result.status === 'rejected') {
+      return errorToOptions({ pkgToUpgrade, error: result.reason });
     } else {
-      // package was already at the latest version
-      res.push({
-        name: pkgToUpgrade,
-        newVersion: latestPackage.version,
-        oldVersion: latestPackage.version,
-        assets: [
-          ...installedPkg.attributes.installed_es,
-          ...installedPkg.attributes.installed_kibana,
-        ],
+      const [installedPkg, latestPackage] = result.value;
+      return successCase({
+        savedObjectsClient,
+        callCluster,
+        installedPkg,
+        latestPackage,
+        pkgToUpgrade,
       });
     }
-  }
-  return res;
+  });
+  const installResponses = await Promise.all(installResponsePromises);
+  console.log('bulkInstallPackages returns', installResponses);
+  return installResponses;
 }
 
 export async function installPackage({
