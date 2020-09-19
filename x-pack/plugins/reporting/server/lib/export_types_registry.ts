@@ -70,7 +70,7 @@ export class ExportTypesRegistry {
 }
 
 // TODO: Define a 2nd ExportTypeRegistry instance for "immediate execute" report job types only.
-// It should not require a `CreateJobFn` for its ExportTypeDefinitions.
+// It should not require a `CreateJobFn` for its ExportTypeDefinitions, which only makes sense for async.
 // Once that is done, the `any` types below can be removed.
 
 /*

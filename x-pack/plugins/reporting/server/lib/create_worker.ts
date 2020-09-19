@@ -32,8 +32,6 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
-    // uses the payload from ESQueue's worker.js, picks out the ID and payload,
-    // and hands it to the export type run function
     const workerFn = (
       jobSource: ReportDocument,
       payload: ReportTaskParams['payload'],

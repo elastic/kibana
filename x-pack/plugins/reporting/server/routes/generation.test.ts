@@ -74,7 +74,7 @@ describe('POST /api/reporting/generate', () => {
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-      createJobFnFactory: () => async () => ({ scheduleParamsTest: { test1: 'yes' } } as any),
+      createJobFnFactory: () => async () => ({ createJobTest: { test1: 'yes' } } as any),
       runTaskFnFactory: () => async () => ({ runParamsTest: { test2: 'yes' } } as any),
     });
     core.getExportTypesRegistry = () => mockExportTypesRegistry;
@@ -169,7 +169,7 @@ describe('POST /api/reporting/generate', () => {
             index: 'foo-index',
             jobtype: 'printable_pdf',
             payload: {
-              scheduleParamsTest: {
+              createJobTest: {
                 test1: 'yes',
               },
             },
