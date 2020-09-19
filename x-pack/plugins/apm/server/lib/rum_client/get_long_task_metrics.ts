@@ -52,7 +52,7 @@ export async function getPageLoadTransactionIds({
                 },
               ],
               ...(afterKey ? { after: afterKey } : {}),
-              size: 10000,
+              size: 20000,
             },
           },
         },
@@ -62,8 +62,8 @@ export async function getPageLoadTransactionIds({
     const { apmEventClient } = setup;
 
     const response = await apmEventClient.search(params);
-    const { transIds } = response.aggregations ?? {};
 
+    const { transIds } = response.aggregations ?? {};
     result = result.concat(
       (transIds?.buckets ?? []).map(({ key }) => (key as unknown) as string)
     );
@@ -74,9 +74,29 @@ export async function getPageLoadTransactionIds({
   return result;
 }
 
-export async function getLongTaskMetrics(
-  setup: Setup & SetupTimeRange & SetupUIFilters
-) {
+export async function getLongTaskMetrics({
+  setup,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+}) {
+  const transactionsIds = await getPageLoadTransactionIds({ setup });
+
+  let i = 0;
+
+  let maxIndex = 15000;
+
+  let sumOfLongTasks = 0;
+  let longestLongTask = 0;
+  let noOfLongTasks = 0;
+
+  if (transactionsIds.length < maxIndex) {
+    maxIndex = transactionsIds.length;
+  }
+
+  let breakIt = true;
+
+  const transIds = transactionsIds.slice(i, maxIndex);
+
   const projection = getRumLongTasksProjection({
     setup,
   });
@@ -91,7 +111,7 @@ export async function getLongTaskMetrics(
             ...projection.body.query.bool.filter,
             {
               terms: {
-                [TRANSACTION_ID]: getPageLoadTransactionIds({ setup }),
+                [TRANSACTION_ID]: transIds,
               },
             },
           ],
@@ -116,11 +136,25 @@ export async function getLongTaskMetrics(
 
   const response = await apmEventClient.search(params);
 
-  const { sumOfLongTasks, longestLongTask } = response.aggregations ?? {};
+  console.log(JSON.stringify(response));
+
+  const { sumOfLongTasks: sum, longestLongTask: longest } =
+    response.aggregations ?? {};
+
+  sumOfLongTasks += sum?.value ?? 0;
+  longestLongTask += longest?.value ?? 0;
+  noOfLongTasks += response.hits.total.value;
+
+  maxIndex += 15000;
+
+  if (transactionsIds.length < maxIndex) {
+    maxIndex = transactionsIds.length;
+    breakIt = true;
+  }
 
   return {
-    noOfLongTasks: response.hits.total.value,
-    sumOfLongTasks: sumOfLongTasks?.value ?? 0,
-    longestLongTask: longestLongTask?.value ?? 0,
+    noOfLongTasks,
+    sumOfLongTasks,
+    longestLongTask,
   };
 }
