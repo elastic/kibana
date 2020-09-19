@@ -189,13 +189,12 @@ async function successCase({
 
     try {
       const assets = await installPackage({ savedObjectsClient, pkgkey, callCluster });
-      const info: BulkInstallPackageInfo = {
+      return {
         name: pkgToUpgrade,
         newVersion: latestPackage.version,
         oldVersion: installedPkg?.attributes.version ?? null,
         assets,
       };
-      return info;
     } catch (installFailed) {
       await handleInstallPackageFailure({
         savedObjectsClient,
@@ -205,15 +204,11 @@ async function successCase({
         installedPkg,
         callCluster,
       });
-      const error: IBulkInstallPackageError = {
-        name: pkgToUpgrade,
-        ...formatBulkInstallError(installFailed),
-      };
-      return error;
+      return errorToOptions({ pkgToUpgrade, error: installFailed });
     }
   } else {
     // package was already at the latest version
-    const info: BulkInstallPackageInfo = {
+    return {
       name: pkgToUpgrade,
       newVersion: latestPackage.version,
       oldVersion: latestPackage.version,
@@ -222,7 +217,6 @@ async function successCase({
         ...installedPkg.attributes.installed_kibana,
       ],
     };
-    return info;
   }
 }
 
