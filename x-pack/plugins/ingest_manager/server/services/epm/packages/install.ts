@@ -51,10 +51,10 @@ export async function installLatestPackage(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, callCluster } = options;
   try {
-    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+    const latestPkg = await Registry.fetchFindLatestPackage(pkgName);
     const pkgkey = Registry.pkgToPkgKey({
-      name: latestPackage.name,
-      version: latestPackage.version,
+      name: latestPkg.name,
+      version: latestPkg.version,
     });
     return installPackage({ savedObjectsClient, pkgkey, callCluster });
   } catch (err) {
@@ -173,28 +173,28 @@ interface UpgradePackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallESAsCurrentUser;
   installedPkg: UnwrapPromise<ReturnType<typeof getInstallationObject>>;
-  latestPackage: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
+  latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
   pkgToUpgrade: string;
 }
 async function upgradePackage({
   savedObjectsClient,
   callCluster,
   installedPkg,
-  latestPackage,
+  latestPkg,
   pkgToUpgrade,
 }: UpgradePackageParams): Promise<BulkInstallResponse> {
   // TODO I think we want version here and not `install_version`?
-  if (!installedPkg || semver.gt(latestPackage.version, installedPkg.attributes.version)) {
+  if (!installedPkg || semver.gt(latestPkg.version, installedPkg.attributes.version)) {
     const pkgkey = Registry.pkgToPkgKey({
-      name: latestPackage.name,
-      version: latestPackage.version,
+      name: latestPkg.name,
+      version: latestPkg.version,
     });
 
     try {
       const assets = await installPackage({ savedObjectsClient, pkgkey, callCluster });
       return {
         name: pkgToUpgrade,
-        newVersion: latestPackage.version,
+        newVersion: latestPkg.version,
         oldVersion: installedPkg?.attributes.version ?? null,
         assets,
       };
@@ -202,8 +202,8 @@ async function upgradePackage({
       await handleInstallPackageFailure({
         savedObjectsClient,
         error: installFailed,
-        pkgName: latestPackage.name,
-        pkgVersion: latestPackage.version,
+        pkgName: latestPkg.name,
+        pkgVersion: latestPkg.version,
         installedPkg,
         callCluster,
       });
@@ -213,8 +213,8 @@ async function upgradePackage({
     // package was already at the latest version
     return {
       name: pkgToUpgrade,
-      newVersion: latestPackage.version,
-      oldVersion: latestPackage.version,
+      newVersion: latestPkg.version,
+      oldVersion: latestPkg.version,
       assets: [
         ...installedPkg.attributes.installed_es,
         ...installedPkg.attributes.installed_kibana,
@@ -243,12 +243,12 @@ export async function bulkInstallPackages({
   const installResponsePromises = installedAndLatestResults.map(async (result, index) => {
     const pkgToUpgrade = packagesToUpgrade[index];
     if (result.status === 'fulfilled') {
-      const [installedPkg, latestPackage] = result.value;
+      const [installedPkg, latestPkg] = result.value;
       return upgradePackage({
         savedObjectsClient,
         callCluster,
         installedPkg,
-        latestPackage,
+        latestPkg,
         pkgToUpgrade,
       });
     } else {
@@ -284,7 +284,7 @@ export async function installPackage({
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
-  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+  const latestPkg = await Registry.fetchFindLatestPackage(pkgName);
   // get the currently installed package
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
 
@@ -293,7 +293,7 @@ export async function installPackage({
   // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
   const installOutOfDateVersionOk =
     installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
-  if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
+  if (semver.lt(pkgVersion, latestPkg.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
