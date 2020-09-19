@@ -13955,8 +13955,6 @@
     "xpack.reporting.exportTypes.common.failedToDecryptReportJobDataErrorMessage": "无法解密报告作业数据。请确保已设置 {encryptionKey}，然后重新生成此报告。{err}",
     "xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage": "作业标头缺失",
     "xpack.reporting.exportTypes.csv.executeJob.dateFormateSetting": "Kibana 高级设置“{dateFormatTimezone}”已设置为“浏览器”。日期将格式化为 UTC 以避免混淆。",
-    "xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage": "无法解密报告作业数据。请确保已设置 {encryptionKey}，然后重新生成此报告。{err}",
-    "xpack.reporting.exportTypes.csv.executeJob.missingJobHeadersErrorMessage": "作业标头缺失",
     "xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues": "CSV 可能包含值已转义的公式",
     "xpack.reporting.exportTypes.csv.hitIterator.expectedHitsErrorMessage": "在以下 Elasticsearch 响应中预期 {hits}：{response}",
     "xpack.reporting.exportTypes.csv.hitIterator.expectedScrollIdErrorMessage": "在以下 Elasticsearch 响应中预期 {scrollId}：{response}",

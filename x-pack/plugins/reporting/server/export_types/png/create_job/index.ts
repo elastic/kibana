@@ -25,13 +25,13 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
     validateUrls([relativeUrl]);
 
     return {
+      headers: serializedEncryptedHeaders,
+      spaceId: reporting.getSpaceId(req),
       objectType,
       title,
       relativeUrl,
-      headers: serializedEncryptedHeaders,
       browserTimezone,
       layout,
-      basePath: config.kbnConfig.get('server', 'basePath'),
       forceNow: new Date().toISOString(),
     };
   };
