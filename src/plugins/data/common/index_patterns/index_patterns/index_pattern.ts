@@ -28,6 +28,7 @@ import {
   IIndexPattern,
   FieldTypeUnknownError,
   FieldFormatNotFoundError,
+  IFieldType,
 } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
@@ -485,7 +486,9 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
-  getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat {
+  getFormatterForField(
+    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
+  ): FieldFormat {
     return (
       this.fieldFormatMap[field.name] ||
       this.fieldFormats.getDefaultInstance(
