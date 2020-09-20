@@ -19,13 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { UrlGeneratorContract } from 'src/plugins/share/public';
 import { getCoreService, getQueryService, getShareService } from './services';
 import { indexPatterns } from '../../data/public';
 import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
 export function getDeprecationMessage(vis: Vis) {
-  let mapsTileMapUrlGenerator;
+  let mapsTileMapUrlGenerator: UrlGeneratorContract<'MAPS_APP_TILE_MAP_URL_GENERATOR'>;
   try {
     mapsTileMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
       'MAPS_APP_TILE_MAP_URL_GENERATOR'

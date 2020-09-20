@@ -19,12 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { UrlGeneratorContract } from 'src/plugins/share/public';
 import { getCoreService, getQueryService, getShareService } from './kibana_services';
 import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
 export function getDeprecationMessage(vis: Vis) {
-  let mapsRegionMapUrlGenerator;
+  let mapsRegionMapUrlGenerator: UrlGeneratorContract<'MAPS_APP_REGION_MAP_URL_GENERATOR'>;
   try {
     mapsRegionMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
       'MAPS_APP_REGION_MAP_URL_GENERATOR'
