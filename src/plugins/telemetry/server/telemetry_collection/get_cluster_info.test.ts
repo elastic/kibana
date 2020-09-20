@@ -38,14 +38,14 @@ describe('get_cluster_info using the elasticsearch client', () => {
       cluster_name: 'testCluster',
       version: {
         number: '7.9.2',
-        build_flavor: 'string',
-        build_type: 'string',
-        build_hash: 'string',
-        build_date: 'string',
+        build_flavor: 'default',
+        build_type: 'docker',
+        build_hash: 'b5ca9c58fb664ca8bf',
+        build_date: '2020-07-21T16:40:44.668009Z',
         build_snapshot: false,
-        lucene_version: 'string',
-        minimum_wire_compatibility_version: 'string',
-        minimum_index_compatibility_version: 'string',
+        lucene_version: '8.5.1',
+        minimum_wire_compatibility_version: '6.8.0',
+        minimum_index_compatibility_version: '6.0.0-beta1',
       },
     });
     const esClient = mockGetClusterInfo(response);

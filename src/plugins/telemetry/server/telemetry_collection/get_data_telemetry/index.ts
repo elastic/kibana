@@ -23,4 +23,5 @@ export {
   getDataTelemetry,
   buildDataTelemetryPayload,
   DataTelemetryPayload,
+  DataTelemetryIndex,
 } from './get_data_telemetry';

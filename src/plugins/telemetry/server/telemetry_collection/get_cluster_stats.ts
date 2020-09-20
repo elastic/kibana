@@ -34,6 +34,7 @@ export async function getClusterStats(esClient: ElasticsearchClient) {
  * Get the cluster uuids from the connected cluster.
  */
 export const getClusterUuids: ClusterDetailsGetter = async ({ esClient }) => {
-  const result = await getClusterStats(esClient);
-  return [{ clusterUuid: result.cluster_uuid }];
+  const { body } = await esClient.cluster.stats({ timeout: TIMEOUT });
+
+  return [{ clusterUuid: body.cluster_uuid }];
 };

@@ -74,7 +74,7 @@ export class Plugin {
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader: IBulkUploader = {} as IBulkUploader;
-  private elasticsearchClient: IClusterClient;
+  private elasticsearchClient: IClusterClient | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;

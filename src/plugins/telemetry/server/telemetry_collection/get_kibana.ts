@@ -48,7 +48,6 @@ export function handleKibanaStats(
     logger.warn('No Kibana stats returned from usage collectors');
     return;
   }
-
   const { kibana, kibana_stats: kibanaStats, ...plugins } = response;
 
   const os = {
@@ -81,7 +80,6 @@ export function handleKibanaStats(
   };
 }
 
-// Tina Note: pass both the legacy and new es clients to bulkFetch. BulkFetch calls all the collector fetch methods.
 export async function getKibana(
   usageCollection: UsageCollectionSetup,
   callWithInternalUser: LegacyAPICaller,
