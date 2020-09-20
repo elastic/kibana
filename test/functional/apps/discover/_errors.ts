@@ -21,10 +21,10 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
-  describe('errors', function describeIndexTests() {
+  describe.only('errors', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('invalid_scripted_field');
@@ -38,8 +38,8 @@ export default function ({ getService, getPageObjects }) {
 
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        const isFetchErrorVisible = await testSubjects.exists('discoverFetchError');
-        expect(isFetchErrorVisible).to.be(true);
+        const toast = await toasts.getToastElement(1);
+        expect(toast).not.to.be(undefined);
       });
     });
   });
