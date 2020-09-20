@@ -520,12 +520,17 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         return JSON.stringify(value, null, 2);
       },
       serializer: (value: string) => {
-        const parsed = JSON.parse(value);
-        // If an empty object was passed, strip out this value entirely.
-        if (!Object.keys(parsed).length) {
-          return undefined;
+        try {
+          const parsed = JSON.parse(value);
+          // If an empty object was passed, strip out this value entirely.
+          if (!Object.keys(parsed).length) {
+            return undefined;
+          }
+          return parsed;
+        } catch (error) {
+          // swallow error and return non-parsed value;
+          return value;
         }
-        return parsed;
       },
     },
     schema: t.any,

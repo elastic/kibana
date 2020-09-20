@@ -16,12 +16,11 @@ export const IgnoreZValueParameter = ({ description }: { description?: string })
       defaultMessage: 'Ignore Z value',
     })}
     description={
-      description
-        ? description
-        : i18n.translate('xpack.idxMgmt.mappingsEditor.ignoredZValueFieldDescription', {
-            defaultMessage:
-              'Three dimension points will be accepted, but only latitude and longitude values will be indexed; the third dimension is ignored.',
-          })
+      description ||
+      i18n.translate('xpack.idxMgmt.mappingsEditor.ignoredZValueFieldDescription', {
+        defaultMessage:
+          'Three dimension points will be accepted, but only latitude and longitude values will be indexed; the third dimension is ignored.',
+      })
     }
     formFieldPath="ignore_z_value"
   />
