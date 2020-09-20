@@ -19,8 +19,8 @@ export const getSettingsHandler: RequestHandler = async (context, request, respo
       item: settings,
     };
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Setings not found` },
       });
