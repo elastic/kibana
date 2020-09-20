@@ -151,7 +151,9 @@ describe('when on the list page', () => {
       let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
-          const hostListData = mockEndpointResultList({ total: 4 }).hosts;
+          const mockedEndpointData = mockEndpointResultList({ total: 4 });
+          const hostListData = mockedEndpointData.hosts;
+          const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
 
@@ -160,6 +162,7 @@ describe('when on the list page', () => {
               hostListData[index] = {
                 metadata: hostListData[index].metadata,
                 host_status: status,
+                query_strategy_version: queryStrategyVersion,
               };
             }
           );
@@ -713,6 +716,7 @@ describe('when on the list page', () => {
       hostInfo = {
         host_status: hosts[0].host_status,
         metadata: hosts[0].metadata,
+        query_strategy_version: mockEndpointResultList.query_strategy_version,
       };
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
