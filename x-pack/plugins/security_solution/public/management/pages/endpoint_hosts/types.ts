@@ -67,7 +67,7 @@ export interface EndpointState {
   /** The current auto refresh interval for data in ms */
   autoRefreshInterval: number;
   /** The query strategy version that informs whether the transform for KQL is enabled or not */
-  queryStrategyVersion: MetadataQueryStrategyVersions;
+  queryStrategyVersion?: MetadataQueryStrategyVersions;
 }
 
 /**
