@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
-  describe.only('errors', function describeIndexTests() {
+  describe('errors', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('invalid_scripted_field');
