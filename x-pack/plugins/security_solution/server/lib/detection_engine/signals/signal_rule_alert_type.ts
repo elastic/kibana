@@ -14,7 +14,11 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
-import { isThresholdRule, isEqlRule } from '../../../../common/detection_engine/utils';
+import {
+  isThresholdRule,
+  isEqlRule,
+  isThreatMatchRule,
+} from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
@@ -46,7 +50,6 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
-import { isThreatMatchRule } from './threat_mapping/utils';
 
 export const signalRulesAlertType = ({
   logger,

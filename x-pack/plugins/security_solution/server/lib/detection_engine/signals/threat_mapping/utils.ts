@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
-
-export const isThreatMatchRule = (ruleType: Type) => ruleType === 'threat_match';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
  * Max(timer_array_1) + Max(timer_array_2)
  * @param existingTimers String array of existing timers
  * @param newTimers String array of new timers.
- * @returns String of the new maximum between the two timers
+ * @returns String array of the new maximum between the two timers
  */
 export const calculateAdditiveMax = (existingTimers: string[], newTimers: string[]): string[] => {
   const numericNewTimerMax = Math.max(0, ...newTimers.map((time) => +time));

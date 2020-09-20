@@ -5,7 +5,7 @@
  */
 
 import { isMlRule } from '../../../machine_learning/helpers';
-import { isThresholdRule } from '../../utils';
+import { isThreatMatchRule, isThresholdRule } from '../../utils';
 import { CreateRulesSchema } from './create_rules_schema';
 
 export const validateAnomalyThreshold = (rule: CreateRulesSchema): string[] => {
@@ -109,7 +109,7 @@ export const validateThreshold = (rule: CreateRulesSchema): string[] => {
 
 export const validateThreatMapping = (rule: CreateRulesSchema): string[] => {
   let errors: string[] = [];
-  if (rule.type === 'threat_match') {
+  if (isThreatMatchRule(rule.type)) {
     if (!rule.threat_mapping) {
       errors = ['when "type" is "threat_match", "threat_mapping" is required', ...errors];
     } else if (rule.threat_mapping.length === 0) {

@@ -6,7 +6,7 @@
 
 import { SearchAfterAndBulkCreateReturnType } from '../search_after_bulk_create';
 
-import { calculateAdditiveMax, combineResults, isThreatMatchRule } from './utils';
+import { calculateAdditiveMax, combineResults } from './utils';
 
 describe('utils', () => {
   describe('calculateAdditiveMax', () => {
@@ -33,16 +33,6 @@ describe('utils', () => {
     test('it should return 10 for the max of the two arrays added together when the max of each array is 5, "5 + 5 = 10"', () => {
       const max = calculateAdditiveMax(['3', '5', '1'], ['3', '5', '1']);
       expect(max).toEqual(['10']);
-    });
-  });
-
-  describe('isThreatMatchRule', () => {
-    test('it returns true if a threat match rule', () => {
-      expect(isThreatMatchRule('threat_match')).toEqual(true);
-    });
-
-    test('it returns false if not a threat match rule', () => {
-      expect(isThreatMatchRule('query')).toEqual(false);
     });
   });
 

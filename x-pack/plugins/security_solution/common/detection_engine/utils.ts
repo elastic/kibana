@@ -20,3 +20,4 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
 export const isEqlRule = (ruleType: Type | undefined) => ruleType === 'eql';
 export const isThresholdRule = (ruleType: Type | undefined) => ruleType === 'threshold';
 export const isQueryRule = (ruleType: Type | undefined) => ruleType === 'query';
+export const isThreatMatchRule = (ruleType: Type) => ruleType === 'threat_match';

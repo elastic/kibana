@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCreateRulesSchemaMock } from './create_rules_schema.mock';
+import {
+  getCreateRulesSchemaMock,
+  getCreateThreatMatchRulesSchemaMock,
+} from './create_rules_schema.mock';
 import { CreateRulesSchema } from './create_rules_schema';
 import { createRuleValidateTypeDependents } from './create_rules_type_dependents';
 
@@ -102,55 +105,23 @@ describe('create_rules_type_dependents', () => {
   });
 
   test('validates with threat_index, threat_query, and threat_mapping when type is "threat_match"', () => {
-    const schema: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
-      type: 'threat_match',
-      threat_index: 'index-123',
-      threat_mapping: [{ entries: [{ field: '', type: 'mapping', value: '' }] }],
-      threat_query: '*:*',
-    };
-    const errors = createRuleValidateTypeDependents(schema);
+    const schema = getCreateThreatMatchRulesSchemaMock();
+    const { threat_filters: threatFilters, ...noThreatFilters } = schema;
+    const errors = createRuleValidateTypeDependents(noThreatFilters);
     expect(errors).toEqual([]);
   });
 
   test('does NOT validate when threat_mapping is an empty array', () => {
     const schema: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
-      type: 'threat_match',
-      threat_index: 'index-123',
+      ...getCreateThreatMatchRulesSchemaMock(),
       threat_mapping: [],
-      threat_query: '*:*',
     };
     const errors = createRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['threat_mapping" must have at least one element']);
   });
 
   test('validates with threat_index, threat_query, threat_mapping, and an optional threat_filters, when type is "threat_match"', () => {
-    const schema: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
-      type: 'threat_match',
-      threat_index: 'index-123',
-      threat_mapping: [{ entries: [{ field: '', type: 'mapping', value: '' }] }],
-      threat_query: '*:*',
-      threat_filters: [
-        {
-          bool: {
-            must: [
-              {
-                query_string: {
-                  query: 'host.name: linux',
-                  analyze_wildcard: true,
-                  time_zone: 'Zulu',
-                },
-              },
-            ],
-            filter: [],
-            should: [],
-            must_not: [],
-          },
-        },
-      ],
-    };
+    const schema = getCreateThreatMatchRulesSchemaMock();
     const errors = createRuleValidateTypeDependents(schema);
     expect(errors).toEqual([]);
   });

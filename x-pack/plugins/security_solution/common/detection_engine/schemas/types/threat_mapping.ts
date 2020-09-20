@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
+import { NonEmptyString } from './non_empty_string';
 
 export const threat_query = t.string;
 export type ThreatQuery = t.TypeOf<typeof threat_query>;
@@ -21,9 +22,9 @@ export type ThreatFiltersOrUndefined = t.TypeOf<typeof threatFiltersOrUndefined>
 export const threatMappingEntries = t.array(
   t.exact(
     t.type({
-      field: t.string,
+      field: NonEmptyString,
       type: t.keyof({ mapping: null }),
-      value: t.string,
+      value: NonEmptyString,
     })
   )
 );

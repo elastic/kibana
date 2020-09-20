@@ -91,14 +91,12 @@ export const getFilter = async ({
 
   switch (type) {
     case 'eql':
+    case 'threat_match':
     case 'threshold': {
       return savedId != null ? savedQueryFilter() : queryFilter();
     }
     case 'query': {
       return queryFilter();
-    }
-    case 'threat_match': {
-      return savedId != null ? savedQueryFilter() : queryFilter();
     }
     case 'saved_query': {
       return savedQueryFilter();
