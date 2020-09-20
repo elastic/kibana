@@ -49,12 +49,12 @@ export class SearchTimeoutError extends KbnError {
             'One or more queries timed out. With our free Basic tier, your queries never time out.',
         });
       case TimeoutErrorMode.CONTACT:
-        return i18n.translate('xpack.data.search.timeoutContactAdmin', {
+        return i18n.translate('data.search.timeoutContactAdmin', {
           defaultMessage:
             'One or more queries timed out. Contact your system administrator to increase the run time.',
         });
       case TimeoutErrorMode.CHANGE:
-        return i18n.translate('xpack.data.search.timeoutIncreaseSetting', {
+        return i18n.translate('data.search.timeoutIncreaseSetting', {
           defaultMessage:
             'One or more queries timed out. Increase run time with the search timeout advanced setting.',
         });

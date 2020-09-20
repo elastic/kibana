@@ -32,7 +32,7 @@ export class PainlessError extends KbnError {
     const [{ script }] = rootCause;
 
     super(
-      i18n.translate('discover.painlessError.painlessScriptedFieldErrorMessage', {
+      i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
         defaultMessage: "Error with Painless scripted field '{script}'.",
         values: { script },
       })

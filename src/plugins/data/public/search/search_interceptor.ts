@@ -30,7 +30,6 @@ import {
 } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
 import { KbnError } from 'src/plugins/kibana_utils/common';
 import {
   getCombinedSignal,
@@ -98,8 +97,10 @@ export class SearchInterceptor {
     appAbortSignal?: AbortSignal
   ) {
     if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
+      const err = new SearchTimeoutError(e, this.getTimeoutMode());
+      this.showTimeoutError(err);
       // Handle a client or a server side timeout
-      return new SearchTimeoutError(e, this.getTimeoutMode());
+      return err;
     } else if (appAbortSignal?.aborted) {
       // In the case an application initiated abort, throw the existing AbortError.
       return e;
@@ -122,10 +123,10 @@ export class SearchInterceptor {
     }
 
     if (e instanceof SearchTimeoutError) {
-      this.deps.toasts.addDanger({
-        title: 'Timeout',
-        text: toMountPoint(e.getErrorMessage(this.application)),
-      });
+      // this.deps.toasts.addDanger({
+      //   title: 'Timeout',
+      //   text: toMountPoint(e.getErrorMessage(this.application)),
+      // });
       return;
     }
 
@@ -204,7 +205,6 @@ export class SearchInterceptor {
     const timeout$ = timeout ? timer(timeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
       timeoutController.abort();
-      this.showTimeoutError(new AbortError());
     });
     this.timeoutSubscriptions.add(subscription);
 
@@ -235,13 +235,10 @@ export class SearchInterceptor {
   // Right now we are debouncing but we will hook this up with background sessions to show only one
   // error notification per session.
   protected showTimeoutError = debounce(
-    (e: Error) => {
-      this.deps.toasts.addError(e, {
+    (e: SearchTimeoutError) => {
+      this.deps.toasts.addDanger({
         title: 'Timed out',
-        toastMessage: i18n.translate('data.search.upgradeLicense', {
-          defaultMessage:
-            'One or more queries timed out. With our free Basic tier, your queries never time out.',
-        }),
+        text: toMountPoint(e.getErrorMessage(this.application)),
       });
     },
     60000,
