@@ -5,7 +5,7 @@
  */
 
 import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
-import { mergeMap, expand, takeUntil, finalize, tap, catchError } from 'rxjs/operators';
+import { mergeMap, expand, takeUntil, finalize, catchError } from 'rxjs/operators';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
