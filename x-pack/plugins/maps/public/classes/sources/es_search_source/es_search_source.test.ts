@@ -9,7 +9,7 @@ jest.mock('../../../kibana_services');
 jest.mock('./load_index_settings');
 
 import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
-import { SearchSource } from '../../../../../../../src/plugins/data/public/search/search_source';
+import { SearchSource } from 'src/plugins/data/public';
 
 // @ts-expect-error
 import { loadIndexSettings } from './load_index_settings';
