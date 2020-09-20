@@ -24,9 +24,14 @@ import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
 export function getDeprecationMessage(vis: Vis) {
-  const mapsRegionMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
-    'MAPS_APP_REGION_MAP_URL_GENERATOR'
-  );
+  let mapsRegionMapUrlGenerator;
+  try {
+    mapsRegionMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
+      'MAPS_APP_REGION_MAP_URL_GENERATOR'
+    );
+  } catch (error) {
+    // ignore error thrown when url generator is not available
+  }
 
   const title = i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' });
 

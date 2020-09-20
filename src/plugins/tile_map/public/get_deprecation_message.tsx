@@ -25,9 +25,14 @@ import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
 export function getDeprecationMessage(vis: Vis) {
-  const mapsTileMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
-    'MAPS_APP_TILE_MAP_URL_GENERATOR'
-  );
+  let mapsTileMapUrlGenerator;
+  try {
+    mapsTileMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
+      'MAPS_APP_TILE_MAP_URL_GENERATOR'
+    );
+  } catch (error) {
+    // ignore error thrown when url generator is not available
+  }
 
   const title = i18n.translate('tileMap.vis.mapTitle', {
     defaultMessage: 'Coordinate Map',
