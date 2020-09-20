@@ -760,7 +760,7 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       })
       .mockImplementation(() => {
-        throw Error('Fake Error');
+        throw Error('Fake Error'); // throws the exception we are testing
       });
     listClient.getListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
@@ -837,7 +837,7 @@ describe('searchAfterAndBulkCreate', () => {
     };
     mockService.callCluster
       .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
-      .mockResolvedValueOnce(bulkItem)
+      .mockResolvedValueOnce(bulkItem) // adds the response with errors we are testing
       .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6)))
       .mockResolvedValueOnce({
         took: 100,
