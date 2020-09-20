@@ -50,6 +50,7 @@ export const createThreatSignals = async ({
     searchAfterTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
+    errors: [],
   };
 
   let threatList = await getThreatList({

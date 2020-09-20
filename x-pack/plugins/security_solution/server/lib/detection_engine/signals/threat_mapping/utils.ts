@@ -36,4 +36,5 @@ export const combineResults = (
   ),
   lastLookBackDate: newResult.lastLookBackDate,
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
+  errors: [...new Set([...currentResult.errors, ...newResult.errors])],
 });
