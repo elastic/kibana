@@ -89,7 +89,10 @@ export function PageLoadDistChart({
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
-    <ChartWrapper loading={loading || breakdownLoading} height="250px">
+    <ChartWrapper
+      loading={loading || breakdownLoading}
+      height="calc(100% - 72px)"
+    >
       {(!loading || data) && (
         <PageLoadChart>
           <Settings

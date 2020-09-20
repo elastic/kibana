@@ -12,6 +12,7 @@ import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { FULL_HEIGHT } from '../RumDashboard';
 
 export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
@@ -45,7 +46,7 @@ export function PageViewsTrend() {
   );
 
   return (
-    <div>
+    <div style={FULL_HEIGHT}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">

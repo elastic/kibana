@@ -89,7 +89,7 @@ export function PageViewsChart({ data, loading }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
-    <ChartWrapper loading={loading} height="250px">
+    <ChartWrapper loading={loading} height="calc(100% - 72px)">
       {(!loading || data) && (
         <Chart>
           <Settings
