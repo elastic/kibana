@@ -8,6 +8,8 @@ import { EqlQueryTypes } from '../../../../common/search_strategy/eql';
 import { EqlQueryFactory } from './types';
 import { eqlValidationQuery } from './validation';
 
+export * from './types';
+
 export const eqlQueryFactory: Record<EqlQueryTypes, EqlQueryFactory<EqlQueryTypes>> = {
   [EqlQueryTypes.validation]: eqlValidationQuery,
 };

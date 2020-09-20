@@ -28,7 +28,7 @@ export const validateEql = ({
     .search<ValidationStrategyRequest, ValidationStrategyResponse>(
       { factoryQueryType: EqlQueryTypes.validation, index, query },
       {
-        strategy: 'eql',
+        strategy: 'security_eql_factory',
         abortSignal: signal,
       }
     )

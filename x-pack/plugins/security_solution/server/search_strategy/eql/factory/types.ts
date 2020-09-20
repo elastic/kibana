@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
+import {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  ISearchOptions,
+} from '../../../../../../../src/plugins/data/common';
 import {
   EqlQueryTypes,
   EqlStrategyRequestType,
@@ -13,9 +16,13 @@ import {
 } from '../../../../common/search_strategy/eql';
 
 export interface EqlQueryFactory<T extends EqlQueryTypes> {
-  buildDsl: (request: EqlStrategyRequestType<T>) => EqlSearch;
+  buildRequest: (request: EqlStrategyRequestType<T>) => IEsSearchRequest;
+  buildOptions: (
+    request: EqlStrategyRequestType<T>,
+    options?: ISearchOptions
+  ) => ISearchOptions | undefined;
   parse: (
     request: EqlStrategyRequestType<T>,
-    response: ApiResponse<unknown>
+    response: IEsSearchResponse<unknown>
   ) => Promise<EqlStrategyResponseType<T>>;
 }
