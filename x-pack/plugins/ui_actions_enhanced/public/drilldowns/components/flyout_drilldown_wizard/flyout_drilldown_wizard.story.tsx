@@ -8,8 +8,7 @@ import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutDrilldownWizard } from './index';
-import { dashboardFactory, urlFactory } from '../../../components/action_wizard/test_data';
-import { ActionFactory } from '../../../dynamic_actions';
+import { mockActionFactories } from '../../../components/action_wizard/test_data';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {
@@ -24,23 +23,12 @@ const otherProps = {
 
 storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {
-    return (
-      <FlyoutDrilldownWizard
-        drilldownActionFactories={[urlFactory as ActionFactory, dashboardFactory as ActionFactory]}
-        {...otherProps}
-      />
-    );
+    return <FlyoutDrilldownWizard drilldownActionFactories={mockActionFactories} {...otherProps} />;
   })
   .add('open in flyout - create', () => {
     return (
       <EuiFlyout onClose={() => {}}>
-        <FlyoutDrilldownWizard
-          drilldownActionFactories={[
-            urlFactory as ActionFactory,
-            dashboardFactory as ActionFactory,
-          ]}
-          {...otherProps}
-        />
+        <FlyoutDrilldownWizard drilldownActionFactories={mockActionFactories} {...otherProps} />
       </EuiFlyout>
     );
   })
@@ -48,13 +36,10 @@ storiesOf('components/FlyoutDrilldownWizard', module)
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
-          drilldownActionFactories={[
-            urlFactory as ActionFactory,
-            dashboardFactory as ActionFactory,
-          ]}
+          drilldownActionFactories={mockActionFactories}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
-            actionFactory: urlFactory as any,
+            actionFactory: mockActionFactories[1],
             actionConfig: {
               url: 'https://elastic.co',
               openInNewTab: true,
@@ -70,10 +55,10 @@ storiesOf('components/FlyoutDrilldownWizard', module)
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
-          drilldownActionFactories={[dashboardFactory as ActionFactory]}
+          drilldownActionFactories={[mockActionFactories[1]]}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
-            actionFactory: urlFactory as any,
+            actionFactory: mockActionFactories[1],
             actionConfig: {
               url: 'https://elastic.co',
               openInNewTab: true,

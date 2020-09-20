@@ -151,13 +151,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/api/apm/settings/custom_links`,
-      },
-      expectForbidden: expect404,
-      expectResponse: expect200,
-    },
-    {
-      req: {
         url: `/api/apm/settings/custom_links/transaction`,
       },
       expectForbidden: expect404,
