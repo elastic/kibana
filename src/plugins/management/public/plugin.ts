@@ -47,6 +47,8 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
+  private hasAnyEnabledApps = true;
+
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
@@ -65,6 +67,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         path: '/app/management',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
+        visible: () => this.hasAnyEnabledApps,
       });
     }
 
@@ -96,11 +99,11 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   public start(core: CoreStart) {
     this.managementSections.start({ capabilities: core.application.capabilities });
-    const hasAnyEnabledApps = getSectionsServiceStartPrivate()
+    this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
       .some((section) => section.getAppsEnabled().length > 0);
 
-    if (!hasAnyEnabledApps) {
+    if (!this.hasAnyEnabledApps) {
       this.appUpdater.next(() => {
         return {
           status: AppStatus.inaccessible,
