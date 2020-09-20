@@ -52,5 +52,9 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./observability_overview/has_data'));
       loadTestFile(require.resolve('./observability_overview/observability_overview'));
     });
+
+    describe('Metrics', function () {
+      loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
+    });
   });
 }
