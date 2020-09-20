@@ -25,7 +25,9 @@ import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
 export function getDeprecationMessage(vis: Vis) {
-  let mapsRegionMapUrlGenerator: UrlGeneratorContract<'MAPS_APP_REGION_MAP_URL_GENERATOR'>;
+  let mapsRegionMapUrlGenerator:
+    | UrlGeneratorContract<'MAPS_APP_REGION_MAP_URL_GENERATOR'>
+    | undefined;
   try {
     mapsRegionMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
       'MAPS_APP_REGION_MAP_URL_GENERATOR'
@@ -64,7 +66,7 @@ export function getDeprecationMessage(vis: Vis) {
       createUrlParams.metricFieldName = metricAggs[0].getField()?.name;
     }
 
-    const url = await mapsRegionMapUrlGenerator.createUrl(createUrlParams);
+    const url = await mapsRegionMapUrlGenerator!.createUrl(createUrlParams);
     getCoreService().application.navigateToUrl(url);
   }
 
