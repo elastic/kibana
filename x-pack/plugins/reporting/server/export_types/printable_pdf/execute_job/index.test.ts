@@ -10,7 +10,11 @@ import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
-import { createMockReportingCore } from '../../../test_helpers';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../../test_helpers';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from './';
@@ -39,20 +43,16 @@ const encryptHeaders = async (headers: Record<string, string>) => {
 const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPDF;
 
 beforeEach(async () => {
-  const kbnConfig = {
-    'server.basePath': '/sbp',
-  };
   const reportingConfig = {
+    'server.basePath': '/sbp',
     index: '.reports-test',
     encryptionKey: mockEncryptionKey,
     'kibanaServer.hostname': 'localhost',
     'kibanaServer.port': 5601,
     'kibanaServer.protocol': 'http',
   };
-  const mockReportingConfig = {
-    get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')],
-    kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
-  };
+  const mockSchema = createMockConfigSchema(reportingConfig);
+  const mockReportingConfig = createMockConfig(mockSchema);
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
 
@@ -79,7 +79,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const generatePdfObservable = (await generatePdfObservableFactory(mockReporting)) as jest.Mock;
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
   await runTask(
     'pdfJobId',
@@ -98,7 +98,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
 
 test(`returns content_type of application/pdf`, async () => {
   const logger = getMockLogger();
-  const runTask = await runTaskFnFactory(mockReporting, logger);
+  const runTask = runTaskFnFactory(mockReporting, logger);
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
@@ -117,7 +117,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await runTask(
     'pdfJobId',

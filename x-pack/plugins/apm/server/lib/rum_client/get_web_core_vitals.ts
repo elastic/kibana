@@ -124,10 +124,10 @@ export async function getWebCoreVitals({
 
   // Divide by 1000 to convert ms into seconds
   return {
-    cls: String(cls?.values['50.0'] || 0),
+    cls: String(cls?.values['50.0']?.toFixed(2) || 0),
     fid: ((fid?.values['50.0'] || 0) / 1000).toFixed(2),
     lcp: ((lcp?.values['50.0'] || 0) / 1000).toFixed(2),
-    tbt: ((tbt?.values['50.0'] || 0) / 1000).toFixed(2),
+    tbt: tbt?.values['50.0'] || 0,
     fcp: fcp?.values['50.0'] || 0,
 
     lcpRanks: getRanksPercentages(lcpRanks?.values ?? defaultRanks),

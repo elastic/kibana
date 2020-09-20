@@ -11,7 +11,7 @@ import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
   AGENT_POLLING_REQUEST_TIMEOUT_MS,
 } from '../common';
-export { AgentService, ESIndexPatternService, getRegistryUrl } from './services';
+export { AgentService, ESIndexPatternService, getRegistryUrl, PackageService } from './services';
 export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,
