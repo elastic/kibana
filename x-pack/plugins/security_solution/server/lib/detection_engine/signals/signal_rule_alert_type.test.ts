@@ -40,7 +40,6 @@ jest.mock('./utils');
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
-jest.mock('./../../../../common/detection_engine/utils');
 jest.mock('../../../../common/detection_engine/parse_schedule_dates');
 
 const getPayload = (ruleAlert: RuleAlertType, services: AlertServicesMock) => ({
@@ -477,6 +476,19 @@ describe('rules_notification_alert_type', () => {
           expect.objectContaining({
             signalsCount: 1,
           })
+        );
+      });
+    });
+
+    describe('threat match', () => {
+      it('should throw an error if threatQuery or threatIndex or threatMapping was not null', async () => {
+        const result = getResult();
+        result.params.type = 'threat_match';
+        payload = getPayload(result, alertServices) as jest.Mocked<RuleExecutorOptions>;
+        await alert.executor(payload);
+        expect(logger.error).toHaveBeenCalled();
+        expect(logger.error.mock.calls[0][0]).toContain(
+          'An error occurred during rule execution: message: "Threat Match rule is missing threatQuery and/or threatIndex and/or threatMapping: threatQuery: "undefined" threatIndex: "undefined" threatMapping: "undefined"" name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
         );
       });
     });

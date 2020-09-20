@@ -14,7 +14,11 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
-import { isThresholdRule, isEqlRule } from '../../../../common/detection_engine/utils';
+import {
+  isThresholdRule,
+  isEqlRule,
+  isThreatMatchRule,
+} from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
@@ -45,6 +49,7 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
+import { createThreatSignals } from './threat_mapping/create_threat_signals';
 
 export const signalRulesAlertType = ({
   logger,
@@ -90,6 +95,10 @@ export const signalRulesAlertType = ({
         query,
         to,
         threshold,
+        threatFilters,
+        threatQuery,
+        threatIndex,
+        threatMapping,
         type,
         exceptionsList,
       } = params;
@@ -310,6 +319,57 @@ export const signalRulesAlertType = ({
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
+        } else if (isThreatMatchRule(type)) {
+          if (
+            threatQuery == null ||
+            threatIndex == null ||
+            threatMapping == null ||
+            query == null
+          ) {
+            throw new Error(
+              [
+                'Threat Match rule is missing threatQuery and/or threatIndex and/or threatMapping:',
+                `threatQuery: "${threatQuery}"`,
+                `threatIndex: "${threatIndex}"`,
+                `threatMapping: "${threatMapping}"`,
+              ].join(' ')
+            );
+          }
+          const inputIndex = await getInputIndex(services, version, index);
+          result = await createThreatSignals({
+            threatMapping,
+            query,
+            inputIndex,
+            type,
+            filters: filters ?? [],
+            language,
+            name,
+            savedId,
+            services,
+            exceptionItems: exceptionItems ?? [],
+            gap,
+            previousStartedAt,
+            listClient,
+            logger,
+            alertId,
+            outputIndex,
+            params,
+            searchAfterSize,
+            actions,
+            createdBy,
+            createdAt,
+            updatedBy,
+            interval,
+            updatedAt,
+            enabled,
+            refresh,
+            tags,
+            throttle,
+            threatFilters: threatFilters ?? [],
+            threatQuery,
+            buildRuleMessage,
+            threatIndex,
+          });
         } else {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
