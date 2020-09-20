@@ -712,11 +712,11 @@ describe('when on the list page', () => {
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
 
     const mockEndpointListApi = () => {
-      const { hosts } = mockEndpointResultList();
+      const { hosts, query_strategy_version: queryStrategyVersion } = mockEndpointResultList();
       hostInfo = {
         host_status: hosts[0].host_status,
         metadata: hosts[0].metadata,
-        query_strategy_version: mockEndpointResultList.query_strategy_version,
+        query_strategy_version: queryStrategyVersion,
       };
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
