@@ -19,7 +19,10 @@ import {
 } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions } from './types';
-import { searchAfterAndBulkCreate } from './search_after_bulk_create';
+import {
+  searchAfterAndBulkCreate,
+  SearchAfterAndBulkCreateReturnType,
+} from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
@@ -481,17 +484,19 @@ describe('rules_notification_alert_type', () => {
 
   describe('should catch error', () => {
     it('when bulk indexing failed', async () => {
-      (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
+      const result: SearchAfterAndBulkCreateReturnType = {
         success: false,
         searchAfterTimes: [],
         bulkCreateTimes: [],
         lastLookBackDate: null,
         createdSignalsCount: 0,
-      });
+        errors: ['Error that bubbled up.'],
+      };
+      (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue(result);
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain(
-        'Bulk Indexing of signals failed. Check logs for further details.'
+        'Bulk Indexing of signals failed: Error that bubbled up. name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
       );
       expect(ruleStatusService.error).toHaveBeenCalled();
     });
