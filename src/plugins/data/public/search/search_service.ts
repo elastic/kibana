@@ -22,12 +22,16 @@ import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
-import { getCallMsearch } from './legacy/call_msearch';
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
+import {
+  createSearchSource,
+  ISearchGeneric,
+  SearchSource,
+  SearchSourceDependencies,
+} from '../../common/search';
+import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';

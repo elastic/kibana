@@ -32,6 +32,7 @@ import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from './feature_importance/decision_path_popover';
 import { TopClasses } from '../../../../common/types/feature_importance';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
+import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
@@ -44,7 +45,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   baseline?: number;
-  analysisType?: ANALYSIS_CONFIG_TYPE;
+  analysisType?: DataFrameAnalysisConfigType;
   resultsField?: string;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
