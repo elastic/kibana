@@ -4,6 +4,11 @@
 
 ## HttpSetup.options property
 
+> Warning: This API is now obsolete.
+> 
+> Use [HttpStart.options](./kibana-plugin-core-public.httpstart.options.md)
+> 
+
 Makes an HTTP request with the OPTIONS method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
 <b>Signature:</b>

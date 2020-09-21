@@ -4,6 +4,11 @@
 
 ## HttpSetup.fetch property
 
+> Warning: This API is now obsolete.
+> 
+> Use [HttpStart.fetch](./kibana-plugin-core-public.httpstart.fetch.md)
+> 
+
 Makes an HTTP request. Defaults to a GET request unless overriden. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
 <b>Signature:</b>

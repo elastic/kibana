@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { HttpStart, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ReducerAction } from './connector_reducer';
 import { ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { TypeRegistry } from '../../type_registry';
@@ -51,7 +51,7 @@ interface ActionConnectorProps {
     body: { message: string; error: string };
   };
   errors: IErrorObject;
-  http: HttpSetup;
+  http: HttpStart;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   docLinks: DocLinksStart;
   capabilities: ApplicationStart['capabilities'];

@@ -19,20 +19,20 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreSetup } from 'kibana/public';
 import { TelemetryPluginConfig } from '../plugin';
 
 interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;
-  http: CoreStart['http'];
-  notifications: CoreStart['notifications'];
+  http: CoreSetup['http'];
+  notifications: CoreSetup['notifications'];
   reportOptInStatusChange?: boolean;
 }
 
 export class TelemetryService {
-  private readonly http: CoreStart['http'];
+  private readonly http: CoreSetup['http'];
   private readonly reportOptInStatusChange: boolean;
-  private readonly notifications: CoreStart['notifications'];
+  private readonly notifications: CoreSetup['notifications'];
   private readonly defaultConfig: TelemetryPluginConfig;
   private updatedConfig?: TelemetryPluginConfig;
 

@@ -23,13 +23,13 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { coreMock } from '../../../../core/public/mocks';
 
 describe('DashboardEmptyScreen', () => {
-  const setupMock = coreMock.createSetup();
+  const startMock = coreMock.createStart();
 
   const defaultProps = {
     showLinkToVisualize: true,
     onLinkClick: jest.fn(),
-    uiSettings: setupMock.uiSettings,
-    http: setupMock.http,
+    uiSettings: startMock.uiSettings,
+    http: startMock.http,
   };
 
   function mountComponent(props?: DashboardEmptyScreenProps) {

@@ -4,6 +4,11 @@
 
 ## HttpSetup.head property
 
+> Warning: This API is now obsolete.
+> 
+> Use [HttpStart.head](./kibana-plugin-core-public.httpstart.head.md)
+> 
+
 Makes an HTTP request with the HEAD method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
 <b>Signature:</b>

@@ -9,7 +9,7 @@ Define an interceptor to be executed after a response is received.
 <b>Signature:</b>
 
 ```typescript
-response?(httpResponse: HttpResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+response?(httpResponse: HttpResponse, controller: IHttpInterceptController, toolkit: HttpInterceptorToolkit): MaybePromise<IHttpResponseInterceptorOverrides | void>;
 ```
 
 ## Parameters
@@ -18,8 +18,9 @@ response?(httpResponse: HttpResponse, controller: IHttpInterceptController): May
 |  --- | --- | --- |
 |  httpResponse | <code>HttpResponse</code> |  |
 |  controller | <code>IHttpInterceptController</code> |  |
+|  toolkit | <code>HttpInterceptorToolkit</code> |  |
 
 <b>Returns:</b>
 
-`MaybePromise<IHttpResponseInterceptorOverrides> | void`
+`MaybePromise<IHttpResponseInterceptorOverrides | void>`
 

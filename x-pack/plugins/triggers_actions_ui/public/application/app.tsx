@@ -9,7 +9,7 @@ import {
   ChromeStart,
   DocLinksStart,
   ToastsSetup,
-  HttpSetup,
+  HttpStart,
   IUiSettingsClient,
   ApplicationStart,
   ChromeBreadcrumb,
@@ -38,7 +38,7 @@ export interface AppDeps {
   navigateToApp: CoreStart['application']['navigateToApp'];
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
-  http: HttpSetup;
+  http: HttpStart;
   uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   capabilities: ApplicationStart['capabilities'];

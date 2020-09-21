@@ -19,12 +19,18 @@
 
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
-import { HttpInterceptor, HttpResponse, HttpFetchOptionsWithPath } from './types';
+import {
+  HttpInterceptor,
+  HttpResponse,
+  HttpFetchOptionsWithPath,
+  HttpInterceptorToolkit,
+} from './types';
 
 export async function interceptRequest(
   options: HttpFetchOptionsWithPath,
   interceptors: ReadonlySet<HttpInterceptor>,
-  controller: HttpInterceptController
+  controller: HttpInterceptController,
+  toolkit: HttpInterceptorToolkit
 ): Promise<HttpFetchOptionsWithPath> {
   let current: HttpFetchOptionsWithPath;
 
@@ -39,7 +45,7 @@ export async function interceptRequest(
             return fetchOptions;
           }
 
-          const overrides = await interceptor.request(current, controller);
+          const overrides = await interceptor.request(current, controller, toolkit);
           return {
             ...current,
             ...overrides,
@@ -54,7 +60,8 @@ export async function interceptRequest(
 
           const overrides = await interceptor.requestError(
             { error, fetchOptions: current },
-            controller
+            controller,
+            toolkit
           );
 
           if (!overrides) {
@@ -76,7 +83,8 @@ export async function interceptResponse(
   fetchOptions: HttpFetchOptionsWithPath,
   responsePromise: Promise<HttpResponse>,
   interceptors: ReadonlySet<HttpInterceptor>,
-  controller: HttpInterceptController
+  controller: HttpInterceptController,
+  toolkit: HttpInterceptorToolkit
 ): Promise<HttpResponse> {
   let current: HttpResponse;
 
@@ -91,7 +99,8 @@ export async function interceptResponse(
             return httpResponse;
           }
 
-          const interceptorOverrides = (await interceptor.response(httpResponse, controller)) || {};
+          const interceptorOverrides =
+            (await interceptor.response(httpResponse, controller, toolkit)) || {};
 
           return {
             ...httpResponse,
@@ -116,7 +125,8 @@ export async function interceptResponse(
                 response: error.response || (current && current.response),
                 body: error.body || (current && current.body),
               },
-              controller
+              controller,
+              toolkit
             );
 
             checkHalt(controller, error);

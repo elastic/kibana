@@ -18,7 +18,7 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { HttpService } from './http_service';
-import { HttpSetup } from './types';
+import { HttpSetup, HttpStart } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { BasePath } from './base_path';
 
@@ -27,7 +27,12 @@ export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   anonymousPaths: jest.Mocked<HttpSetup['anonymousPaths']>;
 };
 
-const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
+export type HttpStartMock = jest.Mocked<HttpStart> & {
+  basePath: BasePath;
+  anonymousPaths: jest.Mocked<HttpStart['anonymousPaths']>;
+};
+
+const createSetupMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
@@ -39,11 +44,17 @@ const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   basePath: new BasePath(basePath),
   anonymousPaths: {
     register: jest.fn(),
-    isAnonymous: jest.fn(),
   },
   addLoadingCountSource: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
   intercept: jest.fn(),
+});
+
+const createStartMock = ({ basePath = '' } = {}): HttpStartMock => ({
+  ...createSetupMock({ basePath }),
+  anonymousPaths: {
+    isAnonymous: jest.fn(),
+  },
 });
 
 const createMock = ({ basePath = '' } = {}) => {
@@ -52,13 +63,13 @@ const createMock = ({ basePath = '' } = {}) => {
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockReturnValue(createServiceMock({ basePath }));
-  mocked.start.mockReturnValue(createServiceMock({ basePath }));
+  mocked.setup.mockReturnValue(createSetupMock({ basePath }));
+  mocked.start.mockReturnValue(createStartMock({ basePath }));
   return mocked;
 };
 
 export const httpServiceMock = {
   create: createMock,
-  createSetupContract: createServiceMock,
-  createStartContract: createServiceMock,
+  createSetupContract: createSetupMock,
+  createStartContract: createStartMock,
 };

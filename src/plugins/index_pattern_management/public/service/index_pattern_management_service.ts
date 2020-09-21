@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpSetup } from '../../../../core/public';
+import { HttpStart } from '../../../../core/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
 import { FieldFormatEditors } from './field_format_editors';
@@ -37,8 +37,8 @@ import {
   UrlFormatEditor,
 } from '../components/field_editor/components/field_format_editor';
 
-interface SetupDependencies {
-  httpClient: HttpSetup;
+interface StartDependencies {
+  httpClient: HttpStart;
 }
 
 /**
@@ -59,8 +59,8 @@ export class IndexPatternManagementService {
     this.environmentService = new EnvironmentService();
   }
 
-  public setup({ httpClient }: SetupDependencies) {
-    const creationManagerSetup = this.indexPatternCreationManager.setup(httpClient);
+  public setup() {
+    const creationManagerSetup = this.indexPatternCreationManager.setup();
     creationManagerSetup.addCreationConfig(IndexPatternCreationConfig);
 
     const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
@@ -90,9 +90,9 @@ export class IndexPatternManagementService {
     };
   }
 
-  public start() {
+  public start({ httpClient }: StartDependencies) {
     return {
-      creation: this.indexPatternCreationManager.start(),
+      creation: this.indexPatternCreationManager.start(httpClient),
       list: this.indexPatternListConfig.start(),
       fieldFormatEditors: this.fieldFormatEditors.start(),
     };

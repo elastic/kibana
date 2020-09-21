@@ -37,6 +37,9 @@ describe('Fetch', () => {
   const fetchInstance = new Fetch({
     basePath: new BasePath(BASE_PATH),
     kibanaVersion: 'VERSION',
+    anonymousPaths: {
+      isAnonymous: jest.fn().mockReturnValue(false),
+    },
   });
   afterEach(() => {
     fetchMock.restore();
@@ -812,6 +815,18 @@ describe('Fetch', () => {
 
       await expect(fetchInstance.fetch('/my/path')).resolves.toEqual({ foo: 'bar' });
       expect(usedSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('should make the toolkit available to interceptors', async () => {
+      expect.assertions(1);
+
+      fetchInstance.intercept({
+        request(options, controller, toolkit) {
+          expect(toolkit.anonymousPaths.isAnonymous('/dummy')).toEqual(false);
+        },
+      });
+
+      await fetchInstance.fetch('/test');
     });
   });
 });

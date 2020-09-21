@@ -166,7 +166,6 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "addLoadingCountSource": [MockFunction],
           "anonymousPaths": Object {
             "isAnonymous": [MockFunction],
-            "register": [MockFunction],
           },
           "basePath": BasePath {
             "basePath": "",

@@ -31,6 +31,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Interface | Description |
 |  --- | --- |
+|  [AnonymousPathsSetup](./kibana-plugin-core-public.anonymouspathssetup.md) | APIs for denoting paths as not requiring authentication |
+|  [AnonymousPathsStart](./kibana-plugin-core-public.anonymouspathsstart.md) | APIs for denoting paths as not requiring authentication |
 |  [App](./kibana-plugin-core-public.app.md) |  |
 |  [AppCategory](./kibana-plugin-core-public.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
 |  [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to show a confirmation message when trying to leave an application.<!-- -->See  |
@@ -66,11 +68,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpInterceptor](./kibana-plugin-core-public.httpinterceptor.md) | An object that may define global interceptor functions for different parts of the request and response lifecycle. See [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md)<!-- -->. |
 |  [HttpInterceptorRequestError](./kibana-plugin-core-public.httpinterceptorrequesterror.md) |  |
 |  [HttpInterceptorResponseError](./kibana-plugin-core-public.httpinterceptorresponseerror.md) |  |
+|  [HttpInterceptorToolkit](./kibana-plugin-core-public.httpinterceptortoolkit.md) | Utilities available to interceptors. See [HttpSetup.intercept()](./kibana-plugin-core-public.httpsetup.intercept.md)<!-- -->.  |
 |  [HttpRequestInit](./kibana-plugin-core-public.httprequestinit.md) | Fetch API options available to [HttpHandler](./kibana-plugin-core-public.httphandler.md)<!-- -->s. |
 |  [HttpResponse](./kibana-plugin-core-public.httpresponse.md) |  |
 |  [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |  |
+|  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [I18nStart](./kibana-plugin-core-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
-|  [IAnonymousPaths](./kibana-plugin-core-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
 |  [IBasePath](./kibana-plugin-core-public.ibasepath.md) | APIs for manipulating the basePath on URL segments. |
 |  [IContextContainer](./kibana-plugin-core-public.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [IHttpFetchError](./kibana-plugin-core-public.ihttpfetcherror.md) |  |
@@ -146,7 +149,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HandlerContextType](./kibana-plugin-core-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-core-public.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-core-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-core-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-core-public.handlercontexttype.md)<!-- -->. |
-|  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [IContextProvider](./kibana-plugin-core-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |

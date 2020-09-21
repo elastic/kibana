@@ -70,15 +70,14 @@ export class SecurityPlugin
     { home, licensing, management }: PluginSetupDependencies
   ) {
     const { http, notifications } = core;
-    const { anonymousPaths } = http;
 
     const logoutUrl = `${core.http.basePath.serverBasePath}/logout`;
     const tenant = core.http.basePath.serverBasePath;
 
     const sessionExpired = new SessionExpired(logoutUrl, tenant);
-    http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
+    http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired));
     this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
-    http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
+    http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout));
 
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
@@ -138,7 +137,7 @@ export class SecurityPlugin
   }
 
   public start(core: CoreStart, { management }: PluginStartDependencies) {
-    this.sessionTimeout.start();
+    this.sessionTimeout.start({ anonymousPaths: core.http.anonymousPaths });
     this.navControlService.start({ core });
     if (management) {
       this.managementService.start({ capabilities: core.application.capabilities });

@@ -4,6 +4,11 @@
 
 ## HttpSetup.get property
 
+> Warning: This API is now obsolete.
+> 
+> Use [HttpStart.get](./kibana-plugin-core-public.httpstart.get.md)
+> 
+
 Makes an HTTP request with the GET method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
 <b>Signature:</b>

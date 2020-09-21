@@ -38,7 +38,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
   private isDataChanged: boolean = false;
 
   constructor(
-    private readonly spacesManager: SpacesManager,
+    private readonly getSpacesManager: () => Promise<SpacesManager>,
     private readonly notifications: NotificationsStart
   ) {
     super();
@@ -54,7 +54,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
         onClose={this.onClose}
         onObjectUpdated={() => (this.isDataChanged = true)}
         savedObject={this.record}
-        spacesManager={this.spacesManager}
+        getSpacesManager={this.getSpacesManager}
         toastNotifications={this.notifications.toasts}
       />
     );

@@ -2,12 +2,27 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-public](./kibana-plugin-core-public.md) &gt; [HttpStart](./kibana-plugin-core-public.httpstart.md)
 
-## HttpStart type
+## HttpStart interface
 
 See [HttpSetup](./kibana-plugin-core-public.httpsetup.md)
 
 <b>Signature:</b>
 
 ```typescript
-export declare type HttpStart = HttpSetup;
+export interface HttpStart extends Omit<HttpSetup, 'anonymousPaths'> 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [anonymousPaths](./kibana-plugin-core-public.httpstart.anonymouspaths.md) | <code>AnonymousPathsStart</code> |  |
+|  [delete](./kibana-plugin-core-public.httpstart.delete.md) | <code>HttpHandler</code> | Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [fetch](./kibana-plugin-core-public.httpstart.fetch.md) | <code>HttpHandler</code> | Makes an HTTP request. Defaults to a GET request unless overriden. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [get](./kibana-plugin-core-public.httpstart.get.md) | <code>HttpHandler</code> | Makes an HTTP request with the GET method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [head](./kibana-plugin-core-public.httpstart.head.md) | <code>HttpHandler</code> | Makes an HTTP request with the HEAD method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [options](./kibana-plugin-core-public.httpstart.options.md) | <code>HttpHandler</code> | Makes an HTTP request with the OPTIONS method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [patch](./kibana-plugin-core-public.httpstart.patch.md) | <code>HttpHandler</code> | Makes an HTTP request with the PATCH method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [post](./kibana-plugin-core-public.httpstart.post.md) | <code>HttpHandler</code> | Makes an HTTP request with the POST method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+|  [put](./kibana-plugin-core-public.httpstart.put.md) | <code>HttpHandler</code> | Makes an HTTP request with the PUT method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
+

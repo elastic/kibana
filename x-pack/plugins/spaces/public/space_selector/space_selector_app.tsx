@@ -10,13 +10,13 @@ import { SpacesManager } from '../spaces_manager';
 
 interface CreateDeps {
   application: ApplicationSetup;
-  spacesManager: SpacesManager;
+  getSpacesManager: () => Promise<SpacesManager>;
   getStartServices: StartServicesAccessor;
 }
 
 export const spaceSelectorApp = Object.freeze({
   id: 'space_selector',
-  create({ application, getStartServices, spacesManager }: CreateDeps) {
+  create({ application, getStartServices, getSpacesManager }: CreateDeps) {
     application.register({
       id: this.id,
       title: i18n.translate('xpack.spaces.spaceSelector.appTitle', {
@@ -29,6 +29,7 @@ export const spaceSelectorApp = Object.freeze({
           getStartServices(),
           import('./space_selector'),
         ]);
+        const spacesManager = await getSpacesManager();
         return renderSpaceSelectorApp(coreStart.i18n, params.element, {
           spacesManager,
           serverBasePath: coreStart.http.basePath.serverBasePath,

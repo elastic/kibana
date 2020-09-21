@@ -160,10 +160,12 @@ export {
   HttpResponse,
   HttpHandler,
   IBasePath,
-  IAnonymousPaths,
+  AnonymousPathsSetup,
+  AnonymousPathsStart,
   IHttpInterceptController,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
+  HttpInterceptorToolkit,
 } from './http';
 
 export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';

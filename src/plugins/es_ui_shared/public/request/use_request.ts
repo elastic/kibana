@@ -19,7 +19,7 @@
 
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 
-import { HttpSetup } from '../../../../../src/core/public';
+import { HttpStart } from '../../../../../src/core/public';
 import { sendRequest, SendRequestConfig } from './send_request';
 
 export interface UseRequestConfig extends SendRequestConfig {
@@ -37,7 +37,7 @@ export interface UseRequestResponse<D = any, E = Error> {
 }
 
 export const useRequest = <D = any, E = Error>(
-  httpClient: HttpSetup,
+  httpClient: HttpStart,
   { path, method, query, body, pollIntervalMs, initialData, deserializer }: UseRequestConfig
 ): UseRequestResponse<D, E> => {
   const isMounted = useRef(false);

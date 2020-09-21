@@ -4,7 +4,12 @@
 
 ## HttpSetup.patch property
 
-Makes an HTTP request with the PATCH method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
+> Warning: This API is now obsolete.
+> 
+> Use [HttpStart.patch](./kibana-plugin-core-public.httpstart.patch.md)
+> 
+
+Makes an HTTP request with the PATCH method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. =
 
 <b>Signature:</b>
 

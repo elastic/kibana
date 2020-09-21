@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 
 import { PersistedLog } from './persisted_log';
 import { createLogKey } from './create_log_key';
-import { HttpSetup } from '../../http';
+import { HttpStart } from '../../http';
 
 /** @public */
 export interface ChromeRecentlyAccessedHistoryItem {
@@ -30,7 +30,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
 }
 
 interface StartDeps {
-  http: HttpSetup;
+  http: HttpStart;
 }
 
 /** @internal */

@@ -7,7 +7,6 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       "addLoadingCountSource": [MockFunction],
       "anonymousPaths": Object {
         "isAnonymous": [MockFunction],
-        "register": [MockFunction],
       },
       "basePath": BasePath {
         "basePath": "",
@@ -370,7 +369,6 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
       "addLoadingCountSource": [MockFunction],
       "anonymousPaths": Object {
         "isAnonymous": [MockFunction],
-        "register": [MockFunction],
       },
       "basePath": BasePath {
         "basePath": "",
@@ -735,7 +733,6 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
       "addLoadingCountSource": [MockFunction],
       "anonymousPaths": Object {
         "isAnonymous": [MockFunction],
-        "register": [MockFunction],
       },
       "basePath": BasePath {
         "basePath": "",

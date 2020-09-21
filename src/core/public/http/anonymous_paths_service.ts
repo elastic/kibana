@@ -17,23 +17,19 @@
  * under the License.
  */
 
-import { IAnonymousPaths, IBasePath } from 'src/core/public';
 import { CoreService } from '../../types';
+import { AnonymousPathsSetup, AnonymousPathsStart, IBasePath } from './types';
 
-interface Deps {
+interface StartDeps {
   basePath: IBasePath;
 }
 
-export class AnonymousPathsService implements CoreService<IAnonymousPaths, IAnonymousPaths> {
+export class AnonymousPathsService
+  implements CoreService<AnonymousPathsSetup, AnonymousPathsStart> {
   private readonly paths = new Set<string>();
 
-  public setup({ basePath }: Deps) {
+  public setup() {
     return {
-      isAnonymous: (path: string): boolean => {
-        const pathWithoutBasePath = basePath.remove(path);
-        return this.paths.has(normalizePath(pathWithoutBasePath));
-      },
-
       register: (path: string) => {
         this.paths.add(normalizePath(path));
       },
@@ -42,8 +38,13 @@ export class AnonymousPathsService implements CoreService<IAnonymousPaths, IAnon
     };
   }
 
-  public start(deps: Deps) {
-    return this.setup(deps);
+  public start({ basePath }: StartDeps) {
+    return {
+      isAnonymous: (path: string): boolean => {
+        const pathWithoutBasePath = basePath.remove(path);
+        return this.paths.has(normalizePath(pathWithoutBasePath));
+      },
+    };
   }
 
   public stop() {}

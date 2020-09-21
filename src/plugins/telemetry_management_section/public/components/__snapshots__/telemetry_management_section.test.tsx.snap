@@ -231,7 +231,6 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "http": Object {
         "addLoadingCountSource": [MockFunction],
         "anonymousPaths": Object {
-          "isAnonymous": [MockFunction],
           "register": [MockFunction],
         },
         "basePath": BasePath {
@@ -432,7 +431,6 @@ exports[`TelemetryManagementSectionComponent renders null because query does not
       "http": Object {
         "addLoadingCountSource": [MockFunction],
         "anonymousPaths": Object {
-          "isAnonymous": [MockFunction],
           "register": [MockFunction],
         },
         "basePath": BasePath {

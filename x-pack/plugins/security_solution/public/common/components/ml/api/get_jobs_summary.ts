@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from '../../../../../../../../src/core/public';
+import { HttpStart } from '../../../../../../../../src/core/public';
 import { MlSummaryJob } from '../../../../../../ml/public';
 
 export interface GetJobsSummaryArgs {
-  http: HttpSetup;
+  http: HttpStart;
   jobIds?: string[];
   signal: AbortSignal;
 }

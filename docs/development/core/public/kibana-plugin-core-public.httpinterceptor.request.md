@@ -9,7 +9,7 @@ Define an interceptor to be executed before a request is sent.
 <b>Signature:</b>
 
 ```typescript
-request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController, toolkit: HttpInterceptorToolkit): MaybePromise<Partial<HttpFetchOptionsWithPath> | void>;
 ```
 
 ## Parameters
@@ -18,8 +18,9 @@ request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInte
 |  --- | --- | --- |
 |  fetchOptions | <code>Readonly&lt;HttpFetchOptionsWithPath&gt;</code> |  |
 |  controller | <code>IHttpInterceptController</code> |  |
+|  toolkit | <code>HttpInterceptorToolkit</code> |  |
 
 <b>Returns:</b>
 
-`MaybePromise<Partial<HttpFetchOptionsWithPath>> | void`
+`MaybePromise<Partial<HttpFetchOptionsWithPath> | void>`
 

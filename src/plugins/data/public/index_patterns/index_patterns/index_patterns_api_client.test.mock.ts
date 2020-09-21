@@ -19,6 +19,7 @@
 
 import { setup } from '../../../../../core/test_helpers/http_test_setup';
 
-export const { http } = setup((injectedMetadata) => {
+export const { httpService } = setup((injectedMetadata) => {
   injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
 });
+export const http = httpService.start();

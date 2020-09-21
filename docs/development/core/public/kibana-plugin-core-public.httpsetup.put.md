@@ -4,6 +4,11 @@
 
 ## HttpSetup.put property
 
+> Warning: This API is now obsolete.
+> 
+> Use [HttpStart.put](./kibana-plugin-core-public.httpstart.put.md)
+> 
+
 Makes an HTTP request with the PUT method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
 <b>Signature:</b>

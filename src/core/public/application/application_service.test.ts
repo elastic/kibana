@@ -51,13 +51,16 @@ let service: ApplicationService;
 
 describe('#setup()', () => {
   beforeEach(() => {
-    const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
+    const basePath = '/base-path';
     setupDeps = {
-      http,
+      http: httpServiceMock.createSetupContract({ basePath }),
       context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http: httpServiceMock.createStartContract({ basePath }),
+      overlays: overlayServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -381,13 +384,16 @@ describe('#setup()', () => {
 
 describe('#start()', () => {
   beforeEach(() => {
-    const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
+    const basePath = '/base-path';
     setupDeps = {
-      http,
+      http: httpServiceMock.createSetupContract({ basePath }),
       context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http: httpServiceMock.createStartContract({ basePath }),
+      overlays: overlayServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -442,7 +448,7 @@ describe('#start()', () => {
 
     expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
       appIds: ['app1', 'app2', 'app3'],
-      http: setupDeps.http,
+      http: startDeps.http,
     });
   });
 
@@ -853,12 +859,15 @@ describe('#stop()', () => {
     removeListenerSpy = jest.spyOn(window, 'removeEventListener');
 
     MockHistory.push.mockReset();
-    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const basePath = '/test';
     setupDeps = {
-      http,
+      http: httpServiceMock.createSetupContract({ basePath }),
       context: contextServiceMock.createSetupContract(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http: httpServiceMock.createStartContract({ basePath }),
+      overlays: overlayServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 

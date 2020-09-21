@@ -6,17 +6,17 @@
 
 import React, { useContext, createContext, useCallback } from 'react';
 
-import { HttpSetup, ToastsSetup } from 'kibana/public';
+import { HttpStart, ToastsSetup } from 'kibana/public';
 import { LicenseStatus } from '../../../common';
 
 export interface ContextArgs {
-  http: HttpSetup;
+  http: HttpStart;
   notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
 }
 
 export interface ContextValue {
-  http: HttpSetup;
+  http: HttpStart;
   notifications: ToastsSetup;
   getLicenseStatus: () => LicenseStatus;
 }

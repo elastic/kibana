@@ -14,16 +14,16 @@ import { spacesManagementApp } from './spaces_management_app';
 interface SetupDeps {
   management: ManagementSetup;
   getStartServices: StartServicesAccessor<PluginsStart>;
-  spacesManager: SpacesManager;
+  getSpacesManager: () => Promise<SpacesManager>;
   securityLicense?: SecurityLicense;
 }
 
 export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
-  public setup({ getStartServices, management, spacesManager, securityLicense }: SetupDeps) {
+  public setup({ getStartServices, management, getSpacesManager, securityLicense }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
-      spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
+      spacesManagementApp.create({ getStartServices, getSpacesManager, securityLicense })
     );
   }
 

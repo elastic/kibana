@@ -11,14 +11,17 @@ import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_
 import { SpacesManager } from '../spaces_manager';
 
 interface SetupDeps {
-  spacesManager: SpacesManager;
+  getSpacesManager: () => Promise<SpacesManager>;
   savedObjectsManagementSetup: SavedObjectsManagementPluginSetup;
   notificationsSetup: NotificationsSetup;
 }
 
 export class ShareSavedObjectsToSpaceService {
-  public setup({ spacesManager, savedObjectsManagementSetup, notificationsSetup }: SetupDeps) {
-    const action = new ShareToSpaceSavedObjectsManagementAction(spacesManager, notificationsSetup);
+  public setup({ getSpacesManager, savedObjectsManagementSetup, notificationsSetup }: SetupDeps) {
+    const action = new ShareToSpaceSavedObjectsManagementAction(
+      getSpacesManager,
+      notificationsSetup
+    );
     savedObjectsManagementSetup.actions.register(action);
     // Note: this column is hidden for now because no saved objects are shareable. It should be uncommented when at least one saved object type is multi-namespace.
     // const column = new ShareToSpaceSavedObjectsManagementColumn(spacesManager);

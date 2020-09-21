@@ -5,7 +5,7 @@
  */
 import { Observable, BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
-import { HttpSetup } from 'src/core/public';
+import { HttpStart } from 'src/core/public';
 import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
@@ -20,7 +20,7 @@ export class SpacesManager {
 
   public readonly onActiveSpaceChange$: Observable<Space>;
 
-  constructor(private readonly http: HttpSetup) {
+  constructor(private readonly http: HttpStart) {
     this.serverBasePath = http.basePath.serverBasePath;
 
     this.onActiveSpaceChange$ = this.activeSpace$

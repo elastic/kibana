@@ -8,19 +8,20 @@ import {
   HttpInterceptor,
   HttpInterceptorResponseError,
   IHttpInterceptController,
-  IAnonymousPaths,
+  HttpInterceptorToolkit,
 } from 'src/core/public';
 
 import { SessionExpired } from './session_expired';
 
 export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
-  constructor(private sessionExpired: SessionExpired, private anonymousPaths: IAnonymousPaths) {}
+  constructor(private sessionExpired: SessionExpired) {}
 
   responseError(
     httpErrorResponse: HttpInterceptorResponseError,
-    controller: IHttpInterceptController
+    controller: IHttpInterceptController,
+    toolkit: HttpInterceptorToolkit
   ) {
-    if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
+    if (toolkit.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
 

@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
-import { HttpSetup } from 'src/core/public';
+import { HttpStart } from 'src/core/public';
 import {
   NEWSFEED_FALLBACK_LANGUAGE,
   NEWSFEED_LAST_FETCH_STORAGE_KEY,
@@ -81,7 +81,7 @@ export class NewsfeedApiDriver {
     return { previous: old, current: updatedHashes };
   }
 
-  fetchNewsfeedItems(http: HttpSetup, config: ApiConfig): Rx.Observable<FetchResult> {
+  fetchNewsfeedItems(http: HttpStart, config: ApiConfig): Rx.Observable<FetchResult> {
     const urlPath = config.pathTemplate.replace('{VERSION}', this.kibanaVersion);
     const fullUrl = config.urlRoot + urlPath;
 
@@ -170,7 +170,7 @@ export class NewsfeedApiDriver {
  * Computes hasNew value from new item hashes saved in localStorage
  */
 export function getApi(
-  http: HttpSetup,
+  http: HttpStart,
   config: NewsfeedPluginBrowserConfig,
   kibanaVersion: string
 ): Rx.Observable<void | FetchResult> {

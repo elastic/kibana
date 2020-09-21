@@ -78,6 +78,7 @@ describe('Session Timeout', () => {
   };
   let notifications: ReturnType<typeof coreMock.createSetup>['notifications'];
   let http: ReturnType<typeof coreMock.createSetup>['http'];
+  let anonymousPaths: ReturnType<typeof coreMock.createStart>['http']['anonymousPaths'];
   let sessionExpired: ReturnType<typeof createSessionExpiredMock>;
   let sessionTimeout: SessionTimeout;
   const toast = Symbol();
@@ -98,6 +99,7 @@ describe('Session Timeout', () => {
     const setup = coreMock.createSetup();
     notifications = setup.notifications;
     http = setup.http;
+    anonymousPaths = coreMock.createStart().http.anonymousPaths;
     notifications.toasts.add.mockReturnValue(toast as any);
     sessionExpired = createSessionExpiredMock();
     const tenant = '';
@@ -118,22 +120,22 @@ describe('Session Timeout', () => {
 
   describe('Lifecycle', () => {
     test(`starts and initializes on a non-anonymous path`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['channel']).not.toBeUndefined();
       expect(http.fetch).toHaveBeenCalledTimes(1);
     });
 
     test(`starts and does not initialize on an anonymous path`, async () => {
-      http.anonymousPaths.isAnonymous.mockReturnValue(true);
-      await sessionTimeout.start();
+      anonymousPaths.isAnonymous.mockReturnValue(true);
+      await sessionTimeout.start({ anonymousPaths });
       // eslint-disable-next-line dot-notation
       expect(sessionTimeout['channel']).toBeUndefined();
       expect(http.fetch).not.toHaveBeenCalled();
     });
 
     test(`stops`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       // eslint-disable-next-line dot-notation
       const close = jest.fn(sessionTimeout['channel']!.close);
       // eslint-disable-next-line dot-notation
@@ -159,7 +161,7 @@ describe('Session Timeout', () => {
     });
 
     test(`handles success`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
 
       expect(http.fetch).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line dot-notation
@@ -170,7 +172,7 @@ describe('Session Timeout', () => {
     test(`handles error`, async () => {
       const mockErrorResponse = new Error('some-error');
       http.fetch.mockRejectedValue(mockErrorResponse);
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
 
       expect(http.fetch).toHaveBeenCalledTimes(1);
       // eslint-disable-next-line dot-notation
@@ -181,7 +183,7 @@ describe('Session Timeout', () => {
 
   describe('warning toast', () => {
     test(`shows idle timeout warning toast`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -196,7 +198,7 @@ describe('Session Timeout', () => {
         provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -204,7 +206,7 @@ describe('Session Timeout', () => {
     });
 
     test(`extend only results in an HTTP call if a warning is shown`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       await sessionTimeout.extend('/foo');
@@ -230,7 +232,7 @@ describe('Session Timeout', () => {
         provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
       jest.advanceTimersByTime(55 * 1000);
@@ -242,7 +244,7 @@ describe('Session Timeout', () => {
     });
 
     test(`extend hides displayed warning toast`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -262,7 +264,7 @@ describe('Session Timeout', () => {
     });
 
     test(`extend does nothing for session-related routes`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -276,7 +278,7 @@ describe('Session Timeout', () => {
     });
 
     test(`checks for updated session info before the warning displays`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we check for updated session info 1 second before the warning is shown
@@ -286,7 +288,7 @@ describe('Session Timeout', () => {
     });
 
     test('clicking "extend" causes a new HTTP request (which implicitly extends the session)', async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       // we display the warning a minute before we expire the the session, which is 5 seconds before it actually expires
@@ -309,7 +311,7 @@ describe('Session Timeout', () => {
         lifespanExpiration: null,
         provider: { type: 'basic', name: 'basic1' },
       });
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       expect(http.fetch).toHaveBeenCalled();
 
       jest.advanceTimersByTime(0);
@@ -319,7 +321,7 @@ describe('Session Timeout', () => {
 
   describe('session expiration', () => {
     test(`expires the session 5 seconds before it really expires`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
 
       jest.advanceTimersByTime(114 * 1000);
       expect(sessionExpired.logout).not.toHaveBeenCalled();
@@ -329,7 +331,7 @@ describe('Session Timeout', () => {
     });
 
     test(`extend delays the expiration`, async () => {
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
       expect(http.fetch).toHaveBeenCalledTimes(1);
 
       const elapsed = 114 * 1000;
@@ -366,7 +368,7 @@ describe('Session Timeout', () => {
         lifespanExpiration: null,
         provider: { type: 'basic', name: 'basic1' },
       });
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
 
       jest.advanceTimersByTime(0);
       expect(sessionExpired.logout).toHaveBeenCalled();
@@ -374,7 +376,7 @@ describe('Session Timeout', () => {
 
     test(`'null' sessionTimeout never logs you out`, async () => {
       http.fetch.mockResolvedValue({ now, idleTimeoutExpiration: null, lifespanExpiration: null });
-      await sessionTimeout.start();
+      await sessionTimeout.start({ anonymousPaths });
 
       jest.advanceTimersByTime(Number.MAX_VALUE);
       expect(sessionExpired.logout).not.toHaveBeenCalled();

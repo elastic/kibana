@@ -9,5 +9,5 @@ APIs for denoting certain paths for not requiring authentication
 <b>Signature:</b>
 
 ```typescript
-anonymousPaths: IAnonymousPaths;
+anonymousPaths: AnonymousPathsSetup;
 ```

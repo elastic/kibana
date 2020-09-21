@@ -8,19 +8,26 @@ import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { FeatureUsageService } from './feature_usage_service';
 
 describe('FeatureUsageService', () => {
-  let http: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let service: FeatureUsageService;
 
   beforeEach(() => {
-    http = httpServiceMock.createSetupContract();
+    http = httpServiceMock.createStartContract();
     service = new FeatureUsageService();
   });
 
   describe('#setup', () => {
     describe('#register', () => {
-      it('calls the endpoint with the correct parameters', async () => {
-        const setup = service.setup({ http });
-        await setup.register('my-feature', 'platinum');
+      it('des not call the endpoint during setup', () => {
+        const setup = service.setup();
+        setup.register('my-feature', 'platinum');
+        expect(http.post).not.toHaveBeenCalled();
+      });
+
+      it('calls the endpoint with the correct parameters on start', () => {
+        const setup = service.setup();
+        setup.register('my-feature', 'platinum');
+        service.start({ http });
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/licensing/feature_usage/register', {
           body: JSON.stringify({
@@ -30,10 +37,11 @@ describe('FeatureUsageService', () => {
         });
       });
 
-      it('does not call endpoint if on anonymous path', async () => {
+      it('does not call endpoint if on anonymous path', () => {
         http.anonymousPaths.isAnonymous.mockReturnValue(true);
-        const setup = service.setup({ http });
-        await setup.register('my-feature', 'platinum');
+        const setup = service.setup();
+        setup.register('my-feature', 'platinum');
+        service.start({ http });
         expect(http.post).not.toHaveBeenCalled();
       });
     });
@@ -42,7 +50,7 @@ describe('FeatureUsageService', () => {
   describe('#start', () => {
     describe('#notifyUsage', () => {
       it('calls the endpoint with the correct parameters', async () => {
-        service.setup({ http });
+        service.setup();
         const start = service.start({ http });
         await start.notifyUsage('my-feature', 42);
 
@@ -56,7 +64,7 @@ describe('FeatureUsageService', () => {
       });
 
       it('correctly convert dates', async () => {
-        service.setup({ http });
+        service.setup();
         const start = service.start({ http });
 
         const now = new Date();
@@ -74,7 +82,7 @@ describe('FeatureUsageService', () => {
 
       it('does not call endpoint if on anonymous path', async () => {
         http.anonymousPaths.isAnonymous.mockReturnValue(true);
-        service.setup({ http });
+        service.setup();
         const start = service.start({ http });
         await start.notifyUsage('my-feature', 42);
         expect(http.post).not.toHaveBeenCalled();

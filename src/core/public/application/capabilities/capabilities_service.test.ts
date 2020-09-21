@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { httpServiceMock, HttpSetupMock } from '../../http/http_service.mock';
+import { httpServiceMock, HttpStartMock } from '../../http/http_service.mock';
 import { CapabilitiesService } from './capabilities_service';
 
 const mockedCapabilities = {
@@ -34,7 +34,7 @@ const mockedCapabilities = {
 };
 
 describe('#start', () => {
-  let http: HttpSetupMock;
+  let http: HttpStartMock;
 
   beforeEach(() => {
     http = httpServiceMock.createStartContract();

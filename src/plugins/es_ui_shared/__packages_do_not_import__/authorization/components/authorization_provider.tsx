@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpStart } from 'kibana/public';
 import React, { createContext, useContext } from 'react';
 
 import { useRequest } from '../../../public';
@@ -54,7 +54,7 @@ export const useAuthorizationContext = () => {
 interface Props {
   privilegesEndpoint: string;
   children: React.ReactNode;
-  httpClient: HttpSetup;
+  httpClient: HttpStart;
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, httpClient, children }: Props) => {

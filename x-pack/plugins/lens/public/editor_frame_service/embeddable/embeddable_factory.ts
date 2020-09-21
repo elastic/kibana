@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Capabilities, HttpSetup } from 'kibana/public';
+import { Capabilities, HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { toExpression, Ast } from '@kbn/interpreter/target/common';
@@ -25,7 +25,7 @@ import { LensAttributeService } from '../../lens_attribute_service';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
-  coreHttp: HttpSetup;
+  coreHttp: HttpStart;
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
   expressionRenderer: ReactExpressionRendererType;

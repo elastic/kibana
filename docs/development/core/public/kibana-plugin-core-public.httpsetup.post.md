@@ -4,6 +4,11 @@
 
 ## HttpSetup.post property
 
+> Warning: This API is now obsolete.
+> 
+> Use [HttpStart.post](./kibana-plugin-core-public.httpstart.post.md)
+> 
+
 Makes an HTTP request with the POST method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
 <b>Signature:</b>

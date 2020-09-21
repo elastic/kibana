@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import Boom from 'boom';
+import { ReactWrapper } from 'enzyme';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
 import { ShareToSpaceForm } from './share_to_space_form';
@@ -81,15 +82,19 @@ const setup = async (opts: SetupOpts = {}) => {
     namespaces: opts.namespaces || ['my-active-space', 'space-1'],
   } as SavedObjectsManagementRecord;
 
-  const wrapper = mountWithIntl(
-    <ShareSavedObjectsToSpaceFlyout
-      savedObject={savedObjectToShare}
-      spacesManager={(mockSpacesManager as unknown) as SpacesManager}
-      toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
-      onClose={onClose}
-      onObjectUpdated={onObjectUpdated}
-    />
-  );
+  let wrapper!: ReactWrapper;
+
+  await act(async () => {
+    wrapper = mountWithIntl(
+      <ShareSavedObjectsToSpaceFlyout
+        savedObject={savedObjectToShare}
+        getSpacesManager={() => Promise.resolve((mockSpacesManager as unknown) as SpacesManager)}
+        toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
+        onClose={onClose}
+        onObjectUpdated={onObjectUpdated}
+      />
+    );
+  });
 
   if (!opts.returnBeforeSpacesLoad) {
     // Wait for spaces manager to complete and flyout to rerender

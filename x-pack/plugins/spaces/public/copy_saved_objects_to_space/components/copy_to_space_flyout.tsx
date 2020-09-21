@@ -37,7 +37,7 @@ import { CopyOptions, ImportRetry } from '../types';
 interface Props {
   onClose: () => void;
   savedObject: SavedObjectsManagementRecord;
-  spacesManager: SpacesManager;
+  getSpacesManager: () => Promise<SpacesManager>;
   toastNotifications: ToastsStart;
 }
 
@@ -46,13 +46,14 @@ const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
-  const { onClose, savedObject, spacesManager, toastNotifications } = props;
+  const { onClose, savedObject, getSpacesManager, toastNotifications } = props;
   const [copyOptions, setCopyOptions] = useState<CopyOptions>({
     includeRelated: INCLUDE_RELATED_DEFAULT,
     createNewCopies: CREATE_NEW_COPIES_DEFAULT,
     overwrite: OVERWRITE_ALL_DEFAULT,
     selectedSpaceIds: [],
   });
+  const [spacesManager, setSpacesManager] = useState<SpacesManager | undefined>();
 
   const [{ isLoading, spaces }, setSpacesState] = useState<{ isLoading: boolean; spaces: Space[] }>(
     {
@@ -61,6 +62,11 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     }
   );
   useEffect(() => {
+    getSpacesManager().then(setSpacesManager);
+  }, [getSpacesManager]);
+  useEffect(() => {
+    if (!spacesManager) return;
+
     const getSpaces = spacesManager.getSpaces('copySavedObjectsIntoSpace');
     const getActiveSpace = spacesManager.getActiveSpace();
     Promise.all([getSpaces, getActiveSpace])
@@ -94,7 +100,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     setCopyInProgress(true);
     setCopyResult({});
     try {
-      const copySavedObjectsResult = await spacesManager.copySavedObjects(
+      const copySavedObjectsResult = await spacesManager!.copySavedObjects(
         [{ type: savedObject.type, id: savedObject.id }],
         copyOptions.selectedSpaceIds,
         copyOptions.includeRelated,
@@ -154,7 +160,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     if (needsErrorResolution) {
       setConflictResolutionInProgress(true);
       try {
-        await spacesManager.resolveCopySavedObjectsErrors(
+        await spacesManager!.resolveCopySavedObjectsErrors(
           [{ type: savedObject.type, id: savedObject.id }],
           retries,
           copyOptions.includeRelated,

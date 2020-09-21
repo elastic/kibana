@@ -6,7 +6,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { CoreSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
@@ -181,7 +181,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   dragDropContext: DragContextState;
   setState: StateSetter<T>;
   showNoDataPopover: () => void;
-  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
@@ -215,7 +215,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   setState: StateSetter<T>;
-  core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
 };
 

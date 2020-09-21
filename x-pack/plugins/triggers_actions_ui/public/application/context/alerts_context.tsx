@@ -6,7 +6,7 @@
 
 import React, { useContext, createContext } from 'react';
 import {
-  HttpSetup,
+  HttpStart,
   IUiSettingsClient,
   ToastsStart,
   DocLinksStart,
@@ -19,7 +19,7 @@ import { AlertTypeModel, ActionTypeModel } from '../../types';
 
 export interface AlertsContextValue<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
-  http: HttpSetup;
+  http: HttpStart;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   toastNotifications: ToastsStart;

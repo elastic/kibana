@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationsSetup, Toast, HttpSetup, ToastInput } from 'src/core/public';
+import {
+  NotificationsSetup,
+  Toast,
+  HttpSetup,
+  ToastInput,
+  AnonymousPathsStart,
+} from 'src/core/public';
 import { BroadcastChannel } from 'broadcast-channel';
 import { SessionInfo } from '../../common/types';
 import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
@@ -36,7 +42,7 @@ const SESSION_CHECK_MS = 1000;
 const SESSION_ROUTE = '/internal/security/session';
 
 export interface ISessionTimeout {
-  start(): void;
+  start(deps: { anonymousPaths: AnonymousPathsStart }): void;
   stop(): void;
   extend(url: string): void;
 }
@@ -56,8 +62,8 @@ export class SessionTimeout implements ISessionTimeout {
     private tenant: string
   ) {}
 
-  start() {
-    if (this.http.anonymousPaths.isAnonymous(window.location.pathname)) {
+  start({ anonymousPaths }: { anonymousPaths: AnonymousPathsStart }) {
+    if (anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
 

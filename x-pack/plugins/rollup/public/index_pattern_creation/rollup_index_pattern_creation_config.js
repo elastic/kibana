@@ -41,7 +41,7 @@ const rollupIndexPatternIndexLabel = i18n.translate(
 );
 
 export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig {
-  key = 'rollup';
+  static key = 'rollup';
 
   constructor(options) {
     super({

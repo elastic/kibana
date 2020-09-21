@@ -7,17 +7,22 @@
 import {
   HttpInterceptor,
   HttpInterceptorResponseError,
+  HttpInterceptorToolkit,
   HttpResponse,
-  IAnonymousPaths,
+  IHttpInterceptController,
 } from 'src/core/public';
 
 import { ISessionTimeout } from './session_timeout';
 
 export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
-  constructor(private sessionTimeout: ISessionTimeout, private anonymousPaths: IAnonymousPaths) {}
+  constructor(private sessionTimeout: ISessionTimeout) {}
 
-  response(httpResponse: HttpResponse) {
-    if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
+  response(
+    httpResponse: HttpResponse,
+    controller: IHttpInterceptController,
+    toolkit: HttpInterceptorToolkit
+  ) {
+    if (toolkit.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
 
@@ -28,8 +33,12 @@ export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
     this.sessionTimeout.extend(httpResponse.request.url);
   }
 
-  responseError(httpErrorResponse: HttpInterceptorResponseError) {
-    if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
+  responseError(
+    httpErrorResponse: HttpInterceptorResponseError,
+    controller: IHttpInterceptController,
+    toolkit: HttpInterceptorToolkit
+  ) {
+    if (toolkit.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
 

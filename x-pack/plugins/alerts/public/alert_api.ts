@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpStart } from 'kibana/public';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -15,7 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { BASE_ALERT_API_PATH, alertStateSchema } from '../common';
 import { Alert, AlertType, AlertTaskState } from '../common';
 
-export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
+type HttpGet = Pick<HttpStart, 'get'>;
+
+export async function loadAlertTypes({ http }: { http: HttpGet }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
 }
 
@@ -23,7 +25,7 @@ export async function loadAlertType({
   http,
   id,
 }: {
-  http: HttpSetup;
+  http: HttpGet;
   id: AlertType['id'];
 }): Promise<AlertType> {
   const maybeAlertType = findFirst<AlertType>((type) => type.id === id)(
@@ -46,7 +48,7 @@ export async function loadAlert({
   http,
   alertId,
 }: {
-  http: HttpSetup;
+  http: HttpGet;
   alertId: string;
 }): Promise<Alert> {
   return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}`);
@@ -57,7 +59,7 @@ export async function loadAlertState({
   http,
   alertId,
 }: {
-  http: HttpSetup;
+  http: HttpGet;
   alertId: string;
 }): Promise<AlertTaskState> {
   return await http

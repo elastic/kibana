@@ -17,7 +17,7 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
+import { HttpStart, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
 import { ActionType, ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { connectorReducer } from './connector_reducer';
@@ -32,7 +32,7 @@ interface ConnectorAddModalProps {
   addModalVisible: boolean;
   setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
-  http: HttpSetup;
+  http: HttpStart;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   toastNotifications: Pick<
     ToastsApi,

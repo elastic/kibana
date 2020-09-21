@@ -17,30 +17,31 @@
  * under the License.
  */
 
-import { HttpSetup } from '../../../../../core/public';
+import { HttpStart } from '../../../../../core/public';
 import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
 
 export class IndexPatternCreationManager {
+  private configConstructors: Array<typeof IndexPatternCreationConfig> = [];
   private configs: IndexPatternCreationConfig[] = [];
 
-  setup(httpClient: HttpSetup) {
+  setup() {
     return {
       addCreationConfig: (Config: typeof IndexPatternCreationConfig) => {
-        const config = new Config({ httpClient });
-
-        if (this.configs.findIndex((c) => c.key === config.key) !== -1) {
-          throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
+        if (this.configConstructors.findIndex((c) => c.key === Config.key) !== -1) {
+          throw new Error(`${Config.key} exists in IndexPatternCreationManager.`);
         }
 
-        this.configs.push(config);
+        this.configConstructors.push(Config);
       },
     };
   }
 
-  start() {
+  start(httpClient: HttpStart) {
+    this.configConstructors.forEach((Config) => this.configs.push(new Config({ httpClient })));
+
     const getType = (key: string | undefined): IndexPatternCreationConfig => {
       if (key) {
-        const index = this.configs.findIndex((config) => config.key === key);
+        const index = this.configConstructors.findIndex((config) => config.key === key);
         const config = this.configs[index];
 
         if (config) {

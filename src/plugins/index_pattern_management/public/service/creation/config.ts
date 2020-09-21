@@ -46,7 +46,7 @@ export interface IndexPatternCreationOption {
 }
 
 export class IndexPatternCreationConfig {
-  public readonly key = 'default';
+  public static readonly key = 'default';
 
   protected type?: string;
   protected name: string;

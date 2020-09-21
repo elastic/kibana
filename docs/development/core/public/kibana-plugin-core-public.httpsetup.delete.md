@@ -4,6 +4,11 @@
 
 ## HttpSetup.delete property
 
+> Warning: This API is now obsolete.
+> 
+> Use [HttpStart.delete](./kibana-plugin-core-public.httpstart.delete.md)
+> 
+
 Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options.
 
 <b>Signature:</b>

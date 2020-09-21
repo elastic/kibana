@@ -20,13 +20,13 @@ import { Space } from '..';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
-  spacesManager: SpacesManager;
+  getSpacesManager: () => Promise<SpacesManager>;
   securityLicense?: SecurityLicense;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager, securityLicense }: CreateParams) {
+  create({ getStartServices, getSpacesManager, securityLicense }: CreateParams) {
     return {
       id: this.id,
       order: 2,
@@ -39,6 +39,7 @@ export const spacesManagementApp = Object.freeze({
           { notifications, i18n: i18nStart, application },
           { features },
         ] = await getStartServices();
+        const spacesManager = await getSpacesManager();
         const spacesBreadcrumbs = [
           {
             text: i18n.translate('xpack.spaces.management.breadcrumb', {

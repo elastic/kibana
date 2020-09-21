@@ -40,6 +40,7 @@ export class CapabilitiesService {
   public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
     const capabilities = await http.post<Capabilities>('/api/core/capabilities', {
       body: JSON.stringify({ applications: appIds }),
+      asSystemRequest: true,
     });
 
     return {

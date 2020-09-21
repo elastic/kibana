@@ -43,13 +43,19 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
       injectedMetadata.getBasePath(),
       injectedMetadata.getServerBasePath()
     );
-    const fetchService = new Fetch({ basePath, kibanaVersion });
+    const fetchService = new Fetch({
+      basePath,
+      kibanaVersion,
+      // Not all anonymous paths may be registered until setup completes, so interceptors that execute during setup may
+      // not have all the paths. This is why http.fetch methods are deprecated during setup and should be removed.
+      anonymousPaths: this.anonymousPaths.start({ basePath }),
+    });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
     loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 
     this.service = {
       basePath,
-      anonymousPaths: this.anonymousPaths.setup({ basePath }),
+      anonymousPaths: this.anonymousPaths.setup(),
       intercept: fetchService.intercept.bind(fetchService),
       fetch: fetchService.fetch.bind(fetchService),
       delete: fetchService.delete.bind(fetchService),
@@ -70,7 +76,10 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
       throw new Error(`HttpService#setup() must be called first!`);
     }
 
-    return this.service;
+    return {
+      ...this.service,
+      anonymousPaths: this.anonymousPaths.start({ basePath: this.service.basePath }),
+    };
   }
 
   public stop() {

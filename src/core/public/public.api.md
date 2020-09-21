@@ -44,6 +44,20 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 // @internal (undocumented)
 export function __kbnBootstrap__(): void;
 
+// Warning: (ae-missing-release-tag) "AnonymousPathsSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface AnonymousPathsSetup {
+    register(path: string): void;
+}
+
+// Warning: (ae-missing-release-tag) "AnonymousPathsStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface AnonymousPathsStart {
+    isAnonymous(path: string): boolean;
+}
+
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> {
     appRoute?: string;
@@ -647,10 +661,10 @@ export interface HttpHeadersInit {
 
 // @public
 export interface HttpInterceptor {
-    request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
-    requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
-    responseError?(httpErrorResponse: HttpInterceptorResponseError, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+    request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController, toolkit: HttpInterceptorToolkit): MaybePromise<Partial<HttpFetchOptionsWithPath> | void>;
+    requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpInterceptController, toolkit: HttpInterceptorToolkit): MaybePromise<Partial<HttpFetchOptionsWithPath> | void>;
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController, toolkit: HttpInterceptorToolkit): MaybePromise<IHttpResponseInterceptorOverrides | void>;
+    responseError?(httpErrorResponse: HttpInterceptorResponseError, controller: IHttpInterceptController, toolkit: HttpInterceptorToolkit): MaybePromise<IHttpResponseInterceptorOverrides | void>;
 }
 
 // @public (undocumented)
@@ -667,6 +681,14 @@ export interface HttpInterceptorResponseError extends HttpResponse {
     error: Error | IHttpFetchError;
     // (undocumented)
     request: Readonly<Request>;
+}
+
+// Warning: (ae-missing-release-tag) "HttpInterceptorToolkit" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export interface HttpInterceptorToolkit {
+    // (undocumented)
+    anonymousPaths: AnonymousPathsStart;
 }
 
 // @public
@@ -698,14 +720,36 @@ export interface HttpResponse<TResponseBody = any> {
 // @public (undocumented)
 export interface HttpSetup {
     addLoadingCountSource(countSource$: Observable<number>): void;
-    anonymousPaths: IAnonymousPaths;
+    anonymousPaths: AnonymousPathsSetup;
     basePath: IBasePath;
+    // @deprecated
+    delete: HttpHandler;
+    // @deprecated
+    fetch: HttpHandler;
+    // @deprecated
+    get: HttpHandler;
+    getLoadingCount$(): Observable<number>;
+    // @deprecated
+    head: HttpHandler;
+    intercept(interceptor: HttpInterceptor): () => void;
+    // @deprecated
+    options: HttpHandler;
+    // @deprecated
+    patch: HttpHandler;
+    // @deprecated
+    post: HttpHandler;
+    // @deprecated
+    put: HttpHandler;
+}
+
+// @public
+export interface HttpStart extends Omit<HttpSetup, 'anonymousPaths'> {
+    // (undocumented)
+    anonymousPaths: AnonymousPathsStart;
     delete: HttpHandler;
     fetch: HttpHandler;
     get: HttpHandler;
-    getLoadingCount$(): Observable<number>;
     head: HttpHandler;
-    intercept(interceptor: HttpInterceptor): () => void;
     options: HttpHandler;
     patch: HttpHandler;
     post: HttpHandler;
@@ -713,21 +757,10 @@ export interface HttpSetup {
 }
 
 // @public
-export type HttpStart = HttpSetup;
-
-// @public
 export interface I18nStart {
     Context: ({ children }: {
         children: React.ReactNode;
     }) => JSX.Element;
-}
-
-// Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
-export interface IAnonymousPaths {
-    isAnonymous(path: string): boolean;
-    register(path: string): void;
 }
 
 // @public
@@ -1020,8 +1053,10 @@ export interface SavedObjectsBulkUpdateOptions {
 
 // @public
 export class SavedObjectsClient {
+    // Warning: (ae-forgotten-export) The symbol "HttpFetch" needs to be exported by the entry point index.d.ts
+    //
     // @internal
-    constructor(http: HttpSetup);
+    constructor(http: HttpFetch);
     bulkCreate: (objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkGet: (objects?: Array<{
         id: string;

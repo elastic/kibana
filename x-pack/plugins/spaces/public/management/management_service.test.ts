@@ -25,7 +25,7 @@ describe('ManagementService', () => {
         getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
           PluginsStart
         >['getStartServices'],
-        spacesManager: spacesManagerMock.create(),
+        getSpacesManager: () => Promise.resolve(spacesManagerMock.create()),
       };
 
       const service = new ManagementService();
@@ -46,7 +46,7 @@ describe('ManagementService', () => {
         getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
           PluginsStart
         >['getStartServices'],
-        spacesManager: spacesManagerMock.create(),
+        getSpacesManager: () => Promise.resolve(spacesManagerMock.create()),
       };
 
       const service = new ManagementService();
@@ -68,7 +68,7 @@ describe('ManagementService', () => {
         getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
           PluginsStart
         >['getStartServices'],
-        spacesManager: spacesManagerMock.create(),
+        getSpacesManager: () => Promise.resolve(spacesManagerMock.create()),
       };
 
       const service = new ManagementService();

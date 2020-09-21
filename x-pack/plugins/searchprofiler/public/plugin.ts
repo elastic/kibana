@@ -54,7 +54,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         const initialLicenseStatus = checkLicenseStatus(license);
 
         return boot({
-          http,
+          http: coreStart.http,
           initialLicenseStatus,
           el: params.element,
           I18nContext: i18nDep.Context,

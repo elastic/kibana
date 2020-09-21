@@ -47,16 +47,18 @@ describe('ApplicationService', () => {
 
   beforeEach(() => {
     history = createMemoryHistory();
-    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
-
-    http.post.mockResolvedValue({ navLinks: {} });
+    const basePath = '/test';
+    const httpSetup = httpServiceMock.createSetupContract({ basePath });
+    httpSetup.post.mockResolvedValue({ navLinks: {} });
+    const httpStart = httpServiceMock.createStartContract({ basePath });
+    httpStart.post.mockResolvedValue({ navLinks: {} });
 
     setupDeps = {
-      http,
+      http: httpSetup,
       context: contextServiceMock.createSetupContract(),
       history: history as any,
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = { http: httpStart, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
   });
 

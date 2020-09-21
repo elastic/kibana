@@ -138,6 +138,8 @@ const API_BASE_URL = '/api/saved_objects/';
  */
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
+type HttpFetch = Pick<HttpSetup, 'fetch'>;
+
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
  * use Elasticsearch for storing plugin state. The client-side
@@ -147,7 +149,7 @@ export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
  * @public
  */
 export class SavedObjectsClient {
-  private http: HttpSetup;
+  private http: HttpFetch;
   private batchQueue: BatchQueueEntry[];
 
   /**
@@ -185,7 +187,7 @@ export class SavedObjectsClient {
   );
 
   /** @internal */
-  constructor(http: HttpSetup) {
+  constructor(http: HttpFetch) {
     this.http = http;
     this.batchQueue = [];
   }

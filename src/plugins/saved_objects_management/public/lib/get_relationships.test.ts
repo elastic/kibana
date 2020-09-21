@@ -21,10 +21,10 @@ import { httpServiceMock } from '../../../../core/public/mocks';
 import { getRelationships } from './get_relationships';
 
 describe('getRelationships', () => {
-  let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
 
   beforeEach(() => {
-    httpMock = httpServiceMock.createSetupContract();
+    httpMock = httpServiceMock.createStartContract();
   });
 
   it('should make an http request', async () => {

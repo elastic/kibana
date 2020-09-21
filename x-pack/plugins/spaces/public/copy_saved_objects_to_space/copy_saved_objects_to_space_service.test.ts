@@ -14,7 +14,7 @@ describe('CopySavedObjectsToSpaceService', () => {
   describe('#setup', () => {
     it('registers the CopyToSpaceSavedObjectsManagementAction', () => {
       const deps = {
-        spacesManager: spacesManagerMock.create(),
+        getSpacesManager: () => Promise.resolve(spacesManagerMock.create()),
         notificationsSetup: notificationServiceMock.createSetupContract(),
         savedObjectsManagementSetup: savedObjectsManagementPluginMock.createSetupContract(),
       };

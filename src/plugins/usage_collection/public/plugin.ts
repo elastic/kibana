@@ -26,7 +26,7 @@ import {
   Plugin,
   CoreSetup,
   CoreStart,
-  HttpSetup,
+  HttpStart,
 } from '../../../core/public';
 import { reportApplicationUsage } from './services/application_usage';
 
@@ -57,7 +57,7 @@ export interface UsageCollectionStart {
   METRIC_TYPE: typeof METRIC_TYPE;
 }
 
-export function isUnauthenticated(http: HttpSetup) {
+export function isUnauthenticated(http: HttpStart) {
   const { anonymousPaths } = http;
   return anonymousPaths.isAnonymous(window.location.pathname);
 }

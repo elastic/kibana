@@ -238,14 +238,18 @@ describe('licensing plugin', () => {
       };
       expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
 
-      await registeredInterceptor!.response!(httpResponse as any, null as any);
+      await registeredInterceptor!.response!(httpResponse as any, null as any, {
+        anonymousPaths: { isAnonymous: () => false },
+      });
 
       expect(coreSetup.http.get).toHaveBeenCalledTimes(1);
 
       const license = await license$.pipe(take(1)).toPromise();
       expect(license.isAvailable).toBe(true);
 
-      await registeredInterceptor!.response!(httpResponse as any, null as any);
+      await registeredInterceptor!.response!(httpResponse as any, null as any, {
+        anonymousPaths: { isAnonymous: () => false },
+      });
 
       expect(coreSetup.http.get).toHaveBeenCalledTimes(1);
     });
@@ -255,8 +259,6 @@ describe('licensing plugin', () => {
       plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
       const coreSetup = coreMock.createSetup();
-      coreSetup.http.anonymousPaths.isAnonymous.mockReturnValue(true);
-
       let registeredInterceptor: HttpInterceptor;
       coreSetup.http.intercept.mockImplementation((interceptor: HttpInterceptor) => {
         registeredInterceptor = interceptor;
@@ -279,7 +281,9 @@ describe('licensing plugin', () => {
           url: 'http://10.10.10.10:5601/api/hello',
         },
       };
-      await registeredInterceptor!.response!(httpResponse as any, null as any);
+      await registeredInterceptor!.response!(httpResponse as any, null as any, {
+        anonymousPaths: { isAnonymous: () => true },
+      });
 
       expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
     });
@@ -321,7 +325,9 @@ describe('licensing plugin', () => {
       };
       expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
 
-      await registeredInterceptor!.response!(httpResponse as any, null as any);
+      await registeredInterceptor!.response!(httpResponse as any, null as any, {
+        anonymousPaths: { isAnonymous: () => false },
+      });
 
       expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
 

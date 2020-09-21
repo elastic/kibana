@@ -49,7 +49,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
 
   const unmount = await spacesManagementApp
     .create({
-      spacesManager,
+      getSpacesManager: () => Promise.resolve(spacesManager),
       securityLicense,
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
     })
@@ -67,7 +67,7 @@ describe('spacesManagementApp', () => {
   it('create() returns proper management app descriptor', () => {
     expect(
       spacesManagementApp.create({
-        spacesManager: spacesManagerMock.create(),
+        getSpacesManager: () => Promise.resolve(spacesManagerMock.create()),
         securityLicense: securityMock.createSetup().license,
         getStartServices: coreMock.createSetup().getStartServices as any,
       })

@@ -34,7 +34,7 @@ interface Props {
   onClose: () => void;
   onObjectUpdated: () => void;
   savedObject: SavedObjectsManagementRecord;
-  spacesManager: SpacesManager;
+  getSpacesManager: () => Promise<SpacesManager>;
   toastNotifications: ToastsStart;
 }
 
@@ -42,16 +42,23 @@ const arraysAreEqual = (a: unknown[], b: unknown[]) =>
   a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
 
 export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
-  const { onClose, onObjectUpdated, savedObject, spacesManager, toastNotifications } = props;
+  const { onClose, onObjectUpdated, savedObject, getSpacesManager, toastNotifications } = props;
   const { namespaces: currentNamespaces = [] } = savedObject;
   const [shareOptions, setShareOptions] = useState<ShareOptions>({ selectedSpaceIds: [] });
   const [showMakeCopy, setShowMakeCopy] = useState<boolean>(false);
+  const [spacesManager, setSpacesManager] = useState<SpacesManager | undefined>();
+
+  useEffect(() => {
+    getSpacesManager().then(setSpacesManager);
+  }, [getSpacesManager]);
 
   const [{ isLoading, spaces }, setSpacesState] = useState<{
     isLoading: boolean;
     spaces: SpaceTarget[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
+    if (!spacesManager) return;
+
     const getSpaces = spacesManager.getSpaces('shareSavedObjectsIntoSpace');
     const getActiveSpace = spacesManager.getActiveSpace();
     Promise.all([getSpaces, getActiveSpace])
@@ -110,7 +117,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
               defaultMessage: 'Object was updated',
             });
       if (spacesToAdd.length > 0) {
-        await spacesManager.shareSavedObjectAdd({ type, id }, spacesToAdd);
+        await (await getSpacesManager()).shareSavedObjectAdd({ type, id }, spacesToAdd);
         const spaceNames = spacesToAdd.map(
           (spaceId) => spaces.find((space) => space.id === spaceId)!.name
         );
@@ -128,7 +135,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
         toastNotifications.addSuccess({ title, text });
       }
       if (spacesToRemove.length > 0) {
-        await spacesManager.shareSavedObjectRemove({ type, id }, spacesToRemove);
+        await (await getSpacesManager()).shareSavedObjectRemove({ type, id }, spacesToRemove);
         const spaceNames = spacesToRemove.map(
           (spaceId) => spaces.find((space) => space.id === spaceId)!.name
         );
@@ -209,7 +216,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
       <CopySavedObjectsToSpaceFlyout
         onClose={onClose}
         savedObject={savedObject}
-        spacesManager={spacesManager}
+        getSpacesManager={getSpacesManager}
         toastNotifications={toastNotifications}
       />
     );

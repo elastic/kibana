@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
+import { HttpStart, HttpFetchQuery } from '../../../../../src/core/public';
 
 export interface SendRequestConfig {
   path: string;
@@ -32,7 +32,7 @@ export interface SendRequestResponse<D = any, E = any> {
 }
 
 export const sendRequest = async <D = any, E = any>(
-  httpClient: HttpSetup,
+  httpClient: HttpStart,
   { path, method, body, query }: SendRequestConfig
 ): Promise<SendRequestResponse<D, E>> => {
   try {

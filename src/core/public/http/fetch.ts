@@ -28,6 +28,8 @@ import {
   HttpFetchOptions,
   HttpResponse,
   HttpFetchOptionsWithPath,
+  AnonymousPathsStart,
+  HttpInterceptorToolkit,
 } from './types';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
@@ -37,6 +39,7 @@ import { HttpInterceptHaltError } from './http_intercept_halt_error';
 interface Params {
   basePath: IBasePath;
   kibanaVersion: string;
+  anonymousPaths: AnonymousPathsStart;
 }
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
@@ -81,6 +84,7 @@ export class Fetch {
   ) => {
     const optionsWithPath = validateFetchArguments(pathOrOptions, options);
     const controller = new HttpInterceptController();
+    const toolkit: HttpInterceptorToolkit = { anonymousPaths: this.params.anonymousPaths };
 
     // We wrap the interception in a separate promise to ensure that when
     // a halt is called we do not resolve or reject, halting handling of the promise.
@@ -90,14 +94,16 @@ export class Fetch {
         const interceptedOptions = await interceptRequest(
           optionsWithPath,
           this.interceptors,
-          controller
+          controller,
+          toolkit
         );
         const initialResponse = this.fetchResponse(interceptedOptions);
         const interceptedResponse = await interceptResponse(
           interceptedOptions,
           initialResponse,
           this.interceptors,
-          controller
+          controller,
+          toolkit
         );
 
         if (optionsWithPath.asResponse) {

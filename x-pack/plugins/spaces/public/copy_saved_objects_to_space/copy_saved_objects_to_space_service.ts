@@ -10,14 +10,17 @@ import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to
 import { SpacesManager } from '../spaces_manager';
 
 interface SetupDeps {
-  spacesManager: SpacesManager;
+  getSpacesManager: () => Promise<SpacesManager>;
   savedObjectsManagementSetup: SavedObjectsManagementPluginSetup;
   notificationsSetup: NotificationsSetup;
 }
 
 export class CopySavedObjectsToSpaceService {
-  public setup({ spacesManager, savedObjectsManagementSetup, notificationsSetup }: SetupDeps) {
-    const action = new CopyToSpaceSavedObjectsManagementAction(spacesManager, notificationsSetup);
+  public setup({ getSpacesManager, savedObjectsManagementSetup, notificationsSetup }: SetupDeps) {
+    const action = new CopyToSpaceSavedObjectsManagementAction(
+      getSpacesManager,
+      notificationsSetup
+    );
     savedObjectsManagementSetup.actions.register(action);
   }
 }

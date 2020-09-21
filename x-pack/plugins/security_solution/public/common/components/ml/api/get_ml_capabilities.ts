@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from '../../../../../../../../src/core/public';
+import { HttpStart } from '../../../../../../../../src/core/public';
 import { MlCapabilitiesResponse } from '../../../../../../ml/public';
 import { InfluencerInput } from '../types';
 
@@ -25,7 +25,7 @@ export const getMlCapabilities = async ({
   http,
   signal,
 }: {
-  http: HttpSetup;
+  http: HttpStart;
   signal: AbortSignal;
 }): Promise<MlCapabilitiesResponse> =>
   http.fetch<MlCapabilitiesResponse>('/api/ml/ml_capabilities', {

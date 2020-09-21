@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ScopedHistory } from 'kibana/public';
 
@@ -15,9 +15,9 @@ export interface AppDependencies {
   chrome: CoreStart['chrome'];
   data: DataPublicPluginStart;
   docLinks: CoreStart['docLinks'];
-  http: CoreSetup['http'];
+  http: CoreStart['http'];
   i18n: CoreStart['i18n'];
-  notifications: CoreSetup['notifications'];
+  notifications: CoreStart['notifications'];
   uiSettings: CoreStart['uiSettings'];
   savedObjects: CoreStart['savedObjects'];
   storage: Storage;

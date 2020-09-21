@@ -15,7 +15,7 @@ describe('ShareSavedObjectsToSpaceService', () => {
   describe('#setup', () => {
     it('registers the ShareToSpaceSavedObjectsManagement Action and Column', () => {
       const deps = {
-        spacesManager: spacesManagerMock.create(),
+        getSpacesManager: () => Promise.resolve(spacesManagerMock.create()),
         notificationsSetup: notificationServiceMock.createSetupContract(),
         savedObjectsManagementSetup: savedObjectsManagementPluginMock.createSetupContract(),
       };

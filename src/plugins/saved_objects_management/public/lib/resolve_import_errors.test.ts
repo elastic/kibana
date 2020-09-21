@@ -35,10 +35,10 @@ function getFormData(form: Map<string, any>) {
 
 describe('resolveImportErrors', () => {
   const getConflictResolutions = jest.fn();
-  let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
 
   beforeEach(() => {
-    httpMock = httpServiceMock.createSetupContract();
+    httpMock = httpServiceMock.createStartContract();
     jest.resetAllMocks();
   });
 

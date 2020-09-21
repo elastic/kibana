@@ -43,7 +43,7 @@ import './index.scss';
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 
 /** @internal */
-export interface TimelionVisDependencies extends Partial<CoreStart> {
+export interface TimelionVisDependencies extends Partial<CoreSetup> {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timefilter: TimefilterContract;

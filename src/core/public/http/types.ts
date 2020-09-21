@@ -31,7 +31,7 @@ export interface HttpSetup {
   /**
    * APIs for denoting certain paths for not requiring authentication
    */
-  anonymousPaths: IAnonymousPaths;
+  anonymousPaths: AnonymousPathsSetup;
 
   /**
    * Adds a new {@link HttpInterceptor} to the global HTTP client.
@@ -40,21 +40,45 @@ export interface HttpSetup {
    */
   intercept(interceptor: HttpInterceptor): () => void;
 
-  /** Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options. */
+  /**
+   * Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options.
+   * @deprecated Use {@link HttpStart.fetch}
+   */
   fetch: HttpHandler;
-  /** Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options. */
+  /**
+   * Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options.
+   * @deprecated Use {@link HttpStart.delete}
+   */
   delete: HttpHandler;
-  /** Makes an HTTP request with the GET method. See {@link HttpHandler} for options. */
+  /**
+   * Makes an HTTP request with the GET method. See {@link HttpHandler} for options.
+   * @deprecated Use {@link HttpStart.get}
+   */
   get: HttpHandler;
-  /** Makes an HTTP request with the HEAD method. See {@link HttpHandler} for options. */
+  /**
+   * Makes an HTTP request with the HEAD method. See {@link HttpHandler} for options.
+   * @deprecated Use {@link HttpStart.head}
+   */
   head: HttpHandler;
-  /** Makes an HTTP request with the OPTIONS method. See {@link HttpHandler} for options. */
+  /**
+   * Makes an HTTP request with the OPTIONS method. See {@link HttpHandler} for options.
+   * @deprecated Use {@link HttpStart.options}
+   */
   options: HttpHandler;
-  /** Makes an HTTP request with the PATCH method. See {@link HttpHandler} for options. */
+  /**
+   * Makes an HTTP request with the PATCH method. See {@link HttpHandler} for options. =
+   * @deprecated Use {@link HttpStart.patch}
+   */
   patch: HttpHandler;
-  /** Makes an HTTP request with the POST method. See {@link HttpHandler} for options. */
+  /**
+   * Makes an HTTP request with the POST method. See {@link HttpHandler} for options.
+   * @deprecated Use {@link HttpStart.post}
+   */
   post: HttpHandler;
-  /** Makes an HTTP request with the PUT method. See {@link HttpHandler} for options. */
+  /**
+   * Makes an HTTP request with the PUT method. See {@link HttpHandler} for options.
+   * @deprecated Use {@link HttpStart.put}
+   */
   put: HttpHandler;
 
   /**
@@ -74,7 +98,26 @@ export interface HttpSetup {
  * See {@link HttpSetup}
  * @public
  */
-export type HttpStart = HttpSetup;
+export interface HttpStart extends Omit<HttpSetup, 'anonymousPaths'> {
+  anonymousPaths: AnonymousPathsStart;
+
+  /** Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options. */
+  fetch: HttpHandler;
+  /** Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options. */
+  delete: HttpHandler;
+  /** Makes an HTTP request with the GET method. See {@link HttpHandler} for options. */
+  get: HttpHandler;
+  /** Makes an HTTP request with the HEAD method. See {@link HttpHandler} for options. */
+  head: HttpHandler;
+  /** Makes an HTTP request with the OPTIONS method. See {@link HttpHandler} for options. */
+  options: HttpHandler;
+  /** Makes an HTTP request with the PATCH method. See {@link HttpHandler} for options. */
+  patch: HttpHandler;
+  /** Makes an HTTP request with the POST method. See {@link HttpHandler} for options. */
+  post: HttpHandler;
+  /** Makes an HTTP request with the PUT method. See {@link HttpHandler} for options. */
+  put: HttpHandler;
+}
 
 /**
  * APIs for manipulating the basePath on URL segments.
@@ -107,16 +150,21 @@ export interface IBasePath {
 /**
  * APIs for denoting paths as not requiring authentication
  */
-export interface IAnonymousPaths {
-  /**
-   * Determines whether the provided path doesn't require authentication. `path` should include the current basePath.
-   */
-  isAnonymous(path: string): boolean;
-
+export interface AnonymousPathsSetup {
   /**
    * Register `path` as not requiring authentication. `path` should not include the current basePath.
    */
   register(path: string): void;
+}
+
+/**
+ * APIs for denoting paths as not requiring authentication
+ */
+export interface AnonymousPathsStart {
+  /**
+   * Determines whether the provided path doesn't require authentication. `path` should include the current basePath.
+   */
+  isAnonymous(path: string): boolean;
 }
 
 /**
@@ -330,6 +378,15 @@ export interface HttpInterceptorRequestError {
 }
 
 /**
+ * Utilities available to interceptors. See {@link HttpSetup.intercept}.
+ * @pubilc
+ */
+export interface HttpInterceptorToolkit {
+  /** {@link AnonymousPathsStart} */
+  anonymousPaths: AnonymousPathsStart;
+}
+
+/**
  * An object that may define global interceptor functions for different parts of the request and response lifecycle.
  * See {@link IHttpInterceptController}.
  *
@@ -343,8 +400,9 @@ export interface HttpInterceptor {
    */
   request?(
     fetchOptions: Readonly<HttpFetchOptionsWithPath>,
-    controller: IHttpInterceptController
-  ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+    controller: IHttpInterceptController,
+    toolkit: HttpInterceptorToolkit
+  ): MaybePromise<Partial<HttpFetchOptionsWithPath> | void>;
 
   /**
    * Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise.
@@ -353,8 +411,9 @@ export interface HttpInterceptor {
    */
   requestError?(
     httpErrorRequest: HttpInterceptorRequestError,
-    controller: IHttpInterceptController
-  ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+    controller: IHttpInterceptController,
+    toolkit: HttpInterceptorToolkit
+  ): MaybePromise<Partial<HttpFetchOptionsWithPath> | void>;
 
   /**
    * Define an interceptor to be executed after a response is received.
@@ -363,8 +422,9 @@ export interface HttpInterceptor {
    */
   response?(
     httpResponse: HttpResponse,
-    controller: IHttpInterceptController
-  ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+    controller: IHttpInterceptController,
+    toolkit: HttpInterceptorToolkit
+  ): MaybePromise<IHttpResponseInterceptorOverrides | void>;
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
@@ -373,8 +433,9 @@ export interface HttpInterceptor {
    */
   responseError?(
     httpErrorResponse: HttpInterceptorResponseError,
-    controller: IHttpInterceptController
-  ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+    controller: IHttpInterceptController,
+    toolkit: HttpInterceptorToolkit
+  ): MaybePromise<IHttpResponseInterceptorOverrides | void>;
 }
 
 /**

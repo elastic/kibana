@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DocLinksStart, HttpSetup } from 'kibana/public';
+import { DocLinksStart, HttpStart } from 'kibana/public';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { AlertingFrameworkHealth } from '../../types';
@@ -21,7 +21,7 @@ import './health_check.scss';
 
 interface Props {
   docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
-  http: HttpSetup;
+  http: HttpStart;
   inFlyout?: boolean;
 }
 

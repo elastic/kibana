@@ -92,11 +92,11 @@ export class IndexPatternManagementPlugin
       },
     });
 
-    return this.indexPatternManagementService.setup({ httpClient: core.http });
+    return this.indexPatternManagementService.setup();
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
-    return this.indexPatternManagementService.start();
+    return this.indexPatternManagementService.start({ httpClient: core.http });
   }
 
   public stop() {

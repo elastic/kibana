@@ -38,13 +38,16 @@ export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
 export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
-  private spacesManager!: SpacesManager;
+  private spacesManager: Promise<SpacesManager>;
+  private setSpacesManager!: (spacesManager: SpacesManager) => void;
+
+  constructor() {
+    this.spacesManager = new Promise<SpacesManager>((resolve) => (this.setSpacesManager = resolve));
+  }
 
   private managementService?: ManagementService;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    this.spacesManager = new SpacesManager(core.http);
-
     if (plugins.home) {
       plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
     }
@@ -54,7 +57,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService.setup({
         management: plugins.management,
         getStartServices: core.getStartServices as CoreSetup<PluginsStart>['getStartServices'],
-        spacesManager: this.spacesManager,
+        getSpacesManager: () => this.spacesManager,
         securityLicense: plugins.security?.license,
       });
     }
@@ -62,7 +65,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     if (plugins.advancedSettings) {
       const advancedSettingsService = new AdvancedSettingsService();
       advancedSettingsService.setup({
-        getActiveSpace: () => this.spacesManager.getActiveSpace(),
+        getActiveSpace: async () => (await this.spacesManager).getActiveSpace(),
         componentRegistry: plugins.advancedSettings.component,
       });
     }
@@ -70,13 +73,13 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     if (plugins.savedObjectsManagement) {
       const shareSavedObjectsToSpaceService = new ShareSavedObjectsToSpaceService();
       shareSavedObjectsToSpaceService.setup({
-        spacesManager: this.spacesManager,
+        getSpacesManager: () => this.spacesManager,
         notificationsSetup: core.notifications,
         savedObjectsManagementSetup: plugins.savedObjectsManagement,
       });
       const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
       copySavedObjectsToSpaceService.setup({
-        spacesManager: this.spacesManager,
+        getSpacesManager: () => this.spacesManager,
         notificationsSetup: core.notifications,
         savedObjectsManagementSetup: plugins.savedObjectsManagement,
       });
@@ -85,18 +88,20 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     spaceSelectorApp.create({
       getStartServices: core.getStartServices,
       application: core.application,
-      spacesManager: this.spacesManager,
+      getSpacesManager: () => this.spacesManager,
     });
 
     return {};
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    initSpacesNavControl(this.spacesManager, core);
+    const spacesManager = new SpacesManager(core.http);
+    this.setSpacesManager(spacesManager);
+    initSpacesNavControl(spacesManager, core);
 
     return {
-      activeSpace$: this.spacesManager.onActiveSpaceChange$,
-      getActiveSpace: () => this.spacesManager.getActiveSpace(),
+      activeSpace$: spacesManager.onActiveSpaceChange$,
+      getActiveSpace: () => spacesManager.getActiveSpace(),
     };
   }
 

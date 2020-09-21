@@ -34,7 +34,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
   };
 
   constructor(
-    private readonly spacesManager: SpacesManager,
+    private readonly getSpacesManager: () => Promise<SpacesManager>,
     private readonly notifications: NotificationsStart
   ) {
     super();
@@ -48,7 +48,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
       <CopySavedObjectsToSpaceFlyout
         onClose={this.onClose}
         savedObject={this.record}
-        spacesManager={this.spacesManager}
+        getSpacesManager={this.getSpacesManager}
         toastNotifications={this.notifications.toasts}
       />
     );

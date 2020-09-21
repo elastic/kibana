@@ -9,7 +9,7 @@ Define an interceptor to be executed if a request interceptor throws an error or
 <b>Signature:</b>
 
 ```typescript
-requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpInterceptController, toolkit: HttpInterceptorToolkit): MaybePromise<Partial<HttpFetchOptionsWithPath> | void>;
 ```
 
 ## Parameters
@@ -18,8 +18,9 @@ requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpIn
 |  --- | --- | --- |
 |  httpErrorRequest | <code>HttpInterceptorRequestError</code> |  |
 |  controller | <code>IHttpInterceptController</code> |  |
+|  toolkit | <code>HttpInterceptorToolkit</code> |  |
 
 <b>Returns:</b>
 
-`MaybePromise<Partial<HttpFetchOptionsWithPath>> | void`
+`MaybePromise<Partial<HttpFetchOptionsWithPath> | void>`
 

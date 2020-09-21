@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
   DatasourceDimensionTriggerProps,
@@ -40,7 +40,7 @@ export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<
   storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
-  http: HttpSetup;
+  http: HttpStart;
   data: DataPublicPluginStart;
   uniqueLabel: string;
   dateRange: DateRange;

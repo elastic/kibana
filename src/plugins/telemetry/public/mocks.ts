@@ -54,8 +54,8 @@ export function mockTelemetryService({
 
   const telemetryService = new TelemetryService({
     config,
-    http: httpServiceMock.createStartContract(),
-    notifications: notificationServiceMock.createStartContract(),
+    http: httpServiceMock.createSetupContract(),
+    notifications: notificationServiceMock.createSetupContract(),
     reportOptInStatusChange,
   });
 
