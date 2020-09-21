@@ -18,7 +18,6 @@ import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { Suite, Test } from 'mocha';
 import { flatten } from 'lodash';
-import { roundNumber } from './utils/round_number';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
