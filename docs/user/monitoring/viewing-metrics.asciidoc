@@ -15,11 +15,11 @@ the cluster.
 
 TIP: If you use a separate monitoring cluster to store the monitoring data, it
 is strongly recommended that you use a separate {kib} instance to view it. If
-the monitoring cluster uses a SAML, Kerberos, PKI, or OpenID Connect
-realm, a dedicated {kib} instance is required. The security tokens that are used
-in these realms are cluster-specific and therefore cannot be used by a single
-{kib} instance to connect to both the production and monitoring clusters. For
-more information about the recommended configuration, see
+you use SAML, Kerberos, PKI, or OpenID Connect realms on your production or
+monitoring clusters, a dedicated {kib} instance is *required*. The security
+tokens that are used in these realms are cluster-specific, therefore you cannot
+use a single {kib} instance to connect to both clusters. For more information
+about the recommended configuration, see
 {ref}/monitoring-overview.html[Monitoring overview].
 
 . Identify where to retrieve monitoring data from.
@@ -70,10 +70,6 @@ NOTE: These users must exist on the monitoring cluster. If you are accessing a
 remote monitoring cluster, you must use credentials that are valid on both the
 {kib} server and the monitoring cluster.
 
-////
-NOTE: Only the file, native, reserved, LDAP and Active Directory realms authentication
-realms are supported when accessing a remote monitoring cluster.
-////
 --
 
 .. Create users that have the `monitoring_user` and `kibana_admin`
