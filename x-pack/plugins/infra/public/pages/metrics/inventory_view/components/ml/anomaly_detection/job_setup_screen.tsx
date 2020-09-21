@@ -107,7 +107,7 @@ export const JobSetupScreen = (props: Props) => {
 
   useEffect(() => {
     if (props.jobType === 'kubernetes') {
-      setPartitionField(['kubernetes.service.name']);
+      setPartitionField(['kubernetes.namespace']);
     }
   }, [props.jobType]);
 

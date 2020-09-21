@@ -154,7 +154,7 @@ const JobsEnabledCallout = (props: CalloutProps) => {
   } else if (props.hasK8sJobs) {
     target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.k8sSuccessTitle', {
       defaultMessage: 'Kubernetes',
-    })
+    });
   }
 
   return (
