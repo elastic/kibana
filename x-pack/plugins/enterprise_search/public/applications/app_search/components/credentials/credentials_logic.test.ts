@@ -16,42 +16,6 @@ import { HttpLogic } from '../../../shared/http';
 import { IApiToken, ICredentialsDetails } from '../../../../../common/types/app_search';
 import { IMeta } from '../../../../../common/types';
 
-function mount(defaults?: object) {
-  if (!defaults) {
-    resetContext({});
-  } else {
-    resetContext({
-      // the enterprise_search.app_search.credentials namespace is set in `path` in credentials_logic
-      defaults: {
-        enterprise_search: {
-          app_search: {
-            credentials: {
-              ...defaults,
-            },
-          },
-        },
-      },
-    });
-  }
-  CredentialsLogic.mount();
-}
-
-const newToken: IApiToken = {
-  id: 1,
-  name: 'myToken',
-  type: PRIVATE,
-  read: true,
-  write: true,
-  access_all_engines: true,
-};
-
-const credentialsDetails: ICredentialsDetails = {
-  engines: [
-    { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
-    { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
-  ],
-};
-
 describe('CredentialsLogic', () => {
   const DEFAULT_VALUES = {
     activeApiToken: {
@@ -72,6 +36,42 @@ describe('CredentialsLogic', () => {
     meta: null,
     nameInputBlurred: false,
     showCredentialsForm: false,
+  };
+
+  const mount = (defaults?: object) => {
+    if (!defaults) {
+      resetContext({});
+    } else {
+      resetContext({
+        // the enterprise_search.app_search.credentials namespace is set in `path` in credentials_logic
+        defaults: {
+          enterprise_search: {
+            app_search: {
+              credentials: {
+                ...defaults,
+              },
+            },
+          },
+        },
+      });
+    }
+    CredentialsLogic.mount();
+  };
+
+  const newToken: IApiToken = {
+    id: 1,
+    name: 'myToken',
+    type: PRIVATE,
+    read: true,
+    write: true,
+    access_all_engines: true,
+  };
+
+  const credentialsDetails: ICredentialsDetails = {
+    engines: [
+      { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
+      { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
+    ],
   };
 
   beforeEach(() => {
