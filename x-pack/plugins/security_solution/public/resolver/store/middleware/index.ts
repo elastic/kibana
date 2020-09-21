@@ -30,6 +30,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: Da
 
       resolverTreeFetcher();
 
+      // TODO if panelviewandparameters changed, and it is on something??
+
       if (
         action.type === 'userRequestedRelatedEventData' ||
         action.type === 'appDetectedMissingEventData'

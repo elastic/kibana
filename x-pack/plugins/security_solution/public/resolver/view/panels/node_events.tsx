@@ -25,7 +25,7 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
   const relatedEventsStats = useSelector((state: ResolverState) =>
     selectors.relatedEventsStats(state)(nodeID)
   );
-  if (processEvent === null || relatedEventsStats === undefined || nodeID) {
+  if (processEvent === null || relatedEventsStats === undefined) {
     return (
       <StyledPanel>
         <PanelLoading />
@@ -130,7 +130,7 @@ const EventCountsForProcess = memo(function ({
         name: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.table.row.count', {
           defaultMessage: 'Count',
         }),
-        dataTestSubj: 'resolver:panel:node-events:event-type-count',
+        'data-test-subj': 'resolver:panel:node-events:event-type-count',
         width: '20%',
         sortable: true,
       },

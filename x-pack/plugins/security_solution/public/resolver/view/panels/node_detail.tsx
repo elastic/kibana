@@ -189,7 +189,7 @@ const NodeDetailView = memo(function ({
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiLink {...nodeDetailNavProps}>
+      <EuiLink {...nodeDetailNavProps} data-test-subj="resolver:node-detail:node-events-link">
         <FormattedMessage
           id="xpack.securitySolution.endpoint.resolver.panel.processDescList.numberOfEvents"
           values={{ relatedEventTotal }}

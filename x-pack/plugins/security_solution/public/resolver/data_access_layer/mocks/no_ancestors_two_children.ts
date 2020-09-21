@@ -10,7 +10,7 @@ import {
   ResolverEntityIndex,
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
-import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
+import { mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';
 
 interface Metadata {
@@ -70,7 +70,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
        */
       resolverTree(): Promise<ResolverTree> {
         return Promise.resolve(
-          mockTreeWithNoAncestorsAnd2Children({
+          mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
             originID: metadata.entityIDs.origin,
             firstChildID: metadata.entityIDs.firstChild,
             secondChildID: metadata.entityIDs.secondChild,
