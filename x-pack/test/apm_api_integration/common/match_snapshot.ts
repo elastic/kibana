@@ -35,15 +35,6 @@ let testContext: {
 
 let registered: boolean = false;
 
-addSerializer({
-  serialize: (value: number) => {
-    return String(roundNumber(value));
-  },
-  test: (value: any) => {
-    return typeof value === 'number';
-  },
-});
-
 function getSnapshotMeta(currentTest: Test) {
   // Make sure snapshot title is unique per-file, rather than entire
   // suite. This allows reuse of tests, for instance to compare
@@ -76,6 +67,15 @@ export function registerMochaHooksForSnapshots() {
     string,
     { snapshotState: ISnapshotState; testsInFile: Test[] }
   > = {};
+
+  addSerializer({
+    serialize: (num: number) => {
+      return String(parseFloat(num.toPrecision(15)));
+    },
+    test: (value: any) => {
+      return typeof value === 'number';
+    },
+  });
 
   registered = true;
 
