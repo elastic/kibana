@@ -144,17 +144,17 @@ const JobsEnabledCallout = (props: CalloutProps) => {
   if (props.hasHostJobs && props.hasK8sJobs) {
     target = `${i18n.translate('xpack.infra.ml.anomalyFlyout.create.hostTitle', {
       defaultMessage: 'Hosts',
-    })} and ${i18n.translate('xpack.infra.ml.anomalyFlyout.create.k8sTitle', {
+    })} and ${i18n.translate('xpack.infra.ml.anomalyFlyout.create.k8sSuccessTitle', {
       defaultMessage: 'Kubernetes',
     })}`;
   } else if (props.hasHostJobs) {
-    target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.hostTitle', {
+    target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.hostSuccessTitle', {
       defaultMessage: 'Hosts',
     });
   } else if (props.hasK8sJobs) {
-    target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.hostsTitle', {
-      defaultMessage: 'Hosts',
-    });
+    target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.k8sSuccessTitle', {
+      defaultMessage: 'Kubernetes',
+    })
   }
 
   return (
