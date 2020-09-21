@@ -33,7 +33,7 @@ const renameCasesConfigurationObject = (
           ...doc.attributes,
           config: {
             ...restConfiguration,
-            incidentConfiguration: { ...(casesConfiguration as object) },
+            incidentConfiguration: casesConfiguration,
           },
         },
       };
