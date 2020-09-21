@@ -120,8 +120,6 @@ export function DiscoverSidebarMobile({
     return null;
   }
 
-  console.log(selectedFields, 'selectedFields');
-
   return (
     <I18nProvider>
       <section

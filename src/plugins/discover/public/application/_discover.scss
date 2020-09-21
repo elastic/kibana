@@ -83,6 +83,10 @@ discover-app {
   display: flex;
   overflow: hidden;
 
+  @include euiBreakpoint('xs', 's') {
+    margin: $euiSizeS;
+  }
+
   .kbn-table {
     margin-bottom: 0;
   }

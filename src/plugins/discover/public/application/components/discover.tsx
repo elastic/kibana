@@ -30,7 +30,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiIcon,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
 import { DiscoverGrid } from './discover_grid/discover_grid';
@@ -138,7 +138,14 @@ export function Discover({
     flyout = (
       <EuiFlyout onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
-          <h2 id="flyoutTitle">Field list</h2>
+          <EuiFlexGroup className="dscSidebarFlyout__header" gutterSize="none" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon onClick={() => setIsFlyoutVisible(false)} iconType="arrowLeft" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <h2 id="flyoutTitle">Field list</h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <DiscoverMobileFlyout
@@ -224,17 +231,17 @@ export function Discover({
                   selectedIndexPattern={searchSource && searchSource.getField('index')}
                   setIndexPattern={setIndexPattern}
                 />
-                <EuiButton fullWidth onClick={() => setIsFlyoutVisible(true)}>
-                  <EuiFlexGroup responsive={false}>
-                    <EuiFlexItem grow={1}>Fields</EuiFlexItem>
-                    <EuiFlexItem grow={false}>Selected</EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="accent">5</EuiBadge>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowUp">5</EuiIcon>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                <EuiButton
+                  contentProps={{ className: 'dscSidebar__mobileButton' }}
+                  iconSide="right"
+                  iconType="arrowRight"
+                  fullWidth
+                  onClick={() => setIsFlyoutVisible(true)}
+                >
+                  Fields
+                  <EuiBadge className="dscSidebar__mobileBadge" color="accent">
+                    5
+                  </EuiBadge>
                 </EuiButton>
               </div>
             )}

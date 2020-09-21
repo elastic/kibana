@@ -61,6 +61,10 @@ export interface DiscoverFieldProps {
    * Determines whether the field name is shortened test.sub1.sub2 = t.s.sub2
    */
   useShortDots?: boolean;
+  /**
+   * Shows Add button at all times and not only on focus
+   */
+  mobile?: boolean;
 }
 
 export function DiscoverField({
@@ -72,6 +76,7 @@ export function DiscoverField({
   getDetails,
   selected,
   useShortDots,
+  mobile = false,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -131,7 +136,9 @@ export function DiscoverField({
       >
         <EuiButtonIcon
           iconType="plusInCircleFilled"
-          className="dscSidebarItem__action"
+          className={
+            mobile ? 'dscSidebarItem__action dscSidebarItem__mobile' : 'dscSidebarItem__action'
+          }
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();
@@ -156,7 +163,9 @@ export function DiscoverField({
         <EuiButtonIcon
           color="danger"
           iconType="cross"
-          className="dscSidebarItem__action"
+          className={
+            mobile ? 'dscSidebarItem__action dscSidebarItem__mobile' : 'dscSidebarItem__action'
+          }
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();

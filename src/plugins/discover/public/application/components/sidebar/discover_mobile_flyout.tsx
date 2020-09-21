@@ -86,7 +86,7 @@ export function DiscoverMobileFlyout({
   selectedIndexPattern,
   setIndexPattern,
 }: DiscoverMobileFlyoutProps) {
-  const [showFields, setShowFields] = useState(false);
+  const [showFields, setShowFields] = useState(true);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
@@ -190,6 +190,7 @@ export function DiscoverMobileFlyout({
                     >
                       <DiscoverField
                         field={field}
+                        mobile
                         indexPattern={selectedIndexPattern}
                         onAddField={onAddField}
                         onRemoveField={onRemoveField}
@@ -265,6 +266,7 @@ export function DiscoverMobileFlyout({
                     >
                       <DiscoverField
                         field={field}
+                        mobile
                         indexPattern={selectedIndexPattern}
                         onAddField={onAddField}
                         onRemoveField={onRemoveField}
@@ -295,6 +297,7 @@ export function DiscoverMobileFlyout({
                 >
                   <DiscoverField
                     field={field}
+                    mobile
                     indexPattern={selectedIndexPattern}
                     onAddField={onAddField}
                     onRemoveField={onRemoveField}
