@@ -6,11 +6,12 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiToolTip, EuiIcon, IconType } from '@elastic/eui';
 import { ProcessorStatus } from '../types';
+import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from './shared';
 
 interface ProcessorStatusIcon {
-  icon: string;
+  icon: IconType;
   iconColor: string;
   label: string;
 }
@@ -24,28 +25,28 @@ const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
     }),
   },
   error: {
-    icon: 'crossInACircleFilled',
+    icon: ErrorIcon,
     iconColor: 'danger',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.errorStatusAriaLabel', {
       defaultMessage: 'Error',
     }),
   },
   error_ignored: {
-    icon: 'alert',
-    iconColor: 'warning',
+    icon: ErrorIgnoredIcon,
+    iconColor: 'danger',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.errorIgnoredStatusAriaLabel', {
       defaultMessage: 'Error ignored',
     }),
   },
   dropped: {
-    icon: 'alert',
-    iconColor: 'warning',
+    icon: 'indexClose',
+    iconColor: 'subdued',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.droppedStatusAriaLabel', {
       defaultMessage: 'Dropped',
     }),
   },
   skipped: {
-    icon: 'dot',
+    icon: SkippedIcon,
     iconColor: 'subdued',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.skippedStatusAriaLabel', {
       defaultMessage: 'Skipped',
@@ -53,7 +54,7 @@ const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
   },
   inactive: {
     icon: 'dot',
-    iconColor: 'subdued',
+    iconColor: '#D3DAE6', // $euiColorLightShade
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.inactiveStatusAriaLabel', {
       defaultMessage: 'Not run',
     }),
@@ -64,7 +65,7 @@ const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
 // This is not expected and likely means we need to modify the code to support a new status
 const unknownStatus = {
   icon: 'dot',
-  iconColor: 'subdued',
+  iconColor: '#D3DAE6', // $euiColorLightShade
   label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.unknownStatusAriaLabel', {
     defaultMessage: 'Unknown',
   }),

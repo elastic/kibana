@@ -36,12 +36,7 @@ export function getFullUrls<TaskPayloadType>({
     config.get('kibanaServer', 'hostname'),
     config.get('kibanaServer', 'port'),
   ] as string[];
-  const getAbsoluteUrl = getAbsoluteUrlFactory({
-    defaultBasePath: basePath,
-    protocol,
-    hostname,
-    port,
-  });
+  const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
 
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
@@ -61,7 +56,6 @@ export function getFullUrls<TaskPayloadType>({
   const urls = relativeUrls.map((relativeUrl) => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
-      basePath: job.basePath,
       path: parsedRelative.pathname,
       hash: parsedRelative.hash,
       search: parsedRelative.search,

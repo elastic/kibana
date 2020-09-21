@@ -69,7 +69,11 @@ export const renderApp = (
       >
         <LicenseProvider license$={plugins.licensing.license$}>
           <Provider store={store}>
-            <HttpProvider http={core.http} errorConnecting={errorConnecting} />
+            <HttpProvider
+              http={core.http}
+              errorConnecting={errorConnecting}
+              readOnlyMode={initialData.readOnlyMode}
+            />
             <FlashMessagesProvider history={params.history} />
             <Router history={params.history}>
               <App {...initialData} />
