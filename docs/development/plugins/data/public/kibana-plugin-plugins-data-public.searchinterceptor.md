@@ -21,7 +21,6 @@ export declare class SearchInterceptor
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [deps](./kibana-plugin-plugins-data-public.searchinterceptor.deps.md) |  | <code>SearchInterceptorDeps</code> |  |
-|  [showTimeoutError](./kibana-plugin-plugins-data-public.searchinterceptor.showtimeouterror.md) |  | <code>((e: SearchTimeoutError) =&gt; void) &amp; import(&quot;lodash&quot;).Cancelable</code> |  |
 
 ## Methods
 

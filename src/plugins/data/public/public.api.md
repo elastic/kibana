@@ -30,7 +30,6 @@ import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { History } from 'history';
 import { Href } from 'history';
-import { HttpFetchError } from 'kibana/public';
 import { IconType } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
@@ -1942,7 +1941,7 @@ export class SearchInterceptor {
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
     // (undocumented)
-    protected getSearchError(e: any, request: IEsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): any;
+    protected getSearchError(e: any, request: IEsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
     // @internal
@@ -1961,8 +1960,6 @@ export class SearchInterceptor {
     };
     // (undocumented)
     showError(e: Error | KbnError): void;
-    // (undocumented)
-    protected showTimeoutError: ((e: SearchTimeoutError) => void) & import("lodash").Cancelable;
     // @internal
     protected timeoutSubscriptions: Subscription;
 }
@@ -2082,7 +2079,7 @@ export interface SearchSourceFields {
 //
 // @public
 export class SearchTimeoutError extends KbnError_2 {
-    constructor(err: HttpFetchError | null | undefined, mode: TimeoutErrorMode);
+    constructor(err: Error, mode: TimeoutErrorMode);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)

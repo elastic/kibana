@@ -23,3 +23,5 @@ search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearc
 
 `Observable<IEsSearchResponse>`
 
+`Observalbe` emitting the search response or an error.
+

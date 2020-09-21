@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-protected getSearchError(e: any, request: IEsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): any;
+protected getSearchError(e: any, request: IEsSearchRequest, timeoutSignal: AbortSignal, appAbortSignal?: AbortSignal): Error;
 ```
 
 ## Parameters
@@ -21,5 +21,5 @@ protected getSearchError(e: any, request: IEsSearchRequest, timeoutSignal: Abort
 
 <b>Returns:</b>
 
-`any`
+`Error`
 
