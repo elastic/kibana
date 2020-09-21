@@ -20,6 +20,7 @@ import {
   EsAssetReference,
   ElasticsearchAssetType,
   InstallType,
+  RegistryPackage,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -259,6 +260,44 @@ export async function installPackageFromRegistry({
 
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
+
+  return installPackage({
+    savedObjectsClient,
+    callCluster,
+    pkgName,
+    pkgVersion,
+    installedPkg,
+    paths,
+    removable,
+    internal,
+    registryPackageInfo,
+    installType,
+  });
+}
+
+async function installPackage({
+  savedObjectsClient,
+  callCluster,
+  pkgName,
+  pkgVersion,
+  installedPkg,
+  paths,
+  removable,
+  internal,
+  registryPackageInfo,
+  installType,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  callCluster: CallESAsCurrentUser;
+  pkgName: string;
+  pkgVersion: string;
+  installedPkg?: SavedObject<Installation>;
+  paths: string[];
+  removable: boolean;
+  internal: boolean;
+  registryPackageInfo: RegistryPackage;
+  installType: InstallType;
+}): Promise<AssetReference[]> {
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.data_streams);
 
   // add the package installation to the saved object.
