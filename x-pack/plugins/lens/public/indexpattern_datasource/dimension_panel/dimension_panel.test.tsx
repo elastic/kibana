@@ -7,7 +7,7 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiFieldNumber } from '@elastic/eui';
+import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
@@ -42,6 +42,7 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasExistence: true,
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
@@ -618,9 +619,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
           .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
-        expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).not.toHaveLength(
-          0
-        );
+        expect(
+          wrapper.find('[data-test-subj="indexPattern-field-selection-row"]').first().prop('error')
+        ).toBeDefined();
 
         expect(setState).not.toHaveBeenCalled();
       });
@@ -1187,7 +1188,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       expect(
         wrapper
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
           .prop('value')
       ).toEqual(0);
@@ -1223,9 +1224,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       act(() => {
         wrapper
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
-          .prop('onChange')!({ target: { value: '0' } });
+          .prop('onChange')!({ currentTarget: { value: '0' } });
       });
 
       expect(setState).toHaveBeenCalledWith({
@@ -1256,6 +1257,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           foo: {
             id: 'foo',
             title: 'Foo pattern',
+            hasRestrictions: false,
             fields: [
               {
                 aggregatable: true,
@@ -1370,6 +1372,66 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
           state: dragDropState(),
+          filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+          layerId: 'myLayer',
+        })
+      ).toBe(false);
+    });
+
+    it('is droppable if the dragged column is compatible', () => {
+      expect(
+        canHandleDrop({
+          ...defaultProps,
+          dragDropContext: {
+            ...dragDropContext,
+            dragging: {
+              columnId: 'col1',
+              groupId: 'a',
+              layerId: 'myLayer',
+            },
+          },
+          state: dragDropState(),
+          columnId: 'col2',
+          filterOperations: (op: OperationMetadata) => true,
+          layerId: 'myLayer',
+        })
+      ).toBe(true);
+    });
+
+    it('is not droppable if the dragged column is the same as the current column', () => {
+      expect(
+        canHandleDrop({
+          ...defaultProps,
+          dragDropContext: {
+            ...dragDropContext,
+            dragging: {
+              columnId: 'col1',
+              groupId: 'a',
+              layerId: 'myLayer',
+            },
+          },
+          state: dragDropState(),
+          columnId: 'col1',
+          filterOperations: (op: OperationMetadata) => true,
+          layerId: 'myLayer',
+        })
+      ).toBe(false);
+    });
+
+    it('is not droppable if the dragged column is incompatible', () => {
+      expect(
+        canHandleDrop({
+          ...defaultProps,
+          dragDropContext: {
+            ...dragDropContext,
+            dragging: {
+              columnId: 'col1',
+              groupId: 'a',
+              layerId: 'myLayer',
+            },
+          },
+          state: dragDropState(),
+          columnId: 'col2',
           filterOperations: (op: OperationMetadata) => op.dataType === 'number',
           layerId: 'myLayer',
         })
@@ -1519,6 +1581,110 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 operationType: 'terms',
                 params: expect.objectContaining({ size: 3 }),
               }),
+            },
+          },
+        },
+      });
+    });
+
+    it('updates the column id when moving an operation to an empty dimension', () => {
+      const dragging = {
+        columnId: 'col1',
+        groupId: 'a',
+        layerId: 'myLayer',
+      };
+      const testState = dragDropState();
+
+      onDrop({
+        ...defaultProps,
+        dragDropContext: {
+          ...dragDropContext,
+          dragging,
+        },
+        droppedItem: dragging,
+        state: testState,
+        columnId: 'col2',
+        filterOperations: (op: OperationMetadata) => true,
+        layerId: 'myLayer',
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col2'],
+            columns: {
+              col2: testState.layers.myLayer.columns.col1,
+            },
+          },
+        },
+      });
+    });
+
+    it('replaces an operation when moving to a populated dimension', () => {
+      const dragging = {
+        columnId: 'col2',
+        groupId: 'a',
+        layerId: 'myLayer',
+      };
+      const testState = dragDropState();
+      testState.layers.myLayer = {
+        indexPatternId: 'foo',
+        columnOrder: ['col1', 'col2', 'col3'],
+        columns: {
+          col1: testState.layers.myLayer.columns.col1,
+
+          col2: {
+            label: 'Top values of src',
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'column', columnId: 'col3' },
+              orderDirection: 'desc',
+              size: 10,
+            },
+            sourceField: 'src',
+          },
+          col3: {
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+            sourceField: 'Records',
+          },
+        },
+      };
+
+      onDrop({
+        ...defaultProps,
+        dragDropContext: {
+          ...dragDropContext,
+          dragging,
+        },
+        droppedItem: dragging,
+        state: testState,
+        columnId: 'col1',
+        filterOperations: (op: OperationMetadata) => true,
+        layerId: 'myLayer',
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder: ['col1', 'col3'],
+            columns: {
+              col1: testState.layers.myLayer.columns.col2,
+              col3: testState.layers.myLayer.columns.col3,
             },
           },
         },

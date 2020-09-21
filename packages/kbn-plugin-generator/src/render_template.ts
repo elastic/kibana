@@ -23,14 +23,32 @@ import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 import prettier from 'prettier';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { transformFileStream } from '@kbn/dev-utils';
 import ejs from 'ejs';
+import { Minimatch } from 'minimatch';
 
 import { snakeCase, camelCase, upperCamelCase } from './casing';
-import { excludeFiles, tapFileStream } from './streams';
 import { Answers } from './ask_questions';
 
 const asyncPipeline = promisify(pipeline);
+
+const excludeFiles = (globs: string[]) => {
+  const patterns = globs.map(
+    (g) =>
+      new Minimatch(g, {
+        matchBase: true,
+      })
+  );
+
+  return transformFileStream((file) => {
+    const path = file.relative.replace(/\.ejs$/, '');
+    const exclude = patterns.some((p) => p.match(path));
+    if (exclude) {
+      return null;
+    }
+  });
+};
 
 /**
  * Stream all the files from the template directory, ignoring
@@ -82,7 +100,7 @@ export async function renderTemplates({
     ),
 
     // render .ejs templates and rename to not use .ejs extension
-    tapFileStream((file) => {
+    transformFileStream((file) => {
       if (file.extname !== '.ejs') {
         return;
       }
@@ -108,7 +126,7 @@ export async function renderTemplates({
     }),
 
     // format each file with prettier
-    tapFileStream((file) => {
+    transformFileStream((file) => {
       if (!file.extname) {
         return;
       }

@@ -21,6 +21,7 @@ import {
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
@@ -34,6 +35,7 @@ import { requireUIRoutes } from './routes';
 import { initBulkUploader } from './kibana_monitoring';
 // @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
+import { mbSafeQuery } from './lib/mb_safe_query';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { registerMonitoringCollection } from './telemetry_collection';
@@ -46,7 +48,6 @@ import {
   IBulkUploader,
   PluginsSetup,
   PluginsStart,
-  LegacyAPI,
   LegacyRequest,
 } from './types';
 
@@ -92,7 +93,7 @@ export class Plugin {
     const router = core.http.createRouter();
     this.legacyShimDependencies = {
       router,
-      instanceUuid: core.uuid.getInstanceUuid(),
+      instanceUuid: this.initializerContext.env.instanceUuid,
       esDataClient: core.elasticsearch.legacy.client,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
@@ -158,8 +159,9 @@ export class Plugin {
       elasticsearch: core.elasticsearch,
       config,
       log: kibanaMonitoringLog,
+      statusGetter$: core.status.overall$,
       kibanaStats: {
-        uuid: core.uuid.getInstanceUuid(),
+        uuid: this.initializerContext.env.instanceUuid,
         name: serverInfo.name,
         index: get(legacyConfig, 'kibana.index'),
         host: serverInfo.hostname,
@@ -221,11 +223,6 @@ export class Plugin {
     }
 
     return {
-      // The legacy plugin calls this to register certain legacy dependencies
-      // that are necessary for the plugin to properly run
-      registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        this.setupLegacy(legacyAPI);
-      },
       // OSS stats api needs to call this in order to centralize how
       // we fetch kibana specific stats
       getKibanaStats: () => this.bulkUploader.getKibanaStats(),
@@ -244,11 +241,12 @@ export class Plugin {
   }
 
   registerPluginInUI(plugins: PluginsSetup) {
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: 'monitoring',
       name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
         defaultMessage: 'Stack Monitoring',
       }),
+      category: DEFAULT_APP_CATEGORIES.management,
       icon: 'monitoringApp',
       navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],
@@ -278,11 +276,6 @@ export class Plugin {
         ],
       },
     });
-  }
-
-  async setupLegacy(legacyAPI: LegacyAPI) {
-    // Set the stats getter
-    this.bulkUploader.setKibanaStatusGetter(() => legacyAPI.getServerStatus());
   }
 
   getLegacyShim(
@@ -361,7 +354,9 @@ export class Plugin {
                     callWithRequest: async (_req: any, endpoint: string, params: any) => {
                       const client =
                         name === 'monitoring' ? cluster : this.legacyShimDependencies.esDataClient;
-                      return client.asScoped(req).callAsCurrentUser(endpoint, params);
+                      return mbSafeQuery(() =>
+                        client.asScoped(req).callAsCurrentUser(endpoint, params)
+                      );
                     },
                   }),
                 },

@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import archives_metadata from '../../../common/archives_metadata';
+import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import expectedAvgDurationByBrowser from './expectation/avg_duration_by_browser.json';
-import expectedAvgDurationByBrowserWithTransactionName from './expectation/avg_duration_by_browser_transaction_name.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const start = encodeURIComponent('2020-06-29T06:45:00.000Z');
-  const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
+  const archiveName = 'apm_8.0.0';
+  const metadata = archives_metadata[archiveName];
+
+  const start = encodeURIComponent(metadata.start);
+  const end = encodeURIComponent(metadata.end);
   const transactionName = '/products';
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
@@ -29,24 +32,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('8.0.0'));
-      after(() => esArchiver.unload('8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('returns the average duration by browser', async () => {
         const response = await supertest.get(
-          `/api/apm/services/client/transaction_groups/avg_duration_by_browser?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-rum/transaction_groups/avg_duration_by_browser?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedAvgDurationByBrowser);
+
+        expect(response.body.length).to.be.greaterThan(0);
+
+        expectSnapshot(response.body).toMatch();
+
+        expectSnapshot(response.body.length).toMatchInline(`1`);
       });
+
       it('returns the average duration by browser filtering by transaction name', async () => {
         const response = await supertest.get(
-          `/api/apm/services/client/transaction_groups/avg_duration_by_browser?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionName=${transactionName}`
+          `/api/apm/services/opbeans-rum/transaction_groups/avg_duration_by_browser?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionName=${transactionName}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedAvgDurationByBrowserWithTransactionName);
+
+        expect(response.body.length).to.be.greaterThan(0);
+
+        expectSnapshot(response.body.length).toMatchInline(`1`);
+
+        expectSnapshot(response.body).toMatch();
       });
     });
   });

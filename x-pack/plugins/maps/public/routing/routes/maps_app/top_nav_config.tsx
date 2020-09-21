@@ -21,7 +21,6 @@ import {
   showSaveModal,
 } from '../../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-// @ts-expect-error
 import { goToSpecifiedPath } from '../../maps_router';
 import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 import { EmbeddableStateTransfer } from '../../../../../../../src/plugins/embeddable/public';

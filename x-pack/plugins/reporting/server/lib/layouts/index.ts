@@ -54,6 +54,7 @@ export interface Size {
 export interface LayoutParams {
   id: string;
   dimensions: Size;
+  selectors?: LayoutSelectorDictionary;
 }
 
 interface LayoutSelectors {

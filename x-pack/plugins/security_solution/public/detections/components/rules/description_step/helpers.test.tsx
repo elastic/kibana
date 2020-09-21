@@ -140,7 +140,11 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
-        indexPatterns: { fields: [{ name: 'test name', type: 'test type' }], title: 'test title' },
+        indexPatterns: {
+          fields: [{ name: 'event.category', type: 'test type' }],
+          title: 'test title',
+          getFormatterForField: () => ({ convert: (val: unknown) => val }),
+        },
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);
@@ -424,6 +428,12 @@ describe('helpers', () => {
       const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threshold');
 
       expect(result.description).toEqual('Threshold');
+    });
+
+    it('returns a humanized description for a threat_match type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threat_match');
+
+      expect(result.description).toEqual('Threat Match');
     });
   });
 });

@@ -4,28 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { IInitialAppData } from '../../../common/types';
-import { IKeaLogic } from '../shared/types';
+import { IConfiguredLimits, IAccount, IRole } from './types';
 
-export interface IAppLogicValues {
+import { getRoleAbilities } from './utils/role';
+
+export interface IAppValues {
   hasInitialized: boolean;
+  ilmEnabled: boolean;
+  configuredLimits: Partial<IConfiguredLimits>;
+  account: Partial<IAccount>;
+  myRole: Partial<IRole>;
 }
-export interface IAppLogicActions {
-  initializeAppData(props: IInitialAppData): void;
+export interface IAppActions {
+  initializeAppData(props: IInitialAppData): Required<IInitialAppData>;
+  setOnboardingComplete(): boolean;
 }
 
-export const AppLogic = kea({
-  actions: (): IAppLogicActions => ({
+export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+  path: ['enterprise_search', 'app_search', 'app_logic'],
+  actions: {
     initializeAppData: (props) => props,
-  }),
-  reducers: () => ({
+    setOnboardingComplete: () => true,
+  },
+  reducers: {
     hasInitialized: [
       false,
       {
         initializeAppData: () => true,
       },
     ],
-  }),
-}) as IKeaLogic<IAppLogicValues, IAppLogicActions>;
+    account: [
+      {},
+      {
+        initializeAppData: (_, { appSearch: account }) => account,
+        setOnboardingComplete: (account) => ({
+          ...account,
+          onboardingComplete: true,
+        }),
+      },
+    ],
+    configuredLimits: [
+      {},
+      {
+        initializeAppData: (_, { configuredLimits }) => configuredLimits.appSearch,
+      },
+    ],
+    ilmEnabled: [
+      false,
+      {
+        initializeAppData: (_, { ilmEnabled }) => !!ilmEnabled,
+      },
+    ],
+  },
+  selectors: {
+    myRole: [
+      (selectors) => [selectors.account],
+      ({ role }) => (role ? getRoleAbilities(role) : {}),
+    ],
+  },
+});

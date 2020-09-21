@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import {
@@ -23,6 +24,7 @@ export interface BulkCreateTestDefinition extends TestDefinition {
 export type BulkCreateTestSuite = TestSuite<BulkCreateTestDefinition>;
 export interface BulkCreateTestCase extends TestCase {
   failure?: 400 | 409; // only used for permitted response case
+  fail409Param?: string;
 }
 
 const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, for simplicity's sake
@@ -56,6 +58,15 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
       for (let i = 0; i < savedObjects.length; i++) {
         const object = savedObjects[i];
         const testCase = testCaseArray[i];
+        if (testCase.failure === 409 && testCase.fail409Param === 'unresolvableConflict') {
+          const { type, id } = testCase;
+          const error = SavedObjectsErrorHelpers.createConflictError(type, id);
+          const payload = { ...error.output.payload, metadata: { isNotOverwritable: true } };
+          expect(object.type).to.eql(type);
+          expect(object.id).to.eql(id);
+          expect(object.error).to.eql(payload);
+          continue;
+        }
         await expectResponses.permitted(object, testCase);
         if (!testCase.failure) {
           expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);

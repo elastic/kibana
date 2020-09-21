@@ -38,11 +38,11 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Generation from Saved Search ID', () => {
-    describe('Saved Search Features', () => {
-      after(async () => {
-        await reportingAPI.deleteAllReports();
-      });
+    after(async () => {
+      await reportingAPI.deleteAllReports();
+    });
 
+    describe('Saved Search Features', () => {
       it('With filters and timebased data, explicit UTC format', async () => {
         // load test data that contains a saved search and documents
         await esArchiver.load('reporting/logs');
@@ -293,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
           searchId: 'search:a6d51430-ace2-11ea-815f-39e12f89a8c2',
           postPayload: {
             timerange: { timezone: 'UTC', min: '1979-01-01T10:00:00Z', max: '1981-01-01T10:00:00Z' }, // prettier-ignore
-            state: { query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fel*' } }] } } ] } } ] } } } // prettier-ignore
+            state: { query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fel*' } }] } } ] } } ] } } }, // prettier-ignore
           },
           isImmediate: true,
         };
@@ -350,8 +350,8 @@ export default function ({ getService }: FtrProviderContext) {
           searchId: 'search:6091ead0-1c6d-11ea-a100-8589bb9d7c6b',
           postPayload: {
             timerange: {
-              min: '2019-06-26T06:20:28Z',
-              max: '2019-06-26T07:27:58Z',
+              min: '2019-05-28T00:00:00Z',
+              max: '2019-06-26T00:00:00Z',
               timezone: 'UTC',
             },
             state: {
@@ -370,8 +370,8 @@ export default function ({ getService }: FtrProviderContext) {
                     {
                       range: {
                         order_date: {
-                          gte: '2019-06-26T06:20:28.066Z',
-                          lte: '2019-06-26T07:27:58.573Z',
+                          gte: '2019-05-28T00:00:00.000Z',
+                          lte: '2019-06-26T00:00:00.000Z',
                           format: 'strict_date_optional_time',
                         },
                       },

@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
-  describe('reporting usage', () => {
+  describe('Usage', () => {
     before(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
@@ -132,7 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
       });
 
-      it('should handle preserve_layout pdf', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/76581
+      it.skip('should handle preserve_layout pdf', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
             reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3),
@@ -149,7 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
 
-      it('should handle print_layout pdf', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/76581
+      it.skip('should handle print_layout pdf', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
             reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3),

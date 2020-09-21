@@ -5,10 +5,7 @@
  */
 
 import { xpackMain } from './legacy/plugins/xpack_main';
-import { monitoring } from './legacy/plugins/monitoring';
-import { security } from './legacy/plugins/security';
-import { spaces } from './legacy/plugins/spaces';
 
 module.exports = function (kibana) {
-  return [xpackMain(kibana), monitoring(kibana), spaces(kibana), security(kibana)];
+  return [xpackMain(kibana)];
 };

@@ -168,7 +168,9 @@ export const expectResponses = {
       expect(actualNamespace).to.eql(spaceId);
     }
     if (isMultiNamespace(type)) {
-      if (id === CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1.id) {
+      if (['conflict_1', 'conflict_2a', 'conflict_2b', 'conflict_3', 'conflict_4a'].includes(id)) {
+        expect(actualNamespaces).to.eql([DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID]);
+      } else if (id === CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1.id) {
         expect(actualNamespaces).to.eql([DEFAULT_SPACE_ID, SPACE_1_ID]);
       } else if (id === CASES.MULTI_NAMESPACE_ONLY_SPACE_1.id) {
         expect(actualNamespaces).to.eql([SPACE_1_ID]);

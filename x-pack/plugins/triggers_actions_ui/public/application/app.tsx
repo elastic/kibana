@@ -26,8 +26,8 @@ import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const TriggersActionsUIHome = lazy(async () => import('./home'));
-const AlertDetailsRoute = lazy(() =>
-  import('./sections/alert_details/components/alert_details_route')
+const AlertDetailsRoute = lazy(
+  () => import('./sections/alert_details/components/alert_details_route')
 );
 
 export interface AppDeps {

@@ -244,7 +244,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       render: (_: any, apiKey: EnrollmentAPIKey) => {
         return (
           apiKey.active && (
-            <DeleteButton apiKey={apiKey} refresh={() => enrollmentAPIKeysRequest.sendRequest()} />
+            <DeleteButton
+              apiKey={apiKey}
+              refresh={() => enrollmentAPIKeysRequest.resendRequest()}
+            />
           )
         );
       },
@@ -258,7 +261,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           agentPolicies={agentPolicies}
           onClose={() => {
             setFlyoutOpen(false);
-            enrollmentAPIKeysRequest.sendRequest();
+            enrollmentAPIKeysRequest.resendRequest();
           }}
         />
       )}

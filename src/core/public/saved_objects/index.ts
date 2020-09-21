@@ -36,12 +36,15 @@ export {
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  SavedObjectsNamespaceType,
 } from '../../server/types';
 
 export {
@@ -49,5 +52,6 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
+  SavedObjectError,
   SavedObjectReference,
 } from '../../types';

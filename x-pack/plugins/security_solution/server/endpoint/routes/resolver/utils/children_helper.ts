@@ -5,24 +5,25 @@
  */
 
 import {
-  entityId,
-  parentEntityId,
+  parentEntityIDSafeVersion,
   isProcessRunning,
   getAncestryAsArray,
+  entityIDSafeVersion,
 } from '../../../../../common/endpoint/models/event';
 import {
-  ResolverChildNode,
-  ResolverEvent,
-  ResolverChildren,
+  SafeResolverChildren,
+  SafeResolverChildNode,
+  SafeResolverEvent,
 } from '../../../../../common/endpoint/types';
 import { createChild } from './node';
 import { ChildrenPaginationBuilder } from './children_pagination';
+import { ChildEvent } from '../queries/children';
 
 /**
  * This class helps construct the children structure when building a resolver tree.
  */
 export class ChildrenNodesHelper {
-  private readonly entityToNodeCache: Map<string, ResolverChildNode> = new Map();
+  private readonly entityToNodeCache: Map<string, SafeResolverChildNode> = new Map();
 
   constructor(private readonly rootID: string, private readonly limit: number) {
     this.entityToNodeCache.set(rootID, createChild(rootID));
@@ -31,8 +32,8 @@ export class ChildrenNodesHelper {
   /**
    * Constructs a ResolverChildren response based on the children that were previously add.
    */
-  getNodes(): ResolverChildren {
-    const cacheCopy: Map<string, ResolverChildNode> = new Map(this.entityToNodeCache);
+  getNodes(): SafeResolverChildren {
+    const cacheCopy: Map<string, SafeResolverChildNode> = new Map(this.entityToNodeCache);
     const rootNode = cacheCopy.get(this.rootID);
     let rootNextChild = null;
 
@@ -51,7 +52,7 @@ export class ChildrenNodesHelper {
    * Get the entity_ids of the nodes that are cached.
    */
   getEntityIDs(): string[] {
-    const cacheCopy: Map<string, ResolverChildNode> = new Map(this.entityToNodeCache);
+    const cacheCopy: Map<string, SafeResolverChildNode> = new Map(this.entityToNodeCache);
     cacheCopy.delete(this.rootID);
     return Array.from(cacheCopy.keys());
   }
@@ -69,9 +70,9 @@ export class ChildrenNodesHelper {
    *
    * @param lifecycle an array of resolver lifecycle events for different process nodes returned from ES.
    */
-  addLifecycleEvents(lifecycle: ResolverEvent[]) {
+  addLifecycleEvents(lifecycle: SafeResolverEvent[]) {
     for (const event of lifecycle) {
-      const entityID = entityId(event);
+      const entityID = entityIDSafeVersion(event);
       if (entityID) {
         const cachedChild = this.getOrCreateChildNode(entityID);
         cachedChild.lifecycle.push(event);
@@ -86,19 +87,19 @@ export class ChildrenNodesHelper {
    * @param queriedNodes the entity_ids of the nodes that returned these start events
    * @param startEvents an array of start events returned by ES
    */
-  addStartEvents(queriedNodes: Set<string>, startEvents: ResolverEvent[]): Set<string> | undefined {
+  addStartEvents(queriedNodes: Set<string>, startEvents: ChildEvent[]): Set<string> | undefined {
     let largestAncestryArray = 0;
     const nodesToQueryNext: Map<number, Set<string>> = new Map();
-    const nonLeafNodes: Set<ResolverChildNode> = new Set();
+    const nonLeafNodes: Set<SafeResolverChildNode> = new Set();
 
-    const isDistantGrandchild = (event: ResolverEvent) => {
+    const isDistantGrandchild = (event: ChildEvent) => {
       const ancestry = getAncestryAsArray(event);
       return ancestry.length > 0 && queriedNodes.has(ancestry[ancestry.length - 1]);
     };
 
     for (const event of startEvents) {
-      const parentID = parentEntityId(event);
-      const entityID = entityId(event);
+      const parentID = parentEntityIDSafeVersion(event);
+      const entityID = entityIDSafeVersion(event);
       if (parentID && entityID && isProcessRunning(event)) {
         // don't actually add the start event to the node, because that'll be done in
         // a different call
@@ -158,7 +159,7 @@ export class ChildrenNodesHelper {
     return nodesToQueryNext.get(largestAncestryArray);
   }
 
-  private setPaginationForNodes(nodes: Set<string>, startEvents: ResolverEvent[]) {
+  private setPaginationForNodes(nodes: Set<string>, startEvents: ChildEvent[]) {
     for (const nodeEntityID of nodes.values()) {
       const cachedNode = this.entityToNodeCache.get(nodeEntityID);
       if (cachedNode) {

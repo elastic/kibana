@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
@@ -49,6 +48,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           dataAccessLayer,
           resolverComponentInstanceID,
           history: memoryHistory,
+          indices: [],
         });
         return simulatorInstance;
       }
@@ -60,7 +60,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
   });
 
   const queryStringWithOriginSelected = urlSearch(resolverComponentInstanceID, {
-    selectedEntityID: 'origin',
+    panelParameters: { nodeID: 'origin' },
+    panelView: 'nodeDetail',
   });
 
   describe(`when the URL query string is ${queryStringWithOriginSelected}`, () => {
@@ -81,7 +82,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           };
         })
       ).toYieldEqualTo({
-        title: 'c',
+        title: 'c.ext',
         titleIcon: 'Running Process',
         detailEntries: [
           ['process.executable', 'executable'],
@@ -94,10 +95,24 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         ],
       });
     });
+    it('should have breaking opportunities (<wbr>s) in node titles to allow wrapping', async () => {
+      await expect(
+        simulator().map(() => {
+          const titleWrapper = simulator().testSubject('resolver:node-detail:title');
+          return {
+            wordBreaks: titleWrapper.find('wbr').length,
+          };
+        })
+      ).toYieldEqualTo({
+        // The GeneratedText component adds 1 <wbr> after the period and one at the end
+        wordBreaks: 2,
+      });
+    });
   });
 
   const queryStringWithFirstChildSelected = urlSearch(resolverComponentInstanceID, {
-    selectedEntityID: 'firstChild',
+    panelParameters: { nodeID: 'firstChild' },
+    panelView: 'nodeDetail',
   });
 
   describe(`when the URL query string is ${queryStringWithFirstChildSelected}`, () => {
@@ -121,6 +136,14 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     });
   });
 
+  it('should show a single analyzed event in the node list', async () => {
+    await expect(
+      simulator().map(
+        () => simulator().testSubject('resolver:node-list:node-link:analyzed-event').length
+      )
+    ).toYieldEqualTo(1);
+  });
+
   it('should have 3 nodes (with icons) in the node list', async () => {
     await expect(
       simulator().map(() => simulator().testSubject('resolver:node-list:node-link:title').length)
@@ -135,7 +158,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       const nodeLinks = await simulator().resolve('resolver:node-list:node-link:title');
       expect(nodeLinks).toBeTruthy();
       if (nodeLinks) {
-        nodeLinks.first().simulate('click');
+        nodeLinks.first().simulate('click', { button: 0 });
       }
     });
     it('should show the details for the first node', async () => {
@@ -154,7 +177,10 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     it("should have the first node's ID in the query string", async () => {
       await expect(simulator().map(() => simulator().historyLocationSearch)).toYieldEqualTo(
         urlSearch(resolverComponentInstanceID, {
-          selectedEntityID: entityIDs.origin,
+          panelView: 'nodeDetail',
+          panelParameters: {
+            nodeID: entityIDs.origin,
+          },
         })
       );
     });
@@ -164,7 +190,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
           'resolver:node-detail:breadcrumbs:node-list-link'
         );
         if (nodeListLink) {
-          nodeListLink.simulate('click');
+          nodeListLink.simulate('click', { button: 0 });
         }
       });
       it('should show the list of nodes with links to each node', async () => {
@@ -174,7 +200,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
               .testSubject('resolver:node-list:node-link:title')
               .map((node) => node.text());
           })
-        ).toYieldEqualTo(['c', 'd', 'e']);
+        ).toYieldEqualTo(['c.ext', 'd', 'e']);
       });
     });
   });

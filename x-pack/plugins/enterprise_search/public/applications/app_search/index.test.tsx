@@ -12,8 +12,10 @@ import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 import { useValues, useActions } from 'kea';
 
-import { SetupGuide } from './components/setup_guide';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
+import { SetupGuide } from './components/setup_guide';
+import { ErrorConnecting } from './components/error_connecting';
+import { EngineOverview } from './components/engine_overview';
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
@@ -42,40 +44,97 @@ describe('AppSearchUnconfigured', () => {
 });
 
 describe('AppSearchConfigured', () => {
-  it('renders with layout', () => {
+  beforeEach(() => {
+    // Mock resets
+    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {} }));
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData: () => {} }));
+  });
 
+  it('renders with layout', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
     expect(wrapper.find(Layout)).toHaveLength(1);
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 
   it('initializes app data with passed props', () => {
     const initializeAppData = jest.fn();
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
 
-    shallow(<AppSearchConfigured readOnlyMode={true} />);
+    shallow(<AppSearchConfigured ilmEnabled={true} />);
 
-    expect(initializeAppData).toHaveBeenCalledWith({ readOnlyMode: true });
+    expect(initializeAppData).toHaveBeenCalledWith({ ilmEnabled: true });
   });
 
   it('does not re-initialize app data', () => {
     const initializeAppData = jest.fn();
     (useActions as jest.Mock).mockImplementation(() => ({ initializeAppData }));
-    (useValues as jest.Mock).mockImplementationOnce(() => ({ hasInitialized: true }));
+    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, hasInitialized: true }));
 
     shallow(<AppSearchConfigured />);
 
     expect(initializeAppData).not.toHaveBeenCalled();
   });
+
+  it('renders ErrorConnecting', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, errorConnecting: true }));
+
+    const wrapper = shallow(<AppSearchConfigured />);
+
+    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+  });
+
+  it('passes readOnlyMode state', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({ myRole: {}, readOnlyMode: true }));
+
+    const wrapper = shallow(<AppSearchConfigured />);
+
+    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
+  });
+
+  describe('ability checks', () => {
+    // TODO: Use this section for routes wrapped in canViewX conditionals
+    // e.g., it('renders settings if a user can view settings')
+  });
 });
 
 describe('AppSearchNav', () => {
-  it('renders', () => {
+  it('renders with the Engines link', () => {
     const wrapper = shallow(<AppSearchNav />);
 
     expect(wrapper.find(SideNav)).toHaveLength(1);
-    expect(wrapper.find(SideNavLink).first().prop('to')).toEqual('/engines');
+    expect(wrapper.find(SideNavLink).prop('to')).toEqual('/engines');
+  });
+
+  it('renders the Settings link', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({
+      myRole: { canViewSettings: true },
+    }));
+    const wrapper = shallow(<AppSearchNav />);
+
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
+      'http://localhost:3002/as/settings/account'
+    );
+  });
+
+  it('renders the Credentials link', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({
+      myRole: { canViewAccountCredentials: true },
+    }));
+    const wrapper = shallow(<AppSearchNav />);
+
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
+      'http://localhost:3002/as/credentials'
+    );
+  });
+
+  it('renders the Role Mappings link', () => {
+    (useValues as jest.Mock).mockImplementation(() => ({
+      myRole: { canViewRoleMappings: true },
+    }));
+    const wrapper = shallow(<AppSearchNav />);
+
     expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
       'http://localhost:3002/as#/role-mappings'
     );

@@ -5,6 +5,7 @@
  */
 
 import { Request, Server } from 'hapi';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
@@ -27,10 +28,11 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   const { features } = plugins;
   const libs = compose(server);
 
-  features.registerFeature({
+  features.registerKibanaFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
     order: 1000,
+    category: DEFAULT_APP_CATEGORIES.observability,
     navLinkId: PLUGIN.ID,
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
@@ -43,7 +45,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
       all: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read', 'uptime-write'],
+        api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
           all: [umDynamicSettings.name, 'alert'],
           read: [],
@@ -54,12 +56,12 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         management: {
           insightsAndAlerting: ['triggersActions'],
         },
-        ui: ['save', 'configureSettings', 'show'],
+        ui: ['save', 'configureSettings', 'show', 'alerting:save'],
       },
       read: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read'],
+        api: ['uptime-read', 'lists-read'],
         savedObject: {
           all: ['alert'],
           read: [umDynamicSettings.name],
@@ -70,7 +72,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         management: {
           insightsAndAlerting: ['triggersActions'],
         },
-        ui: ['show'],
+        ui: ['show', 'alerting:save'],
       },
     },
   });
