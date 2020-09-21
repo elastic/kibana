@@ -21,6 +21,7 @@ export const createFeature = (
     icon: 'discoverApp',
     navLinkId: 'discover',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     catalogue: [],
     privileges:
       privileges === null

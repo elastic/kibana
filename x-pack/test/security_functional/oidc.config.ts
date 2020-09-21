@@ -76,7 +76,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {
-      reportName: 'Chrome X-Pack Security Functional Tests',
+      reportName: 'Chrome X-Pack Security Functional Tests (OpenID Connect)',
     },
   };
 }
