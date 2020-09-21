@@ -596,14 +596,6 @@ describe('CredentialsLogic', () => {
       });
     });
 
-    describe('keyHelpText', () => {
-      it('should update the keyHelpText value to reflect the new name', () => {
-        mount();
-        CredentialsLogic.actions.setTokenName('New Name');
-        expect(CredentialsLogic.values.keyHelpText).toEqual('Your key will be named: new-name');
-      });
-    });
-
     it('should not change any other values', () => {
       mount();
       CredentialsLogic.actions.setTokenName('New Name');
@@ -611,7 +603,6 @@ describe('CredentialsLogic', () => {
         ...DEFAULT_VALUES,
         activeApiToken: expect.any(Object),
         activeApiTokenRawName: expect.any(String),
-        keyHelpText: expect.any(String),
       });
     });
   });

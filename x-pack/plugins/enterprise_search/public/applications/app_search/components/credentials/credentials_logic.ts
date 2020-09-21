@@ -81,7 +81,6 @@ export interface ICredentialsLogicValues {
   isCredentialsDataComplete: boolean;
   isCredentialsDetailsComplete: boolean;
   fullEngineAccessChecked: boolean;
-  keyHelpText: string;
   meta: IMeta;
   nameInputBlurred: boolean;
   showCredentialsForm: boolean;
@@ -248,15 +247,6 @@ export const CredentialsLogic = kea<
       () => [selectors.isCredentialsDetailsComplete, selectors.isCredentialsDataComplete],
       (isCredentialsDetailsComplete, isCredentialsDataComplete) => {
         return isCredentialsDetailsComplete === false || isCredentialsDataComplete === false;
-      },
-    ],
-    keyHelpText: [
-      () => [selectors.activeApiToken, selectors.activeApiTokenRawName],
-      (activeApiToken, activeApiTokenRawName) => {
-        const { name } = activeApiToken;
-        if (!!name && name !== activeApiTokenRawName) {
-          return `Your key will be named: ${name}`;
-        }
       },
     ],
   }),
