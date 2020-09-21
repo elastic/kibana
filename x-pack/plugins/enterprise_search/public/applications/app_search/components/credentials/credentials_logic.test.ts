@@ -621,6 +621,7 @@ describe('CredentialsLogic', () => {
           expect(CredentialsLogic.values.activeApiToken.access_all_engines).toEqual(false);
         });
       });
+
       describe('when value is not ADMIN', () => {
         it('will maintain access_all_engines value when true', () => {
           mount({
@@ -632,6 +633,7 @@ describe('CredentialsLogic', () => {
           CredentialsLogic.actions.setTokenType(PRIVATE);
           expect(CredentialsLogic.values.activeApiToken.access_all_engines).toEqual(true);
         });
+
         it('will maintain access_all_engines value when false', () => {
           mount({
             activeApiToken: {
@@ -658,6 +660,7 @@ describe('CredentialsLogic', () => {
           expect(CredentialsLogic.values.activeApiToken.engines).toEqual([]);
         });
       });
+
       describe('when value is not ADMIN', () => {
         it('will maintain engines array', () => {
           mount({
@@ -685,6 +688,7 @@ describe('CredentialsLogic', () => {
           expect(CredentialsLogic.values.activeApiToken.write).toEqual(true);
         });
       });
+
       describe('when value is not PRIVATE', () => {
         it('sets this to false', () => {
           mount({
@@ -712,6 +716,7 @@ describe('CredentialsLogic', () => {
           expect(CredentialsLogic.values.activeApiToken.read).toEqual(true);
         });
       });
+
       describe('when value is not PRIVATE', () => {
         it('sets this to false', () => {
           mount({
@@ -870,6 +875,7 @@ describe('CredentialsLogic', () => {
         expect(CredentialsLogic.values.activeApiTokenRawName).toEqual('');
       });
     });
+
     describe('showCredentialsForm', () => {
       it('resets this value', () => {
         mount({
@@ -879,6 +885,7 @@ describe('CredentialsLogic', () => {
         expect(CredentialsLogic.values.showCredentialsForm).toEqual(false);
       });
     });
+
     it('should not change any other values', () => {
       mount();
       CredentialsLogic.actions.hideCredentialsForm();
@@ -900,6 +907,7 @@ describe('CredentialsLogic', () => {
         expect(CredentialsLogic.values.isCredentialsDetailsComplete).toEqual(false);
       });
     });
+
     describe('isCredentialsDataComplete', () => {
       it('should reset to false', () => {
         mount({
@@ -909,6 +917,7 @@ describe('CredentialsLogic', () => {
         expect(CredentialsLogic.values.isCredentialsDataComplete).toEqual(false);
       });
     });
+
     describe('formErrors', () => {
       it('should reset', () => {
         mount({
@@ -918,6 +927,7 @@ describe('CredentialsLogic', () => {
         expect(CredentialsLogic.values.formErrors).toEqual([]);
       });
     });
+
     it('should not change any other values', () => {
       mount();
       CredentialsLogic.actions.resetCredentials();
@@ -1008,9 +1018,11 @@ describe('CredentialsLogic', () => {
       // TODO when error handler is available
     });
   });
+
   describe('onApiTokenChange', () => {
     // TODO when onApiTokenChange is implemented
   });
+
   describe('onEngineSelect', () => {
     // TODO when onEngineSelect is implemented
   });
