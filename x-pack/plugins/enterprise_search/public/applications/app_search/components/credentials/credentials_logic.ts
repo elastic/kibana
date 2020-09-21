@@ -75,7 +75,7 @@ export interface ICredentialsLogicValues {
 export const CredentialsLogic = kea<
   MakeLogicType<ICredentialsLogicValues, ICredentialsLogicActions>
 >({
-  path: ['enterprise_search', 'app_search', 'credentials'],
+  path: ['enterprise_search', 'app_search', 'credentials_logic'],
   actions: () => ({
     addEngineName: (engineName) => engineName,
     onApiKeyDelete: (tokenName) => tokenName,
@@ -232,29 +232,36 @@ export const CredentialsLogic = kea<
       actions.fetchCredentials();
       actions.fetchDetails();
     },
-    fetchCredentials: (page = 1) => {
-      HttpLogic.values.http
-        .get(`/api/app_search/credentials`, {
-          query: {
-            'page[current]': page,
-          },
-        })
-        .then(({ meta, results }: { meta: IMeta; results: IApiToken[] }) => {
-          actions.setCredentialsData(meta, results);
-        });
-      // TODO handle errors
+    fetchCredentials: async (page = 1) => {
+      try {
+        const { http } = HttpLogic.values;
+        const query = { 'page[current]': page };
+        const response = await http.get('/api/app_search/credentials', { query });
+
+        actions.setCredentialsData(response.meta, response.results);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    fetchDetails: () => {
-      HttpLogic.values.http
-        .get('/api/app_search/credentials/details')
-        .then((data: ICredentialsDetails) => actions.setCredentialsDetails(data));
-      // TODO handle errors - see ent-search
+    fetchDetails: async () => {
+      try {
+        const { http } = HttpLogic.values;
+        const response = await http.get('/api/app_search/credentials/details');
+
+        actions.setCredentialsDetails(response));
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    deleteApiKey: (tokenName) => {
-      HttpLogic.values.http
-        .delete(`/api/app_search/credentials/${tokenName}`)
-        .then(() => actions.onApiKeyDelete(tokenName));
-      // TODO handle errors - see ent-search
+    deleteApiKey: async (tokenName) => {
+      try {
+        const { http } = HttpLogic.values;
+        await http.delete(`/api/app_search/credentials/${tokenName}`);
+
+        actions.onApiKeyDelete(tokenName));
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     // TODO onApiTokenChange from ent-search
     // TODO onEngineSelect from ent-search
