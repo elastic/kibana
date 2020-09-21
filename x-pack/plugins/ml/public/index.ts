@@ -30,4 +30,5 @@ export type {
   MlCapabilitiesResponse,
   MlSummaryJob,
 } from './shared';
-export { ANOMALY_SEVERITY, getSeverityColor, getSeverityType } from './shared';
+export { getSeverityColor, getSeverityType } from '../common/util/anomaly_utils';
+export { ANOMALY_SEVERITY } from '../common';
