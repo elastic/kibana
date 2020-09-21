@@ -16,4 +16,3 @@ export const eqlValidationSchema = t.exact(
 );
 
 export type EqlValidationSchema = t.TypeOf<typeof eqlValidationSchema>;
-export type EqlValidationSchemaDecoded = EqlValidationSchema;

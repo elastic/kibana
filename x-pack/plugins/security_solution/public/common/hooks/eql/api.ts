@@ -5,6 +5,8 @@
  */
 
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { EqlValidationSchema as EqlValidationRequest } from '../../../../common/detection_engine/schemas/request/eql_validation_schema';
+import { EqlValidationSchema as EqlValidationResponse } from '../../../../common/detection_engine/schemas/response/eql_validation_schema';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
@@ -12,10 +14,8 @@ import {
   isValidationErrorResponse,
 } from '../../../../common/search_strategy/eql';
 
-interface Params {
+interface Params extends EqlValidationRequest {
   data: DataPublicPluginStart;
-  index: string[];
-  query: string;
   signal: AbortSignal;
 }
 
@@ -24,7 +24,7 @@ export const validateEql = async ({
   index,
   query,
   signal,
-}: Params): Promise<{ errors: string[]; valid: boolean }> => {
+}: Params): Promise<EqlValidationResponse> => {
   const { rawEqlResponse: response } = await data.search
     .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
       // @ts-expect-error EqlSearch is missing allow_no_indices
