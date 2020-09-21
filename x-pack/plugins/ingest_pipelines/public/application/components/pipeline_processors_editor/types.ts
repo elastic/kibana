@@ -94,7 +94,7 @@ export interface ProcessorResult {
   tag: string;
   ignored_error?: any;
   error?: any;
-  prevProcessorResult?: ProcessorResult;
+  processorInput?: Document;
   [key: string]: any;
 }
 

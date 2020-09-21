@@ -126,8 +126,8 @@ export async function getBeats(req, beatsIndexPattern, clusterUuid) {
         },
       },
       sort: [
-        { 'beats_stats.beat.uuid': { order: 'asc' } }, // need to keep duplicate uuids grouped
-        { timestamp: { order: 'desc' } }, // need oldest timestamp to come first for rate calcs to work
+        { 'beats_stats.beat.uuid': { order: 'asc', unmapped_type: 'long' } }, // need to keep duplicate uuids grouped
+        { timestamp: { order: 'desc', unmapped_type: 'long' } }, // need oldest timestamp to come first for rate calcs to work
       ],
     },
   };

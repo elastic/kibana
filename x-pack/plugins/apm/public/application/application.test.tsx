@@ -14,6 +14,10 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
 
+jest.mock('../services/rest/index_pattern', () => ({
+  createStaticIndexPattern: () => Promise.resolve(undefined),
+}));
+
 describe('renderApp', () => {
   let mockConsole: jest.SpyInstance;
 
