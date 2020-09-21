@@ -17,4 +17,5 @@
  * under the License.
  */
 
+// @ts-expect-error
 export { KibanaMap } from '../../map/kibana_map';
