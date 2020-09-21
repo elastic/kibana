@@ -67,8 +67,14 @@ export function WorkspacePanelWrapper({
   );
   return (
     <>
-      <div className="lnsWorkspacePanelWrapper__toolbar">
-        <EuiFlexGroup gutterSize="s" direction="row" responsive={false}>
+      <div>
+        <EuiFlexGroup
+          gutterSize="m"
+          direction="row"
+          responsive={false}
+          wrap={true}
+          className="lnsWorkspacePanelWrapper__toolbar"
+        >
           <EuiFlexItem grow={false}>
             <ChartSwitch
               data-test-subj="lnsChartSwitcher"
@@ -82,7 +88,7 @@ export function WorkspacePanelWrapper({
             />
           </EuiFlexItem>
           {activeVisualization && activeVisualization.renderToolbar && (
-            <EuiFlexItem grow>
+            <EuiFlexItem grow={false}>
               <NativeRenderer
                 render={activeVisualization.renderToolbar}
                 nativeProps={{

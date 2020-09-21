@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { find, uniqBy } from 'lodash';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -35,7 +36,7 @@ export function getConnections(
             SERVICE_NAME in node &&
             (node as ServiceConnectionNode)[SERVICE_NAME] === serviceName;
         }
-        if (environment) {
+        if (environment && environment !== ENVIRONMENT_NOT_DEFINED.value) {
           matches =
             matches &&
             SERVICE_ENVIRONMENT in node &&

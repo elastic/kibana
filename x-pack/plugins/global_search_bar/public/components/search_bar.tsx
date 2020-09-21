@@ -52,14 +52,20 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       if (!isMounted()) return;
 
       _setOptions([
-        ..._options.map((option) => ({
-          key: option.id,
-          label: option.title,
-          url: option.url,
-          ...(option.icon && { icon: { type: option.icon } }),
-          ...(option.type &&
-            option.type !== 'application' && { meta: [{ text: cleanMeta(option.type) }] }),
-        })),
+        ..._options.map(({ id, title, url, icon, type, meta }) => {
+          const option: EuiSelectableTemplateSitewideOption = {
+            key: id,
+            label: title,
+            url,
+          };
+
+          if (icon) option.icon = { type: icon };
+
+          if (type === 'application') option.meta = [{ text: meta?.categoryLabel as string }];
+          else option.meta = [{ text: cleanMeta(type) }];
+
+          return option;
+        }),
       ]);
     },
     [isMounted, _setOptions]
@@ -133,7 +139,8 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       onChange={onChange}
       options={options}
       searchProps={{
-        onSearch: setSearchValue,
+        onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
+          setSearchValue(e.currentTarget.value),
         'data-test-subj': 'header-search',
         inputRef: setSearchRef,
         compressed: true,
@@ -193,18 +200,6 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                         />
                       )}
                     </EuiBadge>
-                  </EuiFlexItem>
-                ),
-              }}
-            />
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.shortcut"
-              defaultMessage="{what}{how}"
-              values={{
-                what: <EuiFlexItem grow={false}>Shortcut</EuiFlexItem>,
-                how: (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>{isMac ? 'Command + /' : 'Control + /'}</EuiBadge>
                   </EuiFlexItem>
                 ),
               }}

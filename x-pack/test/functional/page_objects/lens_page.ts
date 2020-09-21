@@ -13,14 +13,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects([
-    'header',
-    'common',
-    'visualize',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const PageObjects = getPageObjects(['header', 'header', 'timePicker', 'common']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -92,19 +85,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param layerIndex - the index of the layer
      */
     async configureDimension(
-      opts: { dimension: string; operation: string; field: string },
+      opts: {
+        dimension: string;
+        operation: string;
+        field?: string;
+        isPreviousIncompatible?: boolean;
+      },
       layerIndex = 0
     ) {
       await retry.try(async () => {
         await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
         await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
       });
+      const operationSelector = opts.isPreviousIncompatible
+        ? `lns-indexPatternDimension-${opts.operation} incompatible`
+        : `lns-indexPatternDimension-${opts.operation}`;
+      await testSubjects.click(operationSelector);
 
-      await testSubjects.click(`lns-indexPatternDimension-${opts.operation}`);
+      if (opts.field) {
+        const target = await testSubjects.find('indexPattern-dimension-field');
+        await comboBox.openOptionsList(target);
+        await comboBox.setElement(target, opts.field);
+      }
+    },
 
-      const target = await testSubjects.find('indexPattern-dimension-field');
-      await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, opts.field);
+    // closes the dimension editor flyout
+    async closeDimensionEditor() {
       await testSubjects.click('lns-indexPattern-dimensionContainerTitle');
     },
 
@@ -114,7 +120,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async removeDimension(dimensionTestSubj: string) {
       await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
-
+    /**
+     * adds new filter to filters agg
+     */
+    async addFilterToAgg(queryString: string) {
+      await testSubjects.click('lns-newBucket-add');
+      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
+      await queryInput.type(queryString);
+      await PageObjects.common.pressEnterKey();
+      await PageObjects.common.pressEnterKey();
+      await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+    },
     /**
      * Save the current Lens visualization.
      */
@@ -148,8 +164,41 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
+    async editDimensionLabel(label: string) {
+      await testSubjects.setValue('indexPattern-label-edit', label);
+    },
+    async editDimensionFormat(format: string) {
+      const formatInput = await testSubjects.find('indexPattern-dimension-format');
+      await comboBox.openOptionsList(formatInput);
+      await comboBox.setElement(formatInput, format);
+    },
+    async editDimensionColor(color: string) {
+      const colorPickerInput = await testSubjects.find('colorPickerAnchor');
+      await colorPickerInput.type(color);
+      await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+    },
+    async editMissingValues(option: string) {
+      await retry.try(async () => {
+        await testSubjects.click('lnsMissingValuesButton');
+        await testSubjects.exists('lnsMissingValuesSelect');
+      });
+      await testSubjects.click('lnsMissingValuesSelect');
+      const optionSelector = await find.byCssSelector(`#${option}`);
+      await optionSelector.click();
+    },
+
     getTitle() {
       return testSubjects.getVisibleText('lns_ChartTitle');
+    },
+
+    async getFiltersAggLabels() {
+      const labels = [];
+      const filters = await testSubjects.findAll('indexPattern-filters-existingFilterContainer');
+      for (let i = 0; i < filters.length; i++) {
+        labels.push(await filters[i].getVisibleText());
+      }
+      log.debug(`Found ${labels.length} filters on current page`);
+      return labels;
     },
 
     /**
@@ -281,6 +330,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+    },
+
+    async assertMissingValues(option: string) {
+      await this.assertExactText('[data-test-subj="lnsMissingValuesSelect"]', option);
+    },
+    async assertColor(color: string) {
+      // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
+      await testSubjects.getAttribute('colorPickerAnchor', color);
     },
   });
 }
