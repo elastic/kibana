@@ -28,7 +28,7 @@ import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
   getHostDetailsUrl,
-  getIPDetailsUrl,
+  getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
 } from '../link_to';
@@ -114,7 +114,7 @@ export const ExternalLink = React.memo<{
 
 ExternalLink.displayName = 'ExternalLink';
 
-const IPDetailsLinkComponent: React.FC<{
+const NetworkDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
@@ -125,7 +125,7 @@ const IPDetailsLinkComponent: React.FC<{
     (ev) => {
       ev.preventDefault();
       navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
-        path: getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
+        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
       });
     },
     [flowTarget, ip, navigateToApp, search]
@@ -134,14 +134,14 @@ const IPDetailsLinkComponent: React.FC<{
   return (
     <LinkAnchor
       onClick={goToNetworkDetails}
-      href={formatUrl(getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+      href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
     >
       {children ? children : ip}
     </LinkAnchor>
   );
 };
 
-export const IPDetailsLink = React.memo(IPDetailsLinkComponent);
+export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 
 const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;

@@ -26,7 +26,8 @@ export function ClientMetrics() {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      const { serviceName } = uiFilters;
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum/client-metrics',
           params: {
@@ -45,7 +46,7 @@ export function ClientMetrics() {
     <ClFlexGroup responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
+          titleSize="l"
           title={
             (((data?.backEnd?.value ?? 0) * 1000).toFixed(0) ?? '-') + ' ms'
           }
@@ -55,7 +56,7 @@ export function ClientMetrics() {
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
+          titleSize="l"
           title={((data?.frontEnd?.value ?? 0)?.toFixed(2) ?? '-') + ' s'}
           description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
@@ -63,7 +64,7 @@ export function ClientMetrics() {
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
-          titleSize="s"
+          titleSize="l"
           title={
             <EuiToolTip content={data?.pageViews?.value}>
               <>{numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>

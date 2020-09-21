@@ -17,7 +17,8 @@ import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
-import { CoreVitals } from './CoreVitals';
+import { UXMetrics } from './UXMetrics';
+import { VisitorBreakdownMap } from './VisitorBreakdownMap';
 
 export function RumDashboard() {
   return (
@@ -36,33 +37,29 @@ export function RumDashboard() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={1} data-cy={`client-metrics`}>
-              <EuiTitle size="xs">
-                <h3>{I18LABELS.coreWebVitals}</h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <CoreVitals />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <UXMetrics />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={3}>
+        <EuiFlexGroup gutterSize="s" wrap>
+          <EuiFlexItem style={{ flexBasis: 650 }}>
+            <EuiPanel>
               <PageLoadDistribution />
-              <EuiSpacer size="m" />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem style={{ flexBasis: 650 }}>
+            <EuiPanel>
               <PageViewsTrend />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiPanel>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={3}>
               <VisitorBreakdown />
+            </EuiFlexItem>
+            <EuiFlexItem grow={3}>
+              <VisitorBreakdownMap />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

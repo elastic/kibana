@@ -117,14 +117,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     );
 
   function fetchData() {
-    if (
-      state.isLoading ||
-      (field.type !== 'number' &&
-        field.type !== 'string' &&
-        field.type !== 'date' &&
-        field.type !== 'boolean' &&
-        field.type !== 'ip')
-    ) {
+    if (state.isLoading) {
       return;
     }
 
@@ -238,7 +231,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
       anchorPosition="rightUp"
-      panelClassName="lnsFieldItem__fieldPopoverPanel"
+      panelClassName="lnsFieldItem__fieldPanel"
     >
       <FieldItemPopoverContents {...state} {...props} />
     </EuiPopover>
@@ -323,7 +316,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   if (histogram && histogram.buckets.length && topValues && topValues.buckets.length) {
     title = (
       <EuiButtonGroup
-        className="lnsFieldItem__popoverButtonGroup"
+        className="lnsFieldItem__buttonGroup"
         buttonSize="compressed"
         isFullWidth
         legend={i18n.translate('xpack.lens.indexPattern.fieldStatsDisplayToggle', {

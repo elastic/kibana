@@ -24,7 +24,7 @@ import { API_BASE_PATH } from './constants';
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-const appDependencies = {
+export const appDependencies = {
   httpClient: (mockHttpClient as unknown) as HttpSetup,
   apiBasePath: API_BASE_PATH,
   trackMetric: () => {},

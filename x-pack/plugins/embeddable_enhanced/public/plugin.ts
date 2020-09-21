@@ -74,8 +74,10 @@ export class EmbeddableEnhancedPlugin
         getGlobalScope: urlDrilldownGlobalScopeProvider({ core }),
         navigateToUrl: (url: string) =>
           core.getStartServices().then(([{ application }]) => application.navigateToUrl(url)),
-        getOpenModal: () => core.getStartServices().then(([{ overlays }]) => overlays.openModal),
-        getSyntaxHelpDocsLink: () => startServices().core.docLinks.links.dashboard.drilldowns, // TODO: replace with docs https://github.com/elastic/kibana/issues/69414
+        getSyntaxHelpDocsLink: () =>
+          startServices().core.docLinks.links.dashboard.urlDrilldownTemplateSyntax,
+        getVariablesHelpDocsLink: () =>
+          startServices().core.docLinks.links.dashboard.urlDrilldownVariables,
       })
     );
 

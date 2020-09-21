@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         results: {
           title: 'artificial_server_log',
+          numberOfFields: 4,
         },
       },
     },
@@ -62,6 +63,9 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerFileBased.assertFileContentPanelExists();
           await ml.dataVisualizerFileBased.assertSummaryPanelExists();
           await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
+          await ml.dataVisualizerFileBased.assertNumberOfFieldCards(
+            testData.expected.results.numberOfFields
+          );
 
           await ml.testExecution.logTestStep('loads the import settings page');
           await ml.dataVisualizerFileBased.navigateToFileImport();
