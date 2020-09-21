@@ -33,7 +33,10 @@ import { ChartWrapper } from '../ChartWrapper';
 import { I18LABELS } from '../translations';
 
 interface Props {
-  data?: Array<Record<string, number | null>>;
+  data?: {
+    topItems: string[];
+    items: Array<Record<string, number | null>>;
+  };
   loading: boolean;
 }
 
@@ -68,8 +71,7 @@ export function PageViewsChart({ data, loading }: Props) {
     });
   };
 
-  const breakdownAccessors =
-    data?.topItems?.length > 0 ? data?.topItems : ['y'];
+  const breakdownAccessors = data?.topItems?.length ? data?.topItems : ['y'];
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
