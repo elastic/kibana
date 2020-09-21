@@ -17,18 +17,4 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { TimelionVisPlugin as Plugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
-
-export { getTimezone } from './helpers/get_timezone';
-export { tickFormatters } from './helpers/tick_formatters';
-export { xaxisFormatterProvider } from './helpers/xaxis_formatter';
-export { generateTicksProvider } from './helpers/tick_generator';
-
-export { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
-
-export { VisTypeTimelionPluginStart, VisTypeTimelionPluginSetup } from './plugin';
+export * from './context_menu_examples';

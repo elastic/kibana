@@ -17,18 +17,23 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { TimelionVisPlugin as Plugin } from './plugin';
+import { Action } from '../../../../src/plugins/ui_actions/public';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
-
-export { getTimezone } from './helpers/get_timezone';
-export { tickFormatters } from './helpers/tick_formatters';
-export { xaxisFormatterProvider } from './helpers/xaxis_formatter';
-export { generateTicksProvider } from './helpers/tick_generator';
-
-export { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
-
-export { VisTypeTimelionPluginStart, VisTypeTimelionPluginSetup } from './plugin';
+export const sampleAction = (
+  id: string,
+  order: number,
+  name: string,
+  icon: string,
+  grouping?: Action['grouping']
+): Action => {
+  return {
+    id,
+    type: 'SAMPLE' as any,
+    order,
+    getDisplayName: () => name,
+    getIconType: () => icon,
+    isCompatible: async () => true,
+    execute: async () => {},
+    grouping,
+  };
+};
