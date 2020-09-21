@@ -146,7 +146,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       os: 'windows',
       entries: [
         {
-          field: 'process.path',
+          field: 'process.path.text',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -199,7 +199,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         description: 'this one is ok',
         entries: [
           {
-            field: 'process.path',
+            field: 'process.path.text',
             operator: 'included',
             type: 'match',
             value: 'c:/programs files/Anti-Virus',
@@ -226,7 +226,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
             description: 'this one is ok',
             entries: [
               {
-                field: 'process.path',
+                field: 'process.path.text',
                 operator: 'included',
                 type: 'match',
                 value: 'c:/programs files/Anti-Virus',
@@ -261,7 +261,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         description: 'this one is ok',
         entries: [
           {
-            field: 'process.path',
+            field: 'process.path.text',
             operator: 'included',
             type: 'match',
             value: 'c:/programs files/Anti-Virus',
@@ -280,7 +280,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
     it('should trim condition entry values', async () => {
       const newTrustedApp = createNewTrustedAppBody();
       newTrustedApp.entries.push({
-        field: 'process.path',
+        field: 'process.path.text',
         value: '\n    some value \r\n ',
         operator: 'included',
         type: 'match',
@@ -293,13 +293,13 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         description: 'this one is ok',
         entries: [
           {
-            field: 'process.path',
+            field: 'process.path.text',
             operator: 'included',
             type: 'match',
             value: 'c:/programs files/Anti-Virus',
           },
           {
-            field: 'process.path',
+            field: 'process.path.text',
             value: 'some value',
             operator: 'included',
             type: 'match',
@@ -331,7 +331,7 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         description: 'this one is ok',
         entries: [
           {
-            field: 'process.path',
+            field: 'process.path.text',
             operator: 'included',
             type: 'match',
             value: 'c:/programs files/Anti-Virus',
