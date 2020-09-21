@@ -429,5 +429,11 @@ describe('helpers', () => {
 
       expect(result.description).toEqual('Threshold');
     });
+
+    it('returns a humanized description for a threat_match type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threat_match');
+
+      expect(result.description).toEqual('Threat Match');
+    });
   });
 });
