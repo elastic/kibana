@@ -74,7 +74,7 @@ export class DynamicActionManager {
     const actionId = this.generateActionId(eventId);
 
     const factory = uiActions.getActionFactory(event.action.factoryId);
-    const actionDefinition: ActionDefinition = factory.create(action as SerializedAction<object>);
+    const actionDefinition: ActionDefinition = factory.create(action as SerializedAction);
     uiActions.registerAction({
       ...actionDefinition,
       id: actionId,
@@ -195,10 +195,7 @@ export class DynamicActionManager {
    * @param action Dynamic action for which to create an event.
    * @param triggers List of triggers to which action should react.
    */
-  public async createEvent(
-    action: SerializedAction<unknown>,
-    triggers: Array<keyof TriggerContextMapping>
-  ) {
+  public async createEvent(action: SerializedAction, triggers: Array<keyof TriggerContextMapping>) {
     const event: SerializedEvent = {
       eventId: uuidv4(),
       triggers,
@@ -231,7 +228,7 @@ export class DynamicActionManager {
    */
   public async updateEvent(
     eventId: string,
-    action: SerializedAction<unknown>,
+    action: SerializedAction,
     triggers: Array<keyof TriggerContextMapping>
   ) {
     const event: SerializedEvent = {
