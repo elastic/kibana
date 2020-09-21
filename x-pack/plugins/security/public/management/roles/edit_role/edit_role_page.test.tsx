@@ -32,6 +32,7 @@ const buildFeatures = () => {
       name: 'Feature 1',
       icon: 'addDataApp',
       app: ['feature1App'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['feature1App'],
@@ -56,6 +57,7 @@ const buildFeatures = () => {
       name: 'Feature 2',
       icon: 'addDataApp',
       app: ['feature2App'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['feature2App'],
