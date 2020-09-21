@@ -22,6 +22,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
+import { SearchTimeoutError, PainlessError } from './errors';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -53,8 +54,8 @@ describe('SearchInterceptor', () => {
       expect(result).toBe(mockResponse);
     });
 
-    test('Observable should fail if fetch has an error', async () => {
-      const mockResponse: any = { result: 500 };
+    test('Observable should fail if fetch has an internal error', async () => {
+      const mockResponse: any = { result: 500, message: 'Internal Error' };
       mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
@@ -68,64 +69,50 @@ describe('SearchInterceptor', () => {
       }
     });
 
-    test('Observable should fail if fetch times out (test merged signal)', async () => {
-      mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
-        return new Promise((resolve, reject) => {
-          options.signal.addEventListener('abort', () => {
-            reject(new AbortError());
-          });
-
-          setTimeout(resolve, 5000);
-        });
-      });
+    test('Should throw SearchTimeoutError on server timeout', async (done) => {
+      const mockResponse: any = {
+        result: 500,
+        body: {
+          message: 'Request timed out',
+        },
+      };
+      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
 
-      const next = jest.fn();
-      const error = (e: any) => {
-        expect(next).not.toBeCalled();
-        expect(e).toBeInstanceOf(AbortError);
-      };
-      response.subscribe({ next, error });
-
-      jest.advanceTimersByTime(5000);
-
-      await flushPromises();
+      try {
+        await response.toPromise();
+      } catch (e) {
+        expect(e).toBeInstanceOf(SearchTimeoutError);
+        done();
+      }
     });
 
-    test('Should not timeout if requestTimeout is undefined', async () => {
-      searchInterceptor = new SearchInterceptor({
-        startServices: mockCoreSetup.getStartServices(),
-        uiSettings: mockCoreSetup.uiSettings,
-        http: mockCoreSetup.http,
-        toasts: mockCoreSetup.notifications.toasts,
-      });
-      mockCoreSetup.http.fetch.mockImplementationOnce((options: any) => {
-        return new Promise((resolve, reject) => {
-          options.signal.addEventListener('abort', () => {
-            reject(new AbortError());
-          });
-
-          setTimeout(resolve, 5000);
-        });
-      });
+    test('Should throw Painless error on server error', async (done) => {
+      const mockResponse: any = {
+        result: 500,
+        body: {
+          attributes: {
+            error: {
+              root_cause: [{ lang: 'painless' }],
+            },
+          },
+        },
+      };
+      mockCoreSetup.http.fetch.mockRejectedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
 
-      expect.assertions(1);
-      const next = jest.fn();
-      const complete = () => {
-        expect(next).toBeCalled();
-      };
-      response.subscribe({ next, complete });
-
-      jest.advanceTimersByTime(5000);
-
-      await flushPromises();
+      try {
+        await response.toPromise();
+      } catch (e) {
+        expect(e).toBeInstanceOf(PainlessError);
+        done();
+      }
     });
 
     test('Observable should fail if user aborts (test merged signal)', async () => {

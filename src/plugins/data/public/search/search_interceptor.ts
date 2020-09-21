@@ -130,9 +130,8 @@ export class SearchInterceptor {
       return;
     }
 
-    this.deps.toasts.addDanger({
+    this.deps.toasts.addError(e, {
       title: 'Search Error',
-      text: e.message,
     });
   }
 
