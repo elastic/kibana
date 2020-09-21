@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionFactoryDefinition, BaseActionFactoryContext } from '../dynamic_actions';
+import {
+  ActionFactoryDefinition,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+  SerializedEvent,
+} from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -24,13 +30,13 @@ import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/pu
  */
 
 export interface DrilldownDefinition<
-  Config extends object = object,
+  Config extends BaseActionConfig = BaseActionConfig,
   SupportedTriggers extends TriggerId = TriggerId,
   FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
     triggers: SupportedTriggers[];
   },
   ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
-> {
+> extends PersistableStateDefinition<SerializedEvent> {
   /**
    * Globally unique identifier for this drilldown.
    */
