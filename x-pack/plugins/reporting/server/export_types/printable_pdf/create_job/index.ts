@@ -25,10 +25,10 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
     validateUrls(relativeUrls);
 
     return {
-      basePath: config.kbnConfig.get('server', 'basePath'),
+      headers: serializedEncryptedHeaders,
+      spaceId: reporting.getSpaceId(req),
       browserTimezone,
       forceNow: new Date().toISOString(),
-      headers: serializedEncryptedHeaders,
       layout,
       relativeUrls,
       title,

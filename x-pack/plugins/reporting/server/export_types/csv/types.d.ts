@@ -29,6 +29,7 @@ export interface IndexPatternSavedObject {
 }
 
 export interface JobParamsDiscoverCsv extends BaseParams {
+  browserTimezone: string;
   indexPatternId: string;
   title: string;
   searchRequest: SearchRequest;
@@ -38,6 +39,7 @@ export interface JobParamsDiscoverCsv extends BaseParams {
 }
 
 export interface TaskPayloadCSV extends BasePayload<JobParamsDiscoverCsv> {
+  browserTimezone: string;
   basePath: string;
   searchRequest: any;
   fields: any;

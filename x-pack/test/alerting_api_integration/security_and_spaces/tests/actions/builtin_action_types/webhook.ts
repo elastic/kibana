@@ -141,6 +141,77 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should remove headers when a webhook is updated', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'A generic Webhook action',
+          actionTypeId: '.webhook',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: webhookSimulatorURL,
+            headers: {
+              someHeader: '123',
+            },
+          },
+        })
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        isPreconfigured: false,
+        name: 'A generic Webhook action',
+        actionTypeId: '.webhook',
+        config: {
+          ...defaultValues,
+          url: webhookSimulatorURL,
+          headers: {
+            someHeader: '123',
+          },
+        },
+      });
+
+      await supertest
+        .put(`/api/actions/action/${createdAction.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A generic Webhook action',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: webhookSimulatorURL,
+            headers: {
+              someOtherHeader: '456',
+            },
+          },
+        })
+        .expect(200);
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/action/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        isPreconfigured: false,
+        name: 'A generic Webhook action',
+        actionTypeId: '.webhook',
+        config: {
+          ...defaultValues,
+          url: webhookSimulatorURL,
+          headers: {
+            someOtherHeader: '456',
+          },
+        },
+      });
+    });
+
     it('should send authentication to the webhook target', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL, {}, kibanaURL);
       const { body: result } = await supertest
