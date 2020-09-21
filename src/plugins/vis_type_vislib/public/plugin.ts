@@ -80,35 +80,30 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
       uiSettings: core.uiSettings,
       charts,
     };
-    const vislibTypes = [
-      createHistogramVisTypeDefinition,
-      createLineVisTypeDefinition,
-      createPieVisTypeDefinition,
-      createAreaVisTypeDefinition,
-      createHeatmapVisTypeDefinition,
-      createHorizontalBarVisTypeDefinition,
-      createGaugeVisTypeDefinition,
-      createGoalVisTypeDefinition,
-    ];
-    const vislibFns = [createVisTypeVislibVisFn(), createPieVisFn()];
 
     // if visTypeXy plugin is disabled it's config will be undefined
-    if (!visTypeXy) {
-      const convertedTypes: any[] = [];
-      const convertedFns: any[] = [];
-
-      // Register legacy vislib types that have been converted
-      convertedFns.forEach(expressions.registerFunction);
-      convertedTypes.forEach((vis) =>
-        visualizations.createBaseVisualization(vis(visualizationDependencies))
-      );
+    if (visTypeXy) {
+      [
+        createPieVisTypeDefinition,
+        createHeatmapVisTypeDefinition,
+        createGaugeVisTypeDefinition,
+        createGoalVisTypeDefinition,
+      ].forEach((vis) => visualizations.createBaseVisualization(vis(visualizationDependencies)));
+      [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
+    } else {
+      // Register all vis types
+      [
+        createHistogramVisTypeDefinition,
+        createLineVisTypeDefinition,
+        createPieVisTypeDefinition,
+        createAreaVisTypeDefinition,
+        createHeatmapVisTypeDefinition,
+        createHorizontalBarVisTypeDefinition,
+        createGaugeVisTypeDefinition,
+        createGoalVisTypeDefinition,
+      ].forEach((vis) => visualizations.createBaseVisualization(vis(visualizationDependencies)));
+      [createVisTypeVislibVisFn(), createPieVisFn()].forEach(expressions.registerFunction);
     }
-
-    // Register non-converted types
-    vislibFns.forEach(expressions.registerFunction);
-    vislibTypes.forEach((vis) =>
-      visualizations.createBaseVisualization(vis(visualizationDependencies))
-    );
   }
 
   public start(core: CoreStart, { data, kibanaLegacy }: VisTypeVislibPluginStartDependencies) {
