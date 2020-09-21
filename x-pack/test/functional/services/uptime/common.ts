@@ -85,17 +85,17 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       };
     },
     async openPageSizeSelectPopover(): Promise<void> {
-      return testSubjects.click('xpack.uptime.monitorList.pageSizeSelect.popoverOpen', 5000);
+      return await testSubjects.click('xpack.uptime.monitorList.pageSizeSelect.popoverOpen', 5000);
     },
     async clickPageSizeSelectPopoverItem(size: number = 10): Promise<void> {
-      return testSubjects.click(
+      return await testSubjects.click(
         `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
         5000
       );
     },
     async waitUntilDataIsLoaded() {
       await header.waitUntilLoadingHasFinished();
-      return retry.tryForTime(60 * 1000, async () => {
+      return await retry.tryForTime(60 * 1000, async () => {
         if (await testSubjects.exists('data-missing')) {
           await testSubjects.click('superDatePickerApplyTimeButton');
           await header.waitUntilLoadingHasFinished();

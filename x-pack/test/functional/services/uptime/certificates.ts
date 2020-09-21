@@ -25,12 +25,12 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
 
   return {
     async hasViewCertButton() {
-      return retry.tryForTime(15000, async () => {
+      return await retry.tryForTime(15000, async () => {
         await testSubjects.existOrFail('uptimeCertificatesLink');
       });
     },
     async certificateExists(cert: { certId: string; monitorId: string }) {
-      return retry.tryForTime(60 * 1000, async () => {
+      return await retry.tryForTime(60 * 1000, async () => {
         if (!(await testSubjects.exists(cert.certId))) {
           await refreshApp();
         }
@@ -39,7 +39,7 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
       });
     },
     async hasCertificates(expectedTotal?: number) {
-      return retry.tryForTime(60 * 1000, async () => {
+      return await retry.tryForTime(60 * 1000, async () => {
         const totalCerts = await testSubjects.getVisibleText('uptimeCertTotal');
         if (expectedTotal) {
           expect(Number(totalCerts)).to.eql(expectedTotal);
@@ -53,7 +53,7 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
     },
     async searchIsWorking(monId: string) {
       const self = this;
-      return retry.tryForTime(60 * 1000, async () => {
+      return await retry.tryForTime(60 * 1000, async () => {
         await changeSearchField(monId);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await self.hasCertificates(1);

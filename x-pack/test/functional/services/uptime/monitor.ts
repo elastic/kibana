@@ -21,14 +21,14 @@ export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProvide
       });
     },
     async displayOverallAvailability(availabilityVal: string) {
-      return retry.tryForTime(60 * 1000, async () => {
+      return await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('uptimeOverallAvailability');
         const availability = await testSubjects.getVisibleText('uptimeOverallAvailability');
         expect(availability).to.be(availabilityVal);
       });
     },
     async locationMapIsRendered() {
-      return retry.tryForTime(15000, async () => {
+      return await retry.tryForTime(15000, async () => {
         await testSubjects.existOrFail('xpack.uptime.locationMap.embeddedPanel', {
           timeout: 3000,
         });
@@ -39,14 +39,14 @@ export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProvide
     },
     async setPingListLocation(location: string) {
       await testSubjects.click('xpack.uptime.pingList.locationSelect', 5000);
-      return testSubjects.click(`xpack.uptime.pingList.locationOptions.${location}`, 5000);
+      return await testSubjects.click(`xpack.uptime.pingList.locationOptions.${location}`, 5000);
     },
     async setPingListStatus(status: string) {
       await testSubjects.click('xpack.uptime.pingList.statusSelect', 5000);
-      return testSubjects.click(`xpack.uptime.pingList.statusOptions.${status}`, 5000);
+      return await testSubjects.click(`xpack.uptime.pingList.statusOptions.${status}`, 5000);
     },
     async checkForPingListTimestamps(timestamps: string[]): Promise<void> {
-      return retry.tryForTime(10000, async () => {
+      return await retry.tryForTime(10000, async () => {
         await Promise.all(
           timestamps.map(
             async (timestamp) =>
@@ -59,12 +59,12 @@ export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('uptimeMonitorToggleMapBtn');
     },
     async hasRedirectInfo() {
-      return retry.tryForTime(30000, async () => {
+      return await retry.tryForTime(30000, async () => {
         await testSubjects.existOrFail('uptimeMonitorRedirectInfo');
       });
     },
     async expandPingRow() {
-      return retry.tryForTime(
+      return await retry.tryForTime(
         60 * 3000,
         async () => {
           await testSubjects.existOrFail('uptimePingListExpandBtn', { timeout: 5000 });
@@ -78,7 +78,7 @@ export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProvide
     },
     async hasRedirectInfoInPingList() {
       await this.expandPingRow();
-      return retry.tryForTime(60 * 1000, async () => {
+      return await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('uptimeMonitorPingListRedirectInfo');
       });
     },

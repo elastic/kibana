@@ -57,13 +57,13 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     }
 
     public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
-      return retry.tryForTime(15000, async () => {
+      return await retry.tryForTime(15000, async () => {
         await Promise.all(monitorIdsToCheck.map((id) => commonService.monitorPageLinkExists(id)));
       });
     }
 
     public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
-      return retry.tryForTime(12000, async () => {
+      return await retry.tryForTime(12000, async () => {
         expect(await commonService.urlContains(value)).to.eql(expected);
       });
     }
@@ -106,7 +106,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public async setMonitorListPageSize(size: number): Promise<void> {
       await commonService.openPageSizeSelectPopover();
-      return commonService.clickPageSizeSelectPopoverItem(size);
+      return await commonService.clickPageSizeSelectPopoverItem(size);
     }
 
     public async checkPingListInteractions(

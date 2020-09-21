@@ -13,7 +13,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
 
   return {
     async openMLFlyout() {
-      return retry.tryForTime(15000, async () => {
+      return await retry.tryForTime(15000, async () => {
         await testSubjects.click('uptimeEnableAnomalyBtn');
         await testSubjects.existOrFail('uptimeMLFlyout');
       });
@@ -21,7 +21,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
 
     async openMLManageMenu() {
       await this.cancelAlertFlyout();
-      return retry.tryForTime(30000, async () => {
+      return await retry.tryForTime(30000, async () => {
         await testSubjects.click('uptimeManageMLJobBtn');
         await testSubjects.existOrFail('uptimeManageMLContextMenu');
       });
@@ -38,7 +38,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
 
     async createMLJob() {
       await testSubjects.click('uptimeMLCreateJobBtn');
-      return retry.tryForTime(30000, async () => {
+      return await retry.tryForTime(30000, async () => {
         await testSubjects.existOrFail('uptimeMLJobSuccessfullyCreated');
         log.info('Job successfully created');
       });
@@ -46,7 +46,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
 
     async deleteMLJob() {
       await testSubjects.click('uptimeDeleteMLJobBtn');
-      return retry.tryForTime(10000, async () => {
+      return await retry.tryForTime(10000, async () => {
         await testSubjects.click('uptimeMLJobDeleteConfirmModel > confirmModalConfirmButton');
         await testSubjects.existOrFail('uptimeMLJobSuccessfullyDeleted');
         log.info('Job successfully deleted');
