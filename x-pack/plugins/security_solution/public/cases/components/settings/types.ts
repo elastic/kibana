@@ -8,6 +8,7 @@ import React from 'react';
 import { ActionConnector } from '../../../../../case/common/api';
 import { JiraSettingFields } from './jira';
 import { ResilientSettingFields } from './resilient';
+import { ServiceNowSettingFields } from './servicenow';
 
 export type CaseSettingsConnector = ActionConnector;
 
@@ -18,7 +19,7 @@ export interface CaseSetting<UIProps = unknown> {
   > | null;
 }
 
-export type AllSettingFields = JiraSettingFields | ResilientSettingFields;
+export type AllSettingFields = JiraSettingFields | ResilientSettingFields | ServiceNowSettingFields;
 
 export interface CaseSettingsRegistry {
   has: (id: string) => boolean;
