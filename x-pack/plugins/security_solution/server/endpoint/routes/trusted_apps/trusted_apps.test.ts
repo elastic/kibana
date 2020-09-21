@@ -191,19 +191,19 @@ describe('when invoking endpoint trusted apps route handlers', () => {
                 {
                   field: 'process.hash.*',
                   operator: 'included',
-                  type: 'exact_cased',
+                  type: 'match',
                   value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
                 },
                 {
                   field: 'process.hash.*',
                   operator: 'included',
-                  type: 'exact_cased',
+                  type: 'match',
                   value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
                 },
                 {
                   field: 'process.hash.*',
                   operator: 'included',
-                  type: 'exact_cased',
+                  type: 'match',
                   value: '741462ab431a22233c787baab9b653c7',
                 },
               ],
