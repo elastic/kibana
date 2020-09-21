@@ -80,7 +80,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         style={getCytoscapeDivStyle(theme)}
       >
         <Controls />
-        <BetaBadge />
         {serviceName && <EmptyBanner />}
         <Popover focusedServiceName={serviceName} />
       </Cytoscape>
@@ -96,7 +95,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         grow={false}
         style={{ width: 600, textAlign: 'center' as const }}
       >
-        <LicensePrompt text={invalidLicenseMessage} showBetaBadge />
+        <LicensePrompt text={invalidLicenseMessage} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
