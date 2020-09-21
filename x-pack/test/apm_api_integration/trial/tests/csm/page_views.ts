@@ -20,16 +20,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({
-          cls: '0',
-          fid: '0.00',
-          lcp: '0.00',
-          tbt: '0.00',
-          fcp: 0,
-          lcpRanks: [0, 0, 100],
-          fidRanks: [0, 0, 100],
-          clsRanks: [0, 0, 100],
-        });
+        expectSnapshot(response.body).toMatch();
       });
       it('returns empty list with breakdowns', async () => {
         const response = await supertest.get(
@@ -37,16 +28,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({
-          cls: '0',
-          fid: '0.00',
-          lcp: '0.00',
-          tbt: '0.00',
-          fcp: 0,
-          lcpRanks: [0, 0, 100],
-          fidRanks: [0, 0, 100],
-          clsRanks: [0, 0, 100],
-        });
+        expectSnapshot(response.body).toMatch();
       });
     });
 
@@ -67,62 +49,16 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expect(response.status).to.be(200);
 
-        expectSnapshot(response.body).toMatchInline(`
-          Object {
-            "cls": "0.00",
-            "clsRanks": Array [
-              100,
-              0,
-              0,
-            ],
-            "fcp": 1072,
-            "fid": "1.35",
-            "fidRanks": Array [
-              0,
-              0,
-              100,
-            ],
-            "lcp": "1.27",
-            "lcpRanks": Array [
-              100,
-              0,
-              0,
-            ],
-            "tbt": 0,
-          }
-        `);
+        expectSnapshot(response.body).toMatch();
       });
-      it('returns page views', async () => {
+      it('returns page views with breakdown', async () => {
         const response = await supertest.get(
           '/api/apm/rum-client/page-view-trends?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters=%7B%22serviceName%22%3A%5B%22kibana-frontend-8_0_0%22%5D%7D&breakdowns=%7B%22name%22%3A%22Browser%22%2C%22fieldName%22%3A%22user_agent.name%22%2C%22type%22%3A%22category%22%7D'
         );
 
         expect(response.status).to.be(200);
 
-        expectSnapshot(response.body).toMatchInline(`
-          Object {
-            "cls": "0.00",
-            "clsRanks": Array [
-              100,
-              0,
-              0,
-            ],
-            "fcp": 1072,
-            "fid": "1.35",
-            "fidRanks": Array [
-              0,
-              0,
-              100,
-            ],
-            "lcp": "1.27",
-            "lcpRanks": Array [
-              100,
-              0,
-              0,
-            ],
-            "tbt": 0,
-          }
-        `);
+        expectSnapshot(response.body).toMatch();
       });
     });
   });
