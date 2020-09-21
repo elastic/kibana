@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.sourcerer', {
-  defaultMessage: 'Index patterns',
+export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.dataSourcesLabel', {
+  defaultMessage: 'Data sources',
 });
 
 export const ALL_DEFAULT = i18n.translate('xpack.securitySolution.indexPatterns.allDefault', {
@@ -15,18 +15,17 @@ export const ALL_DEFAULT = i18n.translate('xpack.securitySolution.indexPatterns.
 });
 
 export const SELECT_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.help', {
-  defaultMessage: 'Select index patterns',
+  defaultMessage: 'Data sources selection',
 });
 
 export const SAVE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.save', {
   defaultMessage: 'Save',
 });
 
-export const CONFIGURE_INDEX_PATTERNS = i18n.translate(
-  'xpack.securitySolution.indexPatterns.configure',
+export const INDEX_PATTERNS_SELECTION_LABEL = i18n.translate(
+  'xpack.securitySolution.indexPatterns.selectionLabel',
   {
-    defaultMessage:
-      'Configure additional Kibana index patterns to see them become available in the Security Solution',
+    defaultMessage: 'Choose the source of the data on this page',
   }
 );
 
@@ -35,5 +34,12 @@ export const DISABLED_INDEX_PATTERNS = i18n.translate(
   {
     defaultMessage:
       'Disabled index patterns are recommended on this page, but first need to be configured in your Kibana index pattern settings',
+  }
+);
+
+export const INDEX_PATTERNS_RESET = i18n.translate(
+  'xpack.securitySolution.indexPatterns.resetButton',
+  {
+    defaultMessage: 'Reset',
   }
 );

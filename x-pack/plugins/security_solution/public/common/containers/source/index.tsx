@@ -137,7 +137,7 @@ export const useFetchIndex = (
     browserFields: DEFAULT_BROWSER_FIELDS,
     docValueFields: DEFAULT_DOC_VALUE_FIELDS,
     indexes: indexNames,
-    indexExists: false,
+    indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
   });
 

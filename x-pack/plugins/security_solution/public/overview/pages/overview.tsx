@@ -31,6 +31,8 @@ import { useMessagesStorage } from '../../common/containers/local_storage/use_me
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
+import { Sourcerer } from '../../common/components/sourcerer';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -78,6 +80,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                 <EuiSpacer size="l" />
               </>
             )}
+            <Sourcerer scope={SourcererScopeName.default} />
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
