@@ -6,13 +6,12 @@
 
 import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
+import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
-  isErrorResponse,
-  isCompleteResponse,
 } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
@@ -55,7 +54,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   ) {
     let { id } = request;
 
-    const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
+    const { combinedSignal, cleanup } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
@@ -65,19 +64,14 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
     return this.runSearch(request, combinedSignal, strategy).pipe(
-      tap({
-        next: (firstResponse) => {
-          this.onRequestStart(request, options.sessionId, timeoutSignal, firstResponse.id);
-        },
-      }),
       expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
-        if (isErrorResponse(response)) {
+        if (!response || (!response.isRunning && response.isPartial)) {
           return throwError(new AbortError());
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (isCompleteResponse(response)) {
+        if (!response.isRunning) {
           return EMPTY;
         }
 
@@ -93,16 +87,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       takeUntil(aborted$),
       tap({
         error: () => {
-          this.onRequestError(request, options.sessionId);
           // If we haven't received the response to the initial request, including the ID, then
           // we don't need to send a follow-up request to delete this search. Otherwise, we
           // send the follow-up request to delete this search, then throw an abort error.
           if (id !== undefined) {
             this.deps.http.delete(`/internal/search/${strategy}/${id}`);
           }
-        },
-        complete: () => {
-          this.onRequestComplete(request, options.sessionId);
         },
       }),
       finalize(() => {
@@ -112,21 +102,27 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     );
   }
 
-  protected onSessionTimeout() {
-    const message = this.application.capabilities.advancedSettings?.save
-      ? i18n.translate('xpack.data.search.timeoutIncreaseSetting', {
-          defaultMessage:
-            'One or more queries timed out. Increase run time with the search:timeout advanced setting.',
-        })
-      : i18n.translate('xpack.data.search.timeoutContactAdmin', {
-          defaultMessage:
-            'One or more queries timed out. Contact your system administrator to increase the run time.',
-        });
-    this.deps.toasts.addDanger({
-      title: i18n.translate('xpack.data.search.timeoutTitle', {
-        defaultMessage: 'Timeout',
-      }),
-      text: message,
-    });
-  }
+  // Right now we are debouncing but we will hook this up with background sessions to show only one
+  // error notification per session.
+  protected showTimeoutError = debounce(
+    (e: Error) => {
+      const message = this.application.capabilities.advancedSettings?.save
+        ? i18n.translate('xpack.data.search.timeoutIncreaseSetting', {
+            defaultMessage:
+              'One or more queries timed out. Increase run time with the search.timeout advanced setting.',
+          })
+        : i18n.translate('xpack.data.search.timeoutContactAdmin', {
+            defaultMessage:
+              'One or more queries timed out. Contact your system administrator to increase the run time.',
+          });
+      this.deps.toasts.addError(e, {
+        title: 'Timed out',
+        toastMessage: message,
+      });
+    },
+    60000,
+    {
+      leading: true,
+    }
+  );
 }

@@ -597,7 +597,6 @@ export class DashboardAppController {
     const refreshDashboardContainer = () => {
       const changes = getChangesFromAppStateForContainerState();
       if (changes && dashboardContainer) {
-        // searchService.session.start();
         dashboardContainer.updateInput(changes);
       }
     };
@@ -1113,7 +1112,6 @@ export class DashboardAppController {
         $scope.model.query = queryStringManager.getQuery();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         if (dashboardContainer) {
-          // searchService.session.start();
           dashboardContainer.updateInput({
             filters: $scope.model.filters,
             query: $scope.model.query,

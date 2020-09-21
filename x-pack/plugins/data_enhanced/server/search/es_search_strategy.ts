@@ -13,7 +13,6 @@ import {
   getTotalLoaded,
   ISearchStrategy,
   SearchUsage,
-  isCompleteResponse,
   getDefaultSearchParams,
   getShardTimeout,
   toSnakeCase,
@@ -49,7 +48,8 @@ export const enhancedEsSearchStrategyProvider = (
         usage &&
         isAsync &&
         isEnhancedEsSearchResponse(response) &&
-        isCompleteResponse(response)
+        !response.isRunning &&
+        !response.isPartial
       ) {
         usage.trackSuccess(response.rawResponse.took);
       }

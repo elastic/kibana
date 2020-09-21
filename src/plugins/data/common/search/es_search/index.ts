@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './utils';
 export * from './types';

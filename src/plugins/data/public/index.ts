@@ -372,7 +372,7 @@ export {
   EsRawResponseExpressionTypeDefinition,
 } from './search';
 
-export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export { ISearchOptions } from '../common';
 export type { SearchSource } from './search';
 
 // Search namespace
