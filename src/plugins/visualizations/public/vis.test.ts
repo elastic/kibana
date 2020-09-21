@@ -35,7 +35,7 @@ jest.mock('./services', () => {
   // eslint-disable-next-line
   const { BaseVisType } = require('./vis_types/base_vis_type');
   // eslint-disable-next-line
-  const { SearchSource } = require('../../data/public/search/search_source');
+  const { SearchSource } = require('../../data/common/search/search_source');
   // eslint-disable-next-line
   const fixturesStubbedLogstashIndexPatternProvider = require('../../../fixtures/stubbed_logstash_index_pattern');
   const visType = new BaseVisType({

@@ -356,6 +356,14 @@ describe('utils', () => {
       expect(aggregated).toEqual(expected);
     });
 
+    test('it should aggregate with an empty create object', () => {
+      const empty = sampleBulkResponse();
+      empty.items = [{}];
+      const aggregated = errorAggregator(empty, []);
+      const expected: BulkResponseErrorAggregation = {};
+      expect(aggregated).toEqual(expected);
+    });
+
     test('it should aggregate with an empty object when given a valid bulk response with no errors', () => {
       const validResponse = sampleBulkResponse();
       const aggregated = errorAggregator(validResponse, []);
