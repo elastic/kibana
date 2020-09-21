@@ -51,7 +51,13 @@ exports[`Home component should render services 1`] = `
           "get$": [Function],
         },
       },
-      "plugins": Object {},
+      "plugins": Object {
+        "ml": Object {
+          "urlGenerator": Object {
+            "createUrl": [Function],
+          },
+        },
+      },
     }
   }
 >
@@ -112,7 +118,13 @@ exports[`Home component should render traces 1`] = `
           "get$": [Function],
         },
       },
-      "plugins": Object {},
+      "plugins": Object {
+        "ml": Object {
+          "urlGenerator": Object {
+            "createUrl": [Function],
+          },
+        },
+      },
     }
   }
 >

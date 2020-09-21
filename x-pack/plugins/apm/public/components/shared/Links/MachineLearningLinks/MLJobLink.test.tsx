@@ -21,9 +21,7 @@ describe('MLJobLink', () => {
       } as Location
     );
 
-    expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now-4h))"`
-    );
+    expect(href).toMatchInlineSnapshot(`""`);
   });
   it('should produce the correct URL with jobId, serviceName, and transactionType', async () => {
     const href = await getRenderedHref(
@@ -40,8 +38,24 @@ describe('MLJobLink', () => {
       } as Location
     );
 
-    expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now-4h))&_a=(mlTimeSeriesExplorer:(entities:(service.name:opbeans-test,transaction.type:request),zoom:(from:now/w,to:now-4h)))"`
+    expect(href).toMatchInlineSnapshot(`""`);
+  });
+
+  it('correctly encodes time range values', async () => {
+    const href = await getRenderedHref(
+      () => (
+        <MLJobLink
+          jobId="apm-production-485b-high_mean_transaction_duration"
+          serviceName="opbeans-java"
+          transactionType="request"
+        />
+      ),
+      {
+        search:
+          '?rangeFrom=2020-07-29T17:27:29.000Z&rangeTo=2020-07-29T18:45:00.000Z&refreshInterval=10000&refreshPaused=true',
+      } as Location
     );
+
+    expect(href).toMatchInlineSnapshot(`""`);
   });
 });

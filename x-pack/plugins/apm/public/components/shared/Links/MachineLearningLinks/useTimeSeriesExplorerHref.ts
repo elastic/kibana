@@ -19,16 +19,15 @@ export function useTimeSeriesExplorerHref({
   serviceName?: string;
   transactionType?: string;
 }) {
+  // default to link to ML Anomaly Detection jobs management page
   const {
     core,
     plugins: { ml },
   } = useApmPluginContext();
-  const location = useLocation();
-
-  // default to link to ML Anomaly Detection jobs management page
-  const [mlADUrl, setMlADLink] = useState(
+  const [mlADLink, setMlADLink] = useState(
     core.http.basePath.prepend('/app/ml/jobs')
   );
+  const location = useLocation();
 
   useEffect(() => {
     let isCancelled = false;
@@ -63,5 +62,5 @@ export function useTimeSeriesExplorerHref({
     };
   }, [ml?.urlGenerator, location.search, jobId, serviceName, transactionType]);
 
-  return mlADUrl;
+  return mlADLink;
 }

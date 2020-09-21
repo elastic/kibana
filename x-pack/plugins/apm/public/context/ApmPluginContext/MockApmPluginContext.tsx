@@ -81,7 +81,7 @@ const mockConfig: ConfigSchema = {
 const mockPlugin = {
   ml: {
     urlGenerator: {
-      createUrl: jest.fn,
+      createUrl: (params: any) => '',
     },
   },
 };

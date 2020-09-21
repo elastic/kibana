@@ -15,7 +15,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ManagementSetup } from 'src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
+import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -34,9 +34,10 @@ import { registerFeature } from './register_feature';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { registerUrlGenerator } from './ml_url_generator';
+import { MlUrlGenerator } from './ml_url_generator';
 import { isFullLicense, isMlEnabled } from '../common/license';
 import { registerEmbeddables } from './embeddables';
+import { ML_APP_URL_GENERATOR } from '../common/constants/ml_url_generator';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -62,6 +63,7 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -111,6 +113,15 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
+        if (pluginsSetup.share) {
+          const baseUrl = core.http.basePath.prepend('/app/ml');
+          this.urlGenerator = pluginsSetup.share.urlGenerators.registerUrlGenerator(
+            new MlUrlGenerator({
+              appBasePath: baseUrl,
+              useHash: core.uiSettings.get('state:storeInSessionStorage'),
+            })
+          );
+        }
 
         const { capabilities } = coreStart.application;
 
@@ -129,7 +140,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           }
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
-          registerUrlGenerator(pluginsSetup.share, core);
         } else if (managementApp) {
           managementApp.disable();
         }
@@ -144,7 +154,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }
     });
 
-    return {};
+    return {
+      urlGenerator: this.urlGenerator,
+    };
   }
 
   start(core: CoreStart, deps: any) {
@@ -154,7 +166,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       http: core.http,
       i18n: core.i18n,
     });
-    return {};
+    return {
+      urlGenerator: this.urlGenerator,
+    };
   }
 
   public stop() {}
