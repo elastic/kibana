@@ -789,7 +789,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         $scope.fetchStatus = fetchStatuses.NO_RESULTS;
         $scope.rows = [];
 
-        // Add error.toToast
         data.search.showError(error);
       });
   };
