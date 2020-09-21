@@ -8,11 +8,7 @@ import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_uti
 import { PipelinesClone } from '../../../public/application/sections/pipelines_clone';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
-import {
-  INGEST_PIPELINES_PAGES,
-  ROUTES_CONFIG,
-  URL_GENERATOR,
-} from '../../../public/application/services/navigation';
+import { getClonePath, ROUTES_CONFIG } from '../../../public/application/services/navigation';
 
 export type PipelinesCloneTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
@@ -33,8 +29,8 @@ export const PIPELINE_TO_CLONE = {
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [URL_GENERATOR[INGEST_PIPELINES_PAGES.CLONE](PIPELINE_TO_CLONE.name)],
-    componentRoutePath: ROUTES_CONFIG[INGEST_PIPELINES_PAGES.CLONE],
+    initialEntries: [getClonePath(PIPELINE_TO_CLONE.name)],
+    componentRoutePath: ROUTES_CONFIG.clone,
   },
   doMountAsync: true,
 };

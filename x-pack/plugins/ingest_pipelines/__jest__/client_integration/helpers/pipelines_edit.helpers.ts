@@ -8,11 +8,7 @@ import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_uti
 import { PipelinesEdit } from '../../../public/application/sections/pipelines_edit';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
-import {
-  INGEST_PIPELINES_PAGES,
-  ROUTES_CONFIG,
-  URL_GENERATOR,
-} from '../../../public/application/services/navigation';
+import { getEditPath, ROUTES_CONFIG } from '../../../public/application/services/navigation';
 
 export type PipelinesEditTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
@@ -33,8 +29,8 @@ export const PIPELINE_TO_EDIT = {
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [URL_GENERATOR[INGEST_PIPELINES_PAGES.EDIT](PIPELINE_TO_EDIT.name)],
-    componentRoutePath: ROUTES_CONFIG[INGEST_PIPELINES_PAGES.EDIT],
+    initialEntries: [getEditPath(PIPELINE_TO_EDIT.name)],
+    componentRoutePath: ROUTES_CONFIG.edit,
   },
   doMountAsync: true,
 };

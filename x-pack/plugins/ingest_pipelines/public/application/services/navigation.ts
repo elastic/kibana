@@ -10,39 +10,30 @@ const EDIT_PATH = 'edit';
 
 const CREATE_PATH = 'create';
 
-const getEditPath = (name: string, encode = true): string => {
+const _getEditPath = (name: string, encode = true): string => {
   return `${BASE_PATH}${EDIT_PATH}/${encode ? encodeURIComponent(name) : name}`;
 };
 
-const getCreatePath = (): string => {
+const _getCreatePath = (): string => {
   return `${BASE_PATH}${CREATE_PATH}`;
 };
 
-const getClonePath = (name: string, encode = true): string => {
+const _getClonePath = (name: string, encode = true): string => {
   return `${BASE_PATH}${CREATE_PATH}/${encode ? encodeURIComponent(name) : name}`;
 };
-const getListPath = (name?: string): string => {
+const _getListPath = (name?: string): string => {
   return `${BASE_PATH}${name ? `?pipeline=${encodeURIComponent(name)}` : ''}`;
 };
 
-export enum INGEST_PIPELINES_PAGES {
-  LIST = 'pipelines_list',
-  EDIT = 'pipeline_edit',
-  CREATE = 'pipeline_create',
-  CLONE = 'pipeline_clone',
-}
-
 export const ROUTES_CONFIG = {
-  [INGEST_PIPELINES_PAGES.LIST]: getListPath(),
-  [INGEST_PIPELINES_PAGES.EDIT]: getEditPath(':name', false),
-  [INGEST_PIPELINES_PAGES.CREATE]: getCreatePath(),
-  [INGEST_PIPELINES_PAGES.CLONE]: getClonePath(':sourceName', false),
+  list: _getListPath(),
+  edit: _getEditPath(':name', false),
+  create: _getCreatePath(),
+  clone: _getClonePath(':sourceName', false),
 };
 
-export const URL_GENERATOR = {
-  [INGEST_PIPELINES_PAGES.LIST]: (selectedPipelineName?: string) =>
-    getListPath(selectedPipelineName),
-  [INGEST_PIPELINES_PAGES.EDIT]: (pipelineName: string) => getEditPath(pipelineName, true),
-  [INGEST_PIPELINES_PAGES.CREATE]: getCreatePath,
-  [INGEST_PIPELINES_PAGES.CLONE]: (pipelineName: string) => getClonePath(pipelineName, true),
-};
+export const getListPath = (selectedPipelineName?: string): string =>
+  _getListPath(selectedPipelineName);
+export const getEditPath = (pipelineName: string): string => _getEditPath(pipelineName, true);
+export const getCreatePath = (): string => _getCreatePath;
+export const getClonePath = (pipelineName: string): string => _getClonePath(pipelineName, true);

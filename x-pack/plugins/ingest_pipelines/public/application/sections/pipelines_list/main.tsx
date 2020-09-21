@@ -26,7 +26,7 @@ import {
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
-import { INGEST_PIPELINES_PAGES, URL_GENERATOR } from '../../services/navigation';
+import { getEditPath, getClonePath, getListPath } from '../../services/navigation';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
@@ -68,16 +68,16 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   }, [pipelineNameFromLocation, data]);
 
   const goToEditPipeline = (name: string) => {
-    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.EDIT](name));
+    history.push(getEditPath(name));
   };
 
   const goToClonePipeline = (name: string) => {
-    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.CLONE](name));
+    history.push(getClonePath(name));
   };
 
   const goHome = () => {
     setShowFlyout(false);
-    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST]());
+    history.push(getListPath());
   };
 
   if (data && data.length === 0) {

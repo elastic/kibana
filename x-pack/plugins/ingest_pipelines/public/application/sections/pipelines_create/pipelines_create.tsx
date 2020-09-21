@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { INGEST_PIPELINES_PAGES, URL_GENERATOR } from '../../services/navigation';
+import { getListPath } from '../../services/navigation';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
@@ -50,11 +50,11 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       return;
     }
 
-    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST](pipeline.name));
+    history.push(getListPath(pipeline.name));
   };
 
   const onCancel = () => {
-    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST]());
+    history.push(getListPath());
   };
 
   useEffect(() => {

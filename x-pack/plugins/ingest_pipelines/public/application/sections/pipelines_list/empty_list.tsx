@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { useKibana } from '../../../shared_imports';
-import { INGEST_PIPELINES_PAGES, URL_GENERATOR } from '../../services/navigation';
+import { getCreatePath } from '../../services/navigation';
 
 export const EmptyList: FunctionComponent = () => {
   const { services } = useKibana();
@@ -46,7 +46,7 @@ export const EmptyList: FunctionComponent = () => {
           }
           actions={
             <EuiButton
-              {...reactRouterNavigate(history, URL_GENERATOR[INGEST_PIPELINES_PAGES.CREATE]())}
+              {...reactRouterNavigate(history, getCreatePath())}
               iconType="plusInCircle"
               fill
             >

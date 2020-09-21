@@ -20,7 +20,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 
-import { INGEST_PIPELINES_PAGES, URL_GENERATOR } from '../../services/navigation';
+import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
 import { attemptToURIDecode } from '../shared';
 
@@ -56,11 +56,11 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST](updatedPipeline.name));
+    history.push(getListPath(updatedPipeline.name));
   };
 
   const onCancel = () => {
-    history.push(URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST]());
+    history.push(getListPath());
   };
 
   useEffect(() => {

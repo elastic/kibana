@@ -13,6 +13,5 @@ export function plugin() {
 export {
   INGEST_PIPELINES_APP_ULR_GENERATOR,
   IngestPipelinesUrlGeneratorState,
+  INGEST_PIPELINES_PAGES,
 } from './url_generator';
-
-export { INGEST_PIPELINES_PAGES } from './application/services/navigation';

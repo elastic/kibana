@@ -6,11 +6,23 @@
 
 import { CoreSetup } from 'src/core/public';
 import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
-import { INGEST_PIPELINES_PAGES, URL_GENERATOR } from './application/services/navigation';
+import {
+  getClonePath,
+  getCreatePath,
+  getEditPath,
+  getListPath,
+} from './application/services/navigation';
 import { Dependencies } from './types';
 import { MANAGEMENT_APP_ID, PLUGIN_ID } from '../common/constants';
 
 export const INGEST_PIPELINES_APP_ULR_GENERATOR = 'INGEST_PIPELINES_APP_URL_GENERATOR';
+
+export enum INGEST_PIPELINES_PAGES {
+  LIST = 'pipelines_list',
+  EDIT = 'pipeline_edit',
+  CREATE = 'pipeline_create',
+  CLONE = 'pipeline_clone',
+}
 
 interface UrlGeneratorState {
   pipelineId: string;
@@ -45,9 +57,20 @@ export class IngestPipelinesUrlGenerator
   public readonly id = INGEST_PIPELINES_APP_ULR_GENERATOR;
 
   public readonly createUrl = async (state: IngestPipelinesUrlGeneratorState): Promise<string> => {
-    return `${await this.getAppBasePath(!!state.absolute)}${URL_GENERATOR[state.page](
-      state.pipelineId!
-    )}`;
+    switch (state.page) {
+      case INGEST_PIPELINES_PAGES.EDIT: {
+        return `${await this.getAppBasePath(!!state.absolute)}${getEditPath(state.pipelineId)}`;
+      }
+      case INGEST_PIPELINES_PAGES.CREATE: {
+        return `${await this.getAppBasePath(!!state.absolute)}${getCreatePath()}`;
+      }
+      case INGEST_PIPELINES_PAGES.LIST: {
+        return `${await this.getAppBasePath(!!state.absolute)}${getListPath(state.pipelineId)}`;
+      }
+      case INGEST_PIPELINES_PAGES.CLONE: {
+        return `${await this.getAppBasePath(!!state.absolute)}${getClonePath(state.pipelineId)}`;
+      }
+    }
   };
 }
 

@@ -15,16 +15,12 @@ import {
 } from '../../../../../test_utils';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
-import {
-  INGEST_PIPELINES_PAGES,
-  ROUTES_CONFIG,
-  URL_GENERATOR,
-} from '../../../public/application/services/navigation';
+import { getListPath, ROUTES_CONFIG } from '../../../public/application/services/navigation';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [URL_GENERATOR[INGEST_PIPELINES_PAGES.LIST]()],
-    componentRoutePath: ROUTES_CONFIG[INGEST_PIPELINES_PAGES.LIST],
+    initialEntries: [getListPath()],
+    componentRoutePath: ROUTES_CONFIG.list,
   },
   doMountAsync: true,
 };

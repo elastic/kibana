@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestPipelinesUrlGenerator } from './url_generator';
-import { INGEST_PIPELINES_PAGES } from './application/services/navigation';
+import { IngestPipelinesUrlGenerator, INGEST_PIPELINES_PAGES } from './url_generator';
 
 describe('IngestPipelinesUrlGenerator', () => {
   const getAppBasePath = (absolute: boolean = false) => {
