@@ -11,6 +11,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnect
 import kibanaAgent
 import templates.KibanaTemplate
 import templates.DefaultTemplate
+import vcs.Elasticsearch
 
 class KibanaConfiguration() {
   var agentNetwork: String = "teamcity"
@@ -32,6 +33,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
     }
 
     vcsRoot(Kibana)
+    vcsRoot(Elasticsearch)
 
     template(DefaultTemplate)
     template(KibanaTemplate)
