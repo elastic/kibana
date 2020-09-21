@@ -52,7 +52,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   severity: 'high',
   severity_mapping: [],
   updated_by: 'elastic_kibana',
-  tags: [],
+  tags: ['some fake tag 1', 'some fake tag 2'],
   to: 'now',
   type: 'query',
   threat: [],
