@@ -12,6 +12,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -21,6 +22,40 @@ import { Ping } from '../../../../common/runtime_types';
 import { UptimeThemeContext } from '../../../contexts';
 import { getJourneySteps, getStepScreenshot } from '../../../state/actions/journey';
 import { journeySelector } from '../../../state/selectors';
+
+interface ScreenshotDisplayProps {
+  isLoading: boolean;
+  screenshot: string;
+}
+
+const THUMBNAIL_WIDTH = 320;
+const THUMBNAIL_HEIGHT = 180;
+
+const ScreenshotDisplay: React.FC<ScreenshotDisplayProps> = ({ isLoading, screenshot }) => {
+  if (isLoading) {
+    return <EuiLoadingSpinner size="l" />;
+  } else if (isLoading === false && !screenshot) {
+    return (
+      <EuiIcon
+        color="subdued"
+        type="faceSad"
+        style={{ width: THUMBNAIL_WIDTH, height: THUMBNAIL_HEIGHT }}
+      />
+    );
+  }
+  return (
+    <img
+      style={{
+        width: THUMBNAIL_WIDTH,
+        height: THUMBNAIL_HEIGHT,
+        objectFit: 'cover',
+        objectPosition: 'center top',
+      }}
+      src={`data:image/png;base64,${screenshot}`}
+      alt="stuff"
+    />
+  );
+};
 
 interface ScriptExpandedRowProps {
   checkGroup?: string;
@@ -57,7 +92,7 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
     }
   }, [dispatch, checkGroup]);
   const {
-    colors: { success },
+    colors: { success: successColor, danger: failColor },
   } = useContext(UptimeThemeContext);
   const f = useSelector(journeySelector);
   console.log('the check grou', checkGroup);
@@ -108,7 +143,9 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
               </div>
               <EuiSpacer size="s" />
               <div>
-                <EuiBadge color={success}>
+                <EuiBadge
+                  color={step.synthetics.payload.status === 'succeeded' ? successColor : failColor}
+                >
                   {step.synthetics.payload.status === 'succeeded' ? 'Succeeded' : 'Failed'}
                 </EuiBadge>
               </div>
@@ -116,33 +153,41 @@ export const ScriptExpandedRow: React.FC<ScriptExpandedRowProps> = ({ checkGroup
               <div>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
-                    {!!step.screenshot && (
-                      <img
-                        style={{ width: 320, height: 180, 'object-fit': 'cover' }}
-                        src={`data:image/png;base64,${step.screenshot}`}
-                        alt="stuff"
-                      />
-                    )}
-                    {!step.screenshot && <span>Screenshot missing</span>}
+                    <ScreenshotDisplay
+                      isLoading={step.screenshotLoading}
+                      screenshot={step.screenshot}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <div>
+                    {/* <div>
                       <EuiButton>Step details</EuiButton>
-                    </div>
+                    </div> */}
                     {step?.synthetics?.payload?.source && (
-                      <>
-                        <EuiSpacer />
-                        <EuiAccordion
-                          id={step.synthetics.step.name + index}
-                          buttonContent="Step script"
-                        >
-                          <EuiText>
-                            <EuiCode language="javascript">
-                              {step.synthetics.payload.source!}
-                            </EuiCode>
-                          </EuiText>
-                        </EuiAccordion>
-                      </>
+                      <EuiAccordion
+                        id={step.synthetics.step.name + index}
+                        buttonContent="Step script"
+                      >
+                        <EuiText>
+                          <EuiCode language="javascript">{step.synthetics.payload.source!}</EuiCode>
+                        </EuiText>
+                      </EuiAccordion>
+                    )}
+                    {step?.synthetics?.payload?.error && (
+                      <EuiAccordion id={`${step.synthetics.step.name}_error`} buttonContent="Error">
+                        <EuiCode style={{ whiteSpace: 'pre-wrap' }} language="html">
+                          {step.synthetics.payload.error.message}
+                        </EuiCode>
+                      </EuiAccordion>
+                    )}
+                    {step?.synthetics?.payload?.error?.stack && (
+                      <EuiAccordion
+                        id={`${step.synthetics.step.name}_stack`}
+                        buttonContent="Stack trace"
+                      >
+                        <EuiCode style={{ whiteSpace: 'pre-wrap' }} language="html">
+                          {step.synthetics.payload.error.stack}
+                        </EuiCode>
+                      </EuiAccordion>
                     )}
                   </EuiFlexItem>
                 </EuiFlexGroup>

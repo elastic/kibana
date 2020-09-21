@@ -8,11 +8,15 @@ import { handleActions, Action } from 'redux-actions';
 import { Ping } from '../../../common/runtime_types';
 import {
   FetchJourneyStepsParams,
+  FetchStepScreenshot,
   GetJourneyFailPayload,
   getJourneySteps,
   getJourneyStepsFail,
   getJourneyStepsSuccess,
   GetJourneySuccessPayload,
+  getStepScreenshot,
+  getStepScreenshotFail,
+  GetStepScreenshotFailPayload,
   getStepScreenshotSuccess,
   GetStepScreenshotSuccessPayload,
 } from '../actions/journey';
@@ -106,6 +110,18 @@ export const journeyReducer = handleActions<JourneyStepsState, Payload>(
       ],
     }),
 
+    [String(getStepScreenshot)]: (
+      state: JourneyStepsState,
+      action: Action<FetchStepScreenshot>
+    ) => ({
+      journeys: state.journeys.map((j) => {
+        if (j.checkGroup !== action.payload.checkGroup) return j;
+        const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
+        step.screenshotLoading = true;
+        return j;
+      }),
+    }),
+
     [String(getStepScreenshotSuccess)]: (
       state: JourneyStepsState,
       action: Action<GetStepScreenshotSuccessPayload>
@@ -114,9 +130,36 @@ export const journeyReducer = handleActions<JourneyStepsState, Payload>(
         if (j.checkGroup !== action.payload.checkGroup) return j;
         const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
         step.screenshot = action.payload.screenshot;
+        step.screenshotLoading = false;
+        return j;
+      }),
+    }),
+
+    [String(getStepScreenshotFail)]: (
+      state: JourneyStepsState,
+      action: Action<GetStepScreenshotFailPayload>
+    ) => ({
+      journeys: state.journeys.map((j) => {
+        if (j.checkGroup !== action.payload.checkGroup) return j;
+        const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
+        step.screenshotLoading = false;
+        // TODO: error handle
         return j;
       }),
     }),
   },
   initialState
 );
+
+interface IHasCheckGroup {
+  checkGroup: string;
+}
+
+const mapFn = (set: (step: JourneyState) => JourneyState, action: Action<IHasCheckGroup>) => (
+  j: JourneyState
+) => {
+  if (j.checkGroup !== action.payload.checkGroup) return j;
+  const step = j.steps.find((s) => s.synthetics.step.index === action.payload.stepIndex);
+  if (!step) return undefined;
+  return set(step);
+};
