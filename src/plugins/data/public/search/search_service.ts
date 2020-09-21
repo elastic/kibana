@@ -22,12 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
-import {
-  createSearchSource,
-  ISearchGeneric,
-  SearchSource,
-  SearchSourceDependencies,
-} from '../../common/search';
+import { ISearchGeneric, SearchSourceService, SearchSourceDependencies } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
@@ -57,6 +52,7 @@ export interface SearchServiceStartDependencies {
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
+  private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
@@ -129,22 +125,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
       },
-      searchSource: {
-        /**
-         * creates searchsource based on serialized search source fields
-         */
-        create: createSearchSource(indexPatterns, searchSourceDependencies),
-        /**
-         * creates an enpty search source
-         */
-        createEmpty: () => {
-          return new SearchSource({}, searchSourceDependencies);
-        },
-      },
+      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
     };
   }
 
   public stop() {
     this.aggsService.stop();
+    this.searchSourceService.stop();
   }
 }

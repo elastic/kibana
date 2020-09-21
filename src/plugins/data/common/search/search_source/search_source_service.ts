@@ -17,12 +17,26 @@
  * under the License.
  */
 
-export { SearchSource, ISearchSource, SearchSourceDependencies } from './search_source';
-export { createSearchSource } from './create_search_source';
-export { SortDirection, EsQuerySortValue, SearchSourceFields } from './types';
-export { injectReferences } from './inject_references';
-export { extractReferences } from './extract_references';
-export { parseSearchSourceJSON } from './parse_json';
-export * from './fetch';
-export * from './legacy';
-export * from './search_source_service';
+import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
+import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+
+export class SearchSourceService {
+  public setup() {}
+
+  public start(indexPatterns: IndexPatternsContract, dependencies: SearchSourceDependencies) {
+    return {
+      /**
+       * creates searchsource based on serialized search source fields
+       */
+      create: createSearchSource(indexPatterns, dependencies),
+      /**
+       * creates an enpty search source
+       */
+      createEmpty: () => {
+        return new SearchSource({}, dependencies);
+      },
+    };
+  }
+
+  public stop() {}
+}
