@@ -178,7 +178,7 @@ export default function (program) {
       'A path to scan for plugins, this can be specified multiple ' +
         'times to specify multiple directories',
       pluginDirCollector,
-      [fromRoot('plugins'), fromRoot('src/legacy/core_plugins')]
+      [fromRoot('plugins')]
     )
     .option(
       '--plugin-path <path>',

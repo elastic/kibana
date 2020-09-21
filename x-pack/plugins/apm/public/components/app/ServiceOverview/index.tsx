@@ -114,8 +114,6 @@ export function ServiceOverview() {
     canCreateJob &&
     !userHasDismissedCallout;
 
-  const displayHealthStatus = data.items.some((item) => 'severity' in item);
-
   return (
     <>
       <EuiSpacer />
@@ -134,7 +132,6 @@ export function ServiceOverview() {
               <EuiPanel>
                 <ServiceList
                   items={data.items}
-                  displayHealthStatus={displayHealthStatus}
                   noItemsMessage={
                     <NoServicesMessage
                       historicalDataFound={data.hasHistoricalData}
