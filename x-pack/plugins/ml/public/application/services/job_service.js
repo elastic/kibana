@@ -797,7 +797,6 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   let path = '';
 
   if (resultsPage !== undefined) {
-    path += '#/';
     path += resultsPage;
   }
 

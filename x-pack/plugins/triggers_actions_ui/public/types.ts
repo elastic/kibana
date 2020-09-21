@@ -134,6 +134,7 @@ export interface AlertTypeParamsExpressionProps<
 > {
   alertParams: AlertParamsType;
   alertInterval: string;
+  alertThrottle: string;
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: IErrorObject;

@@ -181,6 +181,12 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 To integrate with the telemetry services for usage collection of your feature, there are 2 steps:
 
 
+|{kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
+|The default editor is used in most primary visualizations, e.x. Area, Data table, Pie, etc.
+It acts as a container for a particular visualization and options tabs. Contains the default "Data" tab in public/components/sidebar/data_tab.tsx.
+The plugin exposes the static DefaultEditorController class to consume.
+
+
 |{kib-repo}blob/{branch}/src/plugins/vis_type_markdown/README.md[visTypeMarkdown]
 |The markdown visualization that can be used to place text panels on dashboards.
 
@@ -341,6 +347,10 @@ and actions.
 or dashboards from the Kibana instance, from both server and client-side plugins
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/global_search_bar/README.md[globalSearchBar]
+|The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.)
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search_providers[globalSearchProviders]
 |WARNING: Missing README.
 
@@ -488,6 +498,10 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]
 |This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/xpack_legacy/README.md[xpackLegacy]
+|Contains HTTP endpoints and UiSettings that are slated for removal.
 
 
 |===
