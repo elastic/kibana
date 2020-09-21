@@ -31,6 +31,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     '_events',
     '_eventsCount',
     '_maxListeners',
+    'constructor',
     'name',
     'serializer',
     'connectionPool',
@@ -38,35 +39,48 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     'helpers',
   ];
 
+  const getAllPropertyDescriptors = (obj: Record<string, any>) => {
+    const descriptors = Object.entries(Object.getOwnPropertyDescriptors(obj));
+    let prototype = Object.getPrototypeOf(obj);
+    while (prototype != null && prototype !== Object.prototype) {
+      descriptors.push(...Object.entries(Object.getOwnPropertyDescriptors(prototype)));
+      prototype = Object.getPrototypeOf(prototype);
+    }
+    return descriptors;
+  };
+
   const mockify = (obj: Record<string, any>, omitted: string[] = []) => {
-    Object.keys(obj)
-      .filter((key) => !omitted.includes(key))
-      .forEach((key) => {
-        const propType = typeof obj[key];
-        if (propType === 'function') {
+    const descriptors = getAllPropertyDescriptors(obj);
+    descriptors
+      .filter((descriptor) => !omitted.includes(descriptor[0]))
+      .forEach((descriptor) => {
+        const key = descriptor[0];
+        if (typeof descriptor[1].value === 'function') {
           obj[key] = jest.fn(() => createSuccessTransportRequestPromise({}));
-        } else if (propType === 'object' && obj[key] != null) {
-          mockify(obj[key]);
+        } else if (typeof obj[key] === 'object' && obj[key] != null) {
+          mockify(obj[key], omitted);
         }
       });
   };
 
   mockify(client, omittedProps);
 
-  // client got some read-only (getter) properties
-  // so we need to extend it to override the getter-only props.
-  const mock: any = { ...client };
-
-  mock.transport = {
+  client.close = jest.fn().mockReturnValue(Promise.resolve());
+  client.child = jest.fn().mockImplementation(() => createInternalClientMock());
+  Object.defineProperty(client, 'on', {
+    value: jest.fn(),
+  });
+  Object.defineProperty(client, 'off', {
+    value: jest.fn(),
+  });
+  Object.defineProperty(client, 'once', {
+    value: jest.fn(),
+  });
+  client.transport = {
     request: jest.fn(),
   };
-  mock.close = jest.fn().mockReturnValue(Promise.resolve());
-  mock.child = jest.fn().mockImplementation(() => createInternalClientMock());
-  mock.on = jest.fn();
-  mock.off = jest.fn();
-  mock.once = jest.fn();
 
-  return (mock as unknown) as DeeplyMockedKeys<Client>;
+  return client as DeeplyMockedKeys<Client>;
 };
 
 export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
