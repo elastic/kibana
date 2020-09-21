@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference, without } from 'lodash';
+import difference from 'lodash/difference';
+import without from 'lodash/without';
 
 import { i18n } from '@kbn/i18n';
 

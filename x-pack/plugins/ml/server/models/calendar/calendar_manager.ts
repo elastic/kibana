@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference } from 'lodash';
+import difference from 'lodash/difference';
 import { IScopedClusterClient } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
 

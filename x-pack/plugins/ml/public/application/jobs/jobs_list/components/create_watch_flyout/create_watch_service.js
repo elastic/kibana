@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { template } from 'lodash';
+import template from 'lodash/template';
 import { http } from '../../../../services/http_service';
 
 import emailBody from './email.html';

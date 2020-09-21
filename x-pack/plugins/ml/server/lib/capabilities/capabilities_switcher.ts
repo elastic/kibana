@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';

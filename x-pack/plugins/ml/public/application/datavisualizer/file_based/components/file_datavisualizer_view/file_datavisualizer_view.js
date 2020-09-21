@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 
 import { ml } from '../../../../services/ml_api_service';
 import { AboutPanel, LoadingPanel } from '../about_panel';

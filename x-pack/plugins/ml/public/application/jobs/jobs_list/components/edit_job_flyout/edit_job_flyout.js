@@ -6,7 +6,9 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { cloneDeep, isEqual, pick } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
+import pick from 'lodash/pick';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {

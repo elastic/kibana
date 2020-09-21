@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { chunk } from 'lodash';
+import chunk from 'lodash/chunk';
 import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
 import {

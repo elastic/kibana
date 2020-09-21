@@ -12,7 +12,6 @@
 
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {} from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,

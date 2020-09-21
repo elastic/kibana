@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { KibanaRequest, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 import { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';

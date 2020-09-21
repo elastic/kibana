@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference } from 'lodash';
+import difference from 'lodash/difference';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
 import { getSavedObjectsClient } from '../../../../util/dependency_cache';

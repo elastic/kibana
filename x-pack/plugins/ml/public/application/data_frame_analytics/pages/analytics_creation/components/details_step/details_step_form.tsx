@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useRef, useEffect, useState } from 'react';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import {
   EuiFieldText,
   EuiFormRow,

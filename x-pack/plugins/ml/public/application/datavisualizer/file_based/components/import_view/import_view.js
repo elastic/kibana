@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { importerFactory } from './importer';
 import { ResultsLinks } from '../results_links';
 import { FilebeatConfigFlyout } from '../filebeat_config_flyout';

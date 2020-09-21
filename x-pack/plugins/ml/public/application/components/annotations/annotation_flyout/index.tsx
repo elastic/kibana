@@ -7,7 +7,7 @@
 import React, { Component, FC, ReactNode, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 import {
   EuiButton,

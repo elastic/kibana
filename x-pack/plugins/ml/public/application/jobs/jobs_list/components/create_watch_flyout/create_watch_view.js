@@ -15,7 +15,7 @@ import React, { Component } from 'react';
 
 import { EuiCheckbox, EuiFieldText, EuiCallOut } from '@elastic/eui';
 
-import { has } from 'lodash';
+import has from 'lodash/has';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

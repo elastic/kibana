@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { IScopedClusterClient } from 'kibana/server';
 import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';

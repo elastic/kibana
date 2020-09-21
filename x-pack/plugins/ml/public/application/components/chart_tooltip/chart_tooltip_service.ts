@@ -5,7 +5,7 @@
  */
 
 import { BehaviorSubject, Observable } from 'rxjs';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
 import { distinctUntilChanged } from 'rxjs/operators';
 
