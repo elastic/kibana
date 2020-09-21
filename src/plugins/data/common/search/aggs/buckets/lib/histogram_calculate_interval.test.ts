@@ -42,7 +42,7 @@ describe('calculateHistogramInterval', () => {
     });
 
     describe('maxBucketsUserInput is defined', () => {
-      test('should set 1 as an interval for natural (integer) numbers that are less than maxBuckets #1', () => {
+      test('should set 1 as an interval for integer numbers that are less than maxBuckets #1', () => {
         const p = {
           ...params,
           maxBucketsUserInput: 100,
@@ -55,7 +55,7 @@ describe('calculateHistogramInterval', () => {
         expect(calculateHistogramInterval(p)).toEqual(1);
       });
 
-      test('should set 1 as an interval for natural (integer) numbers that are less than maxBuckets #2', () => {
+      test('should set 1 as an interval for integer numbers that are less than maxBuckets #2', () => {
         const p = {
           ...params,
           maxBucketsUiSettings: 1000,
@@ -69,7 +69,7 @@ describe('calculateHistogramInterval', () => {
         expect(calculateHistogramInterval(p)).toEqual(1);
       });
 
-      test('should set correct interval for natural (integer) numbers that are greater than maxBuckets #1', () => {
+      test('should set correct interval for integer numbers that are greater than maxBuckets #1', () => {
         const p = {
           ...params,
           maxBucketsUserInput: 100,
@@ -77,12 +77,12 @@ describe('calculateHistogramInterval', () => {
             min: 400,
             max: 790,
           },
-          esTypes: [ES_FIELD_TYPES.INTEGER],
+          esTypes: [ES_FIELD_TYPES.INTEGER, ES_FIELD_TYPES.SHORT],
         };
         expect(calculateHistogramInterval(p)).toEqual(5);
       });
 
-      test('should set correct interval for natural (integer) numbers that are greater than maxBuckets #2', () => {
+      test('should set correct interval for integer numbers that are greater than maxBuckets #2', () => {
         // diff === 3456211; interval === 50000; buckets === 69
         const p = {
           ...params,
@@ -94,6 +94,32 @@ describe('calculateHistogramInterval', () => {
           esTypes: [ES_FIELD_TYPES.LONG],
         };
         expect(calculateHistogramInterval(p)).toEqual(50000);
+      });
+
+      test('should not set integer interval if the field type is float #1', () => {
+        const p = {
+          ...params,
+          maxBucketsUserInput: 100,
+          values: {
+            min: 0,
+            max: 1,
+          },
+          esTypes: [ES_FIELD_TYPES.FLOAT],
+        };
+        expect(calculateHistogramInterval(p)).toEqual(0.01);
+      });
+
+      test('should not set integer interval if the field type is float #2', () => {
+        const p = {
+          ...params,
+          maxBucketsUserInput: 100,
+          values: {
+            min: 0,
+            max: 1,
+          },
+          esTypes: [ES_FIELD_TYPES.INTEGER, ES_FIELD_TYPES.FLOAT],
+        };
+        expect(calculateHistogramInterval(p)).toEqual(0.01);
       });
 
       test('should not set interval which more than largest possible', () => {

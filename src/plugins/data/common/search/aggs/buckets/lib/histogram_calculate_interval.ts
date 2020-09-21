@@ -29,9 +29,9 @@ export interface CalculateHistogramIntervalParams {
   interval: string;
   maxBucketsUiSettings: number;
   maxBucketsUserInput?: number | '';
+  esTypes: ES_FIELD_TYPES[];
   intervalBase?: number;
   values?: IntervalValuesRange;
-  esTypes: ES_FIELD_TYPES[];
 }
 
 /**
@@ -87,13 +87,14 @@ const calculateAutoInterval = (diff: number, maxBars: number, esTypes: ES_FIELD_
   // see: https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
   if (
     diff < maxBars &&
-    esTypes.length === 1 &&
-    [
-      ES_FIELD_TYPES.INTEGER,
-      ES_FIELD_TYPES.LONG,
-      ES_FIELD_TYPES.SHORT,
-      ES_FIELD_TYPES.BYTE,
-    ].includes(esTypes[0])
+    esTypes.every((esType) =>
+      [
+        ES_FIELD_TYPES.INTEGER,
+        ES_FIELD_TYPES.LONG,
+        ES_FIELD_TYPES.SHORT,
+        ES_FIELD_TYPES.BYTE,
+      ].includes(esType)
+    )
   ) {
     return 1;
   }
