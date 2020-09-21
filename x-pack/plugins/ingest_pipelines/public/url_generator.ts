@@ -59,13 +59,17 @@ export class IngestPipelinesUrlGenerator
   public readonly createUrl = async (state: IngestPipelinesUrlGeneratorState): Promise<string> => {
     switch (state.page) {
       case INGEST_PIPELINES_PAGES.EDIT: {
-        return `${await this.getAppBasePath(!!state.absolute)}${getEditPath(state.pipelineId)}`;
+        return `${await this.getAppBasePath(!!state.absolute)}${getEditPath({
+          pipelineName: state.pipelineId,
+        })}`;
       }
       case INGEST_PIPELINES_PAGES.CREATE: {
         return `${await this.getAppBasePath(!!state.absolute)}${getCreatePath()}`;
       }
       case INGEST_PIPELINES_PAGES.LIST: {
-        return `${await this.getAppBasePath(!!state.absolute)}${getListPath(state.pipelineId)}`;
+        return `${await this.getAppBasePath(!!state.absolute)}${getListPath({
+          inspectedPipelineName: state.pipelineId,
+        })}`;
       }
       case INGEST_PIPELINES_PAGES.CLONE: {
         return `${await this.getAppBasePath(!!state.absolute)}${getClonePath(state.pipelineId)}`;

@@ -50,7 +50,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       return;
     }
 
-    history.push(getListPath(pipeline.name));
+    history.push(getListPath({ inspectedPipelineName: pipeline.name }));
   };
 
   const onCancel = () => {

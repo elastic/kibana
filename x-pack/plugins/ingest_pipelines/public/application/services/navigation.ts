@@ -32,8 +32,13 @@ export const ROUTES_CONFIG = {
   clone: _getClonePath(':sourceName', false),
 };
 
-export const getListPath = (selectedPipelineName?: string): string =>
-  _getListPath(selectedPipelineName);
-export const getEditPath = (pipelineName: string): string => _getEditPath(pipelineName, true);
+export const getListPath = ({
+  inspectedPipelineName,
+}?: {
+  inspectedPipelineName: string;
+}): string => _getListPath(inspectedPipelineName);
+export const getEditPath = ({ pipelineName }: { pipelineName: string }): string =>
+  _getEditPath(pipelineName, true);
 export const getCreatePath = (): string => _getCreatePath();
-export const getClonePath = (pipelineName: string): string => _getClonePath(pipelineName, true);
+export const getClonePath = ({ clonedPipelineName }: { clonedPipelineName: string }): string =>
+  _getClonePath(clonedPipelineName, true);

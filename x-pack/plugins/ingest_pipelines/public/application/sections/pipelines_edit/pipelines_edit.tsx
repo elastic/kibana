@@ -56,7 +56,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(getListPath(updatedPipeline.name));
+    history.push(getListPath({ inspectedPipelineName: updatedPipeline.name }));
   };
 
   const onCancel = () => {

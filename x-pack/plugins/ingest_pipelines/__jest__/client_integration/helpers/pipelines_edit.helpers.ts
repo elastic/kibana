@@ -29,7 +29,7 @@ export const PIPELINE_TO_EDIT = {
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [getEditPath(PIPELINE_TO_EDIT.name)],
+    initialEntries: [getEditPath({ pipelineName: PIPELINE_TO_EDIT.name })],
     componentRoutePath: ROUTES_CONFIG.edit,
   },
   doMountAsync: true,

@@ -29,7 +29,7 @@ export const PIPELINE_TO_CLONE = {
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [getClonePath(PIPELINE_TO_CLONE.name)],
+    initialEntries: [getClonePath({ clonedPipelineName: PIPELINE_TO_CLONE.name })],
     componentRoutePath: ROUTES_CONFIG.clone,
   },
   doMountAsync: true,
