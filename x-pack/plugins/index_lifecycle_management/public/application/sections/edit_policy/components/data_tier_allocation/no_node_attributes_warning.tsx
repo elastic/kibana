@@ -32,15 +32,6 @@ const i18nTexts = {
       }
     ),
   },
-  frozen: {
-    body: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.frozen.nodeAttributesMissingDescription',
-      {
-        defaultMessage:
-          'Define custom node attributes in elasticsearch.yml to use attribute-based allocation. Frozen nodes will be used instead.',
-      }
-    ),
-  },
 };
 
 export const NoNodeAttributesWarning: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
