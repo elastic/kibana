@@ -122,24 +122,18 @@ export const searchAfterAndBulkCreate = async ({
         logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
 
         // perform search_after with optionally undefined sortId
-        const {
-          searchResult,
-          searchDuration,
-        }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter(
-          {
-            searchAfterSortId: sortId,
-            index: inputIndexPattern,
-            from: tuple.from.toISOString(),
-            to: tuple.to.toISOString(),
-            services,
-            logger,
-            filter,
-            pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
-            timestampOverride: ruleParams.timestampOverride,
-          }
-        );
+        const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+          searchAfterSortId: sortId,
+          index: inputIndexPattern,
+          from: tuple.from.toISOString(),
+          to: tuple.to.toISOString(),
+          services,
+          logger,
+          filter,
+          pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+          timestampOverride: ruleParams.timestampOverride,
+        });
         toReturn.searchAfterTimes.push(searchDuration);
-
         // determine if there are any candidate signals to be processed
         const totalHits =
           typeof searchResult.hits.total === 'number'
@@ -233,8 +227,8 @@ export const searchAfterAndBulkCreate = async ({
           logger.debug(
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
           );
-          toReturn.success = toReturn.success && bulkSuccess;
-          toReturn.errors = [...new Set([...toReturn.errors, ...bulkErrors])];
+          toReturn.success = toReturn.success && bulkSuccess && searchResult._shards.failed === 0;
+          toReturn.errors = [...new Set([...toReturn.errors, ...bulkErrors, ...searchErrors])];
         }
 
         // we are guaranteed to have searchResult hits at this point

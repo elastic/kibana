@@ -25,6 +25,7 @@ import {
   getListsClient,
   getSignalTimeTuples,
   getExceptions,
+  createErrorsFromShard,
 } from './utils';
 import { BulkResponseErrorAggregation } from './types';
 import {
@@ -34,6 +35,7 @@ import {
   sampleBulkErrorItem,
   mockLogger,
 } from './__mocks__/es_results';
+import { ShardError } from '../../types';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -781,6 +783,77 @@ describe('utils', () => {
       });
 
       expect(exceptions).toEqual([]);
+    });
+  });
+
+  describe('createErrorsFromShard', () => {
+    test('empty errors will return an empty array', () => {
+      const createdErrors = createErrorsFromShard({ errors: [] });
+      expect(createdErrors).toEqual([]);
+    });
+
+    test('single error will return single converted array of a string of a reason', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            type: 'some type',
+            reason: 'some reason',
+            index_uuid: 'uuid-123',
+            index: 'index-123',
+            caused_by: {
+              type: 'some type',
+              reason: 'some reason',
+            },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'reason: some reason, type: some type, caused by: some reason',
+      ]);
+    });
+
+    test('two errors will return two converted arrays to a string of a reason', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            type: 'some type',
+            reason: 'some reason',
+            index_uuid: 'uuid-123',
+            index: 'index-123',
+            caused_by: {
+              type: 'some type',
+              reason: 'some reason',
+            },
+          },
+        },
+        {
+          shard: 2,
+          index: 'index-345',
+          node: 'node-345',
+          reason: {
+            type: 'some type 2',
+            reason: 'some reason 2',
+            index_uuid: 'uuid-345',
+            index: 'index-345',
+            caused_by: {
+              type: 'some type 2',
+              reason: 'some reason 2',
+            },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'reason: some reason, type: some type, caused by: some reason',
+        'reason: some reason 2, type: some type 2, caused by: some reason 2',
+      ]);
     });
   });
 });

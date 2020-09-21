@@ -16,6 +16,7 @@ import {
   getListsClient,
   getExceptions,
   sortExceptionItems,
+  createErrorsFromShard,
 } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions } from './types';
@@ -107,6 +108,7 @@ describe('rules_notification_alert_type', () => {
       exceptionsWithoutValueLists: [getExceptionListItemSchemaMock()],
       exceptionsWithValueLists: [],
     });
+    (createErrorsFromShard as jest.Mock).mockReturnValue([]);
     (searchAfterAndBulkCreate as jest.Mock).mockClear();
     (getGapMaxCatchupRatio as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
@@ -383,6 +385,7 @@ describe('rules_notification_alert_type', () => {
           },
         ]);
         (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: {},
           hits: {
             hits: [],
           },
@@ -401,6 +404,7 @@ describe('rules_notification_alert_type', () => {
         payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
         jobsSummaryMock.mockResolvedValue([]);
         (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: {},
           hits: {
             hits: [],
           },
@@ -409,6 +413,7 @@ describe('rules_notification_alert_type', () => {
           success: true,
           bulkCreateDuration: 0,
           createdItemsCount: 0,
+          errors: [],
         });
         await alert.executor(payload);
         expect(ruleStatusService.success).not.toHaveBeenCalled();
@@ -425,6 +430,7 @@ describe('rules_notification_alert_type', () => {
           },
         ]);
         (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: { failed: 0 },
           hits: {
             hits: [{}],
           },
@@ -433,6 +439,7 @@ describe('rules_notification_alert_type', () => {
           success: true,
           bulkCreateDuration: 1,
           createdItemsCount: 1,
+          errors: [],
         });
         await alert.executor(payload);
         expect(ruleStatusService.success).toHaveBeenCalled();
@@ -460,6 +467,7 @@ describe('rules_notification_alert_type', () => {
         });
         jobsSummaryMock.mockResolvedValue([]);
         (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: { failed: 0 },
           hits: {
             hits: [{}],
           },
@@ -468,6 +476,7 @@ describe('rules_notification_alert_type', () => {
           success: true,
           bulkCreateDuration: 1,
           createdItemsCount: 1,
+          errors: [],
         });
 
         await alert.executor(payload);

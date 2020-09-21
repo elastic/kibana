@@ -34,6 +34,7 @@ import {
   getExceptions,
   getGapMaxCatchupRatio,
   MAX_RULE_GAP_RATIO,
+  createErrorsFromShard,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -255,8 +256,15 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
           });
-          result.success = success;
-          result.errors = errors;
+          // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
+          const shardFailures =
+            (anomalyResults._shards as typeof anomalyResults._shards & { failures: [] }).failures ??
+            [];
+          const searchErrors = createErrorsFromShard({
+            errors: shardFailures,
+          });
+          result.success = success && anomalyResults._shards.failed === 0;
+          result.errors = [...errors, ...searchErrors];
           result.createdSignalsCount = createdItemsCount;
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
@@ -276,7 +284,7 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
-          const { searchResult: thresholdResults } = await findThresholdSignals({
+          const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
             from,
             to,
@@ -313,8 +321,8 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
           });
-          result.success = success;
-          result.errors = errors;
+          result.success = success && thresholdResults._shards.failed === 0;
+          result.errors = [...errors, ...searchErrors];
           result.createdSignalsCount = createdItemsCount;
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);

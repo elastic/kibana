@@ -17,6 +17,7 @@ import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
+import { ShardError } from '../../types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -438,4 +439,14 @@ export const getSignalTimeTuples = ({
     buildRuleMessage(`totalToFromTuples: ${JSON.stringify(totalToFromTuples, null, 4)}`)
   );
   return totalToFromTuples;
+};
+
+/**
+ * Given errors from a search query this will return an array of strings derived from the errors.
+ * @param errors The errors to derive the strings from
+ */
+export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
+  return errors.map((error) => {
+    return `reason: ${error.reason.reason}, type: ${error.reason.caused_by.type}, caused by: ${error.reason.caused_by.reason}`;
+  });
 };
