@@ -19,7 +19,7 @@ import {
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsUtils,
   ISavedObjectTypeRegistry,
-} from 'src/core/server';
+} from '../../../../../src/core/server';
 import { SpacesServiceSetup } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
 import { SpacesClient } from '../lib/spaces_client';
