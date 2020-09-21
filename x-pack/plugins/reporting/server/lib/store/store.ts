@@ -12,6 +12,7 @@ import { BaseParams, BaseParamsEncryptedFields, ReportingUser } from '../../type
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
 import { Report } from './report';
+
 interface JobSettings {
   timeout: number;
   browser_type: string;
