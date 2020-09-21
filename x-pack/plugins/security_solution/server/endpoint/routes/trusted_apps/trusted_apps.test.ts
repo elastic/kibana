@@ -26,7 +26,10 @@ import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/const
 import { EndpointAppContext } from '../../types';
 import { ExceptionListClient, ListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas/response';
+import {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '../../../../../lists/common/schemas/response';
 import { DeleteTrustedAppsRequestParams } from './types';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
@@ -122,6 +125,97 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         namespaceType: 'agnostic',
         sortField: 'name',
         sortOrder: 'asc',
+      });
+    });
+
+    it('should map Exception List Item to Trusted App item', async () => {
+      const request = createListRequest(10, 100);
+      const emptyResponse: FoundExceptionListItemSchema = {
+        data: [
+          {
+            _tags: ['os:windows'],
+            _version: undefined,
+            comments: [],
+            created_at: '2020-09-21T19:43:48.240Z',
+            created_by: 'test',
+            description: '',
+            entries: [
+              {
+                field: 'process.hash.sha256',
+                operator: 'included',
+                type: 'match',
+                value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+              },
+              {
+                field: 'process.hash.sha1',
+                operator: 'included',
+                type: 'match',
+                value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
+              },
+              {
+                field: 'process.hash.md5',
+                operator: 'included',
+                type: 'match',
+                value: '741462ab431a22233c787baab9b653c7',
+              },
+            ],
+            id: '1',
+            item_id: '11',
+            list_id: 'trusted apps test',
+            meta: undefined,
+            name: 'test',
+            namespace_type: 'agnostic',
+            tags: [],
+            tie_breaker_id: '1',
+            type: 'simple',
+            updated_at: '2020-09-21T19:43:48.240Z',
+            updated_by: 'test',
+          },
+        ],
+        page: 10,
+        per_page: 100,
+        total: 0,
+      };
+
+      exceptionsListClient.findExceptionListItem.mockResolvedValue(emptyResponse);
+      await routeHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          data: [
+            {
+              created_at: '2020-09-21T19:43:48.240Z',
+              created_by: 'test',
+              description: '',
+              entries: [
+                {
+                  field: 'process.hash.*',
+                  operator: 'included',
+                  type: 'exact_cased',
+                  value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+                },
+                {
+                  field: 'process.hash.*',
+                  operator: 'included',
+                  type: 'exact_cased',
+                  value: 'aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
+                },
+                {
+                  field: 'process.hash.*',
+                  operator: 'included',
+                  type: 'exact_cased',
+                  value: '741462ab431a22233c787baab9b653c7',
+                },
+              ],
+              id: '1',
+              name: 'test',
+              os: 'windows',
+            },
+          ],
+          page: 10,
+          per_page: 100,
+          total: 0,
+        },
       });
     });
 
