@@ -58,7 +58,9 @@ export const Editor = memo(({ licenseEnabled, initialValue, onEditorReady }: Pro
     onEditorReady(createEditorShim(editorInstanceRef.current));
 
     return () => {
-      editorInstanceRef.current.destroy();
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.destroy();
+      }
     };
   }, [initialValue, onEditorReady, licenseEnabled]);
 
