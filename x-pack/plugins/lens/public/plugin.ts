@@ -32,7 +32,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
-import { searchProvider } from './search_provider';
+import { getSearchProvider } from './search_provider';
 
 import './index.scss';
 
@@ -121,7 +121,17 @@ export class LensPlugin {
     });
 
     if (globalSearch) {
-      globalSearch.registerResultProvider(searchProvider);
+      globalSearch.registerResultProvider(
+        getSearchProvider(
+          core.getStartServices().then(
+            ([
+              {
+                application: { capabilities },
+              },
+            ]) => capabilities
+          )
+        )
+      );
     }
 
     urlForwarding.forwardApp('lens', 'lens');

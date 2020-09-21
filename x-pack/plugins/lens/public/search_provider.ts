@@ -5,9 +5,11 @@
  */
 
 import levenshtein from 'js-levenshtein';
+import { ApplicationStart } from 'kibana/public';
 import { from, EMPTY } from 'rxjs';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { GlobalSearchResultProvider } from '../../global_search/public';
-import { getFullPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { getFullPath } from '../common';
 
 /**
  * Global search provider adding a Lens entry.
@@ -19,10 +21,12 @@ import { getFullPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
  * TODO: This is a workaround and can be removed once there is a generic way to register sub features
  * of apps. In this case, Lens should be considered a feature of Visualize.
  */
-export const searchProvider: GlobalSearchResultProvider = {
+export const getSearchProvider: (
+  uiCapabilities: Promise<ApplicationStart['capabilities']>
+) => GlobalSearchResultProvider = (uiCapabilities) => ({
   id: 'lens',
   find: (term) => {
-    const title = NOT_INTERNATIONALIZED_PRODUCT_NAME;
+    const title = 'Visualize: Lens';
     const searchableTitle = title.toLowerCase();
 
     term = term.toLowerCase();
@@ -46,17 +50,25 @@ export const searchProvider: GlobalSearchResultProvider = {
       }
     }
     if (score === 0) return EMPTY;
-    return from([
-      [
-        {
-          id: 'lens',
-          title,
-          type: 'application',
-          icon: 'logoKibana',
-          score,
-          url: getFullPath(),
-        },
-      ],
-    ]);
+    return from(
+      uiCapabilities.then(({ navLinks: { visualize: visualizeNavLink } }) =>
+        visualizeNavLink
+          ? [
+              {
+                id: 'lens',
+                title,
+                type: 'application',
+                icon: 'logoKibana',
+                meta: {
+                  categoryId: DEFAULT_APP_CATEGORIES.kibana.id,
+                  categoryLabel: DEFAULT_APP_CATEGORIES.kibana.label,
+                },
+                score,
+                url: getFullPath(),
+              },
+            ]
+          : []
+      )
+    );
   },
-};
+});
