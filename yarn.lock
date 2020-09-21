@@ -1144,10 +1144,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.6.0"
 
-"@elastic/charts@21.1.2":
-  version "21.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-21.1.2.tgz#da7e9c1025bf730a738b6ac6d7024d97dd2b5aa2"
-  integrity sha512-Uri+Xolgii7/mRSarfXTfA6X2JC76ILIxTPO8RlYdI44gzprJfUO7Aw5s8vVQke3x6Cu39a+9B0s6TY4GAaApQ==
+"@elastic/charts@21.3.2":
+  version "21.3.2"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-21.3.2.tgz#346a653f7933564f74a8ce92ce8ebcc40ea563ce"
+  integrity sha512-IBgJQY0Z6jdVmqtltyq7Kx0tD4JLoRKYq+eHmnqjtyPNsIgCIagdtbbnPhsmpSWzq9RIpDwQ7onzU7nDXrIQcQ==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
