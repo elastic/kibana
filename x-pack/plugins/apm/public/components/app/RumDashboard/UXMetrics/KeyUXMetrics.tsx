@@ -24,7 +24,7 @@ export function formatToSec(
   const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
 
   if (valueInMs < 1000) {
-    return valueInMs + ' ms';
+    return valueInMs.toFixed(0) + ' ms';
   }
   return (valueInMs / 1000).toFixed(2) + ' s';
 }
@@ -69,7 +69,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatToSec(data?.tbt)}
+          title={formatToSec(data?.tbt, 'ms')}
           description={TBT_LABEL}
           isLoading={loading}
         />
