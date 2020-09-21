@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { expandLiteralStrings, collapseLiteralStrings } from '../../../../es_ui_shared/public';
+import { expandLiteralStrings, collapseLiteralStrings } from '@kbn/ace';
 
 export function textFromRequest(request: any) {
   let data = request.data;

@@ -22,7 +22,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from '../create';
-import { collapseLiteralStrings } from '../../../../../../es_ui_shared/public';
+import { collapseLiteralStrings } from '@kbn/ace';
 import editorInput1 from './editor_input1.txt';
 
 describe('Editor', () => {

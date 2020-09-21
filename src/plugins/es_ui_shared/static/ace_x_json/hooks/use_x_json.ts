@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { XJsonMode } from '../../../public';
+import { XJsonMode } from '@kbn/ace';
 import { useXJsonMode as useBaseXJsonMode } from '../../../__packages_do_not_import__/xjson';
 
 const xJsonMode = new XJsonMode();

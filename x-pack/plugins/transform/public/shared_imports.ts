@@ -5,13 +5,8 @@
  */
 
 export { createSavedSearchesLoader } from '../../../../src/plugins/discover/public';
-export {
-  XJsonMode,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-  UseRequestConfig,
-  useRequest,
-} from '../../../../src/plugins/es_ui_shared/public';
+export { XJsonMode, collapseLiteralStrings, expandLiteralStrings } from '@kbn/ace';
+export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
   getFieldType,

@@ -44,17 +44,6 @@ export {
 export { indices } from './indices';
 
 export {
-  installXJsonMode,
-  XJsonMode,
-  ElasticsearchSqlHighlightRules,
-  addXJsonToRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from './console_lang';
-
-export {
   AuthorizationContext,
   AuthorizationProvider,
   NotAuthorizedSection,

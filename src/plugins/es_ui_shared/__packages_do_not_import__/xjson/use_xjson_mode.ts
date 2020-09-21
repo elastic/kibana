@@ -18,7 +18,7 @@
  */
 
 import { useState, Dispatch } from 'react';
-import { collapseLiteralStrings, expandLiteralStrings } from '../../public';
+import { collapseLiteralStrings, expandLiteralStrings } from '@kbn/ace';
 
 interface ReturnValue {
   xJson: string;
