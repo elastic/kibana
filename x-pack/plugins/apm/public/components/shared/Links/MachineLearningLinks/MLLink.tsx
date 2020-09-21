@@ -5,12 +5,10 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import rison, { RisonValue } from 'rison-node';
-import url from 'url';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
+import { getTimepickerRisonData } from '../rison_helpers';
 
 interface MlRisonData {
   ml?: {
@@ -29,23 +27,48 @@ export function MLLink({ children, path = '', query = {}, external }: Props) {
   const { core } = useApmPluginContext();
   const location = useLocation();
 
-  const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(
-    location.search
+  const {
+    plugins: { ml },
+  } = useApmPluginContext();
+
+  // default to link to ML Anomaly Detection jobs management page
+  const [mlADLink, setMlADLink] = useState(
+    core.http.basePath.prepend('/app/ml/jobs')
   );
 
-  if (query.ml) {
-    risonQuery.ml = query.ml;
-  }
+  useEffect(() => {
+    let isCancelled = false;
+    const generateLink = async () => {
+      const { time, refreshInterval } = getTimepickerRisonData(location.search);
+      let jobIds: string[] = [];
+      if (query.ml?.jobIds) {
+        jobIds = query.ml.jobIds;
+      }
 
-  const href = url.format({
-    pathname: core.http.basePath.prepend('/app/ml'),
-    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`,
-  });
+      if (ml?.urlGenerator !== undefined) {
+        const href = await ml.urlGenerator.createUrl({
+          page: 'jobs',
+          pageState: {
+            jobId: jobIds,
+            timeRange: time,
+            refreshInterval,
+          },
+        });
+        if (!isCancelled) {
+          setMlADLink(href);
+        }
+      }
+    };
+    generateLink();
+    return () => {
+      isCancelled = true;
+    };
+  }, [ml?.urlGenerator, location.search, query]);
 
   return (
     <EuiLink
       children={children}
-      href={href}
+      href={mlADLink}
       external={external}
       target={external ? '_blank' : undefined}
     />
