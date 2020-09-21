@@ -37,6 +37,7 @@ import { UiActionsStart, createAction } from '../../../src/plugins/ui_actions/pu
 import { AppMountParameters, OverlayStart } from '../../../src/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '../../ui_action_examples/public';
 import { TriggerContextExample } from './trigger_context_example';
+import { ContextMenuExamples } from './context_menu_examples';
 
 interface Props {
   uiActionsApi: UiActionsStart;
@@ -109,7 +110,12 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
             </EuiText>
 
             <EuiSpacer />
+
             <TriggerContextExample uiActionsApi={uiActionsApi} />
+
+            <EuiSpacer />
+
+            <ContextMenuExamples />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>

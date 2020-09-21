@@ -7,8 +7,13 @@ Array [
     "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Canvas",
     "label": "Canvas",
+    "meta": Array [
+      Object {
+        "text": "Kibana",
+      },
+    ],
     "prepend": undefined,
-    "title": "Canvasundefinedundefined",
+    "title": "Canvas • Kibana",
     "url": "/app/test/Canvas",
   },
   Object {
@@ -16,8 +21,13 @@ Array [
     "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Discover",
     "label": "Discover",
+    "meta": Array [
+      Object {
+        "text": "Kibana",
+      },
+    ],
     "prepend": undefined,
-    "title": "Discoverundefinedundefined",
+    "title": "Discover • Kibana",
     "url": "/app/test/Discover",
   },
   Object {
@@ -25,8 +35,13 @@ Array [
     "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Graph",
     "label": "Graph",
+    "meta": Array [
+      Object {
+        "text": "Kibana",
+      },
+    ],
     "prepend": undefined,
-    "title": "Graphundefinedundefined",
+    "title": "Graph • Kibana",
     "url": "/app/test/Graph",
   },
 ]
@@ -39,8 +54,13 @@ Array [
     "className": "euiSelectableTemplateSitewide__listItem",
     "key": "Discover",
     "label": "Discover",
+    "meta": Array [
+      Object {
+        "text": "Kibana",
+      },
+    ],
     "prepend": undefined,
-    "title": "Discoverundefinedundefined",
+    "title": "Discover • Kibana",
     "url": "/app/test/Discover",
   },
   Object {
@@ -54,7 +74,7 @@ Array [
       },
     ],
     "prepend": undefined,
-    "title": "My Dashboard •  Test",
+    "title": "My Dashboard • Test",
     "url": "/app/test/My Dashboard",
   },
 ]

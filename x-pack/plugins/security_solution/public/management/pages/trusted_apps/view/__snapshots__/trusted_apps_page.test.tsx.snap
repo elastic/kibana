@@ -297,13 +297,13 @@ Object {
       class="sc-fzoyAV jWxvlI siemWrapperPage"
     >
       <header
-        class="sc-oVoYc gokfWe siemHeaderPage"
+        class="sc-qWSGh guUwJg siemHeaderPage"
       >
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
-            class="euiFlexItem sc-pdMpF bYVYXb"
+            class="euiFlexItem sc-pAMRk dnbbmF"
           >
             <h1
               class="euiTitle euiTitle--large"
@@ -312,7 +312,7 @@ Object {
               Trusted Applications
                
               <span
-                class="euiBetaBadge sc-pTUxa bXJtIM"
+                class="euiBetaBadge sc-puFxT fWhqFT"
                 title="Beta"
               >
                 Beta
@@ -330,7 +330,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero sc-pdMpF bYVYXb"
+            class="euiFlexItem euiFlexItem--flexGrowZero sc-pAMRk dnbbmF"
             data-test-subj="header-page-supplements"
           >
             <button
@@ -390,7 +390,7 @@ Object {
         class="euiSpacer euiSpacer--l"
       />
       <div
-        class="euiPanel euiPanel--paddingMedium sc-pjuKs cIhDKD"
+        class="euiPanel euiPanel--paddingMedium sc-pJVLq cINVeB"
       >
         <div
           class="euiBasicTable euiBasicTable-loading"

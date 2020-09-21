@@ -47,6 +47,7 @@ featuresStart.getFeatures.mockResolvedValue([
     name: 'feature 1',
     icon: 'spacesApp',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
   }),
 ]);
