@@ -80,7 +80,6 @@ import {
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
   rumJSErrors,
-  rumHighTrafficPages,
   rumLongTaskMetrics,
 } from './rum_client';
 import {

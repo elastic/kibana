@@ -33,13 +33,13 @@ export function CsmSharedContextProvider({
 }) {
   const [newData, setNewData] = useState<SharedData>({ totalPageViews: 0 });
 
-  const setSharedData = (data: SharedData) => {
+  const setSharedData = React.useCallback((data: SharedData) => {
     setNewData(data);
-  };
+  }, []);
 
   const value = useMemo(() => {
     return { sharedData: newData, setSharedData };
-  }, [newData]);
+  }, [newData, setSharedData]);
 
   return <CsmSharedContext.Provider value={value} children={children} />;
 }

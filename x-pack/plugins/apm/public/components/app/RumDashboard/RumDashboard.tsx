@@ -19,7 +19,6 @@ import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
 import { UXMetrics } from './UXMetrics';
 import { VisitorBreakdownMap } from './VisitorBreakdownMap';
-import { CoreVitals } from './CoreVitals';
 import { ImpactfulMetrics } from './ImpactfulMetrics';
 
 export function RumDashboard() {
