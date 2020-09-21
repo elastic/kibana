@@ -520,6 +520,11 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         return JSON.stringify(value, null, 2);
       },
       serializer: (value: string) => {
+        // Strip out empty strings
+        if (value.trim() === '') {
+          return undefined;
+        }
+
         try {
           const parsed = JSON.parse(value);
           // If an empty object was passed, strip out this value entirely.
