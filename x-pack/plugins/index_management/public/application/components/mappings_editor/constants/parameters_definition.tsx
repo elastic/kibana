@@ -218,6 +218,18 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.painlessScriptLabel', {
         defaultMessage: 'Script',
       }),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.scriptIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Script must emit() a value.',
+              }
+            )
+          ),
+        },
+      ],
     },
     schema: t.string,
   },
