@@ -25,12 +25,12 @@ For example, to change the index pattern for a set of charts:
 Specify the variable options.
 
 [role="screenshot"]
-image::images/specify_variable_syntax.png[Specify the variable syntax]
+image::images/specify_variable_syntax.png[Image describing how to specify the variable syntax]
 
 Copy the variable, then apply it to each element you want to update in the *Expression editor*.
 
 [role="screenshot"]
-image::images/copy_variable_syntax.png[Copy the variable syntax]
+image::images/copy_variable_syntax.png[Image demonstrating expression editor]
 
 [float]
 [[apply-changes-to-the-entire-workpad]]
@@ -85,7 +85,7 @@ To use an element with the same functionality and appearance in multiple places,
 Select the element, then click *Edit > Clone*. 
 
 [role="screenshot"]
-image::images/clone_element.gif[Clone elements]
+image::images/clone_element.gif[Image showing how to clone elements]
 
 [float]
 [[move-and-resize-elements]]
