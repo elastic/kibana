@@ -10,7 +10,7 @@ import { dataReducer } from './reducer';
 import * as selectors from './selectors';
 import { DataState } from '../../types';
 import { DataAction } from './action';
-import { ResolverChildNode, ResolverEvent, ResolverTree } from '../../../../common/endpoint/types';
+import { ResolverChildNode, ResolverTree } from '../../../../common/endpoint/types';
 import { values } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
@@ -42,7 +42,7 @@ describe('Resolver Data Middleware', () => {
       const tree = mockResolverTree({
         // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
         // a lot of the frontend functions. So casting it back to the unsafe type for now.
-        events: baseTree.allEvents as ResolverEvent[],
+        events: baseTree.allEvents,
         cursors: {
           childrenNextChild: 'aValidChildCursor',
           ancestryNextAncestor: 'aValidAncestorCursor',
@@ -91,7 +91,7 @@ describe('Resolver Data Middleware', () => {
             entityID: firstChildNodeInTree.id,
             // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
             // a lot of the frontend functions. So casting it back to the unsafe type for now.
-            events: firstChildNodeInTree.relatedEvents as ResolverEvent[],
+            events: firstChildNodeInTree.relatedEvents,
             nextEvent: null,
           },
         };
@@ -159,7 +159,7 @@ describe('Resolver Data Middleware', () => {
               entityID: firstChildNodeInTree.id,
               // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
               // a lot of the frontend functions. So casting it back to the unsafe type for now.
-              events: firstChildNodeInTree.relatedEvents as ResolverEvent[],
+              events: firstChildNodeInTree.relatedEvents,
               nextEvent: 'aValidNextEventCursor',
             },
           };
@@ -213,7 +213,7 @@ function mockedTree() {
   const tree = mockResolverTree({
     // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
     // a lot of the frontend functions. So casting it back to the unsafe type for now.
-    events: baseTree.allEvents as ResolverEvent[],
+    events: baseTree.allEvents,
     /**
      * Calculate children from the ResolverTree response using the children of the `Tree` we generated using the Resolver data generator code.
      * Compile (and attach) stats to the first child node.
@@ -227,7 +227,7 @@ function mockedTree() {
       const childNode: Partial<ResolverChildNode> = {};
       // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
       // a lot of the frontend functions. So casting it back to the unsafe type for now.
-      childNode.lifecycle = node.lifecycle as ResolverEvent[];
+      childNode.lifecycle = node.lifecycle;
 
       // `TreeNode` has `id` which is the same as `entityID`.
       // The `ResolverChildNode` calls the entityID as `entityID`.

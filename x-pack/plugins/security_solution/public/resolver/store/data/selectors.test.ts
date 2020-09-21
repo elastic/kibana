@@ -16,7 +16,7 @@ import {
   mockTreeWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
-import { uniquePidForProcess } from '../../models/process_event';
+import * as eventModel from '../../../../common/endpoint/models/event';
 import { EndpointEvent } from '../../../../common/endpoint/types';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
@@ -305,7 +305,7 @@ describe('data state', () => {
       });
     });
   });
-  describe('with a tree with no descendants and 2 ancestors', () => {
+  fdescribe('with a tree with no descendants and 2 ancestors', () => {
     const originID = 'c';
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
@@ -323,7 +323,7 @@ describe('data state', () => {
         },
       });
     });
-    it('should have no flowto candidate for the origin', () => {
+    fit('should have no flowto candidate for the origin', () => {
       expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
     });
     it('should have no flowto candidate for the first ancestor', () => {
@@ -411,7 +411,7 @@ describe('data state', () => {
       expect(graphables.length).toBe(3);
       for (const event of graphables) {
         expect(() => {
-          selectors.ariaFlowtoCandidate(state())(uniquePidForProcess(event));
+          selectors.ariaFlowtoCandidate(state())(eventModel.entityIDSafeVersion(event)!);
         }).not.toThrow();
       }
     });

@@ -35,16 +35,24 @@ export function mockTreeWith2AncestorsAndNoChildren({
     parentEntityID: firstAncestorID,
     timestamp: 2,
   });
-  return ({
+  return {
     entityID: originID,
     children: {
       childNodes: [],
+      nextChild: null,
     },
     ancestry: {
-      ancestors: [{ lifecycle: [secondAncestor] }, { lifecycle: [firstAncestor] }],
+      nextAncestor: null,
+      ancestors: [
+        { entityID: secondAncestorID, lifecycle: [secondAncestor] },
+        { entityID: firstAncestorID, lifecycle: [firstAncestor] },
+      ],
     },
     lifecycle: [originEvent],
-  } as unknown) as ResolverTree;
+    relatedEvents: { events: [], nextEvent: null },
+    relatedAlerts: { alerts: [], nextAlert: null },
+    stats: { events: { total: 2, byCategory: {} }, totalAlerts: 0 },
+  };
 }
 
 export function mockTreeWithAllProcessesTerminated({

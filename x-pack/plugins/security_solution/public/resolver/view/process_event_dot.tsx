@@ -266,7 +266,7 @@ const UnstyledProcessEventDot = React.memo(
     );
 
     const grandTotal: number | null = useSelector((state: ResolverState) =>
-      selectors.relatedEventTotalForProcess(state)(event as ResolverEvent)
+      selectors.relatedEventTotalForProcess(state)(event)
     );
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */

@@ -45,7 +45,7 @@ describe('process event', () => {
     });
   });
   describe('orderByTime', () => {
-    let mock: (time: number, eventID: string) => ResolverEvent;
+    let mock: (time: number, eventID: string) => SafeResolverEvent;
     let events: SafeResolverEvent[];
     beforeEach(() => {
       mock = (time, eventID) => {
@@ -54,20 +54,20 @@ describe('process event', () => {
           event: {
             id: eventID,
           },
-        } as ResolverEvent;
+        };
       };
       // 2 events each for numbers -1, 0, 1, and NaN
       // each event has a unique id, a through h
       // order is arbitrary
       events = [
-        mock(-1, 'a') as SafeResolverEvent,
-        mock(0, 'c') as SafeResolverEvent,
-        mock(1, 'e') as SafeResolverEvent,
-        mock(NaN, 'g') as SafeResolverEvent,
-        mock(-1, 'b') as SafeResolverEvent,
-        mock(0, 'd') as SafeResolverEvent,
-        mock(1, 'f') as SafeResolverEvent,
-        mock(NaN, 'h') as SafeResolverEvent,
+        mock(-1, 'a'),
+        mock(0, 'c'),
+        mock(1, 'e'),
+        mock(NaN, 'g'),
+        mock(-1, 'b'),
+        mock(0, 'd'),
+        mock(1, 'f'),
+        mock(NaN, 'h'),
       ];
     });
     it('sorts events as expected', () => {

@@ -706,11 +706,15 @@ export function treeRequestParametersToAbort(state: DataState): TreeFetcherParam
  */
 export const relatedEventTotalForProcess: (
   state: DataState
-) => (event: ResolverEvent) => number | null = createSelector(
+) => (event: SafeResolverEvent) => number | null = createSelector(
   relatedEventsStats,
   (statsForProcess) => {
-    return (event: ResolverEvent) => {
-      const stats = statsForProcess(uniquePidForProcess(event));
+    return (event: SafeResolverEvent) => {
+      const nodeID = eventModel.entityIDSafeVersion(event);
+      if (nodeID === undefined) {
+        return null;
+      }
+      const stats = statsForProcess(nodeID);
       if (!stats) {
         return null;
       }
