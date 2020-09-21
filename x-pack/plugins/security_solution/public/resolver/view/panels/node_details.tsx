@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
+import styled from 'styled-components';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
@@ -26,11 +27,16 @@ import {
 } from '../../models/process_event';
 import { CubeForProcess } from './cube_for_process';
 import { ResolverEvent } from '../../../../common/endpoint/types';
-import { useResolverTheme } from '../assets';
+import { useCubeAssets } from '../use_cube_assets';
 import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
+
+const StyledCubeForProcess = styled(CubeForProcess)`
+  position: relative;
+  top: 0.75em;
+`;
 
 export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   const processEvent = useSelector((state: ResolverState) =>
@@ -160,13 +166,7 @@ const NodeDetailView = memo(function NodeDetailView({
       },
     ];
   }, [processName, nodesLinkNavProps]);
-  const { cubeAssetsForNode } = useResolverTheme();
-  const { descriptionText } = useMemo(() => {
-    if (!processEvent) {
-      return { descriptionText: '' };
-    }
-    return cubeAssetsForNode(isProcessTerminated, false);
-  }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
+  const { descriptionText } = useCubeAssets(isProcessTerminated, false);
 
   const nodeDetailHref = useSelector((state: ResolverState) =>
     selectors.relativeHref(state)({
@@ -186,7 +186,7 @@ const NodeDetailView = memo(function NodeDetailView({
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <StyledTitle aria-describedby={titleID}>
-          <CubeForProcess
+          <StyledCubeForProcess
             data-test-subj="resolver:node-detail:title-icon"
             running={!isProcessTerminated}
           />

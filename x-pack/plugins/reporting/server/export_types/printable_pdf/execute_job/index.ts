@@ -12,11 +12,11 @@ import { RunTaskFn, RunTaskFnFactory, TaskRunResult } from '../../../types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
-  getCustomLogo,
   getFullUrls,
   omitBlockedHeaders,
 } from '../../common';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { getCustomLogo } from '../lib/get_custom_logo';
 import { TaskPayloadPDF } from '../types';
 
 type QueuedPdfExecutorFactory = RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>>;
@@ -42,9 +42,7 @@ export const runTaskFnFactory: QueuedPdfExecutorFactory = function executeJobFac
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
       map((decryptedHeaders) => omitBlockedHeaders({ job, decryptedHeaders })),
       map((filteredHeaders) => getConditionalHeaders({ config, job, filteredHeaders })),
-      mergeMap((conditionalHeaders) =>
-        getCustomLogo({ reporting, config, job, conditionalHeaders })
-      ),
+      mergeMap((conditionalHeaders) => getCustomLogo(reporting, conditionalHeaders, job.spaceId)),
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls({ config, job });
 
