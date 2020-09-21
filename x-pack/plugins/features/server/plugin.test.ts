@@ -35,6 +35,7 @@ describe('Features Plugin', () => {
       id: 'baz',
       name: 'baz',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     });
 
@@ -63,6 +64,7 @@ describe('Features Plugin', () => {
       id: 'baz',
       name: 'baz',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     });
 

@@ -35,19 +35,8 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         config.get('kibanaServer', 'port'),
       ] as string[];
 
-      const getAbsoluteUrl = getAbsoluteUrlFactory({
-        defaultBasePath: basePath,
-        protocol,
-        hostname,
-        port,
-      });
-
-      const hashUrl = getAbsoluteUrl({
-        basePath,
-        path: '/',
-        hash: '',
-        search: '',
-      });
+      const getAbsoluteUrl = getAbsoluteUrlFactory({ basePath, protocol, hostname, port });
+      const hashUrl = getAbsoluteUrl({ path: '/', hash: '', search: '' });
 
       // Hack the layout to make the base/login page work
       const layout = {
