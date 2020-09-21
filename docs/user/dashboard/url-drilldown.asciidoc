@@ -1,6 +1,8 @@
 [[url-drilldown]]
 === URL drilldown
 
+beta[]
+
 The URL drilldown allows you to navigate from a dashboard to an internal or external URL.
 The destination URL can be dynamic, depending on the dashboard context or user’s interaction with a visualization.
 
