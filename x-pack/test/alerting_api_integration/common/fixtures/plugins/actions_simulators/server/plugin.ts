@@ -76,6 +76,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       id: 'actionsSimulators',
       name: 'actionsSimulators',
       app: ['actions', 'kibana'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['actions', 'kibana'],

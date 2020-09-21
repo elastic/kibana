@@ -24,7 +24,6 @@ import PropTypes from 'prop-types';
 import {
   EuiCallOut,
   EuiCode,
-  EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,72 +36,12 @@ import { getServices } from '../../../kibana_services';
 // eslint-disable-next-line react/prefer-stateless-function
 export class DiscoverNoResults extends Component {
   static propTypes = {
-    shardFailures: PropTypes.array,
     timeFieldName: PropTypes.string,
     queryLanguage: PropTypes.string,
   };
 
   render() {
-    const { shardFailures, timeFieldName, queryLanguage } = this.props;
-
-    let shardFailuresMessage;
-
-    if (shardFailures && shardFailures.length) {
-      const failures = shardFailures.map((failure, index) => (
-        <div key={`${failure.index}${failure.shard}${failure.reason}`}>
-          <EuiText size="xs">
-            <FormattedMessage
-              id="discover.noResults.indexFailureShardText"
-              defaultMessage="{index}, shard {failureShard}"
-              values={{
-                index: (
-                  <strong>
-                    <FormattedMessage
-                      id="discover.noResults.indexFailureIndexText"
-                      defaultMessage="Index {failureIndex}"
-                      values={{
-                        failureIndex: `&lsquo;${failure.index}&rsquo;`,
-                      }}
-                    />
-                  </strong>
-                ),
-                failureShard: `&lsquo;${failure.shard}&rsquo;`,
-              }}
-            />
-          </EuiText>
-
-          <EuiSpacer size="s" />
-
-          <EuiCodeBlock paddingSize="s">{JSON.stringify(failure.reason)}</EuiCodeBlock>
-
-          {index < shardFailures.length - 1 ? <EuiSpacer size="l" /> : undefined}
-        </div>
-      ));
-
-      shardFailuresMessage = (
-        <Fragment>
-          <EuiSpacer size="xl" />
-
-          <EuiText>
-            <h3>
-              <FormattedMessage
-                id="discover.noResults.addressShardFailuresTitle"
-                defaultMessage="Address shard failures"
-              />
-            </h3>
-
-            <p>
-              <FormattedMessage
-                id="discover.noResults.shardFailuresDescription"
-                defaultMessage="The following shard failures occurred:"
-              />
-            </p>
-
-            {failures}
-          </EuiText>
-        </Fragment>
-      );
-    }
+    const { timeFieldName, queryLanguage } = this.props;
 
     let timeFieldMessage;
 
@@ -264,8 +203,6 @@ export class DiscoverNoResults extends Component {
                 iconType="help"
                 data-test-subj="discoverNoResults"
               />
-
-              {shardFailuresMessage}
               {timeFieldMessage}
               {luceneQueryMessage}
             </EuiFlexItem>
