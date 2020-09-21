@@ -11,7 +11,7 @@ import { Logger, SavedObjectsClientContract } from '../../../../../../../src/cor
 import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
+import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -118,7 +118,7 @@ export const getGapMaxCatchupRatio = ({
   };
 };
 
-export const getListsClient = async ({
+export const getListsClient = ({
   lists,
   spaceId,
   updatedByUser,
@@ -130,20 +130,16 @@ export const getListsClient = async ({
   updatedByUser: string | null;
   services: AlertServices;
   savedObjectClient: SavedObjectsClientContract;
-}): Promise<{
-  listClient: ListClient | undefined;
-  exceptionsClient: ExceptionListClient | undefined;
-}> => {
+}): {
+  listClient: ListClient;
+  exceptionsClient: ExceptionListClient;
+} => {
   if (lists == null) {
     throw new Error('lists plugin unavailable during rule execution');
   }
 
-  const listClient = await lists.getListClient(
-    services.callCluster,
-    spaceId,
-    updatedByUser ?? 'elastic'
-  );
-  const exceptionsClient = await lists.getExceptionListClient(
+  const listClient = lists.getListClient(services.callCluster, spaceId, updatedByUser ?? 'elastic');
+  const exceptionsClient = lists.getExceptionListClient(
     savedObjectClient,
     updatedByUser ?? 'elastic'
   );
@@ -155,14 +151,10 @@ export const getExceptions = async ({
   client,
   lists,
 }: {
-  client: ExceptionListClient | undefined;
-  lists: ListArrayOrUndefined;
+  client: ExceptionListClient;
+  lists: ListArray;
 }): Promise<ExceptionListItemSchema[] | undefined> => {
-  if (client == null) {
-    throw new Error('lists plugin unavailable during rule execution');
-  }
-
-  if (lists != null && lists.length > 0) {
+  if (lists.length > 0) {
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);
       const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
@@ -300,7 +292,7 @@ export const errorAggregator = (
   ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
-    if (item.create.error != null && !ignoreStatusCodes.includes(item.create.status)) {
+    if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
       if (accum[item.create.error.reason] == null) {
         accum[item.create.error.reason] = {
           count: 1,

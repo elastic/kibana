@@ -15,10 +15,14 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
   // open service overview page
   const RANGE_FROM = 'now-24h';
   const RANGE_TO = 'now';
-  loginAndWaitForPage(`/app/csm`, {
-    from: RANGE_FROM,
-    to: RANGE_TO,
-  });
+  loginAndWaitForPage(
+    `/app/csm`,
+    {
+      from: RANGE_FROM,
+      to: RANGE_TO,
+    },
+    'client'
+  );
 });
 
 Then(`should have correct client metrics`, () => {

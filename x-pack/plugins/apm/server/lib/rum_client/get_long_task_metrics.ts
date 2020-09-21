@@ -6,8 +6,8 @@
 
 import {
   getRumLongTasksProjection,
-  getRumOverviewProjection,
-} from '../../projections/rum_overview';
+  getRumPageLoadTransactionsProjection,
+} from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -87,7 +87,7 @@ async function filterPageLoadTransactions(
   setup: Setup & SetupTimeRange & SetupUIFilters,
   transactionIds: string[]
 ) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
