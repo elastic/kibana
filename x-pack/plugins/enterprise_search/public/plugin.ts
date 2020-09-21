@@ -110,7 +110,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           './applications/workplace_search/components/layout'
         );
         params.setHeaderActionMenu((element) =>
-          renderHeaderActions(WorkplaceSearchHeaderActions, element)
+          renderHeaderActions(WorkplaceSearchHeaderActions, element, this.data.externalUrl)
         );
 
         return renderApp(WorkplaceSearch, params, coreStart, plugins, this.config, this.data);

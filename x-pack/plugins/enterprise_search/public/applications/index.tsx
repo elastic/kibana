@@ -96,7 +96,11 @@ export const renderApp = (
  * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
 
-export const renderHeaderActions = (HeaderActions: React.FC, kibanaHeaderEl: HTMLElement) => {
-  ReactDOM.render(<HeaderActions />, kibanaHeaderEl);
+export const renderHeaderActions = (
+  HeaderActions: React.FC,
+  kibanaHeaderEl: HTMLElement,
+  externalUrl: IExternalUrl
+) => {
+  ReactDOM.render(<HeaderActions externalUrl={externalUrl} />, kibanaHeaderEl);
   return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
 };

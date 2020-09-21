@@ -7,12 +7,23 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { EuiButtonEmpty } from '@elastic/eui';
+import { ExternalUrl } from '../../../shared/enterprise_search_url';
+
 import { WorkplaceSearchHeaderActions } from './';
 
 describe('WorkplaceSearchHeaderActions', () => {
-  it('renders', () => {
-    const wrapper = shallow(<WorkplaceSearchHeaderActions />);
+  const externalUrl = new ExternalUrl('http://localhost:3002');
 
-    // TODO: Assert something here
+  it('renders a link to the search application', () => {
+    const wrapper = shallow(<WorkplaceSearchHeaderActions externalUrl={externalUrl} />);
+
+    expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual('http://localhost:3002/ws/search');
+  });
+
+  it('does not render without an Enterprise Search host URL set', () => {
+    const wrapper = shallow(<WorkplaceSearchHeaderActions externalUrl={{}} />);
+
+    expect(wrapper.isEmptyRender()).toBe(true);
   });
 });
