@@ -11,7 +11,6 @@ import { useInfraMLModuleConfiguration } from '../../infra_ml_module_configurati
 import { useInfraMLModuleDefinition } from '../../infra_ml_module_definition';
 import { ModuleSourceConfiguration } from '../../infra_ml_module_types';
 import { metricHostsModule } from './module_descriptor';
-// import { useLogEntryCategoriesQuality } from './use_log_entry_categories_quality';
 
 export const useMetricHostsModule = ({
   indexPattern,

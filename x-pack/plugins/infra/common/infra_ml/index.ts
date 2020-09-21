@@ -5,7 +5,7 @@
  */
 
 export * from './infra_ml';
-export * from './log_analysis_results';
+export * from './anomaly_results';
 export * from './job_parameters';
 export * from './metrics_hosts_ml';
 export * from './metrics_k8s_ml';
