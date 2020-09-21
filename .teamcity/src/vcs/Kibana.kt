@@ -1,4 +1,4 @@
-/*
+package vcs/*
  * Licensed to Elasticsearch under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -19,7 +19,7 @@
 
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
-object DefaultRoot : GitVcsRoot({
+object Kibana : GitVcsRoot({
   id("kibana_master")
 
   name = "kibana / master"

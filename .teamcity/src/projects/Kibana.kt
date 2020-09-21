@@ -1,6 +1,6 @@
 package projects
 
-import DefaultRoot
+import vcs.Kibana
 import builds.*
 import builds.default.*
 import builds.es_snapshots.EsSnapshotsProject
@@ -31,7 +31,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
       param("teamcity.ui.settings.readOnly", "true")
     }
 
-    vcsRoot(DefaultRoot)
+    vcsRoot(Kibana)
 
     template(DefaultTemplate)
     template(KibanaTemplate)

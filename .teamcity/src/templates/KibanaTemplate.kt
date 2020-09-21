@@ -19,7 +19,7 @@
 
 package templates
 
-import DefaultRoot
+import vcs.Kibana
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
 import jetbrains.buildServer.configs.kotlin.v2019_2.Template
@@ -32,7 +32,7 @@ object KibanaTemplate : Template({
   description = "For builds that need to check out kibana and execute against the repo using node"
 
   vcs {
-    root(DefaultRoot)
+    root(Kibana)
 
     checkoutDir = "kibana"
 //    checkoutDir = "/dev/shm/%system.teamcity.buildType.id%/%system.build.number%/kibana"

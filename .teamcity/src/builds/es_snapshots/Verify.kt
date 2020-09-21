@@ -37,6 +37,7 @@ object EsSnapshotsProject : Project({
   }
 
   buildType(esBuild)
+  buildType(ESSnapshotBuild)
 
 //  val defaultCiGroups = (1..DEFAULT_CI_GROUP_COUNT).map {
 //    DefaultCiGroup(it) {
