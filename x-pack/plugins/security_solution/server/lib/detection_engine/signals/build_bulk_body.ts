@@ -5,20 +5,12 @@
  */
 
 import { SavedObject } from 'src/core/types';
-import {
-  SignalSourceHit,
-  SignalHit,
-  Signal,
-  SignalSource,
-  RuleAlertAttributes,
-  BaseSignalHit,
-} from './types';
+import { SignalSourceHit, SignalHit, Signal, RuleAlertAttributes, BaseSignalHit } from './types';
 import { buildRule, buildRuleWithoutOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
-import { EqlSequence } from '../../types';
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;

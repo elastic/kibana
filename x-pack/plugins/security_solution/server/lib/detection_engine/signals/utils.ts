@@ -11,7 +11,7 @@ import { Logger, SavedObjectsClientContract } from '../../../../../../../src/cor
 import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { ListArray, ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
+import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import { BulkResponse, BulkResponseErrorAggregation, isValidUnit, SignalHit } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
