@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { ResolverNodeStats } from '../../../common/endpoint/types';
 import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { Matrix3 } from '../types';
-import { useResolverTheme } from './assets';
+import { useColors } from './use_colors';
 
 /**
  * i18n-translated titles for submenus and identifiers for display of states:
@@ -182,9 +182,7 @@ const NodeSubMenuComponents = React.memo(
       // no matter what, keep track of the last project matrix that was used to size the popover
       projectionMatrixAtLastRender.current = projectionMatrix;
     }, [projectionMatrixAtLastRender, projectionMatrix]);
-    const {
-      colorMap: { pillStroke: pillBorderStroke, resolverBackground: pillFill },
-    } = useResolverTheme();
+    const { pillStroke: pillBorderStroke, resolverBackground: pillFill } = useColors();
     const listStylesFromTheme = useMemo(() => {
       return {
         border: `1.5px solid ${pillBorderStroke}`,
@@ -239,6 +237,7 @@ const NodeSubMenuComponents = React.memo(
                     className="item"
                     data-test-subj="resolver:map:node-submenu-item"
                     style={listStylesFromTheme}
+                    key={opt.optionTitle}
                   >
                     <button type="button" className="kbn-resetFocusState" onClick={opt.action}>
                       {opt.prefix} {opt.optionTitle}
