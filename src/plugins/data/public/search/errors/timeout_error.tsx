@@ -21,7 +21,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
-import { HttpFetchError } from 'kibana/public';
 import { KbnError } from '../../../../kibana_utils/common';
 
 export enum TimeoutErrorMode {
@@ -36,7 +35,7 @@ export enum TimeoutErrorMode {
  */
 export class SearchTimeoutError extends KbnError {
   public mode: TimeoutErrorMode;
-  constructor(err: HttpFetchError | null = null, mode: TimeoutErrorMode) {
+  constructor(err: Error, mode: TimeoutErrorMode) {
     super(`Request timeout: ${JSON.stringify(err?.message)}`);
     this.mode = mode;
   }

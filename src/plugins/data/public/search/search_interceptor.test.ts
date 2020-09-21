@@ -69,7 +69,7 @@ describe('SearchInterceptor', () => {
       }
     });
 
-    test('Should throw SearchTimeoutError on server timeout', async (done) => {
+    test('Should throw SearchTimeoutError on server timeout AND show toast', async (done) => {
       const mockResponse: any = {
         result: 500,
         body: {
@@ -86,7 +86,32 @@ describe('SearchInterceptor', () => {
         await response.toPromise();
       } catch (e) {
         expect(e).toBeInstanceOf(SearchTimeoutError);
+        expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
         done();
+      }
+    });
+
+    test('Search error should be debounced', async (done) => {
+      const mockResponse: any = {
+        result: 500,
+        body: {
+          message: 'Request timed out',
+        },
+      };
+      mockCoreSetup.http.fetch.mockRejectedValue(mockResponse);
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      try {
+        await searchInterceptor.search(mockRequest).toPromise();
+      } catch (e) {
+        expect(e).toBeInstanceOf(SearchTimeoutError);
+        try {
+          await searchInterceptor.search(mockRequest).toPromise();
+        } catch (e2) {
+          expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
+          done();
+        }
       }
     });
 
