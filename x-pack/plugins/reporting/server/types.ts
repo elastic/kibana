@@ -48,7 +48,7 @@ export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 export interface BaseParams {
-  browserTimezone?: string;
+  browserTimezone?: string; // browserTimezone is optional: it is not in old POST URLs that were generated prior to being added to this interface
   layout?: LayoutParams;
   objectType: string;
   title: string;
