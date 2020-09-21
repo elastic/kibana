@@ -25,6 +25,8 @@ import buildRequest from './lib/build_request';
 import createDateAgg from './lib/create_date_agg';
 import esResponse from '../fixtures/es_response';
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';

@@ -7,7 +7,6 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
-
 import {
   RouteValidationFunction,
   KibanaResponseFactory,

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isFinite, isNumber, sum } from 'lodash';
+import isFinite from 'lodash/isFinite';
+import isNumber from 'lodash/isNumber';
+import sum from 'lodash/sum';
 import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
 import {
   SnapshotMetricInput,

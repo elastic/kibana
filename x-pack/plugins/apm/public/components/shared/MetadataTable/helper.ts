@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, pick, isEmpty } from 'lodash';
+import get from 'lodash/get';
+import pick from 'lodash/pick';
+import isEmpty from 'lodash/isEmpty';
 import { Section } from './sections';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';

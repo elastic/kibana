@@ -35,7 +35,8 @@ import {
 import dateMath from '@elastic/datemath';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { isEqual, omit } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import omit from 'lodash/omit';
 import { useMount } from 'react-use';
 import { DocLinksStart } from 'src/core/public';
 

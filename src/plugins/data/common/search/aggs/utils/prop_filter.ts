@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
+import isFunction from 'lodash/isFunction';
 
 type FilterFunc<P extends keyof T, T> = (item: T[P]) => boolean;
 

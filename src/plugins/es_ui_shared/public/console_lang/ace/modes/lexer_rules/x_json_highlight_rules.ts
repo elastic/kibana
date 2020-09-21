@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaultsDeep } from 'lodash';
+import defaultsDeep from 'lodash/defaultsDeep';
 import ace from 'brace';
 import 'brace/mode/json';
 

@@ -8,7 +8,7 @@ import './xy_config_panel.scss';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import {
   EuiButtonGroup,
   EuiFlexGroup,

@@ -19,6 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 import loadFunctions from '../lib/load_functions.js';

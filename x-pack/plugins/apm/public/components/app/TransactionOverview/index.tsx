@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
-import { first } from 'lodash';
+import first from 'lodash/first';
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';

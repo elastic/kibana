@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import React, { memo, useEffect, FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 

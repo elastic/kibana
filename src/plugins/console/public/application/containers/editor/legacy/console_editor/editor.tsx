@@ -19,7 +19,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { ace } from '../../../../../../../es_ui_shared/public';

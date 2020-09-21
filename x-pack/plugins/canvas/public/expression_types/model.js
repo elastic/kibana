@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, pick } from 'lodash';
+import get from 'lodash/get';
+import pick from 'lodash/pick';
 import { Registry } from '@kbn/interpreter/common';
 import { FunctionForm } from './function_form';
 

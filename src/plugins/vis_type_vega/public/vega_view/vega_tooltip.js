@@ -19,6 +19,8 @@
 
 import { calculatePopoverPosition } from '@elastic/eui';
 import { formatValue as createTooltipContent } from 'vega-tooltip';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 // Some of this code was adapted from https://github.com/vega/vega-tooltip

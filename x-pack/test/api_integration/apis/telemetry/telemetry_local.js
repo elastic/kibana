@@ -5,6 +5,8 @@
  */
 
 import expect from '@kbn/expect';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 /*

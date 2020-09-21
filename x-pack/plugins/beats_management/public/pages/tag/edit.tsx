@@ -8,7 +8,7 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';

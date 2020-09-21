@@ -32,7 +32,6 @@ jest.mock('readline', () => ({
 const mockConfig: any = {};
 
 import { sample } from 'lodash';
-
 import { ClusterManager, SomeCliArgs } from './cluster_manager';
 import { Worker } from './worker';
 

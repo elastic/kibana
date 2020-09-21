@@ -7,7 +7,6 @@
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
-
 import {
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,

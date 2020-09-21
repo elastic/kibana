@@ -5,7 +5,6 @@
  */
 
 import { sortBy } from 'lodash/fp';
-
 import {
   formatIndexFields,
   formatFirstFields,

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { trimEnd, debounce } from 'lodash';
+import trimEnd from 'lodash/trimEnd';
+import debounce from 'lodash/debounce';
 import {
   BehaviorSubject,
   throwError,

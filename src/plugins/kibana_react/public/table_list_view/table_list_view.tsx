@@ -20,7 +20,10 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { debounce, keyBy, sortBy, uniq } from 'lodash';
+import debounce from 'lodash/debounce';
+import keyBy from 'lodash/keyBy';
+import sortBy from 'lodash/sortBy';
+import uniq from 'lodash/uniq';
 import {
   EuiTitle,
   EuiInMemoryTable,

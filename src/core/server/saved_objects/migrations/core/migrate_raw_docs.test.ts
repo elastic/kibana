@@ -18,6 +18,8 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsSerializer } from '../../serialization';

@@ -5,7 +5,8 @@
  */
 
 import { createAction } from 'redux-actions';
-import { without, includes } from 'lodash';
+import without from 'lodash/without';
+import includes from 'lodash/includes';
 import { createThunk } from '../../lib/create_thunk';
 import { getWorkpadColors } from '../selectors/workpad';
 // @ts-expect-error

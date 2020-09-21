@@ -6,7 +6,7 @@
 
 import { parse, stringify } from 'query-string';
 import React, { createContext, useCallback, useContext, useMemo, FC } from 'react';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
 

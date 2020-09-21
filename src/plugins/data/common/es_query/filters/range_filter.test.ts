@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { each } from 'lodash';
+import each from 'lodash/each';
 import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
 import { fields, getField } from '../../index_patterns/mocks';
 import { IIndexPattern, IFieldType } from '../../index_patterns';

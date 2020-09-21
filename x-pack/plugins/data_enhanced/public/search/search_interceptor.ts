@@ -6,7 +6,7 @@
 
 import { throwError, EMPTY, timer, from, Subscription } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { i18n } from '@kbn/i18n';
 import {
   SearchInterceptor,

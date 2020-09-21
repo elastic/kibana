@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { LogEntry } from '../../../../common/http_api';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';

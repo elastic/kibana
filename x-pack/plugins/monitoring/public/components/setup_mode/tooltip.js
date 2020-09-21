@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from './formatting';

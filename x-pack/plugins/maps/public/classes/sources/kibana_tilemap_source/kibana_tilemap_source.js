@@ -8,6 +8,8 @@ import { AbstractTMSSource } from '../tms_source';
 import { getKibanaTileMap } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';

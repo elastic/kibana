@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { difference, first, values } from 'lodash';
+import difference from 'lodash/difference';
+import first from 'lodash/first';
+import values from 'lodash/values';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
 export enum Color {

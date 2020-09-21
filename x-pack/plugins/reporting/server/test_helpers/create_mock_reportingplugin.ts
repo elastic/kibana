@@ -9,6 +9,8 @@ jest.mock('../usage');
 jest.mock('../browsers');
 jest.mock('../lib/create_queue');
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { ReportingConfig, ReportingCore } from '../';

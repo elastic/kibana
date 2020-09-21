@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { findIndex } from 'lodash';
+import findIndex from 'lodash/findIndex';
 import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
 import { OnNotification, FieldSpec } from '../types';

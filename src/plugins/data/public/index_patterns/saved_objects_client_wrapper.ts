@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
 import {
   SavedObjectsClientCommon,

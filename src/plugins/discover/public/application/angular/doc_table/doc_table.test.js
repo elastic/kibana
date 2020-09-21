@@ -17,6 +17,8 @@
  * under the License.
  */
 import angular from 'angular';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import 'angular-mocks';
 import 'angular-sanitize';

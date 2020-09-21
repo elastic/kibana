@@ -7,7 +7,7 @@
 import { BaseAction } from './base_action';
 import { ACTION_TYPES, ERROR_CODES } from '../../constants';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 export class JiraAction extends BaseAction {
   constructor(props, errors) {

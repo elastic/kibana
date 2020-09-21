@@ -5,7 +5,8 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import { isString, startsWith } from 'lodash';
+import isString from 'lodash/isString';
+import startsWith from 'lodash/startsWith';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { FetchOptions } from '../../../common/fetch_options';

@@ -14,6 +14,8 @@ import {
   makeESBbox,
   scaleBounds,
 } from './elasticsearch_geo_utils';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 const geoFieldName = 'location';

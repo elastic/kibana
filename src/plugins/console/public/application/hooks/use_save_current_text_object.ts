@@ -18,7 +18,7 @@
  */
 
 import { useRef, useCallback } from 'react';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import { useEditorReadContext, useServicesContext } from '../contexts';
 
 const WAIT_MS = 500;

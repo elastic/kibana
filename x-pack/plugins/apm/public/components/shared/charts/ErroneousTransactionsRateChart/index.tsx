@@ -6,7 +6,7 @@
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { max } from 'lodash';
+import max from 'lodash/max';
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';

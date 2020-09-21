@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import { SenseEditor } from '../../../../models/sense_editor';
 
 interface Actions {

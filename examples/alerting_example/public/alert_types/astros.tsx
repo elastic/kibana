@@ -30,7 +30,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
 import { SanitizedAlert } from '../../../../x-pack/plugins/alerts/common';
 import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerts/public';

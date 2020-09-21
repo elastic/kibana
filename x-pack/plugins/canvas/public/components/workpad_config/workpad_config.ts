@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import {
   sizeWorkpad as setSize,
   setName,

@@ -5,6 +5,8 @@
  */
 
 import React from 'react';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';

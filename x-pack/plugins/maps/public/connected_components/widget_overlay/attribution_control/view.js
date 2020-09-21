@@ -5,6 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { EuiText, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';

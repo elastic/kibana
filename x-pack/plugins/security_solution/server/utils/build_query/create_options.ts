@@ -6,7 +6,6 @@
 
 import { GraphQLResolveInfo } from 'graphql';
 import { getOr } from 'lodash/fp';
-
 import {
   PaginationInput,
   PaginationInputPaginated,

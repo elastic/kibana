@@ -18,7 +18,7 @@ import {
   EuiHorizontalRule,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { mapValues } from 'lodash';
+import mapValues from 'lodash/mapValues';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';

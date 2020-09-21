@@ -6,7 +6,6 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, getOr, has, head } from 'lodash/fp';
-
 import {
   EndpointFields,
   FirstLastSeenHost,

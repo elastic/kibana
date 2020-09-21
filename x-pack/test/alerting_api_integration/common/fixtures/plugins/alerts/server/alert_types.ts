@@ -6,7 +6,7 @@
 
 import { CoreSetup } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { times } from 'lodash';
+import times from 'lodash/times';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   AlertType,

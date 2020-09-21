@@ -5,7 +5,6 @@
  */
 
 import { merge } from 'lodash';
-
 import { SavedObjectsClient } from 'src/core/server';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {

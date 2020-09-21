@@ -6,8 +6,7 @@
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-
+import isEmpty from 'lodash/isEmpty';
 import { euiStyled, useUiTracker } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
 import {

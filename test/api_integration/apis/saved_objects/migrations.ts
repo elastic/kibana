@@ -22,6 +22,8 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import { ElasticsearchClient, SavedObjectMigrationMap, SavedObjectsType } from 'src/core/server';

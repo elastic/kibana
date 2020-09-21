@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { range } from 'lodash';
+import range from 'lodash/range';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiBadge, EuiPagination } from '@elastic/eui';

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, get, last } from 'lodash';
+import isNumber from 'lodash/isNumber';
+import get from 'lodash/get';
+import last from 'lodash/last';
 
 /*
  * @param {Array/Number} data Data containing values to show in the horizontal legend

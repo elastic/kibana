@@ -18,8 +18,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { last } from 'lodash';
-
+import last from 'lodash/last';
 import { i18n } from '@kbn/i18n';
 
 import { RangeValues, RangesParamEditor } from '../../../../vis_default_editor/public';

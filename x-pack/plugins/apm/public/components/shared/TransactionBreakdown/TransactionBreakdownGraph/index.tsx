@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import React, { useMemo } from 'react';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useUiTracker } from '../../../../../../observability/public';

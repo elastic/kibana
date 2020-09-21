@@ -5,7 +5,6 @@
  */
 
 import { getOr } from 'lodash/fp';
-
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import {

@@ -5,16 +5,14 @@
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import {
-  first,
-  flatten,
-  groupBy,
-  isEmpty,
-  sortBy,
-  sum,
-  uniq,
-  zipObject,
-} from 'lodash';
+import first from 'lodash/first';
+import flatten from 'lodash/flatten';
+import groupBy from 'lodash/groupBy';
+import isEmpty from 'lodash/isEmpty';
+import sortBy from 'lodash/sortBy';
+import sum from 'lodash/sum';
+import uniq from 'lodash/uniq';
+import zipObject from 'lodash/zipObject';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';

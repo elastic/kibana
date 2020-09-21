@@ -20,8 +20,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
-
 import { KuiTableRow, KuiTableRowCell, KuiTableRowCheckBoxCell } from '../';
 
 import { LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '../../../services';

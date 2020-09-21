@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import * as ts from 'typescript';
 import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 import { parsedIndexedInterfaceWithNoMatchingSchema } from './__fixture__/parsed_indexed_interface_with_not_matching_schema';

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 // geohash precision mapping of geohash grid cell dimensions (width x height, in meters) at equator.

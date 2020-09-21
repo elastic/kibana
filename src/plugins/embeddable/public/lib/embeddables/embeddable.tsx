@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
 import * as Rx from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';

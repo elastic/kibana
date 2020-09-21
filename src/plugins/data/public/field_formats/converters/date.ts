@@ -18,7 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { memoize, noop } from 'lodash';
+import memoize from 'lodash/memoize';
+import noop from 'lodash/noop';
 import moment from 'moment';
 import { FieldFormat, KBN_FIELD_TYPES, FIELD_FORMAT_IDS } from '../../../common';
 import { TextContextTypeConvert } from '../../../common/field_formats/types';

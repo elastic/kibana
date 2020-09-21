@@ -6,6 +6,8 @@
 
 import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';

@@ -27,6 +27,8 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';

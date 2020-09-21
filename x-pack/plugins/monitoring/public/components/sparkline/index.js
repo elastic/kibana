@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { SparklineFlotChart } from './sparkline_flot_chart';

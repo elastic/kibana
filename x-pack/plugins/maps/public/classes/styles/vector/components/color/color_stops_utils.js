@@ -6,6 +6,8 @@
 
 import { isValidHex } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 export const DEFAULT_CUSTOM_COLOR = '#FF0000';

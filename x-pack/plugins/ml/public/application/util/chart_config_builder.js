@@ -10,7 +10,6 @@
  */
 
 import get from 'lodash/get';
-
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 
 // Builds the basic configuration to plot a chart of the source data

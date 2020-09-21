@@ -23,6 +23,8 @@ import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_se
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider, ORIGIN } from '../../maps_legacy/public';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 export function createRegionMapVisualization({

@@ -8,7 +8,6 @@ import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 
 import React from 'react';
 import get from 'lodash/get';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 

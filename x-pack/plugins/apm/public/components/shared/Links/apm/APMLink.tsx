@@ -6,7 +6,7 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { IBasePath } from 'kibana/public';
-import { pick } from 'lodash';
+import pick from 'lodash/pick';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import url from 'url';

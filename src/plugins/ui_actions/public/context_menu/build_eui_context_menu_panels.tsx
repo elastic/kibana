@@ -19,6 +19,8 @@
 
 import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';

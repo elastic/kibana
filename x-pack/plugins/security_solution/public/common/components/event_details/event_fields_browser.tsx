@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
 

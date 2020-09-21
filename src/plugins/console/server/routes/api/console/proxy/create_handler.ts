@@ -20,7 +20,6 @@
 import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
 import { pick, trimStart, trimEnd } from 'lodash';
-
 import { KibanaRequest, RequestHandler } from 'kibana/server';
 
 import { ESConfigForProxy } from '../../../../types';

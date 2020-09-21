@@ -8,7 +8,7 @@ import React, { FunctionComponent, ChangeEvent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { ExpressionAstExpression } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 

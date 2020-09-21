@@ -12,6 +12,8 @@ import {
   getSearchService,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../../common/elasticsearch_geo_utils';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';

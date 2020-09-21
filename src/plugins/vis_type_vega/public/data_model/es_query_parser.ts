@@ -19,7 +19,8 @@
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, isPlainObject } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import isPlainObject from 'lodash/isPlainObject';
 import { SearchParams } from 'elasticsearch';
 import { TimeCache } from './time_cache';
 import { SearchAPI } from './search_api';

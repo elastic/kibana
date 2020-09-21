@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow } from '@elastic/eui';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { monaco } from '@kbn/monaco';
 import { ExpressionFunction } from '../../../types';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';

@@ -20,6 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import uuid from 'uuid';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';

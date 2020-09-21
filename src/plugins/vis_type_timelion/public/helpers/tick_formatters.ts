@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-
+import get from 'lodash/get';
 import { Axis } from './panel_utils';
 
 function baseTickFormatter(value: number, axis: Axis) {

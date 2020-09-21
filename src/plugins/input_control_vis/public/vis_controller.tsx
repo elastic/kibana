@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { Subscription } from 'rxjs';

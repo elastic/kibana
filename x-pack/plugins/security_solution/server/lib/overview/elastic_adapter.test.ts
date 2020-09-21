@@ -5,7 +5,6 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
 import { OverviewHostData, OverviewNetworkData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 

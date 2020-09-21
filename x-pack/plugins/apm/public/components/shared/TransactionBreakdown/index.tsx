@@ -5,7 +5,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React from 'react';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';

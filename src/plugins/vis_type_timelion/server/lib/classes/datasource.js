@@ -22,6 +22,8 @@ import loadFunctions from '../load_functions.js';
 const fitFunctions = loadFunctions('fit_functions');
 import TimelionFunction from './timelion_function';
 import { offsetTime, preprocessOffset } from '../offset_time';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 function offsetSeries(response, offset) {

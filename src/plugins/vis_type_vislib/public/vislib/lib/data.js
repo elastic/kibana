@@ -18,8 +18,9 @@
  */
 
 import d3 from 'd3';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
-
 import { injectZeros } from '../components/zero_injection/inject_zeros';
 import { orderXValues } from '../components/zero_injection/ordered_x_keys';
 import { labels } from '../components/labels/labels';

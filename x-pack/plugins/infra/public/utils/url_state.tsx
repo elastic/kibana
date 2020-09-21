@@ -6,7 +6,7 @@
 
 import { parse, stringify } from 'query-string';
 import { History, Location } from 'history';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';

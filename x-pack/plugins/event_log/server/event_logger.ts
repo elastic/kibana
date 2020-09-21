@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { merge } from 'lodash';
-
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { EventLogService } from './event_log_service';

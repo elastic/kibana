@@ -20,8 +20,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
-
 import { KuiListingTableToolBar } from './listing_table_tool_bar';
 import { KuiListingTableToolBarFooter } from './listing_table_tool_bar_footer';
 import { KuiListingTableRow } from './listing_table_row';

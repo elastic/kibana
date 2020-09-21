@@ -5,7 +5,8 @@
  */
 
 import React, { PureComponent } from 'react';
-import { uniq, get } from 'lodash';
+import uniq from 'lodash/uniq';
+import get from 'lodash/get';
 import {
   EuiPage,
   EuiPageBody,

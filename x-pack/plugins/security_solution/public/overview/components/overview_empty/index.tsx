@@ -6,7 +6,6 @@
 
 import React, { useMemo } from 'react';
 import { omit } from 'lodash/fp';
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
 import * as i18nCommon from '../../../common/translations';

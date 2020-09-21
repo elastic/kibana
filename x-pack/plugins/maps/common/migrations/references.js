@@ -6,6 +6,8 @@
 
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { SOURCE_TYPES } from '../constants';
 

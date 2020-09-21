@@ -39,6 +39,8 @@ jest.mock('./fetch_index_patterns', () => ({
   fetchIndexPatterns: mockFetchIndexPatterns,
 }));
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 // Using doMock to avoid hoisting so that I can override only the debounce method in lodash
 jest.doMock('lodash', () => ({

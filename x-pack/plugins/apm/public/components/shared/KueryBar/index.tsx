@@ -5,7 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { startsWith, uniqueId } from 'lodash';
+import startsWith from 'lodash/startsWith';
+import uniqueId from 'lodash/uniqueId';
 import React, { useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';

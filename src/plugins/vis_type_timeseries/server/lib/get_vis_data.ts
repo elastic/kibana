@@ -18,6 +18,8 @@
  */
 
 import { FakeRequest, RequestHandlerContext } from 'kibana/server';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';

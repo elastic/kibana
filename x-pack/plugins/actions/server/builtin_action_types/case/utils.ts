@@ -5,7 +5,6 @@
  */
 
 import { flow, get } from 'lodash';
-
 import {
   MapRecord,
   TransformFieldsArgs,

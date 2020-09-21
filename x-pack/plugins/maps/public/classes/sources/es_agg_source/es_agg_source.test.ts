@@ -7,6 +7,8 @@
 import { AbstractESAggSource } from '../es_agg_source';
 import { IField } from '../../fields/field';
 import { IESAggField } from '../../fields/es_agg_field';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { AGG_TYPE } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';

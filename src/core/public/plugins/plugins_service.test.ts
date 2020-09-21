@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { omit, pick } from 'lodash';
+import omit from 'lodash/omit';
+import pick from 'lodash/pick';
 
 import {
   MockedPluginInitializer,

@@ -8,7 +8,7 @@ import { HttpSetup } from 'kibana/public';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { pick } from 'lodash';
+import pick from 'lodash/pick';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
 import { BASE_ALERT_API_PATH } from '../constants';
 import {

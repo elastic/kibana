@@ -5,8 +5,7 @@
  */
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { get } from 'lodash';
-
+import get from 'lodash/get';
 import { getId } from '../../lib/get_id';
 // @ts-expect-error untyped local
 import { findExistingAsset } from '../../lib/find_existing_asset';

@@ -18,7 +18,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, isObject } from 'lodash';
+import compact from 'lodash/compact';
+import isObject from 'lodash/isObject';
 import { Maybe } from '../../typings/common';
 
 export interface KeyValuePair {

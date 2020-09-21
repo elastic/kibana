@@ -19,6 +19,8 @@
 
 import fn from './sum';
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';

@@ -18,7 +18,8 @@
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
-import { take, get as getField } from 'lodash';
+import take from 'lodash/take';
+import get from 'lodash/get';
 import {
   EuiFlyout,
   EuiFlyoutBody,

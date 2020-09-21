@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import moment from 'moment';
 import { formatExpression, SerializedFieldFormat } from '../../../../plugins/expressions/public';
 import { IAggConfig, search, TimefilterContract } from '../../../../plugins/data/public';

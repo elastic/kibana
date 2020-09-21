@@ -6,7 +6,7 @@
 
 import { fromExpression } from '@kbn/interpreter/common';
 import immutable from 'object-path-immutable';
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 const { set, del } = immutable;
 

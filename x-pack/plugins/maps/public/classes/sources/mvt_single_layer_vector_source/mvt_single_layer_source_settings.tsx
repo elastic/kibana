@@ -8,6 +8,8 @@
 import React, { Fragment, Component, ChangeEvent } from 'react';
 import { EuiFieldText, EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';

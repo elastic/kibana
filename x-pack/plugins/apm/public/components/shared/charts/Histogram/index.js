@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import d3 from 'd3';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
 import { scaleLinear } from 'd3-scale';
 import styled from 'styled-components';

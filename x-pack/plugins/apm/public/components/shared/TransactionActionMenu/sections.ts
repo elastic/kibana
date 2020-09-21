@@ -6,7 +6,8 @@
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { IBasePath } from 'kibana/public';
-import { isEmpty, pickBy } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import pickBy from 'lodash/pickBy';
 import moment from 'moment';
 import url from 'url';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';

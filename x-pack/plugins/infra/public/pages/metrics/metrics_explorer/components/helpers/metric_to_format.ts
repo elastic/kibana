@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last } from 'lodash';
+import last from 'lodash/last';
 import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
 import { InfraFormatterType } from '../../../../../lib/lib';
 export const metricToFormat = (metric?: MetricsExplorerMetric) => {

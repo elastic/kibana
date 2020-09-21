@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { upperFirst, isFunction } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
+import isFunction from 'lodash/isFunction';
 import React, { MouseEvent } from 'react';
 import { EuiToolTip, EuiButton, EuiHeaderLink } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';

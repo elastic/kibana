@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { identity } from 'lodash';
+import identity from 'lodash/identity';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { getSavedObjectFinder } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapValues } from 'lodash';
-
+import mapValues from 'lodash/mapValues';
 import { ShortcutMap, ShortcutNameSpace } from '../../types/shortcuts';
 import { ShortcutStrings as strings } from '../../i18n/shortcuts';
 

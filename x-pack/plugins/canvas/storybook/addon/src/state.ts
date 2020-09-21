@@ -10,7 +10,6 @@ import thunkMiddleware from 'redux-thunk';
 import addons from '@storybook/addons';
 import { diff } from 'jsondiffpatch';
 import { isFunction } from 'lodash';
-
 import { EVENTS } from './constants';
 
 // @ts-expect-error untyped local

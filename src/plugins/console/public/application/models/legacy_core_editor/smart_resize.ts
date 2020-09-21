@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { get, throttle } from 'lodash';
+import get from 'lodash/get';
+import throttle from 'lodash/throttle';
 
 // eslint-disable-next-line import/no-default-export
 export default function (editor: any) {

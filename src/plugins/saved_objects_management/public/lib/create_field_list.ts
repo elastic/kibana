@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { forOwn, keyBy, isNumber, isBoolean, isPlainObject, isString } from 'lodash';
+import forOwn from 'lodash/forOwn';
+import keyBy from 'lodash/keyBy';
+import isNumber from 'lodash/isNumber';
+import isBoolean from 'lodash/isBoolean';
+import isPlainObject from 'lodash/isPlainObject';
+import isString from 'lodash/isString';
 import { SimpleSavedObject } from '../../../../core/public';
 import { castEsToKbnFieldTypeName } from '../../../data/public';
 import { ObjectField } from '../management_section/types';

@@ -24,7 +24,6 @@ import {
   PluginConfigDescriptor,
 } from 'kibana/server';
 import { get } from 'lodash';
-
 import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {

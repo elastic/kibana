@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber } from 'lodash';
+import isNumber from 'lodash/isNumber';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';

@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { noop } from 'lodash/fp';
-
 import * as i18n from '../../translations';
 import { Form, UseField, useForm } from '../../../shared_imports';
 import { schema } from './schema';

@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from 'kibana/public';

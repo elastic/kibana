@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatProductName, getIdentifier } from './formatting';

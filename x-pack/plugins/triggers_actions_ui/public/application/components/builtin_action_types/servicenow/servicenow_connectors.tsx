@@ -15,7 +15,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { CasesConfigurationMapping, FieldMapping, createDefaultMapping } from '../case_mappings';

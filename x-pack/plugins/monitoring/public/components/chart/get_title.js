@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { chain } from 'lodash';
+import chain from 'lodash/chain';
 
 /*
  * Chart titles are taken from `metric.title` or `metric.label` fields in the series data.

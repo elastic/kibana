@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-
 import { InventoryMetric } from '../../../../plugins/infra/common/inventory_models/types';
 import { InfraNodeType, InfraTimerangeInput } from '../../../../plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';

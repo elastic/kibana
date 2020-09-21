@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { createSavedGisMapClass } from './saved_gis_map';
 import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';

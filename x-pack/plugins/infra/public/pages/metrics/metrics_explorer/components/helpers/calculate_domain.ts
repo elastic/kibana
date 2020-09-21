@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { min, max, sum, isNumber } from 'lodash';
+import min from 'lodash/min';
+import max from 'lodash/max';
+import sum from 'lodash/sum';
+import isNumber from 'lodash/isNumber';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
 import { getMetricId } from './get_metric_id';

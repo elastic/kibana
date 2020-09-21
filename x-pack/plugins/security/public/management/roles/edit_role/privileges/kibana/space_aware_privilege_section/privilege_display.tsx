@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiIcon, EuiText, PropsOf } from '@elastic/eui';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import React, { ReactNode, FC } from 'react';
 import { NO_PRIVILEGE_VALUE } from '../constants';

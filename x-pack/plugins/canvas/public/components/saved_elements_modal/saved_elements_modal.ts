@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { compose, withState } from 'recompose';
-import { camelCase } from 'lodash';
+import camelCase from 'lodash/camelCase';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
 import { withServices, WithServicesProps } from '../../services';

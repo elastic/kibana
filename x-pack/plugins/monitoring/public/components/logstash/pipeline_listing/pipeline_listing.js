@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import moment from 'moment';
-import { partialRight } from 'lodash';
+import partialRight from 'lodash/partialRight';
 import {
   EuiPage,
   EuiLink,

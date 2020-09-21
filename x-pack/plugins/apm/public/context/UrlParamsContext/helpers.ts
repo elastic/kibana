@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, pickBy } from 'lodash';
+import compact from 'lodash/compact';
+import pickBy from 'lodash/pickBy';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
 

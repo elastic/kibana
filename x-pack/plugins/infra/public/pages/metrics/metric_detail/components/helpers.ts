@@ -6,7 +6,11 @@
 
 import { ReactText } from 'react';
 import Color from 'color';
-import { get, first, last, min, max } from 'lodash';
+import get from 'lodash/get';
+import first from 'lodash/first';
+import last from 'lodash/last';
+import min from 'lodash/min';
+import max from 'lodash/max';
 import { createFormatter } from '../../../../../common/formatters';
 import { InfraDataSeries } from '../../../../graphql/types';
 import {

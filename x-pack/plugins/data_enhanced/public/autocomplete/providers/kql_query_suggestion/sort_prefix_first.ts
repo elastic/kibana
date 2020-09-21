@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { partition } from 'lodash';
+import partition from 'lodash/partition';
 
 export function sortPrefixFirst(array: any[], prefix?: string | number, property?: string): any[] {
   if (!prefix) {

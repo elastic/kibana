@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { each, union } from 'lodash';
+import each from 'lodash/each';
+import union from 'lodash/union';
 import { Filter } from '../../es_query';
 import { dedupFilters } from './dedup_filters';
 

@@ -17,6 +17,8 @@
  * under the License.
  */
 import { schema } from '@kbn/config-schema';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { IRouter } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';

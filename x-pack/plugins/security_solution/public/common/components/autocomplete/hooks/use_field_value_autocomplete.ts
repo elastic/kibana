@@ -5,8 +5,7 @@
  */
 
 import { useEffect, useState, useRef } from 'react';
-import { debounce } from 'lodash';
-
+import debounce from 'lodash/debounce';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { OperatorTypeEnum } from '../../../../lists_plugin_deps';

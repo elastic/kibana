@@ -6,7 +6,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { tint } from 'polished';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Suggestion } from './suggestion';

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { mapValues, includes } from 'lodash';
+import mapValues from 'lodash/mapValues';
+import includes from 'lodash/includes';
 import { Arg } from './arg';
 
 export function Fn(config) {

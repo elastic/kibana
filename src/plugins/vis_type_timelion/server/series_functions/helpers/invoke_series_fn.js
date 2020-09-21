@@ -18,8 +18,9 @@
  */
 
 // invokes a series_function with the specified arguments
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
-
 import indexArguments from '../../handlers/lib/index_arguments';
 
 export default function invokeSeriesFn(fnDef, args, tlConfigOverrides) {

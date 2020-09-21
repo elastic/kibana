@@ -21,6 +21,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { collectionActions } from '../lib/collection_actions';

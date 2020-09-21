@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { identity } from 'lodash';
-
+import identity from 'lodash/identity';
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
 import { AggType } from './agg_type';

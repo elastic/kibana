@@ -13,7 +13,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { isEmpty, flatten } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import flatten from 'lodash/flatten';
 import { useHistory } from 'react-router-dom';
 import { RouteComponentProps } from 'react-router-dom';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';

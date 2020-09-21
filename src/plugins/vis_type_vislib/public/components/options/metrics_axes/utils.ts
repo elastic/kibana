@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { upperFirst } from 'lodash';
-
+import upperFirst from 'lodash/upperFirst';
 import { BasicVislibParams, ValueAxis, SeriesParam } from '../../../types';
 import { ChartModes, ChartTypes, InterpolationModes, Positions } from '../../../utils/collections';
 

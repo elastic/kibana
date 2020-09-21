@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { IndexPattern, IFieldType } from '../../../../../../src/plugins/data/public';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';

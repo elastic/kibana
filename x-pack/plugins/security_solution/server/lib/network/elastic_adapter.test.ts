@@ -5,7 +5,6 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
 import { FlowTargetSourceDest, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 

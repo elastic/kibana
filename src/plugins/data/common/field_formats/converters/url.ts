@@ -18,7 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { escape, memoize } from 'lodash';
+import escape from 'lodash/escape';
+import memoize from 'lodash/memoize';
 import { getHighlightHtml } from '../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';

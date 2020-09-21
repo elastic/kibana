@@ -18,8 +18,9 @@
  */
 
 import d3 from 'd3';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
-
 import { layoutTypes } from '../layout_types';
 
 describe('Vislib Column Layout Test Suite', function () {

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { template, escape, keys } from 'lodash';
+import template from 'lodash/template';
+import escape from 'lodash/escape';
+import keys from 'lodash/keys';
 import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';

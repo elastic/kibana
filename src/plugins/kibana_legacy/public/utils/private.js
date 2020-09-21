@@ -93,6 +93,8 @@
  *
  * @param {[type]} prov [description]
  */
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 const nextId = _.partial(_.uniqueId, 'privateProvider#');

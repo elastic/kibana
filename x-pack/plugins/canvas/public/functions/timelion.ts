@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 import moment from 'moment-timezone';
 import { TimeRange } from 'src/plugins/data/common';
 import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressions/public';

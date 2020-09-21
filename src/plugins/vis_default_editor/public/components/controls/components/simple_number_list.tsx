@@ -18,7 +18,7 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { isArray } from 'lodash';
+import isArray from 'lodash/isArray';
 import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EMPTY_STRING, getInitModelList, getRange, parse } from './number_list/utils';

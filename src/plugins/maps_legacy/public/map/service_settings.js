@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient } from '@elastic/ems-client';

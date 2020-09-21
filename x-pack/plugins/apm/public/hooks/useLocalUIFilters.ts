@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import { useHistory } from 'react-router-dom';
 import { Projection } from '../../common/projections';
 import { pickKeys } from '../../common/utils/pick_keys';

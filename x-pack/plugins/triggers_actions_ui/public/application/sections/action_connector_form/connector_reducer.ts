@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 
 interface CommandType {
   type: 'setConnector' | 'setProperty' | 'setConfigProperty' | 'setSecretsProperty';

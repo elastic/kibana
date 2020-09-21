@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { compact } from 'lodash';
+import compact from 'lodash/compact';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { get, isEqual } from 'lodash';
-
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';

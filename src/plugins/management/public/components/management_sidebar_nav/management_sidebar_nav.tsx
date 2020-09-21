@@ -19,8 +19,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { sortBy } from 'lodash';
-
+import sortBy from 'lodash/sortBy';
 import {
   EuiIcon,
   EuiSideNav,

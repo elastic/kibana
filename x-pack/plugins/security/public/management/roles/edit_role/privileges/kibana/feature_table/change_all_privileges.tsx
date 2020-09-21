@@ -8,6 +8,8 @@ import './change_all_privileges.scss';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { KibanaPrivilege } from '../../../../model';

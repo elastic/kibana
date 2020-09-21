@@ -5,7 +5,6 @@
  */
 
 import cloneDeep from 'lodash/cloneDeep';
-
 import {
   AllocateAction,
   PhaseWithAllocationAction,

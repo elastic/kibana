@@ -6,7 +6,6 @@
 
 import uuid from 'uuid';
 import { isError } from 'lodash/fp';
-
 import { AppToast, ActionToaster } from './';
 import { isToasterError } from './errors';
 import { isAppError } from '../../utils/api';

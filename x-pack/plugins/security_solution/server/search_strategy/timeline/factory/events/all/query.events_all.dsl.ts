@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash/fp';
-
 import {
   SortField,
   TimerangeFilter,

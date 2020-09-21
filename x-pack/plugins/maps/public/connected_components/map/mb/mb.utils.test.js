@@ -6,6 +6,8 @@
 
 import { removeOrphanedSourcesAndLayers } from './utils';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 class MockMbMap {

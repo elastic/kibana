@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { cloneDeep, pick, throttle } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import pick from 'lodash/pick';
+import throttle from 'lodash/throttle';
 import { resolve as resolveUrl } from 'url';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 

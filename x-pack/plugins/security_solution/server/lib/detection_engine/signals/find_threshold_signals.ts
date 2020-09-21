@@ -5,7 +5,6 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-
 import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
 import { singleSearchAfter } from './single_search_after';
 

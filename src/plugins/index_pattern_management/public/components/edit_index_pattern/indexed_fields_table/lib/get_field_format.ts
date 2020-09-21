@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { IIndexPattern } from '../../../../../../data/public';
 
 export function getFieldFormat(indexPattern?: IIndexPattern, fieldName?: string): string {

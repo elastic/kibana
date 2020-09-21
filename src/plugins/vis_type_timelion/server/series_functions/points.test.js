@@ -19,6 +19,8 @@
 
 import fn from './points';
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import assert from 'chai';
 const expect = assert.expect;

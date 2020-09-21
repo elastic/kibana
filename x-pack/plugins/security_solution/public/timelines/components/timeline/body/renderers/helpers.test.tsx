@@ -5,7 +5,6 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { mockTimelineData } from '../../../../../common/mock';
 import {

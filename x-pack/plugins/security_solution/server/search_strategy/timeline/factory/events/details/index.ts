@@ -5,7 +5,6 @@
  */
 
 import { getOr, merge } from 'lodash/fp';
-
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   TimelineEventsQueries,

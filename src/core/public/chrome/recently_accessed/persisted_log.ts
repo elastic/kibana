@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { cloneDeep, isEqual, take } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
+import take from 'lodash/take';
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 

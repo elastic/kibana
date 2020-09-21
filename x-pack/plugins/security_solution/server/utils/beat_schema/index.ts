@@ -5,7 +5,6 @@
  */
 
 import { get, has, isArray, isEmpty, isNumber, isString, memoize, pick } from 'lodash/fp';
-
 import {
   auditbeatSchema,
   baseCategoryFields,

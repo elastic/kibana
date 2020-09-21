@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';

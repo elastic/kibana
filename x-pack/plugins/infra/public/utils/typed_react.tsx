@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import React from 'react';
 import { InferableComponentEnhancerWithProps, ConnectedComponent } from 'react-redux';
 

@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { getOr } from 'lodash/fp';
-
 import { NetworkHttpTable } from '../../components/network_http_table';
 import { useNetworkHttp } from '../../containers/network_http';
 import { networkModel } from '../../store';

@@ -6,7 +6,7 @@
 
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
-import { max } from 'lodash';
+import max from 'lodash/max';
 import * as React from 'react';
 
 import { euiStyled } from '../../../../../observability/public';

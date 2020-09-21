@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { isString } from 'lodash';
+import isString from 'lodash/isString';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {

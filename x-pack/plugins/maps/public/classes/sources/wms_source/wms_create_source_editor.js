@@ -17,6 +17,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { WmsClient } from './wms_client';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 const LAYERS_LABEL = i18n.translate('xpack.maps.source.wms.layersLabel', {

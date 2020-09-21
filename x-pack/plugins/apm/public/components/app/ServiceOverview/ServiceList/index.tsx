@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
-import { orderBy } from 'lodash';
+import orderBy from 'lodash/orderBy';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { asPercent } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

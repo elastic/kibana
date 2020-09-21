@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { isNumber, times, identity, random } from 'lodash';
+import isNumber from 'lodash/isNumber';
+import times from 'lodash/times';
+import identity from 'lodash/identity';
+import random from 'lodash/random';
 import angular, { IRootScopeService, IScope, ICompileService } from 'angular';
 import $ from 'jquery';
 import 'angular-sanitize';

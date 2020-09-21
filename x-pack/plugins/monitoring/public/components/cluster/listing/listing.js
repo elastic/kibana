@@ -7,7 +7,8 @@ import React, { Fragment, Component } from 'react';
 import { Legacy } from '../../../legacy_shims';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import { capitalize, partial } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import partial from 'lodash/partial';
 import {
   EuiHealth,
   EuiLink,

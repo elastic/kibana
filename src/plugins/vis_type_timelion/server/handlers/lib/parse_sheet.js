@@ -20,6 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import path from 'path';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 const grammar = fs.readFileSync(path.resolve(__dirname, '../../../common/chain.peg'), 'utf8');
 import PEG from 'pegjs';

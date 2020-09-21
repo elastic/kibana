@@ -5,7 +5,6 @@
  */
 
 import { getOr } from 'lodash/fp';
-
 import { TlsData, TlsEdges } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';

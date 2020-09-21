@@ -6,7 +6,6 @@
 
 import stringify from 'json-stable-stringify';
 import { isArray, isPlainObject } from 'lodash';
-
 import { JsonObject } from '../../../../common/typed_json';
 import { LogEntriesItemField } from '../../../../common/http_api';
 

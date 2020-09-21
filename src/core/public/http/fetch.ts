@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { omitBy } from 'lodash';
+import omitBy from 'lodash/omitBy';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
 

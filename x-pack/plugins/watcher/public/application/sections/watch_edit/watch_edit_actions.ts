@@ -6,7 +6,7 @@
 
 import { ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { ACTION_TYPES, WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
 import { createWatch } from '../../lib/api';

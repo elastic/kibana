@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash';
+import find from 'lodash/find';
 import { IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 export const getPercentileValue = <TAggConfig extends IResponseAggConfig>(

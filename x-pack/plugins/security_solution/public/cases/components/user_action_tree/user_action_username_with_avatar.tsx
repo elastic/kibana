@@ -7,7 +7,6 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiAvatar } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-
 import { UserActionUsername } from './user_action_username';
 
 interface UserActionUsernameWithAvatarProps {

@@ -6,7 +6,7 @@
 
 import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';

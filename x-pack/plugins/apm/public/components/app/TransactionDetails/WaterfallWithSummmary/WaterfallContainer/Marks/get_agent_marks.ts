@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy } from 'lodash';
+import sortBy from 'lodash/sortBy';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { Mark } from '.';
 

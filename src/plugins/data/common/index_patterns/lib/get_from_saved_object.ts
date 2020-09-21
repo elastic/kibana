@@ -18,7 +18,7 @@
  */
 
 import { SavedObject } from 'src/core/public';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { IIndexPattern, IndexPatternAttributes } from '../..';
 
 export function getFromSavedObject(

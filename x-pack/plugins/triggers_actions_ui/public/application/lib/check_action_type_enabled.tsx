@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCard, EuiLink } from '@elastic/eui';

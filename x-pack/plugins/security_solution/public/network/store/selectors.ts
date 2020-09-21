@@ -6,7 +6,6 @@
 
 import { createSelector } from 'reselect';
 import { get } from 'lodash/fp';
-
 import { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
 import { State } from '../../common/store/types';
 import { initialNetworkState } from './reducer';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { AllowUnknownProperties } from '../typings/common';
 import { APMError } from '../typings/es_schemas/ui/apm_error';
 import { Span } from '../typings/es_schemas/ui/span';

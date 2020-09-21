@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';

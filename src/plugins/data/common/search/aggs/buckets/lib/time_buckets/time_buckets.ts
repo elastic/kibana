@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
+import isString from 'lodash/isString';
+import isObject from 'lodash/isObject';
+import isPlainObject from 'lodash/isPlainObject';
+import sortBy from 'lodash/sortBy';
 import moment, { Moment } from 'moment';
 
 import { parseInterval } from '../../../utils';

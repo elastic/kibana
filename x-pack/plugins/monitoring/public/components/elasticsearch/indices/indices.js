@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/formatting';
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';

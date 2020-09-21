@@ -6,7 +6,7 @@
 import './filters.scss';
 
 import React, { MouseEventHandler, useState } from 'react';
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
 import { updateColumnParam } from '../../../state_helpers';

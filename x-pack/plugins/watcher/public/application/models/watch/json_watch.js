@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { BaseWatch } from './base_watch';
 import { ACTION_TYPES, WATCH_TYPES } from '../../../../common/constants';
 import defaultWatchJson from './default_watch.json';

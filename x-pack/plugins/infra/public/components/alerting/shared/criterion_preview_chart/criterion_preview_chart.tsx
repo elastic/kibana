@@ -6,7 +6,9 @@
 import React, { useMemo } from 'react';
 import { niceTimeFormatter, TooltipValue } from '@elastic/charts';
 import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
-import { sum, min as getMin, max as getMax } from 'lodash';
+import sum from 'lodash/sum';
+import min from 'lodash/min';
+import max from 'lodash/max';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';

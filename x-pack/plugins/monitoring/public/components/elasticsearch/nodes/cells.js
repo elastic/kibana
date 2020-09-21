@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { formatMetric } from '../../../lib/format_number';
 import { EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

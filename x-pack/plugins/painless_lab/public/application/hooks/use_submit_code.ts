@@ -6,8 +6,7 @@
 
 import { useRef, useCallback, useState } from 'react';
 import { HttpSetup } from 'kibana/public';
-import { debounce } from 'lodash';
-
+import debounce from 'lodash/debounce';
 import { API_BASE_PATH } from '../../../common/constants';
 import { Response, PayloadFormat, Payload } from '../types';
 import { formatRequestPayload } from '../lib/format';

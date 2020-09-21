@@ -19,7 +19,7 @@ import {
   EuiFilePicker,
   EuiLink,
 } from '@elastic/eui';
-import { orderBy } from 'lodash';
+import orderBy from 'lodash/orderBy';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Paginate } from '../paginate';

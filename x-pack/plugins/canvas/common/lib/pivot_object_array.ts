@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, zipObject } from 'lodash';
+import map from 'lodash/map';
+import zipObject from 'lodash/zipObject';
 
 const isString = (val: any): boolean => typeof val === 'string';
 

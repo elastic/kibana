@@ -6,7 +6,6 @@
 
 import { onError, ErrorLink } from 'apollo-link-error';
 import { get, throttle, noop } from 'lodash/fp';
-
 import uuid from 'uuid';
 
 import * as i18n from './translations';

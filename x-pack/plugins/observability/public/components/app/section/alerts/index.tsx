@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { EuiSelect } from '@elastic/eui';
-import { uniqBy } from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import { Alert } from '../../../../../../alerts/common';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { SectionContainer } from '..';

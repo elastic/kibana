@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { memoize } from 'lodash';
+import memoize from 'lodash/memoize';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { asDecimal, asInteger } from './formatters';
 import { TimeUnit } from './datetime';

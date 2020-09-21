@@ -24,7 +24,13 @@ import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { sortBy, first, get, gt, gte, lt, lte } from 'lodash';
+import sortBy from 'lodash/sortBy';
+import first from 'lodash/first';
+import get from 'lodash/get';
+import gt from 'lodash/gt';
+import gte from 'lodash/gte';
+import lt from 'lodash/lt';
+import lte from 'lodash/lte';
 const OPERATORS = { gt, gte, lt, lte };
 
 function sortByDirection(data, direction, fn) {

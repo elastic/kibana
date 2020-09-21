@@ -6,6 +6,8 @@
 
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { Role, isRoleReadOnly } from '../../../../../../common/model';
 

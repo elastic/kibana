@@ -5,7 +5,6 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import {
   getDetectionEngineTabUrl,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {

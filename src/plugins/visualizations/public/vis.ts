@@ -27,7 +27,9 @@
  * Not to be confused with vislib/vis.js.
  */
 
-import { isFunction, defaults, cloneDeep } from 'lodash';
+import isFunction from 'lodash/isFunction';
+import defaults from 'lodash/defaults';
+import cloneDeep from 'lodash/cloneDeep';
 import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { PersistedState } from './persisted_state';

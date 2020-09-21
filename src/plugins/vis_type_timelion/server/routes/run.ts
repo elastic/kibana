@@ -19,6 +19,8 @@
 import { IRouter, Logger, CoreSetup } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import Bluebird from 'bluebird';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';

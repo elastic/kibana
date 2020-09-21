@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy } from 'lodash';
+import groupBy from 'lodash/groupBy';
 import React from 'react';
 
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';

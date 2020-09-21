@@ -5,7 +5,9 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { camelCase, isArray, isObject } from 'lodash';
+import camelCase from 'lodash/camelCase';
+import isArray from 'lodash/isArray';
+import isObject from 'lodash/isObject';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';

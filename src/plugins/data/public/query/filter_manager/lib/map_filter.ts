@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { reduceRight } from 'lodash';
-
+import reduceRight from 'lodash/reduceRight';
 import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';
 import { mapPhrase } from './mappers/map_phrase';

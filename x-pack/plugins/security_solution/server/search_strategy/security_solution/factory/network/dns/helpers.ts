@@ -5,7 +5,6 @@
  */
 
 import { get, getOr } from 'lodash/fp';
-
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   NetworkDnsBuckets,

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { isString, isObject } from 'lodash';
+import isString from 'lodash/isString';
+import isObject from 'lodash/isObject';
 import { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
 import { IAggConfig } from '../agg_config';
 

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import moment from 'moment';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';

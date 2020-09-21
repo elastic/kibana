@@ -18,6 +18,8 @@
  */
 
 import { SeriesAgg } from './_series_agg';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { calculateLabel } from '../../../../../common/calculate_label';

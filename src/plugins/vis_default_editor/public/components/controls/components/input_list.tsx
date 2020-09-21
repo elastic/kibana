@@ -18,7 +18,11 @@
  */
 
 import React, { useState, useEffect, Fragment, useCallback } from 'react';
-import { isEmpty, isEqual, mapValues, omitBy, pick } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import mapValues from 'lodash/mapValues';
+import omitBy from 'lodash/omitBy';
+import pick from 'lodash/pick';
 import {
   EuiButtonIcon,
   EuiFlexGroup,

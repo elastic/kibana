@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
+import map from 'lodash/map';
+import reduce from 'lodash/reduce';
+import mapValues from 'lodash/mapValues';
+import get from 'lodash/get';
+import keys from 'lodash/keys';
+import pickBy from 'lodash/pickBy';
 import { Filter, FilterMeta } from './meta_filter';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
 

@@ -7,7 +7,7 @@
 import { ComponentType } from 'react';
 import { withHandlers } from 'recompose';
 import immutable from 'object-path-immutable';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { Arguments as SimpleArguments, SimpleTemplate } from './simple_template';
 import { Arguments as ExtendedArguments, ExtendedTemplate } from './extended_template';

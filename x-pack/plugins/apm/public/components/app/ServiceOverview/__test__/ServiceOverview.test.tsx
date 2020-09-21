@@ -6,7 +6,7 @@
 
 import { render, wait, waitForElement } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 import React, { FunctionComponent, ReactChild } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';

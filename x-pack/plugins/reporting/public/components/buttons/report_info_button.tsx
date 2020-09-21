@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { USES_HEADLESS_JOB_TYPES } from '../../../constants';
 import { JobInfo, ReportingAPIClient } from '../../lib/reporting_api_client';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import {
   RESTRICTIONS_KEYS,
   DEFAULT_UI_RESTRICTION,

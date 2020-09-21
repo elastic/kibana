@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trimStart } from 'lodash';
+import trimStart from 'lodash/trimStart';
 import { CoreSetup } from 'kibana/public';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { UrlForwardingStart } from '../../../../src/plugins/url_forwarding/public';

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { get, hasIn } from 'lodash';
+import get from 'lodash/get';
+import hasIn from 'lodash/hasIn';
 import { i18n } from '@kbn/i18n';
 import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';

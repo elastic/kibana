@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
-
+import cloneDeep from 'lodash/cloneDeep';
 import { Vis } from 'src/plugins/visualizations/public';
 import { AggGroupNames, DataPublicPluginStart } from '../../../../../data/public';
 import { EditorStateActionTypes } from './constants';

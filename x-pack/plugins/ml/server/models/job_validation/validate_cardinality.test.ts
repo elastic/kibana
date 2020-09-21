@@ -5,7 +5,6 @@
  */
 
 import cloneDeep from 'lodash/cloneDeep';
-
 import { IScopedClusterClient } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';

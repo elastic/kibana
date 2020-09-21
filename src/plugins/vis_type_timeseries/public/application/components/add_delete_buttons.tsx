@@ -20,7 +20,7 @@
 import React, { MouseEvent } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isBoolean } from 'lodash';
+import isBoolean from 'lodash/isBoolean';
 
 interface AddDeleteButtonsProps {
   addTooltip: string;

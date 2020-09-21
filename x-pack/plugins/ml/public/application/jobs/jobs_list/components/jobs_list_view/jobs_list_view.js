@@ -34,8 +34,7 @@ import { NodeAvailableWarning } from '../../../../components/node_available_warn
 import { DatePickerWrapper } from '../../../../components/navigation_menu/date_picker_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
-import { isEqual } from 'lodash';
-
+import isEqual from 'lodash/isEqual';
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
 let deletingJobsRefreshTimeout = null;

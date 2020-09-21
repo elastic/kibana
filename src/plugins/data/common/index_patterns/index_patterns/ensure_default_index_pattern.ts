@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { includes } from 'lodash';
+import includes from 'lodash/includes';
 import { IndexPatternsContract } from './index_patterns';
 import { UiSettingsCommon } from '../types';
 

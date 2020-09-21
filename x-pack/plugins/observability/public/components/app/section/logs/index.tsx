@@ -7,7 +7,7 @@
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';

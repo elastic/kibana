@@ -5,7 +5,7 @@
  */
 
 import { fromExpression } from '@kbn/interpreter/common';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { interpretAst } from '../lib/run_interpreter';
 // @ts-expect-error untyped local

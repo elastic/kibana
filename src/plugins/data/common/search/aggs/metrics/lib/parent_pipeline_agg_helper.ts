@@ -18,8 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash';
-
+import noop from 'lodash/noop';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';

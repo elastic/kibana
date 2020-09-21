@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padStart, chunk } from 'lodash';
+import padStart from 'lodash/padStart';
+import chunk from 'lodash/chunk';
 import { Alert, AlertInstanceSummary, AlertInstanceStatus, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,

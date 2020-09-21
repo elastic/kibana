@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, omit } from 'lodash';
+import flatten from 'lodash/flatten';
+import omit from 'lodash/omit';
 import { useHistory, useParams } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';

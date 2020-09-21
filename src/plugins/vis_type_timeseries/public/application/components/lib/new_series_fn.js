@@ -18,6 +18,8 @@
  */
 
 import uuid from 'uuid';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
 import { STACKED_OPTIONS } from '../../visualizations/constants';

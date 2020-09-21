@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _, { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';

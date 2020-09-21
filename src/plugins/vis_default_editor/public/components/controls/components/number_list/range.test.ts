@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { forOwn } from 'lodash';
+import forOwn from 'lodash/forOwn';
 import { parseRange } from './range';
 
 describe('Range parsing utility', () => {

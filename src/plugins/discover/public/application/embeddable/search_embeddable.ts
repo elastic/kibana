@@ -18,6 +18,8 @@
  */
 import './search_embeddable.scss';
 import angular from 'angular';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';

@@ -5,7 +5,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { JsonWatch } from './json_watch';
 import { ThresholdWatch } from './threshold_watch';

@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
+import find from 'lodash/find';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';

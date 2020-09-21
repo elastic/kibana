@@ -13,7 +13,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';

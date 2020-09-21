@@ -6,7 +6,6 @@
 
 import { IRouter } from 'kibana/server';
 import { merge } from 'lodash/fp';
-
 import { SecurityPluginSetup } from '../../../security/server';
 import { LIST_PRIVILEGES_URL } from '../../common/constants';
 import { buildSiemResponse, readPrivileges, transformError } from '../siem_server_deps';

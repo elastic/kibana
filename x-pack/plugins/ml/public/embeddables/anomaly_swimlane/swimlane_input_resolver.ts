@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import {
   catchError,
   debounceTime,

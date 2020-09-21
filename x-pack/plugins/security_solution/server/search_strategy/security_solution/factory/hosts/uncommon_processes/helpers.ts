@@ -5,7 +5,6 @@
  */
 import { get, getOr } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
-
 import { mergeFieldsWithHit } from '../../../../../utils/build_query';
 import {
   ProcessHits,

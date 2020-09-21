@@ -6,7 +6,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 import { BeatTag, ConfigurationBlock } from '../../../../common/domain_types';

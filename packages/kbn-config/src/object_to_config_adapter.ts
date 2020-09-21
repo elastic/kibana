@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { cloneDeep, get, has } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import has from 'lodash/has';
 import { set } from '@elastic/safer-lodash-set';
 import { getFlattenedObject } from '@kbn/std';
 

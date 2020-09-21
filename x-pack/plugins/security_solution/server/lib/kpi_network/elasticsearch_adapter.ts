@@ -5,7 +5,6 @@
  */
 
 import { getOr } from 'lodash/fp';
-
 import { inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 

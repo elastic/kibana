@@ -17,7 +17,6 @@ import find from 'lodash/find';
 import sortBy from 'lodash/sortBy';
 import map from 'lodash/map';
 import reduce from 'lodash/reduce';
-
 import { buildConfig } from './explorer_chart_config_builder';
 import { chartLimits, getChartType } from '../../util/chart_utils';
 

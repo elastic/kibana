@@ -7,7 +7,7 @@
 import React, { ErrorInfo, FC, ReactElement } from 'react';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'recompose';
 import PropTypes from 'prop-types';
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 
 interface Props {
   error?: Error;

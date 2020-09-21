@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants/configuration_blocks';
 import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';

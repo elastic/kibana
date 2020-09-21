@@ -18,7 +18,7 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { search } from '../../../../../../plugins/data/public';
 const { parseEsInterval } = search.aggs;
 import { GTE_INTERVAL_RE } from '../../../../../../plugins/vis_type_timeseries/common/interval_regexp';

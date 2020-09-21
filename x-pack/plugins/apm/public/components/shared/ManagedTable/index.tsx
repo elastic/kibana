@@ -5,7 +5,7 @@
  */
 
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-import { orderBy } from 'lodash';
+import orderBy from 'lodash/orderBy';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../hooks/useUrlParams';

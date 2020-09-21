@@ -5,6 +5,8 @@
  */
 
 import { AbstractLayer } from '../layer';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { TileStyle } from '../../styles/tile/tile_style';

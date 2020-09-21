@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, omit, isEqual, defaultsDeep } from 'lodash';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
+import isEqual from 'lodash/isEqual';
+import defaultsDeep from 'lodash/defaultsDeep';
 
 // This config template is presented to the user for the 'new pipeline' workflow
 const emptyPipeline = 'input {\n' + '}\n' + 'filter {\n' + '}\n' + 'output {\n' + '}';

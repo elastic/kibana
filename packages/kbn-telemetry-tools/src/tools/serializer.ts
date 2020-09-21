@@ -18,7 +18,7 @@
  */
 
 import * as ts from 'typescript';
-import { uniqBy } from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import {
   getResolvedModuleSourceFile,
   getIdentifierDeclarationFromSource,

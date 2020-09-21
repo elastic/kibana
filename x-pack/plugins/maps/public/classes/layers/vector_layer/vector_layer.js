@@ -21,6 +21,8 @@ import {
   LAYER_STYLE_TYPE,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
 } from '../../../../common/constants';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { EuiIcon } from '@elastic/eui';

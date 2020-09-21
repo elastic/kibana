@@ -5,7 +5,7 @@
  */
 
 import { ascending, bisector } from 'd3-array';
-import { pick } from 'lodash';
+import pick from 'lodash/pick';
 
 export interface TimeKey {
   time: number;

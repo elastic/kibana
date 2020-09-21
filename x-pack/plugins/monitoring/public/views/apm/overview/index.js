@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { find } from 'lodash';
+import find from 'lodash/find';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';

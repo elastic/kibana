@@ -5,7 +5,6 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-
 import { IndexField } from '../../graphql/types';
 import { baseCategoryFields, getDocumentation, hasDocumentation } from '../../utils/beat_schema';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';

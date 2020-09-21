@@ -40,6 +40,8 @@
  *     that has more than a single consecutive newline.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';

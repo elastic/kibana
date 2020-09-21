@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // import { storiesOf } from '@storybook/react';
-import { cloneDeep, merge } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import merge from 'lodash/merge';
 import React from 'react';
 import { TransactionDurationAlertTrigger } from '.';
 import { ApmPluginContextValue } from '../../../context/ApmPluginContext';

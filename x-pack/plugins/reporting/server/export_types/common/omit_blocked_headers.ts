@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { omitBy } from 'lodash';
+import omitBy from 'lodash/omitBy';
 import {
   KBN_SCREENSHOT_HEADER_BLOCK_LIST,
   KBN_SCREENSHOT_HEADER_BLOCK_LIST_STARTS_WITH_PATTERN,

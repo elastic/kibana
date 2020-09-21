@@ -6,7 +6,7 @@
 import { EuiSelect } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { map } from 'lodash';
+import map from 'lodash/map';
 import React from 'react';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';

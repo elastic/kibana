@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';

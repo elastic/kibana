@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, pick } from 'lodash';
+import debounce from 'lodash/debounce';
+import pick from 'lodash/pick';
 import { Unit } from '@elastic/datemath';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {

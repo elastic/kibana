@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import * as literal from '../node_types/literal';
 import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 

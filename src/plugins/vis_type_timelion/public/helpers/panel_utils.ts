@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { cloneDeep, defaults, mergeWith, compact } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import defaults from 'lodash/defaults';
+import mergeWith from 'lodash/mergeWith';
+import compact from 'lodash/compact';
 import moment, { Moment } from 'moment-timezone';
 
 import { TimefilterContract } from 'src/plugins/data/public';

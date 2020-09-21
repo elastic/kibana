@@ -6,7 +6,7 @@
 
 import './edit_user_page.scss';
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import React, { Component, Fragment, ChangeEvent } from 'react';
 import {
   EuiButton,

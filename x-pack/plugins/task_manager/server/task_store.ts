@@ -10,7 +10,6 @@
 import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 import { omit, difference, partition, map, defaults } from 'lodash';
-
 import { some, none } from 'fp-ts/lib/Option';
 
 import { SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';

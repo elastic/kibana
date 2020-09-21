@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { ChangeEvent } from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   htmlIdGenerator,

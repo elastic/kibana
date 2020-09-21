@@ -18,8 +18,11 @@
  */
 import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
-import { compact, uniqBy, map, every, isUndefined } from 'lodash';
-
+import compact from 'lodash/compact';
+import uniqBy from 'lodash/uniqBy';
+import map from 'lodash/map';
+import every from 'lodash/every';
+import isUndefined from 'lodash/isUndefined';
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 

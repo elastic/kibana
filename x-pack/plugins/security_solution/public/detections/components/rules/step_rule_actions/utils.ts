@@ -6,7 +6,6 @@
 
 import mustache from 'mustache';
 import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
-
 import {
   AlertAction,
   ActionTypeRegistryContract,

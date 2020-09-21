@@ -5,7 +5,7 @@
  */
 
 import { IconColor } from '@elastic/eui';
-import { invert } from 'lodash';
+import invert from 'lodash/invert';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DeprecationInfo } from '../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
 

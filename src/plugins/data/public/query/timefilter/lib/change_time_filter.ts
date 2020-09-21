@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { keys } from 'lodash';
+import keys from 'lodash/keys';
 import { TimefilterContract } from '../../timefilter';
 import { RangeFilter, TimeRange } from '../../../../common';
 

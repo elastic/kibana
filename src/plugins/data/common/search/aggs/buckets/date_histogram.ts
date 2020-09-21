@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { get, noop, find, every } from 'lodash';
+import get from 'lodash/get';
+import noop from 'lodash/noop';
+import find from 'lodash/find';
+import every from 'lodash/every';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 

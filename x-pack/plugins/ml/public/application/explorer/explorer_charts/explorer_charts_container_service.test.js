@@ -5,7 +5,6 @@
  */
 
 import cloneDeep from 'lodash/cloneDeep';
-
 import mockAnomalyChartRecords from './__mocks__/mock_anomaly_chart_records.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
 import mockJobConfig from './__mocks__/mock_job_config.json';

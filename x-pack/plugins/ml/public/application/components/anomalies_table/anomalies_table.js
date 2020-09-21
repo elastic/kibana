@@ -10,7 +10,6 @@
 
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-
 import React, { Component } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';

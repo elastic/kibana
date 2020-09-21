@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
-
+import isEqual from 'lodash/isEqual';
 import { Dictionary } from '../../../../../../../common/types/common';
 import { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
 import { TransformPivotConfig } from '../../../../../../../common/types/transform';

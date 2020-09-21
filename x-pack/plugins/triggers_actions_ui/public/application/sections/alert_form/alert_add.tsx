@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useReducer, useState, useEffect } from 'react';
-import { isObject } from 'lodash';
+import isObject from 'lodash/isObject';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,

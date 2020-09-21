@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { KeyValueTable } from '../KeyValueTable';

@@ -12,7 +12,8 @@ import React, {
   useState,
 } from 'react';
 import { withRouter } from 'react-router-dom';
-import { uniqueId, mapValues } from 'lodash';
+import uniqueId from 'lodash/uniqueId';
+import mapValues from 'lodash/mapValues';
 import { IUrlParams } from './types';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';

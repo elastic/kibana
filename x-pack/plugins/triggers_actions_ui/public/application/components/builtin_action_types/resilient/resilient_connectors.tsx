@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ResilientActionConnector } from './types';

@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import first from 'lodash/first';
+import gt from 'lodash/gt';
+import gte from 'lodash/gte';
+import last from 'lodash/last';
+import lt from 'lodash/lt';
+import lte from 'lodash/lte';
+import sortBy from 'lodash/sortBy';
 import { mix, parseToRgb, toColorString } from 'polished';
 import {
   InfraWaffleMapBounds,

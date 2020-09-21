@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { first, memoize } from 'lodash';
+import first from 'lodash/first';
+import memoize from 'lodash/memoize';
 
 export const ECS_ALLOWED_LIST = [
   'host',

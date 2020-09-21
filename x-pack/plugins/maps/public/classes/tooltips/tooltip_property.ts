@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { Filter } from '../../../../../../src/plugins/data/public';
 import { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';

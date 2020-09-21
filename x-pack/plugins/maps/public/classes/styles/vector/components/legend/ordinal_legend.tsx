@@ -5,6 +5,8 @@
  */
 
 import React, { Component, Fragment } from 'react';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';

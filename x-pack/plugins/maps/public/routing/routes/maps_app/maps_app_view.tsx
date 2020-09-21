@@ -6,6 +6,8 @@
 
 import React from 'react';
 import 'mapbox-gl/dist/mapbox-gl.css';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { EmbeddableStateTransfer, Adapters } from 'src/plugins/embeddable/public';

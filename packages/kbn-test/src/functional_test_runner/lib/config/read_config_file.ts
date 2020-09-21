@@ -18,8 +18,7 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { defaultsDeep } from 'lodash';
-
+import defaultsDeep from 'lodash/defaultsDeep';
 import { Config } from './config';
 
 const cache = new WeakMap();

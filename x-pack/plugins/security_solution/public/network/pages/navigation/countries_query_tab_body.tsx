@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { getOr } from 'lodash/fp';
-
 import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
 import { useNetworkTopCountries } from '../../containers/network_top_countries';
 import { networkModel } from '../../store';

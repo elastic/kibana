@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { ErrorStrings } from '../../../i18n';
 import { getWorkpad, getFullWorkpadPersisted, getWorkpadPersisted } from '../selectors/workpad';
 import { getAssetIds } from '../selectors/assets';

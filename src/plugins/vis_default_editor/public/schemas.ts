@@ -17,8 +17,9 @@
  * under the License.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _, { defaults } from 'lodash';
-
 import { Optional } from '@kbn/utility-types';
 
 import { AggGroupNames, AggParam, AggGroupName } from '../../data/public';

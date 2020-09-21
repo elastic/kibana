@@ -20,6 +20,8 @@
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React from 'react';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 

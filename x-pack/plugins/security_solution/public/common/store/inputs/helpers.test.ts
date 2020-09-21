@@ -5,7 +5,6 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
 import { mockGlobalState } from '../../mock';
 
 import {

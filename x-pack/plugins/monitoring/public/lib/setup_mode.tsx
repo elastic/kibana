@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { get, includes } from 'lodash';
+import get from 'lodash/get';
+import includes from 'lodash/includes';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from '../legacy_shims';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';

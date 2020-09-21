@@ -7,7 +7,6 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import isEmpty from 'lodash/isEmpty';
-
 import { throwErrors } from '../../../../case/common/api';
 import {
   TimelineResponse,

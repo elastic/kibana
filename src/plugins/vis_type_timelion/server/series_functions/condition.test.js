@@ -22,6 +22,8 @@ import moment from 'moment';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 import getSeriesList from './helpers/get_single_series_list';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 describe('condition.js', function () {

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, get, pick } from 'lodash';
-
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import pick from 'lodash/pick';
 import { WEEK } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
 import { validateId } from './validate_id';

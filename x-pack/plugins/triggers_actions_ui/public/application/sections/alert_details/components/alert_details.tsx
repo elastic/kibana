@@ -5,7 +5,7 @@
  */
 
 import React, { useState, Fragment, useEffect } from 'react';
-import { keyBy } from 'lodash';
+import keyBy from 'lodash/keyBy';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageBody,

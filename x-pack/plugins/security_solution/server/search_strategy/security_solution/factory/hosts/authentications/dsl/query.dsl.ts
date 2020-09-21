@@ -5,7 +5,6 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-
 import { HostAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
 

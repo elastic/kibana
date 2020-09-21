@@ -10,6 +10,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { parseFile } from '../util/file_parser';
 import { MAX_FILE_SIZE } from '../../common/constants/file_import';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 const ACCEPTABLE_FILETYPES = ['json', 'geojson'];

@@ -6,7 +6,10 @@
 
 import { createAction } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { get, pick, cloneDeep, without } from 'lodash';
+import get from 'lodash/get';
+import pick from 'lodash/pick';
+import cloneDeep from 'lodash/cloneDeep';
+import without from 'lodash/without';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
 import { createThunk } from '../../lib/create_thunk';
 import {

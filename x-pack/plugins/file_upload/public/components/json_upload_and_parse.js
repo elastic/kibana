@@ -13,6 +13,8 @@ import { getGeoIndexTypesForFeatures } from '../util/geo_processing';
 import { IndexSettings } from './index_settings';
 import { JsonIndexFilePicker } from './json_index_file_picker';
 import { JsonImportProgress } from './json_import_progress';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 const INDEXING_STAGE = {

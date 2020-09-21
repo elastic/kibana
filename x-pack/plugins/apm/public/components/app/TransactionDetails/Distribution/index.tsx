@@ -7,7 +7,7 @@
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useCallback } from 'react';
 import { ValuesType } from 'utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

@@ -20,8 +20,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import $ from 'jquery';
 import moment from 'moment-timezone';
-import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
-
+import debounce from 'lodash/debounce';
+import compact from 'lodash/compact';
+import get from 'lodash/get';
+import each from 'lodash/each';
+import cloneDeep from 'lodash/cloneDeep';
+import last from 'lodash/last';
+import map from 'lodash/map';
 import { useKibana } from '../../../kibana_react/public';
 import '../flot';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';

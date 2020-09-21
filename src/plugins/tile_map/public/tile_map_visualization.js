@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { GeohashLayer } from './geohash_layer';
 import { getFormatService, getQueryService, getKibanaLegacy } from './services';
 import { scaleBounds, geoContains, mapTooltipProvider } from '../../maps_legacy/public';

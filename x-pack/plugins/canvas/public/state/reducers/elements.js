@@ -6,7 +6,7 @@
 
 import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import * as actions from '../actions/elements';
 
 const { assign, push, del, set } = immutable;

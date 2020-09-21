@@ -5,7 +5,6 @@
  */
 
 import { get, getOr } from 'lodash/fp';
-
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { processFieldsMap, userFieldsMap } from '../ecs_fields';

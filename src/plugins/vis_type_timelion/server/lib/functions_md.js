@@ -19,6 +19,8 @@
 
 import loadFunctions from './load_functions.js';
 const functions = loadFunctions('series_functions/');
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 export default (function () {

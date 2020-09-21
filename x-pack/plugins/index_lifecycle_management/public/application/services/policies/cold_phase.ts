@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import { AllocateAction, ColdPhase, SerializedColdPhase } from '../../../../common/types';
 import { serializedPhaseInitialization } from '../../constants';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';

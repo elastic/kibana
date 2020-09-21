@@ -21,8 +21,7 @@ import React, { ChangeEvent } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isUndefined } from 'lodash';
-
+import isUndefined from 'lodash/isUndefined';
 import { useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 

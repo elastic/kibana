@@ -12,7 +12,7 @@ import {
   BytesPercentageUsage,
   DisabledIfNoDataAndInSetupModeLink,
 } from './helpers';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import {
   EuiFlexGrid,
   EuiFlexGroup,

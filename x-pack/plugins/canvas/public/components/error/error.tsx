@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { ComponentStrings } from '../../../i18n';
 import { ShowDebugging } from './show_debugging';
 

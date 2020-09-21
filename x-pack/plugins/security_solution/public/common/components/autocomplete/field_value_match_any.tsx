@@ -5,8 +5,7 @@
  */
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
-import { uniq } from 'lodash';
-
+import uniq from 'lodash/uniq';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
 import { getGenericComboBoxProps, paramIsValid } from './helpers';

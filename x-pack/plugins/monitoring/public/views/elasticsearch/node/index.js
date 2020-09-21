@@ -9,7 +9,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { partial } from 'lodash';
+import partial from 'lodash/partial';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { getPageData } from './get_page_data';

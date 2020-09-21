@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isNumber } from 'lodash';
+import isNumber from 'lodash/isNumber';
 import React from 'react';
 import styled from 'styled-components';
 import { asPercent } from '../../../../../common/utils/formatters';

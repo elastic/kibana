@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { values } from 'lodash';
+import values from 'lodash/values';
 import createContainer from 'constate';
 import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';

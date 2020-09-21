@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
+import isFunction from 'lodash/isFunction';
 import { IFieldFormat, TextContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString } from '../utils';
 

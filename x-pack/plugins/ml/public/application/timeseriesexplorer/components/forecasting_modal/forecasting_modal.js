@@ -10,7 +10,6 @@
 
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
-
 import React, { Component } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';

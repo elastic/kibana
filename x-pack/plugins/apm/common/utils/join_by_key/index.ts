@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { UnionToIntersection, ValuesType } from 'utility-types';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 
 /**
  * Joins a list of records by a given key. Key can be any type of value, from

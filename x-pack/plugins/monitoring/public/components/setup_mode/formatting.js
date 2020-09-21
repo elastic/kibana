@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 import { i18n } from '@kbn/i18n';
 import {
   APM_SYSTEM_ID,

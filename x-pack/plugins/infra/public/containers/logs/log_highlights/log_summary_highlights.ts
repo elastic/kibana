@@ -5,8 +5,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
-
+import debounce from 'lodash/debounce';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogSummaryHighlights } from './api/fetch_log_summary_highlights';
 import { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';

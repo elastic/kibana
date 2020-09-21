@@ -18,6 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import Chainable from '../../lib/classes/chainable';
 import { linear, log } from './lib/regress';

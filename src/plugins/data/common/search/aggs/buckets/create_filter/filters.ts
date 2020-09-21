@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { buildQueryFilter } from '../../../../../common';
 

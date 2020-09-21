@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';

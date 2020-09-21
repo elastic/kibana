@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { ConfigDeprecationWithContext, ConfigDeprecationLogger } from './types';
 
 const noopLogger = (msg: string) => undefined;

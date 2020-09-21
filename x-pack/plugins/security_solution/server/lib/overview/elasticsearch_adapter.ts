@@ -5,7 +5,6 @@
  */
 
 import { getOr } from 'lodash/fp';
-
 import { OverviewHostData, OverviewNetworkData } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';

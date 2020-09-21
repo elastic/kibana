@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { ApplicationStart, Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';

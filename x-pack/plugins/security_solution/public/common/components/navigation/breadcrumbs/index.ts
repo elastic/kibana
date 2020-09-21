@@ -5,7 +5,6 @@
  */
 
 import { getOr, omit } from 'lodash/fp';
-
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { APP_NAME } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';

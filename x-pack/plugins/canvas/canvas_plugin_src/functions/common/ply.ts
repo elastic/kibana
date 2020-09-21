@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy, flatten, pick, map } from 'lodash';
+import groupBy from 'lodash/groupBy';
+import flatten from 'lodash/flatten';
+import pick from 'lodash/pick';
+import map from 'lodash/map';
 import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 

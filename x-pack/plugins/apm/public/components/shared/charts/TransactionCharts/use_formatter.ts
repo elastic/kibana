@@ -5,7 +5,7 @@
  */
 
 import { useState, Dispatch, SetStateAction } from 'react';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import {
   getDurationFormatter,
   TimeFormatter,

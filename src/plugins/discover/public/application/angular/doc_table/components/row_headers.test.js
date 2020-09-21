@@ -21,6 +21,8 @@ import angular from 'angular';
 import 'angular-mocks';
 import 'angular-sanitize';
 import 'angular-route';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import sinon from 'sinon';
 import { getFakeRow } from 'fixtures/fake_row';

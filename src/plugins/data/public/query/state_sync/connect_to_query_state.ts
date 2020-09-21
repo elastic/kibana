@@ -19,6 +19,8 @@
 
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';

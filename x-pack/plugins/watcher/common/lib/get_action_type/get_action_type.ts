@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { intersection, keys, values } from 'lodash';
+import intersection from 'lodash/intersection';
+import keys from 'lodash/keys';
+import values from 'lodash/values';
 import { ACTION_TYPES } from '../../constants';
 
 export function getActionType(action: { [key: string]: { [key: string]: any } }) {

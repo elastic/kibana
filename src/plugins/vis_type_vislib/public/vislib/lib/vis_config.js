@@ -21,6 +21,8 @@
  * Provides vislib configuration, throws error if invalid property is accessed without providing defaults
  */
 import { set } from '@elastic/safer-lodash-set';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { vislibTypesConfig as visTypes } from './types';
 import { Data } from './data';

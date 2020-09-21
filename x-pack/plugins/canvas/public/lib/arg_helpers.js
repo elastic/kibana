@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { includes } from 'lodash';
+import includes from 'lodash/includes';
 import { getType } from '@kbn/interpreter/common';
 
 /*

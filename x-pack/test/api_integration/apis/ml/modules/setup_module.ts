@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { isEmpty } from 'lodash';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';

@@ -5,7 +5,10 @@
  */
 
 import { getSearchValue } from '../../lib/get_search_value';
-import { get, isEqual, remove, map } from 'lodash';
+import get from 'lodash/get';
+import isEqual from 'lodash/isEqual';
+import remove from 'lodash/remove';
+import map from 'lodash/map';
 import { Action } from '../action';
 import { WatchStatus } from '../watch_status';
 import { WatchErrors } from '../watch_errors';

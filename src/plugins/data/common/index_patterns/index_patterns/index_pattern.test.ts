@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { defaults, map, last } from 'lodash';
-
+import defaults from 'lodash/defaults';
+import map from 'lodash/map';
+import last from 'lodash/last';
 import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';

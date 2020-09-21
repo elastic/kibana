@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-
 import {
   InfraSnapshotMetricInput,
   InfraNodeType,

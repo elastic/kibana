@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find } from 'lodash';
+import find from 'lodash/find';
 import { SavedObjectsClientCommon, SavedObject } from '..';
 
 /**

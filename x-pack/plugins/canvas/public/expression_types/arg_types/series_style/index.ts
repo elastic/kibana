@@ -6,7 +6,7 @@
 
 import PropTypes from 'prop-types';
 import { lifecycle, compose } from 'recompose';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate, Props as ExtendedTemplateProps } from './extended_template';

@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { find } from 'lodash';
+import find from 'lodash/find';
 import { reIdSeries } from './lib/re_id_series';
 import { Series } from './series';
 import { handleAdd, handleDelete, handleChange } from './lib/collection_actions';

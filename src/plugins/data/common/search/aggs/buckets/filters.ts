@@ -18,8 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { size, transform, cloneDeep } from 'lodash';
-
+import size from 'lodash/size';
+import transform from 'lodash/transform';
+import cloneDeep from 'lodash/cloneDeep';
 import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';

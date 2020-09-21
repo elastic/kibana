@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { partial } from 'lodash';
+import partial from 'lodash/partial';
 import { getPoint } from './_get_point';
 import { addToSiri, Serie } from './_add_to_siri';
 import { Chart } from './point_series';

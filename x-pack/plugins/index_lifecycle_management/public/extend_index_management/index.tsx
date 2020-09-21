@@ -5,7 +5,9 @@
  */
 
 import React from 'react';
-import { get, every, some } from 'lodash';
+import get from 'lodash/get';
+import every from 'lodash/every';
+import some from 'lodash/some';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';

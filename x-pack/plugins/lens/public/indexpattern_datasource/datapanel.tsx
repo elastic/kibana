@@ -5,7 +5,10 @@
  */
 
 import './datapanel.scss';
-import { uniq, keyBy, groupBy, throttle } from 'lodash';
+import uniq from 'lodash/uniq';
+import keyBy from 'lodash/keyBy';
+import groupBy from 'lodash/groupBy';
+import throttle from 'lodash/throttle';
 import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,

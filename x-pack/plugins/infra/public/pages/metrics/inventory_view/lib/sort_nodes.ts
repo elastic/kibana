@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sortBy, last, first } from 'lodash';
+import sortBy from 'lodash/sortBy';
+import last from 'lodash/last';
+import first from 'lodash/first';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { WaffleSortOption } from '../hooks/use_waffle_options';
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { getWindow } from '../../lib/get_window';
 
 export class Fullscreen extends React.Component {

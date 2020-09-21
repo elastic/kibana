@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { reduce } from 'lodash';
+import reduce from 'lodash/reduce';
 import { difference, flattenKeys, pickDeep } from './utils';
 import { ParsedUsageCollection } from './ts_parser';
 import { generateMapping, compatibleSchemaTypes } from './manage_schema';

@@ -6,7 +6,6 @@
 
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { getOr } from 'lodash/fp';
-
 import { NetworkDnsTable } from '../../components/network_dns_table';
 import { useNetworkDns, HISTOGRAM_ID } from '../../containers/network_dns';
 import { manageQuery } from '../../../common/components/page/manage_query';

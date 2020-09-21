@@ -27,6 +27,8 @@ Hourly data might have:
  - Annual seasonality (frequency=24×365.25=8766)
 */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 
 // Uh, I don't think this will work when you have nulls in the initial seasonal components

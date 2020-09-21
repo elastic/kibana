@@ -18,6 +18,8 @@
  */
 
 import $ from 'jquery';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import angular from 'angular';
 import tableCellFilterHtml from './table_cell_filter.html';

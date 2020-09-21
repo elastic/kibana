@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiPortal, EuiProgress } from '@elastic/eui';
-import { pickBy } from 'lodash';
+import pickBy from 'lodash/pickBy';
 import React, { Fragment, useMemo, useReducer } from 'react';
 import { useDelayedVisibility } from '../components/shared/useDelayedVisibility';
 

@@ -5,7 +5,7 @@
  */
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
 import { Location } from 'history';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Margins } from '../../../../../shared/charts/Timeline';

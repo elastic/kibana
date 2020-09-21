@@ -21,6 +21,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _, { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../../../plugins/vis_type_timeseries/common/get_last_value';

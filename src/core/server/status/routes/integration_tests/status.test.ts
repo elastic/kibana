@@ -21,7 +21,6 @@ import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import supertest from 'supertest';
 import { omit } from 'lodash';
-
 import { createCoreContext, createHttpServer } from '../../../http/test_utils';
 import { ContextService } from '../../../context';
 import { metricsServiceMock } from '../../../metrics/metrics_service.mock';

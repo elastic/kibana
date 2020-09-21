@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate';
-import { isString } from 'lodash';
+import isString from 'lodash/isString';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 
 import { LogEntriesItem } from '../../../common/http_api';

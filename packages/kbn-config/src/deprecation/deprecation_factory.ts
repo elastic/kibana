@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { set } from '@elastic/safer-lodash-set';
 import { unset } from '@kbn/std';
 import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';

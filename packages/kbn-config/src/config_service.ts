@@ -19,7 +19,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '@kbn/logging';

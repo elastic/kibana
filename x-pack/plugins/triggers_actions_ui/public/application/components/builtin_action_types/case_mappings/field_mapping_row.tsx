@@ -13,7 +13,7 @@ import {
   EuiSuperSelectOption,
 } from '@elastic/eui';
 
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 
 export interface RowProps {
   id: string;

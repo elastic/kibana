@@ -12,7 +12,7 @@ import prettier from 'prettier';
 // @ts-expect-error
 import babelTraverse from '@babel/traverse';
 import { Suite, Test } from 'mocha';
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 

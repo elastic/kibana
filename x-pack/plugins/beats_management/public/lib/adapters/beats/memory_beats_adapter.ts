@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import { CMBeat } from '../../../../common/domain_types';
 import { ReturnTypeBulkAction } from '../../../../common/return_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';

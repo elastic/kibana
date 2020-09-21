@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from '../../legacy_shims';
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 import { CHART_LINE_COLOR, CHART_TEXT_COLOR } from '../../../common/constants';
 
 export async function getChartOptions(axisOptions) {

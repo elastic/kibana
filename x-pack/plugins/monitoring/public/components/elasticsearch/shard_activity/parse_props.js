@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from '../../../legacy_shims';
-import { capitalize } from 'lodash';
+import capitalize from 'lodash/capitalize';
 import { formatMetric } from '../../../lib/format_number';
 import { formatDateTimeLocal } from '../../../../common/formatting';
 

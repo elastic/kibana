@@ -5,7 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { get, first } from 'lodash';
+import get from 'lodash/get';
+import first from 'lodash/first';
 import { getTitle } from './get_title';
 import { getUnits } from './get_units';
 import { MonitoringTimeseries } from './monitoring_timeseries';

@@ -18,7 +18,6 @@
  */
 
 import { get, flow } from 'lodash';
-
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { migrations730 } from './migrations_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';

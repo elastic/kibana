@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash';
+import noop from 'lodash/noop';
 import expect from '@kbn/expect';
 import { Legacy } from '../../legacy_shims';
 import { MonitoringMainController } from './';

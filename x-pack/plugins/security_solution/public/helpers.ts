@@ -5,7 +5,6 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-
 import { CoreStart } from '../../../../src/core/public';
 import { APP_ID } from '../common/constants';
 import {

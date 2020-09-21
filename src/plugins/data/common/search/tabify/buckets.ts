@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { get, isPlainObject, keys, findKey } from 'lodash';
+import get from 'lodash/get';
+import isPlainObject from 'lodash/isPlainObject';
+import keys from 'lodash/keys';
+import findKey from 'lodash/findKey';
 import moment from 'moment';
 import { IAggConfig } from '../aggs';
 import { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';

@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { RoleIndexPrivilege } from '../../../../../../common/model';

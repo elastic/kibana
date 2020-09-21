@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniqBy } from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import { Action } from '../actions';
 import { BaseContext } from '../types';
 import { defer as createDefer, Defer } from '../../../kibana_utils/public';

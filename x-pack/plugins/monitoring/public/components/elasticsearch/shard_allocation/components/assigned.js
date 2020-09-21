@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortBy } from 'lodash';
+import get from 'lodash/get';
+import sortBy from 'lodash/sortBy';
 import React from 'react';
 import { Shard } from './shard';
 import { calculateClass } from '../lib/calculate_class';

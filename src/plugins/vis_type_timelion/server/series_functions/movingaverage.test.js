@@ -21,6 +21,8 @@ import fn from './movingaverage';
 const expect = require('chai').expect;
 
 import moment from 'moment';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import buckets from './fixtures/bucket_list';
 import getSeries from './helpers/get_series';

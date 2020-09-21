@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from 'lodash';
+import flatten from 'lodash/flatten';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';

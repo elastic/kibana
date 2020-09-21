@@ -18,6 +18,8 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
 import { createTickFormatter } from './tick_formatter';

@@ -6,7 +6,7 @@
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
 import Formsy from 'formsy-react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import React from 'react';
 import { ConfigBlockSchema, ConfigurationBlock } from '../../../../common/domain_types';
 import {

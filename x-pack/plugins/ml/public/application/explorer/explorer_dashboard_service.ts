@@ -9,8 +9,7 @@
  * components in the Explorer dashboard.
  */
 
-import { isEqual } from 'lodash';
-
+import isEqual from 'lodash/isEqual';
 import { from, isObservable, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, flatMap, map, scan, shareReplay } from 'rxjs/operators';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults } from 'lodash';
+import defaults from 'lodash/defaults';
 import { IndexPatternsService } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';

@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
-import { isEqual, cloneDeep } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import cloneDeep from 'lodash/cloneDeep';
 import {
   catchError,
   debounceTime,

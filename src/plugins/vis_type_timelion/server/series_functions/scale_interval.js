@@ -20,6 +20,8 @@
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import { toMS } from '../../common/lib/to_milliseconds';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 

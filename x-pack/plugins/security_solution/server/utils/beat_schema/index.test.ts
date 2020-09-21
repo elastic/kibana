@@ -5,7 +5,6 @@
  */
 
 import { cloneDeep, isArray } from 'lodash/fp';
-
 import { convertSchemaToAssociativeArray, getIndexSchemaDoc } from '.';
 import { auditbeatSchema, filebeatSchema, packetbeatSchema } from './8.0.0';
 import { Schema } from './type';

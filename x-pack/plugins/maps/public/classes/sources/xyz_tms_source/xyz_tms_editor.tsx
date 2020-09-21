@@ -6,6 +6,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Component, ChangeEvent } from 'react';
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
 import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

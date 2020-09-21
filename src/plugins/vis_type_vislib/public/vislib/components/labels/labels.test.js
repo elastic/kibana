@@ -17,8 +17,9 @@
  * under the License.
  */
 
+// Prefer importing individual modules, e.g. import get from "lodash/get"
+// eslint-disable-next-line no-restricted-imports
 import _ from 'lodash';
-
 import { labels } from './labels';
 import { dataArray } from './data_array';
 import { uniqLabels } from './uniq_labels';

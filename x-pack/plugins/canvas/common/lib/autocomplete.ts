@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import uniq from 'lodash/uniq';
 // @ts-expect-error untyped library
 import { parse } from '@kbn/interpreter/common';
 import {

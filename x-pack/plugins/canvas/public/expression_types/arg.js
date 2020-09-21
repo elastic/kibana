@@ -5,7 +5,7 @@
  */
 
 import { createElement } from 'react';
-import { pick } from 'lodash';
+import pick from 'lodash/pick';
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type';
 

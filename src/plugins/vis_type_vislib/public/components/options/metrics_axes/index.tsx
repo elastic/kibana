@@ -18,7 +18,9 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { cloneDeep, uniq, get } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import uniq from 'lodash/uniq';
+import get from 'lodash/get';
 import { EuiSpacer } from '@elastic/eui';
 
 import { IAggConfig } from 'src/plugins/data/public';

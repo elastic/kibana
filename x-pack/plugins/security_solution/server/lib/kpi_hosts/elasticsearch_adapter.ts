@@ -5,7 +5,6 @@
  */
 
 import { getOr } from 'lodash/fp';
-
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
 import { buildHostsQuery } from './query_hosts.dsl';
