@@ -305,7 +305,7 @@ describe('data state', () => {
       });
     });
   });
-  fdescribe('with a tree with no descendants and 2 ancestors', () => {
+  describe('with a tree with no descendants and 2 ancestors', () => {
     const originID = 'c';
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
@@ -323,7 +323,7 @@ describe('data state', () => {
         },
       });
     });
-    fit('should have no flowto candidate for the origin', () => {
+    it('should have no flowto candidate for the origin', () => {
       expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
     });
     it('should have no flowto candidate for the first ancestor', () => {

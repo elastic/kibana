@@ -327,11 +327,15 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
       entityID: originID,
       parentEntityID,
       eventID: 'first related event',
+      eventType: 'access',
+      eventCategory: 'registry',
     }),
     mockEndpointEvent({
       entityID: originID,
       parentEntityID,
       eventID: 'second related event',
+      eventType: 'access',
+      eventCategory: 'registry',
     }),
   ];
   return withRelatedEventsOnOrigin(baseTree, relatedEvents);

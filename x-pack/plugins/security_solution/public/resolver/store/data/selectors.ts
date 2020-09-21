@@ -144,7 +144,7 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
   graphableProcesses
   /* eslint-enable no-shadow */
 ) {
-  return indexedProcessTreeModel.factory(graphableProcesses as SafeResolverEvent[]);
+  return indexedProcessTreeModel.factory(graphableProcesses);
 });
 
 /**
@@ -509,8 +509,9 @@ export const processEventForID: (
   state: DataState
 ) => (nodeID: string) => SafeResolverEvent | null = createSelector(
   tree,
-  (indexedProcessTree) => (nodeID: string) =>
-    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID)
+  (indexedProcessTree) => (nodeID: string) => {
+    return indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID);
+  }
 );
 
 /**

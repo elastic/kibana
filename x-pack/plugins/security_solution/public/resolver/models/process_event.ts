@@ -62,7 +62,7 @@ export function eventType(passedEvent: SafeResolverEvent): ResolverProcessType {
     const category = new Set(eventModel.eventCategory(passedEvent));
     const kind = new Set(eventModel.eventKind(passedEvent));
     if (category.has('process')) {
-      if (category.has('start') || category.has('change') || category.has('creation')) {
+      if (type.has('start') || type.has('change') || type.has('creation')) {
         return 'processCreated';
       } else if (type.has('info')) {
         return 'processRan';
