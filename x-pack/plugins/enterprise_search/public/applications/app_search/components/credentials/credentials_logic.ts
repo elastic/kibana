@@ -63,7 +63,6 @@ export interface ICredentialsLogicValues {
   apiTokens: IApiToken[];
   dataLoading: boolean;
   engines: IEngine[];
-  // TODO flashMessages from ent-search
   formErrors: string[];
   isCredentialsDataComplete: boolean;
   isCredentialsDetailsComplete: boolean;
@@ -218,7 +217,6 @@ export const CredentialsLogic = kea<
         resetCredentials: () => [],
       },
     ],
-    // TODO flashMessages from ent-search
   }),
   selectors: ({ selectors }) => ({
     // TODO fullEngineAccessChecked from ent-search
