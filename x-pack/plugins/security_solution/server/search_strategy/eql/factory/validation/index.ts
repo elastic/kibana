@@ -10,10 +10,12 @@ import { getValidationErrors, isValidationErrorResponse } from './helpers';
 
 export const eqlValidationQuery: EqlQueryFactory<EqlQueryTypes.validation> = {
   buildRequest: (request) => ({
-    allow_no_indices: true,
-    index: request.index.join(),
-    body: {
-      query: request.query,
+    params: {
+      allow_no_indices: true,
+      index: request.params.index.join(),
+      body: {
+        query: request.params.query,
+      },
     },
   }),
   buildOptions: (request) => ({
@@ -23,7 +25,7 @@ export const eqlValidationQuery: EqlQueryFactory<EqlQueryTypes.validation> = {
     const errors = isValidationErrorResponse(response) ? getValidationErrors(response) : [];
 
     return {
-      rawResponse: response.body,
+      rawResponse: response.rawEqlResponse,
       errors,
       valid: errors.length === 0,
     };

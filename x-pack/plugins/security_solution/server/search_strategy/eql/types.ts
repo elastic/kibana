@@ -6,14 +6,13 @@
 
 import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { EqlStrategyRequest, EqlStrategyResponse } from '..';
+import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/server';
 
-export interface ValidationStrategyRequest {
-  params: EqlSearch;
+export type EqlSearchStrategyRequest = IEsSearchRequest<
+  unknown,
+  EqlSearch<Record<string, unknown>>
+> & {
   options?: TransportRequestOptions;
-}
+};
 
-export interface ValidationStrategyResponse extends EqlStrategyResponse {
-  valid: boolean;
-  errors: string[];
-}
+export type EqlSearchStrategyResponse = IEsSearchResponse<unknown>;

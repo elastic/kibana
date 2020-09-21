@@ -10,6 +10,10 @@ import {
   ValidationStrategyRequest,
   ValidationStrategyResponse,
 } from '../../../../common/search_strategy/eql/validation';
+import {
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
+} from '../../../../server/search_strategy/eql/types';
 
 interface Params {
   data: DataPublicPluginStart;
@@ -23,12 +27,12 @@ export const validateEql = ({
   index,
   query,
   signal,
-}: Params): Promise<ValidationStrategyResponse> => {
+}: Params): Promise<EqlSearchStrategyResponse> => {
   return data.search
-    .search<ValidationStrategyRequest, ValidationStrategyResponse>(
-      { factoryQueryType: EqlQueryTypes.validation, index, query },
+    .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
+      { params: { allow_no_indices: true, index, body: { query } }, options: { ignore: [400] } },
       {
-        strategy: 'security_eql_factory',
+        strategy: 'security_eql_base',
         abortSignal: signal,
       }
     )
