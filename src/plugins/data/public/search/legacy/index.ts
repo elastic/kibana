@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { fetchSoon } from './fetch_soon';
+export * from './call_msearch';
