@@ -36,7 +36,7 @@ import { schema } from './schema';
 import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
-import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/form';
+import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';

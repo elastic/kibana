@@ -39,7 +39,10 @@ import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      http: { basePath },
+    },
   } = useMlKibana();
 
   const navigateToPath = useNavigateToPath();
@@ -108,7 +111,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       jobCreator.end,
       isSingleMetricJobCreator(jobCreator) === true ? 'timeseriesexplorer' : 'explorer'
     );
-    window.open(url, '_blank');
+    navigateToPath(`${basePath.get()}/app/ml/${url}`);
   }
 
   function clickResetJob() {

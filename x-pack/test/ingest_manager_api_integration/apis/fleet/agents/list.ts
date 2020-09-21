@@ -95,5 +95,22 @@ export default function ({ getService }: FtrProviderContext) {
         .auth(users.kibana_basic_user.username, users.kibana_basic_user.password)
         .expect(404);
     });
+    it('should return a 400 when given an invalid "kuery" value', async () => {
+      await supertest
+        .get(`/api/ingest_manager/fleet/agents?kuery=m`) // missing saved object type
+        .auth(users.fleet_user.username, users.fleet_user.password)
+        .expect(400);
+    });
+    it('should accept a valid "kuery" value', async () => {
+      const filter = encodeURIComponent('fleet-agents.shared_id : "agent2_filebeat"');
+      const { body: apiResponse } = await supertest
+        .get(`/api/ingest_manager/fleet/agents?kuery=${filter}`)
+        .auth(users.fleet_user.username, users.fleet_user.password)
+        .expect(200);
+
+      expect(apiResponse.total).to.eql(1);
+      const agent = apiResponse.list[0];
+      expect(agent.shared_id).to.eql('agent2_filebeat');
+    });
   });
 }
