@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -14,29 +14,33 @@ import {
 } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ManagementSetup } from 'src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
-import { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import type { ManagementSetup } from 'src/plugins/management/public';
+import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
+import type { EmbeddableSetup } from 'src/plugins/embeddable/public';
+
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
-import { SecurityPluginSetup } from '../../security/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { registerManagementSection } from './application/management';
-import { LicenseManagementUIPluginSetup } from '../../license_management/public';
-import { setDependencyCache } from './application/util/dependency_cache';
-import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
-import { registerFeature } from './register_feature';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { registerMlUiActions } from './ui_actions';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { registerUrlGenerator } from './ml_url_generator';
+import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
+
 import { isFullLicense, isMlEnabled } from '../common/license';
+import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { SecurityPluginSetup } from '../../security/public';
+
+import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+
 import { registerEmbeddables } from './embeddables';
+import { registerFeature } from './register_feature';
+import { registerManagementSection } from './application/management';
+import { registerMlUiActions } from './ui_actions';
+import { registerUrlGenerator } from './ml_url_generator';
+import { setDependencyCache } from './application/util/dependency_cache';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
