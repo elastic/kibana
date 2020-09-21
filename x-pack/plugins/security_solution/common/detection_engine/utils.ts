@@ -5,7 +5,7 @@
  */
 
 import { EntriesArray } from '../shared_imports';
-import { RuleType } from './types';
+import { Type } from './schemas/common/schemas';
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
   const found = entries.filter(({ type }) => type === 'list');
@@ -17,4 +17,7 @@ export const hasNestedEntry = (entries: EntriesArray): boolean => {
   return found.length > 0;
 };
 
-export const isThresholdRule = (ruleType: RuleType) => ruleType === 'threshold';
+export const isEqlRule = (ruleType: Type | undefined): boolean => ruleType === 'eql';
+export const isThresholdRule = (ruleType: Type | undefined): boolean => ruleType === 'threshold';
+export const isQueryRule = (ruleType: Type | undefined): boolean => ruleType === 'query';
+export const isThreatMatchRule = (ruleType: Type): boolean => ruleType === 'threat_match';

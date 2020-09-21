@@ -7,7 +7,7 @@
 import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
@@ -49,6 +49,7 @@ export class Simulator {
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
+    indices,
     history,
   }: {
     /**
@@ -60,9 +61,13 @@ export class Simulator {
      */
     resolverComponentInstanceID: string;
     /**
+     * Indices that the backend would use to find the document ID.
+     */
+    indices: string[];
+    /**
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
-    databaseDocumentID?: string;
+    databaseDocumentID: string;
     history?: HistoryPackageHistoryInterface<never>;
   }) {
     // create the spy middleware (for debugging tests)
@@ -99,6 +104,7 @@ export class Simulator {
         store={this.store}
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
+        indices={indices}
       />
     );
   }
@@ -122,6 +128,20 @@ export class Simulator {
    */
   public set resolverComponentInstanceID(value: string) {
     this.wrapper.setProps({ resolverComponentInstanceID: value });
+  }
+
+  /**
+   * Change the indices (updates the React component props.)
+   */
+  public set indices(value: string[]) {
+    this.wrapper.setProps({ indices: value });
+  }
+
+  /**
+   * Get the indices (updates the React component props.)
+   */
+  public get indices(): string[] {
+    return this.wrapper.prop('indices');
   }
 
   /**
@@ -221,7 +241,7 @@ export class Simulator {
   }
 
   /**
-   * This manually runs the animation frames tied to a configurable timestamp in the future
+   * This manually runs the animation frames tied to a configurable timestamp in the future.
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
     this.sideEffectSimulator.controls.time = time;

@@ -6,15 +6,14 @@
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { ReportingCore } from '../';
-import { AuthenticatedUser } from '../../../security/server';
-import { CreateJobBaseParams, CreateJobFn } from '../types';
+import { BaseParams, CreateJobFn, ReportingUser } from '../types';
 import { LevelLogger } from './';
 import { Report } from './store';
 
 export type EnqueueJobFn = (
   exportTypeId: string,
-  jobParams: CreateJobBaseParams,
-  user: AuthenticatedUser | null,
+  jobParams: BaseParams,
+  user: ReportingUser,
   context: RequestHandlerContext,
   request: KibanaRequest
 ) => Promise<Report>;
@@ -27,30 +26,29 @@ export function enqueueJobFactory(
 
   return async function enqueueJob(
     exportTypeId: string,
-    jobParams: CreateJobBaseParams,
-    user: AuthenticatedUser | null,
+    jobParams: BaseParams,
+    user: ReportingUser,
     context: RequestHandlerContext,
     request: KibanaRequest
   ) {
-    type ScheduleTaskFnType = CreateJobFn<CreateJobBaseParams>;
+    type CreateJobFnType = CreateJobFn<BaseParams>;
 
-    const username: string | null = user ? user.username : null;
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const [scheduleTask, { store }] = await Promise.all([
-      exportType.scheduleTaskFnFactory(reporting, logger) as ScheduleTaskFnType,
+    const [createJob, { store }] = await Promise.all([
+      exportType.createJobFnFactory(reporting, logger) as CreateJobFnType,
       reporting.getPluginStartDeps(),
     ]);
 
     // add encrytped headers
-    const payload = await scheduleTask(jobParams, context, request);
+    const payload = await createJob(jobParams, context, request);
 
     // store the pending report, puts it in the Reporting Management UI table
-    const report = await store.addReport(exportType.jobType, username, payload);
+    const report = await store.addReport(exportType.jobType, user, payload);
 
     logger.info(`Scheduled ${exportType.name} report: ${report._id}`);
 

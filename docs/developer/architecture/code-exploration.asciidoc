@@ -313,9 +313,10 @@ To access an elasticsearch instance that has live data you have two options:
 WARNING: Missing README.
 
 
-- {kib-repo}blob/{branch}/x-pack/plugins/beats_management[beats_management]
+- {kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
 
-WARNING: Missing README.
+Notes:
+Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[canvas]
@@ -405,6 +406,11 @@ WARNING: Missing README.
 
 The GlobalSearch plugin provides an easy way to search for various objects, such as applications
 or dashboards from the Kibana instance, from both server and client-side plugins
+
+
+- {kib-repo}blob/{branch}/x-pack/plugins/global_search_bar/README.md[globalSearchBar]
+
+The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.)
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/global_search_providers[globalSearchProviders]

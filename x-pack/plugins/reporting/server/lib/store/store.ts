@@ -5,12 +5,14 @@
  */
 
 import { ElasticsearchServiceSetup } from 'src/core/server';
+import { durationToNumber } from '../../../common/schema_utils';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
-import { CreateJobBaseParams, CreateJobBaseParamsEncryptedFields } from '../../types';
+import { BaseParams, BaseParamsEncryptedFields, ReportingUser } from '../../types';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
 import { Report } from './report';
+
 interface JobSettings {
   timeout: number;
   browser_type: string;
@@ -45,7 +47,7 @@ export class ReportingStore {
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
     this.jobSettings = {
-      timeout: config.get('queue', 'timeout'),
+      timeout: durationToNumber(config.get('queue', 'timeout')),
       browser_type: config.get('capture', 'browser', 'type'),
       max_attempts: config.get('capture', 'maxAttempts'),
       priority: 10, // unused
@@ -140,8 +142,8 @@ export class ReportingStore {
 
   public async addReport(
     type: string,
-    username: string | null,
-    payload: CreateJobBaseParams & CreateJobBaseParamsEncryptedFields
+    user: ReportingUser,
+    payload: BaseParams & BaseParamsEncryptedFields
   ): Promise<Report> {
     const timestamp = indexTimestamp(this.indexInterval);
     const index = `${this.indexPrefix}-${timestamp}`;
@@ -151,7 +153,7 @@ export class ReportingStore {
       _index: index,
       payload,
       jobtype: type,
-      created_by: username,
+      created_by: user ? user.username : false,
       ...this.jobSettings,
     });
 

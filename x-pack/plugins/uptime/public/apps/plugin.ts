@@ -12,7 +12,6 @@ import {
   AppMountParameters,
 } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
-
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -32,7 +31,7 @@ import { PLUGIN } from '../../common/constants/plugin';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   observability: ObservabilityPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
@@ -60,8 +59,8 @@ export class UptimePlugin
         title: PLUGIN.TITLE,
         description: PLUGIN.DESCRIPTION,
         icon: 'uptimeApp',
-        path: '/app/uptime#/',
-        showOnHomePage: true,
+        path: '/app/uptime',
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }
@@ -85,9 +84,8 @@ export class UptimePlugin
     });
 
     core.application.register({
-      appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
-      euiIconType: 'uptimeApp',
+      euiIconType: 'logoObservability',
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,

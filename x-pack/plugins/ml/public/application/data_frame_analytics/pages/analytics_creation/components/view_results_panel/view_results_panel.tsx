@@ -7,20 +7,27 @@
 import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMlUrlGenerator } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
-import { getResultsUrl } from '../../../analytics_management/components/analytics_list/common';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
-
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 interface Props {
   jobId: string;
-  analysisType: ANALYSIS_CONFIG_TYPE;
+  analysisType: DataFrameAnalysisConfigType;
 }
 
 export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
+  const urlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
 
-  const redirectToAnalyticsManagementPage = async () => {
-    const path = getResultsUrl(jobId, analysisType);
+  const redirectToAnalyticsExplorationPage = async () => {
+    const path = await urlGenerator.createUrl({
+      page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+      pageState: {
+        jobId,
+        analysisType,
+      },
+    });
     await navigateToPath(path);
   };
 
@@ -28,7 +35,7 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
     <Fragment>
       <EuiCard
         className="dfAnalyticsCreationWizard__card"
-        icon={<EuiIcon size="xxl" type="tableDensityNormal" />}
+        icon={<EuiIcon size="xxl" type="visTable" />}
         title={i18n.translate('xpack.ml.dataframe.analytics.create.viewResultsCardTitle', {
           defaultMessage: 'View Results',
         })}
@@ -38,7 +45,7 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
             defaultMessage: 'View results for the analytics job.',
           }
         )}
-        onClick={redirectToAnalyticsManagementPage}
+        onClick={redirectToAnalyticsExplorationPage}
         data-test-subj="analyticsWizardViewResultsCard"
       />
     </Fragment>

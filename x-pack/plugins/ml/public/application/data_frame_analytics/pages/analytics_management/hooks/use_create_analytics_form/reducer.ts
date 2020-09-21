@@ -33,19 +33,19 @@ import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
 } from '../../../../../../../common/constants/validation';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 import {
   getDependentVar,
   getNumTopFeatureImportanceValues,
   getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
-  ANALYSIS_CONFIG_TYPE,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
-import { isAdvancedConfig } from '../../components/action_clone/clone_button';
+import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '

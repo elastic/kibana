@@ -18,6 +18,7 @@ import {
   TooltipValueFormatter,
   DARK_THEME,
   LIGHT_THEME,
+  Fit,
 } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_DARK,
@@ -35,7 +36,7 @@ import { BreakdownSeries } from '../PageLoadDistribution/BreakdownSeries';
 
 interface PageLoadData {
   pageLoadDistribution: Array<{ x: number; y: number }>;
-  percentiles: Record<string, number> | undefined;
+  percentiles: Record<string, number | null> | undefined;
   minDuration: number;
   maxDuration: number;
 }
@@ -43,7 +44,7 @@ interface PageLoadData {
 interface Props {
   onPercentileChange: (min: number, max: number) => void;
   data?: PageLoadData | null;
-  breakdowns: BreakdownItem[];
+  breakdown: BreakdownItem | null;
   percentileRange: PercentileRange;
   loading: boolean;
 }
@@ -57,7 +58,7 @@ const PageLoadChart = styled(Chart)`
 export function PageLoadDistChart({
   onPercentileChange,
   data,
-  breakdowns,
+  breakdown,
   loading,
   percentileRange,
 }: Props) {
@@ -115,24 +116,26 @@ export function PageLoadDistChart({
             tickFormat={(d) => numeral(d).format('0.0') + '%'}
           />
           <LineSeries
+            fit={Fit.Linear}
             id={'PagesPercentage'}
             name={I18LABELS.overall}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
             curve={CurveType.CURVE_CATMULL_ROM}
+            lineSeriesStyle={{ point: { visible: false } }}
           />
-          {breakdowns.map(({ name, type }) => (
+          {breakdown && (
             <BreakdownSeries
-              key={`${type}-${name}`}
-              field={type}
-              value={name}
+              key={`${breakdown.type}-${breakdown.name}`}
+              field={breakdown.type}
+              value={breakdown.name}
               percentileRange={percentileRange}
               onLoadingChange={(bLoading) => {
                 setBreakdownLoading(bLoading);
               }}
             />
-          ))}
+          )}
         </PageLoadChart>
       )}
     </ChartWrapper>

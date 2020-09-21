@@ -13,7 +13,7 @@ import { TABLE_COLUMN_EVENTS_MESSAGE } from '../screens/hosts/external_events';
 import { waitsForEventsToBeLoaded, openEventsViewerFieldsBrowser } from '../tasks/hosts/events';
 import { removeColumn, resetFields } from '../tasks/timeline';
 
-// FLAKY: https://github.com/elastic/kibana/issues/72339
+// FLAKY: https://github.com/elastic/kibana/issues/75794
 describe.skip('persistent timeline', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);

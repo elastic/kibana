@@ -64,7 +64,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
-      label: field.name,
+      label: field.displayName,
       dataType: 'date',
       operationType: 'date_histogram',
       suggestedPriority,
@@ -115,25 +115,28 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
-      label: field.name,
+      label: field.displayName,
       sourceField: field.name,
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: 'date_histogram',
-    schema: 'segment',
-    params: {
-      field: column.sourceField,
-      time_zone: column.params.timeZone,
-      useNormalizedEsInterval: true,
-      interval: column.params.interval,
-      drop_partials: false,
-      min_doc_count: 0,
-      extended_bounds: {},
-    },
-  }),
+  toEsAggsConfig: (column, columnId, indexPattern) => {
+    const usedField = indexPattern.fields.find((field) => field.name === column.sourceField);
+    return {
+      id: columnId,
+      enabled: true,
+      type: 'date_histogram',
+      schema: 'segment',
+      params: {
+        field: column.sourceField,
+        time_zone: column.params.timeZone,
+        useNormalizedEsInterval: !usedField || !usedField.aggregationRestrictions?.date_histogram,
+        interval: column.params.interval,
+        drop_partials: false,
+        min_doc_count: 0,
+        extended_bounds: {},
+      },
+    };
+  },
   paramEditor: ({ state, setState, currentColumn: currentColumn, layerId, dateRange, data }) => {
     const field =
       currentColumn &&
@@ -179,13 +182,14 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     return (
       <EuiForm>
         {!intervalIsRestricted && (
-          <EuiFormRow>
+          <EuiFormRow display="rowCompressed" hasChildLabel={false}>
             <EuiSwitch
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
                 defaultMessage: 'Customize time interval',
               })}
               checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
+              compressed
             />
           </EuiFormRow>
         )}
@@ -194,6 +198,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.minimumInterval', {
               defaultMessage: 'Minimum interval',
             })}
+            fullWidth
+            display="rowCompressed"
           >
             {intervalIsRestricted ? (
               <FormattedMessage
@@ -205,9 +211,10 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
               />
             ) : (
               <>
-                <EuiFlexGroup>
+                <EuiFlexGroup responsive={false} gutterSize="s">
                   <EuiFlexItem>
                     <EuiFieldNumber
+                      compressed
                       data-test-subj="lensDateHistogramValue"
                       value={
                         typeof interval.value === 'number' || interval.value === ''
@@ -226,6 +233,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiSelect
+                      compressed
                       data-test-subj="lensDateHistogramUnit"
                       value={interval.unit}
                       onChange={(e) => {

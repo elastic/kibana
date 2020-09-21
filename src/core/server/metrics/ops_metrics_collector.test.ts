@@ -30,7 +30,7 @@ describe('OpsMetricsCollector', () => {
 
   beforeEach(() => {
     const hapiServer = httpServiceMock.createInternalSetupContract().server;
-    collector = new OpsMetricsCollector(hapiServer);
+    collector = new OpsMetricsCollector(hapiServer, {});
 
     mockOsCollector.collect.mockResolvedValue('osMetrics');
   });
@@ -51,6 +51,7 @@ describe('OpsMetricsCollector', () => {
       expect(mockServerCollector.collect).toHaveBeenCalledTimes(1);
 
       expect(metrics).toEqual({
+        collected_at: expect.any(Date),
         process: 'processMetrics',
         os: 'osMetrics',
         requests: 'serverRequestsMetrics',

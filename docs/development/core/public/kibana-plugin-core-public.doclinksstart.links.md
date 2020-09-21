@@ -10,6 +10,9 @@
 readonly links: {
         readonly dashboard: {
             readonly drilldowns: string;
+            readonly drilldownsTriggerPicker: string;
+            readonly urlDrilldownTemplateSyntax: string;
+            readonly urlDrilldownVariables: string;
         };
         readonly filebeat: {
             readonly base: string;
@@ -96,5 +99,6 @@ readonly links: {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly visualize: Record<string, string>;
     };
 ```

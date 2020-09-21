@@ -148,7 +148,7 @@ export class ManifestTask {
         }
       }
 
-      // Try dispatching to ingest-manager package configs
+      // Try dispatching to ingest-manager package policies
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
       if (dispatchErrors.length) {
         reportErrors(this.logger, dispatchErrors);

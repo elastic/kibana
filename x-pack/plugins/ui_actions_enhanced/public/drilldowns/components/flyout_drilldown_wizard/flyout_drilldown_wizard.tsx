@@ -16,11 +16,15 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
-import { ExtraActionFactoryContext } from '../types';
+import { ActionFactoryPlaceContext } from '../types';
 
-export interface DrilldownWizardConfig<ActionConfig extends object = object> {
+export interface DrilldownWizardConfig<ActionConfig extends BaseActionConfig = BaseActionConfig> {
   name: string;
   actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
@@ -28,7 +32,7 @@ export interface DrilldownWizardConfig<ActionConfig extends object = object> {
 }
 
 export interface FlyoutDrilldownWizardProps<
-  CurrentActionConfig extends object = object,
+  CurrentActionConfig extends BaseActionConfig = BaseActionConfig,
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   drilldownActionFactories: ActionFactory[];
@@ -44,9 +48,17 @@ export interface FlyoutDrilldownWizardProps<
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
 
-  extraActionFactoryContext?: ExtraActionFactoryContext<ActionFactoryContext>;
+  actionFactoryPlaceContext?: ActionFactoryPlaceContext<ActionFactoryContext>;
 
+  /**
+   * General overview of drilldowns
+   */
   docsLink?: string;
+
+  /**
+   * Link that explains different triggers
+   */
+  triggerPickerDocsLink?: string;
 
   getTrigger: (triggerId: TriggerId) => Trigger;
 
@@ -57,12 +69,13 @@ export interface FlyoutDrilldownWizardProps<
 }
 
 function useWizardConfigState(
+  actionFactoryContext: BaseActionFactoryContext,
   initialDrilldownWizardConfig?: DrilldownWizardConfig
 ): [
   DrilldownWizardConfig,
   {
     setName: (name: string) => void;
-    setActionConfig: (actionConfig: object) => void;
+    setActionConfig: (actionConfig: BaseActionConfig) => void;
     setActionFactory: (actionFactory?: ActionFactory) => void;
     setSelectedTriggers: (triggers?: TriggerId[]) => void;
   }
@@ -91,7 +104,7 @@ function useWizardConfigState(
           name,
         });
       },
-      setActionConfig: (actionConfig: object) => {
+      setActionConfig: (actionConfig: BaseActionConfig) => {
         setWizardConfig({
           ...wizardConfig,
           actionConfig,
@@ -99,10 +112,13 @@ function useWizardConfigState(
       },
       setActionFactory: (actionFactory?: ActionFactory) => {
         if (actionFactory) {
+          const actionConfig = (actionConfigCache[actionFactory.id] ??
+            actionFactory.createConfig(actionFactoryContext)) as BaseActionConfig;
           setWizardConfig({
             ...wizardConfig,
             actionFactory,
-            actionConfig: actionConfigCache[actionFactory.id] ?? actionFactory.createConfig(),
+            actionConfig,
+            selectedTriggers: [],
           });
         } else {
           if (wizardConfig.actionFactory?.id) {
@@ -129,7 +145,9 @@ function useWizardConfigState(
   ];
 }
 
-export function FlyoutDrilldownWizard<CurrentActionConfig extends object = object>({
+export function FlyoutDrilldownWizard<
+  CurrentActionConfig extends BaseActionConfig = BaseActionConfig
+>({
   onClose,
   onBack,
   onSubmit = () => {},
@@ -139,15 +157,27 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   showWelcomeMessage = true,
   onWelcomeHideClick,
   drilldownActionFactories,
-  extraActionFactoryContext,
+  actionFactoryPlaceContext,
   docsLink,
+  triggerPickerDocsLink,
   getTrigger,
   supportedTriggers,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
   const [
     wizardConfig,
     { setActionFactory, setActionConfig, setName, setSelectedTriggers },
-  ] = useWizardConfigState(initialDrilldownWizardConfig);
+  ] = useWizardConfigState(
+    { ...actionFactoryPlaceContext, triggers: supportedTriggers },
+    initialDrilldownWizardConfig
+  );
+
+  const actionFactoryContext: BaseActionFactoryContext = useMemo(
+    () => ({
+      ...actionFactoryPlaceContext,
+      triggers: wizardConfig.selectedTriggers ?? [],
+    }),
+    [actionFactoryPlaceContext, wizardConfig.selectedTriggers]
+  );
 
   const isActionValid = (
     config: DrilldownWizardConfig
@@ -157,16 +187,11 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
     if (!wizardConfig.actionConfig) return false;
     if (!wizardConfig.selectedTriggers || wizardConfig.selectedTriggers.length === 0) return false;
 
-    return wizardConfig.actionFactory.isConfigValid(wizardConfig.actionConfig);
+    return wizardConfig.actionFactory.isConfigValid(
+      wizardConfig.actionConfig,
+      actionFactoryContext
+    );
   };
-
-  const actionFactoryContext: BaseActionFactoryContext = useMemo(
-    () => ({
-      ...extraActionFactoryContext,
-      triggers: wizardConfig.selectedTriggers ?? [],
-    }),
-    [extraActionFactoryContext, wizardConfig.selectedTriggers]
-  );
 
   const footer = (
     <EuiButton
@@ -207,7 +232,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         onSelectedTriggersChange={setSelectedTriggers}
         supportedTriggers={supportedTriggers}
         getTriggerInfo={getTrigger}
-        triggerPickerDocsLink={docsLink}
+        triggerPickerDocsLink={triggerPickerDocsLink}
       />
       {mode === 'edit' && (
         <>

@@ -292,67 +292,74 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   function runTests(testData: TestData) {
-    it(`${testData.suiteTitle} loads the saved search selection page`, async () => {
+    it(`${testData.suiteTitle} loads the source data in the data visualizer`, async () => {
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} loads the saved search selection page`
+      );
       await ml.dataVisualizer.navigateToIndexPatternSelection();
-    });
 
-    it(`${testData.suiteTitle} loads the index data visualizer page`, async () => {
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} loads the index data visualizer page`
+      );
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
         testData.sourceIndexOrSavedSearch
       );
     });
 
-    it(`${testData.suiteTitle} displays the time range step`, async () => {
+    it(`${testData.suiteTitle} displays index details`, async () => {
+      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
-    });
 
-    it(`${testData.suiteTitle} loads data for full time range`, async () => {
+      await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
       await ml.dataVisualizerIndexBased.clickUseFullDataButton(testData.expected.totalDocCount);
-    });
 
-    it(`${testData.suiteTitle} displays the panels of fields`, async () => {
+      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the panels of fields`);
       await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(testData.expected.fieldsPanelCount);
-    });
 
-    if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
-      it(`${testData.suiteTitle} displays the Metrics panel`, async () => {
+      if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
+        await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the Metrics panel`);
         await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([
           ML_JOB_FIELD_TYPES.NUMBER,
         ]); // document_count not exposed as a type in the panel
-      });
 
-      it(`${testData.suiteTitle} displays the expected metric field cards`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} displays the expected metric field cards`
+        );
         for (const fieldCard of testData.expected.metricCards as FieldVisConfig[]) {
           await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
         }
-      });
 
-      it(`${testData.suiteTitle} filters metric fields cards with search`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} filters metric fields cards with search`
+        );
         await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
           ['number'],
           testData.metricFieldsFilter,
           testData.expected.metricFieldsFilterCardCount
         );
-      });
-    }
+      }
 
-    if (
-      testData.expected.nonMetricCards !== undefined &&
-      testData.expected.nonMetricCards.length > 0
-    ) {
-      it(`${testData.suiteTitle} displays the non-metric Fields panel`, async () => {
+      if (
+        testData.expected.nonMetricCards !== undefined &&
+        testData.expected.nonMetricCards.length > 0
+      ) {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} displays the non-metric Fields panel`
+        );
         await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist(
           getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[])
         );
-      });
 
-      it(`${testData.suiteTitle} displays the expected non-metric field cards`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} displays the expected non-metric field cards`
+        );
         for (const fieldCard of testData.expected.nonMetricCards!) {
           await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
         }
-      });
 
-      it(`${testData.suiteTitle} sets the non metric field types input`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} sets the non metric field types input`
+        );
         const fieldTypes: ML_JOB_FIELD_TYPES[] = getFieldTypes(
           testData.expected.nonMetricCards as FieldVisConfig[]
         );
@@ -362,16 +369,17 @@ export default function ({ getService }: FtrProviderContext) {
           testData.nonMetricFieldsTypeFilter,
           testData.expected.nonMetricFieldsTypeFilterCardCount
         );
-      });
 
-      it(`${testData.suiteTitle} filters non-metric fields cards with search`, async () => {
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} filters non-metric fields cards with search`
+        );
         await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
           getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[]),
           testData.nonMetricFieldsFilter,
           testData.expected.nonMetricFieldsFilterCardCount
         );
-      });
-    }
+      }
+    });
   }
 
   describe('index based', function () {

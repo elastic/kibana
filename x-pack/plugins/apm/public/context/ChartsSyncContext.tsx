@@ -5,10 +5,10 @@
  */
 
 import React, { ReactNode, useMemo, useState } from 'react';
-import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
-import { history } from '../utils/history';
-import { useUrlParams } from '../hooks/useUrlParams';
+import { useHistory, useParams } from 'react-router-dom';
+import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
 import { useFetcher } from '../hooks/useFetcher';
+import { useUrlParams } from '../hooks/useUrlParams';
 
 const ChartsSyncContext = React.createContext<{
   hoverX: number | null;
@@ -18,10 +18,12 @@ const ChartsSyncContext = React.createContext<{
 } | null>(null);
 
 function ChartsSyncContextProvider({ children }: { children: ReactNode }) {
+  const history = useHistory();
   const [time, setTime] = useState<number | null>(null);
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end } = urlParams;
   const { environment } = uiFilters;
 
   const { data = { annotations: [] } } = useFetcher(
@@ -75,7 +77,7 @@ function ChartsSyncContextProvider({ children }: { children: ReactNode }) {
     };
 
     return { ...hoverXHandlers };
-  }, [time, data.annotations]);
+  }, [history, time, data.annotations]);
 
   return <ChartsSyncContext.Provider value={value} children={children} />;
 }

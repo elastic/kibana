@@ -7,15 +7,14 @@
 import sinon from 'sinon';
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { ReportingConfig, ReportingCore } from '../..';
-import { createMockReportingCore } from '../../test_helpers';
-import { createMockLevelLogger } from '../../test_helpers/create_mock_levellogger';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockLevelLogger,
+  createMockReportingCore,
+} from '../../test_helpers';
 import { Report } from './report';
 import { ReportingStore } from './store';
-
-const getMockConfig = (mockConfigGet: sinon.SinonStub) => ({
-  get: mockConfigGet,
-  kbnConfig: { get: mockConfigGet },
-});
 
 describe('ReportingStore', () => {
   const mockLogger = createMockLevelLogger();
@@ -26,10 +25,12 @@ describe('ReportingStore', () => {
   const mockElasticsearch = { legacy: { client: { callAsInternalUser: callClusterStub } } };
 
   beforeEach(async () => {
-    const mockConfigGet = sinon.stub();
-    mockConfigGet.withArgs('index').returns('.reporting-test');
-    mockConfigGet.withArgs('queue', 'indexInterval').returns('week');
-    mockConfig = getMockConfig(mockConfigGet);
+    const reportingConfig = {
+      index: '.reporting-test',
+      queue: { indexInterval: 'week' },
+    };
+    const mockSchema = createMockConfigSchema(reportingConfig);
+    mockConfig = createMockConfig(mockSchema);
     mockCore = await createMockReportingCore(mockConfig);
 
     callClusterStub.reset();
@@ -53,7 +54,9 @@ describe('ReportingStore', () => {
         headers: 'rp_headers_1',
         objectType: 'testOt',
       };
-      await expect(store.addReport(reportType, 'username1', reportPayload)).resolves.toMatchObject({
+      await expect(
+        store.addReport(reportType, { username: 'username1' }, reportPayload)
+      ).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
@@ -66,15 +69,17 @@ describe('ReportingStore', () => {
         priority: 10,
         started_at: undefined,
         status: 'pending',
-        timeout: undefined,
+        timeout: 120000,
       });
     });
 
     it('throws if options has invalid indexInterval', async () => {
-      const mockConfigGet = sinon.stub();
-      mockConfigGet.withArgs('index').returns('.reporting-test');
-      mockConfigGet.withArgs('queue', 'indexInterval').returns('centurially');
-      mockConfig = getMockConfig(mockConfigGet);
+      const reportingConfig = {
+        index: '.reporting-test',
+        queue: { indexInterval: 'centurially' },
+      };
+      const mockSchema = createMockConfigSchema(reportingConfig);
+      mockConfig = createMockConfig(mockSchema);
       mockCore = await createMockReportingCore(mockConfig);
 
       const store = new ReportingStore(mockCore, mockLogger);
@@ -84,9 +89,9 @@ describe('ReportingStore', () => {
         headers: 'rp_headers_2',
         objectType: 'testOt',
       };
-      expect(store.addReport(reportType, 'user1', reportPayload)).rejects.toMatchInlineSnapshot(
-        `[Error: Invalid index interval: centurially]`
-      );
+      expect(
+        store.addReport(reportType, { username: 'user1' }, reportPayload)
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid index interval: centurially]`);
     });
 
     it('handles error creating the index', async () => {
@@ -102,7 +107,7 @@ describe('ReportingStore', () => {
         objectType: 'testOt',
       };
       await expect(
-        store.addReport(reportType, 'user1', reportPayload)
+        store.addReport(reportType, { username: 'user1' }, reportPayload)
       ).rejects.toMatchInlineSnapshot(`[Error: horrible error]`);
     });
 
@@ -125,7 +130,7 @@ describe('ReportingStore', () => {
         objectType: 'testOt',
       };
       await expect(
-        store.addReport(reportType, 'user1', reportPayload)
+        store.addReport(reportType, { username: 'user1' }, reportPayload)
       ).rejects.toMatchInlineSnapshot(`[Error: devastating error]`);
     });
 
@@ -143,7 +148,9 @@ describe('ReportingStore', () => {
         headers: 'rp_headers_5',
         objectType: 'testOt',
       };
-      await expect(store.addReport(reportType, 'user1', reportPayload)).resolves.toMatchObject({
+      await expect(
+        store.addReport(reportType, { username: 'user1' }, reportPayload)
+      ).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
@@ -156,11 +163,11 @@ describe('ReportingStore', () => {
         priority: 10,
         started_at: undefined,
         status: 'pending',
-        timeout: undefined,
+        timeout: 120000,
       });
     });
 
-    it('allows username string to be `null`', async () => {
+    it('allows username string to be `false`', async () => {
       // setup
       callClusterStub.withArgs('indices.exists').resolves(false);
       callClusterStub
@@ -174,20 +181,20 @@ describe('ReportingStore', () => {
         headers: 'rp_test_headers',
         objectType: 'testOt',
       };
-      await expect(store.addReport(reportType, null, reportPayload)).resolves.toMatchObject({
+      await expect(store.addReport(reportType, false, reportPayload)).resolves.toMatchObject({
         _primary_term: undefined,
         _seq_no: undefined,
         attempts: 0,
         browser_type: undefined,
         completed_at: undefined,
-        created_by: null,
+        created_by: false,
         jobtype: 'unknowntype',
         max_attempts: undefined,
         payload: {},
         priority: 10,
         started_at: undefined,
         status: 'pending',
-        timeout: undefined,
+        timeout: 120000,
       });
     });
   });

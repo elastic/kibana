@@ -6,6 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { RumOverview } from '../RumDashboard';
 import { RumHeader } from './RumHeader';
 
@@ -16,7 +17,11 @@ export function RumHome() {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>End User Experience</h1>
+              <h1>
+                {i18n.translate('xpack.apm.csm.title', {
+                  defaultMessage: 'Client Side Monitoring',
+                })}
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -19,6 +19,7 @@
 
 import { cloneDeep, pick, throttle } from 'lodash';
 import { resolve as resolveUrl } from 'url';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObject,
@@ -31,7 +32,10 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
-type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
+type SavedObjectsFindOptions = Omit<
+  SavedObjectFindOptionsServer,
+  'namespace' | 'sortOrder' | 'rootSearchFields'
+>;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 

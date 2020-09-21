@@ -31,23 +31,23 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
-export const pieVisualization: Visualization<PieVisualizationState, PieVisualizationState> = {
+export const pieVisualization: Visualization<PieVisualizationState> = {
   id: 'lnsPie',
 
   visualizationTypes: [
     {
       id: 'donut',
-      largeIcon: CHART_NAMES.donut.icon,
+      icon: CHART_NAMES.donut.icon,
       label: CHART_NAMES.donut.label,
     },
     {
       id: 'pie',
-      largeIcon: CHART_NAMES.pie.icon,
+      icon: CHART_NAMES.pie.icon,
       label: CHART_NAMES.pie.label,
     },
     {
       id: 'treemap',
-      largeIcon: CHART_NAMES.treemap.icon,
+      icon: CHART_NAMES.treemap.icon,
       label: CHART_NAMES.treemap.label,
     },
   ],
@@ -90,8 +90,6 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getSuggestions: suggestions,
 

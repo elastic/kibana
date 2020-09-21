@@ -3,7 +3,6 @@
 
 .pipelineProcessorsEditor__tree {
   &__container {
-    background-color: $euiColorLightestShade;
     padding: $euiSizeS;
   }
 
@@ -50,6 +49,10 @@
         transform: none !important;
       }
     }
+  }
+
+  &__addProcessorButton {
+    width: fit-content;
   }
 
   &__onFailureHandlerContainer {

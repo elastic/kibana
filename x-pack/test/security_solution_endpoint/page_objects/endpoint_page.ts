@@ -24,8 +24,8 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async waitForTableToHaveData(dataTestSubj: string) {
-      await retry.waitForWithTimeout('table to have data', 2000, async () => {
+    async waitForTableToHaveData(dataTestSubj: string, timeout = 2000) {
+      await retry.waitForWithTimeout('table to have data', timeout, async () => {
         const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
         if (tableData[1][0] === 'No items found') {
           return false;

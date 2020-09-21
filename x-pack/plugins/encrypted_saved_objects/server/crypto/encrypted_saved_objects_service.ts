@@ -198,12 +198,15 @@ export class EncryptedSavedObjectsService {
     if (typeDefinition === undefined) {
       return attributes;
     }
+    let encryptionAAD: string | undefined;
 
-    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
     const encryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue != null) {
+        if (!encryptionAAD) {
+          encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+        }
         try {
           encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
         } catch (err) {
@@ -376,8 +379,7 @@ export class EncryptedSavedObjectsService {
     if (typeDefinition === undefined) {
       return attributes;
     }
-
-    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+    let encryptionAAD: string | undefined;
     const decryptedAttributes: Record<string, EncryptOutput> = {};
     for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
@@ -393,7 +395,9 @@ export class EncryptedSavedObjectsService {
           )}`
         );
       }
-
+      if (!encryptionAAD) {
+        encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
+      }
       try {
         decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
       } catch (err) {

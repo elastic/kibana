@@ -25,6 +25,9 @@ import {
   EmbeddableStateTransfer,
   IEmbeddable,
   EmbeddablePanel,
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
 } from '.';
 import { EmbeddablePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
@@ -84,9 +87,29 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
   };
 };
 
+export const mockRefOrValEmbeddable = <
+  OriginalEmbeddableType,
+  ValTypeInput extends EmbeddableInput = EmbeddableInput,
+  RefTypeInput extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+>(
+  embeddable: IEmbeddable,
+  options: {
+    mockedByReferenceInput: RefTypeInput;
+    mockedByValueInput: ValTypeInput;
+  }
+): OriginalEmbeddableType & ReferenceOrValueEmbeddable => {
+  const newEmbeddable: ReferenceOrValueEmbeddable = (embeddable as unknown) as ReferenceOrValueEmbeddable;
+  newEmbeddable.inputIsRefType = (input: unknown): input is RefTypeInput =>
+    !!(input as RefTypeInput).savedObjectId;
+  newEmbeddable.getInputAsRefType = () => Promise.resolve(options.mockedByReferenceInput);
+  newEmbeddable.getInputAsValueType = () => Promise.resolve(options.mockedByValueInput);
+  return newEmbeddable as OriginalEmbeddableType & ReferenceOrValueEmbeddable;
+};
+
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
+    registerEnhancement: jest.fn(),
     setCustomEmbeddableFactoryProvider: jest.fn(),
   };
   return setupContract;
@@ -96,6 +119,9 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
     EmbeddablePanel: jest.fn(),
     getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
@@ -126,4 +152,5 @@ export const embeddablePluginMock = {
   createSetupContract,
   createStartContract,
   createInstance,
+  mockRefOrValEmbeddable,
 };

@@ -86,6 +86,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
     }
   >
     <MonitorListDrawerComponent
+      loading={false}
       monitorDetails={
         Object {
           "error": Object {
@@ -261,6 +262,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
     }
   >
     <MonitorListDrawerComponent
+      loading={false}
       monitorDetails={
         Object {
           "error": Object {

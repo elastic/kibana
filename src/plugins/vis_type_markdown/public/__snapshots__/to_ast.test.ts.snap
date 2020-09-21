@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`markdown vis toExpressionAst function with params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "font": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "size": Array [
+                    15,
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "markdown": Array [
+          "### my markdown",
+        ],
+        "openLinksInNewTab": Array [
+          true,
+        ],
+      },
+      "function": "markdownVis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
+
+exports[`markdown vis toExpressionAst function without params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "font": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "size": Array [
+                    "undefined",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+      },
+      "function": "markdownVis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

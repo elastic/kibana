@@ -20,6 +20,7 @@ import { mock as mockResolverTree } from '../models/resolver_tree';
 import { ResolverAction } from '../store/actions';
 import { createStore } from 'redux';
 import { resolverReducer } from '../store/reducer';
+import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
@@ -181,7 +182,7 @@ describe('useCamera on an unpainted element', () => {
         if (tree !== null) {
           const serverResponseAction: ResolverAction = {
             type: 'serverReturnedResolverData',
-            payload: { result: tree, databaseDocumentID: '' },
+            payload: { result: tree, parameters: mockTreeFetcherParameters() },
           };
           act(() => {
             store.dispatch(serverResponseAction);

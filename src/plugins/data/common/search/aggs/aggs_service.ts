@@ -19,6 +19,7 @@
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import { UI_SETTINGS } from '../../../common';
+import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
   AggTypesRegistry,
@@ -48,7 +49,7 @@ export interface AggsCommonSetupDependencies {
 
 /** @internal */
 export interface AggsCommonStartDependencies {
-  getConfig: <T = any>(key: string) => T;
+  getConfig: GetConfigFn;
 }
 
 /**

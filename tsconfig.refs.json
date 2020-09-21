@@ -1,0 +1,7 @@
+{
+  "include": [],
+  "references": [
+    { "path": "./src/test_utils" },
+    { "path": "./src/core" },
+  ]
+}

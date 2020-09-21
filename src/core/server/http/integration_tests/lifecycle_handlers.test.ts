@@ -20,15 +20,17 @@
 import supertest from 'supertest';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import pkg from '../../../../../package.json';
 
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
 import { HttpServerSetup } from '../http_server';
 import { IRouter, RouteRegistrar } from '../router';
 
-import { configServiceMock } from '../../config/config_service.mock';
+import { configServiceMock } from '../../config/mocks';
 import { contextServiceMock } from '../../context/context_service.mock';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pkg = require('../../../../../package.json');
 
 const actualVersion = pkg.version;
 const versionHeader = 'kbn-version';
@@ -62,6 +64,10 @@ describe('core lifecycle handlers', () => {
           'some-header': 'some-value',
         },
         xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] },
+        requestId: {
+          allowFromAnyIp: true,
+          ipAllowlist: [],
+        },
       } as any)
     );
     server = createHttpServer({ configService });

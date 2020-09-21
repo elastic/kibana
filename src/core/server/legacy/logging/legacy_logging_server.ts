@@ -23,8 +23,7 @@ import Podium from 'podium';
 import { Config } from '../../../../legacy/server/config';
 // @ts-expect-error: implicit any for JS file
 import { setupLogging } from '../../../../legacy/server/logging';
-import { LogLevel } from '../../logging/log_level';
-import { LogRecord } from '../../logging/log_record';
+import { LogLevel, LogRecord } from '../../logging';
 import { LegacyVars } from '../../types';
 
 export const metadataSymbol = Symbol('log message with metadata');

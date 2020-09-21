@@ -21,7 +21,7 @@ const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
-const { REPO_ROOT } = require('@kbn/dev-utils');
+const { REPO_ROOT } = require('@kbn/utils');
 const webpack = require('webpack');
 
 const UiSharedDeps = require('./index');
@@ -32,22 +32,10 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   mode: dev ? 'development' : 'production',
   entry: {
     'kbn-ui-shared-deps': './entry.js',
-    'kbn-ui-shared-deps.v7.dark': [
-      '@elastic/eui/dist/eui_theme_dark.css',
-      '@elastic/charts/dist/theme_only_dark.css',
-    ],
-    'kbn-ui-shared-deps.v7.light': [
-      '@elastic/eui/dist/eui_theme_light.css',
-      '@elastic/charts/dist/theme_only_light.css',
-    ],
-    'kbn-ui-shared-deps.v8.dark': [
-      '@elastic/eui/dist/eui_theme_amsterdam_dark.css',
-      '@elastic/charts/dist/theme_only_dark.css',
-    ],
-    'kbn-ui-shared-deps.v8.light': [
-      '@elastic/eui/dist/eui_theme_amsterdam_light.css',
-      '@elastic/charts/dist/theme_only_light.css',
-    ],
+    'kbn-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
+    'kbn-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
+    'kbn-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
+    'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
   devtool: dev ? '#cheap-source-map' : false,

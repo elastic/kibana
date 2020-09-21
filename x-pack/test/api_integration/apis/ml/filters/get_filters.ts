@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS)
         .expect(400);
       expect(body.error).to.eql('Bad Request');
-      expect(body.message).to.contain('Unable to find filter');
+      expect(body.message).to.contain('resource_not_found_exception');
     });
   });
 };

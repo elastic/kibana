@@ -21,7 +21,7 @@ export const TabPreview = ({ templateDetails }: Props) => {
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.templateDetails.previewTab.descriptionText"
-            defaultMessage="This is the final template that will be applied to your indices."
+            defaultMessage="This is the final template that will be applied to matching indices."
           />
         </p>
       </EuiText>

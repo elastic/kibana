@@ -14,10 +14,6 @@
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/ui-shared-deps": "1.0.0",
-    "@types/compression-webpack-plugin": "^2.0.2",
-    "@types/loader-utils": "^1.1.3",
-    "@types/watchpack": "^1.1.5",
-    "@types/webpack": "^4.41.3",
     "autoprefixer": "^9.7.4",
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^3.0.0",
@@ -46,5 +42,11 @@
     "watchpack": "^1.6.0",
     "webpack": "^4.41.5",
     "webpack-merge": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/compression-webpack-plugin": "^2.0.2",
+    "@types/loader-utils": "^1.1.3",
+    "@types/watchpack": "^1.1.5",
+    "@types/webpack": "^4.41.3"
   }
 }

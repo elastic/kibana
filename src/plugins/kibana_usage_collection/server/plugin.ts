@@ -30,6 +30,7 @@ import {
   CoreStart,
   SavedObjectsServiceSetup,
   OpsMetrics,
+  Logger,
 } from '../../../core/server';
 import {
   registerApplicationUsageCollector,
@@ -37,6 +38,7 @@ import {
   registerManagementUsageCollector,
   registerOpsStatsCollector,
   registerUiMetricUsageCollector,
+  registerCspCollector,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -46,22 +48,21 @@ interface KibanaUsageCollectionPluginsDepsSetup {
 type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
 
 export class KibanaUsageCollectionPlugin implements Plugin {
+  private readonly logger: Logger;
   private readonly legacyConfig$: Observable<SharedGlobalConfig>;
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
     this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
   }
 
-  public setup(
-    { savedObjects }: CoreSetup,
-    { usageCollection }: KibanaUsageCollectionPluginsDepsSetup
-  ) {
-    this.registerUsageCollectors(usageCollection, this.metric$, (opts) =>
-      savedObjects.registerType(opts)
+  public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+    this.registerUsageCollectors(usageCollection, coreSetup, this.metric$, (opts) =>
+      coreSetup.savedObjects.registerType(opts)
     );
   }
 
@@ -79,6 +80,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   private registerUsageCollectors(
     usageCollection: UsageCollectionSetup,
+    coreSetup: CoreSetup,
     metric$: Subject<OpsMetrics>,
     registerType: SavedObjectsRegisterType
   ) {
@@ -89,6 +91,12 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
-    registerApplicationUsageCollector(usageCollection, registerType, getSavedObjectsClient);
+    registerApplicationUsageCollector(
+      this.logger.get('application-usage'),
+      usageCollection,
+      registerType,
+      getSavedObjectsClient
+    );
+    registerCspCollector(usageCollection, coreSetup.http);
   }
 }

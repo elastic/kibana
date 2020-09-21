@@ -11,11 +11,10 @@ import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
-import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
+import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
-  getFittableLayers,
   getLayerById,
   getLayerList,
 } from '../selectors/map_selectors';
@@ -41,7 +40,8 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds, turfBboxToBounds } from '../elasticsearch_geo_utils';
+import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_geo_utils';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -85,10 +85,12 @@ export function updateStyleMeta(layerId: string | null) {
     }
     const sourceDataRequest = layer.getSourceDataRequest();
     const style = layer.getCurrentStyle();
-    if (!style || !sourceDataRequest) {
+    if (!style || !sourceDataRequest || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
       return;
     }
-    const styleMeta = await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+    const styleMeta = await (style as IVectorStyle).pluckStyleMetaFromSourceDataRequest(
+      sourceDataRequest
+    );
     dispatch({
       type: SET_LAYER_STYLE_META,
       layerId,
@@ -321,13 +323,16 @@ export function fitToLayerExtent(layerId: string) {
 
 export function fitToDataBounds(onNoBounds?: () => void) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const layerList = getFittableLayers(getState());
+    const layerList = getLayerList(getState());
 
     if (!layerList.length) {
       return;
     }
 
     const boundsPromises = layerList.map(async (layer: ILayer) => {
+      if (!(await layer.isFittable())) {
+        return null;
+      }
       return layer.getBounds(getDataRequestContext(dispatch, getState, layer.getId()));
     });
 

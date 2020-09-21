@@ -21,8 +21,6 @@ import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiScreenReaderOnly } from '@elastic/eui';
 
 import { useKibana } from '../../../../kibana_react/public';
 import {
@@ -33,11 +31,10 @@ import {
   useLinkedSearchUpdates,
 } from '../utils';
 import { VisualizeServices } from '../types';
-import { ExperimentalVisInfo } from './experimental_vis_info';
-import { VisualizeTopNav } from './visualize_top_nav';
+import { VisualizeEditorCommon } from './visualize_editor_common';
 
 export const VisualizeEditor = () => {
-  const { id: visualizationIdFromUrl } = useParams();
+  const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
@@ -67,7 +64,9 @@ export const VisualizeEditor = () => {
 
   useEffect(() => {
     const { originatingApp: value } =
-      services.embeddable.getStateTransfer(services.scopedHistory).getIncomingEditorState() || {};
+      services.embeddable
+        .getStateTransfer(services.scopedHistory)
+        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
     setOriginatingApp(value);
   }, [services]);
 
@@ -79,38 +78,19 @@ export const VisualizeEditor = () => {
   }, [eventEmitter]);
 
   return (
-    <div className={`app-container visEditor visEditor--${savedVisInstance?.vis.type.name}`}>
-      {savedVisInstance && appState && currentAppState && (
-        <VisualizeTopNav
-          currentAppState={currentAppState}
-          hasUnsavedChanges={hasUnsavedChanges}
-          setHasUnsavedChanges={setHasUnsavedChanges}
-          isChromeVisible={isChromeVisible}
-          isEmbeddableRendered={isEmbeddableRendered}
-          hasUnappliedChanges={hasUnappliedChanges}
-          originatingApp={originatingApp}
-          setOriginatingApp={setOriginatingApp}
-          savedVisInstance={savedVisInstance}
-          stateContainer={appState}
-          visualizationIdFromUrl={visualizationIdFromUrl}
-        />
-      )}
-      {savedVisInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
-      {savedVisInstance && (
-        <EuiScreenReaderOnly>
-          <h1>
-            <FormattedMessage
-              id="visualize.pageHeading"
-              defaultMessage="{chartName} {chartType} visualization"
-              values={{
-                chartName: savedVisInstance.savedVis.title,
-                chartType: savedVisInstance.vis.type.title,
-              }}
-            />
-          </h1>
-        </EuiScreenReaderOnly>
-      )}
-      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
-    </div>
+    <VisualizeEditorCommon
+      visInstance={savedVisInstance}
+      appState={appState}
+      currentAppState={currentAppState}
+      isChromeVisible={isChromeVisible}
+      hasUnsavedChanges={hasUnsavedChanges}
+      hasUnappliedChanges={hasUnappliedChanges}
+      isEmbeddableRendered={isEmbeddableRendered}
+      originatingApp={originatingApp}
+      setOriginatingApp={setOriginatingApp}
+      visualizationIdFromUrl={visualizationIdFromUrl}
+      setHasUnsavedChanges={setHasUnsavedChanges}
+      visEditorRef={visEditorRef}
+    />
   );
 };

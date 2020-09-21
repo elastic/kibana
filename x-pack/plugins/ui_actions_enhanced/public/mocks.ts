@@ -11,6 +11,7 @@ import { embeddablePluginMock } from '../../../../src/plugins/embeddable/public/
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
 import { licensingMock } from '../../licensing/public/mocks';
+import { StartDependencies } from './plugin';
 
 export type Setup = jest.Mocked<AdvancedUiActionsSetup>;
 export type Start = jest.Mocked<AdvancedUiActionsStart>;
@@ -29,13 +30,16 @@ const createStartContract = (): Start => {
     getActionFactories: jest.fn(),
     getActionFactory: jest.fn(),
     FlyoutManageDrilldowns: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
   };
 
   return startContract;
 };
 
 const createPlugin = (
-  coreSetup: CoreSetup = coreMock.createSetup(),
+  coreSetup: CoreSetup<StartDependencies> = coreMock.createSetup(),
   coreStart: CoreStart = coreMock.createStart()
 ) => {
   const pluginInitializerContext = coreMock.createPluginInitializerContext();
@@ -47,6 +51,7 @@ const createPlugin = (
   const setup = plugin.setup(coreSetup, {
     uiActions: uiActions.setup,
     embeddable: embeddable.setup,
+    licensing: licensingMock.createSetup(),
   });
 
   return {

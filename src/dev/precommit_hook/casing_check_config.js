@@ -110,6 +110,14 @@ export const IGNORE_DIRECTORY_GLOBS = [
 ];
 
 /**
+ * These patterns identify files which should have the extension stripped
+ * to reveal the actual name that should be checked.
+ *
+ * @type {Array}
+ */
+export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
+
+/**
  * DO NOT ADD FILES TO THIS LIST!!
  *
  * Use the other configs if the file really shouldn't be snake_case.
@@ -124,11 +132,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
  * @type {Array}
  */
 export const TEMPORARILY_IGNORED_PATHS = [
-  'src/legacy/core_plugins/console/public/src/directives/helpExample.txt',
-  'src/legacy/core_plugins/console/public/src/sense_editor/theme-sense-dark.js',
-  'src/legacy/core_plugins/tile_map/public/__tests__/scaledCircleMarkers.png',
-  'src/legacy/core_plugins/tile_map/public/__tests__/shadedCircleMarkers.png',
-  'src/legacy/core_plugins/tile_map/public/__tests__/shadedGeohashGrid.png',
   'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
   'src/core/server/core_app/assets/favicons/android-chrome-192x192.png',
   'src/core/server/core_app/assets/favicons/android-chrome-256x256.png',

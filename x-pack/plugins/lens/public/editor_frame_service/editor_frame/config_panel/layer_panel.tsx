@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import './layer_panel.scss';
 
 import React, { useContext, useState, useEffect } from 'react';
 import {
@@ -13,29 +14,29 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiFormRow,
-  EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
 import { NativeRenderer } from '../../../native_renderer';
-import { StateSetter } from '../../../types';
+import { StateSetter, isDraggedOperation } from '../../../types';
 import { DragContext, DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { ConfigPanelWrapperProps, DimensionPopoverState } from './types';
-import { DimensionPopover } from './dimension_popover';
+import { ConfigPanelWrapperProps, DimensionContainerState } from './types';
+import { DimensionContainer } from './dimension_container';
 
-const initialPopoverState = {
+const initialDimensionContainerState = {
   isOpen: false,
   openId: null,
   addingToGroupId: null,
-  tabId: null,
 };
 
 export function LayerPanel(
   props: Exclude<ConfigPanelWrapperProps, 'state' | 'setState'> & {
     layerId: string;
+    dataTestSubj: string;
     isOnlyLayer: boolean;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
@@ -48,13 +49,15 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const [popoverState, setPopoverState] = useState<DimensionPopoverState>(initialPopoverState);
+  const [dimensionContainerState, setDimensionContainerState] = useState<DimensionContainerState>(
+    initialDimensionContainerState
+  );
 
-  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer } = props;
+  const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer, dataTestSubj } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
   useEffect(() => {
-    setPopoverState(initialPopoverState);
+    setDimensionContainerState(initialDimensionContainerState);
   }, [props.activeVisualizationId]);
 
   if (
@@ -96,9 +99,9 @@ export function LayerPanel(
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
-      <EuiPanel className="lnsLayerPanel" paddingSize="s">
+      <EuiPanel data-test-subj={dataTestSubj} className="lnsLayerPanel" paddingSize="s">
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
             <LayerSettings
               layerId={layerId}
               layerConfigProps={{
@@ -123,7 +126,6 @@ export function LayerPanel(
                     const nextPublicAPI = layerDatasource.getPublicAPI({
                       state: newState,
                       layerId,
-                      dateRange: props.framePublicAPI.dateRange,
                     });
                     const nextTable = new Set(
                       nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
@@ -154,10 +156,13 @@ export function LayerPanel(
         {groups.map((group, index) => {
           const newId = generateId();
           const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
+
           return (
             <EuiFormRow
               className="lnsLayerPanel__row"
+              fullWidth
               label={group.groupLabel}
+              labelType="legend"
               key={index}
               isInvalid={isMissing}
               error={
@@ -170,55 +175,60 @@ export function LayerPanel(
             >
               <>
                 {group.accessors.map((accessor) => {
-                  const tabs = [
-                    {
-                      id: 'datasource',
-                      name: i18n.translate('xpack.lens.editorFrame.quickFunctionsLabel', {
-                        defaultMessage: 'Quick functions',
-                      }),
-                      content: (
+                  const datasourceDimensionEditor = (
+                    <NativeRenderer
+                      render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                      nativeProps={{
+                        ...layerDatasourceConfigProps,
+                        core: props.core,
+                        columnId: accessor,
+                        filterOperations: group.filterOperations,
+                      }}
+                    />
+                  );
+                  const visDimensionEditor =
+                    activeVisualization.renderDimensionEditor && group.enableDimensionEditor ? (
+                      <div key={accessor} className="lnsLayerPanel__styleEditor">
                         <NativeRenderer
-                          render={props.datasourceMap[datasourceId].renderDimensionEditor}
+                          render={activeVisualization.renderDimensionEditor}
                           nativeProps={{
-                            ...layerDatasourceConfigProps,
-                            core: props.core,
-                            columnId: accessor,
-                            filterOperations: group.filterOperations,
+                            ...layerVisualizationConfigProps,
+                            groupId: group.groupId,
+                            accessor,
+                            setState: props.updateVisualization,
                           }}
                         />
-                      ),
-                    },
-                  ];
-
-                  if (activeVisualization.renderDimensionEditor && group.enableDimensionEditor) {
-                    tabs.push({
-                      id: 'visualization',
-                      name: i18n.translate('xpack.lens.editorFrame.formatStyleLabel', {
-                        defaultMessage: 'Format & style',
-                      }),
-                      content: (
-                        <div className="lnsLayerPanel__styleEditor">
-                          <NativeRenderer
-                            render={activeVisualization.renderDimensionEditor}
-                            nativeProps={{
-                              ...layerVisualizationConfigProps,
-                              groupId: group.groupId,
-                              accessor,
-                              setState: props.updateVisualization,
-                            }}
-                          />
-                        </div>
-                      ),
-                    });
-                  }
-
+                      </div>
+                    ) : null;
                   return (
                     <DragDrop
                       key={accessor}
-                      className="lnsLayerPanel__dimension"
+                      className={classNames('lnsLayerPanel__dimension', {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        'lnsLayerPanel__dimension-isHidden':
+                          isDraggedOperation(dragDropContext.dragging) &&
+                          accessor === dragDropContext.dragging.columnId,
+                      })}
+                      getAdditionalClassesOnEnter={() => {
+                        // If we are dragging another column, add an indication that the behavior will be a replacement'
+                        if (
+                          isDraggedOperation(dragDropContext.dragging) &&
+                          group.groupId !== dragDropContext.dragging.groupId
+                        ) {
+                          return 'lnsLayerPanel__dimension-isReplacing';
+                        }
+                        return '';
+                      }}
                       data-test-subj={group.dataTestSubj}
+                      draggable={!dimensionContainerState.isOpen}
+                      value={{ columnId: accessor, groupId: group.groupId, layerId }}
+                      label={group.groupLabel}
                       droppable={
-                        dragDropContext.dragging &&
+                        Boolean(dragDropContext.dragging) &&
+                        // Verify that the dragged item is not coming from the same group
+                        // since this would be a reorder
+                        (!isDraggedOperation(dragDropContext.dragging) ||
+                          dragDropContext.dragging.groupId !== group.groupId) &&
                         layerDatasource.canHandleDrop({
                           ...layerDatasourceDropProps,
                           columnId: accessor,
@@ -226,17 +236,27 @@ export function LayerPanel(
                         })
                       }
                       onDrop={(droppedItem) => {
-                        layerDatasource.onDrop({
+                        const dropResult = layerDatasource.onDrop({
                           ...layerDatasourceDropProps,
                           droppedItem,
                           columnId: accessor,
                           filterOperations: group.filterOperations,
                         });
+                        if (typeof dropResult === 'object') {
+                          // When a column is moved, we delete the reference to the old
+                          props.updateVisualization(
+                            activeVisualization.removeDimension({
+                              layerId,
+                              columnId: dropResult.deleted,
+                              prevState: props.visualizationState,
+                            })
+                          );
+                        }
                       }}
                     >
-                      <DimensionPopover
-                        popoverState={popoverState}
-                        setPopoverState={setPopoverState}
+                      <DimensionContainer
+                        dimensionContainerState={dimensionContainerState}
+                        setDimensionContainerState={setDimensionContainerState}
                         groups={groups}
                         accessor={accessor}
                         groupId={group.groupId}
@@ -248,15 +268,14 @@ export function LayerPanel(
                               columnId: accessor,
                               filterOperations: group.filterOperations,
                               suggestedPriority: group.suggestedPriority,
-                              togglePopover: () => {
-                                if (popoverState.isOpen) {
-                                  setPopoverState(initialPopoverState);
+                              onClick: () => {
+                                if (dimensionContainerState.isOpen) {
+                                  setDimensionContainerState(initialDimensionContainerState);
                                 } else {
-                                  setPopoverState({
+                                  setDimensionContainerState({
                                     isOpen: true,
                                     openId: accessor,
                                     addingToGroupId: null, // not set for existing dimension
-                                    tabId: 'datasource',
                                   });
                                 }
                               },
@@ -264,22 +283,21 @@ export function LayerPanel(
                           />
                         }
                         panel={
-                          <EuiTabbedContent
-                            tabs={tabs}
-                            selectedTab={tabs.find((t) => t.id === popoverState.tabId) || tabs[0]}
-                            size="s"
-                            onTabClick={(tab) => {
-                              setPopoverState({
-                                ...popoverState,
-                                tabId: tab.id as typeof popoverState['tabId'],
-                              });
-                            }}
-                          />
+                          <>
+                            {datasourceDimensionEditor}
+                            {visDimensionEditor}
+                          </>
                         }
+                        panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                          defaultMessage: '{groupLabel} configuration',
+                          values: {
+                            groupLabel: group.groupLabel,
+                          },
+                        })}
                       />
 
                       <EuiButtonIcon
-                        data-test-subj="indexPattern-dimensionPopover-remove"
+                        data-test-subj="indexPattern-dimension-remove"
                         iconType="cross"
                         iconSize="s"
                         size="s"
@@ -315,7 +333,11 @@ export function LayerPanel(
                     className="lnsLayerPanel__dimension"
                     data-test-subj={group.dataTestSubj}
                     droppable={
-                      dragDropContext.dragging &&
+                      Boolean(dragDropContext.dragging) &&
+                      // Verify that the dragged item is not coming from the same group
+                      // since this would be a reorder
+                      (!isDraggedOperation(dragDropContext.dragging) ||
+                        dragDropContext.dragging.groupId !== group.groupId) &&
                       layerDatasource.canHandleDrop({
                         ...layerDatasourceDropProps,
                         columnId: newId,
@@ -323,13 +345,13 @@ export function LayerPanel(
                       })
                     }
                     onDrop={(droppedItem) => {
-                      const dropSuccess = layerDatasource.onDrop({
+                      const dropResult = layerDatasource.onDrop({
                         ...layerDatasourceDropProps,
                         droppedItem,
                         columnId: newId,
                         filterOperations: group.filterOperations,
                       });
-                      if (dropSuccess) {
+                      if (dropResult) {
                         props.updateVisualization(
                           activeVisualization.setDimension({
                             layerId,
@@ -338,12 +360,23 @@ export function LayerPanel(
                             prevState: props.visualizationState,
                           })
                         );
+
+                        if (typeof dropResult === 'object') {
+                          // When a column is moved, we delete the reference to the old
+                          props.updateVisualization(
+                            activeVisualization.removeDimension({
+                              layerId,
+                              columnId: dropResult.deleted,
+                              prevState: props.visualizationState,
+                            })
+                          );
+                        }
                       }
                     }}
                   >
-                    <DimensionPopover
-                      popoverState={popoverState}
-                      setPopoverState={setPopoverState}
+                    <DimensionContainer
+                      dimensionContainerState={dimensionContainerState}
+                      setDimensionContainerState={setDimensionContainerState}
                       groups={groups}
                       accessor={newId}
                       groupId={group.groupId}
@@ -359,14 +392,13 @@ export function LayerPanel(
                               defaultMessage: 'Add a configuration',
                             })}
                             onClick={() => {
-                              if (popoverState.isOpen) {
-                                setPopoverState(initialPopoverState);
+                              if (dimensionContainerState.isOpen) {
+                                setDimensionContainerState(initialDimensionContainerState);
                               } else {
-                                setPopoverState({
+                                setDimensionContainerState({
                                   isOpen: true,
                                   openId: newId,
                                   addingToGroupId: group.groupId,
-                                  tabId: 'datasource',
                                 });
                               }
                             }}
@@ -379,6 +411,12 @@ export function LayerPanel(
                           </EuiButtonEmpty>
                         </div>
                       }
+                      panelTitle={i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                        defaultMessage: '{groupLabel} configuration',
+                        values: {
+                          groupLabel: group.groupLabel,
+                        },
+                      })}
                       panel={
                         <NativeRenderer
                           render={props.datasourceMap[datasourceId].renderDimensionEditor}
@@ -400,11 +438,10 @@ export function LayerPanel(
                                   prevState: props.visualizationState,
                                 })
                               );
-                              setPopoverState({
+                              setDimensionContainerState({
                                 isOpen: true,
                                 openId: newId,
                                 addingToGroupId: null, // clear now that dimension exists
-                                tabId: popoverState.tabId ?? 'datasource',
                               });
                             },
                           }}
