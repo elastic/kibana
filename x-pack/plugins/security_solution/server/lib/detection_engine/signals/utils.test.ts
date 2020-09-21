@@ -26,14 +26,23 @@ import {
   getSignalTimeTuples,
   getExceptions,
   createErrorsFromShard,
+  createSearchAfterReturnTypeFromResponse,
+  createSearchAfterReturnType,
+  mergeSearchAfterReturnTypeFromResponse,
+  mergeSearchAfterAndBulkCreate,
+  createTotalHitsFromSearchResult,
 } from './utils';
-import { BulkResponseErrorAggregation } from './types';
+import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
   sampleBulkResponse,
   sampleEmptyBulkResponse,
   sampleBulkError,
   sampleBulkErrorItem,
   mockLogger,
+  sampleDocSearchResultsWithSortId,
+  sampleEmptyDocSearchResults,
+  sampleDocSearchResultsNoSortIdNoHits,
+  repeatedSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { ShardError } from '../../types';
 
@@ -854,6 +863,337 @@ describe('utils', () => {
         'reason: some reason, type: some type, caused by: some reason',
         'reason: some reason 2, type: some type 2, caused by: some reason 2',
       ]);
+    });
+  });
+
+  describe('createSearchAfterReturnTypeFromResponse', () => {
+    test('empty results will return successful type', () => {
+      const searchResult = sampleEmptyDocSearchResults();
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(newSearchResult).toEqual(expected);
+    });
+
+    test('multiple results will return successful type with expected success', () => {
+      const searchResult = sampleDocSearchResultsWithSortId();
+      const newSearchResult = createSearchAfterReturnTypeFromResponse({ searchResult });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(newSearchResult).toEqual(expected);
+    });
+
+    test('result with error will create success: false within the result set', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 1;
+      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: false within the result set if failed is 2 or more', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: true within the result set if failed is 0', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 0;
+      const { success } = createSearchAfterReturnTypeFromResponse({ searchResult });
+      expect(success).toEqual(true);
+    });
+  });
+
+  describe('createSearchAfterReturnType', () => {
+    test('createSearchAfterReturnType will return full object when nothing is passed', () => {
+      const searchAfterReturnType = createSearchAfterReturnType();
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+
+    test('createSearchAfterReturnType can override all values', () => {
+      const searchAfterReturnType = createSearchAfterReturnType({
+        bulkCreateTimes: ['123'],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+        searchAfterTimes: ['123'],
+        success: false,
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: ['123'],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+        searchAfterTimes: ['123'],
+        success: false,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+
+    test('createSearchAfterReturnType can override select values', () => {
+      const searchAfterReturnType = createSearchAfterReturnType({
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 5,
+        errors: ['error 1'],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(searchAfterReturnType).toEqual(expected);
+    });
+  });
+
+  describe('mergeSearchAfterReturnTypeFromResponse', () => {
+    test('it merges search in with two default search results and an empty doc correctly', () => {
+      const merged = mergeSearchAfterReturnTypeFromResponse({
+        searchResult: sampleEmptyDocSearchResults(),
+        prev: createSearchAfterReturnType(),
+        next: createSearchAfterReturnType(),
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(merged).toEqual(expected);
+    });
+
+    test('it merges search in with two default search results and a sample doc correctly', () => {
+      const merged = mergeSearchAfterReturnTypeFromResponse({
+        searchResult: sampleDocSearchResultsWithSortId(),
+        prev: createSearchAfterReturnType(),
+        next: createSearchAfterReturnType(),
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(merged).toEqual(expected);
+    });
+
+    test('it merges search in with two default search results where "prev" "success" is false correctly', () => {
+      const { success } = mergeSearchAfterReturnTypeFromResponse({
+        searchResult: sampleEmptyDocSearchResults(),
+        prev: createSearchAfterReturnType({ success: false }),
+        next: createSearchAfterReturnType(),
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search in with two default search results where "next" "success" is false correctly', () => {
+      const { success } = mergeSearchAfterReturnTypeFromResponse({
+        searchResult: sampleEmptyDocSearchResults(),
+        prev: createSearchAfterReturnType(),
+        next: createSearchAfterReturnType({ success: false }),
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search in with two default search results where the search result has a false', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 1;
+      const { success } = mergeSearchAfterReturnTypeFromResponse({
+        searchResult,
+        prev: createSearchAfterReturnType(),
+        next: createSearchAfterReturnType(),
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search where the lastLookBackDate is the "next" date when given', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      const { lastLookBackDate } = mergeSearchAfterReturnTypeFromResponse({
+        searchResult,
+        prev: createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
+        }),
+        next: createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-09-21T19:21:46.194Z'),
+        }),
+      });
+      expect(lastLookBackDate).toEqual(new Date('2020-09-21T19:21:46.194Z'));
+    });
+
+    test('it merges search where the lastLookBackDate is the "prev" if given an empty data set', () => {
+      const searchResult = sampleEmptyDocSearchResults();
+      const { lastLookBackDate } = mergeSearchAfterReturnTypeFromResponse({
+        searchResult,
+        prev: createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
+        }),
+        next: createSearchAfterReturnType({
+          lastLookBackDate: undefined,
+        }),
+      });
+      expect(lastLookBackDate).toEqual(new Date('2020-08-21T19:21:46.194Z'));
+    });
+
+    test('it merges search where values from "next" and "prev" are computed together', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      const merged = mergeSearchAfterReturnTypeFromResponse({
+        searchResult,
+        prev: createSearchAfterReturnType({
+          bulkCreateTimes: ['123'],
+          createdSignalsCount: 3,
+          errors: ['error 1', 'error 2'],
+          lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
+          searchAfterTimes: ['123'],
+          success: true,
+        }),
+        next: createSearchAfterReturnType({
+          bulkCreateTimes: ['456'],
+          createdSignalsCount: 2,
+          errors: ['error 3'],
+          lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+          searchAfterTimes: ['567'],
+          success: true,
+        }),
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
+        createdSignalsCount: 5, // Adds the 3 and 2 together
+        errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
+        searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
+        success: true, // Defaults to success true is all of it was successful
+      };
+      expect(merged).toEqual(expected);
+    });
+  });
+
+  describe('mergeSearchAfterAndBulkCreate', () => {
+    test('it merges a default "prev" and "next" correctly ', () => {
+      const merged = mergeSearchAfterAndBulkCreate({
+        prev: createSearchAfterReturnType(),
+        next: createSearchAfterReturnType(),
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: [],
+        createdSignalsCount: 0,
+        errors: [],
+        lastLookBackDate: null,
+        searchAfterTimes: [],
+        success: true,
+      };
+      expect(merged).toEqual(expected);
+    });
+
+    test('it merges search in with two default search results where "prev" "success" is false correctly', () => {
+      const { success } = mergeSearchAfterAndBulkCreate({
+        prev: createSearchAfterReturnType({ success: false }),
+        next: createSearchAfterReturnType(),
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search in with two default search results where "next" "success" is false correctly', () => {
+      const { success } = mergeSearchAfterAndBulkCreate({
+        prev: createSearchAfterReturnType(),
+        next: createSearchAfterReturnType({ success: false }),
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('it merges search where the lastLookBackDate is the "next" date when given', () => {
+      const { lastLookBackDate } = mergeSearchAfterAndBulkCreate({
+        prev: createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
+        }),
+        next: createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-09-21T19:21:46.194Z'),
+        }),
+      });
+      expect(lastLookBackDate).toEqual(new Date('2020-09-21T19:21:46.194Z'));
+    });
+
+    test('it merges search where the lastLookBackDate is the "prev" if given undefined for "next', () => {
+      const { lastLookBackDate } = mergeSearchAfterAndBulkCreate({
+        prev: createSearchAfterReturnType({
+          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
+        }),
+        next: createSearchAfterReturnType({
+          lastLookBackDate: undefined,
+        }),
+      });
+      expect(lastLookBackDate).toEqual(new Date('2020-08-21T19:21:46.194Z'));
+    });
+
+    test('it merges search where values from "next" and "prev" are computed together', () => {
+      const merged = mergeSearchAfterAndBulkCreate({
+        prev: createSearchAfterReturnType({
+          bulkCreateTimes: ['123'],
+          createdSignalsCount: 3,
+          errors: ['error 1', 'error 2'],
+          lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
+          searchAfterTimes: ['123'],
+          success: true,
+        }),
+        next: createSearchAfterReturnType({
+          bulkCreateTimes: ['456'],
+          createdSignalsCount: 2,
+          errors: ['error 3'],
+          lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
+          searchAfterTimes: ['567'],
+          success: true,
+        }),
+      });
+      const expected: SearchAfterAndBulkCreateReturnType = {
+        bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
+        createdSignalsCount: 5, // Adds the 3 and 2 together
+        errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
+        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
+        searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
+        success: true, // Defaults to success true is all of it was successful
+      };
+      expect(merged).toEqual(expected);
+    });
+  });
+
+  describe('createTotalHitsFromSearchResult', () => {
+    test('it should return 0 for empty results', () => {
+      const result = createTotalHitsFromSearchResult({
+        searchResult: sampleEmptyDocSearchResults(),
+      });
+      expect(result).toEqual(0);
+    });
+
+    test('it should return 4 for 4 result sets', () => {
+      const result = createTotalHitsFromSearchResult({
+        searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
+      });
+      expect(result).toEqual(4);
     });
   });
 });

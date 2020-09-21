@@ -22,10 +22,7 @@ import {
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import {
-  searchAfterAndBulkCreate,
-  SearchAfterAndBulkCreateReturnType,
-} from './search_after_bulk_create';
+import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import {
@@ -35,6 +32,9 @@ import {
   getGapMaxCatchupRatio,
   MAX_RULE_GAP_RATIO,
   createErrorsFromShard,
+  createSearchAfterReturnType,
+  mergeSearchAfterAndBulkCreate,
+  mergeSearchAfterReturnTypeFromResponse,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -105,14 +105,7 @@ export const signalRulesAlertType = ({
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
-      let result: SearchAfterAndBulkCreateReturnType = {
-        success: false,
-        bulkCreateTimes: [],
-        searchAfterTimes: [],
-        lastLookBackDate: null,
-        createdSignalsCount: 0,
-        errors: [],
-      };
+      let result = createSearchAfterReturnType();
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
         alertId,
@@ -263,12 +256,15 @@ export const signalRulesAlertType = ({
           const searchErrors = createErrorsFromShard({
             errors: shardFailures,
           });
-          result.success = success && anomalyResults._shards.failed === 0;
-          result.errors = [...errors, ...searchErrors];
-          result.createdSignalsCount = createdItemsCount;
-          if (bulkCreateDuration) {
-            result.bulkCreateTimes.push(bulkCreateDuration);
-          }
+          result = mergeSearchAfterAndBulkCreate({
+            prev: result,
+            next: createSearchAfterReturnType({
+              success: success && anomalyResults._shards.failed === 0,
+              errors: [...errors, ...searchErrors],
+              createdSignalsCount: createdItemsCount,
+              bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+            }),
+          });
         } else if (isEqlRule(type)) {
           throw new Error('EQL Rules are under development, execution is not yet implemented');
         } else if (isThresholdRule(type) && threshold) {
@@ -321,12 +317,16 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
           });
-          result.success = success && thresholdResults._shards.failed === 0;
-          result.errors = [...errors, ...searchErrors];
-          result.createdSignalsCount = createdItemsCount;
-          if (bulkCreateDuration) {
-            result.bulkCreateTimes.push(bulkCreateDuration);
-          }
+          result = mergeSearchAfterReturnTypeFromResponse({
+            searchResult: thresholdResults,
+            prev: result,
+            next: createSearchAfterReturnType({
+              success,
+              errors: [...errors, ...searchErrors],
+              createdSignalsCount: createdItemsCount,
+              bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
+            }),
+          });
         } else if (isThreatMatchRule(type)) {
           if (
             threatQuery == null ||

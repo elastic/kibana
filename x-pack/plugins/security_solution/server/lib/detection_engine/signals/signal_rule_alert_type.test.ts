@@ -16,14 +16,10 @@ import {
   getListsClient,
   getExceptions,
   sortExceptionItems,
-  createErrorsFromShard,
 } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
-import { RuleExecutorOptions } from './types';
-import {
-  searchAfterAndBulkCreate,
-  SearchAfterAndBulkCreateReturnType,
-} from './search_after_bulk_create';
+import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
+import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
@@ -37,7 +33,17 @@ jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
 jest.mock('./search_after_bulk_create');
 jest.mock('./get_filter');
-jest.mock('./utils');
+jest.mock('./utils', () => {
+  const original = jest.requireActual('./utils');
+  return {
+    ...original,
+    getGapBetweenRuns: jest.fn(),
+    getGapMaxCatchupRatio: jest.fn(),
+    getListsClient: jest.fn(),
+    getExceptions: jest.fn(),
+    sortExceptionItems: jest.fn(),
+  };
+});
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
@@ -108,7 +114,6 @@ describe('rules_notification_alert_type', () => {
       exceptionsWithoutValueLists: [getExceptionListItemSchemaMock()],
       exceptionsWithValueLists: [],
     });
-    (createErrorsFromShard as jest.Mock).mockReturnValue([]);
     (searchAfterAndBulkCreate as jest.Mock).mockClear();
     (getGapMaxCatchupRatio as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
