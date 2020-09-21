@@ -1,9 +1,13 @@
 {
   "name": "@kbn/es",
-  "main": "./src/index.js",
+  "main": "./target/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
+  "scripts": {
+    "kbn:bootstrap": "node scripts/build",
+    "kbn:watch": "node scripts/build --watch"
+  },
   "dependencies": {
     "@elastic/elasticsearch": "7.9.0-rc.1",
     "@kbn/dev-utils": "1.0.0",
@@ -19,5 +23,10 @@
     "tar-fs": "^2.1.0",
     "tree-kill": "^1.2.2",
     "yauzl": "^2.10.0"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "1.0.0",
+    "@babel/cli": "^7.10.5",
+    "del": "^5.1.0"
   }
 }
