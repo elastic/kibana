@@ -238,22 +238,26 @@ const getJobStatus = (jobId: string) => (
 
 const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, JobStatus>) => (
   previousSetupStatus: SetupStatus
-): SetupStatus =>
-  Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>((setupStatus, [, jobStatus]) => {
-    if (jobStatus === 'missing') {
-      return { type: 'required' };
-    } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
-      return setupStatus;
-    } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {
-      return {
-        type: 'skipped',
-        // preserve newlyCreated status
-        newlyCreated: setupStatus.type === 'skipped' && setupStatus.newlyCreated,
-      };
-    }
+): SetupStatus => {
+  return Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>(
+    (setupStatus, [, jobStatus]) => {
+      if (jobStatus === 'missing') {
+        return { type: 'required' };
+      } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
+        return setupStatus;
+      } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {
+        return {
+          type: 'skipped',
+          // preserve newlyCreated status
+          newlyCreated: setupStatus.type === 'skipped' && setupStatus.newlyCreated,
+        };
+      }
 
-    return setupStatus;
-  }, previousSetupStatus);
+      return setupStatus;
+    },
+    previousSetupStatus
+  );
+};
 
 const hasError = <Value extends { error?: any }>(
   value: Value

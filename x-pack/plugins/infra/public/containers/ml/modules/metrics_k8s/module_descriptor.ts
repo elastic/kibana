@@ -57,7 +57,7 @@ const setUpModule = async (
   pField?: string
 ) => {
   const indexNamePattern = indices.join(',');
-  const jobIds = ['k8s_cpu_usage', 'k8s_memory_usage', 'k8s_network_in', 'k8s_network_out'];
+  const jobIds = ['k8s_memory_usage', 'k8s_network_in', 'k8s_network_out'];
   const jobOverrides = jobIds.map((id) => ({
     job_id: id,
     analysis_config: {

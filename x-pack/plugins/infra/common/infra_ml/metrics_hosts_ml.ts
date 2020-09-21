@@ -7,7 +7,6 @@
 import * as rt from 'io-ts';
 
 export const metricsHostsJobTypeRT = rt.keyof({
-  hosts_cpu_usage: null,
   hosts_memory_usage: null,
   hosts_network_in: null,
   hosts_network_out: null,
@@ -16,7 +15,6 @@ export const metricsHostsJobTypeRT = rt.keyof({
 export type MetricsHostsJobType = rt.TypeOf<typeof metricsHostsJobTypeRT>;
 
 export const metricsHostsJobTypes: MetricsHostsJobType[] = [
-  'hosts_cpu_usage',
   'hosts_memory_usage',
   'hosts_network_in',
   'hosts_network_out',

@@ -57,7 +57,7 @@ const setUpModule = async (
   pField?: string
 ) => {
   const indexNamePattern = indices.join(',');
-  const jobIds = ['hosts_cpu_usage', 'hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
+  const jobIds = ['hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
   const jobOverrides = jobIds.map((id) => ({
     job_id: id,
     data_description: {
