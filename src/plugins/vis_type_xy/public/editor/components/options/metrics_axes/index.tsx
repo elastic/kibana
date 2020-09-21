@@ -182,7 +182,9 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
           ...categoryAxes,
           position: mapPosition(categoryAxes.position),
         };
+
         setValue('categoryAxes', [updatedCategoryAxes]);
+
         const oldPosition = valueAxes[index].position;
         const newValueAxes = valueAxes.map(({ position, ...axis }, i) => ({
           ...axis,
@@ -208,14 +210,19 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
     (axisPosition: CategoryAxis['position']) => {
       const isHorizontalAxis = isAxisHorizontal(axisPosition);
 
-      stateParams.valueAxes.forEach((axis, index) => {
-        if (isAxisHorizontal(axis.position) === isHorizontalAxis) {
-          const position = mapPosition(axis.position);
-          onValueAxisPositionChanged(index, position);
-        }
-      });
+      if (
+        stateParams.valueAxes.some(
+          ({ position }) => isAxisHorizontal(position) === isHorizontalAxis
+        )
+      ) {
+        const newValueAxes = stateParams.valueAxes.map(({ position, ...axis }) => ({
+          ...axis,
+          position: mapPosition(position),
+        }));
+        setValue('valueAxes', newValueAxes);
+      }
     },
-    [stateParams.valueAxes, onValueAxisPositionChanged]
+    [setValue, stateParams.valueAxes]
   );
 
   const addValueAxis = useCallback(() => {

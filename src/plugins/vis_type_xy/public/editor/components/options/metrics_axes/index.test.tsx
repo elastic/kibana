@@ -31,6 +31,7 @@ import { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
 import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';
+import { mapPosition, mapPositionOpposite } from './utils';
 
 jest.mock('./series_panel', () => ({
   SeriesPanel: () => 'SeriesPanel',
@@ -103,22 +104,24 @@ describe('MetricsAxisOptions component', () => {
         valueAxes: [axis],
         seriesParams: [chart],
         categoryAxes: [categoryAxis],
-        grid: { valueAxis: defaultValueAxisId },
+        grid: {
+          valueAxis: defaultValueAxisId,
+        },
       },
       setValue,
     } as any;
   });
 
   it('should init with the default set of props', () => {
-    const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
+    const component = shallow(<MetricsAxisOptions {...defaultProps} />);
 
-    expect(comp).toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
   describe('useEffect', () => {
     it('should update series when new agg is added', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      comp.setProps({
+      const component = mount(<MetricsAxisOptions {...defaultProps} />);
+      component.setProps({
         aggs: createAggs([aggCount, aggAverage]),
       });
 
@@ -127,9 +130,9 @@ describe('MetricsAxisOptions component', () => {
     });
 
     it('should update series when new agg label is changed', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
+      const component = mount(<MetricsAxisOptions {...defaultProps} />);
       const agg = { id: aggCount.id, makeLabel: () => 'New label' };
-      comp.setProps({
+      component.setProps({
         aggs: createAggs([agg]),
       });
 
@@ -138,10 +141,10 @@ describe('MetricsAxisOptions component', () => {
     });
 
     it('should update visType when one seriesParam', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
+      const component = mount(<MetricsAxisOptions {...defaultProps} />);
       expect(defaultProps.vis.type.type).toBe(ChartType.Area);
 
-      comp.setProps({
+      component.setProps({
         stateParams: {
           ...defaultProps.stateParams,
           seriesParams: [{ ...chart, type: ChartType.Line }],
@@ -152,10 +155,10 @@ describe('MetricsAxisOptions component', () => {
     });
 
     it('should set histogram visType when multiple seriesParam', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
+      const component = mount(<MetricsAxisOptions {...defaultProps} />);
       expect(defaultProps.vis.type.type).toBe(ChartType.Area);
 
-      comp.setProps({
+      component.setProps({
         stateParams: {
           ...defaultProps.stateParams,
           seriesParams: [chart, { ...chart, type: ChartType.Line }],
@@ -169,12 +172,12 @@ describe('MetricsAxisOptions component', () => {
   describe('updateAxisTitle', () => {
     it('should not update the value axis title if custom title was set', () => {
       defaultProps.stateParams.valueAxes[0].title.text = 'Custom title';
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
+      const component = mount(<MetricsAxisOptions {...defaultProps} />);
       const newAgg = {
         ...aggCount,
         makeLabel: () => 'Custom label',
       };
-      comp.setProps({
+      component.setProps({
         aggs: createAggs([newAgg]),
       });
       const updatedValues = [{ ...axis, title: { text: newAgg.makeLabel() } }];
@@ -182,13 +185,13 @@ describe('MetricsAxisOptions component', () => {
     });
 
     it('should set the custom title to match the value axis label when only one agg exists for that axis', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
+      const component = mount(<MetricsAxisOptions {...defaultProps} />);
       const agg = {
         id: aggCount.id,
         params: { customLabel: 'Custom label' },
         makeLabel: () => 'Custom label',
       };
-      comp.setProps({
+      component.setProps({
         aggs: createAggs([agg]),
       });
 
@@ -202,9 +205,9 @@ describe('MetricsAxisOptions component', () => {
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
+      const component = mount(<MetricsAxisOptions {...defaultProps} />);
       const agg = { id: aggCount.id, makeLabel: () => 'Custom label' };
-      comp.setProps({
+      component.setProps({
         aggs: createAggs([agg, aggAverage]),
         stateParams: {
           ...defaultProps.stateParams,
@@ -217,13 +220,13 @@ describe('MetricsAxisOptions component', () => {
 
     it('should not overwrite the custom title with the value axis label if the custom title has been changed', () => {
       defaultProps.stateParams.valueAxes[0].title.text = 'Custom title';
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
+      const component = mount(<MetricsAxisOptions {...defaultProps} />);
       const agg = {
         id: aggCount.id,
         params: { customLabel: 'Custom label' },
         makeLabel: () => 'Custom label',
       };
-      comp.setProps({
+      component.setProps({
         aggs: createAggs([agg]),
       });
 
@@ -232,8 +235,8 @@ describe('MetricsAxisOptions component', () => {
   });
 
   it('should add value axis', () => {
-    const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-    comp.find(ValueAxesPanel).prop('addValueAxis')();
+    const component = shallow(<MetricsAxisOptions {...defaultProps} />);
+    component.find(ValueAxesPanel).prop('addValueAxis')();
 
     expect(setValue).toHaveBeenCalledWith(VALUE_AXES, [axis, axisRight]);
   });
@@ -244,16 +247,16 @@ describe('MetricsAxisOptions component', () => {
     });
 
     it('should remove value axis', () => {
-      const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-      comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
+      const component = shallow(<MetricsAxisOptions {...defaultProps} />);
+      component.find(ValueAxesPanel).prop('removeValueAxis')(axis);
 
       expect(setValue).toHaveBeenCalledWith(VALUE_AXES, [axisRight]);
     });
 
     it('should update seriesParams "valueAxis" prop', () => {
       const updatedSeriesParam = { ...chart, valueAxis: 'ValueAxis-2' };
-      const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-      comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
+      const component = shallow(<MetricsAxisOptions {...defaultProps} />);
+      component.find(ValueAxesPanel).prop('removeValueAxis')(axis);
 
       expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, [updatedSeriesParam]);
     });
@@ -261,18 +264,241 @@ describe('MetricsAxisOptions component', () => {
     it('should reset grid "valueAxis" prop', () => {
       const updatedGrid = { valueAxis: undefined };
       defaultProps.stateParams.seriesParams[0].valueAxis = 'ValueAxis-2';
-      const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-      comp.find(ValueAxesPanel).prop('removeValueAxis')(axis);
+      const component = shallow(<MetricsAxisOptions {...defaultProps} />);
+      component.find(ValueAxesPanel).prop('removeValueAxis')(axis);
 
       expect(setValue).toHaveBeenCalledWith('grid', updatedGrid);
     });
   });
 
-  it('should update axis value when when category position chnaged', () => {
-    const comp = shallow(<MetricsAxisOptions {...defaultProps} />);
-    comp.find(CategoryAxisPanel).prop('onPositionChanged')(Position.Left);
+  describe('onValueAxisPositionChanged', () => {
+    const getProps = (
+      valuePosition1: Position = Position.Right,
+      valuePosition2: Position = Position.Left
+    ): ValidationVisOptionsProps<VisParams> => ({
+      ...defaultProps,
+      stateParams: {
+        ...defaultProps.stateParams,
+        valueAxes: [
+          {
+            ...valueAxis,
+            id: 'ValueAxis-1',
+            position: valuePosition1,
+          },
+          {
+            ...valueAxis,
+            id: 'ValueAxis-2',
+            position: valuePosition2,
+          },
+          {
+            ...valueAxis,
+            id: 'ValueAxis-3',
+            position: valuePosition2,
+          },
+        ],
+        categoryAxes: [
+          {
+            ...categoryAxis,
+            position: mapPosition(valuePosition1),
+          },
+        ],
+      },
+    });
 
-    const updatedValues = [{ ...axis, name: 'BottomAxis-1', position: Position.Bottom }];
-    expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
+    it('should update all value axes if another value axis changes from horizontal to vertical', () => {
+      const component = mount(<MetricsAxisOptions {...getProps()} />);
+      setValue.mockClear();
+      const onValueAxisPositionChanged = component
+        .find(ValueAxesPanel)
+        .prop('onValueAxisPositionChanged');
+      onValueAxisPositionChanged(0, Position.Bottom);
+      expect(setValue).nthCalledWith(1, 'categoryAxes', [
+        expect.objectContaining({
+          id: 'CategoryAxis-1',
+          position: Position.Right,
+        }),
+      ]);
+      expect(setValue).nthCalledWith(2, 'valueAxes', [
+        expect.objectContaining({
+          id: 'ValueAxis-1',
+          position: Position.Bottom,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
+          position: Position.Top,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-3',
+          position: Position.Top,
+        }),
+      ]);
+    });
+
+    it('should update all value axes if another value axis changes from vertical to horizontal', () => {
+      const component = mount(<MetricsAxisOptions {...getProps(Position.Top, Position.Bottom)} />);
+      setValue.mockClear();
+      const onValueAxisPositionChanged = component
+        .find(ValueAxesPanel)
+        .prop('onValueAxisPositionChanged');
+      onValueAxisPositionChanged(1, Position.Left);
+      expect(setValue).nthCalledWith(1, 'categoryAxes', [
+        expect.objectContaining({
+          id: 'CategoryAxis-1',
+          position: Position.Top,
+        }),
+      ]);
+      expect(setValue).nthCalledWith(2, 'valueAxes', [
+        expect.objectContaining({
+          id: 'ValueAxis-1',
+          position: Position.Right,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
+          position: Position.Left,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-3',
+          position: Position.Left,
+        }),
+      ]);
+    });
+
+    it('should update only changed value axis if value axis stays horizontal', () => {
+      const component = mount(<MetricsAxisOptions {...getProps()} />);
+      setValue.mockClear();
+      const onValueAxisPositionChanged = component
+        .find(ValueAxesPanel)
+        .prop('onValueAxisPositionChanged');
+      onValueAxisPositionChanged(0, Position.Left);
+      expect(setValue).nthCalledWith(1, 'valueAxes', [
+        expect.objectContaining({
+          id: 'ValueAxis-1',
+          position: Position.Left,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
+          position: Position.Left,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-3',
+          position: Position.Left,
+        }),
+      ]);
+    });
+
+    it('should update only changed value axis if value axis stays vertical', () => {
+      const component = mount(<MetricsAxisOptions {...getProps(Position.Top, Position.Bottom)} />);
+      setValue.mockClear();
+      const onValueAxisPositionChanged = component
+        .find(ValueAxesPanel)
+        .prop('onValueAxisPositionChanged');
+      onValueAxisPositionChanged(1, Position.Top);
+      expect(setValue).nthCalledWith(1, 'valueAxes', [
+        expect.objectContaining({
+          id: 'ValueAxis-1',
+          position: Position.Top,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
+          position: Position.Top,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-3',
+          position: Position.Bottom,
+        }),
+      ]);
+    });
+  });
+
+  describe('onCategoryAxisPositionChanged', () => {
+    const getProps = (
+      position: Position = Position.Bottom
+    ): ValidationVisOptionsProps<VisParams> => ({
+      ...defaultProps,
+      stateParams: {
+        ...defaultProps.stateParams,
+        valueAxes: [
+          {
+            ...valueAxis,
+            id: 'ValueAxis-1',
+            position: mapPosition(position),
+          },
+          {
+            ...valueAxis,
+            id: 'ValueAxis-2',
+            position: mapPositionOpposite(mapPosition(position)),
+          },
+          {
+            ...valueAxis,
+            id: 'ValueAxis-3',
+            position: mapPosition(position),
+          },
+        ],
+        categoryAxes: [
+          {
+            ...categoryAxis,
+            position,
+          },
+        ],
+      },
+    });
+
+    it('should update all value axes if category axis changes from horizontal to vertical', () => {
+      const component = mount(<MetricsAxisOptions {...getProps()} />);
+      setValue.mockClear();
+      const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
+      onPositionChanged(Position.Left);
+      expect(setValue).nthCalledWith(1, 'valueAxes', [
+        expect.objectContaining({
+          id: 'ValueAxis-1',
+          position: Position.Bottom,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
+          position: Position.Top,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-3',
+          position: Position.Bottom,
+        }),
+      ]);
+    });
+
+    it('should update all value axes if category axis changes from vertical to horizontal', () => {
+      const component = mount(<MetricsAxisOptions {...getProps(Position.Left)} />);
+      setValue.mockClear();
+      const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
+      onPositionChanged(Position.Top);
+      expect(setValue).nthCalledWith(1, 'valueAxes', [
+        expect.objectContaining({
+          id: 'ValueAxis-1',
+          position: Position.Left,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
+          position: Position.Right,
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-3',
+          position: Position.Left,
+        }),
+      ]);
+    });
+
+    it('should not update value axes if category axis stays horizontal', () => {
+      const component = mount(<MetricsAxisOptions {...getProps()} />);
+      setValue.mockClear();
+      const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
+      onPositionChanged(Position.Top);
+      expect(setValue).not.toBeCalled();
+    });
+
+    it('should not update value axes if category axis stays vertical', () => {
+      const component = mount(<MetricsAxisOptions {...getProps(Position.Left)} />);
+      setValue.mockClear();
+      const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
+      onPositionChanged(Position.Right);
+      expect(setValue).not.toBeCalled();
+    });
   });
 });

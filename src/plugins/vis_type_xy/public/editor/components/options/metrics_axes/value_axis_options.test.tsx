@@ -20,21 +20,16 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { Position } from '@elastic/charts';
+
 import { TextInputOption } from '../../../../../../charts/public';
 
 import { ValueAxis, ScaleType } from '../../../../types';
 import { LabelOptions } from './label_options';
 import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
 import { valueAxis, vis } from './mocks';
-import { Position } from '@elastic/charts';
 
 const POSITION = 'position';
-
-interface PositionOption {
-  text: string;
-  value: Position;
-  disabled: boolean;
-}
 
 describe('ValueAxisOptions component', () => {
   let setParamByIndex: jest.Mock;
@@ -72,47 +67,6 @@ describe('ValueAxisOptions component', () => {
 
     expect(comp.find(TextInputOption).exists()).toBeFalsy();
     expect(comp.find(LabelOptions).exists()).toBeFalsy();
-  });
-
-  it.todo('replace test with new logic');
-  xit('should only allow left and right value axis position when category axis is horizontal', () => {
-    const comp = shallow(<ValueAxisOptions {...defaultProps} />);
-
-    const options: PositionOption[] = comp.find({ paramName: POSITION }).prop('options');
-
-    expect(options.length).toBe(4);
-    options.forEach(({ value, disabled }) => {
-      switch (value) {
-        case Position.Left:
-        case Position.Right:
-          expect(disabled).toBeFalsy();
-          break;
-        case Position.Top:
-        case Position.Bottom:
-          expect(disabled).toBeTruthy();
-          break;
-      }
-    });
-  });
-
-  xit('should only allow top and bottom value axis position when category axis is vertical', () => {
-    const comp = shallow(<ValueAxisOptions {...defaultProps} />);
-
-    const options: PositionOption[] = comp.find({ paramName: POSITION }).prop('options');
-
-    expect(options.length).toBe(4);
-    options.forEach(({ value, disabled }) => {
-      switch (value) {
-        case Position.Left:
-        case Position.Right:
-          expect(disabled).toBeTruthy();
-          break;
-        case Position.Top:
-        case Position.Bottom:
-          expect(disabled).toBeFalsy();
-          break;
-      }
-    });
   });
 
   it('should call onValueAxisPositionChanged when position is changed', () => {
