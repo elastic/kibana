@@ -13,6 +13,40 @@
         "paths": [
           [
             {
+              "service.environment": "testing",
+              "service.name": "opbeans-go",
+              "agent.name": "go"
+            },
+            {
+              "service.environment": "testing",
+              "service.name": "opbeans-java",
+              "agent.name": "java"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.6:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": null,
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": null,
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.6:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
               "service.environment": "production",
               "service.name": "opbeans-python",
               "agent.name": "python"

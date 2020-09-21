@@ -10,19 +10,76 @@ import { PromiseReturnType } from '../../../typings/common';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 describe('getConnections', () => {
-  it('transforms a list of paths into a list of connections filtered by service.name and environment', () => {
-    const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
-      typeof fetchServicePathsFromTraceIds
-    >;
-    const serviceName = 'opbeans-node';
-    const environment = 'production';
+  describe('transforms a list of paths into a list of connections', () => {
+    it('with no filters', () => {
+      const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
+        typeof fetchServicePathsFromTraceIds
+      >;
 
-    const connections = getConnections(
-      response.aggregations?.service_map.value.paths,
-      serviceName,
-      environment
-    );
+      const connections = getConnections(
+        response.aggregations?.service_map.value.paths
+      );
 
-    expect(connections).toMatchSnapshot();
+      expect(connections).toMatchSnapshot();
+    });
+    it('filters by service.name and environment', () => {
+      const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
+        typeof fetchServicePathsFromTraceIds
+      >;
+      const serviceName = 'opbeans-node';
+      const environment = 'production';
+
+      const connections = getConnections(
+        response.aggregations?.service_map.value.paths,
+        serviceName,
+        environment
+      );
+
+      expect(connections).toMatchSnapshot();
+    });
+
+    it('filters by service.name', () => {
+      const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
+        typeof fetchServicePathsFromTraceIds
+      >;
+      const serviceName = 'opbeans-node';
+
+      const connections = getConnections(
+        response.aggregations?.service_map.value.paths,
+        serviceName
+      );
+
+      expect(connections).toMatchSnapshot();
+    });
+
+    it('filters by environment', () => {
+      const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
+        typeof fetchServicePathsFromTraceIds
+      >;
+      const environment = 'testing';
+
+      const connections = getConnections(
+        response.aggregations?.service_map.value.paths,
+        undefined,
+        environment
+      );
+
+      expect(connections).toMatchSnapshot();
+    });
+
+    it('filters by environment not defined', () => {
+      const response = serviceMapFromTraceIdsScriptResponse as PromiseReturnType<
+        typeof fetchServicePathsFromTraceIds
+      >;
+      const environment = 'ENVIRONMENT_NOT_DEFINED';
+
+      const connections = getConnections(
+        response.aggregations?.service_map.value.paths,
+        undefined,
+        environment
+      );
+
+      expect(connections).toMatchSnapshot();
+    });
   });
 });
