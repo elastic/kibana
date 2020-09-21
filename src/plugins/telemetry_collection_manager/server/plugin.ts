@@ -209,7 +209,6 @@ export class TelemetryCollectionManagerPlugin
       return [];
     }
     for (const collection of this.collections) {
-      // TINA notes: looping through each of the three collections options we have (grouping of usage collection) to make sure we have the es Client
       const collectionEsClient = collection.esClientGetter();
       if (collectionEsClient !== undefined) {
         const statsCollectionConfig = this.getStatsCollectionConfig(
@@ -243,15 +242,15 @@ export class TelemetryCollectionManagerPlugin
   }
 
   private async getUsageForCollection(
-    collection: Collection, // contains the esClientGetter method
-    statsCollectionConfig: StatsCollectionConfig // contains the already-scoped esClient
+    collection: Collection,
+    statsCollectionConfig: StatsCollectionConfig
   ): Promise<UsageStatsPayload[]> {
     const context: StatsCollectionContext = {
       logger: this.logger.get(collection.title),
       version: this.version,
       ...collection.customContext,
     };
-    // added call to use new esClient
+
     const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig, context);
 
     if (clustersDetails.length === 0) {

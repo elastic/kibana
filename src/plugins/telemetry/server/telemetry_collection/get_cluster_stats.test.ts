@@ -37,7 +37,7 @@ describe('get_cluster_stats', () => {
     const response = Promise.resolve({ body: { cluster_uuid: '1234' } });
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     esClient.cluster.stats.mockImplementationOnce(
-      // @ts-ignore
+      // @ts-ignore the method only cares about the response body
       async (_params = { timeout: TIMEOUT }) => {
         return response;
       }

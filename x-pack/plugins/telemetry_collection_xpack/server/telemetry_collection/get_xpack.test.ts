@@ -9,12 +9,12 @@ import { getXPackUsage } from './get_xpack';
 describe('get_xpack', () => {
   describe('getXPackUsage', () => {
     it('uses esClient to get /_xpack/usage API', async () => {
-      const response = Promise.resolve({ body: {} });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      // @ts-ignore
-      esClient.xpack.usage.mockResolvedValue(response);
-      const result = getXPackUsage(esClient);
-      expect(result).toEqual(response);
+      // @ts-ignore we only care about the response body
+      esClient.xpack.usage.mockResolvedValue({ body: {} });
+      const result = await getXPackUsage(esClient);
+      expect(result).toEqual({});
+      esClient.xpack.usage.mockClear();
     });
   });
 });

@@ -131,8 +131,6 @@ export type LicenseGetter<CustomContext extends Record<string, any> = {}> = (
   context: StatsCollectionContext & CustomContext
 ) => Promise<{ [clusterUuid: string]: ESLicense | undefined }>;
 
-// Note that CollectionConfig is different to Collection!: CollectionConfig ~= Collection & priority.
-// This is daft!
 export interface CollectionConfig<
   CustomContext extends Record<string, any> = {},
   T extends BasicStatsPayload = BasicStatsPayload
@@ -140,7 +138,7 @@ export interface CollectionConfig<
   title: string;
   priority: number;
   esCluster: ILegacyClusterClient;
-  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient BUT we assure that through a code check
+  esClientGetter: () => IClusterClient | undefined; // --> by now we know that the client getter will return the IClusterClient but we assure that through a code check
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
