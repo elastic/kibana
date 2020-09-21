@@ -22,7 +22,7 @@ describe('MLJobLink', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now-4h))"`
+      `"/basepath/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now-4h))"`
     );
   });
   it('should produce the correct URL with jobId, serviceName, and transactionType', async () => {
@@ -41,7 +41,7 @@ describe('MLJobLink', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now-4h))&_a=(mlTimeSeriesExplorer:(entities:(service.name:opbeans-test,transaction.type:request),zoom:(from:now/w,to:now-4h)))"`
+      `"/basepath/app/ml/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now-4h))&_a=(mlTimeSeriesExplorer:(entities:(service.name:opbeans-test,transaction.type:request),zoom:(from:now/w,to:now-4h)))"`
     );
   });
 });

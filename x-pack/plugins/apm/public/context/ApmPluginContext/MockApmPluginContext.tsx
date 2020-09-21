@@ -78,10 +78,17 @@ const mockConfig: ConfigSchema = {
   },
 };
 
+const mockPlugin = {
+  ml: {
+    urlGenerator: {
+      createUrl: jest.fn,
+    },
+  },
+};
 export const mockApmPluginContextValue = {
   config: mockConfig,
   core: mockCore,
-  plugins: {},
+  plugins: mockPlugin,
 };
 
 export function MockApmPluginContextWrapper({
