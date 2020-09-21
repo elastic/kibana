@@ -17,11 +17,24 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
 import { VisTypeXyPlugin as Plugin } from './plugin';
 
 export { VisTypeXyPluginSetup } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+// TODO: Remove when vis_type_vislib is removed
+export {
+  CategoryAxis,
+  ThresholdLine,
+  ValueAxis,
+  Grid,
+  SeriesParam,
+  Dimensions,
+  ScaleType,
+  AxisType,
+} from './types';
+export { getPositions, getScaleTypes, TruncateLabelsOption } from './editor';
+export { xyVisTypes } from './vis_types';
+
+export function plugin() {
+  return new Plugin();
 }

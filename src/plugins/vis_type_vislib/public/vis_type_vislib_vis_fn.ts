@@ -22,6 +22,8 @@ import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../exp
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
 
+const name = 'vislib';
+
 interface Arguments {
   type: string;
   visConfig: string;
@@ -35,12 +37,12 @@ interface RenderValue {
 }
 
 export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
-  'vislib',
+  typeof name,
   KibanaDatatable,
   Arguments,
   Render<RenderValue>
 > => ({
-  name: 'vislib',
+  name,
   type: 'render',
   inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeVislib.functions.vislib.help', {

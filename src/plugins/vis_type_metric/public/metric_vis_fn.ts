@@ -27,14 +27,14 @@ import {
   Style,
 } from '../../expressions/public';
 import { visType, DimensionsVisParam, VisParams } from './types';
-import { ColorSchemas, vislibColorMaps, ColorModes } from '../../charts/public';
+import { ColorSchemas, vislibColorMaps, ColorMode } from '../../charts/public';
 
 export type Input = KibanaDatatable;
 
 interface Arguments {
   percentageMode: boolean;
   colorSchema: ColorSchemas;
-  colorMode: ColorModes;
+  colorMode: ColorMode;
   useRanges: boolean;
   invertColors: boolean;
   showLabels: boolean;
@@ -86,7 +86,7 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
     colorMode: {
       types: ['string'],
       default: '"None"',
-      options: [ColorModes.NONE, ColorModes.LABELS, ColorModes.BACKGROUND],
+      options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
       help: i18n.translate('visTypeMetric.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
@@ -194,8 +194,8 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
             invertColors: args.invertColors,
             style: {
               bgFill: args.bgFill,
-              bgColor: args.colorMode === ColorModes.BACKGROUND,
-              labelColor: args.colorMode === ColorModes.LABELS,
+              bgColor: args.colorMode === ColorMode.Background,
+              labelColor: args.colorMode === ColorMode.Labels,
               subText: args.subText,
               fontSize,
             },

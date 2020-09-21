@@ -18,15 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
-import { PieOptions } from './components/options';
-import { getPositions, Positions } from './utils/collections';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { getPositions } from '../../vis_type_xy/public';
+
 import { createVislibVisController } from './vis_controller';
 import { CommonVislibParams } from './types';
 import { VisTypeVislibDependencies } from './plugin';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { PieOptions } from './editor';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
@@ -56,7 +58,7 @@ export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => (
       type: 'pie',
       addTooltip: true,
       addLegend: true,
-      legendPosition: Positions.RIGHT,
+      legendPosition: Position.Right,
       isDonut: true,
       labels: {
         show: false,

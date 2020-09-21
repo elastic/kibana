@@ -19,23 +19,24 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ColorMode, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
 import { RangeValues, Schemas } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
-import { GaugeOptions } from './components/options';
-import { getGaugeCollections, Alignments, GaugeTypes } from './utils/collections';
-import { ColorModes, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
+
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
+import { Alignment, GaugeType } from './types';
+import { getGaugeCollections, GaugeOptions } from './editor';
 
 export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';
   gaugeStyle: 'Full';
   orientation: 'vertical';
   type: 'meter';
-  alignment: Alignments;
+  alignment: Alignment;
   colorsRange: RangeValues[];
   extendRange: boolean;
-  gaugeType: GaugeTypes;
+  gaugeType: GaugeType;
   labels: Labels;
   percentageMode: boolean;
   outline?: boolean;
@@ -63,6 +64,7 @@ export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) =>
     defaultMessage:
       "Gauges indicate the status of a metric. Use it to show how a metric's value relates to reference threshold values.",
   }),
+  visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
       type: 'gauge',
@@ -70,15 +72,15 @@ export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) =>
       addLegend: true,
       isDisplayWarning: false,
       gauge: {
-        alignment: Alignments.AUTOMATIC,
+        alignment: Alignment.Automatic,
         extendRange: true,
         percentageMode: false,
-        gaugeType: GaugeTypes.ARC,
+        gaugeType: GaugeType.Arc,
         gaugeStyle: 'Full',
         backStyle: 'Full',
         orientation: 'vertical',
         colorSchema: ColorSchemas.GreenToRed,
-        gaugeColorMode: ColorModes.LABELS,
+        gaugeColorMode: ColorMode.Labels,
         colorsRange: [
           { from: 0, to: 50 },
           { from: 50, to: 75 },
@@ -109,7 +111,6 @@ export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) =>
       },
     },
   },
-  visualization: createVislibVisController(deps),
   editorConfig: {
     collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,

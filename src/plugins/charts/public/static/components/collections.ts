@@ -18,17 +18,22 @@
  */
 
 import { $Values } from '@kbn/utility-types';
+import { i18n } from '@kbn/i18n';
 
-export const ColorModes = Object.freeze({
-  BACKGROUND: 'Background' as 'Background',
-  LABELS: 'Labels' as 'Labels',
-  NONE: 'None' as 'None',
+export const ColorMode = Object.freeze({
+  Background: 'Background' as 'Background',
+  Labels: 'Labels' as 'Labels',
+  None: 'None' as 'None',
 });
-export type ColorModes = $Values<typeof ColorModes>;
+export type ColorMode = $Values<typeof ColorMode>;
 
-export const Rotates = Object.freeze({
-  HORIZONTAL: 0,
-  VERTICAL: 90,
-  ANGLED: 75,
+export const LabelRotation = Object.freeze({
+  Horizontal: 0,
+  Vertical: 90,
+  Angled: 75,
 });
-export type Rotates = $Values<typeof Rotates>;
+export type LabelRotation = $Values<typeof LabelRotation>;
+
+export const defaultCountLabel = i18n.translate('charts.countText', {
+  defaultMessage: 'Count',
+});

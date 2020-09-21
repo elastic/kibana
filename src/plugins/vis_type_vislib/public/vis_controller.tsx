@@ -20,13 +20,15 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
+import { Position } from '@elastic/charts';
+
+import { mountReactNode } from '../../../core/public/utils';
+import { VisParams, ExprVis } from '../../visualizations/public';
+
 // @ts-ignore
 import { Vis as Vislib } from './vislib/vis';
-import { Positions } from './utils/collections';
 import { VisTypeVislibDependencies } from './plugin';
-import { mountReactNode } from '../../../core/public/utils';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
-import { VisParams, ExprVis } from '../../visualizations/public';
 import { getKibanaLegacy } from './services';
 
 const legendClassName = {
@@ -113,7 +115,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
       });
     }
 
-    mountLegend(visData: any, position: Positions) {
+    mountLegend(visData: any, position: Position) {
       this.unmount = mountReactNode(
         <VisLegend
           ref={this.legendRef}

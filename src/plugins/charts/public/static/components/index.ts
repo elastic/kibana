@@ -18,7 +18,7 @@
  */
 
 export { BasicOptions } from './basic_options';
-export { ColorModes, Rotates } from './collections';
+export { ColorMode, LabelRotation, defaultCountLabel } from './collections';
 export { ColorRanges, SetColorRangeValue } from './color_ranges';
 export { ColorSchemaOptions, SetColorSchemaOptionsValue } from './color_schema';
 export { ColorSchemaParams, Labels, Style } from './types';

@@ -19,13 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { GaugeOptions } from './components/options';
-import { getGaugeCollections, GaugeTypes } from './utils/collections';
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
-import { ColorModes, ColorSchemas } from '../../charts/public';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
+import { ColorMode, ColorSchemas } from '../../charts/public';
+
+import { getGaugeCollections, GaugeOptions } from './editor';
+import { createVislibVisController } from './vis_controller';
+import { VisTypeVislibDependencies } from './plugin';
+import { GaugeType } from './types';
 
 export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'goal',
@@ -45,13 +46,13 @@ export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
         verticalSplit: false,
         autoExtend: false,
         percentageMode: true,
-        gaugeType: GaugeTypes.ARC,
+        gaugeType: GaugeType.Arc,
         gaugeStyle: 'Full',
         backStyle: 'Full',
         orientation: 'vertical',
         useRanges: false,
         colorSchema: ColorSchemas.GreenToRed,
-        gaugeColorMode: ColorModes.NONE,
+        gaugeColorMode: ColorMode.None,
         colorsRange: [{ from: 0, to: 10000 }],
         invertColors: false,
         labels: {
