@@ -435,7 +435,7 @@ describe('CredentialsLogic', () => {
     };
 
     describe('apiTokens', () => {
-      it('should set', () => {
+      it('should be set', () => {
         mount();
         CredentialsLogic.actions.setCredentialsData(meta, [newToken, newToken]);
         expect(CredentialsLogic.values.apiTokens).toEqual([newToken, newToken]);
