@@ -11,13 +11,8 @@ import {
   createTimeRangeFilters,
   createResultTypeFilters,
   defaultRequestParameters,
-  createDatasetsFilters,
 } from './common';
-import {
-  Sort,
-  Pagination,
-  GetMetricsK8sAnomaliesRequestPayload,
-} from '../../../../common/http_api/infra_ml';
+import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
 // TODO: Reassess validity of this against ML docs
 const TIEBREAKER_FIELD = '_doc';

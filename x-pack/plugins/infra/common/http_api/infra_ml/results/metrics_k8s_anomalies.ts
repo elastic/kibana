@@ -15,7 +15,6 @@ export const INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH =
 const metricsK8sAnomalyCommonFieldsRT = rt.type({
   id: rt.string,
   anomalyScore: rt.number,
-  dataset: rt.string,
   typical: rt.number,
   actual: rt.number,
   type: anomalyTypeRT,

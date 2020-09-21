@@ -15,7 +15,6 @@ export const INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH =
 const metricsHostAnomalyCommonFieldsRT = rt.type({
   id: rt.string,
   anomalyScore: rt.number,
-  dataset: rt.string,
   typical: rt.number,
   actual: rt.number,
   type: anomalyTypeRT,

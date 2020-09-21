@@ -152,7 +152,7 @@ const JobsEnabledCallout = (props: CalloutProps) => {
       defaultMessage: 'Hosts',
     });
   } else if (props.hasK8sJobs) {
-    target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.k8sTitle', {
+    target = i18n.translate('xpack.infra.ml.anomalyFlyout.create.hostsTitle', {
       defaultMessage: 'Hosts',
     });
   }

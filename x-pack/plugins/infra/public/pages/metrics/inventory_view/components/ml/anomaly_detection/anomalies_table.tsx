@@ -7,20 +7,20 @@
 import React from 'react';
 import { useState } from 'react';
 import moment from 'moment';
-import { useMetricsHostsAnomaliesResults } from '../../../hooks/use_metrics_hosts_anomalies';
-import { useMetricsK8sAnomaliesResults } from '../../../hooks/use_metrics_k8s_anomalies';
+// import { useMetricsHostsAnomaliesResults } from '../../../hooks/use_metrics_hosts_anomalies';
+// import { useMetricsK8sAnomaliesResults } from '../../../hooks/use_metrics_k8s_anomalies';
 
 export const AnomaliesTable = () => {
-  const [start] = useState(moment().toDate().getTime());
+  // const [start] = useState(moment().toDate().getTime());
 
-  const SORT_DEFAULTS = {
-    direction: 'desc' as const,
-    field: 'anomalyScore' as const,
-  };
+  // const SORT_DEFAULTS = {
+  //   direction: 'desc' as const,
+  //   field: 'anomalyScore' as const,
+  // };
 
-  const PAGINATION_DEFAULTS = {
-    pageSize: 25,
-  };
+  // const PAGINATION_DEFAULTS = {
+  //   pageSize: 25,
+  // };
 
   // const {
   //   isLoadingMetricsHostsAnomalies,
