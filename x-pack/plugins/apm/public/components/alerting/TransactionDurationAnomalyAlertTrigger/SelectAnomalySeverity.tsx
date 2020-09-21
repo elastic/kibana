@@ -5,105 +5,60 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { getSeverityColor } from '../../../../common/anomaly_detection';
 import {
-  getSeverityColor,
-  Severity,
-} from '../../../../common/anomaly_detection';
-import { useTheme } from '../../../hooks/useTheme';
+  AnomalyAlertSeverityType,
+  ANOMALY_ALERT_SEVERITY_TYPES,
+} from '../../../../common/alert_types';
 
-type SeverityScore = 0 | 25 | 50 | 75;
-const ANOMALY_SCORES: SeverityScore[] = [0, 25, 50, 75];
-
-const anomalyScoreSeverityMap: {
-  [key in SeverityScore]: { label: string; severity: Severity };
-} = {
-  0: {
-    label: i18n.translate('xpack.apm.alerts.anomalySeverity.warningLabel', {
-      defaultMessage: 'warning',
-    }),
-    severity: Severity.warning,
-  },
-  25: {
-    label: i18n.translate('xpack.apm.alerts.anomalySeverity.minorLabel', {
-      defaultMessage: 'minor',
-    }),
-    severity: Severity.minor,
-  },
-  50: {
-    label: i18n.translate('xpack.apm.alerts.anomalySeverity.majorLabel', {
-      defaultMessage: 'major',
-    }),
-    severity: Severity.major,
-  },
-  75: {
-    label: i18n.translate('xpack.apm.alerts.anomalySeverity.criticalLabel', {
-      defaultMessage: 'critical',
-    }),
-    severity: Severity.critical,
-  },
-};
-
-export function AnomalySeverity({
-  severityScore,
-}: {
-  severityScore: SeverityScore;
-}) {
-  const theme = useTheme();
-  const { label, severity } = anomalyScoreSeverityMap[severityScore];
-  const defaultColor = theme.eui.euiColorMediumShade;
-  const color = getSeverityColor(theme, severity) || defaultColor;
+export function AnomalySeverity({ type }: { type: AnomalyAlertSeverityType }) {
+  const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
+    (option) => option.type === type
+  )!;
   return (
-    <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
-      {label}
+    <EuiHealth
+      color={getSeverityColor(selectedOption.threshold)}
+      style={{ lineHeight: 'inherit' }}
+    >
+      {selectedOption.label}
     </EuiHealth>
   );
 }
 
-const getOption = (value: SeverityScore) => {
-  return {
-    value: value.toString(10),
-    inputDisplay: <AnomalySeverity severityScore={value} />,
-    dropdownDisplay: (
-      <>
-        <AnomalySeverity severityScore={value} />
-        <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued">
-          <p className="euiTextColor--subdued">
-            <FormattedMessage
-              id="xpack.apm.alerts.anomalySeverity.scoreDetailsDescription"
-              defaultMessage="score {value} and above"
-              values={{ value }}
-            />
-          </p>
-        </EuiText>
-      </>
-    ),
-  };
-};
-
 interface Props {
-  onChange: (value: SeverityScore) => void;
-  value: SeverityScore;
+  onChange: (value: AnomalyAlertSeverityType) => void;
+  value: AnomalyAlertSeverityType;
 }
 
 export function SelectAnomalySeverity({ onChange, value }: Props) {
-  const options = ANOMALY_SCORES.map((anomalyScore) => getOption(anomalyScore));
-
   return (
     <EuiSuperSelect
       hasDividers
       style={{ width: 200 }}
-      options={options}
-      valueOfSelected={value.toString(10)}
-      onChange={(selectedValue: string) => {
-        const selectedAnomalyScore = parseInt(
-          selectedValue,
-          10
-        ) as SeverityScore;
-        onChange(selectedAnomalyScore);
+      options={ANOMALY_ALERT_SEVERITY_TYPES.map((option) => ({
+        value: option.type,
+        inputDisplay: <AnomalySeverity type={option.type} />,
+        dropdownDisplay: (
+          <>
+            <AnomalySeverity type={option.type} />
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="subdued">
+              <p className="euiTextColor--subdued">
+                <FormattedMessage
+                  id="xpack.apm.alerts.anomalySeverity.scoreDetailsDescription"
+                  defaultMessage="score {value} and above"
+                  values={{ value }}
+                />
+              </p>
+            </EuiText>
+          </>
+        ),
+      }))}
+      valueOfSelected={value}
+      onChange={(selectedValue: AnomalyAlertSeverityType) => {
+        onChange(selectedValue);
       }}
     />
   );

@@ -115,7 +115,9 @@ describe('licensing plugin', () => {
             refresh();
           } else if (i === 2) {
             expect(value.type).toBe('gold');
-            refresh();
+            // since this is a synchronous subscription, we need to give the exhaustMap a chance
+            // to mark the subscription as complete before emitting another value on the Subject
+            process.nextTick(() => refresh());
           } else if (i === 3) {
             expect(value.type).toBe('platinum');
             done();
