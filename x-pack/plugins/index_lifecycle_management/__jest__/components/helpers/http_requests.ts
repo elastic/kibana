@@ -40,6 +40,8 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 };
 
+export type HttpRequestMockHelpers = ReturnType<typeof registerHttpRequestMockHelpers>;
+
 export const init = () => {
   const server = sinon.fakeServer.create();
 

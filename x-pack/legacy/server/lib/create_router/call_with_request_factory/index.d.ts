@@ -5,9 +5,9 @@
  */
 
 import { Legacy } from 'kibana';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { LegacyAPICaller } from '../../../../../../src/core/server';
 
-export type CallWithRequest = (...args: any[]) => CallCluster;
+export type CallWithRequest = (...args: any[]) => LegacyAPICaller;
 
 export declare function callWithRequestFactory(
   server: Legacy.Server,
