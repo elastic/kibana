@@ -15,7 +15,6 @@ export interface JobParamsPNG extends BaseParams {
 
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPNG extends BasePayload<JobParamsPNG> {
-  basePath?: string;
   browserTimezone: string;
   forceNow?: string;
   layout: LayoutParams;

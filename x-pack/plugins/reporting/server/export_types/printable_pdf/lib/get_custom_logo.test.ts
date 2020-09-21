@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReportingConfig, ReportingCore } from '../../';
+import { ReportingConfig, ReportingCore } from '../../../';
 import {
   createMockConfig,
   createMockConfigSchema,
   createMockReportingCore,
-} from '../../test_helpers';
-import { TaskPayloadPDF } from '../printable_pdf/types';
-import { getConditionalHeaders, getCustomLogo } from './';
+} from '../../../test_helpers';
+import { getConditionalHeaders } from '../../common';
+import { TaskPayloadPDF } from '../types';
+import { getCustomLogo } from './get_custom_logo';
 
 let mockConfig: ReportingConfig;
 let mockReportingPlugin: ReportingCore;
@@ -38,18 +39,13 @@ test(`gets logo from uiSettings`, async () => {
     get: mockGet,
   });
 
-  const conditionalHeaders = await getConditionalHeaders({
+  const conditionalHeaders = getConditionalHeaders({
     job: {} as TaskPayloadPDF,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
 
-  const { logo } = await getCustomLogo({
-    reporting: mockReportingPlugin,
-    config: mockConfig,
-    job: {} as TaskPayloadPDF,
-    conditionalHeaders,
-  });
+  const { logo } = await getCustomLogo(mockReportingPlugin, conditionalHeaders);
 
   expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');
   expect(logo).toBe('purple pony');
