@@ -12,6 +12,8 @@ import {
   EuiSelectableTemplateSitewideOption,
   EuiTitle,
   EuiLoadingSpinner,
+  EuiHeaderSectionItemButton,
+  EuiIcon,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
@@ -176,6 +178,12 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
         isLoading={isLoading}
         onChange={onChange}
         options={items}
+        popoverButtonBreakpoints={['xs', 's']}
+        popoverButton={
+          <EuiHeaderSectionItemButton aria-label={I18LABELS.searchByUrl}>
+            <EuiIcon type="search" size="m" />
+          </EuiHeaderSectionItemButton>
+        }
         searchProps={{
           placeholder: I18LABELS.searchByUrl,
           onInput: onInputChange,
