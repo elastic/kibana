@@ -1,29 +1,4 @@
 {
-<<<<<<< HEAD
-    "id": "metrics_hosts",
-    "title": "Metrics Hosts",
-    "description": "",
-    "type": "Metricbeat Data",
-    "logoFile": "logo.json",
-    "defaultIndexPattern": "metricbeat-*",
-    "query": {
-        "bool": {
-          "must": [
-            {"exists": {"field": "system"}}
-          ],
-          "must_not": [
-            {"bool": {"filter": [{"exists":{"field": "kubernetes"}}]}},
-            {"bool": {"filter": [{"exists":{"field": "docker"}}]}}
-            ]
-        }
-      },
-    "jobs": [
-        {
-            "id": "hosts_cpu_usage",
-            "file": "hosts_cpu_usage.json"
-        },
-        {
-=======
     "id": "metrics_ui_hosts",
     "title": "Metrics Hosts",
     "description": "Detect anomalous memory and network behavior on hosts.",
@@ -31,7 +6,6 @@
     "logoFile": "logo.json",
     "jobs": [
         {
->>>>>>> 03e3c852288644d961aee7b4f976275b95c83885
             "id": "hosts_memory_usage",
             "file": "hosts_memory_usage.json"
         },
@@ -46,14 +20,6 @@
     ],
     "datafeeds": [
         {
-<<<<<<< HEAD
-            "id": "datafeed-hosts_cpu_usage",
-            "file": "datafeed_hosts_cpu_usage.json",
-            "job_id": "hosts_cpu_usage"
-        },
-        {
-=======
->>>>>>> 03e3c852288644d961aee7b4f976275b95c83885
             "id": "datafeed-hosts_memory_usage",
             "file": "datafeed_hosts_memory_usage.json",
             "job_id": "hosts_memory_usage"
