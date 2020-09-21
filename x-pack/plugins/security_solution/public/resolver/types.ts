@@ -505,24 +505,6 @@ export interface DataAccessLayer {
   relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
 
   /**
-   * Return events that have `process.entity_id` that includes `entityID` and that have
-   * a `event.category` that includes `category`.
-   */
-  eventsWithEntityIDAndCategory: (
-    entityID: string,
-    category: string,
-    after: string
-  ) => Promise<{
-    events: SafeResolverEvent[];
-    nextEvent: string | null;
-  }>;
-
-  /**
-   * Return up to one event that has an `event.id` that includes `eventID`.
-   */
-  event(eventID: string): Promise<SafeResolverEvent | null>;
-
-  /**
    * Fetch a ResolverTree for a entityID
    */
   resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
@@ -697,13 +679,17 @@ export type PanelViewAndParameters =
       panelView: 'eventDetail';
       panelParameters: {
         /**
+         * The nodeID (e.g. `process.entity_id`) for the node related to the event being shown.
+         */
+        nodeID: string;
+        /**
          * A value used for the `nodeEventsOfType` view. Used to associate this view with a parent `nodeEventsOfType` view.
          * e.g. The user views the `nodeEventsOfType` and follows a link to the `eventDetail` view. The `eventDetail` view can
          * use `eventType` to populate breadcrumbs and allow the user to return to the previous filter.
          *
-         * This can be inferred from the event itself, but it might not match expectations as an event may have any number of 'eventType's.
+         * This cannot be inferred from the event itself, as an event may have any number of 'eventType's.
          */
-        eventType?: string;
+        eventType: string;
 
         /**
          * `event.id` that uniquely identifies the event to show.
