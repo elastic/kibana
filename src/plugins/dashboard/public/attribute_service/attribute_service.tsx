@@ -156,7 +156,7 @@ export class AttributeService<
   };
 
   public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
-    return ((embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]
+    return ((embeddable.getRoot() as Container).getInput()?.panels?.[embeddable.id]
       ?.explicitInput ?? embeddable.getInput()) as ValType | RefType;
   }
 

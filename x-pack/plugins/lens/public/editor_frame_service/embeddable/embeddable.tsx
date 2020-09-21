@@ -136,7 +136,7 @@ export class Embeddable
     };
     const expression = await this.deps.documentToExpression(this.savedVis);
     this.expression = expression ? this.deps.toExpressionString(expression) : null;
-    this.initializeOutput();
+    await this.initializeOutput();
     this.isInitialized = true;
     if (this.domNode) {
       this.render(this.domNode);
@@ -257,12 +257,9 @@ export class Embeddable
           // to show.
           return null;
         }
-      });
-    const indexPatterns = (
-      await Promise.all(promises)
-    ).filter((indexPattern: IndexPattern | null): indexPattern is IndexPattern =>
-      Boolean(indexPattern)
-    );
+      })
+      .filter((promise): promise is Promise<IndexPattern> => Boolean(promise));
+    const indexPatterns = await Promise.all(promises);
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
     // config dropdown correctly.
