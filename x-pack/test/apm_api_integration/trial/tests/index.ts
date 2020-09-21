@@ -35,6 +35,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
       loadTestFile(require.resolve('./csm/csm_services.ts'));
       loadTestFile(require.resolve('./csm/web_core_vitals.ts'));
       loadTestFile(require.resolve('./csm/long_task_metrics.ts'));
+      loadTestFile(require.resolve('./csm/js_errors.ts'));
     });
   });
 }
