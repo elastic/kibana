@@ -17,10 +17,25 @@
  * under the License.
  */
 
-export * from './aggs';
-export * from './es_search';
-export * from './expressions';
-export * from './search_source';
-export * from './tabify';
-export * from './types';
-export * from './es_search';
+import { IEsSearchResponse } from './types';
+
+/**
+ * @returns true if response had an error while executing in ES
+ */
+export const isErrorResponse = (response?: IEsSearchResponse) => {
+  return !response || (!response.isRunning && response.isPartial);
+};
+
+/**
+ * @returns true if response is completed successfully
+ */
+export const isCompleteResponse = (response?: IEsSearchResponse) => {
+  return response && !response.isRunning && !response.isPartial;
+};
+
+/**
+ * @returns true if request is still running an/d response contains partial results
+ */
+export const isPartialResponse = (response?: IEsSearchResponse) => {
+  return response && response.isRunning && response.isPartial;
+};
