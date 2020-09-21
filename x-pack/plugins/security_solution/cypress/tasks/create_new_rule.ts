@@ -13,14 +13,17 @@ import {
 } from '../objects/rule';
 import {
   ABOUT_CONTINUE_BTN,
-  ANOMALY_THRESHOLD_INPUT,
+  ABOUT_EDIT_TAB,
+  ACTIONS_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
+  ANOMALY_THRESHOLD_INPUT,
   COMBO_BOX_INPUT,
   CREATE_AND_ACTIVATE_BTN,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
+  DEFINE_EDIT_TAB,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INPUT,
@@ -32,8 +35,8 @@ import {
   MITRE_TACTIC,
   MITRE_TACTIC_DROPDOWN,
   MITRE_TECHNIQUES_INPUT,
-  RISK_INPUT,
   REFERENCE_URLS_INPUT,
+  RISK_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
@@ -41,6 +44,7 @@ import {
   RULE_NAME_OVERRIDE,
   RULE_TIMESTAMP_OVERRIDE,
   SCHEDULE_CONTINUE_BUTTON,
+  SCHEDULE_EDIT_TAB,
   SEVERITY_DROPDOWN,
   SEVERITY_MAPPING_OVERRIDE_OPTION,
   SEVERITY_OVERRIDE_ROW,
@@ -48,10 +52,10 @@ import {
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  DEFINE_EDIT_BUTTON,
-  ABOUT_EDIT_BUTTON,
+  EQL_TYPE,
+  EQL_QUERY_INPUT,
 } from '../screens/create_new_rule';
-import { TIMELINE } from '../screens/timeline';
+import { TIMELINE } from '../screens/timelines';
 
 export const createAndActivateRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
@@ -59,11 +63,9 @@ export const createAndActivateRule = () => {
   cy.get(CREATE_AND_ACTIVATE_BTN).should('not.exist');
 };
 
-export const fillAboutRuleAndContinue = (
-  rule: CustomRule | MachineLearningRule | ThresholdRule
-) => {
-  cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
-  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
+export const fillAboutRule = (rule: CustomRule | MachineLearningRule | ThresholdRule) => {
+  cy.get(RULE_NAME_INPUT).clear({ force: true }).type(rule.name, { force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(rule.description, { force: true });
 
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${rule.severity.toLowerCase()}`).click();
@@ -77,12 +79,15 @@ export const fillAboutRuleAndContinue = (
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
   rule.referenceUrls.forEach((url, index) => {
-    cy.get(REFERENCE_URLS_INPUT).eq(index).type(url, { force: true });
+    cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
   });
 
   rule.falsePositivesExamples.forEach((falsePositive, index) => {
-    cy.get(FALSE_POSITIVES_INPUT).eq(index).type(falsePositive, { force: true });
+    cy.get(FALSE_POSITIVES_INPUT)
+      .eq(index)
+      .clear({ force: true })
+      .type(falsePositive, { force: true });
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
 
@@ -91,14 +96,22 @@ export const fillAboutRuleAndContinue = (
     cy.contains(MITRE_TACTIC, mitre.tactic).click();
 
     mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_TECHNIQUES_INPUT).eq(index).type(`${technique}{enter}`, { force: true });
+      cy.get(MITRE_TECHNIQUES_INPUT)
+        .eq(index)
+        .clear({ force: true })
+        .type(`${technique}{enter}`, { force: true });
     });
 
     cy.get(MITRE_BTN).click({ force: true });
   });
 
-  cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
+  cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(rule.note, { force: true });
+};
 
+export const fillAboutRuleAndContinue = (
+  rule: CustomRule | MachineLearningRule | ThresholdRule
+) => {
+  fillAboutRule(rule);
   cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
 };
 
@@ -177,20 +190,6 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
-export const expectDefineFormToRepopulateAndContinue = (rule: CustomRule) => {
-  cy.get(DEFINE_EDIT_BUTTON).click();
-  cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-  cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
-};
-
-export const expectAboutFormToRepopulateAndContinue = (rule: CustomRule) => {
-  cy.get(ABOUT_EDIT_BUTTON).click();
-  cy.get(RULE_NAME_INPUT).invoke('val').should('eq', rule.name);
-  cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
-  cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
-};
-
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
@@ -209,6 +208,14 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
+export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  cy.get(EQL_QUERY_INPUT).type(rule.customQuery);
+  cy.get(EQL_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+
+  cy.get(EQL_QUERY_INPUT).should('not.exist');
+};
+
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
   cy.get(MACHINE_LEARNING_DROPDOWN).click({ force: true });
   cy.contains(MACHINE_LEARNING_LIST, rule.machineLearningJob).click();
@@ -220,10 +227,30 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   cy.get(MACHINE_LEARNING_DROPDOWN).should('not.exist');
 };
 
+export const goToDefineStepTab = () => {
+  cy.get(DEFINE_EDIT_TAB).click({ force: true });
+};
+
+export const goToAboutStepTab = () => {
+  cy.get(ABOUT_EDIT_TAB).click({ force: true });
+};
+
+export const goToScheduleStepTab = () => {
+  cy.get(SCHEDULE_EDIT_TAB).click({ force: true });
+};
+
+export const goToActionsStepTab = () => {
+  cy.get(ACTIONS_EDIT_TAB).click({ force: true });
+};
+
 export const selectMachineLearningRuleType = () => {
   cy.get(MACHINE_LEARNING_TYPE).click({ force: true });
 };
 
 export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
+};
+
+export const selectEqlRuleType = () => {
+  cy.get(EQL_TYPE).click({ force: true });
 };

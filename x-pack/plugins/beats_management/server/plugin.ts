@@ -11,6 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { BeatsManagementConfigType } from '../common';
@@ -22,6 +23,7 @@ import { beatsIndexTemplate } from './index_templates';
 
 interface SetupDeps {
   security?: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 interface StartDeps {
@@ -42,7 +44,7 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
     private readonly initializerContext: PluginInitializerContext<BeatsManagementConfigType>
   ) {}
 
-  public async setup(core: CoreSetup<StartDeps>, { security }: SetupDeps) {
+  public async setup(core: CoreSetup<StartDeps>, { features, security }: SetupDeps) {
     this.securitySetup = security;
 
     const router = core.http.createRouter();
@@ -50,6 +52,20 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
 
     core.http.registerRouteHandlerContext('beatsManagement', (_, req) => {
       return this.beatsLibs!;
+    });
+
+    features.registerElasticsearchFeature({
+      id: 'beats_management',
+      management: {
+        ingest: ['beats_management'],
+      },
+      privileges: [
+        {
+          ui: [],
+          requiredClusterPrivileges: [],
+          requiredRoles: ['beats_admin'],
+        },
+      ],
     });
 
     return {};

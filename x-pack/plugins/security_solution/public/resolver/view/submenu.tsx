@@ -4,23 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-duplicate-imports */
-
-/* eslint-disable react/display-name */
-
 import { i18n } from '@kbn/i18n';
-import React, { useState, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
-import {
-  EuiI18nNumber,
-  EuiSelectable,
-  EuiButton,
-  EuiPopover,
-  ButtonColor,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiI18nNumber } from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiSelectableOption } from '@elastic/eui';
-import { Matrix3 } from '../types';
+import { ResolverNodeStats } from '../../../common/endpoint/types';
+import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
+import { useColors } from './use_colors';
 
 /**
  * i18n-translated titles for submenus and identifiers for display of states:
@@ -43,7 +33,7 @@ export const subMenuAssets = {
     }),
   },
 };
-const idGenerator = htmlIdGenerator();
+
 interface ResolverSubmenuOption {
   optionTitle: string;
   action: () => unknown;
@@ -52,77 +42,6 @@ interface ResolverSubmenuOption {
 
 export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
 
-const OptionListItem = styled.div`
-  width: 175px;
-`;
-
-const OptionList = React.memo(
-  ({
-    subMenuOptions,
-    isLoading,
-  }: {
-    subMenuOptions: ResolverSubmenuOptionList;
-    isLoading: boolean;
-  }) => {
-    const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
-      typeof subMenuOptions !== 'object'
-        ? []
-        : subMenuOptions.map((option: ResolverSubmenuOption) => {
-            const dataTestSubj = 'resolver:map:node-submenu-item';
-            return option.prefix
-              ? {
-                  label: option.optionTitle,
-                  prepend: <span>{option.prefix} </span>,
-                  'data-test-subj': dataTestSubj,
-                }
-              : {
-                  label: option.optionTitle,
-                  prepend: <span />,
-                  'data-test-subj': dataTestSubj,
-                };
-          })
-    );
-
-    const actionsByLabel: Record<string, () => unknown> = useMemo(() => {
-      if (typeof subMenuOptions !== 'object') {
-        return {};
-      }
-      return subMenuOptions.reduce((titleActionRecord, opt) => {
-        const { optionTitle, action } = opt;
-        return { ...titleActionRecord, [optionTitle]: action };
-      }, {});
-    }, [subMenuOptions]);
-
-    const selectableProps = useMemo(() => {
-      return {
-        listProps: { showIcons: true, bordered: true },
-        onChange: (newOptions: EuiSelectableOption[]) => {
-          const selectedOption = newOptions.find((opt) => opt.checked === 'on');
-          if (selectedOption) {
-            const { label } = selectedOption;
-            const actionToTake = actionsByLabel[label];
-            if (typeof actionToTake === 'function') {
-              actionToTake();
-            }
-          }
-          setOptions(newOptions);
-        },
-      };
-    }, [actionsByLabel]);
-
-    return (
-      <EuiSelectable
-        singleSelection={true}
-        options={options}
-        {...selectableProps}
-        isLoading={isLoading}
-      >
-        {(list) => <OptionListItem>{list}</OptionListItem>}
-      </EuiSelectable>
-    );
-  }
-);
-
 /**
  * A Submenu to be displayed in one of two forms:
  *   1) Provided a collection of `optionsWithActions`: it will call `menuAction` then - if and when menuData becomes available - display each item with an optional prefix and call the supplied action for the options when that option is clicked.
@@ -130,136 +49,71 @@ const OptionList = React.memo(
  */
 const NodeSubMenuComponents = React.memo(
   ({
-    count,
-    buttonBorderColor,
-    menuTitle,
-    menuAction,
-    optionsWithActions,
     className,
-    projectionMatrix,
     nodeID,
+    relatedEventStats,
   }: {
-    menuTitle: string;
     className?: string;
-    menuAction?: () => unknown;
-    buttonBorderColor: ButtonColor;
+    // eslint-disable-next-line react/no-unused-prop-types
     buttonFill: string;
-    count?: number;
     /**
      * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.
      */
-    projectionMatrix: Matrix3;
     nodeID: string;
-  } & {
-    optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
+    relatedEventStats: ResolverNodeStats | undefined;
   }) => {
-    // keep a ref to the popover so we can call its reposition method
-    const popoverRef = useRef<EuiPopover>(null);
-
-    const [menuIsOpen, setMenuOpen] = useState(false);
-    const handleMenuOpenClick = useCallback(
-      (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        // stopping propagation/default to prevent other node animations from triggering
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-        setMenuOpen(!menuIsOpen);
-      },
-      [menuIsOpen]
-    );
-    const handleMenuActionClick = useCallback(
-      (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        // stopping propagation/default to prevent other node animations from triggering
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-        if (typeof menuAction === 'function') menuAction();
-        setMenuOpen(true);
-      },
-      [menuAction]
-    );
-
-    const closePopover = useCallback(() => setMenuOpen(false), []);
-    const popoverId = idGenerator('submenu-popover');
-
-    const isMenuLoading = optionsWithActions === 'waitingForRelatedEventData';
-
     // The last projection matrix that was used to position the popover
-    const projectionMatrixAtLastRender = useRef<Matrix3>();
-
-    useLayoutEffect(() => {
-      if (
-        /**
-         * If there is a popover component reference,
-         * and this isn't the first render,
-         * and the projectionMatrix has changed since last render,
-         * then force the popover to reposition itself.
-         */
-        popoverRef.current &&
-        projectionMatrixAtLastRender.current &&
-        projectionMatrixAtLastRender.current !== projectionMatrix
-      ) {
-        popoverRef.current.positionPopoverFixed();
+    const relatedEventCallbacks = useRelatedEventByCategoryNavigation({
+      nodeID,
+      categories: relatedEventStats?.events?.byCategory,
+    });
+    const relatedEventOptions = useMemo(() => {
+      if (relatedEventStats === undefined) {
+        return [];
+      } else {
+        return Object.entries(relatedEventStats.events.byCategory).map(([category, total]) => {
+          return {
+            prefix: <EuiI18nNumber value={total || 0} />,
+            optionTitle: category,
+            action: () => relatedEventCallbacks(category),
+          };
+        });
       }
+    }, [relatedEventStats, relatedEventCallbacks]);
 
-      // no matter what, keep track of the last project matrix that was used to size the popover
-      projectionMatrixAtLastRender.current = projectionMatrix;
-    }, [projectionMatrixAtLastRender, projectionMatrix]);
+    const { pillStroke: pillBorderStroke, resolverBackground: pillFill } = useColors();
+    const listStylesFromTheme = useMemo(() => {
+      return {
+        border: `1.5px solid ${pillBorderStroke}`,
+        backgroundColor: pillFill,
+      };
+    }, [pillBorderStroke, pillFill]);
 
-    if (!optionsWithActions) {
-      /**
-       * When called with a `menuAction`
-       * Render without dropdown and call the supplied action when host button is clicked
-       */
-      return (
-        <div className={className}>
-          <EuiButton
-            onClick={handleMenuActionClick}
-            color={buttonBorderColor}
-            size="s"
-            tabIndex={-1}
-          >
-            {menuTitle}
-          </EuiButton>
-        </div>
-      );
+    if (relatedEventOptions === undefined) {
+      return null;
     }
-    /**
-     * When called with a set of `optionsWithActions`:
-     * Render with a panel of options that appear when the menu host button is clicked
-     */
-
-    const submenuPopoverButton = (
-      <EuiButton
-        onClick={
-          typeof optionsWithActions === 'object' ? handleMenuOpenClick : handleMenuActionClick
-        }
-        color={buttonBorderColor}
-        size="s"
-        iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
-        iconSide="right"
-        tabIndex={-1}
-        data-test-subj="resolver:submenu:button"
-        data-test-resolver-node-id={nodeID}
-      >
-        {count ? <EuiI18nNumber value={count} /> : ''} {menuTitle}
-      </EuiButton>
-    );
 
     return (
-      <div className={className + (menuIsOpen ? ' is-open' : '')}>
-        <EuiPopover
-          id={popoverId}
-          panelPaddingSize="none"
-          button={submenuPopoverButton}
-          isOpen={menuIsOpen}
-          closePopover={closePopover}
-          repositionOnScroll
-          ref={popoverRef}
-        >
-          {menuIsOpen && typeof optionsWithActions === 'object' && (
-            <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
-          )}
-        </EuiPopover>
-      </div>
+      <ul className={`${className} options`} aria-describedby={nodeID}>
+        {relatedEventOptions
+          .sort((opta, optb) => {
+            return opta.optionTitle.localeCompare(optb.optionTitle);
+          })
+          .map((opt) => {
+            return (
+              <li
+                className="item"
+                data-test-subj="resolver:map:node-submenu-item"
+                style={listStylesFromTheme}
+                key={opt.optionTitle}
+              >
+                <button type="button" className="kbn-resetFocusState" onClick={opt.action}>
+                  {opt.prefix} {opt.optionTitle}
+                </button>
+              </li>
+            );
+          })}
+      </ul>
     );
   }
 );
@@ -271,28 +125,45 @@ export const NodeSubMenu = styled(NodeSubMenuComponents)`
   display: flex;
   flex-flow: column;
 
-  & .euiButton {
-    background-color: ${(props) => props.buttonFill};
-    border-color: ${(props) => props.buttonBorderColor};
-    border-style: solid;
-    border-width: 1px;
-
-    &:hover,
-    &:active,
-    &:focus {
-      background-color: ${(props) => props.buttonFill};
-    }
-  }
-
-  & .euiPopover__anchor {
+  &.options {
+    font-size: 0.8rem;
     display: flex;
+    flex-flow: row wrap;
+    background: transparent;
+    position: absolute;
+    top: 4.5em;
+    contain: content;
+    width: 12em;
+    z-index: 2;
   }
 
-  &.is-open .euiButton {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+  &.options .item {
+    margin: 0.25ch 0.35ch 0.35ch 0;
+    padding: 0.35em 0.5em;
+    height: fit-content;
+    width: fit-content;
+    border-radius: 2px;
+    line-height: 0.8;
   }
-  &.is-open .euiSelectableListItem__prepend {
-    color: white;
+
+  &.options .item button {
+    appearance: none;
+    height: fit-content;
+    width: fit-content;
+    line-height: 0.8;
+    outline-style: none;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  &.options .item button:focus {
+    outline-style: none;
+    border-color: transparent;
+    box-shadow: none;
+    text-decoration: underline;
+  }
+
+  &.options .item button:active {
+    transform: scale(0.95);
   }
 `;

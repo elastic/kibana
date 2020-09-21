@@ -5,8 +5,8 @@
  */
 
 import partition from 'lodash/partition';
+import { getFlattenedObject } from '@kbn/std';
 import { UrlDrilldownGlobalScope, UrlDrilldownScope } from './types';
-import { getFlattenedObject } from '../../../../../../src/core/public';
 
 export function buildScope<
   ContextScope extends object = object,
