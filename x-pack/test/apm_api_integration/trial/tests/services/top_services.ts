@@ -45,26 +45,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(response.body.items.length).to.be.greaterThan(0);
         });
 
-        it('some items have severity set', () => {
+        it('some items have a health status set', () => {
           // Under the assumption that the loaded archive has
           // at least one APM ML job, and the time range is longer
-          // than 15m, at least one items should have severity set.
-          // Note that we currently have a bug where healthy services
-          // report as unknown (so without any severity status):
+          // than 15m, at least one items should have a health status
+          // set. Note that we currently have a bug where healthy
+          // services report as unknown (so without any health status):
           // https://github.com/elastic/kibana/issues/77083
 
-          const severityScores = response.body.items.map((item: any) => item.severity);
+          const healthStatuses = response.body.items.map((item: any) => item.healthStatus);
 
-          expect(severityScores.filter(Boolean).length).to.be.greaterThan(0);
+          expect(healthStatuses.filter(Boolean).length).to.be.greaterThan(0);
 
-          expectSnapshot(severityScores).toMatchInline(`
+          expectSnapshot(healthStatuses).toMatchInline(`
             Array [
               undefined,
               undefined,
+              "healthy",
+              "healthy",
               undefined,
               undefined,
-              undefined,
-              "warning",
               undefined,
             ]
           `);

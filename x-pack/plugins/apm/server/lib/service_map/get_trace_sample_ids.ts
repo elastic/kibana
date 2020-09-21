@@ -14,6 +14,7 @@ import {
   TRACE_ID,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../common/elasticsearch_fieldnames';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
@@ -47,9 +48,7 @@ export async function getTraceSampleIds({
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
   }
 
-  if (environment) {
-    query.bool.filter.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
-  }
+  query.bool.filter.push(...getEnvironmentUiFilterES(environment));
 
   const fingerprintBucketSize = serviceName
     ? config['xpack.apm.serviceMapFingerprintBucketSize']

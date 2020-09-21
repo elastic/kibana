@@ -11,14 +11,17 @@ const VECTOR_SOURCE_ID = 'caffa63a-ebfb-466d-8ff6-d797975b88ab';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('mvt geoshape layer', () => {
     before(async () => {
+      await security.testUser.setRoles(['global_maps_all', 'geoshape_data_reader'], false);
       await PageObjects.maps.loadSavedMap('geo_shape_mvt');
     });
 
     after(async () => {
       await inspector.close();
+      await security.testUser.restoreDefaults();
     });
 
     it('should render with mvt-source', async () => {

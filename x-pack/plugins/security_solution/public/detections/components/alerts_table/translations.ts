@@ -48,7 +48,7 @@ export const LOADING_ALERTS = i18n.translate(
 export const TOTAL_COUNT_OF_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.totalCountOfAlertsTitle',
   {
-    defaultMessage: 'alerts match the search criteria',
+    defaultMessage: 'alerts',
   }
 );
 

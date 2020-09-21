@@ -25,6 +25,7 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
 
     return {
       headers: serializedEncryptedHeaders,
+      spaceId: reporting.getSpaceId(request),
       indexPatternSavedObject,
       ...jobParams,
     };
