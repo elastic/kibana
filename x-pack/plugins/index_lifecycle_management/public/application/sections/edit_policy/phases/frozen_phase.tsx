@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { FunctionComponent, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiFieldNumber,
-  EuiDescribedFormGroup,
-  EuiSwitch,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiDescribedFormGroup, EuiSwitch, EuiTextColor } from '@elastic/eui';
 
 import { FrozenPhase as FrozenPhaseInterface, Phases } from '../../../../../common/types';
 import { PhaseValidationErrors } from '../../../services/policies/policy_validation';
@@ -28,13 +20,22 @@ import {
   OptionalLabel,
   ErrableFormRow,
   MinAgeInput,
-  NodeAllocation,
   SetPriorityInput,
+  DescribedFormField,
 } from '../components';
+import { DataTierAllocationField } from './shared';
 
-const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.freezeIndexLabel', {
-  defaultMessage: 'Freeze index',
-});
+const i18nTexts = {
+  freezeLabel: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.freezeIndexLabel', {
+    defaultMessage: 'Freeze index',
+  }),
+  dataTierAllocation: {
+    description: i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.dataTier.description', {
+      defaultMessage:
+        'Move data to data nodes optimized for infrequent, read-only access. Store frozen data on the least-expensive hardware.',
+    }),
+  },
+};
 
 const frozenProperty: keyof Phases = 'frozen';
 const phaseProperty = (propertyName: keyof FrozenPhaseInterface) => propertyName;
@@ -46,18 +47,17 @@ interface Props {
   errors?: PhaseValidationErrors<FrozenPhaseInterface>;
   hotPhaseRolloverEnabled: boolean;
 }
-export class FrozenPhase extends PureComponent<Props> {
-  render() {
-    const {
-      setPhaseData,
-      phaseData,
-      errors,
-      isShowingErrors,
-      hotPhaseRolloverEnabled,
-    } = this.props;
-
-    return (
-      <div id="frozenPhaseContent" aria-live="polite" role="region">
+export const FrozenPhase: FunctionComponent<Props> = ({
+  setPhaseData,
+  phaseData,
+  errors,
+  isShowingErrors,
+  hotPhaseRolloverEnabled,
+}) => {
+  return (
+    <div id="frozenPhaseContent" aria-live="polite" role="region">
+      <>
+        {/* Section title group; containing min age */}
         <EuiDescribedFormGroup
           title={
             <div>
@@ -101,68 +101,82 @@ export class FrozenPhase extends PureComponent<Props> {
           }
           fullWidth
         >
-          <Fragment>
-            {phaseData.phaseEnabled ? (
-              <Fragment>
-                <MinAgeInput<FrozenPhaseInterface>
-                  errors={errors}
-                  phaseData={phaseData}
-                  phase={frozenProperty}
-                  isShowingErrors={isShowingErrors}
-                  setPhaseData={setPhaseData}
-                  rolloverEnabled={hotPhaseRolloverEnabled}
-                />
-                <EuiSpacer />
-
-                <NodeAllocation<FrozenPhaseInterface>
-                  phase={frozenProperty}
-                  setPhaseData={setPhaseData}
-                  errors={errors}
-                  phaseData={phaseData}
-                  isShowingErrors={isShowingErrors}
-                />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
-                    <ErrableFormRow
-                      id={`${frozenProperty}-${phaseProperty('freezeEnabled')}`}
-                      label={
-                        <Fragment>
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.frozenPhase.numberOfReplicasLabel"
-                            defaultMessage="Number of replicas"
-                          />
-                          <OptionalLabel />
-                        </Fragment>
-                      }
-                      isShowingErrors={isShowingErrors}
-                      errors={errors?.freezeEnabled}
-                      helpText={i18n.translate(
-                        'xpack.indexLifecycleMgmt.frozenPhase.replicaCountHelpText',
-                        {
-                          defaultMessage: 'By default, the number of replicas remains the same.',
-                        }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        id={`${frozenProperty}-${phaseProperty('selectedReplicaCount')}`}
-                        value={phaseData.selectedReplicaCount}
-                        onChange={(e) => {
-                          setPhaseData(phaseProperty('selectedReplicaCount'), e.target.value);
-                        }}
-                        min={0}
-                      />
-                    </ErrableFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </Fragment>
-            ) : (
-              <div />
-            )}
-          </Fragment>
+          {phaseData.phaseEnabled ? (
+            <MinAgeInput<FrozenPhaseInterface>
+              errors={errors}
+              phaseData={phaseData}
+              phase={frozenProperty}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
+              rolloverEnabled={hotPhaseRolloverEnabled}
+            />
+          ) : null}
         </EuiDescribedFormGroup>
         {phaseData.phaseEnabled ? (
           <Fragment>
+            {/* Data tier allocation section */}
+            <DataTierAllocationField
+              description={i18nTexts.dataTierAllocation.description}
+              phase={frozenProperty}
+              setPhaseData={setPhaseData}
+              isShowingErrors={isShowingErrors}
+              phaseData={phaseData}
+            />
+
+            {/* Replicas section */}
+            <DescribedFormField
+              title={
+                <h3>
+                  {i18n.translate('xpack.indexLifecycleMgmt.frozenPhase.replicasTitle', {
+                    defaultMessage: 'Replicas',
+                  })}
+                </h3>
+              }
+              description={i18n.translate(
+                'xpack.indexLifecycleMgmt.frozenPhase.numberOfReplicasDescription',
+                {
+                  defaultMessage:
+                    'Set the number of replicas. Remains the same as the previous phase by default.',
+                }
+              )}
+              switchProps={{
+                label: i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.numberOfReplicas.switchLabel',
+                  { defaultMessage: 'Set replicas' }
+                ),
+                initialValue: Boolean(phaseData.selectedReplicaCount),
+                onChange: (v) => {
+                  if (!v) {
+                    setPhaseData('selectedReplicaCount', '');
+                  }
+                },
+              }}
+              fullWidth
+            >
+              <ErrableFormRow
+                id={`${frozenProperty}-${phaseProperty('selectedReplicaCount')}`}
+                label={
+                  <Fragment>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.frozenPhase.numberOfReplicasLabel"
+                      defaultMessage="Number of replicas"
+                    />
+                    <OptionalLabel />
+                  </Fragment>
+                }
+                isShowingErrors={isShowingErrors}
+                errors={errors?.selectedReplicaCount}
+              >
+                <EuiFieldNumber
+                  id={`${frozenProperty}-${phaseProperty('selectedReplicaCount')}`}
+                  value={phaseData.selectedReplicaCount}
+                  onChange={(e) => {
+                    setPhaseData(phaseProperty('selectedReplicaCount'), e.target.value);
+                  }}
+                  min={0}
+                />
+              </ErrableFormRow>
+            </DescribedFormField>
             <EuiDescribedFormGroup
               title={
                 <h3>
@@ -191,8 +205,8 @@ export class FrozenPhase extends PureComponent<Props> {
                 onChange={(e) => {
                   setPhaseData(phaseProperty('freezeEnabled'), e.target.checked);
                 }}
-                label={freezeLabel}
-                aria-label={freezeLabel}
+                label={i18nTexts.freezeLabel}
+                aria-label={i18nTexts.freezeLabel}
               />
             </EuiDescribedFormGroup>
             <SetPriorityInput<FrozenPhaseInterface>
@@ -204,7 +218,7 @@ export class FrozenPhase extends PureComponent<Props> {
             />
           </Fragment>
         ) : null}
-      </div>
-    );
-  }
-}
+      </>
+    </div>
+  );
+};

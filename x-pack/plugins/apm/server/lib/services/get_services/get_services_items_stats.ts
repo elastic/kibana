@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getServiceHealthStatus } from '../../../../common/service_health_status';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { getSeverity } from '../../../../common/anomaly_detection';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
@@ -413,10 +414,11 @@ export const getHealthStatuses = async (
     const stats = anomalies.serviceAnomalies[serviceName];
 
     const severity = getSeverity(stats.anomalyScore);
+    const healthStatus = getServiceHealthStatus({ severity });
 
     return {
       serviceName,
-      severity,
+      healthStatus,
     };
   });
 };

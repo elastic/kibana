@@ -164,6 +164,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "service.name": "opbeans-rum",
                 "serviceAnomalyStats": Object {
                   "anomalyScore": 0,
+                  "healthStatus": "healthy",
                   "jobId": "apm-environment_not_defined-7ed6-high_mean_transaction_duration",
                   "transactionType": "page-load",
                 },
@@ -176,7 +177,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "service.environment": "production",
                 "service.name": "opbeans-python",
                 "serviceAnomalyStats": Object {
+                  "actualValue": 66218.08333333333,
                   "anomalyScore": 0,
+                  "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",
                 },
@@ -189,7 +192,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                 "service.environment": "production",
                 "service.name": "opbeans-java",
                 "serviceAnomalyStats": Object {
+                  "actualValue": 14901.319999999996,
                   "anomalyScore": 0,
+                  "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",
                 },

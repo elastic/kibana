@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
+import { getServiceHealthStatus } from '../../../common/service_health_status';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseReturnType } from '../../../typings/common';
 import {
@@ -12,6 +13,7 @@ import {
 } from '../../../common/transaction_types';
 import {
   ServiceAnomalyStats,
+  getSeverity,
   ML_ERRORS,
 } from '../../../common/anomaly_detection';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
@@ -122,12 +124,19 @@ interface ServiceAnomaliesAggResponse {
             hits: Array<{
               sort: [number];
               _source: {
-                actual: [number];
                 job_id: string;
                 by_field_value: string;
-                record_score: number | null;
-                result_type: 'model_plot' | 'record';
-              };
+              } & (
+                | {
+                    record_score: number | null;
+                    result_type: 'record';
+                    actual: number[];
+                  }
+                | {
+                    result_type: 'model_plot';
+                    actual?: number;
+                  }
+              );
             }>;
           };
         };
@@ -138,25 +147,36 @@ interface ServiceAnomaliesAggResponse {
 
 function transformResponseToServiceAnomalies(
   response: ServiceAnomaliesAggResponse
-): Record<string, ServiceAnomalyStats> {
+) {
   const serviceAnomaliesMap = (
     response.aggregations?.services.buckets ?? []
-  ).reduce(
+  ).reduce<Record<string, ServiceAnomalyStats>>(
     (statsByServiceName, { key: serviceName, top_score: topScoreAgg }) => {
       const mlResult = topScoreAgg.hits.hits[0]._source;
+
+      const anomalyScore =
+        (mlResult.result_type === 'record' && mlResult.record_score) || 0;
+
+      const severity = getSeverity(anomalyScore);
+      const healthStatus = getServiceHealthStatus({ severity });
 
       return {
         ...statsByServiceName,
         [serviceName]: {
           transactionType: mlResult.by_field_value,
           jobId: mlResult.job_id,
-          actualValue: mlResult.actual,
-          anomalyScore: mlResult.record_score || 0,
+          actualValue:
+            mlResult.result_type === 'record'
+              ? mlResult.actual[0]
+              : mlResult.actual,
+          anomalyScore,
+          healthStatus,
         },
       };
     },
     {}
   );
+
   return serviceAnomaliesMap;
 }
 
