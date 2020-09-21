@@ -31,8 +31,7 @@
       ],
       "influencers": [
         "host.name"
-      ],
-      "summary_count_field_name": "doc_count"
+      ]
     },
     "data_description": {
       "time_field": "@timestamp"

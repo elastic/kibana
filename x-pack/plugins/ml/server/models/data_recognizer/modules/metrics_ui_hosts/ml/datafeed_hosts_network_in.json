@@ -15,17 +15,10 @@
     },
     "chunking_config": {
         "mode": "manual",
-<<<<<<< HEAD
-        "time_span": "1000s"
-    },
-    "aggregations": {
-        "host.name": {"terms": {"field": "host.name"},
-=======
         "time_span": "900s"
     },
     "aggregations": {
         "host.name": {"terms": {"field": "host.name", "size": 100},
->>>>>>> 03e3c852288644d961aee7b4f976275b95c83885
             "aggregations": {
                 "buckets": {
                     "date_histogram": {"field": "@timestamp","fixed_interval": "5m"},
