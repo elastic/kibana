@@ -88,4 +88,9 @@ describe('ManageData', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
+  test('render empty without any features', () => {
+    const component = shallowWithIntl(<ManageData addBasePath={addBasePathMock} features={[]} />);
+    expect(component).toMatchSnapshot();
+  });
 });

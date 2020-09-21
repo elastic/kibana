@@ -16,6 +16,9 @@ import {
   positiveNumbersAboveZeroErrorMessage,
 } from './policy_validation';
 
+import { determineDataTierAllocationType } from '../../lib';
+import { serializePhaseWithAllocation } from './shared';
+
 const warmPhaseInitialization: WarmPhase = {
   phaseEnabled: false,
   warmPhaseOnRollover: false,
@@ -28,6 +31,7 @@ const warmPhaseInitialization: WarmPhase = {
   forceMergeEnabled: false,
   selectedForceMergeSegments: '',
   phaseIndexPriority: '',
+  dataTierAllocationType: 'default',
 };
 
 export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhase => {
@@ -38,6 +42,12 @@ export const warmPhaseFromES = (phaseSerialized?: SerializedWarmPhase): WarmPhas
   }
 
   phase.phaseEnabled = true;
+
+  if (phaseSerialized.actions.allocate) {
+    phase.dataTierAllocationType = determineDataTierAllocationType(
+      phaseSerialized.actions.allocate
+    );
+  }
 
   if (phaseSerialized.min_age) {
     if (phaseSerialized.min_age === '0ms') {
@@ -99,19 +109,7 @@ export const warmPhaseToES = (
     delete esPhase.min_age;
   }
 
-  esPhase.actions = esPhase.actions ? { ...esPhase.actions } : {};
-
-  if (phase.selectedNodeAttrs) {
-    const [name, value] = phase.selectedNodeAttrs.split(':');
-    esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);
-    esPhase.actions.allocate.require = {
-      [name]: value,
-    };
-  } else {
-    if (esPhase.actions.allocate) {
-      delete esPhase.actions.allocate.require;
-    }
-  }
+  esPhase.actions = serializePhaseWithAllocation(phase, esPhase.actions);
 
   if (isNumber(phase.selectedReplicaCount)) {
     esPhase.actions.allocate = esPhase.actions.allocate || ({} as AllocateAction);

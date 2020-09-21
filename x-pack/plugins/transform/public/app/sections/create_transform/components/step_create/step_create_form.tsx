@@ -9,13 +9,8 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
-  // Module '"@elastic/eui"' has no exported member 'EuiCard'.
-  // @ts-ignore
   EuiCard,
   EuiCopy,
-  // Module '"@elastic/eui"' has no exported member 'EuiDescribedFormGroup'.
-  // @ts-ignore
-  EuiDescribedFormGroup,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +25,10 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
+import type {
+  PutTransformsRequestSchema,
+  PutTransformsResponseSchema,
+} from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
   isPutTransformsResponseSchema,
@@ -61,16 +59,16 @@ export function getDefaultStepCreateState(): StepDetailsExposedState {
   };
 }
 
-interface Props {
+export interface StepCreateFormProps {
   createIndexPattern: boolean;
   transformId: string;
-  transformConfig: any;
+  transformConfig: PutTransformsRequestSchema;
   overrides: StepDetailsExposedState;
   timeFieldName?: string | undefined;
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: FC<Props> = React.memo(
+export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
   ({ createIndexPattern, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
@@ -256,8 +254,11 @@ export const StepCreateForm: FC<Props> = React.memo(
           ) {
             const percent =
               getTransformProgress({
-                id: transformConfig.id,
-                config: transformConfig,
+                id: transformId,
+                config: {
+                  ...transformConfig,
+                  id: transformId,
+                },
                 stats: stats.transforms[0],
               }) || 0;
             setProgressPercentComplete(percent);

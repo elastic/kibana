@@ -26,6 +26,11 @@ import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
 import { ImportSettings } from '../import_settings';
+import {
+  addCombinedFieldsToPipeline,
+  addCombinedFieldsToMappings,
+  getDefaultCombinedFields,
+} from '../combined_fields';
 import { ExperimentalBadge } from '../experimental_badge';
 import { getIndexPatternNames, loadIndexPatterns } from '../../../../util/index_utils';
 import { ml } from '../../../../services/ml_api_service';
@@ -68,6 +73,7 @@ const DEFAULT_STATE = {
   timeFieldName: undefined,
   isFilebeatFlyoutVisible: false,
   checkingValidIndex: false,
+  combinedFields: [],
 };
 
 export class ImportView extends Component {
@@ -386,6 +392,10 @@ export class ImportView extends Component {
     });
   };
 
+  onCombinedFieldsChange = (combinedFields) => {
+    this.setState({ combinedFields });
+  };
+
   setImportProgress = (progress) => {
     this.setState({
       uploadProgress: progress,
@@ -444,6 +454,7 @@ export class ImportView extends Component {
       timeFieldName,
       isFilebeatFlyoutVisible,
       checkingValidIndex,
+      combinedFields,
     } = this.state;
 
     const createPipeline = pipelineString !== '';
@@ -513,6 +524,9 @@ export class ImportView extends Component {
               onPipelineStringChange={this.onPipelineStringChange}
               indexNameError={indexNameError}
               indexPatternNameError={indexPatternNameError}
+              combinedFields={combinedFields}
+              onCombinedFieldsChange={this.onCombinedFieldsChange}
+              results={this.props.results}
             />
 
             <EuiSpacer size="m" />
@@ -626,12 +640,22 @@ function getDefaultState(state, results) {
       ? JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2)
       : state.indexSettingsString;
 
+  const combinedFields = state.combinedFields.length
+    ? state.combinedFields
+    : getDefaultCombinedFields(results);
+
   const mappingsString =
-    state.mappingsString === '' ? JSON.stringify(results.mappings, null, 2) : state.mappingsString;
+    state.mappingsString === ''
+      ? JSON.stringify(addCombinedFieldsToMappings(results.mappings, combinedFields), null, 2)
+      : state.mappingsString;
 
   const pipelineString =
     state.pipelineString === '' && results.ingest_pipeline !== undefined
-      ? JSON.stringify(results.ingest_pipeline, null, 2)
+      ? JSON.stringify(
+          addCombinedFieldsToPipeline(results.ingest_pipeline, combinedFields),
+          null,
+          2
+        )
       : state.pipelineString;
 
   const timeFieldName = results.timestamp_field;
@@ -642,6 +666,7 @@ function getDefaultState(state, results) {
     mappingsString,
     pipelineString,
     timeFieldName,
+    combinedFields,
   };
 }
 

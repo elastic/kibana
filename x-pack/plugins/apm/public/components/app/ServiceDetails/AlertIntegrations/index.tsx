@@ -24,9 +24,13 @@ const transactionDurationLabel = i18n.translate(
   'xpack.apm.serviceDetails.alertsMenu.transactionDuration',
   { defaultMessage: 'Transaction duration' }
 );
-const errorRateLabel = i18n.translate(
-  'xpack.apm.serviceDetails.alertsMenu.errorRate',
-  { defaultMessage: 'Error rate' }
+const transactionErrorRateLabel = i18n.translate(
+  'xpack.apm.serviceDetails.alertsMenu.transactionErrorRate',
+  { defaultMessage: 'Transaction error rate' }
+);
+const errorCountLabel = i18n.translate(
+  'xpack.apm.serviceDetails.alertsMenu.errorCount',
+  { defaultMessage: 'Error count' }
 );
 const createThresholdAlertLabel = i18n.translate(
   'xpack.apm.serviceDetails.alertsMenu.createThresholdAlert',
@@ -38,8 +42,10 @@ const createAnomalyAlertAlertLabel = i18n.translate(
 );
 
 const CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID =
-  'create_transaction_duration';
-const CREATE_ERROR_RATE_ALERT_PANEL_ID = 'create_error_rate';
+  'create_transaction_duration_panel';
+const CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID =
+  'create_transaction_error_rate_panel';
+const CREATE_ERROR_COUNT_ALERT_PANEL_ID = 'create_error_count_panel';
 
 interface Props {
   canReadAlerts: boolean;
@@ -77,7 +83,14 @@ export function AlertIntegrations(props: Props) {
                 name: transactionDurationLabel,
                 panel: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
               },
-              { name: errorRateLabel, panel: CREATE_ERROR_RATE_ALERT_PANEL_ID },
+              {
+                name: transactionErrorRateLabel,
+                panel: CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID,
+              },
+              {
+                name: errorCountLabel,
+                panel: CREATE_ERROR_COUNT_ALERT_PANEL_ID,
+              },
             ]
           : []),
         ...(canReadAlerts
@@ -96,10 +109,13 @@ export function AlertIntegrations(props: Props) {
           : []),
       ],
     },
+
+    // transaction duration panel
     {
       id: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
       title: transactionDurationLabel,
       items: [
+        // threshold alerts
         {
           name: createThresholdAlertLabel,
           onClick: () => {
@@ -107,6 +123,8 @@ export function AlertIntegrations(props: Props) {
             setPopoverOpen(false);
           },
         },
+
+        // anomaly alerts
         ...(canReadAnomalies
           ? [
               {
@@ -120,14 +138,32 @@ export function AlertIntegrations(props: Props) {
           : []),
       ],
     },
+
+    // transaction error rate panel
     {
-      id: CREATE_ERROR_RATE_ALERT_PANEL_ID,
-      title: errorRateLabel,
+      id: CREATE_TRANSACTION_ERROR_RATE_ALERT_PANEL_ID,
+      title: transactionErrorRateLabel,
+      items: [
+        // threshold alerts
+        {
+          name: createThresholdAlertLabel,
+          onClick: () => {
+            setAlertType(AlertType.TransactionErrorRate);
+            setPopoverOpen(false);
+          },
+        },
+      ],
+    },
+
+    // error alerts panel
+    {
+      id: CREATE_ERROR_COUNT_ALERT_PANEL_ID,
+      title: errorCountLabel,
       items: [
         {
           name: createThresholdAlertLabel,
           onClick: () => {
-            setAlertType(AlertType.ErrorRate);
+            setAlertType(AlertType.ErrorCount);
             setPopoverOpen(false);
           },
         },

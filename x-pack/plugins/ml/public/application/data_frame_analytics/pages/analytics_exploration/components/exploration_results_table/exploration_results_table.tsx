@@ -29,7 +29,6 @@ import {
   SEARCH_SIZE,
   defaultSearchQuery,
   getAnalysisType,
-  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
@@ -39,6 +38,7 @@ import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { useExplorationResults } from './use_exploration_results';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -195,7 +195,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
                 {...classificationData}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}
-                analysisType={(analysisType as unknown) as ANALYSIS_CONFIG_TYPE}
+                analysisType={(analysisType as unknown) as DataFrameAnalysisConfigType}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
