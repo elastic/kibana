@@ -39,6 +39,8 @@ module.exports = {
         'form_lib/examples/validation',
         'form_lib/examples/react_to_changes',
         'form_lib/examples/fields_composition',
+        'form_lib/examples/dynamic_fields',
+        'form_lib/examples/serializers_deserializers',
       ],
     },
     {
