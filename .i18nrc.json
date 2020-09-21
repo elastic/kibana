@@ -57,7 +57,8 @@
     "visTypeXy": "src/plugins/vis_type_xy",
     "visualizations": "src/plugins/visualizations",
     "visualize": "src/plugins/visualize",
-    "apmOss": "src/plugins/apm_oss"
+    "apmOss": "src/plugins/apm_oss",
+    "usageCollection": "src/plugins/usage_collection"
   },
   "exclude": [
     "src/legacy/ui/ui_render/ui_render_mixin.js"

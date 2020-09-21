@@ -29,6 +29,8 @@ export interface FindFileStructureResponse {
       count: number;
       cardinality: number;
       top_hits: Array<{ count: number; value: any }>;
+      max_value?: number;
+      min_value?: number;
     };
   };
   sample_start: string;
@@ -42,7 +44,7 @@ export interface FindFileStructureResponse {
   delimiter: string;
   need_client_timezone: boolean;
   num_lines_analyzed: number;
-  column_names: string[];
+  column_names?: string[];
   explanation?: string[];
   grok_pattern?: string;
   multiline_start_pattern?: string;

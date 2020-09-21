@@ -391,6 +391,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'threat_match': {
+      return [
+        {
+          title: label,
+          description: i18n.THREAT_MATCH_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }

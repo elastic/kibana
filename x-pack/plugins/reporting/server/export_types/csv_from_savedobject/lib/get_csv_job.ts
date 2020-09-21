@@ -12,6 +12,8 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/server';
+import { TimeRangeParams } from '../../../types';
+import { GenerateCsvParams } from '../../csv/generate_csv';
 import {
   DocValueFields,
   IndexPatternField,
@@ -23,7 +25,6 @@ import {
 } from '../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
-import { GenerateCsvParams } from '../../csv/generate_csv';
 
 export const getEsQueryConfig = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
@@ -49,7 +50,7 @@ export const getGenerateCsvParams = async (
   savedObjectsClient: SavedObjectsClientContract,
   uiConfig: IUiSettingsClient
 ): Promise<GenerateCsvParams> => {
-  let timerange;
+  let timerange: TimeRangeParams;
   if (jobParams.post?.timerange) {
     timerange = jobParams.post?.timerange;
   } else {
@@ -136,7 +137,7 @@ export const getGenerateCsvParams = async (
   };
 
   return {
-    jobParams: { browserTimezone: timerange.timezone },
+    browserTimezone: timerange.timezone,
     indexPatternSavedObject,
     searchRequest,
     fields: includes,
