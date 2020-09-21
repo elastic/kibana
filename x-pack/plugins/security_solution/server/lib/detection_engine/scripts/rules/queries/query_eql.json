@@ -7,9 +7,9 @@
   ],
   "rule_id": "rule-id-eql",
   "enabled": false,
-  "index": ["logs-endpoint.events.process-default"],
+  "index": [".ds-logs-endpoint.events.process-default-000001"],
   "interval": "30s",
-  "query": "process where process.name = \"mimikatz.exe\"",
+  "query": "sequence [process where process.name = \"mimikatz.exe\"] [process where process.name = \"explorer.exe\"]",
   "output_index": ".siem-signals-default",
   "meta": {
     "anything_you_want_ui_related_or_otherwise": {
@@ -18,14 +18,13 @@
       }
     }
   },
-  "language": "kuery",
   "risk_score": 1,
   "max_signals": 100,
   "tags": ["tag 1", "tag 2", "any tag you want"],
   "to": "now",
-  "from": "now-30m",
+  "from": "now-300m",
   "severity": "high",
-  "type": "eql_query",
+  "type": "eql",
   "threat": [
     {
       "framework": "MITRE ATT&CK",

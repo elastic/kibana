@@ -95,7 +95,9 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          !isMlRule(type) && type !== 'eql_query' && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
+          !isMlRule(type) && type !== 'eql' && languageOrUndefined == null
+            ? 'kuery'
+            : languageOrUndefined;
 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];

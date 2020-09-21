@@ -260,7 +260,7 @@ export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.
 };
 
 export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'eql_query') {
+  if (typeAndTimelineOnly.type === 'eql') {
     return [
       t.exact(
         t.partial({ event_category_override: dependentRulesSchema.props.event_category_override })

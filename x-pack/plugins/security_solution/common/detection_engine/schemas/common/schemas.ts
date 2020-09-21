@@ -305,7 +305,6 @@ export const type = t.keyof({
   query: null,
   saved_query: null,
   threshold: null,
-  eql_query: null,
   threat_match: null,
 });
 export type Type = t.TypeOf<typeof type>;
