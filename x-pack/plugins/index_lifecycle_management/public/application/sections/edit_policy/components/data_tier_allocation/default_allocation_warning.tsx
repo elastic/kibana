@@ -37,19 +37,6 @@ const i18nTexts = {
       }
     ),
   },
-  frozen: {
-    title: i18n.translate(
-      'xpack.indexLifecycleMgmt.frozenPhase.dataTier.defaultAllocationNotAvailableTitle',
-      { defaultMessage: 'No nodes assigned to the frozen tier' }
-    ),
-    body: i18n.translate(
-      'xpack.indexLifecycleMgmt.frozenPhase.dataTier.defaultAllocationNotAvailableBody',
-      {
-        defaultMessage:
-          'Assign at least one node to the frozen tier to use role-based allocation. The policy will fail to complete allocation if there are no frozen nodes.',
-      }
-    ),
-  },
 };
 
 interface Props {
