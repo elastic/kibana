@@ -6,7 +6,8 @@
 
 import { pick, cloneDeep } from 'lodash';
 
-import { Logger } from 'src/core/server';
+import { LegacyAPICaller } from 'kibana/server';
+import { Logger, CoreStart } from '../../../../../../src/core/server';
 import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
@@ -39,6 +40,8 @@ export type SearchTypes =
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;
+  cluster_name?: string;
+  cluster_uuid?: string;
   file?: {
     [key: string]: SearchTypes;
     Ext?: {
@@ -47,10 +50,39 @@ export interface TelemetryEvent {
   };
 }
 
+// Copied from telemetry_collection/get_cluster_info.ts
+export interface ESClusterInfo {
+  cluster_uuid: string;
+  cluster_name: string;
+  version: {
+    number: string;
+    build_flavor: string;
+    build_type: string;
+    build_hash: string;
+    build_date: string;
+    build_snapshot?: boolean;
+    lucene_version: string;
+    minimum_wire_compatibility_version: string;
+    minimum_index_compatibility_version: string;
+  };
+}
+
+/**
+ * Get the cluster info from the connected cluster.
+ *
+ * This is the equivalent to GET /
+ *
+ * @param {function} callCluster The callWithInternalUser handler (exposed for testing)
+ */
+export function getClusterInfo(callCluster: LegacyAPICaller) {
+  return callCluster<ESClusterInfo>('info');
+}
+
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 5 * 1000; // TODO: change to 60s before merging
   private readonly logger: Logger;
+  private core?: CoreStart;
   private maxQueueSize = 100;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
@@ -67,8 +99,9 @@ export class TelemetryEventsSender {
     this.telemetrySetup = telemetrySetup;
   }
 
-  public start(telemetryStart?: TelemetryPluginStart) {
+  public start(core?: CoreStart, telemetryStart?: TelemetryPluginStart) {
     this.telemetryStart = telemetryStart;
+    this.core = core;
 
     this.logger.debug(`Starting task`);
     setTimeout(() => {
@@ -146,10 +179,23 @@ export class TelemetryEventsSender {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
 
+    const clusterInfo = await this.fetchClusterInfo();
+    this.logger.debug(
+      `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
+    );
+
     try {
       this.isSending = true;
       const toSend: object[] = cloneDeep(this.queue);
       this.queue = [];
+
+      if (clusterInfo) {
+        toSend.forEach((event) => {
+          event.cluster_uuid = clusterInfo.cluster_uuid;
+          event.cluster_name = clusterInfo.cluster_name;
+        });
+      }
+
       this.sendEvents(toSend);
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
@@ -160,6 +206,14 @@ export class TelemetryEventsSender {
   private async sendEvents(events: object[]) {
     // TODO
     this.logger.debug(`Events sent!`);
-    // this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
+    this.logger.debug(`Sending events: ${JSON.stringify(events, null, 2)}`);
+  }
+
+  private async fetchClusterInfo(): Promise<ESClusterInfo | undefined> {
+    if (!this.core) {
+      return undefined;
+    }
+    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
+    return getClusterInfo(callCluster);
   }
 }

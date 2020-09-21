@@ -342,7 +342,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.logger.debug('User artifacts task not available.');
     }
 
-    this.telemetryEventsSender.start(plugins.telemetry);
+    this.telemetryEventsSender.start(core, plugins.telemetry);
 
     return {};
   }
