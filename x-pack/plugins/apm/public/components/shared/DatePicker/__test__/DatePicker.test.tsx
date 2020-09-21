@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSuperDatePicker } from '@elastic/eui';
+import { wait } from '@testing-library/react';
+import { mount } from 'enzyme';
+import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
-import { LocationProvider } from '../../../../context/LocationContext';
+import { Router } from 'react-router-dom';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import {
   UrlParamsContext,
   useUiFilters,
 } from '../../../../context/UrlParamsContext';
-import { DatePicker } from '../index';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { history } from '../../../../utils/history';
-import { mount } from 'enzyme';
-import { EuiSuperDatePicker } from '@elastic/eui';
-import { MemoryRouter } from 'react-router-dom';
-import { wait } from '@testing-library/react';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { DatePicker } from '../index';
 
+const history = createMemoryHistory();
 const mockHistoryPush = jest.spyOn(history, 'push');
 const mockHistoryReplace = jest.spyOn(history, 'replace');
 const mockRefreshTimeRange = jest.fn();
@@ -44,13 +44,11 @@ function MockUrlParamsProvider({
 function mountDatePicker(params?: IUrlParams) {
   return mount(
     <MockApmPluginContextWrapper>
-      <MemoryRouter initialEntries={[history.location]}>
-        <LocationProvider>
-          <MockUrlParamsProvider params={params}>
-            <DatePicker />
-          </MockUrlParamsProvider>
-        </LocationProvider>
-      </MemoryRouter>
+      <Router history={history}>
+        <MockUrlParamsProvider params={params}>
+          <DatePicker />
+        </MockUrlParamsProvider>
+      </Router>
     </MockApmPluginContextWrapper>
   );
 }

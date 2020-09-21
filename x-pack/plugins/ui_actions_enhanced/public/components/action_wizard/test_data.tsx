@@ -8,9 +8,9 @@ import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionWizard } from './action_wizard';
-import { ActionFactory, ActionFactoryDefinition } from '../../dynamic_actions';
+import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
-import { licenseMock } from '../../../../licensing/common/licensing.mock';
+import { licensingMock } from '../../../../licensing/public/mocks';
 import {
   APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
@@ -19,18 +19,16 @@ import {
   VALUE_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
 
-type ActionBaseConfig = object;
-
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
   { id: 'dashboard2', title: 'Dashboard 2' },
 ];
 
-interface DashboardDrilldownConfig {
+type DashboardDrilldownConfig = {
   dashboardId?: string;
   useCurrentFilters: boolean;
   useCurrentDateRange: boolean;
-}
+};
 
 function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDrilldownConfig>) {
   const config = props.config ?? {
@@ -116,14 +114,16 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   },
 };
 
-export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory, () =>
-  licenseMock.createLicense()
-);
+export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory, {
+  getLicense: () => licensingMock.createLicense(),
+  getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+});
 
-interface UrlDrilldownConfig {
+type UrlDrilldownConfig = {
   url: string;
   openInNewTab: boolean;
-}
+};
+
 function UrlDrilldownCollectConfig(props: CollectConfigProps<UrlDrilldownConfig>) {
   const config = props.config ?? {
     url: '',
@@ -176,9 +176,14 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
   },
 };
 
-export const urlFactory = new ActionFactory(urlDrilldownActionFactory, () =>
-  licenseMock.createLicense()
-);
+export const urlFactory = new ActionFactory(urlDrilldownActionFactory, {
+  getLicense: () => licensingMock.createLicense(),
+  getFeatureUsageStart: () => licensingMock.createStart().featureUsage,
+});
+
+export const mockActionFactories: ActionFactory[] = ([dashboardFactory, urlFactory] as Array<
+  ActionFactory<any>
+>) as ActionFactory[];
 
 export const mockSupportedTriggers: TriggerId[] = [
   VALUE_CLICK_TRIGGER,
@@ -208,7 +213,7 @@ export const mockGetTriggerInfo = (triggerId: TriggerId): Trigger => {
 export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
   const [state, setState] = useState<{
     currentActionFactory?: ActionFactory;
-    config?: ActionBaseConfig;
+    config?: BaseActionConfig;
     selectedTriggers?: TriggerId[];
   }>({});
 

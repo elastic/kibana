@@ -6,22 +6,45 @@
 
 import { LegacyAPICaller } from 'src/core/server';
 
+import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
+
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-function convertStatsIntoList(stats: any, disallowedNodeAttributes: string[]): any {
-  return Object.entries(stats.nodes).reduce((accum: any, [nodeId, nodeStats]: [any, any]) => {
-    const attributes = nodeStats.attributes || {};
-    for (const [key, value] of Object.entries(attributes)) {
-      const isNodeAttributeAllowed = !disallowedNodeAttributes.includes(key);
-      if (isNodeAttributeAllowed) {
-        const attributeString = `${key}:${value}`;
-        accum[attributeString] = accum[attributeString] || [];
-        accum[attributeString].push(nodeId);
+interface Stats {
+  nodes: {
+    [nodeId: string]: {
+      attributes: Record<string, string>;
+      roles: string[];
+    };
+  };
+}
+
+function convertStatsIntoList(
+  stats: Stats,
+  disallowedNodeAttributes: string[]
+): ListNodesRouteResponse {
+  return Object.entries(stats.nodes).reduce(
+    (accum, [nodeId, nodeStats]) => {
+      const attributes = nodeStats.attributes || {};
+      for (const [key, value] of Object.entries(attributes)) {
+        const isNodeAttributeAllowed = !disallowedNodeAttributes.includes(key);
+        if (isNodeAttributeAllowed) {
+          const attributeString = `${key}:${value}`;
+          accum.nodesByAttributes[attributeString] = accum.nodesByAttributes[attributeString] ?? [];
+          accum.nodesByAttributes[attributeString].push(nodeId);
+        }
       }
-    }
-    return accum;
-  }, {});
+
+      const dataRoles = nodeStats.roles.filter((r) => r.startsWith('data')) as NodeDataRole[];
+      for (const role of dataRoles) {
+        accum.nodesByRoles[role as NodeDataRole] = accum.nodesByRoles[role] ?? [];
+        accum.nodesByRoles[role as NodeDataRole]!.push(nodeId);
+      }
+      return accum;
+    },
+    { nodesByAttributes: {}, nodesByRoles: {} } as ListNodesRouteResponse
+  );
 }
 
 async function fetchNodeStats(callAsCurrentUser: LegacyAPICaller): Promise<any> {
@@ -54,8 +77,8 @@ export function registerListRoute({ router, config, license, lib }: RouteDepende
         const stats = await fetchNodeStats(
           context.core.elasticsearch.legacy.client.callAsCurrentUser
         );
-        const okResponse = { body: convertStatsIntoList(stats, disallowedNodeAttributes) };
-        return response.ok(okResponse);
+        const body: ListNodesRouteResponse = convertStatsIntoList(stats, disallowedNodeAttributes);
+        return response.ok({ body });
       } catch (e) {
         if (lib.isEsError(e)) {
           return response.customError({

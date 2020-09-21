@@ -22,6 +22,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   async function (options: AlertExecutorOptions) {
     const { services, params } = options;
     const { criteria } = params;
+    if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
     const { sourceId, alertOnNoData } = params as {
       sourceId?: string;
       alertOnNoData: boolean;
@@ -34,8 +36,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const config = source.configuration;
     const alertResults = await evaluateAlert(services.callCluster, params, config);
 
-    // Because each alert result has the same group definitions, just grap the groups from the first one.
-    const groups = Object.keys(first(alertResults) as any);
+    // Because each alert result has the same group definitions, just grab the groups from the first one.
+    const groups = Object.keys(first(alertResults)!);
     for (const group of groups) {
       const alertInstance = services.alertInstanceFactory(`${group}`);
 
@@ -60,7 +62,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       let reason;
       if (nextState === AlertStates.ALERT) {
         reason = alertResults
-          .map((result) => buildFiredAlertReason(formatAlertResult(result[group]) as any))
+          .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
           .join('\n');
       }
       if (alertOnNoData) {
@@ -121,11 +123,13 @@ const mapToConditionsLookup = (
       {}
     );
 
-const formatAlertResult = (alertResult: {
-  metric: string;
-  currentValue: number;
-  threshold: number[];
-}) => {
+const formatAlertResult = <AlertResult>(
+  alertResult: {
+    metric: string;
+    currentValue: number;
+    threshold: number[];
+  } & AlertResult
+) => {
   const { metric, currentValue, threshold } = alertResult;
   if (!metric.endsWith('.pct')) return alertResult;
   const formatter = createFormatter('percent');

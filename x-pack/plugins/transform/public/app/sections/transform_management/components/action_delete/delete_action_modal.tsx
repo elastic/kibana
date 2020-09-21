@@ -15,8 +15,6 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { TRANSFORM_STATE } from '../../../../../../common';
 
 import { DeleteAction } from './use_delete_action';
 
@@ -42,26 +40,11 @@ export const DeleteActionModal: FC<DeleteAction> = ({
     }
   );
   const deleteModalTitle = i18n.translate('xpack.transform.transformList.deleteModalTitle', {
-    defaultMessage: 'Delete {transformId}',
+    defaultMessage: 'Delete {transformId}?',
     values: { transformId: items[0] && items[0].config.id },
   });
   const bulkDeleteModalContent = (
     <>
-      <p>
-        {shouldForceDelete ? (
-          <FormattedMessage
-            id="xpack.transform.transformList.bulkForceDeleteModalBody"
-            defaultMessage="Are you sure you want to force delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}? The {count, plural, one {transform} other {transforms}} will be deleted regardless of {count, plural, one {its} other {their}} current state."
-            values={{ count: items.length }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.transform.transformList.bulkDeleteModalBody"
-            defaultMessage="Are you sure you want to delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?"
-            values={{ count: items.length }}
-          />
-        )}
-      </p>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           {
@@ -100,19 +83,6 @@ export const DeleteActionModal: FC<DeleteAction> = ({
 
   const deleteModalContent = (
     <>
-      <p>
-        {items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED ? (
-          <FormattedMessage
-            id="xpack.transform.transformList.forceDeleteModalBody"
-            defaultMessage="Are you sure you want to force delete this transform? The transform will be deleted regardless of its current state."
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.transform.transformList.deleteModalBody"
-            defaultMessage="Are you sure you want to delete this transform?"
-          />
-        )}
-      </p>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           {userCanDeleteIndex && (

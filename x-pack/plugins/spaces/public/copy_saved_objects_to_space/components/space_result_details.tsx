@@ -5,9 +5,23 @@
  */
 
 import './space_result_details.scss';
-import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiToolTip,
+  EuiIcon,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
+} from 'kibana/public';
+import { EuiSuperSelect } from '@elastic/eui';
+import moment from 'moment';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
@@ -20,104 +34,161 @@ interface Props {
   space: Space;
   retries: ImportRetry[];
   onRetriesChange: (retries: ImportRetry[]) => void;
+  destinationMap: Map<string, string>;
+  onDestinationMapChange: (value?: Map<string, string>) => void;
   conflictResolutionInProgress: boolean;
 }
 
+function getSavedObjectLabel(type: string) {
+  switch (type) {
+    case 'index-pattern':
+    case 'index-patterns':
+    case 'indexPatterns':
+      return 'index patterns';
+    default:
+      return type;
+  }
+}
+
+const isAmbiguousConflictError = (
+  error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError
+): error is SavedObjectsImportAmbiguousConflictError => error.type === 'ambiguous_conflict';
+
 export const SpaceCopyResultDetails = (props: Props) => {
-  const onOverwriteClick = (object: { type: string; id: string }) => {
-    const retry = props.retries.find((r) => r.type === object.type && r.id === object.id);
-
-    props.onRetriesChange([
-      ...props.retries.filter((r) => r !== retry),
-      {
-        type: object.type,
-        id: object.id,
-        overwrite: retry ? !retry.overwrite : true,
-      },
-    ]);
-  };
-
-  const hasPendingOverwrite = (object: { type: string; id: string }) => {
-    const retry = props.retries.find((r) => r.type === object.type && r.id === object.id);
-
-    return Boolean(retry && retry.overwrite);
-  };
-
-  const { objects } = props.summarizedCopyResult;
+  const { destinationMap, onDestinationMapChange, summarizedCopyResult } = props;
+  const { objects } = summarizedCopyResult;
 
   return (
     <div className="spcCopyToSpaceResultDetails">
       {objects.map((object, index) => {
-        const objectOverwritePending = hasPendingOverwrite(object);
+        const { type, id, name, icon, conflict } = object;
+        const pendingObjectRetry = props.retries.find((r) => r.type === type && r.id === id);
+        const isOverwritePending = Boolean(pendingObjectRetry?.overwrite);
+        const switchProps = {
+          show: conflict && !props.conflictResolutionInProgress,
+          label: i18n.translate('xpack.spaces.management.copyToSpace.copyDetail.overwriteSwitch', {
+            defaultMessage: 'Overwrite?',
+          }),
+          onChange: ({ target: { checked } }: EuiSwitchEvent) => {
+            const filtered = props.retries.filter((r) => r.type !== type || r.id !== id);
+            const { error } = conflict!;
 
-        const showOverwriteButton =
-          object.conflicts.length > 0 &&
-          !objectOverwritePending &&
-          !props.conflictResolutionInProgress;
-
-        const showSkipButton =
-          !showOverwriteButton && objectOverwritePending && !props.conflictResolutionInProgress;
+            if (!checked) {
+              props.onRetriesChange(filtered);
+              if (isAmbiguousConflictError(error)) {
+                // reset the selection to the first entry
+                const value = error.destinations[0].id;
+                onDestinationMapChange(new Map(destinationMap.set(`${type}:${id}`, value)));
+              }
+            } else {
+              const destinationId = isAmbiguousConflictError(error)
+                ? destinationMap.get(`${type}:${id}`)
+                : error.destinationId;
+              const retry = { type, id, overwrite: true, ...(destinationId && { destinationId }) };
+              props.onRetriesChange([...filtered, retry]);
+            }
+          },
+        };
+        const selectProps = {
+          options:
+            conflict?.error && isAmbiguousConflictError(conflict.error)
+              ? conflict.error.destinations.map((destination) => {
+                  const header = destination.title ?? `${type} [id=${destination.id}]`;
+                  const lastUpdated = destination.updatedAt
+                    ? moment(destination.updatedAt).fromNow()
+                    : 'never';
+                  return {
+                    value: destination.id,
+                    inputDisplay: destination.id,
+                    dropdownDisplay: (
+                      <Fragment>
+                        <strong>{header}</strong>
+                        <EuiText size="s" color="subdued">
+                          <p className="euiTextColor--subdued">
+                            ID: {destination.id}
+                            <br />
+                            Last updated: {lastUpdated}
+                          </p>
+                        </EuiText>
+                      </Fragment>
+                    ),
+                  };
+                })
+              : [],
+          onChange: (value: string) => {
+            onDestinationMapChange(new Map(destinationMap.set(`${type}:${id}`, value)));
+            const filtered = props.retries.filter((r) => r.type !== type || r.id !== id);
+            const retry = { type, id, overwrite: true, destinationId: value };
+            props.onRetriesChange([...filtered, retry]);
+          },
+        };
+        const selectContainerClass =
+          selectProps.options.length > 0 && isOverwritePending
+            ? ' spcCopyToSpaceResultDetails__selectControl-isOpen'
+            : '';
 
         return (
-          <EuiFlexGroup
-            responsive={false}
-            key={index}
-            alignItems="center"
-            gutterSize="s"
-            className="spcCopyToSpaceResultDetails__row"
-          >
-            <EuiFlexItem grow={5} className="spcCopyToSpaceResultDetails__savedObjectName">
-              <EuiText size="s">
-                <p className="eui-textTruncate" title={object.name || object.id}>
-                  {object.type}: {object.name || object.id}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            {showOverwriteButton && (
-              <EuiFlexItem grow={1}>
+          <Fragment key={index}>
+            <EuiFlexGroup
+              responsive={false}
+              key={index}
+              alignItems="center"
+              gutterSize="s"
+              className="spcCopyToSpaceResultDetails__row"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+                  <EuiIcon aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={5} className="spcCopyToSpaceResultDetails__savedObjectName">
                 <EuiText size="s">
-                  <EuiButtonEmpty
-                    onClick={() => onOverwriteClick(object)}
-                    size="xs"
-                    data-test-subj={`cts-overwrite-conflict-${object.id}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.spaces.management.copyToSpace.copyDetail.overwriteButton"
-                      defaultMessage="Overwrite"
-                    />
-                  </EuiButtonEmpty>
+                  <p className="eui-textTruncate" title={name}>
+                    {name}
+                  </p>
                 </EuiText>
               </EuiFlexItem>
-            )}
-            {showSkipButton && (
-              <EuiFlexItem grow={1}>
-                <EuiText size="s">
-                  <EuiButtonEmpty
-                    onClick={() => onOverwriteClick(object)}
-                    size="xs"
-                    data-test-subj={`cts-skip-conflict-${object.id}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.spaces.management.copyToSpace.copyDetail.skipOverwriteButton"
-                      defaultMessage="Skip"
-                    />
-                  </EuiButtonEmpty>
-                </EuiText>
+              {switchProps.show && (
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={switchProps.label}
+                    compressed={true}
+                    checked={isOverwritePending}
+                    onChange={switchProps.onChange}
+                    data-test-subj={`cts-overwrite-conflict-${type}:${id}`}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem className="spcCopyToSpaceResultDetails__statusIndicator" grow={false}>
+                <div className="eui-textRight">
+                  <CopyStatusIndicator
+                    summarizedCopyResult={props.summarizedCopyResult}
+                    object={object}
+                    pendingObjectRetry={pendingObjectRetry}
+                    conflictResolutionInProgress={
+                      props.conflictResolutionInProgress && isOverwritePending
+                    }
+                  />
+                </div>
               </EuiFlexItem>
-            )}
-            <EuiFlexItem className="spcCopyToSpaceResultDetails__statusIndicator" grow={1}>
-              <div className="eui-textRight">
-                <CopyStatusIndicator
-                  summarizedCopyResult={props.summarizedCopyResult}
-                  object={object}
-                  overwritePending={hasPendingOverwrite(object)}
-                  conflictResolutionInProgress={
-                    props.conflictResolutionInProgress && objectOverwritePending
-                  }
+            </EuiFlexGroup>
+            <div className={'spcCopyToSpaceResultDetails__selectControl' + selectContainerClass}>
+              <div className="spcCopyToSpaceResultDetails__selectControl__childWrapper">
+                <EuiSuperSelect
+                  options={selectProps.options}
+                  valueOfSelected={destinationMap.get(`${type}:${id}`)}
+                  onChange={selectProps.onChange}
+                  prepend={i18n.translate(
+                    'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
+                    { defaultMessage: 'Object ID' }
+                  )}
+                  hasDividers
+                  fullWidth
+                  compressed
                 />
               </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </div>
+          </Fragment>
         );
       })}
     </div>

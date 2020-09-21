@@ -22,13 +22,12 @@ import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
 import { AppRouter, AppNotFound } from '../ui';
-import { EitherApp, MockedMounterMap, MockedMounterTuple } from '../test_types';
-import { createRenderer, createAppMounter, createLegacyAppMounter, getUnmounter } from './utils';
+import { MockedMounterMap, MockedMounterTuple } from '../test_types';
+import { createRenderer, createAppMounter, getUnmounter } from './utils';
 import { AppStatus } from '../types';
-import { ScopedHistory } from '../scoped_history';
 
 describe('AppRouter', () => {
-  let mounters: MockedMounterMap<EitherApp>;
+  let mounters: MockedMounterMap;
   let globalHistory: History;
   let update: ReturnType<typeof createRenderer>;
   let scopedAppHistory: History;
@@ -59,6 +58,7 @@ describe('AppRouter', () => {
         mounters={mockMountersToMounters()}
         appStatuses$={mountersToAppStatus$()}
         setAppLeaveHandler={noop}
+        setAppActionMenu={noop}
         setIsMounting={noop}
       />
     );
@@ -66,9 +66,7 @@ describe('AppRouter', () => {
   beforeEach(() => {
     mounters = new Map([
       createAppMounter({ appId: 'app1', html: '<span>App 1</span>' }),
-      createLegacyAppMounter('legacyApp1', jest.fn()),
       createAppMounter({ appId: 'app2', html: '<div>App 2</div>' }),
-      createLegacyAppMounter('baseApp:legacyApp2', jest.fn()),
       createAppMounter({
         appId: 'app3',
         html: '<div>Chromeless A</div>',
@@ -80,7 +78,6 @@ describe('AppRouter', () => {
         appRoute: '/chromeless-b/path',
       }),
       createAppMounter({ appId: 'disabledApp', html: '<div>Disabled app</div>' }),
-      createLegacyAppMounter('disabledLegacyApp', jest.fn()),
       createAppMounter({
         appId: 'scopedApp',
         extraMountHook: ({ history }) => {
@@ -98,7 +95,7 @@ describe('AppRouter', () => {
         html: '<div>App 6</div>',
         appRoute: '/app/my-app/app6',
       }),
-    ] as Array<MockedMounterTuple<EitherApp>>);
+    ] as MockedMounterTuple[]);
     globalHistory = createMemoryHistory();
     update = createMountersRenderer();
   });
@@ -383,26 +380,6 @@ describe('AppRouter', () => {
     expect(globalHistory.location.pathname).toEqual('/app/scopedApp/subpath');
   });
 
-  it('calls legacy mount handler', async () => {
-    await navigate('/app/legacyApp1');
-    expect(mounters.get('legacyApp1')!.mounter.mount.mock.calls[0][0]).toMatchObject({
-      appBasePath: '/app/legacyApp1',
-      element: expect.any(HTMLDivElement),
-      onAppLeave: expect.any(Function),
-      history: expect.any(ScopedHistory),
-    });
-  });
-
-  it('handles legacy apps with subapps', async () => {
-    await navigate('/app/baseApp');
-    expect(mounters.get('baseApp:legacyApp2')!.mounter.mount.mock.calls[0][0]).toMatchObject({
-      appBasePath: '/app/baseApp',
-      element: expect.any(HTMLDivElement),
-      onAppLeave: expect.any(Function),
-      history: expect.any(ScopedHistory),
-    });
-  });
-
   it('displays error page if no app is found', async () => {
     const dom = await navigate('/app/unknown');
 
@@ -411,12 +388,6 @@ describe('AppRouter', () => {
 
   it('displays error page if app is inaccessible', async () => {
     const dom = await navigate('/app/disabledApp');
-
-    expect(dom?.exists(AppNotFound)).toBe(true);
-  });
-
-  it('displays error page if legacy app is inaccessible', async () => {
-    const dom = await navigate('/app/disabledLegacyApp');
 
     expect(dom?.exists(AppNotFound)).toBe(true);
   });

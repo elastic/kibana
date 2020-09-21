@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiAccordion } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
@@ -46,24 +46,30 @@ export const Criteria: React.FC<Props> = ({
       <EuiFlexItem grow>
         {criteria.map((criterion, idx) => {
           return (
-            <React.Fragment key={idx}>
-              <Criterion
-                idx={idx}
-                fields={fields}
-                criterion={criterion}
-                updateCriterion={updateCriterion}
-                removeCriterion={removeCriterion}
-                canDelete={criteria.length > 1}
-                errors={errors[idx.toString()] as IErrorObject}
-                documentCount={documentCount}
-              />
+            <EuiAccordion
+              id={`criterion-${idx}`}
+              buttonContent={
+                <Criterion
+                  idx={idx}
+                  fields={fields}
+                  criterion={criterion}
+                  updateCriterion={updateCriterion}
+                  removeCriterion={removeCriterion}
+                  canDelete={criteria.length > 1}
+                  errors={errors[idx.toString()] as IErrorObject}
+                  documentCount={documentCount}
+                />
+              }
+              key={idx}
+              arrowDisplay="right"
+            >
               <CriterionPreview
                 alertParams={alertParams}
                 context={context}
                 chartCriterion={criterion}
                 sourceId={sourceId}
               />
-            </React.Fragment>
+            </EuiAccordion>
           );
         })}
       </EuiFlexItem>

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import url from 'url';
 import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
@@ -22,14 +21,13 @@ import {
   Installation,
   Output,
   DEFAULT_AGENT_POLICIES_PACKAGES,
-  decodeCloudId,
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
-import { appContextService } from './app_context';
 import { awaitIfPending } from './setup_utils';
+import { createDefaultSettings } from './settings';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -58,26 +56,8 @@ async function createSetupSideEffects(
     ensureDefaultIndices(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
-        const http = appContextService.getHttpSetup();
-        const serverInfo = http.getServerInfo();
-        const basePath = http.basePath;
-
-        const cloud = appContextService.getCloud();
-        const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-        const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
-        const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
-        const defaultUrl = url.format({
-          protocol: serverInfo.protocol,
-          hostname: serverInfo.hostname,
-          port: serverInfo.port,
-          pathname: basePath.serverBasePath,
-        });
-
-        return settingsService.saveSettings(soClient, {
-          agent_auto_upgrade: true,
-          package_auto_upgrade: true,
-          kibana_url: cloudUrl || flagsUrl || defaultUrl,
-        });
+        const defaultSettings = createDefaultSettings();
+        return settingsService.saveSettings(soClient, defaultSettings);
       }
 
       return Promise.reject(e);
@@ -189,6 +169,12 @@ export async function setupFleet(
         agentPolicyId: agentPolicy.id,
       });
     })
+  );
+
+  await Promise.all(
+    agentPolicies.map((agentPolicy) =>
+      agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id)
+    )
   );
 }
 

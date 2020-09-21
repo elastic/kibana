@@ -9,12 +9,15 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
+  const security = getService('security');
 
   describe('maps full screen mode', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('maps/data');
+      await security.testUser.setRoles(['global_maps_all']);
       await PageObjects.maps.openNewMap();
+    });
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('full screen button should exist', async () => {

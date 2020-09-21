@@ -17,8 +17,12 @@ import {
   getExceptions,
   sortExceptionItems,
 } from './utils';
+import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions } from './types';
-import { searchAfterAndBulkCreate } from './search_after_bulk_create';
+import {
+  searchAfterAndBulkCreate,
+  SearchAfterAndBulkCreateReturnType,
+} from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
@@ -36,6 +40,7 @@ jest.mock('./utils');
 jest.mock('../notifications/schedule_notification_actions');
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
+jest.mock('../../../../common/detection_engine/parse_schedule_dates');
 
 const getPayload = (ruleAlert: RuleAlertType, services: AlertServicesMock) => ({
   alertId: ruleAlert.id,
@@ -227,6 +232,105 @@ describe('rules_notification_alert_type', () => {
       );
     });
 
+    it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
+      const ruleAlert = getResult();
+      ruleAlert.params.meta = {};
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      payload.params.meta = {};
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+        })
+      );
+    });
+
+    it('should resolve results_link when meta is undefined use "/app/security"', async () => {
+      const ruleAlert = getResult();
+      delete ruleAlert.params.meta;
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      delete payload.params.meta;
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+        })
+      );
+    });
+
+    it('should resolve results_link with a custom link', async () => {
+      const ruleAlert = getResult();
+      ruleAlert.params.meta = { kibana_siem_app_url: 'http://localhost' };
+      ruleAlert.actions = [
+        {
+          actionTypeId: '.slack',
+          params: {
+            message:
+              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+          },
+          group: 'default',
+          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+        },
+      ];
+
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      (parseScheduleDates as jest.Mock).mockReturnValue(moment(100));
+      payload.params.meta = { kibana_siem_app_url: 'http://localhost' };
+      await alert.executor(payload);
+
+      expect(scheduleNotificationActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resultsLink:
+            'http://localhost/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:100,kind:absolute,to:100)),timeline:(linkTo:!(global),timerange:(from:100,kind:absolute,to:100)))',
+        })
+      );
+    });
+
     describe('ML rule', () => {
       it('should throw an error if ML plugin was not available', async () => {
         const ruleAlert = getMlResult();
@@ -375,21 +479,36 @@ describe('rules_notification_alert_type', () => {
         );
       });
     });
+
+    describe('threat match', () => {
+      it('should throw an error if threatQuery or threatIndex or threatMapping was not null', async () => {
+        const result = getResult();
+        result.params.type = 'threat_match';
+        payload = getPayload(result, alertServices) as jest.Mocked<RuleExecutorOptions>;
+        await alert.executor(payload);
+        expect(logger.error).toHaveBeenCalled();
+        expect(logger.error.mock.calls[0][0]).toContain(
+          'An error occurred during rule execution: message: "Threat Match rule is missing threatQuery and/or threatIndex and/or threatMapping: threatQuery: "undefined" threatIndex: "undefined" threatMapping: "undefined"" name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
+        );
+      });
+    });
   });
 
   describe('should catch error', () => {
     it('when bulk indexing failed', async () => {
-      (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
+      const result: SearchAfterAndBulkCreateReturnType = {
         success: false,
         searchAfterTimes: [],
         bulkCreateTimes: [],
         lastLookBackDate: null,
         createdSignalsCount: 0,
-      });
+        errors: ['Error that bubbled up.'],
+      };
+      (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue(result);
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain(
-        'Bulk Indexing of signals failed. Check logs for further details.'
+        'Bulk Indexing of signals failed: Error that bubbled up. name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
       );
       expect(ruleStatusService.error).toHaveBeenCalled();
     });

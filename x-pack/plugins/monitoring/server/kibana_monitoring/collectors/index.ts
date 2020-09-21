@@ -8,6 +8,8 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getSettingsCollector } from './get_settings_collector';
 import { MonitoringConfig } from '../../config';
 
+export { KibanaSettingsCollector } from './get_settings_collector';
+
 export function registerCollectors(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig

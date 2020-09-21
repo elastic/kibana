@@ -34,6 +34,7 @@ describe('Expression', () => {
       criteria: [],
       groupBy: undefined,
       filterQueryText: '',
+      sourceId: 'default',
     };
 
     const mocks = coreMock.createSetup();
@@ -67,6 +68,7 @@ describe('Expression', () => {
       <Expressions
         alertsContext={context}
         alertInterval="1m"
+        alertThrottle="1m"
         alertParams={alertParams}
         errors={[]}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}

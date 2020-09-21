@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/new_platform');
 jest.mock('../components/vector_style_editor', () => ({
   VectorStyleEditor: () => {
     return <div>mockVectorStyleEditor</div>;
@@ -16,7 +15,7 @@ import { shallow } from 'enzyme';
 
 // @ts-ignore
 import { DynamicSizeProperty } from './dynamic_size_property';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
 import { Map as MbMap } from 'mapbox-gl';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
@@ -49,7 +48,7 @@ const makeProperty = (
     field,
     (new MockLayer(mockStyle) as unknown) as IVectorLayer,
     () => {
-      return (value: string | number | undefined) => value + '_format';
+      return (value: RawValue) => value + '_format';
     },
     false
   );

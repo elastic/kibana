@@ -29,6 +29,8 @@ import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_util
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../common/constants/app';
 /*
  * Component for rendering the links menu inside a cell in the anomalies table.
  */
@@ -142,7 +144,18 @@ class LinksMenuUI extends Component {
     }
   };
 
-  viewSeries = () => {
+  viewSeries = async () => {
+    const {
+      services: {
+        application: { navigateToApp },
+
+        share: {
+          urlGenerators: { getUrlGenerator },
+        },
+      },
+    } = this.props.kibana;
+    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+
     const record = this.props.anomaly.source;
     const bounds = this.props.bounds;
     const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
@@ -171,44 +184,36 @@ class LinksMenuUI extends Component {
       entityCondition[record.by_field_name] = record.by_field_value;
     }
 
-    // Use rison to build the URL .
-    const _g = rison.encode({
-      ml: {
+    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
+      excludeBasePath: true,
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
         jobIds: [record.job_id],
-      },
-      refreshInterval: {
-        display: 'Off',
-        pause: false,
-        value: 0,
-      },
-      time: {
-        from: from,
-        to: to,
-        mode: 'absolute',
-      },
-    });
-
-    const _a = rison.encode({
-      mlTimeSeriesExplorer: {
+        refreshInterval: {
+          display: 'Off',
+          pause: false,
+          value: 0,
+        },
+        timeRange: {
+          from: from,
+          to: to,
+          mode: 'absolute',
+        },
         zoom: {
           from: zoomFrom,
           to: zoomTo,
         },
         detectorIndex: record.detector_index,
         entities: entityCondition,
-      },
-      query: {
         query_string: {
           analyze_wildcard: true,
           query: '*',
         },
       },
     });
-
-    // Need to encode the _a parameter in case any entities contain unsafe characters such as '+'.
-    let path = '#/timeseriesexplorer';
-    path += `?_g=${_g}&_a=${encodeURIComponent(_a)}`;
-    window.open(path, '_blank');
+    await navigateToApp(PLUGIN_ID, {
+      path: singleMetricViewerLink,
+    });
   };
 
   viewExamples = () => {
@@ -390,6 +395,7 @@ class LinksMenuUI extends Component {
           defaultMessage: 'Select action for anomaly at {time}',
           values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
         })}
+        data-test-subj="mlAnomaliesListRowActionsButton"
       />
     );
 
@@ -404,6 +410,7 @@ class LinksMenuUI extends Component {
               this.closePopover();
               this.openCustomUrl(customUrl);
             }}
+            data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
           >
             {customUrl.url_name}
           </EuiContextMenuItem>
@@ -420,6 +427,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.viewSeries();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
@@ -438,6 +446,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.viewExamples();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
@@ -456,6 +465,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.props.showRuleEditorFlyout(anomaly);
           }}
+          data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
@@ -473,7 +483,7 @@ class LinksMenuUI extends Component {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
       </EuiPopover>
     );
   }

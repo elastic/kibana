@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionFactoryDefinition, BaseActionFactoryContext } from '../dynamic_actions';
+import {
+  ActionFactoryDefinition,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+  SerializedEvent,
+} from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -24,23 +30,36 @@ import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/pu
  */
 
 export interface DrilldownDefinition<
-  Config extends object = object,
+  Config extends BaseActionConfig = BaseActionConfig,
   SupportedTriggers extends TriggerId = TriggerId,
   FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
     triggers: SupportedTriggers[];
   },
   ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
-> {
+> extends PersistableStateDefinition<SerializedEvent> {
   /**
    * Globally unique identifier for this drilldown.
    */
   id: string;
 
   /**
-   * Minimal licence level
+   * Is this action factory not GA?
+   * Adds a beta badge on a list item representing this ActionFactory
+   */
+  readonly isBeta?: boolean;
+
+  /**
+   * Minimal license level
    * Empty means no restrictions
    */
   minimalLicense?: LicenseType;
+
+  /**
+   * Required when `minimalLicense` is used.
+   * Is a user-facing string. Has to be unique. Doesn't need i18n.
+   * The feature's name will be displayed to Cloud end-users when they're billed based on their feature usage.
+   */
+  licenseFeatureName?: string;
 
   /**
    * Determines the display order of the drilldowns in the flyout picker.

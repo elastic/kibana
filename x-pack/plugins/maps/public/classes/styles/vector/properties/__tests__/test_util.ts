@@ -5,7 +5,7 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { FIELD_ORIGIN } from '../../../../../../common/constants';
+import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 import { StyleMeta } from '../../style_meta';
 import {
   CategoryFieldMeta,
@@ -44,7 +44,7 @@ export class MockStyle implements IStyle {
   }
 
   getType() {
-    return 'mockStyle';
+    return LAYER_STYLE_TYPE.VECTOR;
   }
 
   getStyleMeta(): StyleMeta {

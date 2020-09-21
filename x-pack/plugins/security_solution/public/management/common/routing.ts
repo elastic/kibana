@@ -10,6 +10,9 @@ import { generatePath } from 'react-router-dom';
 import querystring from 'querystring';
 
 import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
@@ -18,6 +21,7 @@ import {
 import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import { TrustedAppsUrlParams } from '../pages/trusted_apps/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -86,8 +90,65 @@ export const getPolicyDetailPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-export const getTrustedAppsListPath = (search?: string) => {
-  return `${generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
+const isDefaultOrMissing = (
+  value: number | string | undefined,
+  defaultValue: number | undefined
+) => {
+  return value === undefined || value === defaultValue;
+};
+
+const normalizeListPaginationParams = (
+  params?: Partial<TrustedAppsUrlParams>
+): Partial<TrustedAppsUrlParams> => {
+  if (params) {
+    return {
+      ...(!isDefaultOrMissing(params.page_index, MANAGEMENT_DEFAULT_PAGE)
+        ? { page_index: params.page_index }
+        : {}),
+      ...(!isDefaultOrMissing(params.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { page_size: params.page_size }
+        : {}),
+      ...(!isDefaultOrMissing(params.show, undefined) ? { show: params.show } : {}),
+    };
+  } else {
+    return {};
+  }
+};
+
+/**
+ * Given an object with url params, and a given key, return back only the first param value (case multiples were defined)
+ * @param query
+ * @param key
+ */
+export const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+  const value = query[key];
+
+  return Array.isArray(value) ? value[value.length - 1] : value;
+};
+
+const extractPageIndex = (query: querystring.ParsedUrlQuery): number => {
+  const pageIndex = Number(extractFirstParamValue(query, 'page_index'));
+
+  return !Number.isFinite(pageIndex) || pageIndex < 0 ? MANAGEMENT_DEFAULT_PAGE : pageIndex;
+};
+
+const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
+  const pageSize = Number(extractFirstParamValue(query, 'page_size'));
+
+  return MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : MANAGEMENT_DEFAULT_PAGE_SIZE;
+};
+
+export const extractListPaginationParams = (
+  query: querystring.ParsedUrlQuery
+): TrustedAppsUrlParams => ({
+  page_index: extractPageIndex(query),
+  page_size: extractPageSize(query),
+});
+
+export const getTrustedAppsListPath = (params?: Partial<TrustedAppsUrlParams>): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
-  })}${appendSearch(search)}`;
+  });
+
+  return `${path}${appendSearch(querystring.stringify(normalizeListPaginationParams(params)))}`;
 };

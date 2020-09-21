@@ -5,22 +5,17 @@
  */
 
 import { ReportingConfig } from '../../';
-import { ScheduledTaskParamsPNG } from '../png/types';
-import { ScheduledTaskParamsPDF } from '../printable_pdf/types';
+import { createMockConfig } from '../../test_helpers';
+import { TaskPayloadPNG } from '../png/types';
+import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
 
 interface FullUrlsOpts {
-  job: ScheduledTaskParamsPNG & ScheduledTaskParamsPDF;
+  job: TaskPayloadPNG & TaskPayloadPDF;
   config: ReportingConfig;
 }
 
 let mockConfig: ReportingConfig;
-const getMockConfig = (mockConfigGet: jest.Mock<any, any>) => {
-  return {
-    get: mockConfigGet,
-    kbnConfig: { get: mockConfigGet },
-  };
-};
 
 beforeEach(() => {
   const reportingConfig: Record<string, any> = {
@@ -29,13 +24,10 @@ beforeEach(() => {
     'kibanaServer.protocol': 'http',
     'server.basePath': '/sbp',
   };
-  const mockConfigGet = jest.fn().mockImplementation((...keys: string[]) => {
-    return reportingConfig[keys.join('.') as string];
-  });
-  mockConfig = getMockConfig(mockConfigGet);
+  mockConfig = createMockConfig(reportingConfig);
 });
 
-const getMockJob = (base: object) => base as ScheduledTaskParamsPNG & ScheduledTaskParamsPDF;
+const getMockJob = (base: object) => base as TaskPayloadPNG & TaskPayloadPDF;
 
 test(`fails if no URL is passed`, async () => {
   const fn = () => getFullUrls({ job: getMockJob({}), config: mockConfig } as FullUrlsOpts);

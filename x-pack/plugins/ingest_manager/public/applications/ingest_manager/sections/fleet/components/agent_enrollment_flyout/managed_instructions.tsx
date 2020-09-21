@@ -24,7 +24,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
 }
 
-export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolicies }) => {
+export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
   const { getHref } = useLink();
   const core = useCore();
   const fleetStatus = useFleetStatus();
@@ -34,8 +34,11 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
   const settings = useGetSettings();
   const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
 
-  const kibanaUrl =
-    settings.data?.item?.kibana_url ?? `${window.location.origin}${core.http.basePath.get()}`;
+  const kibanaUrlsSettings = settings.data?.item?.kibana_urls;
+  const kibanaUrl = kibanaUrlsSettings
+    ? kibanaUrlsSettings[0]
+    : `${window.location.origin}${core.http.basePath.get()}`;
+
   const kibanaCASha256 = settings.data?.item?.kibana_ca_sha256;
 
   const steps: EuiContainedStepProps[] = [
@@ -72,13 +75,13 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
         <>
           <FormattedMessage
             id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
-            defaultMessage="Before enrolling agents, set up Fleet. {link}"
+            defaultMessage="Before enrolling agents, {link}."
             values={{
               link: (
                 <EuiLink href={getHref('fleet')}>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.goToFleetButton"
-                    defaultMessage="Go to Fleet."
+                    id="xpack.ingestManager.agentEnrollment.setUpFleetLink"
+                    defaultMessage="set up Fleet"
                   />
                 </EuiLink>
               ),
@@ -88,4 +91,4 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentPolic
       )}
     </>
   );
-};
+});

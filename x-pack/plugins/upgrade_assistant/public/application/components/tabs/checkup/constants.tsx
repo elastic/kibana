@@ -6,8 +6,8 @@
 
 import { IconColor } from '@elastic/eui';
 import { invert } from 'lodash';
-
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationInfo } from '../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
 
 export const LEVEL_MAP: { [level: string]: number } = {
   warning: 0,

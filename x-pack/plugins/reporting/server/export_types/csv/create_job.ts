@@ -5,16 +5,16 @@
  */
 
 import { cryptoFactory } from '../../lib';
-import { CreateJobFn, ScheduleTaskFnFactory } from '../../types';
+import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { JobParamsDiscoverCsv } from './types';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
+export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
   JobParamsDiscoverCsv
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 
-  return async function scheduleTask(jobParams, context, request) {
+  return async function createJob(jobParams, context, request) {
     const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
 
     const savedObjectsClient = context.core.savedObjects.client;
@@ -25,6 +25,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
 
     return {
       headers: serializedEncryptedHeaders,
+      spaceId: reporting.getSpaceId(request),
       indexPatternSavedObject,
       ...jobParams,
     };

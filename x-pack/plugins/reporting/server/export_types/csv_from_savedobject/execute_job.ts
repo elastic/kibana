@@ -7,16 +7,16 @@
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { CancellationToken } from '../../../common';
 import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { RunTaskFnFactory, ScheduledTaskParams, TaskRunResult } from '../../types';
+import { BasePayload, RunTaskFnFactory, TaskRunResult } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
-import { JobParamsPanelCsv, SearchPanel } from './types';
 import { getGenerateCsvParams } from './lib/get_csv_job';
+import { JobParamsPanelCsv, SearchPanel } from './types';
 
 /*
  * The run function receives the full request which provides the un-encrypted
  * headers, so encrypted headers are not part of these kind of job params
  */
-type ImmediateJobParams = Omit<ScheduledTaskParams<JobParamsPanelCsv>, 'headers'>;
+type ImmediateJobParams = Omit<BasePayload<JobParamsPanelCsv>, 'headers'>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -48,9 +48,8 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
     const savedObjectsClient = context.core.savedObjects.client;
-
-    const uiConfig = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
-    const job = await getGenerateCsvParams(jobParams, panel, savedObjectsClient, uiConfig);
+    const uiSettingsClient = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
+    const job = await getGenerateCsvParams(jobParams, panel, savedObjectsClient, uiSettingsClient);
 
     const elasticsearch = reporting.getElasticsearchService();
     const { callAsCurrentUser } = elasticsearch.legacy.client.asScoped(req);
@@ -58,7 +57,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     const { content, maxSizeReached, size, csvContainsFormulas, warnings } = await generateCsv(
       job,
       config,
-      uiConfig,
+      uiSettingsClient,
       callAsCurrentUser,
       new CancellationToken() // can not be cancelled
     );

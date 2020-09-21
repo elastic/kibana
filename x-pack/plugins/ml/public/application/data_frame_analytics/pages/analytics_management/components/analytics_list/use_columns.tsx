@@ -19,11 +19,8 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getJobIdUrl, TAB_IDS } from '../../../../../util/get_selected_ids_url';
-
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
-  getDataFrameAnalyticsProgress,
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
@@ -33,6 +30,8 @@ import {
   DataFrameAnalyticsStats,
 } from './common';
 import { useActions } from './use_actions';
+import { useMlLink } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -76,7 +75,6 @@ export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
     defaultMessage: 'Progress',
   }),
-  sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
   truncateText: true,
   render(item: DataFrameAnalyticsListRow) {
     const { currentPhase, progress, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
@@ -136,9 +134,14 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
-export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
-  <EuiLink href={getJobIdUrl(TAB_IDS.DATA_FRAME_ANALYTICS, item.id)}>{item.id}</EuiLink>
-);
+export const DFAnalyticsJobIdLink = ({ item }: { item: DataFrameAnalyticsListRow }) => {
+  const href = useMlLink({
+    page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    pageState: { jobId: item.id },
+  });
+
+  return <EuiLink href={href}>{item.id}</EuiLink>;
+};
 
 export const useColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
@@ -147,7 +150,6 @@ export const useColumns = (
   isMlEnabledInSpace: boolean = true
 ) => {
   const { actions, modals } = useActions(isManagementTable);
-
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
     if (index !== -1) {
@@ -202,7 +204,7 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
       render: (item: DataFrameAnalyticsListRow) =>
-        isManagementTable ? getDFAnalyticsJobIdLink(item) : item.id,
+        isManagementTable ? <DFAnalyticsJobIdLink item={item} /> : item.id,
     },
     {
       field: DataFrameAnalyticsListColumn.description,
