@@ -12,7 +12,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.vcs
 object BaselineCi : BuildType({
   id("Baseline_CI")
   name = "Baseline CI"
-  description = "Runs builds and visual regression tests for every commit"
+  description = "Runs builds for every commit"
   type = Type.COMPOSITE
   paused = true
 
@@ -24,9 +24,7 @@ object BaselineCi : BuildType({
 
   dependsOn(
     OssBuild,
-    DefaultBuild,
-    OssVisualRegression,
-    DefaultVisualRegression
+    DefaultBuild
   )
 
   addSlackNotifications()

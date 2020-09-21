@@ -114,7 +114,6 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
           name = "Functional"
 
           buildType(OssCiGroups)
-          buildType(OssVisualRegression)
           buildType(OssFirefox)
           buildType(OssAccessibility)
           buildType(OssPluginFunctional)
@@ -139,7 +138,6 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
           name = "Functional"
 
           buildType(DefaultCiGroups)
-          buildType(DefaultVisualRegression)
           buildType(DefaultFirefox)
           buildType(DefaultAccessibility)
           buildType(DefaultSecuritySolution)
