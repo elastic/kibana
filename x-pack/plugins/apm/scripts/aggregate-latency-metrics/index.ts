@@ -389,7 +389,7 @@ export async function aggregateLatencyMetrics() {
               return;
             }
 
-            const response = await destClient?.bulk({
+            const response = await (destClient as any)?.bulk({
               refresh: 'wait_for',
               body: flatten(
                 docs.map((doc) => [
