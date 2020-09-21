@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-formatField: FormatField;
+formatField: FormatFieldFn;
 ```

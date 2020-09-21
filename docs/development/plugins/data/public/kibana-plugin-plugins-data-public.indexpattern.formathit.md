@@ -9,6 +9,6 @@
 ```typescript
 formatHit: {
         (hit: Record<string, any>, type?: string): any;
-        formatField: FormatField;
+        formatField: FormatFieldFn;
     };
 ```
