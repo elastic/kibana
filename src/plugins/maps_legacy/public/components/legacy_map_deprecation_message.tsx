@@ -18,8 +18,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   isMapsAvailable: boolean;
@@ -28,41 +29,51 @@ interface Props {
 }
 
 export function LegacyMapDeprecationMessage(props: Props) {
-  let action;
-  if (!props.isMapsAvailable) {
-    action = (
-      <FormattedMessage
-        id="maps_legacy.defaultDistributionMessage"
-        defaultMessage="To get Maps, upgrade to the {defaultDistribution} of Elasticsearch and Kibana."
-        values={{
-          defaultDistribution: (
-            <EuiLink
-              color="accent"
-              external
-              href="https://www.elastic.co/downloads/kibana"
-              target="_blank"
-            >
-              default distribution
-            </EuiLink>
-          ),
-        }}
-      />
-    );
-  } else {
-    action = (
-      <div>
-        <EuiButton onClick={props.onClick} size="s">
-          <FormattedMessage id="maps_legacy.openInMapsButtonLabel" defaultMessage="View in Maps" />
-        </EuiButton>
-      </div>
-    );
-  }
+  const getMapsMessage = !props.isMapsAvailable ? (
+    <FormattedMessage
+      id="maps_legacy.defaultDistributionMessage"
+      defaultMessage="To get Maps, upgrade to the {defaultDistribution} of Elasticsearch and Kibana."
+      values={{
+        defaultDistribution: (
+          <EuiLink
+            color="accent"
+            external
+            href="https://www.elastic.co/downloads/kibana"
+            target="_blank"
+          >
+            default distribution
+          </EuiLink>
+        ),
+      }}
+    />
+  ) : null;
+
+  const button = props.isMapsAvailable ? (
+    <div>
+      <EuiButton onClick={props.onClick} size="s">
+        <FormattedMessage id="maps_legacy.openInMapsButtonLabel" defaultMessage="View in Maps" />
+      </EuiButton>
+    </div>
+  ) : null;
 
   return (
-    <FormattedMessage
-      id="maps_legacy.legacyMapDeprecationMessage"
-      defaultMessage="{label} will migrate to Maps in 8.0. With Maps, you can add multiple layers and indices, plot individual documents, symbolize features from data values, and more. {action}"
-      values={{ action, label: props.visualizationLabel }}
-    />
+    <EuiCallOut
+      className="hide-for-sharing"
+      data-test-subj="deprecatedVisInfo"
+      size="s"
+      title={i18n.translate('maps_legacy.legacyMapDeprecationTitle', {
+        defaultMessage: '{label} will migrate to Maps in 8.0.',
+        values: { label: props.visualizationLabel },
+      })}
+    >
+      <p>
+        <FormattedMessage
+          id="maps_legacy.legacyMapDeprecationMessage"
+          defaultMessage="With Maps, you can add multiple layers and indices, plot individual documents, symbolize features from data values, add heatmaps, grids, and clusters, and more. {getMapsMessage}"
+          values={{ getMapsMessage }}
+        />
+      </p>
+      {button}
+    </EuiCallOut>
   );
 }
