@@ -323,6 +323,7 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
+export { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {
