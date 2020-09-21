@@ -17,7 +17,38 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import {
+  ThresholdLineConfig,
+  ThresholdLine,
+  ThresholdLineStyle,
+  AxisConfig,
+  SeriesParam,
+  YScaleType,
+} from '../types';
+
+export function getThresholdLine(
+  { style, ...rest }: ThresholdLine,
+  yAxes: Array<AxisConfig<YScaleType>>,
+  seriesParams: SeriesParam[]
+): ThresholdLineConfig {
+  const groupId = yAxes.find(({ id }) => seriesParams.some(({ valueAxis }) => id === valueAxis))
+    ?.groupId;
+
+  return {
+    ...rest,
+    dash: getDash(style),
+    groupId,
+  };
+}
+
+function getDash(style: ThresholdLineStyle): number[] | undefined {
+  switch (style) {
+    case ThresholdLineStyle.Dashed:
+      return [10, 5];
+    case ThresholdLineStyle.DotDashed:
+      return [20, 5, 5, 5];
+    case ThresholdLineStyle.Full:
+    default:
+      return;
+  }
+}

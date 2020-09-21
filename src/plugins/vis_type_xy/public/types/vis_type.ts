@@ -17,7 +17,19 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import { ReactNode } from 'react';
+
+import { BaseVisTypeOptions } from '../../../visualizations/public';
+import { VisParams } from './param';
+
+export type XyVisTypeDefinition = Omit<BaseVisTypeOptions, 'visualization'> & {
+  events: {
+    brush: {
+      disabled: boolean;
+    };
+  };
+  visConfig: {
+    component: ReactNode;
+    defaults: Omit<VisParams, 'dimensions'>;
+  };
+};

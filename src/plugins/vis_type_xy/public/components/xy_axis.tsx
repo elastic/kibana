@@ -17,7 +17,39 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import React, { FC } from 'react';
+
+import { Axis } from '@elastic/charts';
+
+import { AxisConfig } from '../types';
+
+type XYAxisPros = AxisConfig<any>;
+
+export const XYAxis: FC<XYAxisPros> = ({
+  id,
+  title,
+  show,
+  position,
+  groupId,
+  grid,
+  ticks,
+  domain,
+  style,
+}) => {
+  return (
+    <Axis
+      id={id}
+      groupId={groupId}
+      hide={!show}
+      title={title}
+      style={style}
+      domain={domain}
+      position={position}
+      showGridLines={grid?.show}
+      tickFormat={ticks?.formatter}
+      labelFormat={ticks?.labelFormatter}
+      showOverlappingLabels={ticks?.showOverlappingLabels}
+      showDuplicatedTicks={ticks?.showDuplicates}
+    />
+  );
+};

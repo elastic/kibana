@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
@@ -25,7 +26,14 @@ import { Schemas } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
 
-import { ChartMode, AxisType, ScaleType, AxisMode, ThresholdLineStyle } from '../types';
+import {
+  ChartMode,
+  AxisType,
+  ScaleType,
+  AxisMode,
+  ThresholdLineStyle,
+  XyVisTypeDefinition,
+} from '../types';
 import { VisComponent } from '../vis_component';
 import { toExpression } from '../to_expression';
 import { ChartType } from '../../common/types';
@@ -33,7 +41,7 @@ import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 import { defaultCountLabel, LabelRotation } from '../../../charts/public';
 
-export const horizontalBarVisTypeDefinition = {
+export const horizontalBarVisTypeDefinition: XyVisTypeDefinition = {
   name: 'horizontal_bar',
   title: i18n.translate('visTypeXy.horizontalBar.horizontalBarTitle', {
     defaultMessage: 'Horizontal Bar',

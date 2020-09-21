@@ -17,7 +17,42 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import React, { FC } from 'react';
+
+import { AnnotationDomainTypes, LineAnnotation } from '@elastic/charts';
+
+import { ThresholdLineConfig } from '../types';
+
+type XYThresholdLineProps = ThresholdLineConfig & {
+  groupId?: string;
+};
+
+export const XYThresholdLine: FC<XYThresholdLineProps> = ({
+  show,
+  value: dataValue,
+  color,
+  width,
+  groupId,
+  dash,
+}) => {
+  if (!show) {
+    return null;
+  }
+
+  return (
+    <LineAnnotation
+      id="__threshold_line__"
+      groupId={groupId}
+      domainType={AnnotationDomainTypes.YDomain}
+      dataValues={[{ dataValue }]}
+      style={{
+        line: {
+          stroke: color,
+          strokeWidth: width ?? 2,
+          opacity: 1,
+          dash,
+        },
+      }}
+    />
+  );
+};

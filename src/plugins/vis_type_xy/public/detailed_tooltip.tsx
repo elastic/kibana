@@ -17,7 +17,8 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import React from 'react';
+
+export const DetailedTooltip = () => {
+  return <div />;
+};

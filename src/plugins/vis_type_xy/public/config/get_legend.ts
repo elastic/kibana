@@ -17,7 +17,11 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import { LegendOptions, VisParams } from '../types';
+
+export function getLegend({ addLegend, legendPosition }: VisParams): LegendOptions {
+  return {
+    show: addLegend,
+    position: legendPosition,
+  };
+}

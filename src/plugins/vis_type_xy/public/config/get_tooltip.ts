@@ -17,7 +17,29 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import { TooltipProps, TooltipType, TooltipValueFormatter, TickFormatter } from '@elastic/charts';
+
+import { VisParams } from '../types';
+
+export function getTooltip(
+  { addTooltip, detailedTooltip }: VisParams,
+  formatter?: TickFormatter
+): TooltipProps {
+  // let type: TooltipType = TooltipType.None;
+  // if (addTooltip) {
+  //   if (detailedTooltip) {
+  //     type = TooltipType.Follow;
+  //   } else {
+  //     type = TooltipType.VerticalCursor;
+  //   }
+  // }
+  const type = addTooltip ? TooltipType.VerticalCursor : TooltipType.None;
+  const headerFormatter: TooltipValueFormatter | undefined = formatter
+    ? ({ value }) => formatter(value)
+    : undefined;
+
+  return {
+    type,
+    headerFormatter,
+  };
+}

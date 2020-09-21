@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+export { getConfig } from './get_config';

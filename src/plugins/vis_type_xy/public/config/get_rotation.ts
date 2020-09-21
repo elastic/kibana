@@ -17,7 +17,14 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import { Rotation } from '@elastic/charts';
+
+import { CategoryAxis } from '../types';
+
+export function getRotation({ position }: CategoryAxis): Rotation {
+  if (position === 'left' || position === 'right') {
+    return 90;
+  }
+
+  return 0;
+}

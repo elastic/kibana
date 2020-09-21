@@ -17,7 +17,20 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import moment from 'moment';
+
+import { getUISettings } from '../services';
+
+/**
+ * Get timeZone from uiSettings
+ */
+export function getTimeZone() {
+  const uiSettings = getUISettings();
+  if (uiSettings.isDefault('dateFormat:tz')) {
+    const detectedTimeZone = moment.tz.guess();
+    if (detectedTimeZone) return detectedTimeZone;
+    else return moment().format('Z');
+  } else {
+    return uiSettings.get('dateFormat:tz', 'Browser');
+  }
+}

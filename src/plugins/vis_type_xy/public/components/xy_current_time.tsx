@@ -17,7 +17,21 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './config';
-export * from './param';
-export * from './vis_type';
+import React, { FC } from 'react';
+import { DomainRange } from '@elastic/charts';
+import { CurrentTime } from '../../../charts/public';
+
+interface XYCurrentTime {
+  enabled: boolean;
+  isDarkMode: boolean;
+  domain: DomainRange;
+}
+
+export const XYCurrentTime: FC<XYCurrentTime> = ({ enabled, isDarkMode, domain }) => {
+  if (!enabled) {
+    return null;
+  }
+
+  const domainEnd = 'max' in domain ? domain.max : undefined;
+  return <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />;
+};

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
@@ -33,6 +34,7 @@ import {
   AxisMode,
   ThresholdLineStyle,
   InterpolationMode,
+  XyVisTypeDefinition,
 } from '../types';
 import { VisComponent } from '../vis_component';
 import { toExpression } from '../to_expression';
@@ -40,7 +42,7 @@ import { ChartType } from '../../common/types';
 import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 
-export const lineVisTypeDefinition = {
+export const lineVisTypeDefinition: XyVisTypeDefinition = {
   name: 'line',
   title: i18n.translate('visTypeXy.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
