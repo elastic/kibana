@@ -153,33 +153,47 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           (el: { data: { serviceAnomalyStats?: {} } }) => !isEmpty(el.data.serviceAnomalyStats)
         );
 
-        expectSnapshot(dataWithAnomalies.length).toMatchInline(`2`);
+        expectSnapshot(dataWithAnomalies.length).toMatchInline(`6`);
         expectSnapshot(dataWithAnomalies.slice(0, 3)).toMatchInline(`
           Array [
             Object {
               "data": Object {
-                "agent.name": "go",
-                "id": "opbeans-go",
+                "agent.name": "rum-js",
+                "id": "opbeans-rum",
                 "service.environment": "testing",
-                "service.name": "opbeans-go",
+                "service.name": "opbeans-rum",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 3933482.17647059,
-                  "anomalyScore": 2.61017027514827,
+                  "anomalyScore": 0,
                   "healthStatus": "healthy",
-                  "jobId": "apm-testing-d457-high_mean_transaction_duration",
+                  "jobId": "apm-environment_not_defined-7ed6-high_mean_transaction_duration",
+                  "transactionType": "page-load",
+                },
+              },
+            },
+            Object {
+              "data": Object {
+                "agent.name": "python",
+                "id": "opbeans-python",
+                "service.environment": "production",
+                "service.name": "opbeans-python",
+                "serviceAnomalyStats": Object {
+                  "actualValue": 66218.08333333333,
+                  "anomalyScore": 0,
+                  "healthStatus": "healthy",
+                  "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",
                 },
               },
             },
             Object {
               "data": Object {
-                "agent.name": "ruby",
-                "id": "opbeans-ruby",
+                "agent.name": "java",
+                "id": "opbeans-java",
                 "service.environment": "production",
-                "service.name": "opbeans-ruby",
+                "service.name": "opbeans-java",
                 "serviceAnomalyStats": Object {
-                  "actualValue": 684716.581395349,
-                  "anomalyScore": 0.204989077199074,
+                  "actualValue": 14901.319999999996,
+                  "anomalyScore": 0,
                   "healthStatus": "healthy",
                   "jobId": "apm-production-229a-high_mean_transaction_duration",
                   "transactionType": "request",

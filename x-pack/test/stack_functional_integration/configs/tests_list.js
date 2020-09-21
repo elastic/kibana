@@ -46,9 +46,13 @@ export default (envObj) => {
 
   if (envObj.XPACK === 'YES' && ['TRIAL', 'GOLD', 'PLATINUM'].includes(envObj.LICENSE)) {
     // we can't test enabling monitoring on this config because we already enable it through cluster settings for both clusters.
-    if (envObj.VM !== 'ubuntu16_tar_ccs') {
+    if (envObj.VM !== 'ubuntu16_tar_ccs' && envObj.VM !== 'centos7_rpm') {
       // monitoring is last because we switch to the elastic superuser here
       xs.push('monitoring');
+    }
+    if (envObj.VM === 'centos7_rpm') {
+      // monitoring is last because we switch to the elastic superuser here
+      xs.push('monitoring/_monitoring_metricbeat');
     }
   }
 
