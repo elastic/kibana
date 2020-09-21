@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable complexity */
-
 import moment from 'moment';
 
 import { AlertServices } from '../../../../../alerts/server';
@@ -25,7 +23,7 @@ interface SearchAfterAndBulkCreateParams {
   previousStartedAt: Date | null | undefined;
   ruleParams: RuleTypeParams;
   services: AlertServices;
-  listClient: ListClient | undefined; // TODO: undefined is for temporary development, remove before merged
+  listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
   id: string;
@@ -53,6 +51,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
+  errors: string[];
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -83,15 +82,16 @@ export const searchAfterAndBulkCreate = async ({
   buildRuleMessage,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const toReturn: SearchAfterAndBulkCreateReturnType = {
-    success: false,
+    success: true,
     searchAfterTimes: [],
     bulkCreateTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
+    errors: [],
   };
 
   // sortId tells us where to start our next consecutive search_after query
-  let sortId;
+  let sortId: string | undefined;
 
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
@@ -113,6 +113,7 @@ export const searchAfterAndBulkCreate = async ({
     if (tuple == null || tuple.to == null || tuple.from == null) {
       logger.error(buildRuleMessage(`[-] malformed date tuple`));
       toReturn.success = false;
+      toReturn.errors = [...new Set([...toReturn.errors, 'malformed date tuple'])];
       return toReturn;
     }
     signalsCreatedCount = 0;
@@ -155,7 +156,7 @@ export const searchAfterAndBulkCreate = async ({
         // yields zero hits, but there were hits using the previous
         // sortIds.
         // e.g. totalHits was 156, index 50 of 100 results, do another search-after
-        // this time with a new sortId, index 22 of the remainding 56, get another sortId
+        // this time with a new sortId, index 22 of the remaining 56, get another sortId
         // search with that sortId, total is still 156 but the hits.hits array is empty.
         if (totalHits === 0 || searchResult.hits.hits.length === 0) {
           logger.debug(
@@ -165,7 +166,6 @@ export const searchAfterAndBulkCreate = async ({
               } was 0, exiting and moving on to next tuple`
             )
           );
-          toReturn.success = true;
           break;
         }
         toReturn.lastLookBackDate =
@@ -178,16 +178,13 @@ export const searchAfterAndBulkCreate = async ({
         // filter out the search results that match with the values found in the list.
         // the resulting set are signals to be indexed, given they are not duplicates
         // of signals already present in the signals index.
-        const filteredEvents: SignalSearchResponse =
-          listClient != null
-            ? await filterEventsAgainstList({
-                listClient,
-                exceptionsList,
-                logger,
-                eventSearchResult: searchResult,
-                buildRuleMessage,
-              })
-            : searchResult;
+        const filteredEvents: SignalSearchResponse = await filterEventsAgainstList({
+          listClient,
+          exceptionsList,
+          logger,
+          eventSearchResult: searchResult,
+          buildRuleMessage,
+        });
 
         // only bulk create if there are filteredEvents leftover
         // if there isn't anything after going through the value list filter
@@ -204,6 +201,8 @@ export const searchAfterAndBulkCreate = async ({
           const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
+            success: bulkSuccess,
+            errors: bulkErrors,
           } = await singleBulkCreate({
             filteredEvents,
             ruleParams,
@@ -234,42 +233,28 @@ export const searchAfterAndBulkCreate = async ({
           logger.debug(
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
           );
-
-          if (
-            filteredEvents.hits.hits[0].sort != null &&
-            filteredEvents.hits.hits[0].sort.length !== 0
-          ) {
-            sortId = filteredEvents.hits.hits[0].sort
-              ? filteredEvents.hits.hits[0].sort[0]
-              : undefined;
-          } else {
-            logger.debug(buildRuleMessage('sortIds was empty on filteredEvents'));
-            toReturn.success = true;
-            break;
-          }
-        } else {
-          // we are guaranteed to have searchResult hits at this point
-          // because we check before if the totalHits or
-          // searchResult.hits.hits.length is 0
-          if (
-            searchResult.hits.hits[0].sort != null &&
-            searchResult.hits.hits[0].sort.length !== 0
-          ) {
-            sortId = searchResult.hits.hits[0].sort ? searchResult.hits.hits[0].sort[0] : undefined;
-          } else {
-            logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
-            toReturn.success = true;
-            break;
-          }
+          toReturn.success = toReturn.success && bulkSuccess;
+          toReturn.errors = [...new Set([...toReturn.errors, ...bulkErrors])];
         }
-      } catch (exc) {
+
+        // we are guaranteed to have searchResult hits at this point
+        // because we check before if the totalHits or
+        // searchResult.hits.hits.length is 0
+        const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1].sort;
+        if (lastSortId != null && lastSortId.length !== 0) {
+          sortId = lastSortId[0];
+        } else {
+          logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
+          break;
+        }
+      } catch (exc: unknown) {
         logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
         toReturn.success = false;
+        toReturn.errors = [...new Set([...toReturn.errors, `${exc}`])];
         return toReturn;
       }
     }
   }
   logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
-  toReturn.success = true;
   return toReturn;
 };
