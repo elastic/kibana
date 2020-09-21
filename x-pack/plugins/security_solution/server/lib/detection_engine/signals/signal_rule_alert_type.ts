@@ -27,6 +27,7 @@ import {
   RuleAlertAttributes,
   EqlSignalSearchResponse,
   SignalHit,
+  BaseSignalHit,
 } from './types';
 import {
   getGapBetweenRuns,
@@ -34,6 +35,8 @@ import {
   getExceptions,
   getGapMaxCatchupRatio,
   MAX_RULE_GAP_RATIO,
+  generateBuildingBlockIds,
+  generateSignalId,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -52,6 +55,12 @@ import { getNotificationResultsLink } from '../notifications/utils';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
 import { bulkInsertSignals, filterDuplicateSignals } from './single_bulk_create';
 import { buildSignalFromSequence, buildSignalFromEvent } from './build_bulk_body';
+import { buildParent } from './build_signal';
+
+interface Sequence {
+  buildingBlocks: BaseSignalHit[];
+  sequenceSignal: BaseSignalHit;
+}
 
 export const signalRulesAlertType = ({
   logger,
@@ -364,29 +373,59 @@ export const signalRulesAlertType = ({
             'transport.request',
             request
           );
-          let newSignals: SignalHit[] | undefined;
+          let newSignals: BaseSignalHit[] | undefined;
           if (response.hits.sequences !== undefined) {
-            newSignals = response.hits.sequences.map((sequence) =>
-              buildSignalFromSequence(sequence, savedObject)
+            // 2D array: For each sequence, we make an array containing building block signals for each
+            // event within the sequence. We also wrap each building block with a doc id and index so they're ready
+            // to be used in the next step - creating the signal that links them all together.
+            const buildingBlockArrays = response.hits.sequences.map((sequence) =>
+              wrapBuildingBlocks(
+                sequence.events.map((event) => {
+                  const signal = buildSignalFromEvent(event, savedObject);
+                  signal.signal.rule.building_block_type = 'default';
+                  return signal;
+                }),
+                outputIndex
+              )
             );
+
+            // Now that we have an array of building blocks for each matching sequence,
+            // we can build the signal that links the building blocks of a sequence together
+            // and also insert references to this signal in each building block
+            const sequences: Sequence[] = buildingBlockArrays.map((blocks) => {
+              const sequenceSignal = wrapSignal(
+                buildSignalFromSequence(blocks, savedObject),
+                outputIndex
+              );
+              blocks.forEach((block) => {
+                // TODO: fix type of blocks so we don't have to check existence of _source.signal
+                if (block._source.signal) {
+                  block._source.signal.child = buildParent(sequenceSignal);
+                }
+              });
+              return {
+                buildingBlocks: blocks,
+                sequenceSignal,
+              };
+            });
+            newSignals = sequences.reduce((acc: BaseSignalHit[], sequence): BaseSignalHit[] => {
+              acc.push(...sequence.buildingBlocks);
+              acc.push(sequence.sequenceSignal);
+              return acc;
+            }, []);
           } else if (response.hits.events !== undefined) {
             newSignals = response.hits.events.map((event) =>
-              buildSignalFromEvent(event, savedObject)
+              wrapSignal(buildSignalFromEvent(event, savedObject), outputIndex)
             );
           } else {
             throw new Error(
               'eql query response should have either `sequences` or `events` but had neither'
             );
           }
-          const filteredSignals = filterDuplicateSignals(alertId, newSignals);
-          if (filteredSignals.length > 0) {
-            const insertResult = await bulkInsertSignals(
-              filteredSignals,
-              outputIndex,
-              logger,
-              services,
-              refresh
-            );
+          // TODO: replace with code that filters out recursive rule signals while allowing sequences and their building blocks
+          // const filteredSignals = filterDuplicateSignals(alertId, newSignals);
+          if (newSignals.length > 0) {
+            const insertResult = await bulkInsertSignals(newSignals, logger, services, refresh);
             result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
             result.createdSignalsCount += insertResult.createdItemsCount;
           }
@@ -467,6 +506,29 @@ export const signalRulesAlertType = ({
           lastLookBackDate: result.lastLookBackDate?.toISOString(),
         });
       }
+    },
+  };
+};
+
+export const wrapBuildingBlocks = (buildingBlocks: SignalHit[], index: string): BaseSignalHit[] => {
+  const blockIds = generateBuildingBlockIds(buildingBlocks);
+  return buildingBlocks.map((block, idx) => {
+    return {
+      _id: blockIds[idx],
+      _index: index,
+      _source: {
+        ...block,
+      },
+    };
+  });
+};
+
+export const wrapSignal = (signal: SignalHit, index: string): BaseSignalHit => {
+  return {
+    _id: generateSignalId(signal),
+    _index: index,
+    _source: {
+      ...signal,
     },
   };
 };

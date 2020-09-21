@@ -7,10 +7,10 @@
 import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerts/server';
-import { SignalSearchResponse, BulkResponse, SignalHit } from './types';
+import { SignalSearchResponse, BulkResponse, SignalHit, BaseSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
-import { generateId, makeFloatString, errorAggregator, generateSignalId } from './utils';
+import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../src/core/server';
 
@@ -173,28 +173,24 @@ export const singleBulkCreate = async ({
 
 // Bulk Index new signals.
 export const bulkInsertSignals = async (
-  filteredSignals: SignalHit[],
-  signalsIndex: string,
+  signals: BaseSignalHit[],
   logger: Logger,
   services: AlertServices,
   refresh: RefreshTypes
 ): Promise<BulkInsertSignalsResponse> => {
-  logger.debug(`about to bulk create ${filteredSignals.length} signals`);
-
   // index documents after creating an ID based on the
   // id and index of each parent and the rule ID
-  const bulkBody = filteredSignals.flatMap((doc) => [
+  const bulkBody = signals.flatMap((doc) => [
     {
       create: {
-        _index: signalsIndex,
-        _id: generateSignalId(doc),
+        _index: doc._index,
+        _id: doc._id,
       },
     },
-    doc,
+    doc._source,
   ]);
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {
-    index: signalsIndex,
     refresh,
     body: bulkBody,
   });

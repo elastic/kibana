@@ -51,6 +51,7 @@ export interface SignalSource {
     parent?: Ancestor;
     parents?: Ancestor[];
     ancestors: Ancestor[];
+    child?: Ancestor;
     rule: {
       id: string;
     };

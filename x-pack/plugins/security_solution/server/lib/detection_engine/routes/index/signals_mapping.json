@@ -41,6 +41,25 @@
               }
             }
           },
+          "child": {
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
+          },
           "ancestors": {
             "properties": {
               "rule": {

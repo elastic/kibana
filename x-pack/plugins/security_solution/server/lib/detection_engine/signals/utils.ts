@@ -223,6 +223,27 @@ export const generateSignalId = (newSignal: SignalHit) =>
     )
     .digest('hex');
 
+/**
+ * Generates unique doc ids for each building block signal within a sequence. The id of each building block
+ * depends on the parents of every building block, so that a signal which appears in multiple different sequences
+ * (e.g. if multiple rules build sequences that share a common event/signal) will get a unique id per sequence.
+ * @param buildingBlocks The full list of building blocks in the sequence.
+ */
+export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] => {
+  const baseHashString = buildingBlocks.reduce(
+    (baseString, block) =>
+      baseString
+        .concat(
+          block.signal.parents.reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
+        )
+        .concat(block.signal.rule.id),
+    ''
+  );
+  return buildingBlocks.map((block, idx) =>
+    createHash('sha256').update(baseHashString).update(String(idx)).digest('hex')
+  );
+};
+
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {
     return moment.duration(parseDuration(intervalString));

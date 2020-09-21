@@ -82,11 +82,11 @@ export const buildBulkBody = ({
 };
 
 export const buildSignalFromSequence = (
-  sequence: EqlSequence<SignalSource>,
+  events: BaseSignalHit[],
   ruleSO: SavedObject<RuleAlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
-  const signal: Signal = buildSignal(sequence.events, rule);
+  const signal: Signal = buildSignal(events, rule);
   return {
     '@timestamp': new Date().toISOString(),
     event: {

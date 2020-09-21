@@ -9,10 +9,7 @@ import { sampleDocNoSortId, sampleRuleAlertParams, sampleRuleGuid } from './__mo
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import {
-  getPartialRulesSchemaMock,
-  getRulesSchemaMock,
-} from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { getRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 
 describe('buildRule', () => {
   beforeEach(() => {
@@ -285,14 +282,14 @@ describe('buildRule', () => {
       `${INTERNAL_IMMUTABLE_KEY}:true`,
     ];
     const noInternals = removeInternalTagsFromRule(rule);
-    expect(noInternals).toEqual(getPartialRulesSchemaMock());
+    expect(noInternals).toEqual(getRulesSchemaMock());
   });
 
   test('it works with an empty array', () => {
     const rule = getRulesSchemaMock();
     rule.tags = [];
     const noInternals = removeInternalTagsFromRule(rule);
-    const expected = getPartialRulesSchemaMock();
+    const expected = getRulesSchemaMock();
     expected.tags = [];
     expect(noInternals).toEqual(expected);
   });
