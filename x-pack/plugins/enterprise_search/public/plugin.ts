@@ -106,7 +106,12 @@ export class EnterpriseSearchPlugin implements Plugin {
         const { renderApp, renderHeaderActions } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
 
-        params.setHeaderActionMenu((element) => renderHeaderActions(() => 'Hello World', element));
+        const { WorkplaceSearchHeaderActions } = await import(
+          './applications/workplace_search/components/layout'
+        );
+        params.setHeaderActionMenu((element) =>
+          renderHeaderActions(WorkplaceSearchHeaderActions, element)
+        );
 
         return renderApp(WorkplaceSearch, params, coreStart, plugins, this.config, this.data);
       },

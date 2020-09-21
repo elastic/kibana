@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { WorkplaceSearchNav } from './nav';
-export { WorkplaceSearchHeaderActions } from './kibana_header_actions';
+import React from 'react';
+
+export const WorkplaceSearchHeaderActions: React.FC = () => <div>Hello World</div>;
