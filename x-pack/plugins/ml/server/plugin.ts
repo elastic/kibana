@@ -15,6 +15,7 @@ import {
   CapabilitiesStart,
   IClusterClient,
 } from 'kibana/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
@@ -74,6 +75,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       }),
       icon: PLUGIN_ICON,
       order: 500,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
