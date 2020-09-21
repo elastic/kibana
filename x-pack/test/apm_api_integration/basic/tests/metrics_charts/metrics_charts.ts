@@ -19,8 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/77870
-  describe.skip('when data is loaded', () => {
+  describe('when data is loaded', () => {
     before(() => esArchiver.load('metrics_8.0.0'));
     after(() => esArchiver.unload('metrics_8.0.0'));
 
