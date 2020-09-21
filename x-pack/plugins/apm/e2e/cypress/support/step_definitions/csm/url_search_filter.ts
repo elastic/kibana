@@ -24,8 +24,8 @@ Then(`it displays top pages in the suggestion popover`, () => {
     listOfUrls.should('have.length', 5);
 
     const actualUrlsText = [
-      'http://opbeans-node:3000/dashboardPage views: 17Page load duration: 108.734 ms Select',
-      'http://opbeans-node:3000/ordersPage views: 14Page load duration: 71.5895 ms',
+      'http://opbeans-node:3000/dashboardPage views: 17Page load duration: 109 ms Select',
+      'http://opbeans-node:3000/ordersPage views: 14Page load duration: 72 ms',
     ];
 
     cy.get('li.euiSelectableListItem')
