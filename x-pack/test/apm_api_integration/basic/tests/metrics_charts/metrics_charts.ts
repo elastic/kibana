@@ -99,8 +99,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                0.72209,
-                0.71817,
+                0.722093920925555,
+                0.718173546796348,
               ]
             `);
           });
@@ -161,7 +161,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .toMatchInline(`
               Array [
                 0.203,
-                0.17878,
+                0.178777777777778,
                 0.01,
                 0.009,
               ]
@@ -203,8 +203,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                0.70792,
-                0.7054,
+                0.707924703557837,
+                0.705395980841182,
               ]
             `);
           });
@@ -213,8 +213,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const yValues = systemMemoryUsageChart?.series.map((serie) => first(serie.data)?.y);
             expectSnapshot(yValues).toMatchInline(`
               Array [
-                0.70792,
-                0.70792,
+                0.707924703557837,
+                0.707924703557837,
               ]
             `);
           });
@@ -243,7 +243,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                222501617.77778,
+                222501617.777778,
                 374341632,
                 1560281088,
               ]
@@ -284,8 +284,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                138573397.33333,
-                147677639.11111,
+                138573397.333333,
+                147677639.111111,
               ]
             `);
           });
@@ -323,7 +323,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                44.44444,
+                44.4444444444444,
                 45,
               ]
             `);
@@ -422,16 +422,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
           .toMatchInline(`
           Array [
-            0.11452,
-            0.114,
+            0.114523896426499,
+            0.114002376090415,
           ]
         `);
 
         const yValues = systemMemoryUsageChart?.series.map((serie) => first(serie.data)?.y);
         expectSnapshot(yValues).toMatchInline(`
           Array [
-            0.11384,
-            0.11384,
+            0.11383724014064,
+            0.11383724014064,
           ]
         `);
       });

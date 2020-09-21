@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotState, toMatchSnapshot, toMatchInlineSnapshot } from 'jest-snapshot';
+import {
+  SnapshotState,
+  toMatchSnapshot,
+  toMatchInlineSnapshot,
+  addSerializer,
+} from 'jest-snapshot';
 import path from 'path';
 import expect from '@kbn/expect';
 // @ts-expect-error
@@ -13,7 +18,7 @@ import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { Suite, Test } from 'mocha';
 import { flatten } from 'lodash';
-import { roundNumbers } from './utils/round_number';
+import { roundNumber } from './utils/round_number';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -29,6 +34,15 @@ let testContext: {
 } | null = null;
 
 let registered: boolean = false;
+
+addSerializer({
+  serialize: (value: number) => {
+    return String(roundNumber(value));
+  },
+  test: (value: any) => {
+    return typeof value === 'number';
+  },
+});
 
 function getSnapshotMeta(currentTest: Test) {
   // Make sure snapshot title is unique per-file, rather than entire
@@ -186,12 +200,10 @@ export function expectSnapshot(received: any) {
     throw new Error('A current Mocha context is needed to match snapshots');
   }
 
-  const _received = roundNumbers(received);
-
   return {
-    toMatch: expectToMatchSnapshot.bind(null, testContext.snapshotContext, _received),
+    toMatch: expectToMatchSnapshot.bind(null, testContext.snapshotContext, received),
     // use bind to support optional 3rd argument (actual)
-    toMatchInline: expectToMatchInlineSnapshot.bind(null, testContext.snapshotContext, _received),
+    toMatchInline: expectToMatchInlineSnapshot.bind(null, testContext.snapshotContext, received),
   };
 }
 

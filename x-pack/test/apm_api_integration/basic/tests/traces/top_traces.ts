@@ -73,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "serviceName": "opbeans-node",
             "transactionName": "POST /api/orders",
             "transactionType": "request",
-            "transactionsPerMinute": 0.03333,
+            "transactionsPerMinute": 0.0333333333333333,
           }
         `);
 
