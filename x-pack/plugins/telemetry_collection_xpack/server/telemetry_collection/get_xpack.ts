@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
 import { XpackUsage } from '@elastic/elasticsearch/api/requestParams';
+import { ElasticsearchClient } from '../../../../../src/core/server';
 import { TIMEOUT } from './constants';
 
 /**
