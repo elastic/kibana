@@ -68,5 +68,7 @@ export { ORIGIN } from './common/constants/origin';
 
 export { WmsOptions } from './components/wms_options';
 
+export { lazyLoadMapsLegacyModules } from './lazy_load_bundle';
+
 export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
 export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;

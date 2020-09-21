@@ -25,8 +25,6 @@ import { setToasts, setUiSettings, setKibanaVersion, setMapsLegacyConfig } from 
 import { ServiceSettings } from './map/service_settings';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
-// @ts-ignore
-import { KibanaMap } from './map/kibana_map';
 import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
 import { MapsLegacyConfig } from '../config';
 // @ts-ignore
@@ -68,16 +66,13 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
     bindSetupCoreAndPlugins(core, config, kibanaVersion);
 
     const serviceSettings = new ServiceSettings(config, config.tilemap);
-    const getKibanaMapFactoryProvider = (...args: any) => new KibanaMap(...args);
-    const getBaseMapsVis = () =>
-      new BaseMapsVisualizationProvider(getKibanaMapFactoryProvider, serviceSettings);
+    const getBaseMapsVis = () => new BaseMapsVisualizationProvider(serviceSettings);
 
     return {
       serviceSettings,
       getZoomPrecision,
       getPrecision,
       config,
-      getKibanaMapFactoryProvider,
       getBaseMapsVis,
     };
   }

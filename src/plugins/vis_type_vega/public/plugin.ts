@@ -28,7 +28,6 @@ import {
   setSavedObjects,
   setInjectedVars,
   setUISettings,
-  setKibanaMapFactory,
   setMapsLegacyConfig,
   setInjectedMetadata,
 } from './services';
@@ -81,7 +80,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);
-    setKibanaMapFactory(mapsLegacy.getKibanaMapFactoryProvider);
     setMapsLegacyConfig(mapsLegacy.config);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {

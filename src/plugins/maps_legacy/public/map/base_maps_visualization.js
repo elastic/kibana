@@ -22,11 +22,12 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { getEmsTileLayerId, getUiSettings, getToasts } from '../kibana_services';
+import { lazyLoadMapsLegacyModules } from '../lazy_load_bundle';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) {
+export function BaseMapsVisualizationProvider(mapServiceSettings) {
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
@@ -95,9 +96,9 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
       const centerFromUIState = uiState.get('mapCenter');
       options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.params.mapZoom;
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
-      const services = { toastService };
 
-      this._kibanaMap = getKibanaMap(this._container, options, services);
+      const modules = await lazyLoadMapsLegacyModules();
+      this._kibanaMap = new modules.KibanaMap(this._container, options);
       this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
       this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 
