@@ -15,7 +15,7 @@ import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
-import { APM_SERVICE_MAPS_FEATURE_NAME } from '../feature';
+import { notifyFeatureUsage } from '../feature';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getParsedUiFilters } from '../lib/helpers/convert_ui_filters/get_parsed_ui_filters';
 
@@ -37,7 +37,11 @@ export const serviceMapRoute = createRoute(() => ({
     if (!isActivePlatinumLicense(context.licensing.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    context.licensing.featureUsage.notifyUsage(APM_SERVICE_MAPS_FEATURE_NAME);
+
+    notifyFeatureUsage({
+      licensingPlugin: context.licensing,
+      featureName: 'serviceMaps',
+    });
 
     const logger = context.logger;
     const setup = await setupRequest(context, request);
