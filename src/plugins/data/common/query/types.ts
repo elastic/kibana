@@ -19,7 +19,8 @@
 
 export * from './timefilter/types';
 
-export interface Query {
+// eslint-disable-next-line
+export type Query = {
   query: string | { [key: string]: any };
   language: string;
-}
+};

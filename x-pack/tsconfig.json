@@ -22,7 +22,6 @@
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
       "plugins/xpack_main/*": ["x-pack/legacy/plugins/xpack_main/public/*"],
-      "plugins/spaces/*": ["x-pack/legacy/plugins/spaces/public/*"],
       "test_utils/*": ["x-pack/test_utils/*"],
       "fixtures/*": ["src/fixtures/*"]
     },
