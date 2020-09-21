@@ -23,16 +23,6 @@ const defaultApiToken: IApiToken = {
 
 // TODO CREATE_MESSAGE, UPDATE_MESSAGE, and DELETE_MESSAGE from ent-search
 
-export const apiTokenSort = (apiTokenA: IApiToken, apiTokenB: IApiToken) => {
-  if (!apiTokenA.id) {
-    return -1;
-  }
-  if (!apiTokenB.id) {
-    return 1;
-  }
-  return apiTokenA.id - apiTokenB.id;
-};
-
 export interface ICredentialsLogicActions {
   addEngineName(engineName: string): string;
   onApiKeyDelete(tokenName: string): string;
