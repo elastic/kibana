@@ -54,6 +54,7 @@ export {
   AssetType,
   Installable,
   KibanaAssetType,
+  KibanaSavedObjectType,
   AssetParts,
   AssetsGroupedByServiceByType,
   CategoryId,

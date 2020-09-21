@@ -38,6 +38,17 @@ export enum KibanaAssetType {
   map = 'map',
 }
 
+/*
+ Enum of saved object types that are allowed to be installed 
+*/
+export enum KibanaSavedObjectType {
+  dashboard = 'dashboard',
+  visualization = 'visualization',
+  search = 'search',
+  indexPattern = 'index-pattern',
+  map = 'map',
+}
+
 export enum ElasticsearchAssetType {
   componentTemplate = 'component_template',
   ingestPipeline = 'ingest_pipeline',
@@ -258,7 +269,9 @@ export type NotInstalled<T = {}> = T & {
 
 export type AssetReference = KibanaAssetReference | EsAssetReference;
 
-export type KibanaAssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
+export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: KibanaSavedObjectType;
+};
 export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
 };

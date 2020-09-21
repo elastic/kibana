@@ -11,28 +11,34 @@ import {
 } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import * as Registry from '../../registry';
-import { AssetType, KibanaAssetType, AssetReference, AssetParts } from '../../../../types';
+import {
+  AssetType,
+  KibanaAssetType,
+  AssetReference,
+  AssetParts,
+  KibanaSavedObjectType,
+} from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { IndexPatternType } from '../index_pattern/install';
 
 type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
-  type: AssetType;
+  type: KibanaSavedObjectType;
 };
 export type ArchiveAsset = Pick<
   SavedObject,
   'id' | 'attributes' | 'migrationVersion' | 'references'
 > & {
-  type: AssetType;
+  type: KibanaSavedObjectType;
 };
 
 // KibanaSavedObjectTypes are used to ensure saved objects being created for a given
 // KibanaAssetType have the correct type
-const KibanaSavedObjectTypes: Record<KibanaAssetType, string> = {
-  [KibanaAssetType.dashboard]: 'dashboard',
-  [KibanaAssetType.indexPattern]: 'index-pattern',
-  [KibanaAssetType.map]: 'map',
-  [KibanaAssetType.search]: 'search',
-  [KibanaAssetType.visualization]: 'visualization',
+const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
+  [KibanaAssetType.dashboard]: KibanaSavedObjectType.dashboard,
+  [KibanaAssetType.indexPattern]: KibanaSavedObjectType.indexPattern,
+  [KibanaAssetType.map]: KibanaSavedObjectType.map,
+  [KibanaAssetType.search]: KibanaSavedObjectType.search,
+  [KibanaAssetType.visualization]: KibanaSavedObjectType.visualization,
 };
 
 // Define how each asset type will be installed
@@ -106,7 +112,9 @@ export const deleteKibanaInstalledRefs = async (
     installed_kibana: installedAssetsToSave,
   });
 };
-export async function getKibanaAssets(paths: string[]) {
+export async function getKibanaAssets(
+  paths: string[]
+): Promise<Record<KibanaAssetType, ArchiveAsset[]>> {
   const kibanaAssetTypes = Object.values(KibanaAssetType);
   const isKibanaAssetType = (path: string) => {
     const parts = Registry.pathParts(path);
@@ -130,7 +138,7 @@ export async function getKibanaAssets(paths: string[]) {
   const result = {} as Record<KibanaAssetType, ArchiveAsset[]>;
 
   for (const [index, assetType] of kibanaAssetTypes.entries()) {
-    const expectedType = KibanaSavedObjectTypes[assetType];
+    const expectedType = KibanaSavedObjectTypeMapping[assetType];
     const properlyTypedAssets = resolvedAssets[index].filter(({ type }) => type === expectedType);
 
     result[assetType] = properlyTypedAssets;
@@ -176,7 +184,7 @@ async function installKibanaIndexPatterns({
 }
 
 export function toAssetReference({ id, type }: SavedObject) {
-  const reference: AssetReference = { id, type };
+  const reference: AssetReference = { id, type: type as KibanaSavedObjectType };
 
   return reference;
 }
