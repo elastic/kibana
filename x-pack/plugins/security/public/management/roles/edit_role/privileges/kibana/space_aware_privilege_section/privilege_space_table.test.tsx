@@ -28,6 +28,7 @@ const features = [
     id: 'normal',
     name: 'normal feature',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: { all: [], read: [] },
@@ -43,6 +44,7 @@ const features = [
     id: 'normal_with_sub',
     name: 'normal feature with sub features',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: { all: [], read: [] },
@@ -96,6 +98,7 @@ const features = [
     id: 'bothPrivilegesExcludedFromBase',
     name: 'bothPrivilegesExcludedFromBase',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         excludeFromBasePrivileges: true,
@@ -113,6 +116,7 @@ const features = [
     id: 'allPrivilegeExcludedFromBase',
     name: 'allPrivilegeExcludedFromBase',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         excludeFromBasePrivileges: true,

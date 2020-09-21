@@ -24,6 +24,7 @@ import { transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { PartialFilter } from '../../types';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
@@ -78,6 +79,10 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         tags,
         threat,
         threshold,
+        threat_filters: threatFilters,
+        threat_index: threatIndex,
+        threat_query: threatQuery,
+        threat_mapping: threatMapping,
         throttle,
         timestamp_override: timestampOverride,
         to,
@@ -87,13 +92,10 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         exceptions_list: exceptionsList,
       } = request.body;
       try {
-        const query =
-          type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+        const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          type !== 'machine_learning' && type !== 'eql_query' && languageOrUndefined == null
-            ? 'kuery'
-            : languageOrUndefined;
+          !isMlRule(type) && type !== 'eql_query' && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
@@ -166,6 +168,10 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           type,
           threat,
           threshold,
+          threatFilters,
+          threatIndex,
+          threatQuery,
+          threatMapping,
           timestampOverride,
           references,
           note,

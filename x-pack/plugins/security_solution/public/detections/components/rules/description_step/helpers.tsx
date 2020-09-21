@@ -383,11 +383,19 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
-    case 'eql_query': {
+    case 'eql': {
       return [
         {
           title: label,
-          description: 'placeholder to get rid of typecheck error',
+          description: i18n.EQL_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    case 'threat_match': {
+      return [
+        {
+          title: label,
+          description: i18n.THREAT_MATCH_TYPE_DESCRIPTION,
         },
       ];
     }

@@ -46,6 +46,12 @@ import {
   SeverityMapping,
   event_category_override,
 } from '../common/schemas';
+import {
+  threat_index,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+} from '../types/threat_mapping';
 
 import {
   DefaultStringArray,
@@ -118,6 +124,10 @@ export const addPrepackagedRulesSchema = t.intersection([
       references: DefaultStringArray, // defaults to empty array of strings if not set during decode
       note, // defaults to "undefined" if not set during decode
       exceptions_list: DefaultListArray, // defaults to empty array if not set during decode
+      threat_filters, // defaults to "undefined" if not set during decode
+      threat_mapping, // defaults to "undefined" if not set during decode
+      threat_query, // defaults to "undefined" if not set during decode
+      threat_index, // defaults to "undefined" if not set during decode
     })
   ),
 ]);

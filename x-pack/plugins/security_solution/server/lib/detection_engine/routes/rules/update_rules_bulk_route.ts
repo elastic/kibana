@@ -13,6 +13,7 @@ import {
   UpdateRulesBulkSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -109,13 +110,10 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               });
             }
 
-            const query =
-              type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+            const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
             const language =
-              type !== 'machine_learning' && languageOrUndefined == null
-                ? 'kuery'
-                : languageOrUndefined;
+              !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
 
             // TODO: Fix these either with an is conversion or by better typing them within io-ts
             const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];

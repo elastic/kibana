@@ -164,6 +164,7 @@ function mockFeatures() {
       id: 'appName',
       name: 'appName',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           savedObject: {

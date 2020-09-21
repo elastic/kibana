@@ -49,6 +49,10 @@ const signalSchema = schema.object({
   lists: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // For backwards compatibility with customers that had a data bug in 7.7. Once we use a migration script please remove this.
   exceptions_list: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // For backwards compatibility with customers that had a data bug in 7.8. Once we use a migration script please remove this.
   exceptionsList: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  threatFilters: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  threatIndex: schema.maybe(schema.string()),
+  threatQuery: schema.maybe(schema.string()),
+  threatMapping: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
 });
 
 /**

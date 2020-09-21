@@ -157,6 +157,8 @@ describe('Transform: Common', () => {
       isContinuousModeEnabled: false,
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
+      transformFrequency: '1m',
+      transformSettingsMaxPageSearchSize: 100,
       destinationIndex: 'the-destination-index',
       touched: true,
       valid: true,
@@ -171,9 +173,13 @@ describe('Transform: Common', () => {
     expect(request).toEqual({
       description: 'the-transform-description',
       dest: { index: 'the-destination-index' },
+      frequency: '1m',
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      settings: {
+        max_page_search_size: 100,
       },
       source: {
         index: ['the-index-pattern-title'],

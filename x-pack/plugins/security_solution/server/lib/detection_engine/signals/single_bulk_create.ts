@@ -75,6 +75,7 @@ export interface SingleBulkCreateResponse {
   success: boolean;
   bulkCreateDuration?: string;
   createdItemsCount: number;
+  errors: string[];
 }
 
 export interface BulkInsertSignalsResponse {
@@ -106,7 +107,7 @@ export const singleBulkCreate = async ({
   logger.debug(`about to bulk create ${filteredEvents.hits.hits.length} events`);
   if (filteredEvents.hits.hits.length === 0) {
     logger.debug(`all events were duplicates`);
-    return { success: true, createdItemsCount: 0 };
+    return { success: true, createdItemsCount: 0, errors: [] };
   }
   // index documents after creating an ID based on the
   // source documents' originating index, and the original
@@ -155,20 +156,33 @@ export const singleBulkCreate = async ({
   logger.debug(`individual bulk process time took: ${makeFloatString(end - start)} milliseconds`);
   logger.debug(`took property says bulk took: ${response.took} milliseconds`);
 
-  if (response.errors) {
-    const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
+  const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+  const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
+  const errorCountByMessage = errorAggregator(response, [409]);
+
+  logger.debug(`bulk created ${createdItemsCount} signals`);
+  if (duplicateSignalsCount > 0) {
     logger.debug(`ignored ${duplicateSignalsCount} duplicate signals`);
-    const errorCountByMessage = errorAggregator(response, [409]);
-    if (!isEmpty(errorCountByMessage)) {
-      logger.error(
-        `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
-      );
-    }
   }
 
-  const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
-  logger.debug(`bulk created ${createdItemsCount} signals`);
-  return { success: true, bulkCreateDuration: makeFloatString(end - start), createdItemsCount };
+  if (!isEmpty(errorCountByMessage)) {
+    logger.error(
+      `[-] bulkResponse had errors with responses of: ${JSON.stringify(errorCountByMessage)}`
+    );
+    return {
+      errors: Object.keys(errorCountByMessage),
+      success: false,
+      bulkCreateDuration: makeFloatString(end - start),
+      createdItemsCount,
+    };
+  } else {
+    return {
+      errors: [],
+      success: true,
+      bulkCreateDuration: makeFloatString(end - start),
+      createdItemsCount,
+    };
+  }
 };
 
 // Bulk Index new signals.

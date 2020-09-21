@@ -43,6 +43,7 @@ export const getSignalParamsSchemaDecodedMock = (): SignalParamsSchema => ({
   savedId: null,
   severity: 'high',
   severityMapping: null,
+  threatFilters: null,
   threat: null,
   timelineId: null,
   timelineTitle: null,

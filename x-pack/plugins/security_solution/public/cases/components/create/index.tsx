@@ -24,16 +24,17 @@ import {
   useForm,
   UseField,
   FormDataProvider,
+  useFormData,
 } from '../../../shared_imports';
 import { usePostCase } from '../../containers/use_post_case';
 import { schema } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import * as i18n from '../../translations';
-import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
+import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
 import { useGetTags } from '../../containers/use_get_tags';
 import { getCaseDetailsUrl } from '../../../common/components/link_to';
-import { useTimelineClick } from '../utils/use_timeline_click';
+import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_click';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -69,13 +70,18 @@ export const Create = React.memo(() => {
     options: { stripEmptyFields: false },
     schema,
   });
-  const { submit } = form;
+
+  const fieldName = 'description';
+  const { submit, setFieldValue } = form;
+  const [{ description }] = useFormData({ form, watch: [fieldName] });
+
   const { tags: tagOptions } = useGetTags();
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
       label,
     }))
   );
+
   useEffect(
     () =>
       setOptions(
@@ -85,10 +91,16 @@ export const Create = React.memo(() => {
       ),
     [tagOptions]
   );
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CasePostRequest>(
-    form,
-    'description'
+
+  const onDescriptionChange = useCallback((newValue) => setFieldValue(fieldName, newValue), [
+    setFieldValue,
+  ]);
+
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline(
+    description,
+    onDescriptionChange
   );
+
   const handleTimelineClick = useTimelineClick();
 
   const onSubmit = useCallback(async () => {
@@ -141,7 +153,7 @@ export const Create = React.memo(() => {
         </Container>
         <ContainerBig>
           <UseField
-            path="description"
+            path={fieldName}
             component={MarkdownEditorForm}
             componentProps={{
               dataTestSubj: 'caseDescription',
