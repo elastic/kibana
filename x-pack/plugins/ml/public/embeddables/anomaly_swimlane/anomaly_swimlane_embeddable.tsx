@@ -10,9 +10,9 @@ import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
-import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
-import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { MlDependencies } from '../../application/app';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { MlDependencies } from '../../application/app';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,

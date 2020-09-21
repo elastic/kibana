@@ -145,3 +145,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     </div>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default EmbeddableSwimLaneContainer;

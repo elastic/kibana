@@ -6,15 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { StartServicesAccessor } from 'kibana/public';
+import type { StartServicesAccessor } from 'kibana/public';
 
-import {
+import type {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
 import { HttpService } from '../../application/services/http_service';
-import { MlPluginStart, MlStartDependencies } from '../../plugin';
-import { MlDependencies } from '../../application/app';
+import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlDependencies } from '../../application/app';
 import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   AnomalySwimlaneEmbeddableInput,

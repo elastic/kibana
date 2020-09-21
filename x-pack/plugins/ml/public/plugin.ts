@@ -24,22 +24,15 @@ import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_mana
 import type { EmbeddableSetup } from 'src/plugins/embeddable/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
-import { isFullLicense, isMlEnabled } from '../common/license';
 import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { SecurityPluginSetup } from '../../security/public';
 
 import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 
-import { registerEmbeddables } from './embeddables';
-import { registerFeature } from './register_feature';
-import { registerManagementSection } from './application/management';
-import { registerMlUiActions } from './ui_actions';
-import { registerUrlGenerator } from './ml_url_generator';
 import { setDependencyCache } from './application/util/dependency_cache';
 
 export interface MlStartDependencies {
@@ -105,11 +98,22 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       },
     });
 
-    const managementApp = registerManagementSection(pluginsSetup.management, core);
-
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
       const [coreStart] = await core.getStartServices();
+
+      const {
+        isFullLicense,
+        isMlEnabled,
+        registerEmbeddables,
+        registerFeature,
+        registerManagementSection,
+        registerMlUiActions,
+        registerUrlGenerator,
+        MlCardState,
+      } = await import('./register_helper');
+
+      const managementApp = registerManagementSection(pluginsSetup.management, core);
 
       if (isMlEnabled(license)) {
         // add ML to home page
