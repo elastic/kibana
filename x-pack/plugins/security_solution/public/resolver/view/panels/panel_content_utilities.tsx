@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumbs, EuiCode, EuiBetaBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
-import { useResolverTheme } from '../assets';
+import { useColors } from '../use_colors';
 
 /**
  * A bold version of EuiCode to display certain titles with
@@ -63,7 +65,7 @@ export const GeneratedText = React.memo(function ({ children }) {
           valueSplitByWordBoundaries[0],
           ...valueSplitByWordBoundaries
             .splice(1)
-            .reduce(function (generatedTextMemo: Array<string | JSX.Element>, value, index) {
+            .reduce(function (generatedTextMemo: Array<string | JSX.Element>, value) {
               return [...generatedTextMemo, value, <wbr />];
             }, []),
         ];
@@ -73,7 +75,6 @@ export const GeneratedText = React.memo(function ({ children }) {
     });
   }
 });
-GeneratedText.displayName = 'GeneratedText';
 
 /**
  * A component to keep time representations in blocks so they don't wrap
@@ -93,9 +94,7 @@ export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
 }: {
   breadcrumbs: Breadcrumbs;
 }) {
-  const {
-    colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
-  } = useResolverTheme();
+  const { resolverBreadcrumbBackground, resolverEdgeText } = useColors();
   return (
     <>
       <BetaHeader>

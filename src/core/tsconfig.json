@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "outDir": "./target",
+    "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
