@@ -82,10 +82,11 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
     );
 
     features.registerElasticsearchFeature({
-      id: 'index_lifecycle_management',
+      id: PLUGIN.ID,
       management: {
-        data: ['index_lifecycle_management'],
+        data: [PLUGIN.ID],
       },
+      catalogue: [PLUGIN.ID],
       privileges: [
         {
           requiredClusterPrivileges: ['manage_ilm'],

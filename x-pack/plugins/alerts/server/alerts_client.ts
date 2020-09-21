@@ -251,7 +251,7 @@ export class AlertsClient {
         }
         throw e;
       }
-      await this.unsecuredSavedObjectsClient.update('alert', createdAlert.id, {
+      await this.unsecuredSavedObjectsClient.update<RawAlert>('alert', createdAlert.id, {
         scheduledTaskId: scheduledTask.id,
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
@@ -488,9 +488,8 @@ export class AlertsClient {
       : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
-    const updatedObject = await this.unsecuredSavedObjectsClient.update<RawAlert>(
+    const updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
       'alert',
-      id,
       this.updateMeta({
         ...attributes,
         ...data,
@@ -500,6 +499,8 @@ export class AlertsClient {
         updatedBy: username,
       }),
       {
+        id,
+        overwrite: true,
         version,
         references,
       }
@@ -798,6 +799,7 @@ export class AlertsClient {
       'alert',
       alertId
     );
+
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
@@ -809,7 +811,7 @@ export class AlertsClient {
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-      await this.unsecuredSavedObjectsClient.update(
+      await this.unsecuredSavedObjectsClient.update<RawAlert>(
         'alert',
         alertId,
         this.updateMeta({

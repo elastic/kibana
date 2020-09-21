@@ -30,15 +30,11 @@ export default function ({ getService }: FtrProviderContext) {
     return (await es.search({ index: '.kibana_security_session*' })).hits.total.value;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/76223
-  describe.skip('Session Lifespan cleanup', () => {
+  describe('Session Lifespan cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', waitForStatus: 'green' });
-      await es.deleteByQuery({
+      await es.indices.delete({
         index: '.kibana_security_session*',
-        q: '*',
-        waitForCompletion: true,
-        refresh: true,
         ignore: [404],
       });
     });
