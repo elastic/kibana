@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep, get, omit, has, flow } from 'lodash';
+
+import { SavedObjectMigrationFn } from 'kibana/server';
+import { ChartType } from '../../../vis_type_xy/common/types';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -750,6 +752,39 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+/**
+ * Migrate vislib bar, line and area charts to use new vis_type_xy plugin
+ */
+const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState.type)) {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...visState.params,
+              isVislibVis: true,
+              detailedTooltip: false,
+            },
+          }),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -781,5 +816,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.4.2': flow(transformSplitFiltersStringToQueryObject),
   '7.7.0': flow(migrateOperatorKeyTypo, migrateSplitByChartRow),
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
-  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
+  '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource, migrateVislibAreaLineBarTypes),
 };
