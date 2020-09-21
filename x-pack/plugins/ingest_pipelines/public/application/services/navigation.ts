@@ -34,9 +34,9 @@ export const ROUTES_CONFIG = {
 
 export const getListPath = ({
   inspectedPipelineName,
-}?: {
+}: {
   inspectedPipelineName: string;
-}): string => _getListPath(inspectedPipelineName);
+} = {}): string => _getListPath(inspectedPipelineName);
 export const getEditPath = ({ pipelineName }: { pipelineName: string }): string =>
   _getEditPath(pipelineName, true);
 export const getCreatePath = (): string => _getCreatePath();

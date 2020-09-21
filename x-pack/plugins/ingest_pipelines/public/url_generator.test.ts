@@ -95,7 +95,7 @@ describe('IngestPipelinesUrlGenerator', () => {
       expect(url).toBe('/app/test_app/create');
     });
 
-    it('generates absolute url for pipeline clone', async () => {
+    it('generates absolute url for pipeline create', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.CREATE,
         pipelineId: 'pipeline_name',

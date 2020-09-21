@@ -72,7 +72,9 @@ export class IngestPipelinesUrlGenerator
         })}`;
       }
       case INGEST_PIPELINES_PAGES.CLONE: {
-        return `${await this.getAppBasePath(!!state.absolute)}${getClonePath(state.pipelineId)}`;
+        return `${await this.getAppBasePath(!!state.absolute)}${getClonePath({
+          clonedPipelineName: state.pipelineId,
+        })}`;
       }
     }
   };
