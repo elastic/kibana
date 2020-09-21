@@ -17,7 +17,7 @@
  * under the License.
  */
 import { ApiResponse, RequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '../../../../../../src/core/server';
 
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,

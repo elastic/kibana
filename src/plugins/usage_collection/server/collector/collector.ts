@@ -18,7 +18,7 @@
  */
 
 import { Logger, LegacyAPICaller } from 'kibana/server';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '../../../../../src/core/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
