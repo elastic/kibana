@@ -55,7 +55,7 @@ export type MlGenericUrlState = MLPageState<
 >;
 
 export interface AnomalyDetectionQueryState {
-  jobId?: JobId;
+  jobId?: JobId | string[];
   groupIds?: string[];
   globalState?: MlCommonGlobalState;
 }

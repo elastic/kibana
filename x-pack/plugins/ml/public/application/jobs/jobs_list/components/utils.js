@@ -268,6 +268,7 @@ export function deleteJobs(jobs, finish = () => {}) {
 }
 
 export function filterJobs(jobs, clauses) {
+  console.log('jobs, clauses', jobs, clauses);
   if (clauses.length === 0) {
     return jobs;
   }
@@ -309,8 +310,13 @@ export function filterJobs(jobs, clauses) {
     } else {
       // filter other clauses, i.e. the toggle group buttons
       if (Array.isArray(c.value)) {
-        // the groups value is an array of group ids
-        js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        // if it's an array of job ids
+        if (c.field === 'id') {
+          js = jobs.filter((job) => c.value.indexOf(jobProperty(job, c.field)) >= 0);
+        } else {
+          // the groups value is an array of group ids
+          js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        }
       } else {
         js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
       }
@@ -353,6 +359,7 @@ function jobProperty(job, prop) {
     job_state: 'jobState',
     datafeed_state: 'datafeedState',
     groups: 'groups',
+    id: 'id',
   };
   return job[propMap[prop]];
 }
@@ -387,6 +394,10 @@ export function getSelectedIdFromUrl(url) {
 
 export function getGroupQueryText(groupIds) {
   return `groups:(${groupIds.join(' or ')})`;
+}
+
+export function getJobQueryText(jobIds) {
+  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : jobIds;
 }
 
 export function clearSelectedJobIdFromUrl(url) {

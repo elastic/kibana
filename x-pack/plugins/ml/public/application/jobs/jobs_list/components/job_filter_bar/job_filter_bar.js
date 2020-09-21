@@ -9,7 +9,12 @@ import React, { Component, Fragment } from 'react';
 
 import { ml } from '../../../../services/ml_api_service';
 import { JobGroup } from '../job_group';
-import { getGroupQueryText, getSelectedIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
+import {
+  getGroupQueryText,
+  getSelectedIdFromUrl,
+  clearSelectedJobIdFromUrl,
+  getJobQueryText,
+} from '../utils';
 
 import { EuiSearchBar, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -60,7 +65,7 @@ export class JobFilterBar extends Component {
     if (groupIds !== undefined) {
       defaultQueryText = getGroupQueryText(groupIds);
     } else if (jobId !== undefined) {
-      defaultQueryText = jobId;
+      defaultQueryText = getJobQueryText(jobId);
     }
 
     if (defaultQueryText !== undefined) {
