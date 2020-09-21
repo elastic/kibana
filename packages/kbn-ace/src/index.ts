@@ -25,5 +25,3 @@ export {
   XJsonMode,
   installXJsonMode,
 } from './ace/modes';
-
-export { expandLiteralStrings, collapseLiteralStrings } from './lib';

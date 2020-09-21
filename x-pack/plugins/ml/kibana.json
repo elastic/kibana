@@ -29,6 +29,7 @@
   "server": true,
   "ui": true,
   "requiredBundles": [
+    "esUiShared",
     "kibanaUtils",
     "kibanaReact",
     "dashboard",
