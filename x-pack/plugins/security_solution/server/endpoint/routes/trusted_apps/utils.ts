@@ -10,7 +10,7 @@ import { NewTrustedApp, TrustedApp } from '../../../../common/endpoint/types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 
-type NewExecptionItem = Parameters<ExceptionListClient['createExceptionListItem']>[0];
+type NewExceptionItem = Parameters<ExceptionListClient['createExceptionListItem']>[0];
 
 /**
  * Map an ExcptionListItem to a TrustedApp item
@@ -51,22 +51,34 @@ export const newTrustedAppItemToExceptionItem = ({
   entries,
   name,
   description = '',
-}: NewTrustedApp): NewExecptionItem => {
+}: NewTrustedApp): NewExceptionItem => {
   return {
     _tags: tagsListFromOs(os),
     comments: [],
     description,
-    entries,
+    // @ts-ignore
+    entries: entries.map(({ value, ...newEntry }) => {
+      let newValue = value.trim();
+
+      if (newEntry.field === 'process.hash.*') {
+        newValue = newValue.toLowerCase();
+      }
+
+      return {
+        ...newEntry,
+        value: newValue,
+      };
+    }),
     itemId: uuid.v4(),
     listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
     meta: undefined,
-    name,
+    name: name.trim(),
     namespaceType: 'agnostic',
     tags: [],
     type: 'simple',
   };
 };
 
-const tagsListFromOs = (os: NewTrustedApp['os']): NewExecptionItem['_tags'] => {
+const tagsListFromOs = (os: NewTrustedApp['os']): NewExceptionItem['_tags'] => {
   return [`os:${os}`];
 };

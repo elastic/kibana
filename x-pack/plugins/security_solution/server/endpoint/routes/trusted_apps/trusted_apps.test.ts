@@ -138,7 +138,9 @@ describe('when invoking endpoint trusted apps route handlers', () => {
 
   describe('when creating a trusted app', () => {
     let routeHandler: RequestHandler<undefined, PostTrustedAppCreateRequest>;
-    const createNewTrustedAppBody = (): PostTrustedAppCreateRequest => ({
+    const createNewTrustedAppBody = (): {
+      -readonly [k in keyof PostTrustedAppCreateRequest]: PostTrustedAppCreateRequest[k];
+    } => ({
       name: 'Some Anti-Virus App',
       description: 'this one is ok',
       os: 'windows',
@@ -151,11 +153,11 @@ describe('when invoking endpoint trusted apps route handlers', () => {
         },
       ],
     });
-    const createPostRequest = () => {
+    const createPostRequest = (body?: PostTrustedAppCreateRequest) => {
       return httpServerMock.createKibanaRequest<undefined, PostTrustedAppCreateRequest>({
         path: TRUSTED_APPS_LIST_API,
         method: 'post',
-        body: createNewTrustedAppBody(),
+        body: body ?? createNewTrustedAppBody(),
       });
     };
 
@@ -246,6 +248,109 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       await routeHandler(context, request, response);
       expect(response.internalError).toHaveBeenCalled();
       expect(endpointAppContext.logFactory.get('trusted_apps').error).toHaveBeenCalled();
+    });
+
+    it('should trim trusted app entry name', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.name = `\n  ${newTrustedApp.name}  \r\n`;
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
+        _tags: ['os:windows'],
+        comments: [],
+        description: 'this one is ok',
+        entries: [
+          {
+            field: 'process.path',
+            operator: 'included',
+            type: 'match',
+            value: 'c:/programs files/Anti-Virus',
+          },
+        ],
+        itemId: expect.stringMatching(/.*/),
+        listId: 'endpoint_trusted_apps',
+        meta: undefined,
+        name: 'Some Anti-Virus App',
+        namespaceType: 'agnostic',
+        tags: [],
+        type: 'simple',
+      });
+    });
+
+    it('should trim condition entry values', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries.push({
+        field: 'process.path',
+        value: '\n    some value \r\n ',
+        operator: 'included',
+        type: 'match',
+      });
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
+        _tags: ['os:windows'],
+        comments: [],
+        description: 'this one is ok',
+        entries: [
+          {
+            field: 'process.path',
+            operator: 'included',
+            type: 'match',
+            value: 'c:/programs files/Anti-Virus',
+          },
+          {
+            field: 'process.path',
+            value: 'some value',
+            operator: 'included',
+            type: 'match',
+          },
+        ],
+        itemId: expect.stringMatching(/.*/),
+        listId: 'endpoint_trusted_apps',
+        meta: undefined,
+        name: 'Some Anti-Virus App',
+        namespaceType: 'agnostic',
+        tags: [],
+        type: 'simple',
+      });
+    });
+
+    it('should convert hash values to lowercase', async () => {
+      const newTrustedApp = createNewTrustedAppBody();
+      newTrustedApp.entries.push({
+        field: 'process.hash.*',
+        value: 'XXXXXYYYYZZZZZ',
+        operator: 'included',
+        type: 'match',
+      });
+      const request = createPostRequest(newTrustedApp);
+      await routeHandler(context, request, response);
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
+        _tags: ['os:windows'],
+        comments: [],
+        description: 'this one is ok',
+        entries: [
+          {
+            field: 'process.path',
+            operator: 'included',
+            type: 'match',
+            value: 'c:/programs files/Anti-Virus',
+          },
+          {
+            field: 'process.hash.*',
+            value: 'xxxxxyyyyzzzzz',
+            operator: 'included',
+            type: 'match',
+          },
+        ],
+        itemId: expect.stringMatching(/.*/),
+        listId: 'endpoint_trusted_apps',
+        meta: undefined,
+        name: 'Some Anti-Virus App',
+        namespaceType: 'agnostic',
+        tags: [],
+        type: 'simple',
+      });
     });
   });
 
