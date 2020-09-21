@@ -901,6 +901,7 @@ export interface UIPolicyConfig {
 /** Policy: Malware protection fields */
 export interface MalwareFields {
   mode: ProtectionModes;
+  userNotification?: boolean;
 }
 
 /** Policy protection mode options */
