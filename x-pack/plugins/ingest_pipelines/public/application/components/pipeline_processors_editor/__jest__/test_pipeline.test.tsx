@@ -141,10 +141,9 @@ describe('Test pipeline', () => {
       const { actions, find, exists } = testBed;
 
       const error = {
-        status: 400,
-        error: 'Bad Request',
-        message:
-          '"[parse_exception] [_source] required property is missing, with { property_name="_source" }"',
+        status: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
       };
 
       httpRequestsMockHelpers.setSimulatePipelineResponse(undefined, { body: error });
@@ -153,7 +152,20 @@ describe('Test pipeline', () => {
       actions.clickAddDocumentsButton();
 
       // Add invalid sample documents array and run the pipeline
-      actions.addDocumentsJson(JSON.stringify([{}]));
+      actions.addDocumentsJson(
+        JSON.stringify([
+          {
+            _index: 'test',
+            _id: '1',
+            _version: 1,
+            _seq_no: 0,
+            _primary_term: 1,
+            _source: {
+              name: 'John Doe',
+            },
+          },
+        ])
+      );
       await actions.clickRunPipelineButton();
 
       // Verify error rendered

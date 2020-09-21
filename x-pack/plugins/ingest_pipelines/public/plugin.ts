@@ -9,10 +9,11 @@ import { CoreSetup, Plugin } from 'src/core/public';
 
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
-import { Dependencies } from './types';
+import { SetupDependencies, StartDependencies } from './types';
 
-export class IngestPipelinesPlugin implements Plugin {
-  public setup(coreSetup: CoreSetup, plugins: Dependencies): void {
+export class IngestPipelinesPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies): void {
     const { management, usageCollection } = plugins;
     const { http, getStartServices } = coreSetup;
 

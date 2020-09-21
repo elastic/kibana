@@ -52,7 +52,7 @@ const i18nTexts = {
       }
     ),
     validationMessage: i18n.translate(
-      'ingestPipelines.pipelineEditor.loadDocuments.indexRequiredError',
+      'xpack.ingestPipelines.pipelineEditor.loadDocuments.indexRequiredError',
       {
         defaultMessage: 'An index name is required.',
       }
@@ -66,7 +66,7 @@ const i18nTexts = {
       }
     ),
     validationMessage: i18n.translate(
-      'ingestPipelines.pipelineEditor.loadDocuments.idRequiredError',
+      'xpack.ingestPipelines.pipelineEditor.loadDocuments.idRequiredError',
       {
         defaultMessage: 'A document ID is required.',
       }
@@ -106,8 +106,6 @@ export const ImportDocumentForm: FunctionComponent<Props> = ({ onAddDocuments })
   const { form } = useForm({ defaultValue: { index: '', id: '' } });
 
   const submitForm = async (e: React.FormEvent) => {
-    // e.preventDefault();
-
     const { isValid, data } = await form.submit();
 
     const { id, index } = data;

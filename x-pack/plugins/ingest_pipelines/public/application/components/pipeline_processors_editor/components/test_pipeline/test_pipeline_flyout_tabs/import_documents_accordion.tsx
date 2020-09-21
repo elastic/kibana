@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiAccordion, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+
+import { useKibana } from '../../../../../../shared_imports';
 
 import { ImportDocumentForm } from './import_document_form';
 
@@ -18,14 +21,6 @@ const i18nTexts = {
       defaultMessage: 'Import existing documents',
     }
   ),
-  // TODO add link to Discover
-  contentDescription: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.importDocumentsAccordion.contentDescriptionText',
-    {
-      defaultMessage:
-        'Provide the index name and document ID of the indexed document to test. To explore your existing data, use Discover.',
-    }
-  ),
 };
 
 interface Props {
@@ -33,6 +28,29 @@ interface Props {
 }
 
 export const ImportDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments }) => {
+  const { services } = useKibana();
+  const [discoverLink, setDiscoverLink] = useState('');
+
+  useEffect(() => {
+    let unmounted = false;
+
+    const getDiscoverUrl = async (): Promise<void> => {
+      if (!unmounted) {
+        const discoverUrlGenerator = services.urlGenerators.getUrlGenerator(
+          'DISCOVER_APP_URL_GENERATOR'
+        );
+        const discoverUrl = await discoverUrlGenerator.createUrl({ indexPatternId: undefined });
+        setDiscoverLink(discoverUrl);
+      }
+    };
+
+    getDiscoverUrl();
+
+    return () => {
+      unmounted = true;
+    };
+  }, [services.urlGenerators]);
+
   return (
     <EuiAccordion
       id="addDocumentsAccordion"
@@ -42,7 +60,19 @@ export const ImportDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocume
     >
       <>
         <EuiText size="s" color="subdued">
-          <p>{i18nTexts.contentDescription}</p>
+          <p>
+            <FormattedMessage
+              id="xpack.ingestPipelines.pipelineEditor.importDocumentsAccordion.contentDescriptionText"
+              defaultMessage="Provide the index name and document ID of the indexed document to test. To explore your existing data, use {discoverLink}."
+              values={{
+                discoverLink: (
+                  <EuiLink href={discoverLink} target="_blank" external>
+                    Discover
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
         </EuiText>
 
         <EuiSpacer size="m" />

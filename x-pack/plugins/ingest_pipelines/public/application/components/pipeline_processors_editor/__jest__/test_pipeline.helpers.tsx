@@ -94,6 +94,11 @@ const appServices = {
   notifications: notificationServiceMock.createSetupContract(),
   history,
   uiSettings: {},
+  urlGenerators: {
+    getUrlGenerator: jest.fn().mockReturnValue({
+      createUrl: jest.fn(),
+    }),
+  },
 };
 
 const testBedSetup = registerTestBed<TestSubject>(

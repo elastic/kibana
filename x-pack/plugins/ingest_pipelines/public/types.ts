@@ -6,8 +6,13 @@
 
 import { ManagementSetup } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { SharePluginStart } from 'src/plugins/share/public';
 
-export interface Dependencies {
+export interface SetupDependencies {
   management: ManagementSetup;
   usageCollection: UsageCollectionSetup;
+}
+
+export interface StartDependencies {
+  share: SharePluginStart;
 }
