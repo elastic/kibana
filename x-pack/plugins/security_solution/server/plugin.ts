@@ -66,9 +66,7 @@ import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
 import {
-  securityEqlFactorySearchStrategyProvider,
   securityEqlSearchStrategyProvider,
-  SECURITY_EQL_FACTORY_SEARCH_STRATEGY,
   SECURITY_EQL_SEARCH_STRATEGY,
 } from './search_strategy/eql';
 
@@ -282,17 +280,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     core.getStartServices().then(([_, depsStart]) => {
       const eqlSearchStrategy = securityEqlSearchStrategyProvider(this.logger);
-      const eqlFactorySearchStrategy = securityEqlFactorySearchStrategyProvider(depsStart.data);
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
 
       plugins.data.search.registerSearchStrategy(SECURITY_EQL_SEARCH_STRATEGY, eqlSearchStrategy);
-      plugins.data.search.registerSearchStrategy(
-        SECURITY_EQL_FACTORY_SEARCH_STRATEGY,
-        eqlFactorySearchStrategy
-      );
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy

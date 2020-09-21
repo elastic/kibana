@@ -6,8 +6,11 @@
 
 import { Logger } from 'kibana/server';
 import { ISearchStrategy } from '../../../../../../src/plugins/data/server';
+import {
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
+} from '../../../common/search_strategy/eql';
 import { EqlSearchResponse } from '../../lib/types';
-import { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from './types';
 
 export const SECURITY_EQL_SEARCH_STRATEGY = 'security_eql_base';
 

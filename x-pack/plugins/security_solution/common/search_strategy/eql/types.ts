@@ -6,7 +6,7 @@
 
 import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/server';
+import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
 
 export type EqlSearchStrategyRequest = IEsSearchRequest<
   unknown,

@@ -4,16 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
-import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { EqlStrategyRequest, EqlStrategyResponse } from '..';
-
-export interface ValidationStrategyRequest {
-  params: EqlSearch;
-  options?: TransportRequestOptions;
-}
-
-export interface ValidationStrategyResponse extends EqlStrategyResponse {
-  valid: boolean;
-  errors: string[];
-}
+export * from './helpers';
