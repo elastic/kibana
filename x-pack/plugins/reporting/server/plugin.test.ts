@@ -17,6 +17,7 @@ jest.mock('./browsers/install', () => ({
 import { coreMock } from 'src/core/server/mocks';
 import { ReportingPlugin } from './plugin';
 import { createMockConfigSchema } from './test_helpers';
+import { featuresPluginMock } from '../../features/server/mocks';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -31,10 +32,11 @@ describe('Reporting Plugin', () => {
   beforeEach(async () => {
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
-    coreSetup = await coreMock.createSetup(configSchema);
-    coreStart = await coreMock.createStart();
+    coreSetup = coreMock.createSetup(configSchema);
+    coreStart = coreMock.createStart();
     pluginSetup = ({
       licensing: {},
+      features: featuresPluginMock.createSetup(),
       usageCollection: {
         makeUsageCollector: jest.fn(),
         registerCollector: jest.fn(),

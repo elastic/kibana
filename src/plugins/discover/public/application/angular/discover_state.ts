@@ -28,7 +28,7 @@ import {
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
 import { esFilters, Filter, Query } from '../../../../data/public';
-import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
+import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
 
 export interface AppState {
   /**
@@ -55,6 +55,10 @@ export interface AppState {
    * Array of the used sorting [[field,direction],...]
    */
   sort?: string[][];
+  /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
 }
 
 interface GetStateParams {

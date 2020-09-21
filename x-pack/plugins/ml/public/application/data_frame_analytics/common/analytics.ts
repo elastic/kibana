@@ -10,13 +10,13 @@ import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
-import { getErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
 import {
   AnalysisConfig,
   ClassificationAnalysis,
+  DataFrameAnalysisConfigType,
   RegressionAnalysis,
-  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/types/data_frame_analytics';
 import {
   isOutlierAnalysis,
@@ -26,6 +26,7 @@ import {
   getDependentVar,
   getPredictedFieldName,
 } from '../../../../common/util/analytics_utils';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
 export type IndexPattern = string;
 
 export enum ANALYSIS_ADVANCED_FIELDS {
@@ -429,7 +430,7 @@ interface LoadEvalDataConfig {
   predictionFieldName?: string;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
-  jobType: ANALYSIS_CONFIG_TYPE;
+  jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
 }
 
@@ -486,7 +487,7 @@ export const loadEvalData = async ({
     results.eval = evalResult;
     return results;
   } catch (e) {
-    results.error = getErrorMessage(e);
+    results.error = extractErrorMessage(e);
     return results;
   }
 };
@@ -550,7 +551,7 @@ export {
   isRegressionAnalysis,
   isClassificationAnalysis,
   getPredictionFieldName,
-  ANALYSIS_CONFIG_TYPE,
   getDependentVar,
   getPredictedFieldName,
+  ANALYSIS_CONFIG_TYPE,
 };

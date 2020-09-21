@@ -15,18 +15,23 @@ import {
   TRANSACTION_NAME,
 } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
-import { ProcessorEvent } from '../../common/processor_event';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getDocumentTypeFilterForAggregatedTransactions,
+} from '../lib/helpers/aggregated_transactions';
 
 export function getTransactionsProjection({
   setup,
   serviceName,
   transactionName,
   transactionType,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end, uiFiltersES } = setup;
 
@@ -47,12 +52,19 @@ export function getTransactionsProjection({
       ...transactionTypeFilter,
       ...serviceNameFilter,
       ...uiFiltersES,
+      ...getDocumentTypeFilterForAggregatedTransactions(
+        searchAggregatedTransactions
+      ),
     ],
   };
 
   return {
     apm: {
-      events: [ProcessorEvent.transaction as const],
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
     },
     body: {
       query: {

@@ -7,24 +7,18 @@
 import { kea, MakeLogicType } from 'kea';
 import { HttpLogic } from '../../../shared/http';
 
-import { IAccount, IOrganization } from '../../types';
-
 import { IFeedActivity } from './recent_activity';
 
 export interface IOverviewServerData {
   hasUsers: boolean;
   hasOrgSources: boolean;
   canCreateContentSources: boolean;
-  canCreateInvitations: boolean;
   isOldAccount: boolean;
   sourcesCount: number;
   pendingInvitationsCount: number;
   accountsCount: number;
   personalSourcesCount: number;
   activityFeed: IFeedActivity[];
-  organization: IOrganization;
-  isFederatedAuth: boolean;
-  fpAccount: IAccount;
 }
 
 export interface IOverviewActions {
@@ -37,35 +31,12 @@ export interface IOverviewValues extends IOverviewServerData {
 }
 
 export const OverviewLogic = kea<MakeLogicType<IOverviewValues, IOverviewActions>>({
+  path: ['enterprise_search', 'workplace_search', 'overview_logic'],
   actions: {
     setServerData: (serverData) => serverData,
     initializeOverview: () => null,
   },
   reducers: {
-    organization: [
-      {} as IOrganization,
-      {
-        setServerData: (_, { organization }) => organization,
-      },
-    ],
-    isFederatedAuth: [
-      true,
-      {
-        setServerData: (_, { isFederatedAuth }) => isFederatedAuth,
-      },
-    ],
-    fpAccount: [
-      {} as IAccount,
-      {
-        setServerData: (_, { fpAccount }) => fpAccount,
-      },
-    ],
-    canCreateInvitations: [
-      false,
-      {
-        setServerData: (_, { canCreateInvitations }) => canCreateInvitations,
-      },
-    ],
     hasUsers: [
       false,
       {
