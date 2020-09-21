@@ -11,11 +11,25 @@ import { LensTopNavActions } from './types';
 export function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
   showCancel: boolean;
+  isByValueMode: boolean;
   actions: LensTopNavActions;
   savingPermitted: boolean;
 }): TopNavMenuData[] {
   const { showSaveAndReturn, showCancel, actions, savingPermitted } = options;
   const topNavMenu: TopNavMenuData[] = [];
+
+  const saveButtonLabel = options.isByValueMode
+    ? i18n.translate('xpack.lens.app.addToLibrary', {
+        defaultMessage: 'Save to library',
+      })
+    : options.showSaveAndReturn
+    ? i18n.translate('xpack.lens.app.saveAs', {
+        defaultMessage: 'Save as',
+      })
+    : i18n.translate('xpack.lens.app.save', {
+        defaultMessage: 'Save',
+      });
+
   if (showSaveAndReturn) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -33,13 +47,7 @@ export function getLensTopNavConfig(options: {
   }
 
   topNavMenu.push({
-    label: showSaveAndReturn
-      ? i18n.translate('xpack.lens.app.saveAs', {
-          defaultMessage: 'Save as',
-        })
-      : i18n.translate('xpack.lens.app.save', {
-          defaultMessage: 'Save',
-        }),
+    label: saveButtonLabel,
     emphasize: !showSaveAndReturn,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',

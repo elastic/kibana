@@ -127,6 +127,17 @@ export function App({
     [lastKnownDoc]
   );
 
+  const getIsByValueMode = useCallback(
+    () =>
+      Boolean(
+        // Temporarily required until the 'by value' paradigm is default.
+        dashboardFeatureFlag.allowByValueEmbeddables &&
+          state.isLinkedToOriginatingApp &&
+          !(initialInput as LensByReferenceInput)?.savedObjectId
+      ),
+    [dashboardFeatureFlag.allowByValueEmbeddables, state.isLinkedToOriginatingApp, initialInput]
+  );
+
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
     // can be loaded without a full page refresh
@@ -208,11 +219,7 @@ export function App({
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
-    const isByValueMode =
-      // Temporarily required until the 'by value' paradigm is default.
-      dashboardFeatureFlag.allowByValueEmbeddables &&
-      state.isLinkedToOriginatingApp &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+    const isByValueMode = getIsByValueMode();
     const breadcrumbs: EuiBreadcrumb[] = [];
     if (state.isLinkedToOriginatingApp && getOriginatingAppName() && redirectToOrigin) {
       breadcrumbs.push({
@@ -250,6 +257,7 @@ export function App({
     getOriginatingAppName,
     state.persistedDoc,
     redirectToOrigin,
+    getIsByValueMode,
     initialInput,
     application,
     chrome,
@@ -436,6 +444,7 @@ export function App({
         // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
+    isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
     actions: {
@@ -598,6 +607,14 @@ export function App({
             title: lastKnownDoc.title || '',
             description: lastKnownDoc.description || '',
           }}
+          returnToOriginSwitchLabel={
+            getIsByValueMode() && initialInput
+              ? i18n.translate('xpack.lens.app.updatePanel', {
+                  defaultMessage: 'Update panel on {originatingAppName}',
+                  values: { originatingAppName: getOriginatingAppName() },
+                })
+              : undefined
+          }
           objectType={i18n.translate('xpack.lens.app.saveModalType', {
             defaultMessage: 'Lens visualization',
           })}
