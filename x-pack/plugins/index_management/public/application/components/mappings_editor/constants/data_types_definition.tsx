@@ -71,6 +71,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  constant_keyword: {
+    value: 'constant_keyword',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.constantKeywordDescription', {
+      defaultMessage: 'Constant keyword',
+    }),
+    documentation: {
+      main: '/keyword.html#constant-keyword-field-type',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.constantKeywordLongDescription"
+          defaultMessage="Constant keyword fields are a special type of keyword fields for fields that contain the same keyword across all documents in the index. Supports the same queries and aggregations as {keyword} fields."
+          values={{
+            keyword: <EuiCode inline>{'keyword'}</EuiCode>,
+          }}
+        />
+      </p>
+    ),
+  },
   numeric: {
     value: 'numeric',
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.numericDescription', {
@@ -699,6 +719,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  histogram: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.histogramDescription', {
+      defaultMessage: 'Histogram',
+    }),
+    value: 'histogram',
+    documentation: {
+      main: '/histogram.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.histogramLongDescription"
+          defaultMessage="Histogram fields store pre-aggregated numerical data representing a histogram, and are intended for use with aggregations."
+        />
+      </p>
+    ),
+  },
   join: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.joinDescription', {
       defaultMessage: 'Join',
@@ -784,6 +821,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  wildcard: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.wildcardDescription', {
+      defaultMessage: 'Wildcard',
+    }),
+    value: 'wildcard',
+    documentation: {
+      main: '/keyword.html#wildcard-field-type',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.wildcardLongDescription"
+          defaultMessage="Wildcard fields store values optimized for wildcard grep-like queries."
+        />
+      </p>
+    ),
+  },
   other: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.otherDescription', {
       defaultMessage: 'Other',
@@ -805,6 +859,7 @@ export const MAIN_TYPES: MainType[] = [
   'binary',
   'boolean',
   'completion',
+  'constant_keyword',
   'date',
   'date_nanos',
   'dense_vector',
@@ -825,6 +880,8 @@ export const MAIN_TYPES: MainType[] = [
   'shape',
   'text',
   'token_count',
+  'histogram',
+  'wildcard',
   'other',
 ];
 

@@ -18,8 +18,11 @@
  */
 
 import uuid from 'uuid';
+import {
+  ISessionService,
+} from '../../common/search';
 
-export class SessionService {
+export class SessionService implements ISessionService {
   private sessionId?: string;
   private isRestore!: boolean;
   protected isStored!: boolean;
@@ -59,5 +62,3 @@ export class SessionService {
     this.isStored = false;
   }
 }
-
-export type ISessionService = PublicMethodsOf<SessionService>;

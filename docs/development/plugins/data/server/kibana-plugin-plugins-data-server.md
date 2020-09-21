@@ -42,7 +42,6 @@
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
-|  [Filter](./kibana-plugin-plugins-data-server.filter.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IEsSearchResponse](./kibana-plugin-plugins-data-server.iessearchresponse.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
@@ -58,12 +57,10 @@
 |  [OptionedValueProp](./kibana-plugin-plugins-data-server.optionedvalueprop.md) |  |
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
-|  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
 |  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-server.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-server.tabbedtable.md) | \* |
-|  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 
 ## Variables
 
@@ -93,11 +90,14 @@
 |  [AggParam](./kibana-plugin-plugins-data-server.aggparam.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.esaggsexpressionfunctiondefinition.md) |  |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-server.fieldformatsgetconfigfn.md) |  |
+|  [Filter](./kibana-plugin-plugins-data-server.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-server.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
 |  [IAggType](./kibana-plugin-plugins-data-server.iaggtype.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-server.ifieldparamtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-server.imetricaggtype.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
+|  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [TabbedAggRow](./kibana-plugin-plugins-data-server.tabbedaggrow.md) | \* |
+|  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 

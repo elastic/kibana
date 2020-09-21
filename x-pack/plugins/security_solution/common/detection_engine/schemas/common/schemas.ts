@@ -130,7 +130,7 @@ export type Query = t.TypeOf<typeof query>;
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 
-export const language = t.keyof({ kuery: null, lucene: null });
+export const language = t.keyof({ eql: null, kuery: null, lucene: null });
 export type Language = t.TypeOf<typeof language>;
 
 export const languageOrUndefined = t.union([language, t.undefined]);
@@ -294,10 +294,12 @@ export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
 export const type = t.keyof({
+  eql: null,
   machine_learning: null,
   query: null,
   saved_query: null,
   threshold: null,
+  threat_match: null,
 });
 export type Type = t.TypeOf<typeof type>;
 

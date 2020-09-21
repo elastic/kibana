@@ -18,13 +18,24 @@ describe('ui filter queries', () => {
   });
 
   it('fetches environments', async () => {
-    mock = await inspectSearchParams((setup) => getEnvironments(setup, 'foo'));
+    mock = await inspectSearchParams((setup) =>
+      getEnvironments({
+        setup,
+        serviceName: 'foo',
+        searchAggregatedTransactions: false,
+      })
+    );
 
     expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches environments without a service name', async () => {
-    mock = await inspectSearchParams((setup) => getEnvironments(setup));
+    mock = await inspectSearchParams((setup) =>
+      getEnvironments({
+        setup,
+        searchAggregatedTransactions: false,
+      })
+    );
 
     expect(mock.params).toMatchSnapshot();
   });

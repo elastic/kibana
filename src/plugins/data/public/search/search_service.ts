@@ -21,16 +21,23 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
+import { handleResponse } from './fetch';
+import {
+  createSearchSource,
+  ISearchGeneric,
+  SearchSource,
+  SearchSourceDependencies,
+  ISessionService,
+} from '../../common/search';
+import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { esdsl, esRawResponse } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
-import { ISessionService, SessionService } from './session_service';
+import { SessionService } from './session_service';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -51,7 +58,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private sessionService!: ISessionService;
 
   public setup(
-    { http, getStartServices, injectedMetadata, notifications, uiSettings }: CoreSetup,
+    { http, getStartServices, notifications, uiSettings }: CoreSetup,
     { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
@@ -85,7 +92,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { application, http, injectedMetadata, notifications, uiSettings }: CoreStart,
+    { application, http, notifications, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
@@ -99,8 +106,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getConfig: uiSettings.get.bind(uiSettings),
       session: this.sessionService,
       search,
-      http,
-      loadingCount$,
+      onResponse: handleResponse,
+      legacy: {
+        callMsearch: getCallMsearch({ http }),
+        loadingCount$,
+      },
     };
 
     return {

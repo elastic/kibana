@@ -18,7 +18,18 @@
  */
 
 import * as ts from 'typescript';
-import { pick, isObject, each, isArray, reduce, isEmpty, merge, transform, isEqual } from 'lodash';
+import {
+  pick,
+  pickBy,
+  isObject,
+  forEach,
+  isArray,
+  reduce,
+  isEmpty,
+  merge,
+  transform,
+  isEqual,
+} from 'lodash';
 import * as path from 'path';
 import glob from 'glob';
 import { readFile, writeFile } from 'fs';
@@ -186,17 +197,17 @@ export function getPropertyValue(
   }
 }
 
-export function pickDeep(collection: any, identity: any, thisArg?: any) {
-  const picked: any = pick(collection, identity, thisArg);
-  const collections = pick(collection, isObject, thisArg);
+export function pickDeep(collection: any, identity: any) {
+  const picked: any = pick(collection, identity);
+  const collections = pickBy(collection, isObject);
 
-  each(collections, function (item, key) {
+  forEach(collections, function (item, key) {
     let object;
     if (isArray(item)) {
       object = reduce(
         item,
         function (result, value) {
-          const pickedDeep = pickDeep(value, identity, thisArg);
+          const pickedDeep = pickDeep(value, identity);
           if (!isEmpty(pickedDeep)) {
             result.push(pickedDeep);
           }
@@ -205,7 +216,7 @@ export function pickDeep(collection: any, identity: any, thisArg?: any) {
         [] as any[]
       );
     } else {
-      object = pickDeep(item, identity, thisArg);
+      object = pickDeep(item, identity);
     }
 
     if (!isEmpty(object)) {
@@ -230,33 +241,38 @@ export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
   return { [keyPath.join('.')]: obj };
 };
 
+type ObjectDict = Record<string, any>;
 export function difference(actual: any, expected: any) {
-  function changes(obj: { [key: string]: any }, base: { [key: string]: any }) {
-    return transform(obj, function (result, value, key) {
-      if (key && /@@INDEX@@/.test(`${key}`)) {
-        // The type definition is an Index Signature, fuzzy searching for similar keys
-        const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.+)?'));
-        const keysInBase = Object.keys(base)
-          .map((k) => {
-            const match = k.match(regexp);
-            return match && match[0];
-          })
-          .filter((s): s is string => !!s);
+  function changes(obj: ObjectDict, base: ObjectDict) {
+    return transform(
+      obj,
+      function (result, value, key) {
+        if (key && /@@INDEX@@/.test(`${key}`)) {
+          // The type definition is an Index Signature, fuzzy searching for similar keys
+          const regexp = new RegExp(`${key}`.replace(/@@INDEX@@/g, '(.+)?'));
+          const keysInBase = Object.keys(base)
+            .map((k) => {
+              const match = k.match(regexp);
+              return match && match[0];
+            })
+            .filter((s): s is string => !!s);
 
-        if (keysInBase.length === 0) {
-          // Mark this key as wrong because we couldn't find any matching keys
-          result[key] = value;
-        }
-
-        keysInBase.forEach((k) => {
-          if (!isEqual(value, base[k])) {
-            result[k] = isObject(value) && isObject(base[k]) ? changes(value, base[k]) : value;
+          if (keysInBase.length === 0) {
+            // Mark this key as wrong because we couldn't find any matching keys
+            result[key] = value;
           }
-        });
-      } else if (key && !isEqual(value, base[key])) {
-        result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
-      }
-    });
+
+          keysInBase.forEach((k) => {
+            if (!isEqual(value, base[k])) {
+              result[k] = isObject(value) && isObject(base[k]) ? changes(value, base[k]) : value;
+            }
+          });
+        } else if (key && !isEqual(value, base[key])) {
+          result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
+        }
+      },
+      {} as ObjectDict
+    );
   }
   return changes(actual, expected);
 }
