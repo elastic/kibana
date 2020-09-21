@@ -98,6 +98,7 @@ export function BaseMapsVisualizationProvider(mapServiceSettings) {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       const modules = await lazyLoadMapsLegacyModules();
+      this._leaflet = modules.L;
       this._kibanaMap = new modules.KibanaMap(this._container, options);
       this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
       this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default

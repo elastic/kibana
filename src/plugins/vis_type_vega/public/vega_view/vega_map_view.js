@@ -125,14 +125,18 @@ export class VegaMapView extends VegaBaseView {
       });
     }
 
-    const vegaMapLayer = new VegaMapLayer(this._parser.spec, {
-      vega,
-      bindingsContainer: this._$controls.get(0),
-      delayRepaint: mapConfig.delayRepaint,
-      viewConfig: this._vegaViewConfig,
-      onWarning: this.onWarn.bind(this),
-      onError: this.onError.bind(this),
-    });
+    const vegaMapLayer = new VegaMapLayer(
+      this._parser.spec,
+      {
+        vega,
+        bindingsContainer: this._$controls.get(0),
+        delayRepaint: mapConfig.delayRepaint,
+        viewConfig: this._vegaViewConfig,
+        onWarning: this.onWarn.bind(this),
+        onError: this.onError.bind(this),
+      },
+      modules.L
+    );
 
     this._kibanaMap.addLayer(vegaMapLayer);
 

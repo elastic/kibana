@@ -19,8 +19,6 @@
 
 // @ts-ignore
 import { PluginInitializerContext } from 'kibana/public';
-// @ts-ignore
-import { L } from './leaflet';
 import { MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
@@ -60,7 +58,6 @@ export {
   FileLayer,
   TmsLayer,
   mapTooltipProvider,
-  L,
 };
 
 export * from './common/types';

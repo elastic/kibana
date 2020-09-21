@@ -148,6 +148,10 @@ export const createTileMapVisualization = (dependencies) => {
     }
 
     _recreateGeohashLayer() {
+      if (!this._leaflet) {
+        return;
+      }
+
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
@@ -158,7 +162,8 @@ export const createTileMapVisualization = (dependencies) => {
         this._geoJsonFeatureCollectionAndMeta.meta,
         geohashOptions,
         this._kibanaMap.getZoomLevel(),
-        this._kibanaMap
+        this._kibanaMap,
+        this._leaflet
       );
       this._kibanaMap.addLayer(this._geohashLayer);
     }

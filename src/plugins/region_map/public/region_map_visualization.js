@@ -169,6 +169,9 @@ export function createRegionMapVisualization({
     }
 
     _recreateChoroplethLayer(name, attribution, showAllData) {
+      if (!this._leaflet) {
+        return;
+      }
       this._kibanaMap.removeLayer(this._choroplethLayer);
 
       if (this._choroplethLayer) {
@@ -189,7 +192,8 @@ export function createRegionMapVisualization({
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          serviceSettings
+          serviceSettings,
+          this._leaflet
         );
       }
 
