@@ -68,13 +68,18 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // Saved objects with encrypted attributes should have IDs that are hard to guess especially
     // since IDs are part of the AAD used during encryption, that's why we control them within this
     // wrapper and don't allow consumers to specify their own IDs directly.
-    if (options.id) {
+
+    // only allow a specified ID if we're overwriting an existing ESO with a Version
+    // this helps us ensure that the document really was previously created using ESO
+    // and not being used to get around the specified ID limitation
+    const canSpecifyID = options.overwrite && options.version;
+    if (options.id && !canSpecifyID) {
       throw new Error(
         'Predefined IDs are not allowed for saved objects with encrypted attributes.'
       );
     }
 
-    const id = generateID();
+    const id = options.id ?? generateID();
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -97,7 +102,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async bulkCreate<T>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsBaseOptions & Pick<SavedObjectsCreateOptions, 'overwrite'>
   ) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
@@ -110,14 +115,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
         // since IDs are part of the AAD used during encryption, that's why we control them within this
-        // wrapper and don't allow consumers to specify their own IDs directly.
-        if (object.id) {
+        // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
+        const canSpecifyID = options?.overwrite && object.version;
+        if (object.id && !canSpecifyID) {
           throw new Error(
             'Predefined IDs are not allowed for saved objects with encrypted attributes.'
           );
         }
 
-        const id = generateID();
+        const id = object.id ?? generateID();
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,
@@ -150,14 +156,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // sequential processing.
     const encryptedObjects = await Promise.all(
       objects.map(async (object) => {
-        const { type, id, attributes } = object;
+        const { type, id, attributes, namespace: objectNamespace } = object;
         if (!this.options.service.isRegistered(type)) {
           return object;
         }
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           type,
-          options?.namespace
+          objectNamespace ?? options?.namespace
         );
         return {
           ...object,

@@ -44,7 +44,7 @@ describe('Test pipeline', () => {
 
   describe('Test pipeline actions', () => {
     it('should successfully add sample documents and execute the pipeline', async () => {
-      const { find, actions, exists } = testBed;
+      const { actions, exists } = testBed;
 
       httpRequestsMockHelpers.setSimulatePipelineResponse(SIMULATE_RESPONSE);
 
@@ -59,7 +59,6 @@ describe('Test pipeline', () => {
       expect(exists('testPipelineFlyout')).toBe(true);
       expect(exists('documentsTabContent')).toBe(true);
       expect(exists('outputTabContent')).toBe(false);
-      expect(find('outputTab').props().disabled).toEqual(true);
 
       // Add sample documents and click run
       actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
@@ -89,21 +88,25 @@ describe('Test pipeline', () => {
       });
 
       // Verify output tab is active
-      expect(find('outputTab').props().disabled).toEqual(false);
       expect(exists('documentsTabContent')).toBe(false);
       expect(exists('outputTabContent')).toBe(true);
 
       // Click reload button and verify request
       const totalRequests = server.requests.length;
       await actions.clickRefreshOutputButton();
-      expect(server.requests.length).toBe(totalRequests + 1);
+      // There will be two requests made to the simulate API
+      // the second request will have verbose enabled to update the processor results
+      expect(server.requests.length).toBe(totalRequests + 2);
+      expect(server.requests[server.requests.length - 2].url).toBe(
+        '/api/ingest_pipelines/simulate'
+      );
       expect(server.requests[server.requests.length - 1].url).toBe(
         '/api/ingest_pipelines/simulate'
       );
 
       // Click verbose toggle and verify request
       await actions.toggleVerboseSwitch();
-      expect(server.requests.length).toBe(totalRequests + 2);
+      expect(server.requests.length).toBe(totalRequests + 3);
       expect(server.requests[server.requests.length - 1].url).toBe(
         '/api/ingest_pipelines/simulate'
       );
@@ -228,10 +231,10 @@ describe('Test pipeline', () => {
         // Click processor to open manage flyout
         await actions.clickProcessor('processors>0');
         // Verify flyout opened
-        expect(exists('processorSettingsForm')).toBe(true);
+        expect(exists('editProcessorForm')).toBe(true);
 
         // Navigate to "Output" tab
-        actions.clickProcessorOutputTab();
+        await actions.clickProcessorOutputTab();
         // Verify content
         expect(exists('processorOutputTabContent')).toBe(true);
       });

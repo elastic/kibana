@@ -141,7 +141,7 @@ export class SecurityPlugin
     this.sessionTimeout.start();
     this.navControlService.start({ core });
     if (management) {
-      this.managementService.start();
+      this.managementService.start({ capabilities: core.application.capabilities });
     }
   }
 

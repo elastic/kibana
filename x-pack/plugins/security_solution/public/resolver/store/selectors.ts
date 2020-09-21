@@ -84,14 +84,14 @@ export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSele
 /**
  * If we need to fetch, this is the entity ID to fetch.
  */
-export const databaseDocumentIDToFetch = composeSelectors(
+export const treeParametersToFetch = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToFetch
+  dataSelectors.treeParametersToFetch
 );
 
-export const databaseDocumentIDToAbort = composeSelectors(
+export const treeRequestParametersToAbort = composeSelectors(
   dataStateSelector,
-  dataSelectors.databaseDocumentIDToAbort
+  dataSelectors.treeRequestParametersToAbort
 );
 
 export const resolverComponentInstanceID = composeSelectors(
@@ -115,7 +115,20 @@ export const relatedEventsStats: (
 );
 
 /**
+ * This returns the "aggregate total" for related events, tallied as the sum
+ * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
+ * towards the aggregate total.
+ */
+export const relatedEventAggregateTotalByEntityId: (
+  state: ResolverState
+) => (nodeID: string) => number = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventAggregateTotalByEntityId
+);
+
+/**
  * Map of related events... by entity id
+ * @deprecated
  */
 export const relatedEventsByEntityId = composeSelectors(
   dataStateSelector,
@@ -125,6 +138,7 @@ export const relatedEventsByEntityId = composeSelectors(
 /**
  * Returns a function that returns the information needed to display related event details based on
  * the related event's entityID and its own ID.
+ * @deprecated
  */
 export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
   dataStateSelector,
@@ -134,6 +148,7 @@ export const relatedEventDisplayInfoByEntityAndSelfId = composeSelectors(
 /**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
+ * @deprecated
  */
 export const relatedEventsByCategory = composeSelectors(
   dataStateSelector,
@@ -142,6 +157,7 @@ export const relatedEventsByCategory = composeSelectors(
 
 /**
  * Entity ids to booleans for waiting status
+ * @deprecated
  */
 export const relatedEventsReady = composeSelectors(
   dataStateSelector,
@@ -152,6 +168,7 @@ export const relatedEventsReady = composeSelectors(
  * Business logic lookup functions by ECS category by entity id.
  * Example usage:
  * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
+ * @deprecated
  */
 export const relatedEventInfoByEntityId = composeSelectors(
   dataStateSelector,
@@ -195,12 +212,15 @@ function uiStateSelector(state: ResolverState) {
 /**
  * Whether or not the resolver is pending fetching data
  */
-export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
+export const isTreeLoading = composeSelectors(dataStateSelector, dataSelectors.isTreeLoading);
 
 /**
  * Whether or not the resolver encountered an error while fetching data
  */
-export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+export const hadErrorLoadingTree = composeSelectors(
+  dataStateSelector,
+  dataSelectors.hadErrorLoadingTree
+);
 
 /**
  * True if the children cursor is not null
@@ -226,6 +246,7 @@ const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.node
 
 /**
  * Total count of related events for a process.
+ * @deprecated
  */
 export const relatedEventTotalForProcess = composeSelectors(
   dataStateSelector,
@@ -301,13 +322,27 @@ export const ariaFlowtoNodeID: (
   }
 );
 
+export const panelViewAndParameters = composeSelectors(
+  uiStateSelector,
+  uiSelectors.panelViewAndParameters
+);
+
+export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
+
 /**
- * The legacy `crumbEvent` and `crumbId` parameters.
  * @deprecated
  */
-export const breadcrumbParameters = composeSelectors(
+export const relatedEventsRelativeHrefs = composeSelectors(
   uiStateSelector,
-  uiSelectors.breadcrumbParameters
+  uiSelectors.relatedEventsRelativeHrefs
+);
+
+/**
+ * @deprecated
+ */
+export const relatedEventDetailHrefs = composeSelectors(
+  uiStateSelector,
+  uiSelectors.relatedEventDetailHrefs
 );
 
 /**

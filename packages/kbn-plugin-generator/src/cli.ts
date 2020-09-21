@@ -21,7 +21,8 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT, run, createFailError, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { run, createFailError, createFlagError } from '@kbn/dev-utils';
 
 import { snakeCase } from './casing';
 import { askQuestions, getDefaultAnswers } from './ask_questions';

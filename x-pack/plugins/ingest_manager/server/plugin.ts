@@ -13,8 +13,10 @@ import {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -47,7 +49,7 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType, NewPackagePolicy } from '../common';
+import { EsAssetReference, IngestManagerConfigType, NewPackagePolicy } from '../common';
 import {
   appContextService,
   licenseService,
@@ -55,6 +57,7 @@ import {
   ESIndexPatternService,
   AgentService,
   packagePolicyService,
+  PackageService,
 } from './services';
 import {
   getAgentStatusById,
@@ -65,6 +68,7 @@ import {
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerIngestManagerUsageCollector } from './collectors/register';
+import { getInstallation } from './services/epm/packages';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -118,6 +122,7 @@ export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCall
  */
 export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
+  packageService: PackageService;
   agentService: AgentService;
   /**
    * Services for Ingest's package policies
@@ -173,10 +178,11 @@ export class IngestManagerPlugin
     // Register feature
     // TODO: Flesh out privileges
     if (deps.features) {
-      deps.features.registerFeature({
+      deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
         name: 'Ingest Manager',
         icon: 'savedObjectsApp',
+        category: DEFAULT_APP_CATEGORIES.management,
         navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
         catalogue: ['ingestManager'],
@@ -238,7 +244,7 @@ export class IngestManagerPlugin
           // we currently only use this global interceptor if fleet is enabled
           // since it would run this func on *every* req (other plugins, CSS, etc)
           registerLimitedConcurrencyRoutes(core, config);
-          registerAgentRoutes(router);
+          registerAgentRoutes(router, config);
           registerEnrollmentApiKeyRoutes(router);
           registerInstallScriptRoutes({
             router,
@@ -273,6 +279,15 @@ export class IngestManagerPlugin
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
+      packageService: {
+        getInstalledEsAssetReferences: async (
+          savedObjectsClient: SavedObjectsClientContract,
+          pkgName: string
+        ): Promise<EsAssetReference[]> => {
+          const installation = await getInstallation({ savedObjectsClient, pkgName });
+          return installation?.installed_es || [];
+        },
+      },
       agentService: {
         getAgent,
         listAgents,

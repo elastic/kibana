@@ -29,6 +29,7 @@ import {
 
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
+import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
@@ -50,7 +51,7 @@ export const AppSearchUnconfigured: React.FC = () => (
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData } = useActions(AppLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
     if (!hasInitialized) initializeAppData(props);
@@ -62,7 +63,7 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
         <SetupGuide />
       </Route>
       <Route>
-        <Layout navigation={<AppSearchNav />}>
+        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
             <ErrorConnecting />
           ) : (
@@ -72,6 +73,9 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
               </Route>
               <Route exact path={ENGINES_PATH}>
                 <EngineOverview />
+              </Route>
+              <Route>
+                <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
             </Switch>
           )}

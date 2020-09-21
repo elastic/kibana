@@ -11,7 +11,7 @@ import {
   HotPhase,
   WarmPhase,
   FrozenPhase,
-} from '../services/policies/types';
+} from '../../../common/types';
 
 export const defaultNewHotPhase: HotPhase = {
   phaseEnabled: true,
@@ -20,6 +20,8 @@ export const defaultNewHotPhase: HotPhase = {
   selectedMaxAgeUnits: 'd',
   selectedMaxSizeStored: '50',
   selectedMaxSizeStoredUnits: 'gb',
+  forceMergeEnabled: false,
+  selectedForceMergeSegments: '',
   phaseIndexPriority: '100',
   selectedMaxDocuments: '',
 };
@@ -36,6 +38,7 @@ export const defaultNewWarmPhase: WarmPhase = {
   selectedReplicaCount: '',
   warmPhaseOnRollover: true,
   phaseIndexPriority: '50',
+  dataTierAllocationType: 'default',
 };
 
 export const defaultNewColdPhase: ColdPhase = {
@@ -46,6 +49,7 @@ export const defaultNewColdPhase: ColdPhase = {
   selectedReplicaCount: '',
   freezeEnabled: false,
   phaseIndexPriority: '0',
+  dataTierAllocationType: 'default',
 };
 
 export const defaultNewFrozenPhase: FrozenPhase = {
@@ -56,6 +60,7 @@ export const defaultNewFrozenPhase: FrozenPhase = {
   selectedReplicaCount: '',
   freezeEnabled: false,
   phaseIndexPriority: '0',
+  dataTierAllocationType: 'default',
 };
 
 export const defaultNewDeletePhase: DeletePhase = {

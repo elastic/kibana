@@ -30,7 +30,7 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import { APP_ICON, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import { createMapsUrlGenerator } from './url_generator';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
@@ -44,7 +44,7 @@ import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
+import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
@@ -54,7 +54,7 @@ export interface MapsPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsLegacy: { config: MapsLegacyConfigType };
+  mapsLegacy: { config: MapsLegacyConfig };
   share: SharePluginSetup;
 }
 
@@ -121,9 +121,8 @@ export class MapsPlugin
       title: getAppTitle(),
       order: 4000,
       icon: `plugins/${APP_ID}/icon.svg`,
-      euiIconType: APP_ICON,
+      euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      // @ts-expect-error
       async mount(context, params) {
         const { renderApp } = await lazyLoadMapModules();
         return renderApp(context, params);

@@ -8,7 +8,7 @@ import React, { Fragment, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
@@ -18,7 +18,7 @@ import { useToastNotifications } from '../../../../app_dependencies';
 import {
   getPivotQuery,
   getPivotPreviewDevConsoleStatement,
-  getPreviewRequestBody,
+  getPreviewTransformRequestBody,
   isDefaultQuery,
   isMatchAllQuery,
 } from '../../../../common';
@@ -44,7 +44,7 @@ export const StepDefineSummary: FC<Props> = ({
   const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(searchQuery);
 
-  const previewRequest = getPreviewRequestBody(
+  const previewRequest = getPreviewTransformRequestBody(
     searchItems.indexPattern.title,
     pivotQuery,
     pivotGroupByArr,
@@ -132,23 +132,21 @@ export const StepDefineSummary: FC<Props> = ({
         </EuiFormRow>
 
         <EuiSpacer size="m" />
-        <EuiText>
-          <DataGrid
-            {...pivotPreviewProps}
-            copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
-            copyToClipboardDescription={i18n.translate(
-              'xpack.transform.pivotPreview.copyClipboardTooltip',
-              {
-                defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
-              }
-            )}
-            dataTestSubj="transformPivotPreview"
-            title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
-              defaultMessage: 'Transform pivot preview',
-            })}
-            toastNotifications={toastNotifications}
-          />
-        </EuiText>
+        <DataGrid
+          {...pivotPreviewProps}
+          copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
+          copyToClipboardDescription={i18n.translate(
+            'xpack.transform.pivotPreview.copyClipboardTooltip',
+            {
+              defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+            }
+          )}
+          dataTestSubj="transformPivotPreview"
+          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
+            defaultMessage: 'Transform pivot preview',
+          })}
+          toastNotifications={toastNotifications}
+        />
       </EuiForm>
     </div>
   );

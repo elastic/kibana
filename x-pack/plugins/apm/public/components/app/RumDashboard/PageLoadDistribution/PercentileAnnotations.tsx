@@ -16,11 +16,11 @@ import styled from 'styled-components';
 import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
-  percentiles?: Record<string, number>;
+  percentiles?: Record<string, number | null>;
 }
 
 function generateAnnotationData(
-  values?: Record<string, number>
+  values?: Record<string, number | null>
 ): LineAnnotationDatum[] {
   return Object.entries(values ?? {}).map((value) => ({
     dataValue: value[1],

@@ -17,15 +17,4 @@
  * under the License.
  */
 
-export * from './types';
-export {
-  getSearchParams,
-  getSearchParamsFromRequest,
-  getPreference,
-  getTimeout,
-  getIgnoreThrottled,
-  getMaxConcurrentShardRequests,
-} from './get_search_params';
-
-export { RequestFailure } from './request_error';
 export { handleResponse } from './handle_response';

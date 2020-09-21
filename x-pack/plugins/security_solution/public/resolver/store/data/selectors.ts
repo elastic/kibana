@@ -15,6 +15,7 @@ import {
   AABB,
   VisibleEntites,
   SectionData,
+  TreeFetcherParameters,
 } from '../../types';
 import {
   isGraphableProcess,
@@ -34,6 +35,7 @@ import {
   LegacyEndpointEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
+import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
@@ -42,8 +44,18 @@ import { formatDate } from '../../view/panels/panel_content_utilities';
 /**
  * If there is currently a request.
  */
-export function isLoading(state: DataState): boolean {
-  return state.pendingRequestDatabaseDocumentID !== undefined;
+export function isTreeLoading(state: DataState): boolean {
+  return state.tree.pendingRequestParameters !== undefined;
+}
+
+/**
+ * If a request was made and it threw an error or returned a failure response code.
+ */
+export function hadErrorLoadingTree(state: DataState): boolean {
+  if (state.tree.lastResponse) {
+    return !state.tree.lastResponse.successful;
+  }
+  return false;
 }
 
 /**
@@ -54,26 +66,11 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
- * If a request was made and it threw an error or returned a failure response code.
- */
-export function hasError(state: DataState): boolean {
-  if (state.lastResponse && state.lastResponse.successful === false) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
  * The last ResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
-  if (state.lastResponse && state.lastResponse.successful) {
-    return state.lastResponse.result;
-  } else {
-    return undefined;
-  }
+  return state.tree.lastResponse?.successful ? state.tree.lastResponse.result : undefined;
 };
 
 /**
@@ -155,6 +152,7 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
 
 /**
  * This returns a map of entity_ids to stats about the related events and alerts.
+ * @deprecated
  */
 export const relatedEventsStats: (
   state: DataState
@@ -171,7 +169,28 @@ export const relatedEventsStats: (
 );
 
 /**
+ * This returns the "aggregate total" for related events, tallied as the sum
+ * of their individual `event.category`s. E.g. a [DNS, Network] would count as two
+ * towards the aggregate total.
+ */
+export const relatedEventAggregateTotalByEntityId: (
+  state: DataState
+) => (entityId: string) => number = createSelector(relatedEventsStats, (relatedStats) => {
+  return (entityId) => {
+    const statsForEntity = relatedStats(entityId);
+    if (statsForEntity === undefined) {
+      return 0;
+    }
+    return Object.values(statsForEntity?.events?.byCategory || {}).reduce(
+      (sum, val) => sum + val,
+      0
+    );
+  };
+});
+
+/**
  * returns a map of entity_ids to related event data.
+ * @deprecated
  */
 export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRelatedEvents> {
   return data.relatedEvents;
@@ -188,6 +207,7 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
  * {title: "a.b", description: "1"}, {title: "c", description: "d"}
  *
  * @param {object} obj The object to turn into `<dt><dd>` entries
+ * @deprecated
  */
 const objectToDescriptionListEntries = function* (
   obj: object,
@@ -215,6 +235,7 @@ const objectToDescriptionListEntries = function* (
 /**
  * Returns a function that returns the information needed to display related event details based on
  * the related event's entityID and its own ID.
+ * @deprecated
  */
 export const relatedEventDisplayInfoByEntityAndSelfID: (
   state: DataState
@@ -245,9 +266,8 @@ export const relatedEventDisplayInfoByEntityAndSelfID: (
     const countOfCategory = relatedEventsForThisProcess.events.reduce((sumtotal, evt) => {
       return eventModel.primaryEventCategory(evt) === specificCategory ? sumtotal + 1 : sumtotal;
     }, 0);
-
     // Assuming these details (agent, ecs, process) aren't as helpful, can revisit
-    const { agent, ecs, process, ...relevantData } = specificEvent as ResolverEvent & {
+    const { agent, ecs, process, ...relevantData } = specificEvent as SafeResolverEvent & {
       // Type this with various unknown keys so that ts will let us delete those keys
       ecs: unknown;
       process: unknown;
@@ -274,12 +294,13 @@ export const relatedEventDisplayInfoByEntityAndSelfID: (
 /**
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
+ * @deprecated
  */
 export const relatedEventsByCategory: (
   state: DataState
 ) => (entityID: string) => (ecsCategory: string) => ResolverEvent[] = createSelector(
   relatedEventsByEntityId,
-  function provideGettersByCategory(
+  function (
     /* eslint-disable no-shadow */
     relatedEventsByEntityId
     /* eslint-enable no-shadow */
@@ -310,6 +331,7 @@ export const relatedEventsByCategory: (
 /**
  * returns a map of entity_ids to booleans indicating if it is waiting on related event
  * A value of `undefined` can be interpreted as `not yet requested`
+ * @deprecated
  */
 export function relatedEventsReady(data: DataState): Map<string, boolean> {
   return data.relatedEventsReady;
@@ -317,6 +339,7 @@ export function relatedEventsReady(data: DataState): Map<string, boolean> {
 
 /**
  * `true` if there were more children than we got in the last request.
+ * @deprecated
  */
 export function hasMoreChildren(state: DataState): boolean {
   const resolverTree = resolverTreeResponse(state);
@@ -325,6 +348,7 @@ export function hasMoreChildren(state: DataState): boolean {
 
 /**
  * `true` if there were more ancestors than we got in the last request.
+ * @deprecated
  */
 export function hasMoreAncestors(state: DataState): boolean {
   const resolverTree = resolverTreeResponse(state);
@@ -340,6 +364,7 @@ interface RelatedInfoFunctions {
  * A map of `entity_id`s to functions that provide information about
  * related events by ECS `.category` Primarily to avoid having business logic
  * in UI components.
+ * @deprecated
  */
 export const relatedEventInfoByEntityId: (
   state: DataState
@@ -438,18 +463,24 @@ export const relatedEventInfoByEntityId: (
 );
 
 /**
- * If we need to fetch, this is the ID to fetch.
+ * If the tree resource needs to be fetched then these are the parameters that should be used.
  */
-export function databaseDocumentIDToFetch(state: DataState): string | null {
-  // If there is an ID, it must match either the last received version, or the pending version.
-  // Otherwise, we need to fetch it
-  // NB: this technique will not allow for refreshing of data.
+export function treeParametersToFetch(state: DataState): TreeFetcherParameters | null {
+  /**
+   * If there are current tree parameters that don't match the parameters used in the pending request (if there is a pending request) and that don't match the parameters used in the last completed request (if there was a last completed request) then we need to fetch the tree resource using the current parameters.
+   */
   if (
-    state.databaseDocumentID !== undefined &&
-    state.databaseDocumentID !== state.pendingRequestDatabaseDocumentID &&
-    state.databaseDocumentID !== state.lastResponse?.databaseDocumentID
+    state.tree.currentParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree.currentParameters,
+      state.tree.lastResponse?.parameters
+    ) &&
+    !treeFetcherParametersModel.equal(
+      state.tree.currentParameters,
+      state.tree.pendingRequestParameters
+    )
   ) {
-    return state.databaseDocumentID;
+    return state.tree.currentParameters;
   } else {
     return null;
   }
@@ -672,15 +703,18 @@ export const nodesAndEdgelines: (
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
  */
-export function databaseDocumentIDToAbort(state: DataState): string | null {
+export function treeRequestParametersToAbort(state: DataState): TreeFetcherParameters | null {
   /**
-   * If there is a pending request, and its not for the current databaseDocumentID (even, if the current databaseDocumentID is undefined) then we should abort the request.
+   * If there is a pending request, and its not for the current parameters (even, if the current parameters are undefined) then we should abort the request.
    */
   if (
-    state.pendingRequestDatabaseDocumentID !== undefined &&
-    state.pendingRequestDatabaseDocumentID !== state.databaseDocumentID
+    state.tree.pendingRequestParameters !== undefined &&
+    !treeFetcherParametersModel.equal(
+      state.tree.pendingRequestParameters,
+      state.tree.currentParameters
+    )
   ) {
-    return state.pendingRequestDatabaseDocumentID;
+    return state.tree.pendingRequestParameters;
   } else {
     return null;
   }

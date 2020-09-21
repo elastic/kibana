@@ -73,7 +73,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://example.com',
-        rejectUnauthorizedCertificates: false,
+        proxyRejectUnauthorizedCertificates: false,
       }
     );
     // @ts-expect-error
@@ -140,6 +140,9 @@ describe('send_email module', () => {
           "host": "example.com",
           "port": 1025,
           "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": undefined,
+          },
         },
       ]
     `);

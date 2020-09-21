@@ -66,6 +66,6 @@ describe('FieldName', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('strong').first().text()).toEqual(highlight);
+    expect(wrapper.find('mark').first().text()).toEqual(highlight);
   });
 });

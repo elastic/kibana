@@ -6,7 +6,6 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media.ts';
 import {
@@ -21,6 +20,7 @@ import {
   HostPolicyResponseActionStatus,
   HostPolicyResponseAppliedAction,
   HostStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
@@ -132,6 +132,7 @@ describe('when on the list page', () => {
               hostListData[index] = {
                 metadata: hostListData[index].metadata,
                 host_status: status,
+                query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
               };
             }
           );
@@ -302,6 +303,8 @@ describe('when on the list page', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
         metadata: { host, ...details },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        query_strategy_version,
       } = mockEndpointDetailsApiResult();
 
       hostDetails = {
@@ -313,6 +316,7 @@ describe('when on the list page', () => {
             id: '1',
           },
         },
+        query_strategy_version,
       };
 
       agentId = hostDetails.metadata.elastic.agent.id;
@@ -511,7 +515,7 @@ describe('when on the list page', () => {
       const renderResult = await renderAndWaitForData();
       const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
-      expect(linkToReassign.textContent).toEqual('Reassign Configuration');
+      expect(linkToReassign.textContent).toEqual('Reassign Policy');
       expect(linkToReassign.getAttribute('href')).toEqual(
         `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
       );
@@ -573,7 +577,7 @@ describe('when on the list page', () => {
       it('should include the sub-panel title', async () => {
         expect(
           (await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutTitle')).textContent
-        ).toBe('Configuration Response');
+        ).toBe('Policy Response');
       });
 
       it('should show a configuration section for each protection', async () => {
@@ -667,6 +671,101 @@ describe('when on the list page', () => {
       it('should format unknown policy action names', async () => {
         expect(renderResult.getByText('A New Unknown Action')).not.toBeNull();
       });
+    });
+  });
+
+  describe('when the more actions column is opened', () => {
+    let hostInfo: HostInfo;
+    let agentId: string;
+    let agentPolicyId: string;
+    const generator = new EndpointDocGenerator('seed');
+    let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+
+    const mockEndpointListApi = () => {
+      const { hosts } = mockEndpointResultList();
+      hostInfo = {
+        host_status: hosts[0].host_status,
+        metadata: hosts[0].metadata,
+        query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
+      };
+      const packagePolicy = docGenerator.generatePolicyPackagePolicy();
+      packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;
+      const agentPolicy = generator.generateAgentPolicy();
+      agentPolicyId = agentPolicy.id;
+      agentId = hosts[0].metadata.elastic.agent.id;
+
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [hostInfo],
+        endpointPackagePolicies: [packagePolicy],
+        agentPolicy,
+      });
+    };
+
+    beforeEach(() => {
+      mockEndpointListApi();
+
+      reactTestingLibrary.act(() => {
+        history.push('/endpoints');
+      });
+
+      renderAndWaitForData = async () => {
+        const renderResult = render();
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+        return renderResult;
+      };
+
+      coreStart.application.getUrlForApp.mockImplementation((appName) => {
+        switch (appName) {
+          case 'securitySolution':
+            return '/app/security';
+          case 'ingestManager':
+            return '/app/ingestManager';
+        }
+        return appName;
+      });
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('navigates to the Security Solution Host Details page', async () => {
+      const renderResult = await renderAndWaitForData();
+      // open the endpoint actions menu
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+
+      const hostLink = await renderResult.findByTestId('hostLink');
+      expect(hostLink.getAttribute('href')).toEqual(
+        `/app/security/hosts/${hostInfo.metadata.host.hostname}`
+      );
+    });
+    it('navigates to the Ingest Agent Policy page', async () => {
+      const renderResult = await renderAndWaitForData();
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+
+      const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
+      expect(agentPolicyLink.getAttribute('href')).toEqual(
+        `/app/ingestManager#/policies/${agentPolicyId}`
+      );
+    });
+    it('navigates to the Ingest Agent Details page', async () => {
+      const renderResult = await renderAndWaitForData();
+      const endpointActionsButton = await renderResult.findByTestId('endpointTableRowActions');
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+
+      const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
+      expect(agentDetailsLink.getAttribute('href')).toEqual(
+        `/app/ingestManager#/fleet/agents/${agentId}`
+      );
     });
   });
 });

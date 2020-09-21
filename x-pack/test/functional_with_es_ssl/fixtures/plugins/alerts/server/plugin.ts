@@ -21,10 +21,11 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
   public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
     createNoopAlertType(alerts);
     createAlwaysFiringAlertType(alerts);
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: 'alerting_fixture',
       name: 'alerting_fixture',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       alerting: ['test.always-firing', 'test.noop'],
       privileges: {
         all: {

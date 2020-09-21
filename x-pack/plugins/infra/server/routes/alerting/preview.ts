@@ -30,7 +30,16 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
-      const { criteria, filterQuery, lookback, sourceId, alertType, alertInterval } = request.body;
+      const {
+        criteria,
+        filterQuery,
+        lookback,
+        sourceId,
+        alertType,
+        alertInterval,
+        alertThrottle,
+        alertOnNoData,
+      } = request.body;
 
       const callCluster = (endpoint: string, opts: Record<string, any>) => {
         return callWithRequest(requestContext, endpoint, opts);
@@ -51,22 +60,26 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               lookback,
               config: source.configuration,
               alertInterval,
+              alertThrottle,
+              alertOnNoData,
             });
 
             const numberOfGroups = previewResult.length;
             const resultTotals = previewResult.reduce(
-              (totals, [firedResult, noDataResult, errorResult]) => {
+              (totals, [firedResult, noDataResult, errorResult, notifications]) => {
                 return {
                   ...totals,
                   fired: totals.fired + firedResult,
                   noData: totals.noData + noDataResult,
                   error: totals.error + errorResult,
+                  notifications: totals.notifications + notifications,
                 };
               },
               {
                 fired: 0,
                 noData: 0,
                 error: 0,
+                notifications: 0,
               }
             );
             return response.ok({
@@ -82,24 +95,28 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               callCluster,
               params: { criteria, filterQuery, nodeType },
               lookback,
-              config: source.configuration,
+              source,
               alertInterval,
+              alertThrottle,
+              alertOnNoData,
             });
 
             const numberOfGroups = previewResult.length;
             const resultTotals = previewResult.reduce(
-              (totals, [firedResult, noDataResult, errorResult]) => {
+              (totals, [firedResult, noDataResult, errorResult, notifications]) => {
                 return {
                   ...totals,
                   fired: totals.fired + firedResult,
                   noData: totals.noData + noDataResult,
                   error: totals.error + errorResult,
+                  notifications: totals.notifications + notifications,
                 };
               },
               {
                 fired: 0,
                 noData: 0,
                 error: 0,
+                notifications: 0,
               }
             );
 

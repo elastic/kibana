@@ -44,7 +44,7 @@ import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_ab
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
 import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
@@ -124,15 +124,17 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   setAbsoluteRangeDatePicker,
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
-  const {
-    loading: userInfoLoading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    hasIndexWrite,
-    signalIndexName,
-  } = useUserInfo();
+  const [
+    {
+      loading: userInfoLoading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      hasIndexWrite,
+      signalIndexName,
+    },
+  ] = useUserData();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
@@ -388,7 +390,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     <EuiToolTip
                       position="top"
                       content={
-                        rule?.type === 'machine_learning' && !hasMlPermissions
+                        isMlRule(rule?.type) && !hasMlPermissions
                           ? detectionI18n.ML_RULES_DISABLED_MESSAGE
                           : undefined
                       }

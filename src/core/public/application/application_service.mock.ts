@@ -20,6 +20,7 @@
 import { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import type { MountPoint } from '../types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import {
   ApplicationSetup,
@@ -27,7 +28,6 @@ import {
   ApplicationStart,
   InternalApplicationSetup,
   PublicAppInfo,
-  PublicLegacyAppInfo,
 } from './types';
 import { ApplicationServiceContract } from './test_types';
 
@@ -39,7 +39,6 @@ const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
 
 const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup> => ({
   register: jest.fn(),
-  registerLegacyApp: jest.fn(),
   registerAppUpdater: jest.fn(),
   registerMountContext: jest.fn(),
 });
@@ -48,7 +47,7 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
-    applications$: new BehaviorSubject<Map<string, PublicAppInfo | PublicLegacyAppInfo>>(new Map()),
+    applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     currentAppId$: currentAppId$.asObservable(),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     navigateToApp: jest.fn(),
@@ -84,9 +83,10 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
-    applications$: new BehaviorSubject<Map<string, PublicAppInfo | PublicLegacyAppInfo>>(new Map()),
+    applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
+    currentActionMenu$: new BehaviorSubject<MountPoint | undefined>(undefined),
     getComponent: jest.fn(),
     getUrlForApp: jest.fn(),
     navigateToApp: jest.fn().mockImplementation((appId) => currentAppId$.next(appId)),

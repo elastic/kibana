@@ -16,12 +16,11 @@ import {
 } from '../../adapters/framework/adapter_types';
 import { Comparator, InventoryMetricConditions } from './types';
 import { AlertServices } from '../../../../../alerts/server';
-import { InfraSnapshot } from '../../snapshot';
-import { parseFilterQuery } from '../../../utils/serialized_query';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
-import { InfraSourceConfiguration } from '../../sources';
+import { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api/snapshot_api';
+import { InfraSource } from '../../sources';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
+import { getNodes } from '../../../routes/snapshot/lib/get_nodes';
 
 type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean[];
@@ -33,7 +32,7 @@ type ConditionResult = InventoryMetricConditions & {
 export const evaluateCondition = async (
   condition: InventoryMetricConditions,
   nodeType: InventoryItemType,
-  sourceConfiguration: InfraSourceConfiguration,
+  source: InfraSource,
   callCluster: AlertServices['callCluster'],
   filterQuery?: string,
   lookbackSize?: number
@@ -55,7 +54,7 @@ export const evaluateCondition = async (
     nodeType,
     metric,
     timerange,
-    sourceConfiguration,
+    source,
     filterQuery,
     customMetric
   );
@@ -94,12 +93,11 @@ const getData = async (
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
-  sourceConfiguration: InfraSourceConfiguration,
+  source: InfraSource,
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput
 ) => {
-  const snapshot = new InfraSnapshot();
-  const esClient = <Hit = {}, Aggregation = undefined>(
+  const client = <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> => callCluster('search', options);
 
@@ -107,17 +105,17 @@ const getData = async (
     metric === 'custom' ? (customMetric as SnapshotCustomMetricInput) : { type: metric },
   ];
 
-  const options = {
-    filterQuery: parseFilterQuery(filterQuery),
+  const snapshotRequest: SnapshotRequest = {
+    filterQuery,
     nodeType,
     groupBy: [],
-    sourceConfiguration,
+    sourceId: 'default',
     metrics,
     timerange,
     includeTimeseries: Boolean(timerange.lookbackSize),
   };
   try {
-    const { nodes } = await snapshot.getNodes(esClient, options);
+    const { nodes } = await getNodes(client, snapshotRequest, source);
 
     if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
 

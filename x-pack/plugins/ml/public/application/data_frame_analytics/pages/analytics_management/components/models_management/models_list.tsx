@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useCallback, useMemo } from 'react';
+import React, { FC, useState, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  Direction,
+  EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiTitle,
   EuiButton,
-  EuiSearchBarProps,
+  EuiSearchBar,
   EuiSpacer,
   EuiButtonIcon,
   EuiBadge,
+  SearchFilterConfig,
 } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
@@ -29,19 +29,23 @@ import { useInferenceApiService } from '../../../../../services/ml_api_service/i
 import { ModelsTableToConfigMapping } from './index';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
-import { useMlKibana, useNotifications } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
-import { getResultsUrl } from '../analytics_list/common';
 import {
   ModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
 } from '../../../../../../../common/types/inference';
 import {
+  getAnalysisType,
   REFRESH_ANALYTICS_LIST_STATE,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
 } from '../../../../common';
+import { useTableSettings } from '../analytics_list/use_table_settings';
+import { filterAnalyticsModels, AnalyticsSearchBar } from '../analytics_search_bar';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -59,6 +63,7 @@ export const ModelsList: FC = () => {
       application: { navigateToUrl, capabilities },
     },
   } = useMlKibana();
+  const urlGenerator = useMlUrlGenerator();
 
   const canDeleteDataFrameAnalytics = capabilities.ml.canDeleteDataFrameAnalytics as boolean;
 
@@ -66,21 +71,40 @@ export const ModelsList: FC = () => {
   const { toasts } = useNotifications();
 
   const [searchQueryText, setSearchQueryText] = useState('');
-
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<string>(ModelsTableToConfigMapping.id);
-  const [sortDirection, setSortDirection] = useState<Direction>('asc');
-
+  const [filteredModels, setFilteredModels] = useState<ModelItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
-
   const [modelsToDelete, setModelsToDelete] = useState<ModelItemFull[]>([]);
-
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+
+  const updateFilteredItems = (queryClauses: any) => {
+    if (queryClauses.length) {
+      const filtered = filterAnalyticsModels(items, queryClauses);
+      setFilteredModels(filtered);
+    } else {
+      setFilteredModels(items);
+    }
+  };
+
+  const filterList = () => {
+    if (searchQueryText !== '') {
+      const query = EuiSearchBar.Query.parse(searchQueryText);
+      let clauses: any = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      updateFilteredItems(clauses);
+    } else {
+      updateFilteredItems([]);
+    }
+  };
+
+  useEffect(() => {
+    filterList();
+  }, [searchQueryText, items]);
 
   /**
    * Fetches inference trained models.
@@ -257,12 +281,19 @@ export const ModelsList: FC = () => {
       type: 'icon',
       available: (item) => item.metadata?.analytics_config?.id,
       onClick: async (item) => {
-        await navigateToUrl(
-          getResultsUrl(
-            item.metadata?.analytics_config.id,
-            Object.keys(item.metadata?.analytics_config.analysis)[0]
-          )
-        );
+        if (item.metadata?.analytics_config === undefined) return;
+
+        const url = await urlGenerator.createUrl({
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+          pageState: {
+            jobId: item.metadata?.analytics_config.id as string,
+            analysisType: getAnalysisType(
+              item.metadata?.analytics_config.analysis
+            ) as DataFrameAnalysisConfigType,
+          },
+        });
+
+        await navigateToUrl(url);
       },
       isPrimary: true,
     },
@@ -355,91 +386,51 @@ export const ModelsList: FC = () => {
     },
   ];
 
-  const pagination = {
-    initialPageIndex: pageIndex,
-    initialPageSize: pageSize,
-    totalItemCount: items.length,
-    pageSizeOptions: [10, 20, 50],
-    hidePerPageOptions: false,
-  };
+  const filters: SearchFilterConfig[] =
+    inferenceTypesOptions && inferenceTypesOptions.length > 0
+      ? [
+          {
+            type: 'field_value_selection',
+            field: 'type',
+            name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+              defaultMessage: 'Type',
+            }),
+            multiSelect: 'or',
+            options: inferenceTypesOptions,
+          },
+        ]
+      : [];
 
-  const sorting = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-  };
-  const search: EuiSearchBarProps = {
-    query: searchQueryText,
-    onChange: (searchChange) => {
-      if (searchChange.error !== null) {
-        return false;
-      }
-      setSearchQueryText(searchChange.queryText);
-      return true;
-    },
-    box: {
-      incremental: true,
-    },
-    ...(inferenceTypesOptions && inferenceTypesOptions.length > 0
-      ? {
-          filters: [
-            {
-              type: 'field_value_selection',
-              field: 'type',
-              name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
-                defaultMessage: 'Type',
-              }),
-              multiSelect: 'or',
-              options: inferenceTypesOptions,
-            },
-          ],
-        }
-      : {}),
-    ...(selectedModels.length > 0
-      ? {
-          toolsLeft: (
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.ml.inference.modelsList.selectedModelsMessage"
-                      defaultMessage="{modelsCount, plural, one{# model} other {# models}} selected"
-                      values={{ modelsCount: selectedModels.length }}
-                    />
-                  </h5>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButton
-                  color="danger"
-                  onClick={prepareModelsForDeletion.bind(null, selectedModels)}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.inference.modelsList.deleteModelsButtonLabel"
-                    defaultMessage="Delete"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        }
-      : {}),
-  };
+  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<ModelItem>(
+    ModelsTableToConfigMapping.id,
+    filteredModels
+  );
 
-  const onTableChange: EuiInMemoryTable<ModelItem>['onTableChange'] = ({
-    page = { index: 0, size: 10 },
-    sort = { field: ModelsTableToConfigMapping.id, direction: 'asc' },
-  }) => {
-    const { index, size } = page;
-    setPageIndex(index);
-    setPageSize(size);
-
-    const { field, direction } = sort;
-    setSortField(field);
-    setSortDirection(direction);
-  };
+  const toolsLeft = (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h5>
+              <FormattedMessage
+                id="xpack.ml.inference.modelsList.selectedModelsMessage"
+                defaultMessage="{modelsCount, plural, one{# model} other {# models}} selected"
+                values={{ modelsCount: selectedModels.length }}
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton color="danger" onClick={prepareModelsForDeletion.bind(null, selectedModels)}>
+            <FormattedMessage
+              id="xpack.ml.inference.modelsList.deleteModelsButtonLabel"
+              defaultMessage="Delete"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
 
   const isSelectionAllowed = canDeleteDataFrameAnalytics;
 
@@ -473,21 +464,31 @@ export const ModelsList: FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
-        <EuiInMemoryTable
-          allowNeutralSort={false}
+        <EuiFlexGroup alignItems="center">
+          {selectedModels.length > 0 && toolsLeft}
+          <EuiFlexItem>
+            <AnalyticsSearchBar
+              filters={filters}
+              searchQueryText={searchQueryText}
+              setSearchQueryText={setSearchQueryText}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <EuiBasicTable<ModelItem>
           columns={columns}
           hasActions={true}
           isExpandable={true}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
-          items={items}
+          items={pageOfItems}
           itemId={ModelsTableToConfigMapping.id}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
-          search={search}
+          onChange={onTableChange}
           selection={selection}
+          pagination={pagination!}
+          sorting={sorting}
+          data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
           })}
