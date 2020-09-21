@@ -255,26 +255,9 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       newTrustedApp.name = `\n  ${newTrustedApp.name}  \r\n`;
       const request = createPostRequest(newTrustedApp);
       await routeHandler(context, request, response);
-      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
-        _tags: ['os:windows'],
-        comments: [],
-        description: 'this one is ok',
-        entries: [
-          {
-            field: 'process.path.text',
-            operator: 'included',
-            type: 'match',
-            value: 'c:/programs files/Anti-Virus',
-          },
-        ],
-        itemId: expect.stringMatching(/.*/),
-        listId: 'endpoint_trusted_apps',
-        meta: undefined,
-        name: 'Some Anti-Virus App',
-        namespaceType: 'agnostic',
-        tags: [],
-        type: 'simple',
-      });
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].name).toEqual(
+        'Some Anti-Virus App'
+      );
     });
 
     it('should trim condition entry values', async () => {
@@ -287,32 +270,20 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       });
       const request = createPostRequest(newTrustedApp);
       await routeHandler(context, request, response);
-      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
-        _tags: ['os:windows'],
-        comments: [],
-        description: 'this one is ok',
-        entries: [
-          {
-            field: 'process.path.text',
-            operator: 'included',
-            type: 'match',
-            value: 'c:/programs files/Anti-Virus',
-          },
-          {
-            field: 'process.path.text',
-            value: 'some value',
-            operator: 'included',
-            type: 'match',
-          },
-        ],
-        itemId: expect.stringMatching(/.*/),
-        listId: 'endpoint_trusted_apps',
-        meta: undefined,
-        name: 'Some Anti-Virus App',
-        namespaceType: 'agnostic',
-        tags: [],
-        type: 'simple',
-      });
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.path.text',
+          operator: 'included',
+          type: 'match',
+          value: 'c:/programs files/Anti-Virus',
+        },
+        {
+          field: 'process.path.text',
+          value: 'some value',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
     });
 
     it('should convert hash values to lowercase', async () => {
@@ -325,32 +296,20 @@ describe('when invoking endpoint trusted apps route handlers', () => {
       });
       const request = createPostRequest(newTrustedApp);
       await routeHandler(context, request, response);
-      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0]).toEqual({
-        _tags: ['os:windows'],
-        comments: [],
-        description: 'this one is ok',
-        entries: [
-          {
-            field: 'process.path.text',
-            operator: 'included',
-            type: 'match',
-            value: 'c:/programs files/Anti-Virus',
-          },
-          {
-            field: 'process.hash.*',
-            value: 'xxxxxyyyyzzzzz',
-            operator: 'included',
-            type: 'match',
-          },
-        ],
-        itemId: expect.stringMatching(/.*/),
-        listId: 'endpoint_trusted_apps',
-        meta: undefined,
-        name: 'Some Anti-Virus App',
-        namespaceType: 'agnostic',
-        tags: [],
-        type: 'simple',
-      });
+      expect(exceptionsListClient.createExceptionListItem.mock.calls[0][0].entries).toEqual([
+        {
+          field: 'process.path.text',
+          operator: 'included',
+          type: 'match',
+          value: 'c:/programs files/Anti-Virus',
+        },
+        {
+          field: 'process.hash.*',
+          value: 'xxxxxyyyyzzzzz',
+          operator: 'included',
+          type: 'match',
+        },
+      ]);
     });
   });
 
