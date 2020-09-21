@@ -37,12 +37,13 @@ export type ISearchRequestParams<T = Record<string, any>> = {
   trackTotalHits?: boolean;
 } & Search<T>;
 
-export interface IEsSearchRequest extends IKibanaSearchRequest {
-  params?: ISearchRequestParams;
+export interface IEsSearchRequest<T = Record<string, any>, P = ISearchRequestParams<T>>
+  extends IKibanaSearchRequest {
+  params?: P;
   indexType?: string;
 }
 
-export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
+export interface IEsSearchResponse<T = any> extends IKibanaSearchResponse {
   /**
    * Indicates whether async search is still in flight
    */
@@ -51,8 +52,37 @@ export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
    * Indicates whether the results returned are complete or partial
    */
   isPartial?: boolean;
-  rawResponse: SearchResponse<Source>;
+  rawResponse: SearchResponse<T>;
+  rawEqlResponse?: EqlSearchResponse<T>;
 }
 
 export const isEsResponse = (response: any): response is IEsSearchResponse =>
   response && response.rawResponse;
+
+export interface EqlSearchResponse<T> {
+  is_partial: boolean;
+  is_running: boolean;
+  took: number;
+  timed_out: boolean;
+  hits: {
+    total: TotalValue;
+    sequences?: Array<EqlSequence<T>>;
+    events?: Array<BaseHit<T>>;
+  };
+}
+
+export interface TotalValue {
+  value: number;
+  relation: string;
+}
+
+export interface BaseHit<T> {
+  _index: string;
+  _id: string;
+  _source: T;
+}
+
+export interface EqlSequence<T> {
+  join_keys: any[];
+  events: Array<BaseHit<T>>;
+}

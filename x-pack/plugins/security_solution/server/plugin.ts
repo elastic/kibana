@@ -18,8 +18,10 @@ import {
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
@@ -63,6 +65,10 @@ import { AppRequestContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
+import {
+  securityEqlSearchStrategyProvider,
+  SECURITY_EQL_SEARCH_STRATEGY,
+} from './search_strategy/eql';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -273,10 +279,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initServer(libs);
 
     core.getStartServices().then(([_, depsStart]) => {
+      const eqlSearchStrategy = securityEqlSearchStrategyProvider(this.logger);
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(depsStart.data);
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
+
+      plugins.data.search.registerSearchStrategy(SECURITY_EQL_SEARCH_STRATEGY, eqlSearchStrategy);
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
