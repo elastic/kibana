@@ -25,10 +25,10 @@ const { run } = require('@kbn/dev-utils');
 
 const TARGET_BUILD_DIR = path.resolve(__dirname, '../target');
 const ROOT_DIR = path.resolve(__dirname, '../');
-const WEBPACK_CONFIG_PATH = path.resolve(__dirname, '../webpack.config.js');
+const WORKER_PATH_SECTION = 'ace/modes/x_json/worker/x_json.ace.worker.js';
 
 run(
-  async ({ procRunner, log, flags }) => {
+  async ({ procRunner, log }) => {
     log.info('Deleting old output');
 
     await del(TARGET_BUILD_DIR);
@@ -50,13 +50,10 @@ run(
 
     log.success('Copying worker file to target.');
 
-    await procRunner.run('webpack', {
-      cmd: 'webpack',
-      args: ['--config', WEBPACK_CONFIG_PATH, flags.dev ? '--env.dev' : '--env.prod'],
-      wait: true,
-      env,
-      cwd,
-    });
+    fs.copyFileSync(
+      path.resolve(__dirname, '..', 'src', WORKER_PATH_SECTION),
+      path.resolve(__dirname, '..', 'target', WORKER_PATH_SECTION)
+    );
 
     log.success('Complete');
   },
