@@ -26,7 +26,7 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
 import { ResolverState } from '../../types';
 import { useNavigateOrReplace } from '../use_navigate_or_replace';
-import { useResolverTheme } from '../assets';
+import { useColors } from '../use_colors';
 
 const StyledLimitWarning = styled(LimitWarning)`
   flex-flow: row wrap;
@@ -208,9 +208,7 @@ function NodeDetailLink({ name, item }: { name: string; item: ProcessTableView }
   const isTerminated = useSelector((state: ResolverState) =>
     entityID === undefined ? false : selectors.isProcessTerminated(state)(entityID)
   );
-  const {
-    colorMap: { descriptionText },
-  } = useResolverTheme();
+  const { descriptionText } = useColors();
   return (
     <EuiButtonEmpty {...useNavigateOrReplace({ search: item.href })}>
       {name === '' ? (
