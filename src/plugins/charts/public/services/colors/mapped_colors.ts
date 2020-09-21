@@ -45,26 +45,12 @@ export class MappedColors {
     return _.mapValues(this.uiSettings.get(COLOR_MAPPING_SETTING), standardizeColor);
   }
 
-  public get oldMap(): any {
-    return this._oldMap;
-  }
-
   public get mapping(): any {
     return this._mapping;
   }
 
   get(key: string | number) {
     return this.getConfigColorMapping()[key as any] || this._mapping[key];
-  }
-
-  flush() {
-    this._oldMap = _.clone(this._mapping);
-    this._mapping = {};
-  }
-
-  purge() {
-    this._oldMap = {};
-    this._mapping = {};
   }
 
   mapKeys(keys: Array<string | number>) {

@@ -48,7 +48,7 @@ export class ColorsService {
   }
 
   createColorLookupFunction(
-    arrayOfStringsOrNumbers?: any,
+    arrayOfStringsOrNumbers?: Array<string | number>,
     colorMapping: Partial<Record<string, string>> = {}
   ) {
     if (!Array.isArray(arrayOfStringsOrNumbers)) {
@@ -67,7 +67,7 @@ export class ColorsService {
 
     this.mappedColors.mapKeys(arrayOfStringsOrNumbers);
 
-    return (value: string) => {
+    return (value: string | number) => {
       return colorMapping[value] || this.mappedColors.get(value);
     };
   }

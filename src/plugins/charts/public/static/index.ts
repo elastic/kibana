@@ -19,3 +19,4 @@
 
 export * from './color_maps';
 export * from './components';
+export * from './utils';
