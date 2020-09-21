@@ -35,9 +35,10 @@ module.exports = {
       type: 'category',
       label: 'Examples',
       items: [
+        'form_lib/examples/style_fields',
         'form_lib/examples/validation',
         'form_lib/examples/react_to_changes',
-        'form_lib/examples/style_fields',
+        'form_lib/examples/fields_composition',
       ],
     },
     {

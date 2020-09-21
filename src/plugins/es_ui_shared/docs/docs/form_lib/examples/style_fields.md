@@ -119,9 +119,3 @@ export const StyleFieldsComponent = () => {
   );
 };
 ```
-
-
-// Composition (swapping fields)
-
-// Dynamic fields (UseArray)
-
