@@ -23,6 +23,8 @@ import {
   SearchSourceFields,
   TimefilterContract,
 } from '../../../plugins/data/public';
+import { ExpressionAstExpression } from '../../expressions/public';
+
 import { SerializedVis, Vis, VisParams } from './vis';
 
 export { Vis, SerializedVis, VisParams };
@@ -31,6 +33,12 @@ export interface VisualizationController {
   render(visData: any, visParams: any): Promise<void>;
   destroy(): void;
   isLoaded?(): Promise<void> | void;
+}
+
+export interface PipelineParams {
+  timefilter: TimefilterContract;
+  timeRange?: any;
+  abortSignal?: AbortSignal;
 }
 
 export type VisualizationControllerConstructor = new (
@@ -71,4 +79,7 @@ export interface VisToExpressionAstParams {
   abortSignal?: AbortSignal;
 }
 
-export type VisToExpressionAst = (vis: Vis, params: VisToExpressionAstParams) => string;
+export type VisToExpressionAst = (
+  vis: Vis,
+  params: VisToExpressionAstParams
+) => Promise<ExpressionAstExpression> | ExpressionAstExpression;

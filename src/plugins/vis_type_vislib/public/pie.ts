@@ -28,6 +28,7 @@ import { getPositions } from '../../vis_type_xy/public';
 import { createVislibVisController } from './vis_controller';
 import { CommonVislibParams } from './types';
 import { VisTypeVislibDependencies } from './plugin';
+import { toExpression } from './to_expression';
 import { PieOptions } from './editor';
 
 export interface PieVisParams extends CommonVislibParams {
@@ -49,6 +50,7 @@ export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => (
   description: i18n.translate('visTypeVislib.pie.pieDescription', {
     defaultMessage: 'Compare parts of a whole',
   }),
+  toExpression,
   visualization: createVislibVisController(deps),
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];

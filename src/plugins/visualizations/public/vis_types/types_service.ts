@@ -18,12 +18,17 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
-// @ts-ignore
-import { BaseVisType } from './base_vis_type';
-// @ts-ignore
-import { ReactVisType } from './react_vis_type';
+
 import { TriggerContextMapping } from '../../../ui_actions/public';
+
+import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+import { BaseVisType } from './base_vis_type';
+import { ReactVisType } from './react_vis_type';
+import { Vis } from '../vis';
+import { Schemas } from '../legacy/build_pipeline';
+import { VisToExpressionAst } from '../types';
+
+export type ExpressionFn = (vis: Vis, params: any, schemas: Schemas) => Promise<string> | string;
 
 export interface VisType {
   name: string;
@@ -39,6 +44,8 @@ export interface VisType {
   stage: 'experimental' | 'beta' | 'production';
   requiresSearch: boolean;
   hidden: boolean;
+  toExpressionAst?: VisToExpressionAst;
+  toExpression?: ExpressionFn;
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

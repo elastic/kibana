@@ -31,6 +31,7 @@ import { createVislibVisController } from './vis_controller';
 import { TimeMarker } from './vislib/visualizations/time_marker';
 import { CommonVislibParams } from './types';
 import { VisTypeVislibDependencies } from './plugin';
+import { toExpression } from './to_expression';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
   type: 'heatmap';
@@ -51,6 +52,7 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
   description: i18n.translate('visTypeVislib.heatmap.heatmapDescription', {
     defaultMessage: 'Shade cells within a matrix',
   }),
+  toExpression,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];
   },

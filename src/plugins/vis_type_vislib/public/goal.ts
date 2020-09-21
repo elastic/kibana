@@ -26,6 +26,7 @@ import { ColorMode, ColorSchemas } from '../../charts/public';
 import { getGaugeCollections, GaugeOptions } from './editor';
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
+import { toExpression } from './to_expression';
 import { GaugeType } from './types';
 
 export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
@@ -35,6 +36,7 @@ export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
   description: i18n.translate('visTypeVislib.goal.goalDescription', {
     defaultMessage: 'A goal chart indicates how close you are to your final goal.',
   }),
+  toExpression,
   visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
