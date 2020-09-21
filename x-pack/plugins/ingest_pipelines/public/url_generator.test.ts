@@ -16,21 +16,21 @@ describe('IngestPipelinesUrlGenerator', () => {
   const urlGenerator = new IngestPipelinesUrlGenerator(getAppBasePath);
 
   describe('Pipelines List', () => {
-    it('should generate correct relative url for list without pipelineId', async () => {
+    it('generates relative url for list without pipelineId', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.LIST,
       });
       expect(url).toBe('/app/test_app/');
     });
 
-    it('should generate correct absolute url for list without pipelineId', async () => {
+    it('generates absolute url for list without pipelineId', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.LIST,
         absolute: true,
       });
       expect(url).toBe('http://localhost/app/test_app/');
     });
-    it('should generate correct relative url for list with a pipelineId', async () => {
+    it('generates relative url for list with a pipelineId', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.LIST,
         pipelineId: 'pipeline_name',
@@ -38,7 +38,7 @@ describe('IngestPipelinesUrlGenerator', () => {
       expect(url).toBe('/app/test_app/?pipeline=pipeline_name');
     });
 
-    it('should generate correct absolute url for list with a pipelineId', async () => {
+    it('generates absolute url for list with a pipelineId', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.LIST,
         pipelineId: 'pipeline_name',
@@ -49,7 +49,7 @@ describe('IngestPipelinesUrlGenerator', () => {
   });
 
   describe('Pipeline Edit', () => {
-    it('should generate correct relative url for pipeline edit', async () => {
+    it('generates relative url for pipeline edit', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.EDIT,
         pipelineId: 'pipeline_name',
@@ -57,7 +57,7 @@ describe('IngestPipelinesUrlGenerator', () => {
       expect(url).toBe('/app/test_app/edit/pipeline_name');
     });
 
-    it('should generate correct absolute url for pipeline edit', async () => {
+    it('generates absolute url for pipeline edit', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.EDIT,
         pipelineId: 'pipeline_name',
@@ -68,7 +68,7 @@ describe('IngestPipelinesUrlGenerator', () => {
   });
 
   describe('Pipeline Clone', () => {
-    it('should generate correct relative url for pipeline clone', async () => {
+    it('generates relative url for pipeline clone', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.CLONE,
         pipelineId: 'pipeline_name',
@@ -76,7 +76,7 @@ describe('IngestPipelinesUrlGenerator', () => {
       expect(url).toBe('/app/test_app/create/pipeline_name');
     });
 
-    it('should generate correct absolute url for pipeline clone', async () => {
+    it('generates absolute url for pipeline clone', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.CLONE,
         pipelineId: 'pipeline_name',
@@ -87,7 +87,7 @@ describe('IngestPipelinesUrlGenerator', () => {
   });
 
   describe('Pipeline Create', () => {
-    it('should generate correct relative url for pipeline create', async () => {
+    it('generates relative url for pipeline create', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.CREATE,
         pipelineId: 'pipeline_name',
@@ -95,7 +95,7 @@ describe('IngestPipelinesUrlGenerator', () => {
       expect(url).toBe('/app/test_app/create');
     });
 
-    it('should generate correct absolute url for pipeline clone', async () => {
+    it('generates absolute url for pipeline clone', async () => {
       const url = await urlGenerator.createUrl({
         page: INGEST_PIPELINES_PAGES.CREATE,
         pipelineId: 'pipeline_name',

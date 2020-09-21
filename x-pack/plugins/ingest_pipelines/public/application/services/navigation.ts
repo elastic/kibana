@@ -35,5 +35,5 @@ export const ROUTES_CONFIG = {
 export const getListPath = (selectedPipelineName?: string): string =>
   _getListPath(selectedPipelineName);
 export const getEditPath = (pipelineName: string): string => _getEditPath(pipelineName, true);
-export const getCreatePath = (): string => _getCreatePath;
+export const getCreatePath = (): string => _getCreatePath();
 export const getClonePath = (pipelineName: string): string => _getClonePath(pipelineName, true);
